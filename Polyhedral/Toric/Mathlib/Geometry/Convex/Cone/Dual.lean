@@ -8,4 +8,6 @@ variable {R M N : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCom
 -- TODO: Replace `dual_span`
 @[simp] lemma dual_span' (s : Set M) : dual p (span R s) = dual p s := dual_span ..
 
+@[simp low + 1] lemma mem_dual'_singleton {x : M} {y : N} : y ∈ dual p {x} ↔ 0 ≤ p x y := by simp
+
 end PointedCone
