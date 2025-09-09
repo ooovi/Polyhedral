@@ -87,7 +87,7 @@ theorem face_polyhedral
       Left.nonneg_neg_iff]
     exact le_of_eq hv₂
 
-theorem face_int
+theorem face_intersection
     {c : PointedCone R N}
     {f : PointedCone R N} (hf : IsFace p c f)
     {f' : PointedCone R N} (hf' : IsFace p c f') :
@@ -134,6 +134,7 @@ section LinearOrder
 variable {R M N : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
   [AddCommGroup N] [Module R M] [Module R N] {p : M →ₗ[R] N →ₗ[R] R}
 
+-- TODO do we need hR?
 theorem face_face (hR : ∀ (x y : R), 0 < y → ∃ z, 0 < z * y + x)
     {c : PointedCone R N} (hc : c.FG)
     {f : PointedCone R N} (hf : IsFace p c f)

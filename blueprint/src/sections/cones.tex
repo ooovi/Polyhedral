@@ -243,8 +243,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{definition}
   \label{3-perp}
   \uses{}
-  % \lean{}
-  % \leanok
+  \lean{PointedCone.perp}
+  \leanok
   For any subset \( A \subseteq M \), we define the \emph{perp space}
   \[
       A^{\perp}\ :=\ \{v \in N\ \mid\ \forall u \in A, \langle v, u \rangle = 0\},
@@ -275,8 +275,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{definition}[Face of a cone]
   \label{3-face}
   \uses{3-perp}
-  % \lean{}
-  % \leanok
+  \lean{PointedCone.IsFace}
+  \leanok
   A \emph{face} of a pointed cone \( \sigma \subseteq N \) is the
   intersection of \( \sigma \) with some hyperplane \( u^{\perp} \)
   for \( u \in \sigma^{\vee} \). We write \( \tau \preceq \sigma \) if
@@ -302,8 +302,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}
   \label{3-face-polyhedral}
   \uses{3-face, 3-polyhedral-cone}
-  % \lean{}
-  % \leanok
+  \lean{PointedCone.face_polyhedral}
+  \leanok
   A face of a polyhedral cone is polyhedral.
 \end{lemma}
 \begin{proof}
@@ -335,8 +335,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}[Intersection of faces]
   \label{3-face-intersection}
   \uses{3-face}
-  % \lean{}
-  % \leanok
+  \lean{PointedCone.face_intersection}
+  \leanok
   If \( \sigma \) is a pointed cone, then the intersection of two
   faces of \( \sigma \) is a again face of \( \sigma \).
 \end{lemma}
@@ -373,11 +373,11 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \end{proof}
 
 
-
+% TODO do we need LinearOrder?
 \begin{lemma}[Face of a face]
   \label{3-face-face}
   \uses{3-face}
-  % \lean{}
+  \lean{PointedCone.face_face}
   % \leanok
   A face of a face of a polyhedral cone \( \sigma \) is again a face
   of \( \sigma \).
