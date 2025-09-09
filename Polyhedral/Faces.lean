@@ -64,28 +64,30 @@ lemma isFace_subset {c : PointedCone R N} {f : PointedCone R N} (h : IsFace p c 
   obtain ⟨h₁, ⟨h₂, h₃⟩⟩ := h
   simp [h₃]
 
--- TODO generalize to arbitrary (perfect?) pairing
 theorem face_polyhedral
     {c : PointedCone R N} (hc : IsPolyhedral c)
-    {f : PointedCone R N} (hf : IsFace .id c f) : IsPolyhedral f := by
+    {f : PointedCone R N} (hf : IsFace p c f) : IsPolyhedral f := by
+  rw [IsPolyhedral, IsFace] at *
   obtain ⟨S, hS₁, hS₂⟩ := hc
-  subst hS₂
   obtain ⟨u, hu₁, hu₂⟩ := hf
+  subst hS₂
   subst hu₂
-  use (insert (-u) S)
-  apply And.intro (Set.Finite.insert _ hS₁)
-  ext v
-  rw [dual_insert, Submodule.mem_inf, Submodule.mem_inf]
+  use (insert (-(p u)) S)
   constructor
-  · rintro ⟨hv₁, hv₂⟩
-    apply And.intro hv₂ (le_antisymm _ _)
-    · rwa [mem_dual'_singleton, map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff] at hv₁
-    · exact hu₁ hv₂
-  · intro ⟨hv₁, hv₂⟩
-    apply And.intro _ hv₁
-    simp only [mem_dual, Set.mem_singleton_iff, id_coe, id_eq, forall_eq, neg_apply,
-      Left.nonneg_neg_iff]
-    exact le_of_eq hv₂
+  · apply Set.Finite.insert
+    exact hS₁
+  · ext v
+    rw [dual_insert, Submodule.mem_inf, Submodule.mem_inf]
+    constructor
+    · rintro ⟨hv₁, hv₂⟩
+      apply And.intro hv₂ (le_antisymm _ _)
+      · rwa [mem_dual'_singleton, map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff] at hv₁
+      · exact hu₁ hv₂
+    · intro ⟨hv₁, hv₂⟩
+      apply And.intro _ hv₁
+      simp only [mem_dual, Set.mem_singleton_iff, id_coe, id_eq, forall_eq, neg_apply,
+        Left.nonneg_neg_iff]
+      exact le_of_eq hv₂
 
 theorem face_intersection
     {c : PointedCone R N}
@@ -223,6 +225,11 @@ instance : SetLike (PolyhedralCone R N) N where
   coe s := s.carrier
   coe_injective' p q h := by cases p; cases q; congr; exact SetLike.coe_injective' h
 
+
+-- TODO is this the most general M?
+instance : LE (PolyhedralCone R N) := {le := fun f f' => IsFace (M := Module.Dual R N) .id f f'}
+
+
 end PolyhedralCone
 
 end Definition
@@ -233,9 +240,6 @@ namespace PolyhedralCone
 variable {𝕜 N : Type*}
   [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
   [AddCommGroup N] [Module 𝕜 N] [Module.Finite 𝕜 N]
-
--- TODO is this the most general M?
-instance : LE (PolyhedralCone 𝕜 N) := {le := fun f f' => IsFace (M := Module.Dual 𝕜 N) .id f f'}
 
 instance : PartialOrder (PolyhedralCone 𝕜 N) := {
   le_refl := by {intro a; use 0; constructor <;> simp}
