@@ -16,8 +16,59 @@ element has a multiplicative inverse.
 % done. face lattice + combinatorial equivalence + basic theorems (face lattice is graded, intervals are face lattices, etc)
 % polar duality + basic theorems (polarity is an involution, flips face lattice)
 % normals, normal fan, normal equivalence
-% basic operations yield polytopes: product, direct sum, join, Minkowski sum, projections, sections, convex hull
+% done. basic operations yield polytopes: product, direct sum, join, Minkowski sum, projections, sections, convex hull
 
+\section{Notation}
+
+\begin{definition}
+  \label{halfspace}
+  \uses{}
+  A {\bf halfspace} is the dual of a point.
+\end{definition}
+
+\begin{definition}
+  \label{hyperplane}
+  \uses{}
+  A {\bf hyperplane} is the perp space of a point.
+\end{definition}
+% theorem: thise are exacty linear subspaces of codim 1
+
+\begin{definition}
+  \label{ambient-dimension}
+  \uses{}
+  The dimension of the module the cone is a submodule of.
+\end{definition}
+
+\begin{definition}
+  \label{dimension}
+  \uses{}
+  The dimension of a pointed cone.
+\end{definition}
+
+\begin{definition}
+  \label{full-dimensional}
+  \uses{}
+  A polyhedral cone is {\bf full-dimensional} if its dimension is the same as the dimension of the ambient space.
+\end{definition}
+
+\begin{definition}
+  \label{k-faces}
+  \uses{}
+  The set of all \(k\)-dimensional faces of a polyheadral cone.
+\end{definition}
+
+\begin{definition}
+  \label{f-vector}
+  \uses{}
+  For each \(k\) gives the number of \(k\)-dimensional faces of a polyheadral cone.
+\end{definition}
+
+\begin{definition}
+  \label{pointy-cone}
+  \uses{}
+  A {\bf pointy cone} is a submodule that does not contain a nontrivial linear space.
+  % TODO: this would be a reasonable definition of a pointed cone. should we change it?
+\end{definition}
 
 \section{Polyhedral cones}
 
@@ -74,6 +125,41 @@ element has a multiplicative inverse.
   if \( \sigma = S^\vee \) for some finite set \( S \subseteq M \).
 \end{definition}
 
+\subsection{Examples}
+
+\begin{proposition}
+  \label{bot-polyhedral}
+  \uses{polyhedral-cone}
+  \lean{PointedCone.IsPolyhedral.bot}
+  \leanok
+  The zero-space \( \{0\} \subseteq N \) is a polyhedral cone.
+\end{proposition}
+\begin{proof}
+  \uses{}
+  \leanok
+  If \( S \subseteq M \) is a finite \( \Bbbk \)-basis of \( M \),
+  then \( \{0\} = (S \cup -S)^\vee \).
+\end{proof}
+
+\begin{proposition}
+  \label{all-polyhedral-cone}
+  \uses{polyhedral-cone}
+  The full space is a polyhedral cone.
+\end{proposition}
+
+\begin{proposition}
+  \label{halfspace-polyhedral-cone}
+  \uses{polyhedral-cone}
+  Any halfspace is a polyhedral cone.
+\end{proposition}
+
+\begin{proposition}
+  \label{linear-subspace-polyhedral-cone}
+  \uses{polyhedral-cone}
+  Any linear subspace is a polyhedral cone.
+\end{proposition}
+
+
 \begin{proposition}
   \label{dual-polyhedral}
   \uses{polyhedral-cone, cone-finitely-generated}
@@ -108,19 +194,6 @@ element has a multiplicative inverse.
   S^{\vee} \) for a finite set \( S \subseteq N \).
 \end{proof}
 
-\begin{proposition}
-  \label{bot-polyhedral}
-  \uses{polyhedral-cone}
-  \lean{PointedCone.IsPolyhedral.bot}
-  \leanok
-  The zero-space \( \{0\} \subseteq N \) is a polyhedral cone.
-\end{proposition}
-\begin{proof}
-  \uses{}
-  \leanok
-  If \( S \subseteq M \) is a finite \( \Bbbk \)-basis of \( M \),
-  then \( \{0\} = (S \cup -S)^\vee \).
-\end{proof}
 
 \begin{proposition}[Fourier-Motkin elimination]
   \label{fourier-motzkin}
@@ -194,7 +267,7 @@ element has a multiplicative inverse.
   \Cone(S) \).
 \end{proposition}
 \begin{proof}
-  \uses{polyhedral-of-fg, 1-2-1-double-dual-polyhedral-cone}
+  \uses{polyhedral-of-fg, double-dual-polyhedral-cone}
   \leanok
   The cone \( \sigma := \Cone(S) \) is finitely generated, hence
   polyhedral by~\ref{polyhedral-of-fg}. Furthermore, we have \(
@@ -241,6 +314,78 @@ element has a multiplicative inverse.
   \ref{dual-polyhedral} \( + \) \ref{polyhedral-iff-fg}.
 \end{proof}
 
+\begin{proposition}
+  \label{pointy-linear-sum-polyhedral-cone}
+  \uses{polyhedral-cone}
+  Every polyhedral cone can be written as the minkowski sum of a pointy cone and a linear subspace.
+\end{proposition} % hard
+
+
+\subsection{Operations}
+
+\begin{proposition}
+  \label{linear-transformation-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma \subseteq N \) is
+  polyhedral and \(f : N -> M\) is a linear map, then \( f.map \sigma \subseteq M \) is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{sum-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma, \tau \subseteq N \) are
+  polyhedral, then \( \sigma + \tau \) is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{direct-sum-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma, \tau \subseteq N \) are
+  polyhedral, the direct sum \( \sigma \oplus_p \tau \) is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{join-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma, \tau \subseteq N \) are
+  polyhedral, their join is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{intersection-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma, \tau \subseteq N \) are
+  polyhedral, then \( \sigma \cap \tau \) is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{product-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma, \tau \subseteq N \) are
+  polyhedral, then the cartesian product \( \sigma \prod \tau \) is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{convex-hull-polyhedral}
+  \uses{polyhedral-cone}
+  If \( \sigma, \tau \subseteq N \) are
+  polyhedral, then the convex hull of the two is polyhedral too.
+\end{proposition}
+
+\begin{proposition}
+  \label{polyhedra-lattice}
+  \uses{polyhedral-cone}
+  Polyhedral cones for a lattice under intersections and convex hulls (its the same lattice as on pointed cones).
+\end{proposition}
+
+\subsection{Special cones}
+
+\begin{proposition}
+  \label{simplicial-cone}
+  \uses{polyhedral-cone}
+  A simplicial cone \(\sigma\) is a polyhedral cone that can be generated by \(dim (\sigma)\) many
+  generators.
+\end{proposition}
 
 \subsection{Faces and the Face Lattice}
 
@@ -422,7 +567,7 @@ the set of faces of a polyhedral cone \( \sigma \) (written \(
 
 \begin{lemma}[Face order is a lattice]
   \label{face-lattice}
-  \uses{}
+  \uses{face, face-intersection}
   % \lean{}
   % \leanok
   Given a polyhedral cone, the partial order on its faces
@@ -453,16 +598,41 @@ The grading is given by the number of faces of this face.
   is an order isomorphism between their face lattices.
 \end{definition}
 
-\begin{lemma}[Intervals are face lattices]
-  \label{face-lattice-intervals}
-  \uses{face-lattice}
+\begin{proposition}
+  \label{dual-face-lattice}
+  \uses{face-lattice, dual-cone}
   % \lean{}
   % \leanok
-  For each interval of the face lattice of a polyhedral cone, there exists
-  a polyhedral cone such that the interval is isomorphic to its face lattice.
-\end{lemma}
-\begin{proof}
-\end{proof}
+  Face lattices of dual cones are dual to each other.
+\end{proposition}
+
+\begin{proposition}
+  \label{face-face-lattice}
+  \uses{face-lattice, face-face}
+  % \lean{}
+  % \leanok
+  The face lattice of a face is isomorphic to a lower interval of the face lattice of a polyhedral cone.
+\end{proposition}
+
+\begin{proposition}
+  \label{ombinatorial-equivalence-linear-transformaions}
+  \uses{face-lattice, combinatorial-equivalence}
+  % \lean{}
+  % \leanok
+  Linear transformaions preserve combinatorial equivalence. There is an iso that should be provided
+\end{proposition}
+
+
+% \begin{lemma}[Intervals are face lattices]
+%   \label{face-lattice-intervals}
+%   \uses{face-lattice}
+%   % \lean{}
+%   % \leanok
+%   For each interval of the face lattice of a polyhedral cone, there exists
+%   a polyhedral cone such that the interval is isomorphic to its face lattice.
+% \end{lemma}
+% \begin{proof}
+% \end{proof}
 
 \subsection{Polarity}
 
