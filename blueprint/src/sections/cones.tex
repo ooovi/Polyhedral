@@ -18,57 +18,24 @@ element has a multiplicative inverse.
 % normals, normal fan, normal equivalence
 % done. basic operations yield polytopes: product, direct sum, join, Minkowski sum, projections, sections, convex hull
 
-\section{Notation}
 
 \begin{definition}
-  \label{halfspace}
-  \uses{}
-  A {\bf halfspace} is the dual of a point.
-\end{definition}
-
-\begin{definition}
-  \label{hyperplane}
-  \uses{}
+  \label{names}
   A {\bf hyperplane} is the perp space of a point.
-\end{definition}
 % theorem: thise are exacty linear subspaces of codim 1
 
-\begin{definition}
-  \label{ambient-dimension}
-  \uses{}
+  A {\bf halfspace} is the dual of a point.
   The dimension of the module the cone is a submodule of.
-\end{definition}
 
-\begin{definition}
-  \label{dimension}
-  \uses{}
-  The dimension of a pointed cone.
-\end{definition}
+  The {\bf dimension} of a pointed cone.
 
-\begin{definition}
-  \label{full-dimensional}
-  \uses{}
   A polyhedral cone is {\bf full-dimensional} if its dimension is the same as the dimension of the ambient space.
-\end{definition}
 
-\begin{definition}
-  \label{k-faces}
-  \uses{}
   The set of all \(k\)-dimensional faces of a polyheadral cone.
-\end{definition}
 
-\begin{definition}
-  \label{f-vector}
-  \uses{}
   For each \(k\) gives the number of \(k\)-dimensional faces of a polyheadral cone.
 \end{definition}
 
-\begin{definition}
-  \label{pointy-cone}
-  \uses{}
-  A {\bf pointy cone} is a submodule that does not contain a nontrivial linear space.
-  % TODO: this would be a reasonable definition of a pointed cone. should we change it?
-\end{definition}
 
 \section{Polyhedral cones}
 
@@ -79,6 +46,14 @@ element has a multiplicative inverse.
   \leanok
   A {\bf pointed cone} \( \sigma \subseteq N \) is a \( \Bbbk_{\geq 0}
   \)-submodule of \( N \).
+\end{definition}
+
+\begin{definition}
+  \label{pointy-cone}
+  \uses{pointed-cone}
+  A {\bf pointy cone} \( \sigma \subseteq N \) is a \( \Bbbk_{\geq 0}
+  \)-submodule of \( N \) that does not contain a nontrivial linear space.
+  % TODO: this would be a reasonable definition of a pointed cone. should we change it?
 \end{definition}
 
 \begin{definition}
@@ -316,7 +291,7 @@ element has a multiplicative inverse.
 
 \begin{proposition}
   \label{pointy-linear-sum-polyhedral-cone}
-  \uses{polyhedral-cone}
+  \uses{pointy-cone}
   Every polyhedral cone can be written as the minkowski sum of a pointy cone and a linear subspace.
 \end{proposition} % hard
 
@@ -324,57 +299,67 @@ element has a multiplicative inverse.
 \subsection{Operations}
 
 \begin{proposition}
-  \label{linear-transformation-polyhedral}
+  \label{linear-transformation-polyhedral-cone}
   \uses{polyhedral-cone}
   If \( \sigma \subseteq N \) is
   polyhedral and \(f : N -> M\) is a linear map, then \( f.map \sigma \subseteq M \) is polyhedral too.
 \end{proposition}
 
 \begin{proposition}
-  \label{sum-polyhedral}
+  \label{sum-polyhedral-cone}
   \uses{polyhedral-cone}
   If \( \sigma, \tau \subseteq N \) are
   polyhedral, then \( \sigma + \tau \) is polyhedral too.
 \end{proposition}
 
 \begin{proposition}
-  \label{direct-sum-polyhedral}
+  \label{direct-sum-polyhedral-cone}
   \uses{polyhedral-cone}
   If \( \sigma, \tau \subseteq N \) are
   polyhedral, the direct sum \( \sigma \oplus_p \tau \) is polyhedral too.
 \end{proposition}
 
 \begin{proposition}
-  \label{join-polyhedral}
+  \label{join-polyhedral-cone}
   \uses{polyhedral-cone}
   If \( \sigma, \tau \subseteq N \) are
   polyhedral, their join is polyhedral too.
 \end{proposition}
 
 \begin{proposition}
-  \label{intersection-polyhedral}
+  \label{intersection-polyhedral-cone}
   \uses{polyhedral-cone}
   If \( \sigma, \tau \subseteq N \) are
   polyhedral, then \( \sigma \cap \tau \) is polyhedral too.
 \end{proposition}
 
 \begin{proposition}
-  \label{product-polyhedral}
+  \label{product-polyhedral-cone}
   \uses{polyhedral-cone}
   If \( \sigma, \tau \subseteq N \) are
   polyhedral, then the cartesian product \( \sigma \prod \tau \) is polyhedral too.
 \end{proposition}
 
+
+\begin{definition}[Convex hull]
+  \label{convex-hull}
+  \uses{}
+  \lean{convexHull}
+  \leanok
+  For a set $S \subseteq N$, the {\bf convex hull of $S$} is
+  $$\Conv(S) := \left\{\sum_{u \in S} \lambda_u | \lambda_u \ge 0, \sum_u \lambda_u = 1\right\}$$
+\end{definition}
+
 \begin{proposition}
-  \label{convex-hull-polyhedral}
-  \uses{polyhedral-cone}
+  \label{convex-hull-polyhedral-cone}
+  \uses{polyhedral-cone, convex-hull}
   If \( \sigma, \tau \subseteq N \) are
   polyhedral, then the convex hull of the two is polyhedral too.
 \end{proposition}
 
 \begin{proposition}
   \label{polyhedra-lattice}
-  \uses{polyhedral-cone}
+  \uses{polyhedral-cone, convex-hull-polyhedral-cone,intersection-polyhedral-cone}
   Polyhedral cones for a lattice under intersections and convex hulls (its the same lattice as on pointed cones).
 \end{proposition}
 
@@ -382,7 +367,7 @@ element has a multiplicative inverse.
 
 \begin{proposition}
   \label{simplicial-cone}
-  \uses{polyhedral-cone}
+  \uses{polyhedral-cone, names}
   A simplicial cone \(\sigma\) is a polyhedral cone that can be generated by \(dim (\sigma)\) many
   generators.
 \end{proposition}
