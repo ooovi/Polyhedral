@@ -31,7 +31,9 @@ local notation3 "R≥0" => {c : R // 0 ≤ c}
 local notation3 "𝕜≥0" => {c : 𝕜 // 0 ≤ c}
 
 namespace PointedCone
+
 section PartialOrder
+
 variable [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [AddCommGroup N]
   [Module R M] [Module R N] {p : M →ₗ[R] N →ₗ[R] R} [p.IsPerfPair] {C C₁ C₂ : PointedCone R N}
   {s : Set M}

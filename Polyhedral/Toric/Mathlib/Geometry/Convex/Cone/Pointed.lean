@@ -13,4 +13,7 @@ abbrev span : PointedCone 𝕜 E := Submodule.span _ S
 
 lemma subset_span : S ⊆ PointedCone.span 𝕜 S := Submodule.subset_span
 
+def submodule (S : Submodule 𝕜 E) : PointedCone 𝕜 E :=
+  S.restrictScalars _
+
 end PointedCone
