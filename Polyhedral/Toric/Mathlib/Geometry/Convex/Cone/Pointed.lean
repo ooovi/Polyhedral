@@ -26,16 +26,14 @@ variable {𝕜 E : Type*} [Ring 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜] [A
 
 local notation "𝕜≥0" => {c : 𝕜 // 0 ≤ c}
 
-lemma Submodule.span_pos_span_eq_span (S : Set E) :
+lemma span_span_eq_restrictedScalar_span (S : Set E) :
     PointedCone.span 𝕜 (Submodule.span 𝕜 S)
       = Submodule.restrictScalars 𝕜≥0 (Submodule.span 𝕜 S) := by simp
 
-lemma Submodule.span_pos_span_eq_span_pos_pos_sup_span_pos_neg (S : Set E) :
+lemma Submodule.span_span_eq_span_pos_sup_span_neg (S : Set E) :
     PointedCone.span 𝕜 (Submodule.span 𝕜 S) = PointedCone.span 𝕜 S ⊔ PointedCone.span 𝕜 (-S) := by
-  simp
   rw [Submodule.ext_iff]
-  intro x
-  simp
+  intro x; simp
   rw [Submodule.mem_sup] -- Submodule.mem_sup'
   rw [Submodule.mem_span_set']
   constructor
@@ -50,7 +48,7 @@ lemma Submodule.span_pos_span_eq_span_pos_pos_sup_span_pos_neg (S : Set E) :
       use n; use fp; use g
     use xn; constructor
     · rw [Submodule.mem_span_set']
-      use n; use fn; use (fun k => ⟨ -(g k).val, by simp ⟩)
+      use n; use fn; use (fun k => ⟨ -(g k).val, by simp ⟩) -- easier?
       simp [xn]
     simp [xp, xn, fp, fn]
     -- rw [Finset.sum_union]
@@ -62,15 +60,19 @@ lemma Submodule.span_pos_span_eq_span_pos_pos_sup_span_pos_neg (S : Set E) :
     obtain ⟨ nn, fn, gn, hn ⟩ := hxn
     let n := np + nn
     let f : Fin n → 𝕜 := Fin.append (fun k => (fp k).1) (fun k => (fn k).1)
-    let g : Fin n → S := Fin.append gp (fun k => ⟨ -(gn k).1, by sorry ⟩ )
+    let g : Fin n → S := Fin.append gp (fun k => ⟨ -(gn k).1, by -- easier?
+      have H : (gn k).val ∈ -S := by simp
+      simp [-Subtype.coe_prop] at H
+      exact H ⟩ )
     use n; use f; use g
     sorry
 
 lemma Submodule.restrictScalars_pos_span_eq_span_pos_union_neg (S : Set E) :
     .restrictScalars 𝕜≥0 (Submodule.span 𝕜 S) = PointedCone.span 𝕜 (S ∪ -S) := by
+   -- PointedCone.span 𝕜 (Submodule.span 𝕜 S) = PointedCone.span 𝕜 (S ∪ -S) := by
   rw [←Submodule.span_coe_eq_restrictScalars]
   rw [span, Submodule.span_union]
-  exact span_pos_span_eq_span_pos_pos_sup_span_pos_neg S
+  exact span_span_eq_span_pos_sup_span_neg S
 
 lemma ofSubmodule.FG_of_FG {S : Submodule 𝕜 E} (h : S.FG) : (S : PointedCone 𝕜 E).FG := by
   rw [Submodule.fg_def] at *
