@@ -6,6 +6,8 @@ Authors: Justus Springer
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
+import Mathlib.LinearAlgebra.SesquilinearForm
+
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Dual
 
 /-!
@@ -41,6 +43,9 @@ variable [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [AddCo
 /-- A cone is polyhedral if it is the dual of a finite set. -/
 def IsPolyhedral (C : PointedCone R N) : Prop :=
   ∃ s : Set (Module.Dual R N), s.Finite ∧ dual .id s = C
+
+abbrev PolyhedralCone (R M : Type*) [CommRing R] [PartialOrder R] [IsOrderedRing R]
+    [AddCommGroup M] [Module R M] := { C : PointedCone R M // IsPolyhedral C }
 
 variable (p) in
 lemma isPolyhedral_iff_exists_finite_dual_eq :
@@ -217,6 +222,16 @@ lemma isPolyhedral_iff_fg : IsPolyhedral C ↔ C.FG := ⟨fg_of_isPolyhedral , .
 /-- The dual of a polyhedral cone is again polyhedral. -/
 protected lemma IsPolyhedral.dual [p.IsPerfPair] (hC : IsPolyhedral C) :
     IsPolyhedral (dual p.flip C) := .dual_of_fg (fg_of_isPolyhedral hC)
+
+/-- A linear subspace is a polyhedral cone -/
+lemma IsPolyhedral.submodule (S : Submodule 𝕜 M) : IsPolyhedral (S : PointedCone 𝕜 M)
+  := isPolyhedral_iff_fg.mpr
+      <| PointedCone.ofSubmodule.FG_of_FG
+      <| (Submodule.fg_iff_finiteDimensional S).mpr inferInstance
+
+def PolyhedralCone.ofSubmodule (S : Submodule 𝕜 M) : PolyhedralCone 𝕜 M := ⟨ S, .submodule S ⟩
+
+instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := ⟨ .ofSubmodule ⟩
 
 end LinearOrder
 end PointedCone
