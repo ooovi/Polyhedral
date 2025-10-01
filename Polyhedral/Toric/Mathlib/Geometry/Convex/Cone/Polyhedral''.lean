@@ -198,7 +198,11 @@ variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGrou
 -- Now we are ready to define PolyhedralCone, because from here on we assume V=H.
 -- From here on we also mke no use any longer of the precise pairing.
 
+/-- Abbreviation for PointedCone.FG. Intended for use in contexts with V=H. -/
 abbrev PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) := C.FG
+
+example {C C' : PointedCone 𝕜 M} (hC : C.IsPolyhedral) (hC' : C'.IsPolyhedral) :
+    (C ⊔ C').IsPolyhedral := Submodule.FG.sup hC hC'
 
 section CommRing
 
@@ -227,8 +231,6 @@ omit [Module.Finite 𝕜 M] in
 
 end PolyhedralCone
 end CommRing
-
-
 
 -- namespace PolyhedralCone
 
