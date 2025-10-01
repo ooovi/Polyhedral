@@ -1,40 +1,59 @@
+
 import Mathlib.Geometry.Convex.Cone.Pointed
+import Mathlib.Geometry.Convex.Cone.Dual
 import Mathlib.RingTheory.Finiteness.Basic
+import Mathlib.LinearAlgebra.PerfectPairing.Basic
 
-namespace Submodule
-
-lemma restrictedScalars_FG_of_FG {E S R : Type*} [Semiring R] [Semiring S]
-  [AddCommMonoid E] [Module R S] [Module R E] [Module S E] [IsScalarTower R S E]
-  [Module.Finite R S] {s : Submodule S E} (hfin : s.FG) : (s.restrictScalars R).FG := by
-  rw [← Module.Finite.iff_fg] at *
-  exact Module.Finite.trans S s
-
-end Submodule
+import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule
 
 namespace PointedCone
-variable {𝕜 E : Type*} [Semiring 𝕜] [PartialOrder 𝕜] [IsOrderedRing 𝕜] [AddCommMonoid E]
-  [Module 𝕜 E] {S : Set E}
 
-variable (𝕜 S) in
+variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid E]
+  [Module R E] {S : Set E}
+
+variable (R S) in
 /-- The span of a set `S` is the smallest pointed cone that contains `S`.
 
 Pointed cones being defined as submodules over nonnegative scalars, this is exactly the
 submodule span of `S` w.r.t. nonnegative scalars. -/
-abbrev span : PointedCone 𝕜 E := Submodule.span _ S
+abbrev span : PointedCone R E := Submodule.span _ S
 
-lemma subset_span : S ⊆ PointedCone.span 𝕜 S := Submodule.subset_span
+lemma subset_span : S ⊆ PointedCone.span R S := Submodule.subset_span
 
-abbrev ofSubmodule (S : Submodule 𝕜 E) : PointedCone 𝕜 E := S.restrictScalars _
+abbrev ofSubmodule (S : Submodule R E) : PointedCone R E := S.restrictScalars _
 
-instance : Coe (Submodule 𝕜 E) (PointedCone 𝕜 E) := ⟨ ofSubmodule ⟩
+instance : Coe (Submodule R E) (PointedCone R E) := ⟨ ofSubmodule ⟩
 
-lemma ofSubmodule.carrier_eq (S : Submodule 𝕜 E) : (ofSubmodule S : Set E) = S :=
-  Submodule.coe_restrictScalars 𝕜 S
+lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule S : Set E) = S :=
+  Submodule.coe_restrictScalars R S
 
-variable {𝕜 E : Type*} [Ring 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜] [AddCommGroup E]
-  [Module 𝕜 E]
+variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup E]
+  [Module R E]
 
-lemma ofSubmodule.FG_of_FG {S : Submodule 𝕜 E} (hS : S.FG) : (S : PointedCone 𝕜 E).FG
+lemma ofSubmodule.FG_of_FG {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
     := Submodule.restrictedScalars_FG_of_FG hS
+
+lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
+  ofSubmodule.FG_of_FG Module.Finite.fg_top
+
+/- Duality -/
+
+variable {R F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
+  [Module R E] [AddCommGroup F] [Module R F] {p : E →ₗ[R] F →ₗ[R] R}
+
+alias dual_bot := dual_zero
+
+-- TODO: are there instances missing that should make this automatic?
+-- TODO: 0 in `dual_univ` simplifies to ⊥, so maybe it is not the best statement?
+lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
+  := dual_univ (LinearMap.IsPerfPair.bijective_right p).1
+
+lemma dual_sup (C C' : PointedCone R E) :
+    PointedCone.dual p (C ⊔ C') = PointedCone.dual p C ⊓ PointedCone.dual p C' := dual_union _ _
+
+lemma dual_inf {C C' : PointedCone R E} :
+    PointedCone.dual p (C ⊓ C') = PointedCone.dual p C ⊔ PointedCone.dual p C' := by
+  -- apply dual_dual_flip_dual
+  sorry
 
 end PointedCone
