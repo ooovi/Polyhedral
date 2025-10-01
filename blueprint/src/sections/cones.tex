@@ -119,6 +119,8 @@ element has a multiplicative inverse.
 \begin{proposition}
   \label{all-polyhedral-cone}
   \uses{polyhedral-cone}
+  \lean{PointedCone.IsPolyhedral.top}
+  \leanok
   The full space is a polyhedral cone.
 \end{proposition}
 
@@ -382,8 +384,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{definition}
   \label{perp}
   \uses{}
-  \lean{PointedCone.perp}
-  \leanok
+  % \lean{PointedCone.perp}
+  % \leanok
   For any subset \( A \subseteq M \), we define the \emph{perp space}
   \[
       A^{\perp}\ :=\ \{v \in N\ \mid\ \forall u \in A, \langle v, u \rangle = 0\},
@@ -414,8 +416,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{definition}[Face of a cone]
   \label{face}
   \uses{perp}
-  \lean{PointedCone.IsFace}
-  \leanok
+  % \lean{PointedCone.IsFace}
+  % \leanok
   A \emph{face} of a pointed cone \( \sigma \subseteq N \) is the
   intersection of \( \sigma \) with some hyperplane \( u^{\perp} \)
   for \( u \in \sigma^{\vee} \). We write \( \tau \preceq \sigma \) if
@@ -441,8 +443,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}
   \label{face-polyhedral}
   \uses{face, polyhedral-cone}
-  \lean{PointedCone.face_polyhedral}
-  \leanok
+  % \lean{PointedCone.face_polyhedral}
+  % \leanok
   A face of a polyhedral cone is polyhedral.
 \end{lemma}
 \begin{proof}
@@ -474,8 +476,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}[Intersection of faces]
   \label{face-intersection}
   \uses{face}
-  \lean{PointedCone.face_intersection}
-  \leanok
+  % \lean{PointedCone.face_intersection}
+  % \leanok
   If \( \sigma \) is a pointed cone, then the intersection of two
   faces of \( \sigma \) is a again face of \( \sigma \).
 \end{lemma}
@@ -516,7 +518,7 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}[Face of a face]
   \label{face-face}
   \uses{face}
-  \lean{PointedCone.face_face}
+  % \lean{PointedCone.face_face}
   % \leanok
   A face of a face of a polyhedral cone \( \sigma \) is again a face
   of \( \sigma \).
