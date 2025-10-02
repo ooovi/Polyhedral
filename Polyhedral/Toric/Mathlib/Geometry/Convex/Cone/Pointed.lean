@@ -43,34 +43,37 @@ variable {R F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
 
 alias dual_bot := dual_zero
 
--- TODO: are there instances missing that should make this automatic?
+-- TODO: are there instances missing that should make the proof automatic?
 -- TODO: 0 in `dual_univ` simplifies to ⊥, so maybe it is not the best statement?
-lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
+@[simp] lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
   := dual_univ (LinearMap.IsPerfPair.bijective_right p).1
 
-#check dual_union
+example /- dual_inf -/ (C C' : PointedCone R E) :
+    dual p (C ⊓ C' : PointedCone R E) = dual p (C ∩ C') := rfl
+example (C C' : PointedCone R E) : dual p (C ⊔ C') = dual p (C ∪ C') := rfl
 
--- lemma span_sup (C C' : PointedCone R E) :
---     span (C ⊔ C' : PointedCone R E) = span (C ∪ C') := sorry
+lemma dual_sup (C C' : PointedCone R E) : dual p (C ⊔ C' : PointedCone R E) = dual p (C ∪ C')
+  := by nth_rw 2 [←dual_span]; rw [Submodule.span_union']
 
-lemma dual_coe (C C' : PointedCone R E) :
-    dual p (C ⊔ C' : PointedCone R E) = dual p (C ∪ C') := sorry
+-- TODO: simp lemma?
+lemma dual_sup_dual_inf_dual (C C' : PointedCone R E) :
+    dual p (C ⊔ C' : PointedCone R E) = dual p C ⊓ dual p C' := by rw [dual_sup, dual_union]
 
-lemma dual_sup (C C' : PointedCone R E) :
-    PointedCone.dual p (C ⊔ C' : PointedCone R E)
-      = PointedCone.dual p C ⊓ PointedCone.dual p C' := by
-
-  -- dual_union _ _
+-- TODO: Does this even hold in general? Certainly if C and C' are CoFG.
+-- @[simp] lemma dual_flip_dual_union
+example {C C' : PointedCone R E} : -- (hC : C.FG) (hC' : C'.FG) :
+    dual p.flip (dual p (C ∪ C')) = C ⊔ C' := by
   sorry
 
-example (C C' : PointedCone R E) :
-    PointedCone.dual p (C ⊔ C') = PointedCone.dual p (C ∪ C') := rfl
+/-- The linearlity space of a cone. -/
+def lineal (C : PointedCone R E) := sSup {S : Submodule R E | S ≤ C }
 
--- lemma span_sup (C C' : PointedCone R E) :
---     span (C ⊔ C' : PointedCone R E) = span (C ∪ C') := sorry
+/-- A pointy cone has trivial lineality space. -/
+def IsPointy (C : PointedCone R E) := C.lineal = ⊥
 
--- lemma dual_sup (C C' : PointedCone R E) :
---     PointedCone.dual p (C ⊔ C') = PointedCone.dual p C ⊓ PointedCone.dual p C'
---   := dual_union _ _
+/-- A cone is a sum of a pointed cone and its lineality space. -/
+lemma exists_pointy_sup_lineal (C : PointedCone R E) :
+    ∃ D : PointedCone R E, D.IsPointy ∧ D ⊔ C.lineal = C := by
+  sorry
 
 end PointedCone
