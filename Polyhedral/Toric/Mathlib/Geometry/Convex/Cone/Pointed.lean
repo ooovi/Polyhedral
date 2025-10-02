@@ -48,12 +48,29 @@ alias dual_bot := dual_zero
 lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
   := dual_univ (LinearMap.IsPerfPair.bijective_right p).1
 
-lemma dual_sup (C C' : PointedCone R E) :
-    PointedCone.dual p (C ⊔ C') = PointedCone.dual p C ⊓ PointedCone.dual p C' := dual_union _ _
+#check dual_union
 
-lemma dual_inf {C C' : PointedCone R E} :
-    PointedCone.dual p (C ⊓ C') = PointedCone.dual p C ⊔ PointedCone.dual p C' := by
-  -- apply dual_dual_flip_dual
+-- lemma span_sup (C C' : PointedCone R E) :
+--     span (C ⊔ C' : PointedCone R E) = span (C ∪ C') := sorry
+
+lemma dual_coe (C C' : PointedCone R E) :
+    dual p (C ⊔ C' : PointedCone R E) = dual p (C ∪ C') := sorry
+
+lemma dual_sup (C C' : PointedCone R E) :
+    PointedCone.dual p (C ⊔ C' : PointedCone R E)
+      = PointedCone.dual p C ⊓ PointedCone.dual p C' := by
+
+  -- dual_union _ _
   sorry
+
+example (C C' : PointedCone R E) :
+    PointedCone.dual p (C ⊔ C') = PointedCone.dual p (C ∪ C') := rfl
+
+-- lemma span_sup (C C' : PointedCone R E) :
+--     span (C ⊔ C' : PointedCone R E) = span (C ∪ C') := sorry
+
+-- lemma dual_sup (C C' : PointedCone R E) :
+--     PointedCone.dual p (C ⊔ C') = PointedCone.dual p C ⊓ PointedCone.dual p C'
+--   := dual_union _ _
 
 end PointedCone

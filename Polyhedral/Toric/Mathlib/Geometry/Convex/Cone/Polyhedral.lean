@@ -27,122 +27,58 @@ in both arguments, then polyhedral cones are precisely the finitely generated co
 open Function Module
 open Submodule hiding span
 
-variable {R 𝕜 M N : Type*}
-
-local notation3 "R≥0" => {c : R // 0 ≤ c}
-local notation3 "𝕜≥0" => {c : 𝕜 // 0 ≤ c}
+variable {𝕜 M N : Type*}
 
 namespace PointedCone
 
-section PartialOrder
-
-variable [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [AddCommGroup N]
-  [Module R M] [Module R N] {p : M →ₗ[R] N →ₗ[R] R} [p.IsPerfPair] {C C₁ C₂ : PointedCone R N}
-  {s : Set M}
-
-/-- A cone is polyhedral if it is the dual of a finite set. -/
-def IsPolyhedral (C : PointedCone R N) : Prop :=
-  ∃ s : Set (Module.Dual R N), s.Finite ∧ dual .id s = C
-
-abbrev PolyhedralCone (R M : Type*) [CommRing R] [PartialOrder R] [IsOrderedRing R]
-    [AddCommGroup M] [Module R M] := { C : PointedCone R M // IsPolyhedral C }
-
-variable (p) in
-lemma isPolyhedral_iff_exists_finite_dual_eq :
-    IsPolyhedral C ↔ ∃ s : Set M, s.Finite ∧ dual p s = C := by
-  refine (Equiv.Set.congr p.toPerfPair.symm.toEquiv).exists_congr fun s ↦ ?_
-  congr!
-  · exact (Set.finite_image_iff p.toPerfPair.symm.injective.injOn).symm
-  · ext
-    simp
-
-alias ⟨IsPolyhedral.exists_finite_dual_eq, _⟩ := isPolyhedral_iff_exists_finite_dual_eq
-
-lemma IsPolyhedral.dual_of_finite (hs : s.Finite) : IsPolyhedral (dual p s) :=
-  (isPolyhedral_iff_exists_finite_dual_eq _).2 ⟨s, hs, rfl⟩
-
-lemma IsPolyhedral.dual_of_fg {C : PointedCone R M} (hC : C.FG) :
-    IsPolyhedral (dual p (C : Set M)) := by
-  obtain ⟨s, rfl⟩ := hC; rw [dual_span]; exact .dual_of_finite s.finite_toSet
-
-variable (p) in
-lemma IsPolyhedral_iff_exists_finset : IsPolyhedral C ↔ ∃ s : Finset M, dual p s = C where
-  mp hC := by obtain ⟨s, hs, rfl⟩ := hC.exists_finite_dual_eq p; exact ⟨hs.toFinset, by simp⟩
-  mpr := by rintro ⟨s, rfl⟩; exact .dual_of_finite s.finite_toSet
-
-lemma IsPolyhedral.top : IsPolyhedral (⊤ : PointedCone R N) := ⟨∅, by simp⟩
-
-variable (p) in
-@[simp] lemma IsPolyhedral.dual_dual_flip (hC : IsPolyhedral C) :
-    dual p (dual p.flip (C : Set N)) = C := by
-  obtain ⟨s, hs, rfl⟩ := hC.exists_finite_dual_eq p; exact dual_dual_flip_dual _
-
-variable (p) in
-@[simp] lemma IsPolyhedral.dual_flip_dual {C : PointedCone R M} (hC : IsPolyhedral C) :
-    dual p.flip (dual p (C : Set M)) = C := hC.dual_dual_flip _
-
-lemma isPolyhedral.dual_inj (hC₁ : IsPolyhedral C₁) (hC₂ : IsPolyhedral C₂) :
-    dual p.flip C₁ = dual p.flip C₂ ↔ C₁ = C₂ where
-  mp h := by rw [← hC₁.dual_dual_flip p, ← hC₂.dual_dual_flip p, h]
-  mpr h := by rw [h]
-
-end PartialOrder
-
 section LinearOrder
-variable [CommRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  [Projective R M]
 
-/-- If the module `M` is finite, then the zero cone in `M` is polyhedral. -/
-lemma IsPolyhedral.bot [Module.Finite R M] : IsPolyhedral (⊥ : PointedCone R M) := by
-  obtain ⟨s, hS : span R _ = ⊤⟩ := Module.Finite.fg_top (R := R≥0) (M := Module.Dual R M)
-  refine ⟨s, s.finite_toSet, ?_⟩
-  rw [← dual_span', hS, Submodule.top_coe, dual_univ, Submodule.zero_eq_bot]
-  -- TODO: Rename to `Module.Dual.eval_injective`
-  exact Module.eval_apply_injective _
+variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
+  [Module 𝕜 M] [Module 𝕜 N] {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} {C : PointedCone 𝕜 M} {s : Set M} {w : N}
 
-end LinearOrder
+variable (p s w) in
+/-- A set whose dual cone is `span R {w} ⊔ dual p s`, see `dual_sup_span_singleton_eq_dual` -/
+private noncomputable abbrev auxGenSet : Set M :=
+  {x ∈ s | 0 ≤ p x w} ∪
+    .image2 (fun x y ↦ p x w • y - p y w • x) {x ∈ s | 0 ≤ p x w} {y ∈ s | p y w < 0}
 
-section LinearOrder
-variable [Field 𝕜] [LinearOrder 𝕜] [AddCommGroup M] [Module 𝕜 M] {s : Set (Dual 𝕜 M)} {w : M}
+variable (w) in
+omit [IsStrictOrderedRing 𝕜] in
+private lemma auxGenSet_finite (hs : s.Finite) :
+    (auxGenSet p s w).Finite := .union (hs.sep _) <| .image2 _ (hs.sep _) (hs.sep _)
 
-variable (s w) in
-/-- A set whose dual cone is `span 𝕜 {w} ⊔ dual p s`, see `dual_sup_span_singleton_eq_dual` -/
-private noncomputable abbrev auxGenSet : Set (Dual 𝕜 M) :=
-  {x ∈ s | 0 ≤ x w} ∪ .image2 (fun x y ↦ x w • y - y w • x) {x ∈ s | 0 ≤ x w} {y ∈ s | y w < 0}
-
-private lemma auxGenSet_finite (hs : s.Finite) : (auxGenSet s w).Finite :=
-  .union (hs.sep _) <| .image2 _ (hs.sep _) (hs.sep _)
-
-variable [IsStrictOrderedRing 𝕜] {C : PointedCone 𝕜 M}
-
-private lemma auxGenSet_subset_span : auxGenSet s w ⊆ span 𝕜 s := by
+private lemma auxGenSet_subset_span :
+    (auxGenSet p s w : Set M) ⊆ span 𝕜 (s : Set M) := by
   simp only [Set.union_subset_iff, Set.image2_subset_iff, Set.mem_setOf_eq, and_imp]
   refine ⟨subset_trans (fun x hx ↦ hx.1) subset_span, fun x hxS hxw y hyS hyw ↦ ?_⟩
-  simpa [sub_eq_add_neg] using add_mem (smul_mem (span 𝕜 s) ⟨x w, hxw⟩ (subset_span hyS))
-    (smul_mem _ ⟨-y w, neg_nonneg.mpr hyw.le⟩ (subset_span hxS))
+  simpa [sub_eq_add_neg] using add_mem (smul_mem (span 𝕜 s) ⟨p x w, hxw⟩ (subset_span hyS))
+    (smul_mem _ ⟨-p y w, neg_nonneg.mpr hyw.le⟩ (subset_span hxS))
 
-private lemma span_singleton_le_dual_auxGenSet : span 𝕜 {w} ≤ dual .id (auxGenSet s w) := by
+private lemma span_singleton_le_dual_auxGenSet :
+    span 𝕜 {w} ≤ dual p (auxGenSet p s w) := by
   simp only [span_singleton_le_iff_mem, mem_dual, Set.mem_union, Set.mem_setOf_eq, Set.mem_image2]
   rintro z (hz | ⟨x, ⟨hxS, hxw⟩, y, ⟨hyS, hyw⟩, rfl⟩)
   · exact hz.2
-  · simp [mul_comm]
+  · simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply, smul_eq_mul,
+      sub_nonneg]
+    rw [mul_comm]
 
 /-- The crucial lemma in the proof that a finitely generated cone is polyhedral:
 The sum of a polyhedral cone and the cone generated by a single ray is again polyhedral. -/
 private lemma dual_auxGenSet (hs : s.Finite) :
-    dual .id (auxGenSet s w) = span 𝕜 {w} ⊔ dual .id s := by
+    dual p (auxGenSet p s w) = span 𝕜 {w} ⊔ dual p s := by
   classical
   apply ge_antisymm
   · rw [← dual_span]
     exact sup_le span_singleton_le_dual_auxGenSet <| dual_le_dual auxGenSet_subset_span
-  obtain hSw | hSw := {y ∈ s | y w < 0}.eq_empty_or_nonempty
+  obtain hSw | hSw := {y ∈ s | p y w < 0}.eq_empty_or_nonempty
   · simp only [Set.sep_eq_empty_iff_mem_false, not_lt] at hSw
     exact le_sup_of_le_right <| dual_le_dual fun x hx => .inl ⟨hx, hSw _ hx⟩
   rw [dual_union]
   intro v ⟨hv1, hv2⟩
   rw [Submodule.mem_sup]
-  replace hv2 {x y : Dual 𝕜 M} (hx : x ∈ s ∧ 0 ≤ x w) (hy : y ∈ s ∧ y w < 0) :
-      y w * x v ≤ y v * x w := by
+  replace hv2 {x y : M} (hx : x ∈ s ∧ 0 ≤ p x w) (hy : y ∈ s ∧ p y w < 0) :
+      p y w * p x v ≤ p y v * p x w := by
     simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_setOf_eq,
       forall_exists_index, and_imp] at hv2
     specialize hv2 x hx.1 hx.2 y hy.1 hy.2 rfl
@@ -150,32 +86,31 @@ private lemma dual_auxGenSet (hs : s.Finite) :
       sub_nonneg] at hv2
     nth_rw 2 [mul_comm] at hv2
     exact hv2
-  obtain hSv | ⟨y, hy⟩ := {y ∈ s | y w < 0 ∧ y v < 0}.eq_empty_or_nonempty
+  obtain hSv | ⟨y, hy⟩ := {y ∈ s | p y w < 0 ∧ p y v < 0}.eq_empty_or_nonempty
   · simp +contextual only [Set.sep_and, Set.eq_empty_iff_forall_notMem, Set.mem_inter_iff,
       Set.mem_setOf_eq, not_and, true_and, not_lt, and_imp] at hSv
     refine ⟨0, zero_mem _, v, fun x hx => ?_, zero_add _⟩
-    by_cases hxw : 0 ≤ x w
+    by_cases hxw : 0 ≤ p x w
     · exact hv1 ⟨hx, hxw⟩
     · exact hSv x hx (lt_of_not_ge hxw)
-  lift s to Finset (Dual 𝕜 M) using hs
-  let u : 𝕜 := ({y ∈ s | y w < 0}.image (fun y => y v * (y w)⁻¹)).max' <| by
+  lift s to Finset M using hs
+  let u : 𝕜 := ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max' <| by
     simpa [Finset.Nonempty, Set.Nonempty] using hSw.image _
   have hu : 0 ≤ u := by
     refine le_trans (mul_nonneg_of_nonpos_of_nonpos hy.2.2.le (inv_nonpos.mpr hy.2.1.le))
-      (Finset.le_max' _ (y v * (y w)⁻¹) ?_)
+      (Finset.le_max' _ (p y v * (p y w)⁻¹) ?_)
     simp only [Finset.mem_image, Finset.mem_filter]
     exact ⟨y, ⟨hy.1, hy.2.1⟩, rfl⟩
   refine ⟨u • w, ?_, v - u • w, fun z hzS ↦ ?_, add_sub_cancel _ _⟩
   · rw [← Nonneg.mk_smul _ hu]
     exact Submodule.smul_mem _ _ (Submodule.subset_span rfl)
   simp only [map_sub, map_smul, smul_eq_mul, sub_nonneg]
-  obtain hzw | hzw := lt_or_ge (z w) 0
-  · dsimp
-    rw [← _root_.mul_le_mul_right_of_neg (inv_neg''.mpr hzw), mul_inv_cancel_right₀ hzw.ne]
-    exact Finset.le_max' _ (z v * (z w)⁻¹) <|
+  obtain hzw | hzw := lt_or_ge (p z w) 0
+  · rw [← _root_.mul_le_mul_right_of_neg (inv_neg''.mpr hzw), mul_inv_cancel_right₀ hzw.ne]
+    exact Finset.le_max' _ (p z v * (p z w)⁻¹) <|
       Finset.mem_image.mpr ⟨z, Finset.mem_filter.mpr ⟨hzS, hzw⟩, rfl⟩
   obtain ⟨y, hy, t_eq : _ = u⟩ := Finset.mem_image.mp <|
-    ({y ∈ s | y w < 0}.image (fun y => y v * (y w)⁻¹)).max'_mem <| by
+    ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max'_mem <| by
       simpa [Finset.Nonempty, Set.Nonempty] using hSw.image _
   rw [Finset.mem_filter] at hy
   rw [← t_eq, ← _root_.mul_le_mul_left_of_neg hy.2, ← mul_assoc]
@@ -183,55 +118,248 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   rw [mul_inv_cancel_left₀ hy.2.ne]
   exact hv2 ⟨hzS, hzw⟩ hy
 
-variable [AddCommGroup N] [Module 𝕜 N] {p : N →ₗ[𝕜] M →ₗ[𝕜] 𝕜} [Module.Finite 𝕜 M] {s : Set M}
+-- variable [AddCommGroup N] [Module 𝕜 N] {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} {s : Set M}
+variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair]
+variable [Module.Finite 𝕜 N]
 
-variable (𝕜) in
-/-- A finitely generated cone is polyhedral. -/
-lemma IsPolyhedral.of_fg (hC : C.FG) : IsPolyhedral C := by
-  classical
+lemma FG.exists_finite_dual (hC : C.FG) :
+    ∃ s : Set N, s.Finite ∧ dual p.flip s = C := by
+  classical -- for Finset.coe_insert
   obtain ⟨s, rfl⟩ := hC
   induction s using Finset.induction with
   | empty =>
     rw [Finset.coe_empty, span_empty]
-    exact .bot
-  | @insert w A hwA hA =>
-    obtain ⟨s, hs, hsA⟩ := hA
-    rw [Finset.coe_insert, Submodule.span_insert, ← hsA, ← dual_auxGenSet hs]
-    exact ⟨_, auxGenSet_finite hs, rfl⟩
+    obtain ⟨s, hs⟩ := fg_top (R := 𝕜) (E := N)
+    exact ⟨s, s.finite_toSet, by rw [← dual_span, hs]; exact dual_top⟩
+  | insert w A hwA hA =>
+    obtain ⟨s, hfin, hs⟩ := hA
+    rw [Finset.coe_insert, span_insert, ← hs, ← dual_auxGenSet hfin]
+    exact ⟨_, auxGenSet_finite w hfin, rfl⟩
 
-protected lemma IsPolyhedral.span (hS : s.Finite) : IsPolyhedral (span 𝕜 s) := .of_fg 𝕜 (fg_span hS)
+-- variable (𝕜) in
+lemma FG.exists_finset_dual (hC : C.FG) :
+    ∃ s : Finset N, dual p.flip s = C := by
+  obtain ⟨s, sfin, hs⟩ := FG.exists_finite_dual p hC
+  exact ⟨ sfin.toFinset, by simp [hs] ⟩
 
+-- variable (𝕜) in
+/-- A finitely generated cone is the dual of a finitely generated cone. -/
+lemma FG.exists_fg_dual (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 N, D.FG ∧ dual p.flip D = C := by
+  obtain ⟨s, hfin, rfl⟩ := FG.exists_finite_dual p hC
+  exact ⟨ span 𝕜 s, fg_span hfin, dual_span _ ⟩
+
+variable [Module.Finite 𝕜 M]
+
+omit [Module.Finite 𝕜 N] in
+@[simp] lemma FG.dual_dual_flip {C : PointedCone 𝕜 N} (hC : C.FG) :
+    dual p (dual p.flip C) = C := by
+  obtain ⟨s, hs, rfl⟩ := FG.exists_finite_dual p.flip hC; exact dual_dual_flip_dual _
+
+omit [Module.Finite 𝕜 M] in
+@[simp] lemma FG.dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) :
+  dual p.flip (dual p C) = C := FG.dual_dual_flip p.flip hC
+
+/-- A finitely generated cone is polyhedral. -/
+lemma dual.fg_of_fg (hC : C.FG) : (dual p C).FG := by
+  obtain ⟨D, hfg, rfl⟩ := FG.exists_fg_dual p hC
+  rw [FG.dual_dual_flip] <;> exact hfg
+
+omit [Module.Finite 𝕜 N] in
 /-- The double dual of a finite set equals the cone generated by that set. -/
-lemma dual_dual_eq_span [p.IsPerfPair] {s : Set M} (hS : s.Finite) :
+lemma dual_dual_flip_eq_span {s : Set N} (hS : s.Finite) :
     dual p (dual p.flip s) = span 𝕜 s := by
-  simpa using IsPolyhedral.dual_dual_flip p (.span hS)
+  simpa using FG.dual_dual_flip p (Submodule.fg_span hS)
 
-/-- A polyhedral cone is finitely generated. -/
-lemma fg_of_isPolyhedral (hC : IsPolyhedral C) : C.FG := by
-  obtain ⟨s, S_fin, rfl⟩ := hC
-  obtain ⟨T, T_fin, hT⟩ :=
-    (IsPolyhedral.of_fg 𝕜 <| fg_span S_fin).exists_finite_dual_eq (Module.Dual.eval 𝕜 M)
-  rw [← dual_span', span, ← hT, Module.Dual.eval, dual_dual_eq_span T_fin]
-  exact Submodule.fg_span T_fin
+omit [Module.Finite 𝕜 M] in
+/-- The double dual of a finite set equals the cone generated by that set. -/
+lemma dual_flip_dual_eq_span {s : Set M} (hS : s.Finite) :
+    dual p.flip (dual p s) = span 𝕜 s := by
+  simpa using FG.dual_dual_flip p.flip (Submodule.fg_span hS)
 
-alias IsPolyhedral.fg := fg_of_isPolyhedral
+omit [Module.Finite 𝕜 M] in
+lemma FG.dual_inj {C₁ C₂ : PointedCone 𝕜 M} (hC₁ : C₁.FG) (hC₂ : C₂.FG) :
+    dual p C₁ = dual p C₂ ↔ C₁ = C₂ where
+  mp h := by rw [← FG.dual_flip_dual p hC₁, ← FG.dual_flip_dual p hC₂, h]
+  mpr h := by rw [h]
 
-/-- A cone is polyhedral if and only if it is finitely generated. -/
-lemma isPolyhedral_iff_fg : IsPolyhedral C ↔ C.FG := ⟨fg_of_isPolyhedral , .of_fg _⟩
+-- lemma dual_inf {C C' : PointedCone 𝕜 M} (hC : C.FG) (hC' : C'.FG) :
+--     dual p (C ∩ C') = dual p C ⊔ dual p C' := by
+--   rw [←FG.dual_inj p.flip]
+--   rw [dual_sup]
+--   rw [FG.dual_flip_dual]
+--   sorry; sorry; sorry; sorry
 
-/-- The dual of a polyhedral cone is again polyhedral. -/
-protected lemma IsPolyhedral.dual [p.IsPerfPair] (hC : IsPolyhedral C) :
-    IsPolyhedral (dual p.flip C) := .dual_of_fg (fg_of_isPolyhedral hC)
+omit p
 
 /-- A linear subspace is a polyhedral cone -/
-lemma IsPolyhedral.submodule (S : Submodule 𝕜 M) : IsPolyhedral (S : PointedCone 𝕜 M)
-  := isPolyhedral_iff_fg.mpr
-      <| PointedCone.ofSubmodule.FG_of_FG
-      <| (Submodule.fg_iff_finiteDimensional S).mpr inferInstance
-
-def PolyhedralCone.ofSubmodule (S : Submodule 𝕜 M) : PolyhedralCone 𝕜 M := ⟨ S, .submodule S ⟩
-
-instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := ⟨ .ofSubmodule ⟩
+lemma IsPolyhedral.submodule (S : Submodule 𝕜 M) : (S : PointedCone 𝕜 M).FG
+  := PointedCone.ofSubmodule.FG_of_FG
+    <| (Submodule.fg_iff_finiteDimensional S).mpr inferInstance
 
 end LinearOrder
+
+
+-- Now we are ready to define PolyhedralCone, because from here on we assume V=H.
+-- From here on we also mke no use any longer of the precise pairing.
+
+variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
+  [Module 𝕜 M] [Module.Finite 𝕜 M]
+
+/-- Abbreviation for PointedCone.FG. Intended for use in contexts with V=H. -/
+abbrev IsPolyhedral (C : PointedCone 𝕜 M) := C.FG
+
+-- this definition allows to prove certain statement immediately from FG.
+example {C C' : PointedCone 𝕜 M} (hC : C.IsPolyhedral) (hC' : C'.IsPolyhedral) :
+    (C ⊔ C').IsPolyhedral := Submodule.FG.sup hC hC'
+
+variable {C C' : PointedCone 𝕜 M} (hC : C.IsPolyhedral) (hC' : C'.IsPolyhedral)
+
+-- lemma dual_inf : PointedCone.dual p (C ⊓ C') = PointedCone.dual p C ⊔ PointedCone.dual p C' := by
+--   -- apply dual_dual_flip_dual
+--   sorry
+
+lemma IsPolyhedral.inf : (C ⊓ C').IsPolyhedral := by
+  sorry
+
 end PointedCone
+
+section CommRing
+
+variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
+  [Module 𝕜 M] [Module.Finite 𝕜 M]
+
+variable (𝕜 M) in
+structure PolyhedralCone extends PointedCone 𝕜 M where
+  isPolyhedral : FG toSubmodule
+
+namespace PolyhedralCone
+
+@[coe] abbrev toPointedCone (C : PolyhedralCone 𝕜 M) : PointedCone 𝕜 M := C.toSubmodule
+
+instance : Coe (PolyhedralCone 𝕜 M) (PointedCone 𝕜 M) where
+  coe := toPointedCone
+
+omit [Module.Finite 𝕜 M] in
+lemma toPointedCone_injective :
+    Injective (toPointedCone : PolyhedralCone 𝕜 M → PointedCone 𝕜 M) :=
+  fun ⟨_, _⟩ _ ↦ by congr!
+
+instance : SetLike (PolyhedralCone 𝕜 M) M where
+  coe C := C.toPointedCone
+  coe_injective' := SetLike.coe_injective.comp toPointedCone_injective
+
+omit [Module.Finite 𝕜 M] in
+@[simp] lemma coe_toPointedCone (C : PolyhedralCone 𝕜 M) : (C.toPointedCone : Set M) = C := rfl
+
+end PolyhedralCone
+end CommRing
+
+-- namespace PolyhedralCone
+
+-- variable {R M N : Type*}
+--   [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
+--   [AddCommGroup M] [Module R M] [Module.Finite R M] [Projective R M]
+--   [AddCommGroup N] [Module R N] -- [Module.Finite 𝕜 M]
+
+-- instance : Bot (PolyhedralCone R M) := ⟨⊥, .bot⟩
+
+-- instance uniqueBot : Unique (⊥ : PolyhedralCone R M) :=
+--   inferInstanceAs <| Unique (⊥ : PointedCone R M)
+
+-- instance : Top (PolyhedralCone R M) := ⟨ ⊤, .top ⟩
+
+-- instance : Min (PolyhedralCone R M) where
+--   min C C' := ⟨C ⊓ C', C.isPolyhedral.inf C'.isPolyhedral⟩
+
+-- @[simp, norm_cast] lemma coe_inf (C D : PolyhedralCone R M) :
+--     (C ⊓ D).toPointedCone = C.toPointedCone ⊓ D.toPointedCone := rfl
+
+-- instance : SemilatticeInf (PolyhedralCone R M) :=
+--   PolyhedralCone.toPointedCone_injective.semilatticeInf _ coe_inf
+
+-- -- TODO: add simp lemmas
+
+-- variable {𝕜 M N : Type*}
+--   [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+--   [AddCommGroup M] [Module 𝕜 M] [Module.Finite 𝕜 M]
+--   [AddCommGroup N] [Module 𝕜 N] -- [Module.Finite 𝕜 M]
+
+-- def of_IsPolyhedral {C : PointedCone 𝕜 M} (hC : C.IsPolyhedral) : PolyhedralCone 𝕜 M := ⟨ C, hC ⟩
+-- def of_fg {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M := of_IsPolyhedral (.of_fg 𝕜 hC)
+
+-- def span {S : Set M} (hfin : S.Finite) : PolyhedralCone 𝕜 M := of_IsPolyhedral (.span hfin)
+
+-- variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair]
+
+-- def dual (C : PolyhedralCone 𝕜 M) : PolyhedralCone 𝕜 N
+--   := ⟨PointedCone.dual p C, PointedCone.IsPolyhedral.dual C.isPolyhedral⟩
+
+-- def dual_of_finite (S : Set M) (hS : S.Finite) : PolyhedralCone 𝕜 N
+--   := ⟨PointedCone.dual p S, PointedCone.IsPolyhedral.dual_of_finite hS⟩
+
+-- def dual_of_fg (C : PointedCone 𝕜 M) (hC : C.FG) : PolyhedralCone 𝕜 N
+--   := ⟨PointedCone.dual p C, PointedCone.IsPolyhedral.dual_of_fg hC⟩
+
+-- variable [Module.Finite 𝕜 N]
+-- variable {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} [p.IsPerfPair]
+
+-- -- probably needs assumptions, such as perfect pairing maybe?
+-- lemma dual_dual_flip (C : PolyhedralCone 𝕜 N) : dual p (dual p.flip C) = C := by
+--   sorry
+-- lemma dual_flip_dual (C : PolyhedralCone 𝕜 M) : dual p.flip (dual p C) = C := by
+--   sorry
+
+-- instance : Max (PolyhedralCone 𝕜 M) where
+--   max C C' := ⟨C ⊔ C', C.isPolyhedral.sup C'.isPolyhedral⟩
+
+-- @[simp, norm_cast] lemma coe_sup (C D : PolyhedralCone 𝕜 M) :
+--     (C ⊔ D).toPointedCone = C.toPointedCone ⊔ D.toPointedCone := rfl
+
+-- instance : SemilatticeSup (PolyhedralCone 𝕜 M) :=
+--   PolyhedralCone.toPointedCone_injective.semilatticeSup _ coe_sup
+
+-- lemma dual_inf {C C' : PolyhedralCone 𝕜 M} : dual p (C ⊓ C') = dual p C ⊔ dual p C' :=
+--   sorry
+
+-- lemma dual_sup {C C' : PolyhedralCone 𝕜 M} : dual p (C ⊔ C') = dual p C ⊓ dual p C' :=
+--   sorry
+
+-- end PolyhedralCone
+
+-- /- Lattice structure -/
+
+-- namespace PolyhedralCone
+
+-- variable [Field 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜] [AddCommGroup M] [Module 𝕜 M] {s : Set (Dual 𝕜 M)} {w : M}
+
+-- def ofSubmodule (S : Submodule 𝕜 M) : PolyhedralCone 𝕜 M := ⟨ S, .submodule S ⟩
+
+-- instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := ⟨ .ofSubmodule ⟩
+
+-- instance completeLattice : CompleteLattice (PolyhedralCone 𝕜 M) :=
+--   { (inferInstance : OrderTop (PolyhedralCone 𝕜 M)),
+--     (inferInstance : OrderBot (PolyhedralCone 𝕜 M)) with
+--     sup := fun a b ↦ sInf { x | a ≤ x ∧ b ≤ x }
+--     le_sup_left := fun _ _ ↦ le_sInf' fun _ ⟨h, _⟩ ↦ h
+--     le_sup_right := fun _ _ ↦ le_sInf' fun _ ⟨_, h⟩ ↦ h
+--     sup_le := fun _ _ _ h₁ h₂ ↦ sInf_le' ⟨h₁, h₂⟩
+--     inf := (· ⊓ ·)
+--     le_inf := fun _ _ _ ↦ Set.subset_inter
+--     inf_le_left := fun _ _ ↦ Set.inter_subset_left
+--     inf_le_right := fun _ _ ↦ Set.inter_subset_right
+--     sSup S := sInf {sm | ∀ s ∈ S, s ≤ sm}
+--     le_sSup := fun _ _ hs ↦ le_sInf' fun _ hq ↦ by exact hq _ hs
+--     sSup_le := fun _ _ hs ↦ sInf_le' hs
+--     le_sInf := fun _ _ ↦ le_sInf'
+--     sInf_le := fun _ _ ↦ sInf_le' }
+
+-- end PolyhedralCone
+
+
+/- What's next:
+  * halfspaces
+  * intersection/convex hull of PC is PC
+  * linear trafo
+  * lattice structure
+-/
