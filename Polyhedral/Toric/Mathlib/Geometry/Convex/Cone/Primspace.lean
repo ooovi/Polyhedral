@@ -35,6 +35,11 @@ namespace PolyhedralCone
 def IsPrimspace (P : PolyhedralCone 𝕜 M) := ∃ x : Dual 𝕜 M, dual .id (ray x) = P
   -- := ∃ x : Dual 𝕜 M, dual_of_finset .id {x} = P
 
+lemma IsPrimspace.top : IsPrimspace (⊤ : PolyhedralCone 𝕜 M) := by
+  use 0
+  -- simp [ray, span]
+  sorry
+
 lemma IsPrimspace.of_map {f : M →ₗ[𝕜] N} (hf : Surjective f)
     {P : PolyhedralCone 𝕜 M} (hP : P.IsPrimspace) : (map f P).IsPrimspace := by
   unfold IsPrimspace
@@ -45,10 +50,14 @@ lemma IsPrimspace.of_map {f : M →ₗ[𝕜] N} (hf : Surjective f)
 variable (𝕜 M) in
 abbrev Primspace := { P : PolyhedralCone 𝕜 M // P.IsPrimspace }
 
+def of_IsPrimspace {C : PolyhedralCone 𝕜 M} (hC : C.IsPrimspace) : Primspace 𝕜 M := ⟨C, hC⟩
+
 namespace Primspace
 
+def top : Primspace 𝕜 M := of_IsPrimspace IsPrimspace.top
+
 def map {f : M →ₗ[𝕜] M'} (P : Primspace 𝕜 M) (hf : Surjective f) : Primspace 𝕜 M'
-  := ⟨_, IsPrimspace.of_map hf P.2⟩
+  := of_IsPrimspace <| IsPrimspace.of_map hf P.2
 
 -- TODO: comap
 
@@ -62,17 +71,14 @@ lemma neg_id_surj : Surjective (-LinearMap.id : M →ₗ[𝕜] M) := by
   use -x
   simp
 
-def opposite (P : Primspace 𝕜 M) := map P neg_id_surj
+abbrev opposite (P : Primspace 𝕜 M) := map P neg_id_surj
 
 def boundary (P : Primspace 𝕜 M) : Submodule 𝕜 M where
   carrier := P ⊓ P.opposite
-  add_mem' := sorry
-  zero_mem' := sorry
-  smul_mem' := sorry
+  add_mem' := by simp [opposite]; sorry
+  zero_mem' := by simp [opposite]; sorry
+  smul_mem' := by simp [opposite]; sorry
 
 end Primspace
-
--- NOTE: not generally true: p needs to be not zero.
--- lemma ray_dual (x : M) : ((ray x).dual p).IsPrimspace
 
 end PolyhedralCone
