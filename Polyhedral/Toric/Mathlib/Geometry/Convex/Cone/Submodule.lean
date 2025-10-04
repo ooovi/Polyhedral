@@ -44,7 +44,7 @@ open Module
 def CoFG (N : Submodule R E) : Prop :=
   ∃ S : Finset (Dual R E), dual .id S = N
 
-lemma dual_bilin_dual_id (s : Set E) : dual p s = dual .id (p '' s):= by ext x; simp
+lemma dual_bilin_dual_id (s : Set E) : dual p s = dual .id (p '' s) := by ext x; simp
 
 -- NOTE: converse is not true
 lemma cofg_intro (N : Submodule R F) (hN : ∃ S : Finset E, dual p S = N) : N.CoFG := by
@@ -70,8 +70,28 @@ lemma cofg_of_dual_fg' (N : Submodule R F) (M : Submodule R E) (hM : M.FG) (hN :
 lemma dual_cofg_iff_fg (N : Submodule R E) : N.FG → (dual p N).CoFG
   := (cofg_of_dual_fg' _ N · rfl)
 
+lemma cofg_inter (M N : Submodule R E) (hM : M.CoFG) (hN : N.CoFG) : (M ⊓ N).CoFG := by
+  classical
+  obtain ⟨S, rfl⟩ := hM
+  obtain ⟨T, rfl⟩ := hN
+  use S ∪ T
+  rw [Finset.coe_union, dual_union]
+
 -- @[simp]
 lemma dual_fg_iff_cofg (N : Submodule R E) : N.CoFG → (dual p N).FG := sorry
+
+variable {E' F' : Type*}
+  [AddCommGroup E'] [Module R E']
+  [AddCommGroup F'] [Module R F']
+  -- {p' : E' →ₗ[R] F' →ₗ[R] R}
+
+lemma map_dual (f : E →ₗ[R] E') (C : Submodule R E) :
+    dual (Dual.eval R E') (map f C) = comap f.dualMap (dual (Dual.eval R E) C) := by
+  ext x; simp
+
+-- lemma map_dual' (f : (Dual R E) →ₗ[R] (Dual R E')) (C : Submodule R (Dual R E)) :
+--     dual .id (map f C) = comap f.dualMap (dual .id C) := by
+--   ext x; simp
 
 end CoFG
 
