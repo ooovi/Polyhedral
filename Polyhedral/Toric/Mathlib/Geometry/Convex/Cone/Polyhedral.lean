@@ -263,6 +263,9 @@ variable {C C' : PointedCone 𝕜 M} (hC : C.IsPolyhedral) (hC' : C'.IsPolyhedra
 lemma IsPolyhedral.inf : (C ⊓ C').IsPolyhedral := by
   sorry
 
+alias IsPolyhedral.map := Submodule.FG.map
+-- alias IsPolyhedral.fg_of_fg_map := Submodule.fg_of_fg_map
+
 end PointedCone
 
 section CommRing

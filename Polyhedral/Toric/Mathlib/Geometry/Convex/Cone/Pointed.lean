@@ -38,8 +38,24 @@ lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
 
 /- Duality -/
 
+/-- Polar duality on cones. -/
+alias polar := dual
+
 variable {R F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
   [Module R E] [AddCommGroup F] [Module R F] {p : E →ₗ[R] F →ₗ[R] R}
+
+@[simp]
+lemma polar_eq_dual (S : Submodule R E) : polar p S = Submodule.dual p S := by
+  ext x; constructor
+  · intro h _ ha
+    have h' := h (neg_mem_iff.mpr ha)
+    simp at h'
+    exact le_antisymm (h ha) h'
+  · intro h _ ha
+    rw [h ha]
+
+def CoFG (N : PointedCone R E) : Prop :=
+  ∃ S : Finset (Module.Dual R E), dual .id S = N
 
 alias dual_bot := dual_zero
 
