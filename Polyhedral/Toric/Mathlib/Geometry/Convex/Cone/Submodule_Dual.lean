@@ -5,6 +5,7 @@ Authors: Yaël Dillies
 -/
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.BilinearMap
+import Mathlib.LinearAlgebra.Dual.Defs
 
 /-!
 # The algebraic dual of a cone
@@ -31,9 +32,10 @@ Deduce from `dual_flip_dual_dual_flip` that polyhedral cones are invariant under
 
 assert_not_exists TopologicalSpace Real Cardinal
 
-open Function LinearMap Pointwise Set
+open Module Function LinearMap Pointwise Set
 
 namespace Submodule
+
 variable {R M N : Type*}
   [CommSemiring R]
   [AddCommMonoid M] [Module R M]
@@ -98,5 +100,14 @@ lemma dual_span (s : Set M) : dual p (Submodule.span R s) = dual p s := by
   | zero => simp
   | add y z _hy _hz hy hz => rw [map_add, add_apply, ← hy, ← hz, add_zero]
   | smul t y _hy hy => simp only [map_smul, smul_apply, smul_eq_mul, ← hy, mul_zero]
+
+variable {M' N' : Type*}
+  [AddCommMonoid M'] [Module R M']
+  [AddCommMonoid N'] [Module R N']
+
+-- TODO: generalize to arbitrary pairings
+lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
+    comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
+  ext x; simp
 
 end Submodule

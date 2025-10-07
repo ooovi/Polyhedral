@@ -73,11 +73,13 @@ lemma neg_id_surj : Surjective (-LinearMap.id : M →ₗ[𝕜] M) := by
 
 abbrev opposite (P : Primspace 𝕜 M) := map P neg_id_surj
 
+instance : Neg (Primspace 𝕜 M) := ⟨opposite⟩
+
 def boundary (P : Primspace 𝕜 M) : Submodule 𝕜 M where
-  carrier := P ⊓ P.opposite
-  add_mem' := by simp [opposite]; sorry
-  zero_mem' := by simp [opposite]; sorry
-  smul_mem' := by simp [opposite]; sorry
+  carrier := P ⊓ -P
+  add_mem' := by simp; sorry
+  zero_mem' := by simp; sorry
+  smul_mem' := by simp; sorry
 
 end Primspace
 

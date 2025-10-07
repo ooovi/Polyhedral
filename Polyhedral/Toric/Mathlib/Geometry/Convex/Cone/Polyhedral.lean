@@ -153,6 +153,19 @@ lemma map_dual (C : PolyhedralCone 𝕜 M) :
     dual (Dual.eval 𝕜 M') (map f C) = comap f.dualMap (dual (Dual.eval 𝕜 M) C) := by
   sorry -- ext x; simp
 
+instance : Neg (PolyhedralCone 𝕜 M) where
+  neg C := of_FG <| Submodule.FG.map (-.id) C.isFG
+
+instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) where
+  coe S := of_FG <| PointedCone.ofSubmodule.FG_of_FG
+    <| (Submodule.fg_iff_finiteDimensional S).mpr inferInstance
+
+
+-- /-- A linear subspace is a polyhedral cone -/
+-- lemma IsPolyhedral.submodule (S : Submodule 𝕜 M) : (S : PointedCone 𝕜 M).FG
+--   := PointedCone.ofSubmodule.FG_of_FG
+--     <| (Submodule.fg_iff_finiteDimensional S).mpr inferInstance
+
 end Map
 
 end PolyhedralCone
