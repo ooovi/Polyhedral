@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2025 Justus Springer. All rights reserved.
+Copyright (c) 2025 Justus Springer, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Justus Springer
+Authors: Justus Springer, Martin Winter
 -/
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
@@ -117,6 +117,25 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   nth_rw 4 [mul_comm]
   rw [mul_inv_cancel_left₀ hy.2.ne]
   exact hv2 ⟨hzS, hzw⟩ hy
+
+-- The following theorems *should* not assume the finiteness of the ambient space!
+
+lemma FG.is_dual_dual_of_finite (hC : C.FG) :
+    ∃ s : Set M, s.Finite ∧ dual p.flip (dual p s) = C := by
+  sorry
+
+lemma FG.is_dual_dual_of_cofg (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 N, D.CoFG ∧ dual p.flip D = C := by
+  sorry
+
+lemma FG.dual_dual_fg_of_cofg (hC : C.CoFG) : (dual (Dual.eval 𝕜 M) C).FG := by
+  sorry
+
+@[simp] lemma FG.dual_dual_of_fg (hC : C.CoFG) : dual p.flip (dual p s) = C := by
+  sorry
+
+lemma inf_fg' {C C' : PointedCone 𝕜 M} (hC : C.FG) (hC' : C'.FG) : (C ⊓ C').FG := by
+  sorry
 
 -- variable [AddCommGroup N] [Module 𝕜 N] {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} {s : Set M}
 variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair]

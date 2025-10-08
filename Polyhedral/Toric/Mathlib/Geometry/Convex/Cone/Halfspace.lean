@@ -30,6 +30,7 @@ variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
   {M : Type*} [AddCommGroup M] [Module R M] -- [AddCommGroup (Dual R M)]
   {M' : Type*} [AddCommGroup M'] [Module R M']
 
+-- Maybe define this on `Set M` instead?
 def IsHalfspaceOrTop (P : PointedCone R M)
     := ∃ x : (Dual R M), dual .id {x} = P
 
