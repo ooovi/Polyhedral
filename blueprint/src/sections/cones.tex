@@ -142,8 +142,8 @@ element has a multiplicative inverse.
 \begin{proposition}
   \label{dual-polyhedral}
   \uses{polyhedral-cone, cone-finitely-generated}
-  \lean{PointedCone.IsPolyhedral.dual_of_fg}
-  \leanok
+  % \lean{PointedCone.IsPolyhedral.dual_of_fg}
+  % \leanok
   If \( \sigma \subset N \) is finitely generated, then \( \sigma^\vee
   \subset M \) is polyhedral.
 \end{proposition}
@@ -159,8 +159,7 @@ element has a multiplicative inverse.
 \begin{proposition}[Double dual]
   \label{double-dual-polyhedral-cone}
   \uses{polyhedral-cone}
-  % \lean{PointedCone.IsPolyhedral.dual_dual_flip,
-  PointedCone.IsPolyhedral.dual_flip_dual}
+  % \lean{PointedCone.IsPolyhedral.dual_dual_flip, PointedCone.IsPolyhedral.dual_flip_dual}
   % \leanok
   If \( \sigma \subseteq N \) is polyhedral, then \( \sigma^{\vee\vee}
   = \sigma \).
@@ -177,8 +176,8 @@ element has a multiplicative inverse.
 \begin{proposition}[Fourier-Motkin elimination]
   \label{fourier-motzkin}
   \uses{polyhedral-cone}
-  \lean{PointedCone.dual_auxGenSet}
-  \leanok
+  % \lean{PointedCone.dual_auxGenSet}
+  % \leanok
   If \( \sigma \subseteq N \) is a polyhedral cone and \( w \in N \),
   then \( \sigma + \Cone(\{w\}) \) is polyhedral too.
 \end{proposition}
@@ -386,8 +385,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{definition}
   \label{perp}
   \uses{}
-  \lean{PointedCone.perp}
-  \leanok
+  % \lean{PointedCone.perp}
+  % \leanok
   For any subset \( A \subseteq M \), we define the \emph{perp space}
   \[
       A^{\perp}\ :=\ \{v \in N\ \mid\ \forall u \in A, \langle v, u \rangle = 0\},
@@ -399,15 +398,15 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}
   \label{perp-closed-negation}
   \uses{}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   If \( A \subseteq M \) is closed under negation (for instance, \( A
   \subseteq M \) a \( \Bbbk \)-submodule), then \( A^{\perp} =
   A^{\vee} \).
 \end{lemma}
 \begin{proof}
   \uses{}
-  \leanok
+  % \leanok
   \( A^{\perp} \subseteq A^{\vee} \) is clear. Let \( x \in A^{\vee}
   \) and \( a \in A \). then \( \langle x, a \rangle \geq 0 \) and \(
   -\langle x, a \rangle = \langle x, -a \rangle \geq 0 \). Hence \(
@@ -418,8 +417,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{definition}[Face of a cone]
   \label{face}
   \uses{perp}
-  \lean{PointedCone.IsFace}
-  \leanok
+  % \lean{PointedCone.IsFace}
+  % \leanok
   A \emph{face} of a pointed cone \( \sigma \subseteq N \) is the
   intersection of \( \sigma \) with some hyperplane \( u^{\perp} \)
   for \( u \in \sigma^{\vee} \). We write \( \tau \preceq \sigma \) if
@@ -431,8 +430,8 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{proposition}
   \label{cone-inter-perp}
   \uses{perp, dual-cone}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   For any subset \( S \subseteq N \) and \( u \in S^{\vee} \), we have
   \[
       \Cone(S) \cap u^{\perp} = \Cone(S \cap u^{\perp}).
@@ -451,7 +450,7 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \end{lemma}
 \begin{proof}
   \uses{cone-inter-perp}
-  \leanok
+  % \leanok
   Use \ref{cone-inter-perp} and the fact that if \( S \) is finite,
   so is \( S \cap u^{\perp} \).
 \end{proof}
@@ -467,7 +466,7 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \end{lemma}
 \begin{proof}
   \uses{}
-  \leanok
+  % \leanok
   By \ref{face-polyhedral}, a face of a polyhedral cone \( \sigma =
   \Cone(S) \) is of the form \( \Cone(S') \) for some \( S' \subseteq
   S \). Being finite, \( S \) has only finitely many subsets, which
@@ -478,14 +477,14 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}[Intersection of faces]
   \label{face-intersection}
   \uses{face}
-  \lean{PointedCone.face_intersection}
-  \leanok
+  % \lean{PointedCone.face_intersection}
+  % \leanok
   If \( \sigma \) is a pointed cone, then the intersection of two
   faces of \( \sigma \) is a again face of \( \sigma \).
 \end{lemma}
 \begin{proof}
   \uses{}
-  \leanok
+  % \leanok
   Let \( \tau = \sigma \cap u^{\perp} \) and \( \tau' = \sigma \cap
   \tau'^{\perp} \) be faces. We claim that \( \sigma \cap u^{\perp}
   \cap u'^{\perp} = \sigma \cap (u + u')^{\perp} \). The inclusion
@@ -499,14 +498,14 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}
   \label{face-dual-eq-sum}
   \uses{face}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   Let \( \tau \preceq \sigma \) be a face of a pointed cone. Then \(
   \tau^{\vee} = \tau^{\perp} + \sigma^{\vee} \).
 \end{lemma}
 \begin{proof}
   \uses{perp-closed-negation}
-  \leanok
+  % \leanok
   It's easy to show that \( \tau = \Span_{\Bbbk}(\tau) \cap
   \sigma^{\vee} \). Dualising gives \( \tau^{\vee} =
   \Span_{\Bbbk}(\tau)^{\vee} + \sigma^{\vee} \).
@@ -520,14 +519,14 @@ bijection between faces of \( \sigma \) and faces of \( \sigma^{\vee}
 \begin{lemma}[Face of a face]
   \label{face-face}
   \uses{face}
-  \lean{PointedCone.face_face}
-  \leanok
+  % \lean{PointedCone.face_face}
+  % \leanok
   A face of a face of a polyhedral cone \( \sigma \) is again a face
   of \( \sigma \).
 \end{lemma}
 \begin{proof}
   \uses{face-dual-eq-sum}
-  \leanok
+  % \leanok
   Let \( \tau = \sigma \cap u^{\perp} \) with \( u \in \sigma^{\vee}
   \) and \( \rho = \tau \cap v^{\perp} \) with \( v \in \tau^{\vee}
   \). By \ref{face-dual-eq-sum}, we can write \( v = v_1 + v_2 \)
@@ -557,8 +556,8 @@ the set of faces of a polyhedral cone \( \sigma \) (written \(
 \begin{lemma}[Face order is a lattice]
   \label{face-lattice}
   \uses{face, face-intersection}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   Given a polyhedral cone, the partial order on its faces
   is a lattice. We call it the \emph{face lattice} of the cone.
 \end{lemma}
@@ -569,8 +568,8 @@ Top is the entire cone, bot is the empty cone.
 \begin{lemma}[Face lattice is graded]
   \label{face-lattice-graded}
   \uses{face-lattice}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   Given a polyhedral cone, the partial order on its faces
   is graded.
 \end{lemma}
@@ -581,8 +580,8 @@ The grading is given by the number of faces of this face.
 \begin{definition}[Combinatorial Equivalence]
   \label{combinatorial-equivalence}
   \uses{face-lattice}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   Two polyhedral cones are \emph{combinatorially equivalent} if there
   is an order isomorphism between their face lattices.
 \end{definition}
@@ -590,24 +589,24 @@ The grading is given by the number of faces of this face.
 \begin{proposition}
   \label{dual-face-lattice}
   \uses{face-lattice, dual-cone}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   Face lattices of dual cones are dual to each other.
 \end{proposition}
 
 \begin{proposition}
   \label{face-face-lattice}
   \uses{face-lattice, face-face}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   The face lattice of a face is isomorphic to a lower interval of the face lattice of a polyhedral cone.
 \end{proposition}
 
 \begin{proposition}
   \label{ombinatorial-equivalence-linear-transformaions}
   \uses{face-lattice, combinatorial-equivalence}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   Linear transformaions preserve combinatorial equivalence. There is an iso that should be provided
 \end{proposition}
 
@@ -628,8 +627,8 @@ The grading is given by the number of faces of this face.
 \begin{definition}[Polar Cone]
   \label{polar-cone}
   \uses{pointed-cone}
-  \lean{}
-  \leanok
+  % \lean{}
+  % \leanok
   For a pointed cone \( \sigma \), the {\bf polar cone of \( \sigma \)} is
   the pointed cone
   \[
