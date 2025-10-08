@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2025 Yaël Dillies. All rights reserved.
+Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yaël Dillies
+Authors: Martin Winter
 -/
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.BilinearMap

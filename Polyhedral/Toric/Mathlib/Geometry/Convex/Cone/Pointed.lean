@@ -224,6 +224,8 @@ lemma dual_lineal_eq_span_dual (C : PointedCone R E) :
 
 -- ## IsPointy
 
+-- TODO: use ConvexCone.Salient
+
 /-- A pointy cone has trivial lineality space. -/
 def IsPointy (C : PointedCone R E) := C.lineal = ⊥
 

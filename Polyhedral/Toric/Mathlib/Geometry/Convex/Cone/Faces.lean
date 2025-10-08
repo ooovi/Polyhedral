@@ -26,8 +26,13 @@ variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 
 namespace PointedCone
 
+-- This is extreme face
+def IsFaceOf' (F C : PointedCone 𝕜 M)
+  := ∀ x ∈ C, ∀ y ∈ C, ∀ t ∈ Set.Icc 0 1, t • x  + (1 - t) • y ∈ F → (x ∈ F ∧ y ∈ F)
+
+-- This is exposed face
 def IsFaceOf (F C : PointedCone 𝕜 M)
-  := ∃ H : PointedCone.HalfspaceOrTop 𝕜 M, C ≤ H ∧ C ⊓ H.boundary = F
+  := ∃ H : HalfspaceOrTop 𝕜 M, C ≤ H ∧ C ⊓ H.boundary = F
 
 lemma IsFaceOf.trans {C₁ C₂ C₃ : PointedCone 𝕜 M} (h12 : C₂.IsFaceOf C₁) (h23 : C₃.IsFaceOf C₂) :
   C₃.IsFaceOf C₁ := sorry
@@ -109,5 +114,7 @@ instance (C : PointedCone 𝕜 M) : Min (Face C) where
 variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair] in
 instance (C : PointedCone 𝕜 M) : Max (Face C) where
   max F₁ F₂ := of_isFaceOf <| IsFaceOf.sup F₁.isFaceOf F₂.isFaceOf
+
+-- instance {C : PolyhedralCone 𝕜 M} : Coe (Face C) (PolyhedralCone 𝕜 M) := sorry
 
 end PointedCone
