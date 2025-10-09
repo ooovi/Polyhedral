@@ -1,5 +1,3 @@
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.Algebra.Order.Ring.Defs
 import Mathlib.Analysis.Convex.Function
 import Mathlib.Analysis.Convex.Extreme
 
@@ -126,7 +124,7 @@ end PartialOrderSemiring
 
 section OrderedRing
 
-variable {𝕜 : Type*} {E : Type*} [Ring 𝕜] [PartialOrder 𝕜] [IsOrderedRing 𝕜] [AddCommMonoid E]
+variable {𝕜 : Type*} {E : Type*} [Semiring 𝕜] [PartialOrder 𝕜] [IsOrderedRing 𝕜] [AddCommMonoid E]
     [Module 𝕜 E] {l : E →ₗ[𝕜] 𝕜} {A B C : Set E} {x : E}
 
 namespace IsExposed
@@ -145,7 +143,7 @@ theorem eq_inter_halfSpace [Nontrivial 𝕜] {A B : Set E} (hAB : IsExposed 𝕜
     contradiction
   exact hAB.eq_inter_halfSpace' hB
 
-protected theorem inter {A B C : Set E} (hB : IsExposed 𝕜 A B)
+protected theorem inter [IsOrderedCancelAddMonoid 𝕜] {A B C : Set E} (hB : IsExposed 𝕜 A B)
     (hC : IsExposed 𝕜 A C) : IsExposed 𝕜 A (B ∩ C) := by
   rintro ⟨w, hwB, hwC⟩
   obtain ⟨l₁, rfl⟩ := hB ⟨w, hwB⟩
@@ -160,7 +158,7 @@ protected theorem inter {A B C : Set E} (hB : IsExposed 𝕜 A B)
   · exact
       (add_le_add_iff_left (l₁ x)).1 (le_trans (add_le_add (hwB.2 x hxA) (hwC.2 y hy)) (hx w hwB.1))
 
-theorem sInter {F : Finset (Set E)} (hF : F.Nonempty)
+theorem sInter [IsOrderedCancelAddMonoid 𝕜] {F : Finset (Set E)} (hF : F.Nonempty)
     (hAF : ∀ B ∈ F, IsExposed 𝕜 A B) : IsExposed 𝕜 A (⋂₀ F) := by
   classical
   induction F using Finset.induction with
@@ -177,10 +175,10 @@ end IsExposed
 
 end OrderedRing
 
-section LinearOrderedRing
+section LinearOrderedSemiring
 
-variable {𝕜 : Type*} {E : Type*} [Ring 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommMonoid E]
-  [Module 𝕜 E] {A B : Set E}
+variable {𝕜 : Type*} {E : Type*} [Semiring 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+  [AddCommMonoid E] [Module 𝕜 E] {A B : Set E}
 
 namespace IsExposed
 
@@ -210,4 +208,4 @@ end IsExposed
 theorem exposedPoints_subset_extremePoints : A.exposedPoints 𝕜 ⊆ A.extremePoints 𝕜 := fun _ hx =>
   (mem_exposedPoints_iff_exposed_singleton.1 hx).isExtreme.mem_extremePoints
 
-end LinearOrderedRing
+end LinearOrderedSemiring
