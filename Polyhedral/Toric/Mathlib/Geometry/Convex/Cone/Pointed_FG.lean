@@ -9,6 +9,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm
 
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Dual
+import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.CoFG
 
 /-!
 # Polyhedral cones
@@ -30,6 +31,8 @@ open Submodule hiding span
 variable {𝕜 M N : Type*}
 
 namespace PointedCone
+
+alias sup_fg := Submodule.FG.sup
 
 section LinearOrder
 
@@ -118,7 +121,80 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   rw [mul_inv_cancel_left₀ hy.2.ne]
   exact hv2 ⟨hzS, hzw⟩ hy
 
+variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair]
+
 -- The following theorems *should* not assume the finiteness of the ambient space!
+
+lemma cofg_of_fg_sup_cofg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.CoFG) : (C ⊔ D).CoFG := by
+  classical
+  obtain ⟨s, rfl⟩ := hC
+  induction s using Finset.induction with
+  | empty => simp [hD]
+  | insert w s hws hs =>
+    obtain ⟨t, ht⟩ := hs
+    use (auxGenSet .id t.toSet w).toFinset
+    simp [span_insert, sup_assoc, ← ht]
+    exact dual_auxGenSet t.finite_toSet
+
+lemma exists_cofg_sup_submodule {C : PointedCone 𝕜 M} (hC : C.FG)
+    {S : Submodule 𝕜 M} (hS : S.FG) (hCS : C ≤ S) :
+      ∃ D : PointedCone 𝕜 M, D.CoFG ∧ D ⊓ S = C := by
+  wlog hC' : C = ⊥ with h
+  · specialize h fg_bot hS bot_le rfl
+    obtain ⟨D, hcofg, hD⟩ := h
+    exact ⟨_, cofg_of_fg_sup_cofg hC hcofg, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
+  · obtain ⟨D, hcofg, hD⟩ := Submodule.exists_cofg_inf_bot hS
+    exact ⟨D, coe_cofg.mpr hcofg, by simp [← restrictScalars_inf, inf_comm, hD, hC']⟩
+
+lemma exists_cofg_sup_span {C : PointedCone 𝕜 M} (hC : C.FG) :
+      ∃ D : PointedCone 𝕜 M, D.CoFG ∧ D ⊓ Submodule.span 𝕜 (M := M) C = C :=
+  exists_cofg_sup_submodule hC (Submodule.span_scalars_FG hC) Submodule.subset_span
+
+lemma inf_fg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
+  let S : Submodule 𝕜 M := .span 𝕜 (C ⊔ D)
+  have hS : S.FG := by
+    have h := sup_fg hC hD
+    unfold S
+    simp
+    --rw [← Submodule.coe_union]
+    sorry
+  -- span_eq <| sup_fg hC hD
+  obtain ⟨sC, hCcofg, hsC⟩ := exists_cofg_sup_submodule hC hS (by sorry)
+  obtain ⟨sD, hDcofg, hsD⟩ := exists_cofg_sup_submodule hD hS (by sorry)
+  rw [← hsC, ← hsD, ← inf_assoc]
+  nth_rw 3 [inf_comm]; nth_rw 2 [inf_assoc]; nth_rw 2 [inf_comm]
+  rw [inf_assoc]
+  simp only [le_refl, inf_of_le_left]
+  have hcofg := cofg_inf hCcofg hDcofg
+  -- some use that the inf of a CoFG cone and a FG submodule is FG
+  sorry
+
+lemma CoFG.is_dual_finite_inf_span''''' {C : PointedCone 𝕜 N} (hC : C.FG)
+    (S : Submodule 𝕜 N) (hFG : S.FG) (hS : C ≤ S) : ∃ s : Set M, s.Finite ∧ dual p s ⊓ S = C := by
+  sorry
+
+lemma CoFG.is_dual_finite_inf_span'''' {C : PointedCone 𝕜 N} (hC : C.FG) :
+    ∃ s : Set M, s.Finite ∧ dual p s ⊓ Submodule.span (M := N) 𝕜 C = C := by
+  sorry
+
+lemma FG.dual_span_finite_sup_lineal (hC : C.FG) :
+    ∃ s : Set N, s.Finite ∧ dual p C = span 𝕜 s ⊔ (dual p C).lineal := by
+  sorry
+
+lemma FG.dual_span_finset_sup_lineal (hC : C.FG) :
+    ∃ s : Finset N, dual p C = span 𝕜 s ⊔ (dual p C).lineal := by
+  sorry
+
+lemma CoFG.dual_sup_lineal (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 N, D.FG ∧ dual p C = D ⊔ (dual p C).lineal := by
+  sorry
+
+lemma CoFG.is_sup_cofg_fg (hC : C.CoFG) :
+    ∃ D : PointedCone 𝕜 M, D.FG ∧ D ⊔ C.lineal = C := by
+  sorry
+
+lemma CoFG.lineal_cofg (hC : C.CoFG) : C.lineal.CoFG := by
+  sorry
 
 lemma FG.is_dual_dual_of_finite (hC : C.FG) :
     ∃ s : Set M, s.Finite ∧ dual p.flip (dual p s) = C := by
@@ -131,11 +207,12 @@ lemma FG.is_dual_dual_of_cofg (hC : C.FG) :
 lemma FG.dual_dual_fg_of_cofg (hC : C.CoFG) : (dual (Dual.eval 𝕜 M) C).FG := by
   sorry
 
+lemma FG.dual_dual_fg_of_fg (hC : C.CoFG) : (dual p.flip (dual p s)).FG := by
+  sorry
+
 @[simp] lemma FG.dual_dual_of_fg (hC : C.CoFG) : dual p.flip (dual p s) = C := by
   sorry
 
-lemma inf_fg' {C C' : PointedCone 𝕜 M} (hC : C.FG) (hC' : C'.FG) : (C ⊓ C').FG := by
-  sorry
 
 -- variable [AddCommGroup N] [Module 𝕜 N] {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} {s : Set M}
 variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair]
@@ -143,7 +220,7 @@ variable [Module.Finite 𝕜 N]
 
 lemma FG.exists_finite_dual (hC : C.FG) :
     ∃ s : Set N, s.Finite ∧ dual p.flip s = C := by
-  classical -- for Finset.coe_insert
+  classical -- for Finset.induction and Finset.coe_insert
   obtain ⟨s, rfl⟩ := hC
   induction s using Finset.induction with
   | empty =>
@@ -192,7 +269,7 @@ omit [Module.Finite 𝕜 M] in
   mpr h := by rw [h]
 
 /-- The dual of a finitely generated cone is finitely generated. -/
--- Norte: the converse does not hold: if the dual of C is FG, C might not.
+-- Note: the converse does not hold: if the dual of C is FG, C might not.
 lemma dual_fg (hC : C.FG) : (dual p C).FG := by
   obtain ⟨D, hfg, rfl⟩ := FG.exists_fg_dual p hC
   rw [FG.dual_dual_flip] <;> exact hfg
@@ -222,8 +299,6 @@ lemma dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) :
   simpa using FG.dual_flip_dual p hC
 
 variable {C C' : PointedCone 𝕜 M}
-
-alias sup_fg := Submodule.FG.sup
 
 -- TODO: can we make Dual.eval a default (in the sense of Inhabited) for pairings?
 

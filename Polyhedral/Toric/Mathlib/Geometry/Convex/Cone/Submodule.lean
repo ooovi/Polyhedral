@@ -7,12 +7,43 @@ import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule_Dual
 namespace Submodule
 
 variable {E S R : Type*} [Semiring R] [Semiring S]
-  [AddCommMonoid E] [Module R S] [Module R E] [Module S E] [IsScalarTower R S E]
+  [AddCommMonoid E] [Module S R] [Module R E] [Module S E] [IsScalarTower S R E]
 
-lemma restrictedScalars_FG_of_FG [Module.Finite R S] {s : Submodule S E} (hfin : s.FG) :
-    (s.restrictScalars R).FG := by
-  rw [← Module.Finite.iff_fg] at *;
-  exact Module.Finite.trans S s
+section RestrictedScalar
+
+lemma restrictedScalars_fg_of_fg [Module.Finite S R] {s : Submodule R E} (hfg : s.FG) :
+    (s.restrictScalars S).FG := by
+  rw [← Module.Finite.iff_fg] at *
+  exact Module.Finite.trans R s
+
+lemma restrictedScalars_fg_iff_fg [Module.Finite S R] {s : Submodule R E} :
+    (s.restrictScalars S).FG ↔ s.FG := by
+  constructor
+  · intro h
+    obtain ⟨t, ht⟩ := h
+    use t
+    sorry
+  · intro _;
+    rw [← Module.Finite.iff_fg] at *
+    exact Module.Finite.trans R s
+
+-- Converse ?
+lemma span_scalars_FG [Module.Finite S R] {s : Submodule S E} (hfg : s.FG) :
+    (span R (M := E) s).FG := by
+  obtain ⟨t, ht⟩ := hfg
+  use t; rw [← ht, Submodule.span_span_of_tower]
+
+@[simp]
+lemma restrictScalars_inf {s t : Submodule R E} :
+    (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
+  ext x; simp
+
+@[simp]
+lemma restrictScalars_sup {s t : Submodule R E} :
+    (s ⊔ t).restrictScalars S = (s.restrictScalars S) ⊔ (t.restrictScalars S):= by
+  ext x; simp [mem_sup]
+
+end RestrictedScalar
 
 example (S S' : Set E) : span R (S ∪ S') = (span R S) ⊔ (span R S')
   := Submodule.span_union S S' -- should `Submodule.span_union` be a simp lemma? Yael says possibly

@@ -6,6 +6,7 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule
+import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.CoFG
 
 namespace PointedCone
 
@@ -34,11 +35,11 @@ lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule S : Set E) = S :
 variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]
 
-lemma ofSubmodule.FG_of_FG {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
-    := Submodule.restrictedScalars_FG_of_FG hS
+lemma ofSubmodule.fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
+    := Submodule.restrictedScalars_fg_of_fg hS
 
 lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
-  ofSubmodule.FG_of_FG Module.Finite.fg_top
+  ofSubmodule.fg_of_fg Module.Finite.fg_top
 
 variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]
@@ -132,6 +133,8 @@ alias polar := dual
 variable {R F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
   [Module R E] [AddCommGroup F] [Module R F] {p : E →ₗ[R] F →ₗ[R] R}
 
+lemma dual_bilin_dual_id (s : Set E) : dual p s = dual .id (p '' s) := by ext x; simp
+
 @[simp]
 lemma polar_eq_dual (S : Submodule R E) : dual p S = Submodule.dual p S := by
   ext x; constructor
@@ -145,12 +148,21 @@ lemma polar_eq_dual (S : Submodule R E) : dual p S = Submodule.dual p S := by
 def CoFG (N : PointedCone R E) : Prop :=
   ∃ S : Finset (Module.Dual R E), dual .id S = N
 
-lemma cofg_inter (C D : PointedCone R E) (hC : C.CoFG) (hD : D.CoFG) : (C ⊓ D).CoFG := by
+lemma cofg_inf {C D : PointedCone R E} (hC : C.CoFG) (hD : D.CoFG) : (C ⊓ D).CoFG := by
   classical
   obtain ⟨S, rfl⟩ := hC
   obtain ⟨T, rfl⟩ := hD
   use S ∪ T
   rw [Finset.coe_union, dual_union]
+
+@[simp]
+lemma coe_cofg {S : Submodule R E} :
+    (S : PointedCone R E).CoFG ↔ S.CoFG := by
+  classical
+  unfold CoFG Submodule.CoFG
+  -- obtain ⟨A, hA⟩ := hcofg
+  -- use (A.toSet ∪ -A.toSet).toFinset _
+  sorry
 
 alias dual_bot := dual_zero
 
@@ -215,16 +227,21 @@ lemma lineal_eq_inf_neg (C : PointedCone R E) : C.lineal = C ⊓ -C := by
 lemma lineal_inf (C D : PointedCone R E) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [lineal_mem]; aesop
 
-lemma dual_lineal_eq_span_dual (C : PointedCone R E) :
-    Submodule.dual (Dual.eval R E) C.lineal = Submodule.span R (dual (Dual.eval R E) C) := by
-  ext x
-  simp [lineal_mem]
+-- the other direction does not hold in general (consider a cone with lineality space and now
+--  delete every points from that lineality space except for the origin).
+--  It holds for FG (and CoFG?)
+-- Q: do I need p.IsPerfPair?
+lemma span_dual_eq_sual_lineal [p.IsPerfPair] (C : PointedCone R E) :
+    Submodule.span R (dual p C) ≤ .dual p C.lineal := by
+  -- simp [lineal_mem]
+  -- C.lin ≤ C
+  -- hence dual C ≤ dual C.lin
+  -- hence span dual C ≤ span dual C.lin = dual C.lin
   sorry
-
 
 -- ## IsPointy
 
--- TODO: use ConvexCone.Salient
+-- TODO: use `ConvexCone.Salient`
 
 /-- A pointy cone has trivial lineality space. -/
 def IsPointy (C : PointedCone R E) := C.lineal = ⊥
@@ -269,5 +286,26 @@ lemma exists_pointy_sup_lineal' (C : PointedCone R E) :
     ∃ D : PointedCone R E, (Submodule.span R D) ⊓ C.lineal = ⊥ ∧ D ⊔ C.lineal = C := by
 
   sorry
+
+/-- This is a variant of `IsModularLattice.sup_inf_assoc_of_le`. While submodules form a modular
+  lattice, pointed cones do in general not. -/
+lemma sup_inf_assoc_of_le_submodule {C : PointedCone R E} (D : PointedCone R E)
+    {E : Submodule R E} (hCE : C ≤ E) : C ⊔ (D ⊓ E) = (C ⊔ D) ⊓ E := by
+  ext x
+  simp [Submodule.mem_sup]
+  constructor
+  · intro h
+    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
+    exact ⟨⟨y, hy, z, hz, hyzx⟩, by
+      rw [← hyzx]; exact Submodule.add_mem E (hCE hy) hz' ⟩
+  · intro h
+    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
+    exact ⟨y, hy, z, ⟨hz, by
+      rw [← add_left_cancel_iff (a := -y), neg_add_cancel_left] at hyzx
+      rw [hyzx]
+      specialize hCE hy
+      rw [Submodule.restrictScalars_mem, ← Submodule.neg_mem_iff] at hCE
+      exact Submodule.add_mem E hCE hx
+    ⟩, hyzx⟩
 
 end PointedCone

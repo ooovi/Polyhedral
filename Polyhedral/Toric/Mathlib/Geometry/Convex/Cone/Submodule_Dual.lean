@@ -110,4 +110,6 @@ lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
     comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
   ext x; simp
 
+lemma dual_bilin_dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+
 end Submodule

@@ -157,7 +157,7 @@ instance : Neg (PolyhedralCone 𝕜 M) where
   neg C := of_FG <| Submodule.FG.map (-.id) C.isFG
 
 instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) where
-  coe S := of_FG <| PointedCone.ofSubmodule.FG_of_FG
+  coe S := of_FG <| PointedCone.ofSubmodule.fg_of_fg
     <| (Submodule.fg_iff_finiteDimensional S).mpr inferInstance
 
 
