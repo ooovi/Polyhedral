@@ -26,24 +26,26 @@ variable {p : E →ₗ[R] F →ₗ[R] R} -- bilinear pairing
 def CoFG (S : Submodule R E) : Prop :=
   ∃ s : Finset (Dual R E), dual .id s = S
 
-variable [DecidableEq (Dual R F)] in
+variable (p) in
 /-- The dual of a `Finset` is co-FG. -/
 lemma cofg_of_finset (s : Finset E) : (dual p s).CoFG := by
+  classical
   use Finset.image p s
   simp [dual_bilin_dual_id]
 
-variable [DecidableEq (Dual R F)] in
+variable (p) in
 /-- The dual of a finite set is co-FG. -/
 lemma cofg_of_finite {s : Set E} (hs : s.Finite) : (dual p s).CoFG := by
+  classical
   use Finset.image p hs.toFinset
   simp [dual_bilin_dual_id]
 
-variable [DecidableEq (Dual R F)] in
+variable (p) in
 /-- The dual of an FG-cone is co-FG. -/
 lemma cofg_of_fg {C : Submodule R E} (hC : C.FG) : (dual p C).CoFG := by
   obtain ⟨s, hs⟩ := hC
   rw [← hs, dual_span]
-  exact cofg_of_finset _
+  exact cofg_of_finset p _
 
 section IsPerfPair
 
@@ -141,11 +143,25 @@ open Function
 --       -- distribute, reshuffle and exact `ht`
 --       sorry
 
-section Dual
+lemma cofg_top : (⊤ : Submodule R E).CoFG := ⟨⊥, by simp⟩
 
-lemma dual_dual' {S : Submodule R E} (hS : S.CoFG) : dual .id (dual (Dual.eval R E) S) = S := by
+/-- If a submodule is co-FG, then it equals its double dual. -/
+lemma cofg_dual_dual {S : Submodule R E} (hS : S.CoFG) : dual .id (dual (Dual.eval R E) S) = S := by
   obtain ⟨s, rfl⟩ := hS
   exact dual_flip_dual_dual_flip (p := Dual.eval R E) s
+
+/-- If a submodule is co-FG, then so is its double-dual. -/
+lemma dual_dual_cofg {S : Submodule R E} (hS : S.CoFG) :
+    (dual .id (dual (Dual.eval R E) S) : Submodule R E).CoFG := by
+  rw [cofg_dual_dual hS]; exact hS
+
+lemma fg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊓ T).FG :=
+  sorry
+
+lemma cofg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊔ T).CoFG :=
+  sorry
+
+section Dual
 
 -- lemma dual_dual {S : Submodule R E} (hS : S.CoFG) : (dual p.flip (dual p S)).CoFG := by
 --   obtain ⟨s, rfl⟩ := hS
@@ -155,6 +171,8 @@ lemma dual_dual' {S : Submodule R E} (hS : S.CoFG) : dual .id (dual (Dual.eval R
 --  ensures that submodules are projective. But I don't know.
 variable {R : Type*} [Field R]
 variable {E : Type*} [AddCommGroup E] [Module R E]
+variable {F : Type*} [AddCommGroup F] [Module R F]
+variable {p : E →ₗ[R] F →ₗ[R] R} -- bilinear pairing
 -- variable [Module.Free R E]
 
 lemma exists_finite_span_inf_dual_eq_bot (s : Finset E) :
@@ -188,12 +206,58 @@ lemma exists_finite_span_inf_dual_eq_bot (s : Finset E) :
 --   obtain ⟨t, ht⟩ := exists_finite_span_inf_dual_eq_bot R s
 --   exact ⟨dual .id t.toSet, ⟨t, by simp⟩ , ht⟩
 
+-- Not true! if S* := dual dual S != S, choose T = span (S* \ S).
+-- variable [p.IsPerfPair] in
+-- lemma foo {S T : Submodule R E} (hST : IsCompl S T) : IsCompl S (dual p.flip (dual p T)) := sorry
+
+-- Not true
+-- lemma FG.compl_cofg {S T : Submodule R E} (hS : S.FG) (hST : IsCompl S T) : T.CoFG := by
+--   sorry
+
+lemma cofg_of_fg_sup_cofg {S T : Submodule R E} (hS : S.FG) (hT : T.CoFG) : (S ⊔ T).CoFG := by
+  sorry
+
+-- lemma FG.exists_isCompl_cofg' {S : Submodule R E} (hS : S.FG) :
+--     ∃ T : Submodule R E, T.CoFG ∧ IsCompl S T := by
+--   have ⟨T, hST⟩  := Submodule.exists_isCompl S
+--   exact ⟨T, compl_cofg hS hST, hST⟩
+
+lemma FG.exists_isCompl_cofg {S : Submodule R E} (hS : S.FG) :
+    ∃ T : Submodule R E, T.CoFG ∧ IsCompl S T := by
+  classical
+  obtain ⟨s, rfl⟩ := hS
+  obtain ⟨f, hinj⟩ := Module.Dual.exists_embed R E
+  induction s using Finset.induction with
+  | empty => use ⊤; simp [isCompl_bot_top, cofg_top]
+  | insert w s hws hs =>
+    obtain ⟨T, ⟨t, ht⟩, hcompl⟩ := hs
+    -- Q: shouldn't p and q be implicit in `linearProjOfIsCompl`?
+    --have proj := linearProjOfIsCompl (span R s) T hcompl
+    use (dual .id (insert (f w) t))
+    constructor
+    · exact cofg_of_finite .id (by simp)
+    · constructor
+      · intro P hPw hPT
+        have hdisj := @hcompl.1 P
+        rw [Finset.coe_insert, span_insert] at hPw
+        refine hdisj ?_ ?_
+        · sorry
+        · sorry
+      · intro P hPw hPT
+        have hcodi := @hcompl.2 P
+        sorry
+
 lemma exists_cofg_inf_bot {S : Submodule R E} (hS : S.FG) :
     ∃ T : Submodule R E, T.CoFG ∧ S ⊓ T = ⊥ := by
-  obtain ⟨f, hinj⟩ := Module.Dual.exists_embed R E
+  classical
+  obtain ⟨_, b⟩ := Free.exists_basis R E
+  let b' := Basis.toDual b
+  let hb := Basis.toDual_injective b
+  let f := b.toDual
+  --obtain ⟨f, hinj⟩ := Module.Dual.exists_embed R E
   use dual .id (map f S)
   constructor
-  · exact dual_cofg_of_fg .id (Submodule.FG.map _ hS)
+  · exact cofg_of_fg .id (Submodule.FG.map _ hS)
   · ext x
     simp only [map_coe, mem_inf, mem_dual, Set.mem_image, SetLike.mem_coe, LinearMap.id_coe, id_eq,
       forall_exists_index, and_imp, forall_apply_eq_imp_iff₂, mem_bot]
@@ -204,8 +268,7 @@ lemma exists_cofg_inf_bot {S : Submodule R E} (hS : S.FG) :
       rw [h]
       rw [← forall_dual_apply_eq_zero_iff (K := R)]
       intro b
-      specialize hSf
-
+      specialize hSf x hx
       sorry
     · simp +contextual
 
@@ -219,15 +282,6 @@ lemma exists_cofg_sup_top {S : Submodule R E} (hS : S.FG) :
     simp [map_coe, mem_sup]
     -- ???
     sorry
-
-lemma FG.comple_cofg {S T : Submodule R E} (hS : S.FG) (hST : IsCompl S T) : T.CoFG := by
-
-  sorry
-
-lemma FG.exists_isCompl {S : Submodule R E} (hS : S.FG) :
-    ∃ T : Submodule R E, T.CoFG ∧ IsCompl S T := by
-  -- Submodule.exists_isCompl
-  sorry
 
 end Dual
 
