@@ -13,4 +13,3 @@ import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Primspace
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Ray
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule_Dual
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.SubmoduleOfRank
