@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Dimension.Finrank
@@ -161,7 +167,7 @@ lemma fg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊓
 lemma cofg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊔ T).CoFG :=
   sorry
 
-section Dual
+section Module.Free
 
 -- lemma dual_dual {S : Submodule R E} (hS : S.CoFG) : (dual p.flip (dual p S)).CoFG := by
 --   obtain ⟨s, rfl⟩ := hS
@@ -169,121 +175,35 @@ section Dual
 
 -- TODO: maybe in this section we can do with less assumptions. Eg Module.Free and something that
 --  ensures that submodules are projective. But I don't know.
-variable {R : Type*} [Field R]
-variable {E : Type*} [AddCommGroup E] [Module R E]
-variable {F : Type*} [AddCommGroup F] [Module R F]
-variable {p : E →ₗ[R] F →ₗ[R] R} -- bilinear pairing
--- variable [Module.Free R E]
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {E : Type*} [AddCommGroup E] [Module R E] [Free R E]
 
-lemma exists_finite_span_inf_dual_eq_bot (s : Finset E) :
-    ∃ t : Finset (Dual R E), span R s ⊓ dual (M := Dual R E) .id t = ⊥ := by
-  classical
-  induction s using Finset.induction with
-  | empty => use ∅; simp
-  | insert w s hws hs =>
-    obtain ⟨t, ht⟩ := hs
-    by_cases w = 0
-    case pos hw => use t; simp [hw, ht]
-    case neg hw =>
-      --let S' := map (Dual.eval R E) S
-      have hr : ∃ r : Dual R E, r w ≠ 0 := by
-        by_contra H; push_neg at H
-        exact hw <| (forall_dual_apply_eq_zero_iff R w).mp H
-      let r := hr.choose
-      have hr : r w ≠ 0 := Exists.choose_spec hr
-      use insert r t
-      rw [Finset.coe_insert, Finset.coe_insert, span_insert, dual_insert]
-      ext x
-      simp
-      constructor
-      · intro ⟨hx1, hx2, hx3⟩         -- rw [Module.forall_dual_apply_eq_zero_iff] at hh
-        sorry
-      · simp +contextual
-
--- lemma foo' {S : Submodule R E} (hS : S.FG) :
---     ∃ T : Submodule R E, T.CoFG ∧ S ⊓ T = ⊥ := by
---   obtain ⟨s, rfl⟩ := hS
---   obtain ⟨t, ht⟩ := exists_finite_span_inf_dual_eq_bot R s
---   exact ⟨dual .id t.toSet, ⟨t, by simp⟩ , ht⟩
-
--- Not true! if S* := dual dual S != S, choose T = span (S* \ S).
--- variable [p.IsPerfPair] in
--- lemma foo {S T : Submodule R E} (hST : IsCompl S T) : IsCompl S (dual p.flip (dual p T)) := sorry
-
--- Not true
--- lemma FG.compl_cofg {S T : Submodule R E} (hS : S.FG) (hST : IsCompl S T) : T.CoFG := by
---   sorry
-
-lemma cofg_of_fg_sup_cofg {S T : Submodule R E} (hS : S.FG) (hT : T.CoFG) : (S ⊔ T).CoFG := by
-  sorry
-
--- lemma FG.exists_isCompl_cofg' {S : Submodule R E} (hS : S.FG) :
---     ∃ T : Submodule R E, T.CoFG ∧ IsCompl S T := by
---   have ⟨T, hST⟩  := Submodule.exists_isCompl S
---   exact ⟨T, compl_cofg hS hST, hST⟩
-
-lemma FG.exists_isCompl_cofg {S : Submodule R E} (hS : S.FG) :
-    ∃ T : Submodule R E, T.CoFG ∧ IsCompl S T := by
-  classical
-  obtain ⟨s, rfl⟩ := hS
-  obtain ⟨f, hinj⟩ := Module.Dual.exists_embed R E
-  induction s using Finset.induction with
-  | empty => use ⊤; simp [isCompl_bot_top, cofg_top]
-  | insert w s hws hs =>
-    obtain ⟨T, ⟨t, ht⟩, hcompl⟩ := hs
-    -- Q: shouldn't p and q be implicit in `linearProjOfIsCompl`?
-    --have proj := linearProjOfIsCompl (span R s) T hcompl
-    use (dual .id (insert (f w) t))
-    constructor
-    · exact cofg_of_finite .id (by simp)
-    · constructor
-      · intro P hPw hPT
-        have hdisj := @hcompl.1 P
-        rw [Finset.coe_insert, span_insert] at hPw
-        refine hdisj ?_ ?_
-        · sorry
-        · sorry
-      · intro P hPw hPT
-        have hcodi := @hcompl.2 P
-        sorry
-
-lemma exists_cofg_inf_bot {S : Submodule R E} (hS : S.FG) :
+lemma FG.exists_cofg_inf_bot {S : Submodule R E} (hS : S.FG) :
     ∃ T : Submodule R E, T.CoFG ∧ S ⊓ T = ⊥ := by
   classical
   obtain ⟨_, b⟩ := Free.exists_basis R E
-  let b' := Basis.toDual b
-  let hb := Basis.toDual_injective b
-  let f := b.toDual
-  --obtain ⟨f, hinj⟩ := Module.Dual.exists_embed R E
-  use dual .id (map f S)
+  use dual b.toDual S
   constructor
-  · exact cofg_of_fg .id (Submodule.FG.map _ hS)
+  · exact Submodule.cofg_of_fg _ hS
   · ext x
-    simp only [map_coe, mem_inf, mem_dual, Set.mem_image, SetLike.mem_coe, LinearMap.id_coe, id_eq,
-      forall_exists_index, and_imp, forall_apply_eq_imp_iff₂, mem_bot]
+    simp only [mem_inf, mem_dual, SetLike.mem_coe, mem_bot]
     constructor
-    · intro ⟨hx, hSf⟩
-      let x' : S := ⟨x, hx⟩
-      have h : x = 0 ↔ x' = 0 := by sorry
-      rw [h]
-      rw [← forall_dual_apply_eq_zero_iff (K := R)]
-      intro b
-      specialize hSf x hx
-      sorry
+    · intro hS; exact Dual.toDual_eq_zero (hS.2 hS.1).symm
     · simp +contextual
 
+-- Q: is this true? If so, also implement with `IsCompl`.
 lemma exists_cofg_sup_top {S : Submodule R E} (hS : S.FG) :
     ∃ T : Submodule R E, T.CoFG ∧ S ⊔ T = ⊤ := by
-  obtain ⟨f, hinj⟩ := Module.Dual.exists_embed R E
-  use dual .id (map f S)
+  classical
+  obtain ⟨_, b⟩ := Free.exists_basis R E
+  use dual b.toDual S
   constructor
-  · exact dual_cofg_of_fg .id (Submodule.FG.map _ hS)
+  · exact Submodule.cofg_of_fg _ hS
   · ext x
-    simp [map_coe, mem_sup]
-    -- ???
+    simp only [mem_sup, mem_dual, SetLike.mem_coe, mem_top, iff_true]
     sorry
 
-end Dual
+end Module.Free
 
 variable {E' F' : Type*}
   [AddCommGroup E'] [Module R E']
@@ -297,6 +217,7 @@ lemma map_dual (f : E →ₗ[R] E') (C : Submodule R E) :
 -- lemma map_dual' (f : (Dual R E) →ₗ[R] (Dual R E')) (C : Submodule R (Dual R E)) :
 --     dual .id (map f C) = comap f.dualMap (dual .id C) := by
 --   ext x; simp
+
 end CoFG
 
 end Submodule

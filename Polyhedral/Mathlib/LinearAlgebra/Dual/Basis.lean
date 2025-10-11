@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.FreeModule.Basic
 import Mathlib.Algebra.Ring.SumsOfSquares
@@ -43,12 +49,16 @@ variable [AddCommMonoid M] [Module R M]
 lemma Module.Dual.toDual_nonneg (b : Basis ι R M) (x : M) :
     0 ≤ Basis.toDual b x x := IsSumSq.nonneg (toDual_isSumSq b x)
 
-@[simp]
-lemma Module.Dual.toDual_eq_zero_iff_zero {b : Basis ι R M} {x : M} :
-    Basis.toDual b x x = 0 ↔ x = 0 := by
-  rw [← b.linearCombination_repr x]
-  constructor <;>
+lemma Module.Dual.toDual_eq_zero {b : Basis ι R M} {x : M}
+    (hb : Basis.toDual b x x = 0) : x = 0 := by
+  revert hb; rw [← b.linearCombination_repr x]
   simp +contextual [Finsupp.linearCombination_apply, Finsupp.sum, Basis.toDual_apply,
       Finset.sum_mul_self_eq_zero_iff]
+  -- The proof is weird: it only works if I first revert hb and then use +contextual, but not
+  -- without these extra steps.
+
+@[simp]
+lemma Module.Dual.toDual_eq_zero_iff_zero {b : Basis ι R M} {x : M} :
+    Basis.toDual b x x = 0 ↔ x = 0 := ⟨toDual_eq_zero, by simp +contextual⟩
 
 end IsStrictOrderedRing
