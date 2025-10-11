@@ -7,8 +7,8 @@ import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Pointed
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Pointed
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Hyperplane
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Hyperplane
 
 /-!
 # Halfspace

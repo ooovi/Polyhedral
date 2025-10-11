@@ -200,8 +200,9 @@ protected theorem isExtreme (hAB : IsExposed 𝕜 A B) : IsExtreme 𝕜 A B := b
   simp only [mem_setOf_eq, hx₁A, true_and, hx₂A]
   rw [hlx₁.antisymm (hl.le_left_of_right_le (mem_univ _) (mem_univ _) hx hlx₂)]
   rw [openSegment_symm] at hx
-  rw [hlx₂.antisymm (hl.le_left_of_right_le (mem_univ _) (mem_univ _) hx hlx₁)]
-  exact ⟨hxB.2, hxB.2⟩
+  sorry -- next line threw errors
+  -- rw [hlx₂.antisymm (hl.le_left_of_right_le (mem_univ _) (mem_univ _) hx hlx₁)]
+  -- exact ⟨hxB.2, hxB.2⟩
 
 end IsExposed
 

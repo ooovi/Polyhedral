@@ -1,9 +1,9 @@
-
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Dual
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Pointed
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 
 namespace PointedCone
 

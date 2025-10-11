@@ -5,8 +5,8 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.CoFG
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
 
 namespace PointedCone
 

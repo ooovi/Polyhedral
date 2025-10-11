@@ -1,13 +1,13 @@
 import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.RingTheory.Finiteness.Defs
 import Mathlib.LinearAlgebra.Dimension.Finite
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Module
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule_Dual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 
 open Module
 

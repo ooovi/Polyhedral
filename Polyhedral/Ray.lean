@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Justus Springer
+Authors: Martin Winter
 -/
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.Geometry.Convex.Cone.Pointed
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Pointed
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 
 /-!
 # Ray

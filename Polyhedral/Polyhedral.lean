@@ -6,10 +6,9 @@ Authors: Martin Winter
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Dual
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Pointed_FG
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FG
 
 /-!
 # Polyhedral cones

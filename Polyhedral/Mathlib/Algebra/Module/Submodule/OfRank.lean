@@ -1,13 +1,13 @@
 /-
 Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Justus Springer
+Authors: Martin Winter
 -/
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.RingTheory.Finiteness.Defs
 import Mathlib.LinearAlgebra.Dimension.Finite
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Corank
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Corank
 
 /-!
 # Submodules of bounded rank
@@ -103,8 +103,8 @@ instance : Coe (OfRank R M k) (OfRankLe R M k) where
 
 end OfRank
 
-abbrev LineOrBot := OfRankLe R M 1
-abbrev Line := OfRank R M 1
+-- abbrev LineOrBot := OfRankLe R M 1
+-- abbrev Line := OfRank R M 1
 
 end OfRank
 
@@ -170,8 +170,8 @@ instance : Coe (OfCorank R M k) (OfCorankLe R M k) where
 
 end OfCorank
 
-abbrev HyperplaneOrTop := OfCorankLe R M 1
-abbrev Hyperplane := OfCorank R M 1
+-- abbrev HyperplaneOrTop := OfCorankLe R M 1
+-- abbrev Hyperplane := OfCorank R M 1
 
 end OfCorank
 

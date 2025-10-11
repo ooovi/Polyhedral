@@ -8,8 +8,8 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Dual
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.CoFG
+import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 /-!
 # Polyhedral cones

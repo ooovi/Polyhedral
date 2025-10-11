@@ -1,15 +1,24 @@
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.CoFG
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Corank
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Dual
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Faces
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Halfspace
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Hyperplane
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Line
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Module
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Pointed_FG
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Pointed
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Polyhedral
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Primspace
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Ray
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule_Dual
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
+-- import Polyhedral.Mathlib.Algebra.Module.Submodule.Corank
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+-- import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual_2
+import Polyhedral.Mathlib.Algebra.Module.Submodule.OfRank
+
+import Polyhedral.Mathlib.Algebra.Module.Exposed
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FG
+
+import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+
+import Polyhedral.Faces
+-- import Polyhedral._Faces
+import Polyhedral.Halfspace
+import Polyhedral.Hyperplane
+import Polyhedral.Line
+import Polyhedral.Polyhedral
+-- import Polyhedral._Polyhedral
+-- import Polyhedral._Primspace
+import Polyhedral.Ray

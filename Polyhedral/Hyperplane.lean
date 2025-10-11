@@ -1,15 +1,14 @@
 /-
 Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Justus Springer
+Authors: Martin Winter
 -/
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm
 
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule_Dual
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Line
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+-- import Polyhedral.Line
 
 /-!
 # Polyhedral cones

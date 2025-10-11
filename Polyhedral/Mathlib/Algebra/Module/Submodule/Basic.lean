@@ -1,8 +1,6 @@
 import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm
+import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 import Mathlib.LinearAlgebra.Dual.Defs
-
-import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Submodule_Dual
 
 namespace Submodule
 
