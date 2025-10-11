@@ -16,20 +16,20 @@ variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommM
   [Module R E] {S : Set E}
 
 variable (R S) in
-/-- The span of a set `S` is the smallest pointed cone that contains `S`.
+-- /-- The span of a set `S` is the smallest pointed cone that contains `S`.
 
-Pointed cones being defined as submodules over nonnegative scalars, this is exactly the
-submodule span of `S` w.r.t. nonnegative scalars. -/
-abbrev span : PointedCone R E := Submodule.span _ S
+-- Pointed cones being defined as submodules over nonnegative scalars, this is exactly the
+-- submodule span of `S` w.r.t. nonnegative scalars. -/
+-- abbrev span : PointedCone R E := Submodule.span _ S
 
-lemma subset_span : S ⊆ PointedCone.span R S := Submodule.subset_span
+-- lemma subset_span : S ⊆ PointedCone.span R S := Submodule.subset_span
 
 @[coe]
 abbrev ofSubmodule (S : Submodule R E) : PointedCone R E := S.restrictScalars _
 
-instance : Coe (Submodule R E) (PointedCone R E) := ⟨ ofSubmodule ⟩
+instance : Coe (Submodule R E) (PointedCone R E) := ⟨ ofSubmodule _ ⟩
 
-lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule S : Set E) = S :=
+lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule _ S : Set E) = S :=
   Submodule.coe_restrictScalars R S
 
 variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup E]
@@ -47,7 +47,7 @@ variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommG
 -- TODO: implement sSup, sInf, sSup_map, sSupHomClass and sInfHomClass also for Submodule
 
 @[simp]
-lemma sSup_coe (S : Set (Submodule R E)) : sSup S = sSup (ofSubmodule '' S) := by
+lemma sSup_coe (S : Set (Submodule R E)) : sSup S = sSup (ofSubmodule _ '' S) := by
   ext x
   -- we would like to use something like `Submodule.restrictScalars` for `sSup`.
   -- we cannot use `map_sSup` because this needs `sSupHomClass`.
@@ -176,7 +176,7 @@ example /- dual_inf -/ (C C' : PointedCone R E) :
 example (C C' : PointedCone R E) : dual p (C ⊔ C') = dual p (C ∪ C') := rfl
 
 lemma dual_sup (C C' : PointedCone R E) : dual p (C ⊔ C' : PointedCone R E) = dual p (C ∪ C')
-  := by nth_rw 2 [←dual_span]; rw [Submodule.span_union']
+  := by nth_rw 2 [←dual_span]; simp
 
 -- TODO: simp lemma?
 lemma dual_sup_dual_inf_dual (C C' : PointedCone R E) :

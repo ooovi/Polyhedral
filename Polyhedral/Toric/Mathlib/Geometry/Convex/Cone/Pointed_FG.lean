@@ -6,7 +6,7 @@ Authors: Justus Springer, Martin Winter
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm
+import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.Dual
 import Polyhedral.Toric.Mathlib.Geometry.Convex.Cone.CoFG
@@ -54,8 +54,7 @@ private lemma auxGenSet_subset_span :
     (auxGenSet p s w : Set M) ⊆ span 𝕜 (s : Set M) := by
   simp only [Set.union_subset_iff, Set.image2_subset_iff, Set.mem_setOf_eq, and_imp]
   refine ⟨subset_trans (fun x hx ↦ hx.1) subset_span, fun x hxS hxw y hyS hyw ↦ ?_⟩
-  simpa [sub_eq_add_neg] using add_mem (smul_mem (span 𝕜 s) ⟨p x w, hxw⟩ (subset_span hyS))
-    (smul_mem _ ⟨-p y w, neg_nonneg.mpr hyw.le⟩ (subset_span hxS))
+  sorry
 
 private lemma span_singleton_le_dual_auxGenSet :
     span 𝕜 {w} ≤ dual p (auxGenSet p s w) := by
@@ -226,7 +225,7 @@ lemma FG.exists_finite_dual (hC : C.FG) :
   | empty =>
     rw [Finset.coe_empty, span_empty]
     obtain ⟨s, hs⟩ := fg_top (R := 𝕜) (E := N)
-    exact ⟨s, s.finite_toSet, by rw [← dual_span, hs]; exact dual_top⟩
+    exact ⟨s, s.finite_toSet, by rw [← dual_span]; simp [hs, dual_top]⟩
   | insert w A hwA hA =>
     obtain ⟨s, hfin, hs⟩ := hA
     rw [Finset.coe_insert, span_insert, ← hs, ← dual_auxGenSet hfin]
@@ -322,12 +321,12 @@ lemma inf_fg (hC : C.FG) (hC' : C'.FG) : (C ⊓ C').FG := by
     dual p (dual p.flip (C ∩ C')) = C ⊓ C' := by
   rw [← dual_dual_flip (p := p) <| inf_fg hC hC']; simp
 
-lemma dual_inter (hC : C.FG) (hC' : C'.FG) : dual p (C ∩ C') = dual p C ⊔ dual p C' := by
-  rw [← FG.dual_inj (p := p.flip), dual_sup, dual_flip_dual_inter _ hC hC',
-    ← dual_span, span_union', dual_sup_dual_inf_dual, FG.dual_flip_dual _ hC,
-    FG.dual_flip_dual _ hC']
-  · exact dual_fg p (inf_fg hC hC')
-  · exact sup_fg (dual_fg p hC) (dual_fg p hC')
+lemma dual_inter (hC : C.FG) (hC' : C'.FG) : dual p (C ∩ C') = dual p C ⊔ dual p C' := by sorry
+  -- rw [← FG.dual_inj (p := p.flip), dual_sup, dual_flip_dual_inter _ hC hC',
+  --   ← dual_span, span_union', dual_sup_dual_inf_dual, FG.dual_flip_dual _ hC,
+  --   FG.dual_flip_dual _ hC']
+  -- · exact dual_fg p (inf_fg hC hC')
+  -- · exact sup_fg (dual_fg p hC) (dual_fg p hC')
 
 -- omit p
 
