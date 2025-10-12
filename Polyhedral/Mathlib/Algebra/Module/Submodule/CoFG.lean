@@ -32,21 +32,20 @@ variable {p : E →ₗ[R] F →ₗ[R] R} -- bilinear pairing
 def CoFG (S : Submodule R E) : Prop :=
   ∃ s : Finset (Dual R E), dual .id s = S
 
-variable (p) in
+variable (p)
+
 /-- The dual of a `Finset` is co-FG. -/
 lemma cofg_of_finset (s : Finset E) : (dual p s).CoFG := by
   classical
   use Finset.image p s
   simp [dual_bilin_dual_id]
 
-variable (p) in
 /-- The dual of a finite set is co-FG. -/
 lemma cofg_of_finite {s : Set E} (hs : s.Finite) : (dual p s).CoFG := by
   classical
   use Finset.image p hs.toFinset
   simp [dual_bilin_dual_id]
 
-variable (p) in
 /-- The dual of an FG-cone is co-FG. -/
 lemma cofg_of_fg {C : Submodule R E} (hC : C.FG) : (dual p C).CoFG := by
   obtain ⟨s, hs⟩ := hC
@@ -62,6 +61,8 @@ variable [AddCommGroup F] [Module R F]
 variable {p : E →ₗ[R] F →ₗ[R] R} [p.IsPerfPair]
 
 open Function
+
+variable (p)
 
 /- TODO: all theorems in this section only need that `p.flip` is surjective
   rather than full `p.IsPerfPair`. Perhaps implement this when typeclasses are
@@ -87,35 +88,35 @@ lemma CoFG.exists_fg_dual {C : Submodule R E} (hC : C.CoFG) :
 end IsPerfPair
 
 -- NOTE: converse is not true
-@[deprecated cofg_of_finset (since := "2025-10-10")]
-lemma cofg_intro (N : Submodule R F) (hN : ∃ S : Finset E, dual p S = N) : N.CoFG := by
-  classical
-  obtain ⟨S, hS⟩ := hN
-  use Finset.image p S
-  rw [Finset.coe_image, ← hS, ← dual_bilin_dual_id]
+-- @[deprecated cofg_of_finset (since := "2025-10-10")]
+-- lemma cofg_intro (N : Submodule R F) (hN : ∃ S : Finset E, dual p S = N) : N.CoFG := by
+--   classical
+--   obtain ⟨S, hS⟩ := hN
+--   use Finset.image p S
+--   rw [Finset.coe_image, ← hS, ← dual_bilin_dual_id]
 
-@[deprecated cofg_of_fg (since := "2025-10-10")]
-lemma cofg_of_dual_fg (N : Submodule R F) (hN : ∃ M : Submodule R E, M.FG ∧ dual p M = N) :
-    N.CoFG := by
-  obtain ⟨M, ⟨S, hS⟩, hM⟩ := hN
-  refine cofg_intro (E := E) (p := p) N ?_
-  exact ⟨S, by rw [← dual_span, hS, hM]⟩
+-- @[deprecated cofg_of_fg (since := "2025-10-10")]
+-- lemma cofg_of_dual_fg (N : Submodule R F) (hN : ∃ M : Submodule R E, M.FG ∧ dual p M = N) :
+--     N.CoFG := by
+--   obtain ⟨M, ⟨S, hS⟩, hM⟩ := hN
+--   refine cofg_intro (E := E) (p := p) N ?_
+--   exact ⟨S, by rw [← dual_span, hS, hM]⟩
 
-@[deprecated cofg_of_fg (since := "2025-10-10")]
-lemma cofg_of_dual_fg' (N : Submodule R F) (M : Submodule R E) (hM : M.FG) (hN : dual p M = N) :
-    N.CoFG := cofg_of_dual_fg N ⟨M, hM, hN⟩
+-- @[deprecated cofg_of_fg (since := "2025-10-10")]
+-- lemma cofg_of_dual_fg' (N : Submodule R F) (M : Submodule R E) (hM : M.FG) (hN : dual p M = N) :
+--     N.CoFG := cofg_of_dual_fg N ⟨M, hM, hN⟩
 
--- NOTE: converse not true in general (but true over fields)
-variable (p) in
-@[deprecated cofg_of_fg (since := "2025-10-10")]
-lemma dual_cofg_of_fg {N : Submodule R E} (hN : N.FG) : (dual p N).CoFG
-  := cofg_of_dual_fg' _ N hN rfl
+-- -- NOTE: converse not true in general (but true over fields)
+-- variable (p) in
+-- @[deprecated cofg_of_fg (since := "2025-10-10")]
+-- lemma dual_cofg_of_fg {N : Submodule R E} (hN : N.FG) : (dual p N).CoFG
+--   := cofg_of_dual_fg' _ N hN rfl
 
-@[deprecated CoFG.exists_fg_dual (since := "2025-10-10")]
-lemma cofg_def_fg (N : Submodule R E) (hN : N.CoFG) :
-    ∃ M : Submodule R (Dual R E), M.FG ∧ dual .id M = N := by
-  obtain ⟨S, hS⟩ := hN
-  exact ⟨span R S, ⟨S, rfl⟩, by rw [dual_span, hS]⟩
+-- @[deprecated CoFG.exists_fg_dual (since := "2025-10-10")]
+-- lemma cofg_def_fg (N : Submodule R E) (hN : N.CoFG) :
+--     ∃ M : Submodule R (Dual R E), M.FG ∧ dual .id M = N := by
+--   obtain ⟨S, hS⟩ := hN
+--   exact ⟨span R S, ⟨S, rfl⟩, by rw [dual_span, hS]⟩
 
 lemma cofg_inter (M N : Submodule R E) (hM : M.CoFG) (hN : N.CoFG) : (M ⊓ N).CoFG := by
   obtain ⟨S, rfl⟩ := hM
@@ -161,12 +162,6 @@ lemma dual_dual_cofg {S : Submodule R E} (hS : S.CoFG) :
     (dual .id (dual (Dual.eval R E) S) : Submodule R E).CoFG := by
   rw [cofg_dual_dual hS]; exact hS
 
-lemma fg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊓ T).FG :=
-  sorry
-
-lemma cofg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊔ T).CoFG :=
-  sorry
-
 section Module.Free
 
 -- lemma dual_dual {S : Submodule R E} (hS : S.CoFG) : (dual p.flip (dual p S)).CoFG := by
@@ -178,6 +173,66 @@ section Module.Free
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
 variable {E : Type*} [AddCommGroup E] [Module R E] [Free R E]
 
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {E : Type*} [AddCommGroup E] [Module R E] [Free R E]
+
+lemma cofg_of_cofg_sup {S T : Submodule R E} (hS : S.CoFG) : (S ⊔ T).CoFG := by
+  classical
+  -- obtain ⟨W, hW⟩ := exists_isCompl (S ⊔ T)
+  obtain ⟨p, hp⟩ := (S ⊔ T).exists_isProj -- IsCompl.projection hW
+  obtain ⟨s, hS⟩ := hS
+  use Finset.image (.id - p).dualMap s
+  simp [← dual_map', hS]
+  have hker : LinearMap.ker (.id - p) = S ⊔ T := sorry
+  have h := Submodule.comap_map_eq (f := .id - p) (p := S)
+  sorry
+
+  -- let S' := span R s ⊓ dual (Dual.eval R E) T
+  -- obtain ⟨p, hp⟩ := exists_isProj S'
+  -- use Finset.image p s
+  -- simp
+  -- rw [← dual_map' (f := p.dualMap)]
+
+  -- let S' : Submodule R (Dual R E) := span R s'
+  -- let S'' := restrict S' (dual (Dual.eval R E) T)
+  -- let s'' : Set S' := {x : S' | (x : Dual R E) ∈ s'}
+  -- have hs'' : s''.Finite := sorry
+  -- obtain ⟨p, hp⟩ := exists_isProj S''
+  -- use (Finset.image S'.subtype (Finset.image p hs''.toFinset))
+  -- simp
+  -- ext x
+  -- simp [mem_sup]
+  -- constructor
+  -- · sorry
+  -- · intro h
+  --   obtain ⟨y, hy⟩ := h
+  --   sorry
+
+end Field
+
+lemma cofg_of_fg_sup_cofg {C D : Submodule R E} (hC : C.FG) (hD : D.CoFG) : (C ⊔ D).CoFG := by
+  classical
+  obtain ⟨_, b⟩ := Free.exists_basis R E
+  obtain ⟨s, rfl⟩ := hC
+  induction s using Finset.induction with
+  | empty => simp [hD]
+  | insert w s hws hs =>
+    obtain ⟨t, ht⟩ := hs
+    use insert (b.toDual w) t
+    simp [span_insert, sup_assoc, ← ht]
+    simp [dual_insert]
+    rw [← dual_union]
+    ext x
+    simp
+    sorry
+
+-- Q: Does this lemma really depend on a linear order on `R`? Can it be proven without?
+--  Currently the order is needed for `Dual.toDual_eq_zero`.
+--  It would further be interesting to know whether any complemented pair (which exists in a
+--  in the case of a field; use `ComplementedLattice`) with on FG has the other one CoFG.
+/-- For an FG submodule `S`, there exists a CoFG submodule `T` so that `S ⊓ T = ⊥`. -/
 lemma FG.exists_cofg_inf_bot {S : Submodule R E} (hS : S.FG) :
     ∃ T : Submodule R E, T.CoFG ∧ S ⊓ T = ⊥ := by
   classical
@@ -202,6 +257,34 @@ lemma exists_cofg_sup_top {S : Submodule R E} (hS : S.FG) :
   · ext x
     simp only [mem_sup, mem_dual, SetLike.mem_coe, mem_top, iff_true]
     sorry
+
+lemma FG.exists_cofg_inf_of_le {S S' : Submodule R E} (hS : S.FG) (hS' : S'.FG) (hSS' : S ≤ S') :
+    ∃ T : Submodule R E, T.CoFG ∧ S' ⊓ T = S := by sorry
+  -- classical
+  -- obtain ⟨s, rfl⟩ := hS
+  -- induction s using Finset.induction with
+  -- | empty => simp [exists_cofg_inf_bot hS']
+  -- | insert w s hws hs =>
+  --   obtain ⟨t, ht⟩ := hs
+  --   use (auxGenSet .id t.toSet w).toFinset
+  --   simp [span_insert, sup_assoc, ← ht]
+  --   exact dual_auxGenSet t.finite_toSet
+  --   sorry
+
+lemma fg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊓ T).FG :=
+  sorry
+
+lemma cofg_of_cofg_inf_fg {S T : Submodule R E} (hS : S.CoFG) (hT : S.FG) : (S ⊔ T).CoFG :=
+  sorry
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {E : Type*} [AddCommGroup E] [Module R E] [Free R E]
+variable {F : Type*} [AddCommGroup F] [Module R F] [Free R F]
+
+variable {p : E →ₗ[R] F →ₗ[R] R} -- bilinear pairing
+
+-- ### HIGH PRIORITY! Prove this!
+lemma dual_dual_eq_of_fg {S : Submodule R E} (hS : S.FG) : dual p.flip (dual p S) = S := by sorry
 
 end Module.Free
 

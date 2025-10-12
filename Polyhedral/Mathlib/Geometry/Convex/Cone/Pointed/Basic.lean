@@ -35,11 +35,11 @@ lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule _ S : Set E) = S
 variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]
 
-lemma ofSubmodule.fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
-    := Submodule.restrictedScalars_fg_of_fg hS
+lemma ofSubmodule_fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
+    := Submodule.restrictedScalars_fg_of_fg _ hS
 
 lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
-  ofSubmodule.fg_of_fg Module.Finite.fg_top
+  ofSubmodule_fg_of_fg Module.Finite.fg_top
 
 variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]
@@ -52,6 +52,10 @@ lemma sSup_coe (S : Set (Submodule R E)) : sSup S = sSup (ofSubmodule _ '' S) :=
   -- we would like to use something like `Submodule.restrictScalars` for `sSup`.
   -- we cannot use `map_sSup` because this needs `sSupHomClass`.
   sorry
+
+/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
+lemma submodule_span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span (M := E) R C).FG := by
+  obtain ⟨s, rfl⟩ := hC; use s; simp
 
 -- ### Neg
 
@@ -124,11 +128,7 @@ lemma map_span (f : E →ₗ[R] E') (s : Set E) : map f (span R s) = span R (f '
 
 end Map
 
-
 /- Duality -/
-
-/-- Polar duality on cones. -/
-alias polar := dual
 
 variable {R F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
   [Module R E] [AddCommGroup F] [Module R F] {p : E →ₗ[R] F →ₗ[R] R}
@@ -136,7 +136,7 @@ variable {R F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
 lemma dual_bilin_dual_id (s : Set E) : dual p s = dual .id (p '' s) := by ext x; simp
 
 @[simp]
-lemma polar_eq_dual (S : Submodule R E) : dual p S = Submodule.dual p S := by
+lemma dual_eq_submodule_dual (S : Submodule R E) : dual p S = Submodule.dual p S := by
   ext x; constructor
   · intro h _ ha
     have h' := h (neg_mem_iff.mpr ha)
@@ -144,25 +144,6 @@ lemma polar_eq_dual (S : Submodule R E) : dual p S = Submodule.dual p S := by
     exact le_antisymm (h ha) h'
   · intro h _ ha
     rw [h ha]
-
-def CoFG (N : PointedCone R E) : Prop :=
-  ∃ S : Finset (Module.Dual R E), dual .id S = N
-
-lemma cofg_inf {C D : PointedCone R E} (hC : C.CoFG) (hD : D.CoFG) : (C ⊓ D).CoFG := by
-  classical
-  obtain ⟨S, rfl⟩ := hC
-  obtain ⟨T, rfl⟩ := hD
-  use S ∪ T
-  rw [Finset.coe_union, dual_union]
-
-@[simp]
-lemma coe_cofg {S : Submodule R E} :
-    (S : PointedCone R E).CoFG ↔ S.CoFG := by
-  classical
-  unfold CoFG Submodule.CoFG
-  -- obtain ⟨A, hA⟩ := hcofg
-  -- use (A.toSet ∪ -A.toSet).toFinset _
-  sorry
 
 alias dual_bot := dual_zero
 

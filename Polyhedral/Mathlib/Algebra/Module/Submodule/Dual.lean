@@ -101,15 +101,40 @@ lemma dual_span (s : Set M) : dual p (Submodule.span R s) = dual p s := by
   | add y z _hy _hz hy hz => rw [map_add, add_apply, ← hy, ← hz, add_zero]
   | smul t y _hy hy => simp only [map_smul, smul_apply, smul_eq_mul, ← hy, mul_zero]
 
+-- ----------------
+
+/-- The dual submodule w.r.t. the standard dual map is the dual annihilator. -/
+lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dualAnnihilator := by
+  ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
+
 variable {M' N' : Type*}
   [AddCommMonoid M'] [Module R M']
   [AddCommMonoid N'] [Module R N']
 
--- TODO: generalize to arbitrary pairings
+lemma dual_bilin_dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+
+-- variable {p : M →ₗ[R] N →ₗ[R] R} {p' : M' →ₗ[R] N' →ₗ[R] R}
+
+-- lemma dual_map_foo {p : (Dual R M) →ₗ[R] N →ₗ[R] R}
+--     (f : (Dual R M) →ₗ[R] (Dual R M)) (s : Set (Dual R M)) :
+--     dual p (f '' s) --= dual .id ((p ∘ₗ f) '' s)
+--                     = comap (p ∘ₗ f).dualMap (dual (Dual.eval R (Dual R M)) s)
+--                     := by
+--   ext x; simp
+
+-- lemma dual_map_foo' (f : M →ₗ[R] M) (s : Set M) :
+--     dual p (f '' s) = dual .id ((p ∘ f) '' s)
+--                     --= comap (p ∘ₗ f).dualMap (dual .id s)
+--                     := by
+--   ext x; simp
+
+-- TODO: generalize to arbitrary pairings (but what takes the place of `f.dualMap`?)
 lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
     comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
   ext x; simp
 
-lemma dual_bilin_dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+lemma dual_map' (f : M →ₗ[R] M') (s : Set (Dual R M')) :
+    comap f (dual .id s) = dual .id (f.dualMap '' s) := by
+  ext x; simp
 
 end Submodule
