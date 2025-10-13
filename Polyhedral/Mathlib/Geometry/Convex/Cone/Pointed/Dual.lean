@@ -12,6 +12,9 @@ open Module
 variable {R M N : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
   [AddCommGroup N] [Module R M] [Module R N] {p : M →ₗ[R] N →ₗ[R] R}
 
+@[simp] lemma coe_dual (S : Submodule R M) : dual p S = Submodule.dual p S := by
+  ext x; simp
+
 -- TODO: Replace `dual_span`
 @[simp] lemma dual_span' (s : Set M) : dual p (span R s) = dual p s := dual_span ..
 
