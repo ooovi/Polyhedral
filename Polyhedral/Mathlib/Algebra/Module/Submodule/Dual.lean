@@ -111,7 +111,11 @@ variable {M' N' : Type*}
   [AddCommMonoid M'] [Module R M']
   [AddCommMonoid N'] [Module R N']
 
+
 lemma dual_bilin_dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+
+lemma dual_bilin_dual_id_submodule (S : Submodule R M) : dual p S = dual .id (map p S) := by
+  rw [map_coe, dual_bilin_dual_id]
 
 -- variable {p : M →ₗ[R] N →ₗ[R] R} {p' : M' →ₗ[R] N' →ₗ[R] R}
 

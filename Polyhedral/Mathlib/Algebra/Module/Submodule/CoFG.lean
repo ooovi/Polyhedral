@@ -284,7 +284,7 @@ variable {F : Type*} [AddCommGroup F] [Module R F] [Free R F]
 variable {p : E →ₗ[R] F →ₗ[R] R} -- bilinear pairing
 
 -- ### HIGH PRIORITY! Prove this!
-lemma dual_dual_eq_of_fg {S : Submodule R E} (hS : S.FG) : dual p.flip (dual p S) = S := by sorry
+lemma fg_dual_dual_flip {S : Submodule R E} (hS : S.FG) : dual p.flip (dual p S) = S := by sorry
 
 end Module.Free
 

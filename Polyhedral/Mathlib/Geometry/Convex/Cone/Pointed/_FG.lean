@@ -8,9 +8,7 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.CoFG
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed._CoFG
 
 /-!
 # Polyhedral cones
@@ -26,7 +24,7 @@ in both arguments, then polyhedral cones are precisely the finitely generated co
 (`IsPolyhedral.dual_dual_flip`, `IsPolyhedral.dual_flip_dual`).
 -/
 
-open Function Module
+open Function Module LinearMap
 open Submodule hiding span dual
 
 variable {𝕜 M N : Type*}
@@ -125,217 +123,192 @@ private lemma dual_auxGenSet (hs : s.Finite) :
 
 variable {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜}
 
--- The following theorems *should* not assume the finiteness of the ambient space!
-
-variable (p) -- Q: should we make `p` implicit in some of the below?
-
-/-- The union of an FG cone and a coFG cone is coFG. -/
-lemma sup_fg_cofg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.CoFG) : (C ⊔ D).CoFG := by classical
+/-- The union of an FG cone and a CoFG cone is CoFG. -/
+lemma sup_fg_cofg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.CoFG p) : (C ⊔ D).CoFG p
+    := by classical
   obtain ⟨s, rfl⟩ := hC
   induction s using Finset.induction with
   | empty => simp [hD]
   | insert w s hws hs =>
     obtain ⟨t, ht⟩ := hs
-    use (auxGenSet .id t.toSet w).toFinset
+    use (auxGenSet p t.toSet w).toFinset
     simp [span_insert, sup_assoc, ← ht]
     exact dual_auxGenSet t.finite_toSet
 
-lemma sup_fg_cofg' {C : PointedCone 𝕜 M}
-    (hC : C.FG) (s : Finset N) : (C ⊔ dual p.flip s).CoFG := by classical
-  obtain ⟨t, rfl⟩ := hC
-  induction t using Finset.induction with
-  | empty => simp [cofg_of_finset]
-  | insert w s hws hs =>
-    obtain ⟨t, ht⟩ := hs
-    use (auxGenSet .id t.toSet w).toFinset
-    simp [span_insert, sup_assoc, ← ht]
-    exact dual_auxGenSet t.finite_toSet
-
-lemma sup_fg_cofg'' {C : PointedCone 𝕜 M} {D : PointedCone 𝕜 N}
-    (hC : C.FG) (hD : D.FG) : (C ⊔ dual p.flip D).CoFG := by classical
-  obtain ⟨s, rfl⟩ := hD
-  rw [dual_span]
-  exact sup_fg_cofg' p hC s
-
--- lemma sup_fg_cofg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.CoFG' p) : (C ⊔ D).CoFG' p
---     := by classical
---   obtain ⟨s, rfl⟩ := hC
---   induction s using Finset.induction with
---   | empty => simp [hD]
---   | insert w s hws hs =>
---     obtain ⟨t, ht⟩ := hs
---     use (auxGenSet p.flip t.toSet w).toFinset
---     simp [span_insert, sup_assoc, ← ht]
---     exact dual_auxGenSet t.finite_toSet
-
-lemma sup_fg_cofg''' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.CoFG) : (C ⊔ D).CoFG := by
-  obtain ⟨s, rfl⟩ := hD
-  exact sup_fg_cofg' (Dual.eval 𝕜 M) hC s
-
+variable (p) [Fact p.IsFaithfulPair] in
 /-- An FG cone can be written as the intersection of a CoFG cone and an FG submodule. -/
-lemma FG.exists_cofg_inf_submodule {C : PointedCone 𝕜 M} (hC : C.FG)
-    {S : Submodule 𝕜 M} (hS : S.FG) (hCS : C ≤ S) :
-      ∃ D : PointedCone 𝕜 M, D.CoFG ∧ D ⊓ S = C := by
+lemma FG.exists_cofg_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
+    {S : Submodule 𝕜 N} (hS : S.FG) (hCS : C ≤ S) :
+      ∃ D : PointedCone 𝕜 N, D.CoFG p ∧ D ⊓ S = C := by
   wlog hC' : C = ⊥ with h
-  · specialize h fg_bot hS bot_le rfl
+  · specialize h p fg_bot hS bot_le rfl
     obtain ⟨D, hcofg, hD⟩ := h
     exact ⟨_, sup_fg_cofg hC hcofg, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
-  · obtain ⟨D, hcofg, hD⟩ := hS.exists_cofg_inf_bot
-    exact ⟨D, coe_cofg.mpr hcofg, by simp [← restrictScalars_inf, inf_comm, hD, hC']⟩
+  · obtain ⟨D, hcofg, hD⟩ := hS.exists_cofg_inf_bot p
+    exact ⟨_, (coe_cofg p).mpr hcofg, by simp [← restrictScalars_inf, inf_comm, hD, hC']⟩
 
+variable (p) [Fact p.IsFaithfulPair] in
 /-- An FG cone can be written as the intersection of its linear span with a CoFG cone. -/
-lemma FG.exists_cofg_sup_span {C : PointedCone 𝕜 M} (hC : C.FG) :
-      ∃ D : PointedCone 𝕜 M, D.CoFG ∧ D ⊓ Submodule.span 𝕜 (M := M) C = C :=
-  exists_cofg_inf_submodule hC (Submodule.span_scalars_FG hC) Submodule.subset_span
+lemma FG.exists_cofg_sup_span {C : PointedCone 𝕜 N} (hC : C.FG) :
+      ∃ D : PointedCone 𝕜 N, D.CoFG p ∧ D ⊓ Submodule.span 𝕜 (M := N) C = C :=
+  exists_cofg_inf_submodule p hC (Submodule.span_scalars_FG hC) Submodule.subset_span
 
+variable (p) [Fact p.IsFaithfulPair] in
 /-- An FG cone can be written as the intersection of a CoFG cone and an FG submodule. -/
-lemma FG.exists_cofg_sup_fg_submodule {C : PointedCone 𝕜 M} (hC : C.FG) :
-      ∃ D : PointedCone 𝕜 M, D.CoFG ∧ ∃ S : Subspace 𝕜 M, S.FG ∧ D ⊓ S = C := by
-  obtain ⟨D, hcofg, hD⟩ := exists_cofg_sup_span hC
+lemma FG.exists_cofg_sup_fg_submodule {C : PointedCone 𝕜 N} (hC : C.FG) :
+      ∃ D : PointedCone 𝕜 N, D.CoFG p ∧ ∃ S : Subspace 𝕜 N, S.FG ∧ D ⊓ S = C := by
+  obtain ⟨D, hcofg, hD⟩ := exists_cofg_sup_span p hC
   exact ⟨D, hcofg, Submodule.span 𝕜 C, submodule_span_fg hC, hD⟩
 
-section Module.Finite
-
-variable [Module.Finite 𝕜 M]
-
-lemma FG.cofg {C : PointedCone 𝕜 M} (hC : C.FG) : C.CoFG := by
-  obtain ⟨D, hcofg, rfl⟩ := exists_cofg_inf_submodule hC Finite.fg_top (by simp)
-  simpa using hcofg
-
-lemma FG.exists_fg_dual {C : PointedCone 𝕜 M} (hC : C.FG) : ∃ s : Finset N, dual p.flip s = C := by
-  -- obtain ⟨D, hcofg, rfl⟩ := exists_cofg_inf_submodule hC Finite.fg_top (by simp)
-  -- simpa using hcofg
-  sorry
-
-end Module.Finite
-
--- We *should* be able to prove the following in this section:
-
-lemma inf_fg_cofg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.CoFG) : (C ⊓ D).FG := by
-  sorry -- can be reduced to the question "is inf of FG submodule and CoFG halfspace always FG?"
-
-section Surjective
-
-variable [Fact (Surjective p.flip)]
-
+variable (p) [Fact p.IsFaithfulPair] in
 /-- An FG cone is the dual of a CoFG cone. -/
-lemma FG.exists_cofg_dual {C : PointedCone 𝕜 M} (hC : C.FG) :
-    ∃ D : PointedCone 𝕜 N, D.CoFG ∧ dual p.flip D = C := by
-  obtain ⟨D, hD, S, hS, rfl⟩ := exists_cofg_sup_fg_submodule hC
-  obtain ⟨C', hfg, rfl⟩ := CoFG.exists_fg_dual p hD
-  use C' ⊔ dual p S
+lemma FG.exists_cofg_flip_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 M, D.CoFG p.flip ∧ dual p D = C := by
+  obtain ⟨D, hD, S, hS, rfl⟩ := exists_cofg_sup_fg_submodule p hC
+  obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
+  use C' ⊔ dual p.flip S
   constructor
-  · exact sup_fg_cofg hfg <| cofg_of_fg p (ofSubmodule_fg_of_fg hS)
-  · simp [dual_sup_dual_inf_dual, Submodule.fg_dual_dual_flip hS]
+  · exact sup_fg_cofg hfg <| cofg_of_fg p.flip (ofSubmodule_fg_of_fg hS)
+  · simp [dual_sup_dual_inf_dual, Submodule.fg_dual_flip_dual hS]
     -- TODO: prove `Submodule.fg_dual_dual_flip` (the equivalent for cones was already proven here).
 
-/-- The double dual of an FG cone is itself. -/
-@[simp]
-lemma FG.fg_dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) : dual p.flip (dual p C) = C := by
-  obtain ⟨D, hcofg, rfl⟩ := exists_cofg_dual p hC
-  exact dual_flip_dual_dual_flip (p := p) D
+variable (p) [Fact p.flip.IsFaithfulPair] in
+/-- An FG cone is the dual of a CoFG cone. -/
+lemma FG.exists_cofg_dual_flip {C : PointedCone 𝕜 M} (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 N, D.CoFG p ∧ dual p.flip D = C := by
+  rw [← flip_flip p]; exact exists_cofg_flip_dual p.flip hC
 
-end Surjective
-
-section Module.Finite
-
-variable [Module.Finite 𝕜 M]
-
-lemma CoFG.fg {C : PointedCone 𝕜 M} (hC : C.CoFG) : C.FG := by
-  --obtain ⟨D, hfg, hD⟩ := exists_fg_dual .id hC
-      -- can't use this because it needs p.flip surjective. But below I don't need it. This is off.
-  obtain ⟨s, rfl⟩ := hC
-  rw [← dual_span]
-  obtain ⟨C', hC'⟩ := FG.cofg <| fg_span (R := {c : 𝕜 // 0 ≤ c}) (s.finite_toSet)
-  simp [span, ← hC'] -- Problem: C' livesin double-dual, so `FG.fg_dual_flip_dual` does not apply.
-  -- rw [FG.fg_dual_flip_dual]
-  sorry
-
-end Module.Finite
-
-section Surjective'
-
-variable [Fact (Surjective p)]
-
-/-- The double dual of an FG cone is itself. -/
+variable (p) [Fact p.IsFaithfulPair] in
+/-- The double dual of an FG cone is the cone itself. -/
 @[simp]
 lemma FG.fg_dual_dual_flip {C : PointedCone 𝕜 N} (hC : C.FG) : dual p (dual p.flip C) = C := by
-  obtain ⟨D, hcofg, rfl⟩ := exists_cofg_dual p.flip hC
+  obtain ⟨D, hcofg, rfl⟩ := exists_cofg_flip_dual p hC
   exact dual_dual_flip_dual (p := p) D
 
-end Surjective'
+variable (p) [Fact p.flip.IsFaithfulPair] in
+/-- The double dual of an FG cone is the cone itself. -/
+@[simp]
+lemma FG.fg_dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) : dual p.flip (dual p C) = C := by
+  rw [← flip_flip p]; exact fg_dual_dual_flip p.flip hC
 
-section IsPerfPair
-
-variable [p.IsPerfPair]
-
--- TODO: For everything in this section:
---   Is there a proof that only requires surjectivity of `p.flip` instead of `p.IsPerfPair`?
-
+variable [Fact p.IsFaithfulPair] in
 /-- The dual of a CoFG cone is FG. -/
-lemma CoFG.dual_fg {C : PointedCone 𝕜 M} (hC : C.CoFG) : (dual p C).FG := by
-  obtain ⟨D, hfg, rfl⟩ := exists_fg_dual p hC
+lemma CoFG.dual_fg {C : PointedCone 𝕜 M} (hC : C.CoFG p.flip) : (dual p C).FG := by
+  obtain ⟨D, hfg, rfl⟩ := exists_fg_dual hC
   rw [FG.fg_dual_dual_flip p hfg]
   exact hfg
 
-lemma CoFG.dual_fg' {C : PointedCone 𝕜 N} (hC : C.CoFG) : (dual p.flip C).FG := by
-  obtain ⟨D, hfg, rfl⟩ := exists_fg_dual p.flip hC
-  rw [LinearMap.flip_flip]
-  rw [FG.fg_dual_flip_dual p hfg]
-  exact hfg
+variable [Fact p.flip.IsFaithfulPair] in
+/-- The dual of a CoFG cone is FG. -/
+lemma CoFG.dual_flip_fg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).FG := by
+  rw [← flip_flip p] at hC; exact dual_fg hC
+
+-- ----------------- ^^^^^^^ everything up there is proven vvvvv down there is work
+
+section Module.Finite
+
+/- TODO: it is likely that in this section a lot of the assumptions (in terms of Module.Finite and
+  IsFaithfulPair) can be reduced because it can be inferred from others. -/
+
+variable [Module.Finite 𝕜 N] in
+variable (p) [Fact p.IsFaithfulPair] in
+/-- A finite dimensional FG cone is also CoFG. -/
+lemma FG.cofg {C : PointedCone 𝕜 N} (hC : C.FG) : C.CoFG p := by
+  obtain ⟨D, hcofg, rfl⟩ := exists_cofg_inf_submodule p hC Finite.fg_top (by simp)
+  simpa using hcofg
+
+  -- the two faithfuls should imply each other; maybe are even equivalent to `IsPerfPair` in findim.
+variable [Module.Finite 𝕜 M] in
+variable [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in
+/-- A finite dimensional CoFG cone is also FG. -/
+lemma CoFG.fg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : C.FG := by
+  obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
+  exact CoFG.dual_fg <| FG.cofg p.flip hfg
+
+variable [Module.Finite 𝕜 M] [Module.Finite 𝕜 N] in
+variable [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in
+/-- A finite dimensional cone is FG if and only if it is CoFG. -/
+lemma fg_iff_cofg {C : PointedCone 𝕜 N} : C.CoFG p ↔ C.FG := ⟨CoFG.fg, FG.cofg p⟩
 
 variable [Module.Finite 𝕜 M] in
-lemma inf_fg_cofg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.CoFG) : (C ⊓ D).FG := by
-  obtain ⟨C', hCfg, rfl⟩ := FG.exists_cofg_dual (Dual.eval 𝕜 M) hC
-  obtain ⟨D', hDfg, rfl⟩ := CoFG.exists_fg_dual (Dual.eval 𝕜 M) hD
-  rw [← dual_union, ← dual_sup]
-  apply CoFG.dual_fg -- here we need finite dim
-  -- TODO -- here we need `(C ⊔ D).CoFG` if `C` and `D` are CoFG.
+variable [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in
+/-- In finite dimensional space, the dual of and FG cone is itself FG. -/
+lemma FG.dual_fg {C : PointedCone 𝕜 M} (hC : C.FG) : (dual p C).FG
+  := CoFG.dual_fg (FG.cofg p.flip hC)
+
+variable [Module.Finite 𝕜 M] in
+variable [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in
+/-- In finite dimensional space, the dual of and CoFG cone is itself CoFG. -/
+lemma CoFG.dual_cofg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).CoFG p.flip
+  := FG.dual_cofg p.flip (CoFG.fg hC)
+
+variable [Module.Finite 𝕜 M] in
+private lemma inf_fg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
+  exact CoFG.fg <| inf_cofg .id (FG.cofg .id hC) (FG.cofg .id hD)
+
+end Module.Finite
+
+/- WARNING: `FG.restrict_fg` is used below, but is currently unproven and needs to be proven
+  in this section! -/
+
+lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) :
+    (C.restrict S).FG := by
   sorry
 
+/-- The intersection of two FG cones is an FG cone. -/
+lemma inf_fg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
+  wlog _ : Module.Finite 𝕜 N with h
+  · let CD := Submodule.span 𝕜 (M := N) (C ⊔ D)
+    specialize h (FG.restrict_fg CD hC) (FG.restrict_fg CD hD) (Finite.iff_fg.mpr ?_)
+    · simp only [CD, coe_sup_submodule_span]
+      exact span_fg <| sup_fg hC hD
+    · rw [← restrict_inf] at h
+      refine FG.fg_of_restrict ?_ h
+      simp only [CD, coe_sup_submodule_span]
+      exact le_trans (le_trans (inf_le_sup (a := C) (b := D)) subset_span)
+          (span_le_restrictScalars _ 𝕜 _)
+  · exact inf_fg' hC hD
+
+-- ------------------------
+
+lemma inf_fg_submodule_cofg {S : Submodule 𝕜 N} (hS : S.FG) {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
+    True := by -- (C.restrict S).CoFG p := by -- what is the restriction of `p`???
+  sorry
+
+lemma inf_fg_submodule_cofg' {S : Submodule 𝕜 N} (hS : S.FG) {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
+    (S ⊓ C : PointedCone 𝕜 N).FG := by
+  sorry -- I think we first need to do finite theory, and then apply here
+
+variable [Fact p.IsFaithfulPair] in
+lemma inf_fg_cofg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.CoFG p) : (C ⊓ D).FG := by
+  obtain ⟨C', hCcofg, S, hSfg, rfl⟩ := FG.exists_cofg_sup_fg_submodule p hC
+  -- obtain ⟨C', hCfg, rfl⟩ := FG.exists_cofg_flip_dual p hC
+  -- obtain ⟨D', hDfg, rfl⟩ := CoFG.exists_fg_dual hD
+  rw [inf_comm, ← inf_assoc]
+  sorry -- can be reduced to the question "is inf of FG submodule and CoFG halfspace always FG?"
+
+lemma CoFG.exists_fg_sup_submodule {C : PointedCone 𝕜 N} (hC : C.CoFG p)
+    {S : Submodule 𝕜 N} (hS : S.CoFG p) (hCS : S ≤ C) :
+      ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ S = C := by
+  sorry
+
+lemma sup_cofg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.CoFG p) : (C ⊔ D).CoFG p := by
+  obtain ⟨C', hCfg, rfl⟩ := CoFG.exists_fg_dual hC
+  obtain ⟨D', hDfg, rfl⟩ := CoFG.exists_fg_dual hD
+  -- need dual(C ⊓ D) = dual(C) ⊔ dual(D)
+  sorry
+
+variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ⊓ D) = (dual p C) ⊔ (dual p D) := by
-  obtain ⟨C', hCfg, rfl⟩ := hC
-  obtain ⟨D', hDfg, rfl⟩ := hD
-  -- rw [dual_sup]
-  sorry
-
-lemma sup_cofg {C D : PointedCone 𝕜 M} (hC : C.CoFG) (hD : D.CoFG) : (C ⊔ D).CoFG := by
-  obtain ⟨C', hCfg, rfl⟩ := CoFG.exists_fg_dual (Dual.eval 𝕜 M) hC
-  obtain ⟨D', hDfg, rfl⟩ := CoFG.exists_fg_dual (Dual.eval 𝕜 M) hD
-  sorry
-
-lemma CoFG.exists_fg_sup_submodule {C : PointedCone 𝕜 M} (hC : C.CoFG)
-    {S : Submodule 𝕜 M} (hS : S.CoFG) (hCS : S ≤ C) :
-      ∃ D : PointedCone 𝕜 M, D.FG ∧ D ⊔ S = C := by
-  sorry
-
-lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
-  obtain ⟨C', hCcofg, rfl⟩ := FG.exists_cofg_dual (Dual.eval 𝕜 M) hC
-  obtain ⟨D', hDcofg, rfl⟩ := FG.exists_cofg_dual (Dual.eval 𝕜 M) hD
+  obtain ⟨C', hCcofg, rfl⟩ := FG.exists_cofg_dual_flip p hC
+  obtain ⟨D', hDcofg, rfl⟩ := FG.exists_cofg_dual_flip p hD
+  simp only [Set.inf_eq_inter]
+  rw [← coe_inf]
   rw [← dual_sup_dual_inf_dual]
-  -- exact CoFG.dual_fg (sup_cofg)
+  -- rw [CoFG.fg_dual_dual_flip p.flip hfg]
+  -- needs C.CoFG ∧ D.CoFG → (C ⊔ D).CoFG
   sorry
-
-lemma inf_fg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
-  let CD : Submodule 𝕜 M := Submodule.span 𝕜 (C ⊔ D)
-  have hCD : CD.FG := by sorry
-  have hCD_C : C ≤ CD := by sorry
-  have hCD_D : D ≤ CD := by sorry
-  obtain ⟨C', hCcofg, hC'⟩ := FG.exists_cofg_inf_submodule hC hCD hCD_C
-  obtain ⟨D', hDcofg, hD'⟩ := FG.exists_cofg_inf_submodule hD hCD hCD_D
-  rw [← hC', ← hD']
-  rw [inf_assoc]
-  nth_rw 2 [inf_comm]
-  rw [inf_assoc, ← inf_assoc]
-  simp
-  -- obtain ⟨C', hCcofg, rfl⟩ := FG.exists_dual_cofg (Dual.eval 𝕜 M) hC
-  -- obtain ⟨D', hDcofg, rfl⟩ := FG.exists_dual_cofg (Dual.eval 𝕜 M) hD
-  -- rw [← dual_sup_dual_inf_dual]
-  -- exact CoFG.dual_fg (sup_cofg)
-  sorry
-
-end IsPerfPair
 
 lemma CoFG.is_dual_finite_inf_span''''' {C : PointedCone 𝕜 N} (hC : C.FG)
     (S : Submodule 𝕜 N) (hFG : S.FG) (hS : C ≤ S) : ∃ s : Set M, s.Finite ∧ dual p s ⊓ S = C := by
@@ -357,11 +330,11 @@ lemma CoFG.dual_sup_lineal (hC : C.FG) :
     ∃ D : PointedCone 𝕜 N, D.FG ∧ dual p C = D ⊔ (dual p C).lineal := by
   sorry
 
-lemma CoFG.is_sup_cofg_fg (hC : C.CoFG) :
+lemma CoFG.is_sup_cofg_fg (hC : C.CoFG p.flip) :
     ∃ D : PointedCone 𝕜 M, D.FG ∧ D ⊔ C.lineal = C := by
   sorry
 
-lemma CoFG.lineal_cofg (hC : C.CoFG) : C.lineal.CoFG := by
+lemma CoFG.lineal_cofg (hC : C.CoFG p.flip) : C.lineal.CoFG p.flip := by
   sorry
 
 lemma FG.is_dual_dual_of_finite (hC : C.FG) :
@@ -369,7 +342,7 @@ lemma FG.is_dual_dual_of_finite (hC : C.FG) :
   sorry
 
 lemma FG.is_dual_dual_of_cofg (hC : C.FG) :
-    ∃ D : PointedCone 𝕜 N, D.CoFG ∧ dual p.flip D = C := by
+    ∃ D : PointedCone 𝕜 N, D.CoFG p ∧ dual p.flip D = C := by
   sorry
 
 

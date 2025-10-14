@@ -6,7 +6,7 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 
 namespace PointedCone
 
@@ -27,7 +27,7 @@ variable (R S) in
 @[coe]
 abbrev ofSubmodule (S : Submodule R E) : PointedCone R E := S.restrictScalars _
 
-instance : Coe (Submodule R E) (PointedCone R E) := ⟨ ofSubmodule _ ⟩
+instance : Coe (Submodule R E) (PointedCone R E) := ⟨ofSubmodule _⟩
 
 lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule _ S : Set E) = S :=
   Submodule.coe_restrictScalars R S
@@ -40,6 +40,46 @@ lemma ofSubmodule_fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R 
 
 lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
+
+lemma span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span R (M := E) C).FG
+  := Submodule.span_scalars_FG hC
+
+lemma coe_sup_submodule_span {C D : PointedCone R E} :
+    Submodule.span R ((C : Set E) ⊔ (D : Set E)) = Submodule.span R (C ⊔ D : PointedCone R E) := by
+  ext x; simp; sorry
+
+lemma span_le_submodule_span (s : Set E) : span R s ≤ Submodule.span R s
+  := Submodule.span_le_restrictScalars _ R s
+
+lemma span_le (s : Set E) : s ≤ span R s := by sorry
+
+-- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
+/-- The restriction of `C ⊓ S` considered as a cone in `S`. -/
+abbrev restrict (S : Submodule R E) (C : PointedCone R E) : PointedCone R S := C.comap S.subtype
+/-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
+abbrev embed (S : Submodule R E) (C : PointedCone R S) : PointedCone R E := C.map S.subtype
+
+lemma embed_restrict (S : Submodule R E) (C : PointedCone R E) :
+    embed S (restrict S C) = (S ⊓ C : PointedCone R E)
+  := by sorry -- map_comap_subtype _ _
+
+@[simp]
+lemma restrict_embed (S : Submodule R E) (T : Submodule R S) : restrict S (embed S T) = T
+  := by sorry -- simp [comap_map_eq]
+
+lemma FG.embed_fg (S : Submodule R E) {C : PointedCone R S} (hC : C.FG) :
+    (C.embed S).FG := by classical
+  obtain ⟨s, rfl⟩ := hC
+  use Finset.image S.subtype s
+  simp [embed, map, Submodule.map_span]
+
+lemma FG.fg_of_restrict {S : Submodule R E} {C : PointedCone R E}
+    (hSC : C ≤ S) (hC : (C.restrict S).FG) : C.FG := by
+  rw [← (inf_eq_left.mpr hSC), inf_comm, ← embed_restrict]
+  exact FG.embed_fg S hC
+
+lemma restrict_inf (S : Submodule R E) {C D : PointedCone R E} :
+    (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S := sorry
 
 variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]

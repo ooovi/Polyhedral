@@ -24,6 +24,9 @@ variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
   This is in analogy to `FG` (finitely generated) which is the span of afinite set. -/
 def CoFG (C : PointedCone R M) : Prop := ∃ s : Finset (Dual R M), dual .id s = C
 
+variable (p) in
+def CoFG' (C : PointedCone R M) : Prop := ∃ s : Finset N, dual p.flip s = C
+
 variable (p)
 
 /-- The dual of a `Finset` is co-FG. -/
