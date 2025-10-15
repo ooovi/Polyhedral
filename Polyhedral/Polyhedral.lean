@@ -10,6 +10,8 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FG
 
+import Polyhedral.ExtremeFaces
+
 /-!
 # Polyhedral cones
 
@@ -21,30 +23,16 @@ open Submodule hiding span
 
 variable {𝕜 M N : Type*}
 
--- Now we are ready to define PolyhedralCone, because from here on we assume V=H.
--- From here on we also mke no use any longer of the precise pairing.
-
-variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
-  [Module 𝕜 M] [Module.Finite 𝕜 M] -- {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} [p.IsPerfPair]
-
-/-- Abbreviation for PointedCone.FG. Intended for use in contexts with V=H. -/
-abbrev PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) := C.FG
-
--- this definition allows to prove certain statement immediately from FG.
-example {C C' : PointedCone 𝕜 M} (hC : C.IsPolyhedral) (hC' : C'.IsPolyhedral) :
-    (C ⊔ C').IsPolyhedral := Submodule.FG.sup hC hC'
-
-variable {C C' : PointedCone 𝕜 M} (hC : C.IsPolyhedral) (hC' : C'.IsPolyhedral)
-
-alias IsPolyhedral.map := Submodule.FG.map
--- alias IsPolyhedral.fg_of_fg_map := Submodule.fg_of_fg_map
-
 variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
   [Module 𝕜 M]
 
+/-- A cone is polyhedral if it has finitely many faces. -/
+abbrev PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) := Finite (Face C)
+
 variable (𝕜 M) in
+/-- A polyhedral cone is a pointed cone with finitely many faces. -/
 structure PolyhedralCone extends PointedCone 𝕜 M where
-  isFG : FG toSubmodule
+  isPolyhedral : PointedCone.IsPolyhedral toSubmodule
 
 namespace PolyhedralCone
 
@@ -53,7 +41,7 @@ namespace PolyhedralCone
 instance : Coe (PolyhedralCone 𝕜 M) (PointedCone 𝕜 M) where
   coe := toPointedCone
 
-def of_FG {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M := ⟨C, hC⟩
+def of_FG {C : PointedCone 𝕜 M} (hC : C.IsPolyhedral) : PolyhedralCone 𝕜 M := ⟨C, hC⟩
 
 lemma toPointedCone_injective :
     Injective (toPointedCone : PolyhedralCone 𝕜 M → PointedCone 𝕜 M) :=
