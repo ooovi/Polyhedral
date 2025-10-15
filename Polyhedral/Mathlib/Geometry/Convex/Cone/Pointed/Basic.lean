@@ -225,7 +225,7 @@ end Ring
 
 section Ring_AddCommGroup
 
-variable {R E : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E] [Module R E]
+variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E] [Module R E]
 
 -- ## Lineality
 
@@ -244,6 +244,28 @@ lemma lineal_submodule (S : Submodule R E) : (S : PointedCone R E).lineal = S :=
 
 @[simp] lemma lineal_top : (⊤ : PointedCone R E).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R E).lineal = ⊥ := lineal_submodule ⊥
+
+lemma span_inter_lineal_eq_lineal {C : PointedCone R E} {s : Set E} (h : span R s = C) :
+    span R (s ∩ C.lineal) = C.lineal := by
+  rw [← antisymm_iff (r := LE.le)]
+  constructor
+  · rw [← Submodule.span_eq (C.lineal : PointedCone R E)]
+    exact Submodule.span_mono (by simp)
+  · rw [← SetLike.coe_subset_coe]
+    rw [Set.subset_def]
+    intro x hx
+    let S:= s ∩ C.lineal
+    let S' := s \ C.lineal
+    have hS : S ∪ S' = s := by simp [S, S']
+    have hS' : S ∩ S' = ∅ := by aesop
+
+    --have hs : s = (s ∩ C.lineal) ∪ ()
+    -- rw [Submodule.mem_span_finite_of_mem_span] at h
+    sorry
+
+section Ring
+
+variable {R E : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E] [Module R E]
 
 -- @[simp] -- no simp because right side has twice as many `x`?
 lemma lineal_mem {x : E} {C : PointedCone R E} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
@@ -265,24 +287,7 @@ lemma lineal_eq_inf_neg (C : PointedCone R E) : C.lineal = C ⊓ -C := by
 lemma lineal_inf (C D : PointedCone R E) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [lineal_mem]; aesop
 
-
-lemma span_inter_lineal_eq_lineal {C : PointedCone R E} {s : Set E} (h : span R s = C) :
-    span R (s ∩ C.lineal) = C.lineal := by
-  rw [← antisymm_iff (r := LE.le)]
-  constructor
-  · rw [← Submodule.span_eq (C.lineal : PointedCone R E)]
-    exact Submodule.span_mono (by simp)
-  · rw [← SetLike.coe_subset_coe]
-    rw [Set.subset_def]
-    intro x hx
-    let S:= s ∩ C.lineal
-    let S' := s \ C.lineal
-    have hS : S ∪ S' = s := by simp [S, S']
-    have hS' : S ∩ S' = ∅ := by aesop
-
-    --have hs : s = (s ∩ C.lineal) ∪ ()
-    -- rw [Submodule.mem_span_finite_of_mem_span] at h
-    sorry
+end Ring
 
 end Ring_AddCommGroup
 
