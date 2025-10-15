@@ -246,10 +246,36 @@ variable [Module.Finite 𝕜 M] in
 private lemma inf_fg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
   exact CoFG.fg <| inf_cofg .id (FG.cofg .id hC) (FG.cofg .id hD)
 
+variable [Module.Finite 𝕜 M] in
+variable [Fact p.flip.IsFaithfulPair] in
+private lemma FG.restrict_fg' (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) :
+    (C.restrict S).FG := by
+  wlog hle : C ≤ S with h
+  · let C' := C ⊓ S
+    have hS : S.FG := IsNoetherian.noetherian S
+    have hfg : C'.FG := inf_fg' hC (restrictedScalars_fg_of_fg _ hS)
+    have h' : C' ≤ S := by sorry
+    -- specialize h hC h'
+    sorry
+  · sorry
+
+variable [Module.Finite 𝕜 M] in
+variable [Fact p.flip.IsFaithfulPair] in
+private lemma FG.dual_inf_dual_sup_dual' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
+    dual p (C ⊓ D) = (dual p C) ⊔ (dual p D) := by
+  obtain ⟨C', hCfg', rfl⟩ := FG.exists_cofg_dual_flip p hC
+  obtain ⟨D', hDfg', rfl⟩ := FG.exists_cofg_dual_flip p hD
+  simp only [Set.inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
+  sorry -- exact CoFG.fg <| inf_cofg .id (FG.cofg .id hC) (FG.cofg .id hD)
+
 end Module.Finite
 
 /- WARNING: `FG.restrict_fg` is used below, but is currently unproven and needs to be proven
   in this section! -/
+
+lemma FG.restrict_fg'' (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) (hSC : C ≤ S) :
+    (C.restrict S).FG := by
+  sorry
 
 lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) :
     (C.restrict S).FG := by
@@ -270,6 +296,13 @@ lemma inf_fg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG :
   · exact inf_fg' hC hD
 
 -- ------------------------
+
+lemma CoFG.dual_sup_dual_inf_dual {C D : PointedCone 𝕜 M}
+    (hC : C.CoFG p.flip) (hD : D.CoFG p.flip) : dual p (C ⊓ D) = (dual p C) ⊔ (dual p D) := by
+  obtain ⟨C', hCfg', rfl⟩ := CoFG.exists_fg_dual hC
+  obtain ⟨D', hDfg', rfl⟩ := CoFG.exists_fg_dual hD
+  simp only [Set.inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
+  sorry
 
 lemma inf_fg_submodule_cofg {S : Submodule 𝕜 N} (hS : S.FG) {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
     True := by -- (C.restrict S).CoFG p := by -- what is the restriction of `p`???

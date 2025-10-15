@@ -4,6 +4,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 import Mathlib.Order.ModularLattice
+import Mathlib.RingTheory.Noetherian.Defs
 
 namespace Submodule
 
@@ -62,15 +63,17 @@ example (S S' : Submodule R M) : span R (S ⊔ S' : Submodule R M) = S ⊔ S'
     := by rw [←coe_inf, span_eq]
 
 -- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
+-- alias restrict := submoduleOf
 /-- The restriction of `S ⊓ T` considered as a submodule of `S`. -/
-abbrev restrict (S T : Submodule R M) : Submodule R S := T.comap S.subtype
+abbrev restrict (S T : Submodule R M) : Submodule R S := T.submoduleOf S -- T.comap S.subtype
+
 /-- A submodule `T` of a submodule `S` of `M` intepreted as a submodule of `M`. -/
 abbrev embed (S : Submodule R M) (T : Submodule R S) : Submodule R M := T.map S.subtype
 
 -- def restrict_set (S : Set M) (T : Submodule R M) : Set T := S.preimage T.subtype
 
 -- Q: is this a good idea? It is not in mathlib for a reason.
-instance {S : Submodule R M} : CoeOut (Submodule R S) (Submodule R M) := ⟨embed S⟩
+-- instance {S : Submodule R M} : CoeOut (Submodule R S) (Submodule R M) := ⟨embed S⟩
 
 -- @[simp] -- not neede because simp already solves this goal
 lemma embed_restrict (S T : Submodule R M) : embed S (restrict S T) = S ⊓ T
@@ -82,9 +85,19 @@ variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 
 @[simp]
 lemma restrict_embed (S : Submodule R M) (T : Submodule R S) : restrict S (embed S T) = T
-  := by simp [comap_map_eq]
+  := by simp [submoduleOf, comap_map_eq]
 
 end Ring
+
+-- section Field
+
+-- variable {M R : Type*} [Ring R] [IsNoetherianRing R] [AddCommGroup M] [Module R M]
+
+-- lemma fg_of_submodule_of_finite [Module.Finite R M] (S : Submodule R M) : S.FG := by
+--   have h : Module.Finite R S := Module.Finite.of_submodule
+--   exact Module.Finite.iff_fg.mp h
+
+-- end Field
 
 end Semiring
 

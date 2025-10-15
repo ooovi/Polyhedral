@@ -11,6 +11,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 namespace PointedCone
 
 open Module
+open Submodule hiding span dual restrict embed
 
 variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid E]
   [Module R E] {S : Set E}
@@ -30,56 +31,73 @@ abbrev ofSubmodule (S : Submodule R E) : PointedCone R E := S.restrictScalars _
 instance : Coe (Submodule R E) (PointedCone R E) := ⟨ofSubmodule _⟩
 
 lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule _ S : Set E) = S :=
-  Submodule.coe_restrictScalars R S
+  coe_restrictScalars R S
 
 variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]
 
 lemma ofSubmodule_fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
-    := Submodule.restrictedScalars_fg_of_fg _ hS
+    := restrictedScalars_fg_of_fg _ hS
 
 lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
 
 lemma span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span R (M := E) C).FG
-  := Submodule.span_scalars_FG hC
+  := span_scalars_FG hC
 
 lemma coe_sup_submodule_span {C D : PointedCone R E} :
     Submodule.span R ((C : Set E) ⊔ (D : Set E)) = Submodule.span R (C ⊔ D : PointedCone R E) := by
   ext x; simp; sorry
 
 lemma span_le_submodule_span (s : Set E) : span R s ≤ Submodule.span R s
-  := Submodule.span_le_restrictScalars _ R s
+  := span_le_restrictScalars _ R s
 
 lemma span_le (s : Set E) : s ≤ span R s := by sorry
 
 -- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
-/-- The restriction of `C ⊓ S` considered as a cone in `S`. -/
-abbrev restrict (S : Submodule R E) (C : PointedCone R E) : PointedCone R S := C.comap S.subtype
+/-- The intersection `C ⊓ S` considered as a cone in `S`. -/
+abbrev pointedConeOf (S : Submodule R E) (C : PointedCone R E) : PointedCone R S
+  := C.submoduleOf S -- C.comap S.subtype
+
+alias restrict := pointedConeOf
+
 /-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
 abbrev embed (S : Submodule R E) (C : PointedCone R S) : PointedCone R E := C.map S.subtype
 
 lemma embed_restrict (S : Submodule R E) (C : PointedCone R E) :
-    embed S (restrict S C) = (S ⊓ C : PointedCone R E)
-  := by sorry -- map_comap_subtype _ _
+    embed S (restrict S C) = (S ⊓ C : PointedCone R E) := by
+  -- unfold embed restrict map comap
+  -- -- rw [← Submodule.restrictScalars_]
+  -- --rw [Submodule.restrictScalars_s]
+  -- --rw [comap_restrictScalar]
+  -- rw [← Submodule.restrictScalars_map]
+  -- exact Submodule.map_comap_subtype
+  sorry -- map_comap_subtype _ _
 
 @[simp]
 lemma restrict_embed (S : Submodule R E) (T : Submodule R S) : restrict S (embed S T) = T
   := by sorry -- simp [comap_map_eq]
 
-lemma FG.embed_fg (S : Submodule R E) {C : PointedCone R S} (hC : C.FG) :
-    (C.embed S).FG := by classical
-  obtain ⟨s, rfl⟩ := hC
-  use Finset.image S.subtype s
-  simp [embed, map, Submodule.map_span]
+lemma embed_fg_of_fg (S : Submodule R E) {C : PointedCone R S} (hC : C.FG) :
+    (C.embed S).FG := Submodule.FG.map _ hC
+
+lemma fg_of_embed_fg {S : Submodule R E} {C : PointedCone R S} (hC : (C.embed S).FG) :
+    C.FG := fg_of_fg_map_injective _ (injective_subtype (S : PointedCone R E)) hC
+
+@[simp]
+lemma embed_fg_iff_fg {S : Submodule R E} {C : PointedCone R S} : (C.embed S).FG ↔ C.FG
+  := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
 
 lemma FG.fg_of_restrict {S : Submodule R E} {C : PointedCone R E}
     (hSC : C ≤ S) (hC : (C.restrict S).FG) : C.FG := by
   rw [← (inf_eq_left.mpr hSC), inf_comm, ← embed_restrict]
-  exact FG.embed_fg S hC
+  exact embed_fg_of_fg S hC
 
 lemma restrict_inf (S : Submodule R E) {C D : PointedCone R E} :
-    (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S := sorry
+    (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S
+  := by ext x; simp [restrict, submoduleOf]
+
+-- Submodule.submoduleOf_sup_of_le
 
 variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E]
   [Module R E]

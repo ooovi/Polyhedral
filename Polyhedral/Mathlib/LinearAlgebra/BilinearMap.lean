@@ -17,6 +17,9 @@ variable {R : Type*} [CommSemiring R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {N : Type*} [AddCommMonoid N] [Module R N]
 
+/- For a field this is known as being 'formally real'. This is equivalent to the existence of an
+  ordered field structure. This could ve relevant on field with no preferred order, e.g. the
+  field of rational functions -/
 def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
     := ∃ g : N →ₗ[R] M, ∀ x : N, (p ∘ₗ g) x x = 0 → x = 0
 
