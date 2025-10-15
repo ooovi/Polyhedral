@@ -316,7 +316,12 @@ variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid
 lemma ofSubmodule_fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
     := restrictedScalars_fg_of_fg _ hS
 
+/- We current struggle to implement the converse, see `fg_of_restrictedScalars_fg`. -/
 alias coe_fg := ofSubmodule_fg_of_fg
+
+@[simp]
+lemma coe_fg_iff {S : Submodule R E} : (S : PointedCone R E).FG ↔ S.FG :=
+  ⟨fg_of_restrictedScalars_fg, coe_fg⟩
 
 lemma span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span R (M := E) C).FG :=
   span_scalars_FG R hC

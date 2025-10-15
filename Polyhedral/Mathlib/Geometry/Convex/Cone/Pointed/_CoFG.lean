@@ -1,7 +1,14 @@
 
+import Mathlib.Geometry.Convex.Cone.Pointed
+import Mathlib.Geometry.Convex.Cone.Dual
+import Mathlib.RingTheory.Finiteness.Basic
+import Mathlib.LinearAlgebra.PerfectPairing.Basic
+import Mathlib.Algebra.Module.Submodule.Pointwise
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule._CoFG
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 namespace PointedCone
 
@@ -13,54 +20,86 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
-variable (p) in
 /-- A cone is `CoFG` (co-finitely generated) if it is the dual of a finite set.
-  This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
-def CoFG (C : PointedCone R N) : Prop := ∃ s : Finset M, dual p s = C
+  This is in analogy to `FG` (finitely generated) which is the span of afinite set. -/
+def CoFG (C : PointedCone R M) : Prop := ∃ s : Finset (Dual R M), dual .id s = C
 
-lemma CoFG.exists_fg_dual {C : PointedCone R N} (hC : C.CoFG p) :
-    ∃ D : PointedCone R M, D.FG ∧ dual p D = C := by
-  obtain ⟨s, hs⟩ := hC; use span R s
-  exact ⟨Submodule.fg_span s.finite_toSet, by simp [hs]⟩
+variable (p) in
+def CoFG' (C : PointedCone R M) : Prop := ∃ s : Finset N, dual p.flip s = C
 
 variable (p)
 
 /-- The dual of a `Finset` is co-FG. -/
-lemma cofg_of_finset (s : Finset M) : (dual p s).CoFG p := by use s
+lemma cofg_of_finset (s : Finset M) : (dual p s).CoFG := by
+  classical
+  use Finset.image p s
+  simp [dual_bilin_dual_id]
 
 /-- The dual of a finite set is co-FG. -/
-lemma cofg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).CoFG p := by
-  use hs.toFinset; simp
+lemma cofg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).CoFG := by
+  classical
+  use Finset.image p hs.toFinset
+  simp [dual_bilin_dual_id]
 
 /-- The dual of an FG-cone is co-FG. -/
-lemma cofg_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).CoFG p := by
+lemma cofg_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).CoFG := by
+  obtain ⟨s, hs⟩ := hC
+  rw [← hs, dual_span]
+  exact cofg_of_finset p _
+
+section Surjective
+
+variable {R M N : Type*}
+variable [CommRing R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- NOTE: Most theory of CoFG relies on the fact that `p.flip` is surjective. This is the
+--  case, for example, if `p.IsPerfPair`, or if `p := Dual.eval R M`.
+
+instance : Fact (Surjective (.id : M →ₗ[R] M)) := ⟨surjective_id⟩
+
+instance : Fact (Surjective (Dual.eval R M).flip) := ⟨surjective_id⟩
+
+instance [p.IsPerfPair] : Fact (Surjective p)
+    := ⟨(LinearMap.IsPerfPair.bijective_left p).surjective⟩
+
+instance [p.IsPerfPair] : Fact (Surjective p.flip)
+    := ⟨(LinearMap.IsPerfPair.bijective_right p).surjective⟩
+
+instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip)
+    := ⟨by rw [LinearMap.flip_flip]; exact inst.elim⟩
+
+variable (p) [Fact (Surjective p.flip)]
+
+lemma CoFG.exists_finset_dual {C : PointedCone R M} (hC : C.CoFG) :
+    ∃ s : Finset N, dual p.flip s = C := by classical
   obtain ⟨s, rfl⟩ := hC
-  use s; rw [← dual_span]
+  use s.image <| surjInv <| Fact.elim <| inferInstanceAs <| Fact (Surjective p.flip)
+  rw [Finset.coe_image, dual_bilin_dual_id, ← Set.image_comp, comp_surjInv, Set.image_id]
 
-alias FG.dual_cofg := cofg_of_fg
+lemma CoFG.exists_finite_dual {C : PointedCone R M} (hC : C.CoFG) :
+    ∃ s : Set N, s.Finite ∧ dual p.flip s = C := by
+  obtain ⟨s, rfl⟩ := exists_finset_dual (p := p) hC
+  use s; simp
 
-lemma inf_cofg {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
-    (C ⊓ D).CoFG p := by classical
+lemma CoFG.exists_fg_dual {C : PointedCone R M} (hC : C.CoFG) :
+    ∃ S : PointedCone R N, S.FG ∧ dual p.flip S = C := by
+  obtain ⟨s, rfl⟩ := exists_finset_dual (p := p) hC
+  use span R s; simp; use s
+
+end Surjective
+
+lemma cofg_inf {C D : PointedCone R M} (hC : C.CoFG) (hD : D.CoFG) :
+    (C ⊓ D).CoFG := by classical
   obtain ⟨S, rfl⟩ := hC
   obtain ⟨T, rfl⟩ := hD
   use S ∪ T; rw [Finset.coe_union, dual_union]
 
-/-- The double dual of a CoFG cone is the cone itself. -/
 @[simp]
-lemma CoFG.fg_dual_dual_flip {C : PointedCone R N} (hC : C.CoFG p) :
-    dual p (dual p.flip C) = C := by
-  obtain ⟨D, hcofg, rfl⟩ := exists_fg_dual hC
-  exact dual_dual_flip_dual (p := p) D
-
-/-- The double dual of a CoFG cone is the cone itself. -/
-@[simp]
-lemma CoFG.fg_dual_flip_dual {C : PointedCone R M} (hC : C.CoFG p.flip) :
-    dual p.flip (dual p C) = C := by
-  rw [← LinearMap.flip_flip p]; exact fg_dual_dual_flip p.flip hC
-
-@[simp]
-lemma coe_cofg {S : Submodule R N} :
-    (S : PointedCone R N).CoFG p ↔ S.CoFG p := by -- classical
+lemma coe_cofg {S : Submodule R M} :
+    (S : PointedCone R M).CoFG ↔ S.CoFG := by -- classical
   -- unfold CoFG Submodule.CoFG
   constructor
   · intro hcofg

@@ -21,21 +21,19 @@ lemma restrictedScalars_fg_of_fg [Module.Finite S R] {s : Submodule R M} (hs : s
   rw [← Module.Finite.iff_fg] at *
   exact Module.Finite.trans R s
 
+-- Q: Is there a simpler proof for this?
 lemma fg_of_restrictedScalars_fg [Module.Finite S R] {s : Submodule R M}
     (hs : (s.restrictScalars S).FG) : s.FG := by
   obtain ⟨g, hg⟩ := hs
   use g
-  ext x
-  -- rw [mem_span]
-  --rw [hg]
-  rw [← span_eq (p := s)] at hg
-  --rw [restrictScalars_span] at hg
-  sorry
+  rw [← SetLike.coe_set_eq, coe_restrictScalars] at hg
+  have hg := congrArg (span R) hg
+  rw [Submodule.span_span_of_tower] at hg
+  simp [hg] -- span_eq
 
 lemma restrictedScalars_fg_iff_fg [Module.Finite S R] {s : Submodule R M} :
     (s.restrictScalars S).FG ↔ s.FG := ⟨fg_of_restrictedScalars_fg, restrictedScalars_fg_of_fg S⟩
 
--- Converse ?
 variable (R) in
 lemma span_scalars_FG [Module.Finite S R] {s : Submodule S M} (hfg : s.FG) :
     (span R (M := M) s).FG := by

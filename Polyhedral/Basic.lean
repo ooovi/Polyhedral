@@ -13,7 +13,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FG
 
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 
-import Polyhedral.Faces
+-- import Polyhedral.Faces
 import Polyhedral.ExtremeFaces
 -- import Polyhedral._Faces
 import Polyhedral.Halfspace

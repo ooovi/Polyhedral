@@ -63,7 +63,8 @@ lemma isFaithfulPair_of_id : IsFaithfulPair (R := R) (N := M) .id
 
 instance : Fact (IsFaithfulPair (R := R) (N := M) .id) := ⟨isFaithfulPair_of_id⟩
 
-lemma isFaithfulPair_of_isPerfPair [p.IsPerfPair] : p.IsFaithfulPair := sorry
+lemma isFaithfulPair_of_isPerfPair [p.IsPerfPair] : p.IsFaithfulPair :=
+    isFaithfulPair_of_surjective (IsPerfPair.bijective_left p).surjective
 
 instance [p.IsPerfPair] : Fact p.IsFaithfulPair := ⟨isFaithfulPair_of_isPerfPair⟩
 
