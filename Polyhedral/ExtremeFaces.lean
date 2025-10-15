@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig
 -- -/
 import Mathlib.Analysis.Convex.Extreme
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 
 /-!
@@ -100,7 +100,6 @@ lemma subdual_inf_sup (C : PointedCone 𝕜 M) :
     subdual p C F₁ ⊓ subdual p C F₂ = subdual p C (F₁ ⊔ F₂) := by
     simp [subdual, inf_assoc]
     rw [← inf_assoc, dual_sup_dual_inf_dual]
-
 
 lemma IsFaceOf.susub (h1 : F₁.IsFaceOf C) (h2 : F₂.IsFaceOf C) :
     (subdual .id (dual (Module.Dual.eval 𝕜 M) C)
