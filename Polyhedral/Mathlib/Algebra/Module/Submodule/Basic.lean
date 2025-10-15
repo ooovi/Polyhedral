@@ -91,6 +91,13 @@ lemma restrict_embed (S : Submodule R M) (T : Submodule R S) : restrict S (embed
 
 end Ring
 
+section Field
+
+lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restrict S T).FG := by
+  sorry
+
+end Field
+
 -- section Field
 
 -- variable {M R : Type*} [Ring R] [IsNoetherianRing R] [AddCommGroup M] [Module R M]

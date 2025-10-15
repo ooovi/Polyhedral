@@ -127,7 +127,7 @@ lemma restrict_submodule_inf (S : Submodule R E) (C : PointedCone R E) :
     (S ⊓ C : PointedCone R E).restrict S = C.restrict S := by
   simp [restrict_inf, coe_restrict, restrict_self]
 
--- lemma foo (S T : Submodule R E) (C : PointedCone R E) :
+-- lemma foo (S : Submodule R E) {T : Submodule R E} {C : PointedCone R E} (hCT : C ≤ T):
 --   restrict (.restrict T S) (restrict T C) = restrict T (restrict S C) := sorry
 
 -- Submodule.submoduleOf_sup_of_le

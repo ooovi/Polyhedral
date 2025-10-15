@@ -55,7 +55,7 @@ private lemma auxGenSet_subset_span :
   refine ⟨subset_trans (fun x hx ↦ hx.1) subset_span, fun x hxS hxw y hyS hyw ↦ ?_⟩
   -- simpa [sub_eq_add_neg] using add_mem (smul_mem (span 𝕜 s) ⟨p x w, hxw⟩ (subset_span hyS))
   --   (smul_mem _ ⟨-p y w, neg_nonneg.mpr hyw.le⟩ (subset_span hxS))
-  sorry -- code broke on mathlib/Lean update ?
+  sorry -- this code broke on mathlib/Lean update ...
 
 private lemma span_singleton_le_dual_auxGenSet :
     span 𝕜 {w} ≤ dual p (auxGenSet p s w) := by
@@ -203,8 +203,6 @@ variable [Fact p.flip.IsFaithfulPair] in
 lemma CoFG.dual_flip_fg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).FG := by
   rw [← flip_flip p] at hC; exact dual_fg hC
 
--- ----------------- ^^^^^^^ everything up there is proven vvvvv down there is work
-
 section Module.Finite
 
 /- TODO: it is likely that in this section a lot of the assumptions (in terms of Module.Finite and
@@ -242,54 +240,56 @@ variable [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in
 lemma CoFG.dual_cofg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).CoFG p.flip
   := FG.dual_cofg p.flip (CoFG.fg hC)
 
+-- see `inf_fg` for version not assuming Module.Finite
 variable [Module.Finite 𝕜 M] in
 private lemma inf_fg' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
   exact CoFG.fg <| inf_cofg .id (FG.cofg .id hC) (FG.cofg .id hD)
 
+-- see `FG.restrict_fg` for version not assuming Module.Finite
 variable [Module.Finite 𝕜 M] in
-variable [Fact p.flip.IsFaithfulPair] in
 private lemma FG.restrict_fg' (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) :
     (C.restrict S).FG := by
-  wlog hle : C ≤ S with h
-  · let C' := C ⊓ S
-    have hS : S.FG := IsNoetherian.noetherian S
-    have hfg : C'.FG := inf_fg' hC (restrictedScalars_fg_of_fg _ hS)
-    have h' : C' ≤ S := by sorry
-    -- specialize h hC h'
-    sorry
-  · sorry
+  rw [← restrict_inf_submodule]
+  refine restrict_fg_of_fg_le (by simp) ?_
+  exact inf_fg' hC <| restrictedScalars_fg_of_fg _ (IsNoetherian.noetherian S)
 
 variable [Module.Finite 𝕜 M] in
 variable [Fact p.flip.IsFaithfulPair] in
 private lemma FG.dual_inf_dual_sup_dual' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ⊓ D) = (dual p C) ⊔ (dual p D) := by
-  obtain ⟨C', hCfg', rfl⟩ := FG.exists_cofg_dual_flip p hC
-  obtain ⟨D', hDfg', rfl⟩ := FG.exists_cofg_dual_flip p hD
-  simp only [Set.inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
+  -- obtain ⟨C', hCfg', rfl⟩ := FG.exists_cofg_dual_flip p hC
+  -- obtain ⟨D', hDfg', rfl⟩ := FG.exists_cofg_dual_flip p hD
+  -- simp only [Set.inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
   sorry -- exact CoFG.fg <| inf_cofg .id (FG.cofg .id hC) (FG.cofg .id hD)
 
 end Module.Finite
 
+-- ----------------- ^^^^^^^ everything up there is proven vvvvv down there is work
+
 /- WARNING: `FG.restrict_fg` is used below, but is currently unproven and needs to be proven
   in this section! -/
 
-lemma FG.restrict_fg'' (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) (hSC : C ≤ S) :
-    (C.restrict S).FG := by
-  sorry
+lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) : (C.restrict S).FG := by
+  wlog _ : Module.Finite 𝕜 M with h
+  · let S' := Submodule.span 𝕜 (M := M) C
+    specialize @h 𝕜 S' _ _ _ _ _ (.restrict S' S) (restrict S' C) _ _
+    · exact restrict_fg_of_fg_le (le_submodule_span_self C) hC
+    · exact Finite.iff_fg.mpr (span_fg hC)
+    · have hfg : (restrict S' S).FG := sorry
+      have hfg : (restrict S' C).FG := sorry
 
-lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) :
-    (C.restrict S).FG := by
-  sorry
+      sorry
+  · exact restrict_fg' S hC
 
 /-- The intersection of two FG cones is an FG cone. -/
-lemma inf_fg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
-  wlog _ : Module.Finite 𝕜 N with h
-  · let CD := Submodule.span 𝕜 (M := N) (C ⊔ D)
+lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
+  wlog _ : Module.Finite 𝕜 M with h
+  · let CD := Submodule.span 𝕜 (M := M) (C ⊔ D)
     specialize h (FG.restrict_fg CD hC) (FG.restrict_fg CD hD) (Finite.iff_fg.mpr ?_)
     · simp only [CD, coe_sup_submodule_span]
       exact span_fg <| sup_fg hC hD
     · rw [← restrict_inf] at h
-      refine FG.fg_of_restrict ?_ h
+      refine fg_of_restrict_le ?_ h
       simp only [CD, coe_sup_submodule_span]
       exact le_trans (le_trans (inf_le_sup (a := C) (b := D)) subset_span)
           (span_le_restrictScalars _ 𝕜 _)
