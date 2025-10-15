@@ -23,6 +23,11 @@ variable {N : Type*} [AddCommMonoid N] [Module R N]
 def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
     := ∃ g : N →ₗ[R] M, ∀ x : N, (p ∘ₗ g) x x = 0 → x = 0
 
+variable (p : M →ₗ[R] N →ₗ[R] R)
+
+instance [inst : Fact p.flip.flip.IsFaithfulPair] : Fact p.IsFaithfulPair
+    := by rw [flip_flip] at inst; exact inst
+
 end CommSemiring
 
 section CommRing
@@ -30,7 +35,6 @@ section CommRing
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
-variable (p : M →ₗ[R] N →ₗ[R] R)
 
 lemma isFaithfulPair_of_toDual {ι : Type*} [DecidableEq ι] (b : Basis ι R M) :
     b.toDual.IsFaithfulPair := ⟨.id, fun _ => Dual.toDual_eq_zero⟩
@@ -42,30 +46,37 @@ section Field
 variable {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
-variable (p : M →ₗ[R] N →ₗ[R] R)
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma isFaithfulPair_of_surjective (hp : range p = ⊤) -- (hp : Surjective p)
+lemma isFaithfulPair_of_range_top (hp : range p = ⊤)
     : p.IsFaithfulPair := by classical
   obtain ⟨_, b⟩ := Free.exists_basis R N
   obtain ⟨p', hp'⟩ := LinearMap.exists_rightInverse_of_surjective p hp -- needs [Field R]
   use p' ∘ₗ b.toDual
   simp [← LinearMap.comp_assoc, hp']
 
+lemma isFaithfulPair_of_surjective (hp : Surjective p) : p.IsFaithfulPair
+  := isFaithfulPair_of_range_top <| range_eq_top_of_surjective p hp
+
 lemma isFaithfulPair_of_id : IsFaithfulPair (R := R) (N := M) .id
-  := isFaithfulPair_of_surjective _ range_id
+  := isFaithfulPair_of_range_top range_id
 
 instance : Fact (IsFaithfulPair (R := R) (N := M) .id) := ⟨isFaithfulPair_of_id⟩
 
-variable [Module.Finite R M] in
-lemma isFaithfulPair_of_eval : IsFaithfulPair (Dual.eval R M)
-  := sorry
-
-variable [Module.Finite R M] in
-instance : Fact (Dual.eval R M).IsFaithfulPair := ⟨isFaithfulPair_of_eval⟩
-
 lemma isFaithfulPair_of_isPerfPair [p.IsPerfPair] : p.IsFaithfulPair := sorry
 
-instance [p.IsPerfPair] : Fact p.IsFaithfulPair := ⟨isFaithfulPair_of_isPerfPair p⟩
+instance [p.IsPerfPair] : Fact p.IsFaithfulPair := ⟨isFaithfulPair_of_isPerfPair⟩
+
+section IsReflexive
+
+variable [IsReflexive R M]
+
+lemma isFaithfulPair_of_eval : IsFaithfulPair (Dual.eval R M)
+  := isFaithfulPair_of_surjective (bijective_dual_eval R M).surjective
+
+instance : Fact (Dual.eval R M).IsFaithfulPair := ⟨isFaithfulPair_of_eval⟩
+
+end IsReflexive
 
 end Field
 

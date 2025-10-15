@@ -43,6 +43,8 @@ variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommG
 
 -- TODO: implement sSup, sInf, sSup_map, sSupHomClass and sInfHomClass also for Submodule
 
+lemma coe_inf (S T : Submodule R E) : S ⊓ T = (S ⊓ T : PointedCone R E) := restrictScalars_inf
+
 @[simp]
 lemma sSup_coe (S : Set (Submodule R E)) : sSup S = sSup (ofSubmodule '' S) := by
   ext x
@@ -136,11 +138,21 @@ lemma coe_sup_submodule_span {C D : PointedCone R E} :
     Submodule.span R ((C : Set E) ⊔ (D : Set E)) = Submodule.span R (C ⊔ D : PointedCone R E) := by
   ext x; simp; sorry
 
-lemma span_le_submodule_span_self (s : Set E) : span R s ≤ Submodule.span R s
-  := span_le_restrictScalars _ R s
+lemma span_le_submodule_span_of_le {s t : Set E} (hst : s ⊆ t) : span R s ≤ Submodule.span R t
+  := le_trans (span_le_restrictScalars _ R s) (Submodule.span_mono hst)
 
-lemma le_submodule_span_self (C : PointedCone R E) : C ≤ Submodule.span R (C : Set E) := by
-  nth_rw 1 [← span_eq C]; exact span_le_submodule_span_self _
+lemma span_le_submodule_span_self (s : Set E) : span R s ≤ Submodule.span R s
+  := span_le_submodule_span_of_le (subset_refl s)
+
+lemma le_submodule_span_of_le {C D : PointedCone R E} (hCD : C ≤ D) :
+    C ≤ Submodule.span R (D : Set E) := by
+  nth_rw 1 [← span_eq C]
+  exact span_le_submodule_span_of_le hCD
+
+lemma le_submodule_span_self (C : PointedCone R E) : C ≤ Submodule.span R (C : Set E)
+  := le_submodule_span_of_le (le_refl C)
+
+
 
 lemma span_le (s : Set E) : s ≤ span R s := by sorry
 
@@ -199,6 +211,9 @@ lemma fg_of_restrict_le {S : Submodule R E} {C : PointedCone R E}
 
 @[simp] lemma fg_iff_restrict_le {S : Submodule R E} {C : PointedCone R E} (hSC : C ≤ S) :
     (C.restrict S).FG ↔ C.FG := ⟨fg_of_restrict_le hSC, restrict_fg_of_fg_le hSC⟩
+
+lemma restrict_mono (S : Submodule R E) {C D : PointedCone R E} (hCD : C ≤ D) :
+    C.restrict S ≤ D.restrict S := fun _ => (hCD ·)
 
 lemma restrict_inf (S : Submodule R E) {C D : PointedCone R E} :
     (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S
@@ -301,11 +316,13 @@ variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid
 lemma ofSubmodule_fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
     := restrictedScalars_fg_of_fg _ hS
 
+alias coe_fg := ofSubmodule_fg_of_fg
+
+lemma span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span R (M := E) C).FG :=
+  span_scalars_FG R hC
+
 lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
-
-lemma span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span R (M := E) C).FG
-  := span_scalars_FG hC
 
 end Ring_LinearOrder
 
