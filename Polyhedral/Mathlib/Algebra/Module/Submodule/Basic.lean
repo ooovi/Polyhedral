@@ -79,6 +79,8 @@ abbrev embed (S : Submodule R M) (T : Submodule R S) : Submodule R M := T.map S.
 lemma embed_restrict (S T : Submodule R M) : embed S (restrict S T) = S ⊓ T
   := map_comap_subtype _ _
 
+lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := submoduleOf_self S
+
 section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
