@@ -1,7 +1,5 @@
-
-
 import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 namespace PointedCone
 
@@ -18,10 +16,26 @@ variable (p) in
   This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
 def CoFG (C : PointedCone R N) : Prop := ∃ s : Finset M, dual p s = C
 
+/-- A CoFG cone is the dual of a finite set. -/
+lemma CoFG.exists_finset_dual {C : PointedCone R N} (hC : C.CoFG p) :
+    ∃ s : Finset M, dual p s = C := by
+  obtain ⟨s, hs⟩ := hC; use s
+
+/-- A CoFG cone is the dual of a finite set. -/
+lemma CoFG.exists_finite_dual {C : PointedCone R N} (hC : C.CoFG p) :
+    ∃ s : Set M, s.Finite ∧ dual p s = C := by
+  obtain ⟨s, hs⟩ := hC; exact ⟨s, s.finite_toSet, hs⟩
+
+/-- A CoFG cone is the dual of an FG cone. -/
 lemma CoFG.exists_fg_dual {C : PointedCone R N} (hC : C.CoFG p) :
     ∃ D : PointedCone R M, D.FG ∧ dual p D = C := by
-  obtain ⟨s, hs⟩ := hC; use span R s
-  exact ⟨Submodule.fg_span s.finite_toSet, by simp [hs]⟩
+  obtain ⟨s, hs⟩ := hC; exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
+
+lemma cofg_id {C : PointedCone R N} (hC : C.CoFG p) : C.CoFG .id
+    := by classical
+  obtain ⟨s, hs⟩ := hC
+  use Finset.image p s
+  simp [← dual_id, hs]
 
 variable (p)
 
@@ -36,6 +50,8 @@ lemma cofg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).CoFG p := by
 lemma cofg_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).CoFG p := by
   obtain ⟨s, rfl⟩ := hC
   use s; rw [← dual_span]
+
+variable {p}
 
 alias FG.dual_cofg := cofg_of_fg
 
@@ -56,7 +72,7 @@ lemma CoFG.fg_dual_dual_flip {C : PointedCone R N} (hC : C.CoFG p) :
 @[simp]
 lemma CoFG.fg_dual_flip_dual {C : PointedCone R M} (hC : C.CoFG p.flip) :
     dual p.flip (dual p C) = C := by
-  rw [← LinearMap.flip_flip p]; exact fg_dual_dual_flip p.flip hC
+  rw [← LinearMap.flip_flip p]; exact fg_dual_dual_flip hC
 
 @[simp]
 lemma coe_cofg {S : Submodule R N} :

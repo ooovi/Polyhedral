@@ -141,4 +141,27 @@ lemma dual_map' (f : M →ₗ[R] M') (s : Set (Dual R M')) :
     comap f (dual .id s) = dual .id (f.dualMap '' s) := by
   ext x; simp
 
+lemma dual_sup (S T : Submodule R M) :
+    dual p (S ⊔ T : Submodule R M) = dual p (S ∪ T) := by
+  nth_rw 2 [←dual_span]; sorry
+
+lemma dual_sup_dual_inf_dual (S T : Submodule R M) :
+    dual p (S ⊔ T : Submodule R M) = dual p S ⊓ dual p T := by rw [dual_sup, dual_union]
+
+lemma dual_inf_dual_sup_dual (S T : Submodule R M) :
+    dual p (S ⊓ T : Submodule R M) = dual p S ⊔ dual p T := by
+  ext x
+  simp [mem_sup]
+  constructor
+  · intro h
+    -- x can be written as the sum of y and z, where y is in S* and z is in T*
+    sorry
+  · intro h y hyS hyT
+    obtain ⟨x', hx', y', hy', hxy⟩ := h
+    specialize hx' hyS
+    specialize hy' hyT
+    rw [← hxy, ← zero_add 0]
+    nth_rw 1 [hx', hy']
+    simp
+
 end Submodule

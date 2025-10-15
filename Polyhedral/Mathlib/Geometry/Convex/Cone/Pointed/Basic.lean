@@ -11,7 +11,6 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 namespace PointedCone
 
 open Module
-open Submodule hiding span dual restrict embed
 
 section Semiring
 
@@ -32,7 +31,7 @@ abbrev ofSubmodule (S : Submodule R E) : PointedCone R E := S.restrictScalars _
 instance : Coe (Submodule R E) (PointedCone R E) := ⟨ofSubmodule⟩
 
 lemma ofSubmodule.carrier_eq (S : Submodule R E) : (ofSubmodule S : Set E) = S :=
-  coe_restrictScalars R S
+  Submodule.coe_restrictScalars R S
 
 end Semiring
 
@@ -43,7 +42,8 @@ variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommG
 
 -- TODO: implement sSup, sInf, sSup_map, sSupHomClass and sInfHomClass also for Submodule
 
-lemma coe_inf (S T : Submodule R E) : S ⊓ T = (S ⊓ T : PointedCone R E) := restrictScalars_inf
+lemma coe_inf (S T : Submodule R E) : S ⊓ T = (S ⊓ T : PointedCone R E)
+    := Submodule.restrictScalars_inf
 
 @[simp]
 lemma sSup_coe (S : Set (Submodule R E)) : sSup S = sSup (ofSubmodule '' S) := by
@@ -139,14 +139,14 @@ lemma coe_sup_submodule_span {C D : PointedCone R E} :
   ext x; simp; sorry
 
 lemma span_le_submodule_span_of_le {s t : Set E} (hst : s ⊆ t) : span R s ≤ Submodule.span R t
-  := le_trans (span_le_restrictScalars _ R s) (Submodule.span_mono hst)
+  := le_trans (Submodule.span_le_restrictScalars _ R s) (Submodule.span_mono hst)
 
 lemma span_le_submodule_span_self (s : Set E) : span R s ≤ Submodule.span R s
   := span_le_submodule_span_of_le (subset_refl s)
 
 lemma le_submodule_span_of_le {C D : PointedCone R E} (hCD : C ≤ D) :
     C ≤ Submodule.span R (D : Set E) := by
-  nth_rw 1 [← span_eq C]
+  nth_rw 1 [← Submodule.span_eq C]
   exact span_le_submodule_span_of_le hCD
 
 lemma le_submodule_span_self (C : PointedCone R E) : C ≤ Submodule.span R (C : Set E)
@@ -194,7 +194,7 @@ lemma embed_fg_of_fg (S : Submodule R E) {C : PointedCone R S} (hC : C.FG) :
     (C.embed S).FG := Submodule.FG.map _ hC
 
 lemma fg_of_embed_fg {S : Submodule R E} {C : PointedCone R S} (hC : (C.embed S).FG) : C.FG
-    := fg_of_fg_map_injective _ (injective_subtype (S : PointedCone R E)) hC
+    := Submodule.fg_of_fg_map_injective _ (Submodule.injective_subtype (S : PointedCone R E)) hC
 
 @[simp] lemma embed_fg_iff_fg {S : Submodule R E} {C : PointedCone R S} : (C.embed S).FG ↔ C.FG
   := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
@@ -212,22 +212,26 @@ lemma fg_of_restrict_le {S : Submodule R E} {C : PointedCone R E}
 @[simp] lemma fg_iff_restrict_le {S : Submodule R E} {C : PointedCone R E} (hSC : C ≤ S) :
     (C.restrict S).FG ↔ C.FG := ⟨fg_of_restrict_le hSC, restrict_fg_of_fg_le hSC⟩
 
+lemma restrict_fg_iff_inf_fg (S : Submodule R E) (C : PointedCone R E) :
+    (C.restrict S).FG ↔ (S ⊓ C : PointedCone R E).FG := by
+  rw [← embed_restrict, embed_fg_iff_fg]
+
 lemma restrict_mono (S : Submodule R E) {C D : PointedCone R E} (hCD : C ≤ D) :
     C.restrict S ≤ D.restrict S := fun _ => (hCD ·)
 
 lemma restrict_inf (S : Submodule R E) {C D : PointedCone R E} :
     (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S
-  := by ext x; simp [restrict, submoduleOf]
+  := by ext x; simp [restrict, Submodule.submoduleOf]
 
 @[simp]
 lemma restrict_inf_submodule (S : Submodule R E) (C : PointedCone R E) :
     (C ⊓ S).restrict S = C.restrict S := by
-  simp [restrict_inf, coe_restrict, restrict_self]
+  simp [restrict_inf, coe_restrict, Submodule.restrict_self]
 
 @[simp]
 lemma restrict_submodule_inf (S : Submodule R E) (C : PointedCone R E) :
     (S ⊓ C : PointedCone R E).restrict S = C.restrict S := by
-  simp [restrict_inf, coe_restrict, restrict_self]
+  simp [restrict_inf, coe_restrict, Submodule.restrict_self]
 
 -- lemma foo (S : Submodule R E) {T : Submodule R E} {C : PointedCone R E} (hCT : C ≤ T):
 --   restrict (.restrict T S) (restrict T C) = restrict T (restrict S C) := sorry
@@ -314,82 +318,22 @@ variable {R E : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid
   [Module R E]
 
 lemma ofSubmodule_fg_of_fg {S : Submodule R E} (hS : S.FG) : (S : PointedCone R E).FG
-    := restrictedScalars_fg_of_fg _ hS
+    := Submodule.restrictedScalars_fg_of_fg _ hS
 
 /- We current struggle to implement the converse, see `fg_of_restrictedScalars_fg`. -/
 alias coe_fg := ofSubmodule_fg_of_fg
 
 @[simp]
 lemma coe_fg_iff {S : Submodule R E} : (S : PointedCone R E).FG ↔ S.FG :=
-  ⟨fg_of_restrictedScalars_fg, coe_fg⟩
+  ⟨Submodule.fg_of_restrictedScalars_fg, coe_fg⟩
 
 lemma span_fg {C : PointedCone R E} (hC : C.FG) : (Submodule.span R (M := E) C).FG :=
-  span_scalars_FG R hC
+  Submodule.span_scalars_FG R hC
 
 lemma fg_top [Module.Finite R E] : (⊤ : PointedCone R E).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
 
 end Ring_LinearOrder
-
-
-/- Duality -/
-
-section CommRing
-
-variable {R E F : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E]
-  [Module R E] [AddCommGroup F] [Module R F] {p : E →ₗ[R] F →ₗ[R] R}
-
-lemma dual_bilin_dual_id (s : Set E) : dual p s = dual .id (p '' s) := by ext x; simp
-
-@[simp]
-lemma dual_eq_submodule_dual (S : Submodule R E) : dual p S = Submodule.dual p S := by
-  ext x; constructor
-  · intro h _ ha
-    have h' := h (neg_mem_iff.mpr ha)
-    simp at h'
-    exact le_antisymm (h ha) h'
-  · intro h _ ha
-    rw [h ha]
-
-alias dual_bot := dual_zero
-
--- TODO: are there instances missing that should make the proof automatic?
--- TODO: 0 in `dual_univ` simplifies to ⊥, so maybe it is not the best statement?
-@[simp] lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
-  := dual_univ (LinearMap.IsPerfPair.bijective_right p).1
-
-example /- dual_inf -/ (C C' : PointedCone R E) :
-    dual p (C ⊓ C' : PointedCone R E) = dual p (C ∩ C') := rfl
-example (C C' : PointedCone R E) : dual p (C ⊔ C') = dual p (C ∪ C') := rfl
-
-lemma dual_sup (C C' : PointedCone R E) : dual p (C ⊔ C' : PointedCone R E) = dual p (C ∪ C')
-  := by nth_rw 2 [←dual_span]; simp
-
--- TODO: simp lemma?
-lemma dual_sup_dual_inf_dual (C C' : PointedCone R E) :
-    dual p (C ⊔ C' : PointedCone R E) = dual p C ⊓ dual p C' := by rw [dual_sup, dual_union]
-
--- TODO: Does this even hold in general? Certainly if C and C' are CoFG.
--- @[simp] lemma dual_flip_dual_union
-example {C C' : PointedCone R E} : -- (hC : C.FG) (hC' : C'.FG) :
-    dual p.flip (dual p (C ∪ C')) = C ⊔ C' := by
-  sorry
-
-
-
--- the other direction does not hold in general (consider a cone with lineality space and now
---  delete every points from that lineality space except for the origin).
---  It holds for FG (and CoFG?)
--- Q: do I need p.IsPerfPair?
-lemma span_dual_eq_dual_lineal [p.IsPerfPair] (C : PointedCone R E) :
-    Submodule.span R (dual p C) ≤ .dual p C.lineal := by
-  -- simp [lineal_mem]
-  -- C.lin ≤ C
-  -- hence dual C ≤ dual C.lin
-  -- hence span dual C ≤ span dual C.lin = dual C.lin
-  sorry
-
-end CommRing
 
 section Ring_AddCommGroup
 

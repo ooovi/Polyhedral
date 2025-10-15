@@ -22,10 +22,12 @@ section IsNoetherianRing
 
 variable [IsNoetherianRing R]
 
+/-- The intersection of a submodule with an FG submodule is FG. -/
 lemma inf_fg_right (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (S ⊓ T).FG := by
   have := isNoetherian_of_fg_of_noetherian _ hT
   exact fg_of_restrict_le inf_le_right <| IsNoetherian.noetherian <| restrict T (S ⊓ T)
 
+/-- The intersection of a submodule with an FG submodule is FG. -/
 lemma inf_fg_left {S : Submodule R M} (hS : S.FG) (T : Submodule R M) : (S ⊓ T).FG := by
   rw [inf_comm]; exact inf_fg_right T hS
 
