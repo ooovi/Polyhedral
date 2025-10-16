@@ -126,8 +126,6 @@ variable [AddCommGroup N] [Module 𝕜 N] (p : M →ₗ[𝕜] N →ₗ[𝕜] �
 instance (C : PointedCone 𝕜 M) : Max (Face C) where
   max F₁ F₂ := of_IsFaceOf <| .sup F₁ F₂
 
--- instance {C : PolyhedralCone 𝕜 M} : Coe (Face C) (PolyhedralCone 𝕜 M) := sorry
-
 end Field
 
 end PointedCone

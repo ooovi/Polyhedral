@@ -48,6 +48,9 @@ lemma toPointedCone_injective :
     Injective (toPointedCone : PolyhedralCone 𝕜 M → PointedCone 𝕜 M) :=
   fun ⟨_, _⟩ _ ↦ by congr!
 
+instance {C : PolyhedralCone 𝕜 M} :
+    CoeOut (PointedCone.Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
+
 variable [Module.Finite 𝕜 M]
 
 instance : SetLike (PolyhedralCone 𝕜 M) M where
