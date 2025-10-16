@@ -24,38 +24,122 @@ abbrev IsFaceOf (F C : PointedCone 𝕜 M) := IsExtreme 𝕜 (E := M) C F
 
 variable {C F F₁ F₂ : PointedCone 𝕜 M}
 
+-- TODO does this make sense to have?
 abbrev IsFaceOf.rfl : C.IsFaceOf C := IsExtreme.rfl
+
+abbrev IsFaceOf.trans (h₁ : F₁.IsFaceOf F) (h₂ : F.IsFaceOf F₂) : F₁.IsFaceOf F₂ :=
+  IsExtreme.trans h₂ h₁
+
+abbrev IsFaceOf.inter (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
+  IsExtreme.inter h₁ h₂
+
 
 /-- A face of a pointed cone `C` is a pointed cone that is an extreme subset of `C`. -/
 structure Face (C : PointedCone 𝕜 M) extends PointedCone 𝕜 M where
-  isExtreme : IsExtreme (E := M) 𝕜 C toSubmodule
+  isFaceOf : IsFaceOf toSubmodule C
+
+namespace Face
 
 def of_IsFaceOf (hF : F.IsFaceOf C) : Face C := ⟨F, hF⟩
 
+-- we can't have an actual Coe instance because coercion target throws away the information `C`
 @[coe]
-def Face.toPointedCone {C : PointedCone 𝕜 M} (f : Face C) := f.toSubmodule
+def toPointedCone {C : PointedCone 𝕜 M} (f : Face C) := f.toSubmodule
 
-instance : LE (Face C) := ⟨ fun F F' => F.toPointedCone ≤ F'.toPointedCone ⟩
+instance : CoeOut (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
+coe f := f.toSubmodule
 
-abbrev Face.le (F : Face C) : F.toSubmodule ≤ C := F.isExtreme.subset
+instance : CoeHead (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
+coe f := f.toSubmodule
+
+@[simp, norm_cast]
+theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
+    F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
+  constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
+
+
+/-!
+## Partial Order and Lattice on Faces
+
+-/
+
+-- maybe this is a better definition for lt
+-- private lemma lt_iff_le_not_ge {F₁ F₂ : C.Face} :
+--     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧ F₁ ≠ F₂ ↔
+--     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧ ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone) := by
+--   simp; intro hf
+--   constructor <;> intro h <;> by_contra hc
+--   · have := IsExtreme.antisymm hc hf
+--     norm_cast at this
+--   · rw [hc] at h
+--     exact h IsExtreme.rfl
+
+instance : PartialOrder (Face C) where
+le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
+lt F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
+  ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone)
+le_refl F := IsExtreme.rfl
+le_trans F₁ F₂ F h₁ h₂ := IsExtreme.trans h₂ h₁
+lt_iff_le_not_ge F C := by simp
+le_antisymm F₁ F₂ h₁ h₂ := by convert IsExtreme.antisymm h₂ h₁; norm_cast
+
+@[simp]
+theorem toPointedCone_le {F₁ F₂ : Face C} (h : F₁ ≤ F₂) :
+    F₁.toPointedCone ≤ F₂.toPointedCone := by
+  intro x xF₁; simp [LE.le] at h; exact h.subset xF₁
+
+abbrev le_all {F : Face C} : F.toSubmodule ≤ C := F.isFaceOf.subset
 
 /-- The supremum of two faces `F₁, F₂` of `C` is the smallest face of `C` that has both `F₁` and
 `F₂` as faces. -/
-def Face.sup (F₁ : Face C) (F₂ : Face C) :=
-  sInf { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ F₁.toPointedCone ≤ F ∧ F₂.toPointedCone ≤ F}
-
-lemma IsFaceOf.sup (F₁ : Face C) (F₂ : Face C) :
-    (Face.sup F₁ F₂).IsFaceOf C := by
-  unfold Face.sup
+def sup (F₁ : Face C) (F₂ : Face C) : Face C := by
+  refine ⟨sInf { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F}, ?_⟩
   constructor
   · intros _ sm
     simp at sm ⊢
-    exact sm C rfl F₁.le F₂.le
+    exact sm C IsFaceOf.rfl F₁.le_all F₂.le_all
   · simp; intros _ xc _ yc _ zfs zo F FFs FF₁ FF₂
     exact FFs.left_mem_of_mem_openSegment xc yc (zfs F FFs FF₁ FF₂) zo
 
+lemma sup.symm (F₁ F₂ : Face C) : sup F₁ F₂ = sup F₂ F₁ := by simp [sup, and_comm]
+
+-- this is terrible
+private lemma left_mem_of_mem_openSegment {F₁ F₂ : Face C} :
+    ∀ ⦃x : M⦄, x ∈ SetLike.coe F₂.toPointedCone →
+    ∀ ⦃y : M⦄, y ∈ SetLike.coe F₂.toPointedCone →
+    ∀ ⦃z : M⦄, z ∈ SetLike.coe F₁.toPointedCone → z ∈ openSegment 𝕜 x y →
+    x ∈ SetLike.coe F₁.toPointedCone := by
+  intros _ asup _ bsup _ zF zo
+  exact F₁.isFaceOf.left_mem_of_mem_openSegment (le_all asup) (le_all bsup) zF zo
+
+instance : SemilatticeSup (Face C) where
+sup := sup
+le_sup_left F₁ F₂ := by
+  constructor
+  · simp only [SetLike.coe_subset_coe]; exact le_sInf (fun F' F's => F's.2.1)
+  · exact left_mem_of_mem_openSegment
+le_sup_right F₁ F₂ := by
+  constructor
+  · simp only [SetLike.coe_subset_coe]; exact le_sInf (fun F' F's => F's.2.2)
+  · exact left_mem_of_mem_openSegment
+sup_le F₁ F₂ F₃ f₁₂ f₂₃:= by
+  constructor
+  · intros x xs
+    have : F₃.toPointedCone ∈ { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F} :=
+      ⟨F₃.isFaceOf, toPointedCone_le f₁₂, toPointedCone_le f₂₃⟩
+    exact sInf_le this xs
+  · exact left_mem_of_mem_openSegment
+
+end Face
+
 end Semiring
 
+
+
+/-!
+## Particular Faces
+
+-/
 section Field
 
 variable [Field 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜] [AddCommGroup M] [Module 𝕜 M]
@@ -68,19 +152,21 @@ lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
   · simp
     intros x xC y yC z zlin zop
     rw [lineal_mem] at zlin ⊢
+    refine ⟨xC, ?_⟩
 
     simp [openSegment] at zop
-    obtain ⟨a, a0, b, b0, ab1, zab⟩ := zop
+    obtain ⟨a, a0, _, b0, _, zab⟩ := zop
+
+    rw [← one_smul 𝕜 (-x), ← Field.mul_inv_cancel a (ne_of_lt a0).symm, mul_comm, mul_smul]
+    apply C.smul_mem (r := a⁻¹) (inv_nonneg_of_nonneg (G₀ := 𝕜) <| le_of_lt a0)
 
     have := congrArg Neg.neg zab
     rw [neg_add, ← smul_neg a] at this
     apply eq_sub_of_add_eq at this
     rw [sub_neg_eq_add] at this
-    have : a • -x ∈ C := by rw [this]; exact C.add_mem zlin.2 (C.smul_mem (le_of_lt b0) yC)
-    apply C.smul_mem (r := a⁻¹) (inv_nonneg_of_nonneg (G₀ := 𝕜) <| le_of_lt a0) at this
-    rw [smul_comm, ← mul_smul, Field.mul_inv_cancel a (ne_of_lt a0).symm, one_smul 𝕜 (-x)] at this
+    rw [this]
 
-    exact ⟨xC, this⟩
+    exact C.add_mem zlin.2 (C.smul_mem (le_of_lt b0) yC)
 
 section Pair
 
@@ -115,16 +201,10 @@ lemma IsFaceOf.susub (h1 : F₁.IsFaceOf C) (h2 : F₂.IsFaceOf C) :
 
 end Pair
 
+namespace Face
 
 instance (C : PointedCone 𝕜 M) : Bot (Face C) := ⟨of_IsFaceOf <| .lineal⟩
 instance (C : PointedCone 𝕜 M) : Top (Face C) := ⟨of_IsFaceOf <| .rfl⟩
-
-instance (C : PointedCone 𝕜 M) : Min (Face C) where
-  min F₁ F₂ := of_IsFaceOf <| .sup F₁ F₂
-
-variable [AddCommGroup N] [Module 𝕜 N] (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair] in
-instance (C : PointedCone 𝕜 M) : Max (Face C) where
-  max F₁ F₂ := of_IsFaceOf <| .sup F₁ F₂
 
 end Field
 
