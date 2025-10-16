@@ -37,25 +37,25 @@ lemma cofg_id {C : PointedCone R N} (hC : C.CoFG p) : C.CoFG .id
   use Finset.image p s
   simp [← dual_id, hs]
 
-variable (p)
-
+variable (p) in
 /-- The dual of a `Finset` is co-FG. -/
 lemma cofg_of_finset (s : Finset M) : (dual p s).CoFG p := by use s
 
+variable (p) in
 /-- The dual of a finite set is co-FG. -/
 lemma cofg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).CoFG p := by
   use hs.toFinset; simp
 
+variable (p) in
 /-- The dual of an FG-cone is co-FG. -/
 lemma cofg_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).CoFG p := by
   obtain ⟨s, rfl⟩ := hC
   use s; rw [← dual_span]
 
-variable {p}
-
 alias FG.dual_cofg := cofg_of_fg
 
-lemma inf_cofg {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
+/-- The intersection of two CoFG cones i CoFG. -/
+lemma cofg_inf {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
     (C ⊓ D).CoFG p := by classical
   obtain ⟨S, rfl⟩ := hC
   obtain ⟨T, rfl⟩ := hD
@@ -73,6 +73,17 @@ lemma CoFG.dual_dual_flip {C : PointedCone R N} (hC : C.CoFG p) :
 lemma CoFG.dual_flip_dual {C : PointedCone R M} (hC : C.CoFG p.flip) :
     dual p.flip (dual p C) = C := by
   rw [← LinearMap.flip_flip p]; exact dual_dual_flip hC
+
+@[deprecated]
+lemma CoFG.dual_inf_dual_sup_dual {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
+    dual p.flip (C ⊓ D : PointedCone R N) = (dual p.flip C) ⊔ (dual p.flip D) := by
+  have ⟨C', hCfg, hC'⟩ := CoFG.exists_fg_dual hC
+  have ⟨D', hDfg, hD'⟩ := CoFG.exists_fg_dual hD
+  rw [← hC', ← hD', ← dual_sup_dual_inf_dual]
+  rw [dual_flip_dual (by sorry)] -- not true
+  rw [dual_flip_dual (by sorry)] -- not true
+  rw [dual_flip_dual (by sorry)] -- not true
+  -- Maybe we can prove this only with Field (need dual_dual for FG; need p.IsFaithfulPair?)
 
 @[simp]
 lemma coe_cofg {S : Submodule R N} :

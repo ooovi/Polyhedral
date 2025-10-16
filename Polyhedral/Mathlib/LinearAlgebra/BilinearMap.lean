@@ -25,8 +25,8 @@ def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
 
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
-instance [inst : Fact p.flip.flip.IsFaithfulPair] : Fact p.IsFaithfulPair
-    := by rw [flip_flip] at inst; exact inst
+instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair
+    := by rw [flip_flip]; exact inst
 
 end CommSemiring
 
@@ -62,6 +62,7 @@ lemma isFaithfulPair_of_id : IsFaithfulPair (R := R) (N := M) .id
   := isFaithfulPair_of_range_top range_id
 
 instance : Fact (IsFaithfulPair (R := R) (N := M) .id) := ⟨isFaithfulPair_of_id⟩
+instance : Fact (Dual.eval R M).flip.IsFaithfulPair := ⟨isFaithfulPair_of_id⟩
 
 lemma isFaithfulPair_of_isPerfPair [p.IsPerfPair] : p.IsFaithfulPair :=
     isFaithfulPair_of_surjective (IsPerfPair.bijective_left p).surjective
@@ -76,6 +77,7 @@ lemma isFaithfulPair_of_eval : IsFaithfulPair (Dual.eval R M)
   := isFaithfulPair_of_surjective (bijective_dual_eval R M).surjective
 
 instance : Fact (Dual.eval R M).IsFaithfulPair := ⟨isFaithfulPair_of_eval⟩
+
 
 end IsReflexive
 

@@ -50,17 +50,42 @@ lemma restrictScalars_sup {s t : Submodule R M} :
     (s ⊔ t).restrictScalars S = (s.restrictScalars S) ⊔ (t.restrictScalars S):= by
   ext x; simp [mem_sup]
 
+@[simp]
+lemma restrictScalars_sSup {s : Set (Submodule R M)} :
+    (sSup s).restrictScalars S = sSup (restrictScalars S '' s):= by
+  ext x
+  simp [mem_sSup]
+  constructor
+  · intro h T ha
+    specialize h (span R T)
+    sorry
+  · sorry
+
 end RestrictedScalar
 
 example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
   := Submodule.span_union S S' -- should `Submodule.span_union` be a simp lemma? Yael says possibly
-example (S S' : Submodule R M) : span R (S ⊔ S' : Submodule R M) = S ⊔ S'
-  := by simp
 
 @[simp] lemma span_union' (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
   := by rw [Submodule.span_union]; simp
 @[simp] lemma span_inter (S S' : Submodule R M) : span R (S ∩ S') = S ⊓ S'
     := by rw [←coe_inf, span_eq]
+
+lemma span_sSup (S : Set (Submodule R M)) :
+    span R (⋃ C ∈ S, C : Set M) = sSup S := by
+  rw [Set.biUnion_eq_iUnion]
+  rw [Submodule.span_iUnion]
+  simp
+  rw [sSup_eq_iSup]
+  --
+  --rw [Submodule.span_iUnion]
+  --
+  -- rw [← span_eq (p := sSup S)]
+  -- apply congr _
+  -- ext x
+  -- simp
+  -- simp
+  sorry
 
 -- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
 -- alias restrict := submoduleOf

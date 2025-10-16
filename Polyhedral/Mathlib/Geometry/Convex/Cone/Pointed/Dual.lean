@@ -29,21 +29,70 @@ lemma dual_eq_submodule_dual (S : Submodule R M) : dual p S = Submodule.dual p S
   · intro h _ ha
     rw [h ha]
 
+@[simp]
+lemma dual_coe_coe_eq_dual_coe (S : Submodule R M) : dual p (S : PointedCone R M) = dual p S := by
+  rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
+
 alias coe_dual := dual_eq_submodule_dual
 
--- TODO: Replace `dual_span`
+-- TODO: Replace `dual_span` in Cone/Dual.lean
 @[simp] lemma dual_span' (s : Set M) : dual p (span R s) = dual p s := dual_span ..
 
 @[simp low + 1] lemma mem_dual'_singleton {x : M} {y : N} : y ∈ dual p {x} ↔ 0 ≤ p x y := by simp
 
+alias dual_mono := dual_le_dual
 
-lemma dual_subset {s t : Set M} (hst : s ⊆ t) : dual p t ≤ dual p s := by
-  intro x hx
-  rw [mem_dual] at *
-  intro y hy
-  exact hx (hst hy)
+-- lemma span_sSup_sInf_span (S : Set (PointedCone R M)) :
+--     span R (sSup S : PointedCone R M) = sInf {span R (E:=M) C | C ∈ S} := by
+--   sorry
 
-lemma dual_lineal (C : PointedCone R M) : dual p C.lineal = span R (dual p C) := sorry
+-- lemma dual_sSup' (S : Set (Set M)) :
+--     dual p (sSup S) = dual p (⋃ C ∈ S, C) := by
+--   rw [← dual_span, span, Submodule.span_sSup, dual_span]
+
+variable (p) in
+/-- The operation that maps a cone to its double dual. -/
+def dualClosure : ClosureOperator (PointedCone R M) where
+  toFun C := dual p.flip (dual p C)
+  monotone' _ _ hCD := dual_le_dual (dual_le_dual hCD)
+  le_closure' _ := SetLike.coe_subset_coe.mp subset_dual_dual
+  idempotent' _ := by rw [dual_flip_dual_dual_flip]
+  isClosed_iff := by simp
+
+variable (p) in
+/-- The operation that maps a cone to its double dual. -/
+def dualClosure_flip : ClosureOperator (PointedCone R N) where
+  toFun C := dual p (dual p.flip C)
+  monotone' _ _ hCD := dual_le_dual (dual_le_dual hCD)
+  le_closure' _ := SetLike.coe_subset_coe.mp subset_dual_dual
+  idempotent' _ := by rw [dual_flip_dual_dual_flip]
+  isClosed_iff := by simp
+
+variable (p) in
+@[simp] lemma dualClosure_flip_eq : dualClosure p.flip = dualClosure_flip p := by sorry
+
+variable (p) in
+@[simp] lemma dualClosure_eq_flip : dualClosure_flip p.flip = dualClosure p := by sorry
+
+lemma dual_sSup (S : Set (PointedCone R M)) :
+    dual p (⋃ C ∈ S, C) = dual p (sSup S : PointedCone R M) := by
+  rw [← dual_span, span, Submodule.span_sSup]
+
+lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
+    dual p (sSup S : PointedCone R M) = sInf (dual p '' (SetLike.coe '' S)) := by
+  --rw [Submodule.coe_sInf]
+  sorry
+
+lemma dual_lineal_span_dual (C : PointedCone R M) : dual p C.lineal = span R (dual p C) := by
+  unfold lineal
+  unfold span Submodule.span
+  rw [← dual_coe_coe_eq_dual_coe]
+  unfold ofSubmodule
+  rw [Submodule.restrictScalars_sSup]
+  simp
+  rw [dual_sSup_sInf_dual]
+  -- rw [Submodule.coe_sInf]
+  sorry
 
 section Map
 
@@ -56,6 +105,10 @@ variable {M' N' : Type*}
 -- TODO: generalize to arbitrary pairings
 lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
     comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
+  ext x; simp
+
+lemma dual_map' (f : M →ₗ[R] M') (C : PointedCone R M) :
+    comap f.dualMap (dual (Dual.eval R M) C) = dual (Dual.eval R M') (map f C) := by
   ext x; simp
 
 -- TODO: generalize to arbitrary pairings
@@ -82,21 +135,21 @@ lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
 
 lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by ext x; simp
 
-example /- dual_inf -/ (C C' : PointedCone R M) :
-    dual p (C ⊓ C' : PointedCone R M) = dual p (C ∩ C') := rfl
-example (C C' : PointedCone R M) : dual p (C ⊔ C') = dual p (C ∪ C') := rfl
+example /- dual_inf -/ (C D : PointedCone R M) :
+    dual p (C ⊓ D : PointedCone R M) = dual p (C ∩ D) := rfl
+example (C D : PointedCone R M) : dual p (C ⊔ D) = dual p (C ∪ D) := rfl
 
-lemma dual_sup (C C' : PointedCone R M) : dual p (C ⊔ C' : PointedCone R M) = dual p (C ∪ C')
+lemma dual_sup (C D : PointedCone R M) : dual p (C ⊔ D : PointedCone R M) = dual p (C ∪ D)
   := by nth_rw 2 [←dual_span]; simp
 
 -- TODO: simp lemma?
-lemma dual_sup_dual_inf_dual (C C' : PointedCone R M) :
-    dual p (C ⊔ C' : PointedCone R M) = dual p C ⊓ dual p C' := by rw [dual_sup, dual_union]
+lemma dual_sup_dual_inf_dual (C D : PointedCone R M) :
+    dual p (C ⊔ D : PointedCone R M) = dual p C ⊓ dual p D := by rw [dual_sup, dual_union]
 
--- TODO: Does this even hold in general? Certainly if C and C' are CoFG.
+-- TODO: Does this even hold in general? Certainly if C and D are CoFG.
 -- @[simp] lemma dual_flip_dual_union
-example {C C' : PointedCone R M} : -- (hC : C.FG) (hC' : C'.FG) :
-    dual p.flip (dual p (C ∪ C')) = C ⊔ C' := by
+example {C D : PointedCone R M} : -- (hC : C.FG) (hC' : D.FG) :
+    dual p.flip (dual p (C ∪ D)) = C ⊔ D := by
   sorry
 
 

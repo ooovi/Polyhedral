@@ -162,10 +162,10 @@ lemma cofg_of_cofg_inf_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S
   sorry
 
 -- ### HIGH PRIORITY! This is needed in the cone theory!
-lemma fg_dual_dual_flip {S : Submodule R M} (hS : S.FG) : dual p.flip (dual p S) = S := by sorry
+lemma fg_dual_flip_dual {S : Submodule R M} (hS : S.FG) : dual p.flip (dual p S) = S := by sorry
 
 -- ### HIGH PRIORITY! This is needed in the cone theory!
-lemma fg_dual_flip_dual {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
+lemma fg_dual_dual_flip {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
 
 end CommRing
 
