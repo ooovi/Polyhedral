@@ -134,6 +134,9 @@ lemma sup_fg_cofg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.CoFG p) : (C �
     simp [span_insert, sup_assoc, ← ht]
     exact dual_auxGenSet t.finite_toSet
 
+lemma sup_cofg_fg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.FG) : (C ⊔ D).CoFG p
+    := by rw [sup_comm]; exact sup_fg_cofg hD hC
+
 variable (p) [Fact p.IsFaithfulPair] in
 /-- An FG cone can be written as the intersection of a CoFG cone and an FG submodule. -/
 lemma FG.exists_cofg_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
@@ -316,9 +319,17 @@ lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG)
     (C.restrict S).FG := by
   rw [restrict_fg_iff_inf_fg]; exact inf_submodule_fg S hC
 
-private lemma inf_submodule_fg_cofg {S : Submodule 𝕜 N} {C : PointedCone 𝕜 N}
-    (hS : S.FG) (hC : C.CoFG p) : (C ⊓ S).FG := by
-  sorry
+/-- The intersection of an FG cone and a CoFG cone is FG. -/
+private lemma inf_fg_cofg {C D : PointedCone 𝕜 N}
+    (hC : C.FG) (hD : D.CoFG p) : (C ⊓ D).FG := by
+  obtain ⟨C', hCcofg, rfl⟩ := FG.exists_cofg_flip_dual .id hC
+  obtain ⟨D', hDfg, rfl⟩ := CoFG.exists_fg_dual (cofg_id hD)
+  rw [← dual_sup_dual_inf_dual]
+  exact CoFG.dual_fg (sup_cofg_fg hCcofg hDfg)
+
+/-- The intersection of a CoFG cone and an FG cone is FG. -/
+lemma inf_cofg_fg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.FG) : (C ⊓ D).FG
+    := by rw [inf_comm]; exact inf_fg_cofg hD hC
 
 -- private lemma inf_submodule_cofg (S : Submodule 𝕜 N) {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
 --     (C.restrict S).CoFG p := by
