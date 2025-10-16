@@ -331,6 +331,9 @@ private lemma inf_fg_cofg {C D : PointedCone 𝕜 N}
 lemma inf_cofg_fg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.FG) : (C ⊓ D).FG
     := by rw [inf_comm]; exact inf_fg_cofg hD hC
 
+-- lemma foo (C : PointedCone 𝕜 M) (S : Submodule 𝕜 N) :
+--   ∃ T : Submodule 𝕜 M, (dual p C).restrict S = dual (Dual.eval 𝕜 T) (C.restrict T) := by sorry
+
 -- private lemma inf_submodule_cofg (S : Submodule 𝕜 N) {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
 --     (C.restrict S).CoFG p := by
 --   sorry
@@ -394,7 +397,7 @@ lemma dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) 
   -- obtain ⟨C', hCcofg, rfl⟩ := FG.exists_cofg_dual_flip p hC
   -- obtain ⟨D', hDcofg, rfl⟩ := FG.exists_cofg_dual_flip p hD
   -- simp only [Set.inf_eq_inter]
-  -- rw [← coe_inf]
+  -- rw [← coe_inf] -- or Submodule.coe_inf
   -- rw [← dual_sup_dual_inf_dual]
   -- -- rw [CoFG.fg_dual_dual_flip p.flip hfg]
   -- -- needs C.CoFG ∧ D.CoFG → (C ⊔ D).CoFG
