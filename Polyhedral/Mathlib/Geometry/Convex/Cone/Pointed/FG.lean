@@ -282,11 +282,16 @@ lemma CoFG.dual_cofg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).
 
 omit [Module.Finite 𝕜 N] in
 variable [Module.Finite 𝕜 M] in
+variable (p) [Fact p.IsFaithfulPair] in
+variable [Fact p.flip.IsFaithfulPair] in
 private lemma FG.dual_inf_dual_sup_dual' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ⊓ D) = (dual p C) ⊔ (dual p D) := by
-  -- obtain ⟨C', hCfg', rfl⟩ := FG.exists_cofg_dual_flip p hC
-  -- obtain ⟨D', hDfg', rfl⟩ := FG.exists_cofg_dual_flip p hD
-  -- simp only [Set.inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
+  obtain ⟨C', hCfg', rfl⟩ := FG.exists_cofg_dual_flip p hC
+  obtain ⟨D', hDfg', rfl⟩ := FG.exists_cofg_dual_flip p hD
+  -- simp only [Set.inf_eq_inter]
+  simp [← Submodule.coe_inf]
+  rw [← dual_union, ← dual_sup]
+  -- rw [FG.dual_dual_flip]
   sorry -- exact CoFG.fg <| inf_cofg .id (FG.cofg .id hC) (FG.cofg .id hD)
 
 end Module.Finite

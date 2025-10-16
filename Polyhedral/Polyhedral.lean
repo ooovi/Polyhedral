@@ -33,6 +33,7 @@ variable (𝕜 M) in
 /-- A polyhedral cone is a pointed cone with finitely many faces. -/
 structure PolyhedralCone extends PointedCone 𝕜 M where
   isPolyhedral : PointedCone.IsPolyhedral toSubmodule
+  -- TODO: we also need dual-closed (so dual dual C = C)
 
 namespace PolyhedralCone
 

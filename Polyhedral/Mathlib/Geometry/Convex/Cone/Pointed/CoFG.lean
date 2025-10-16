@@ -63,16 +63,16 @@ lemma inf_cofg {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
 
 /-- The double dual of a CoFG cone is the cone itself. -/
 @[simp]
-lemma CoFG.fg_dual_dual_flip {C : PointedCone R N} (hC : C.CoFG p) :
+lemma CoFG.dual_dual_flip {C : PointedCone R N} (hC : C.CoFG p) :
     dual p (dual p.flip C) = C := by
   obtain ⟨D, hcofg, rfl⟩ := exists_fg_dual hC
   exact dual_dual_flip_dual (p := p) D
 
 /-- The double dual of a CoFG cone is the cone itself. -/
 @[simp]
-lemma CoFG.fg_dual_flip_dual {C : PointedCone R M} (hC : C.CoFG p.flip) :
+lemma CoFG.dual_flip_dual {C : PointedCone R M} (hC : C.CoFG p.flip) :
     dual p.flip (dual p C) = C := by
-  rw [← LinearMap.flip_flip p]; exact fg_dual_dual_flip hC
+  rw [← LinearMap.flip_flip p]; exact dual_dual_flip hC
 
 @[simp]
 lemma coe_cofg {S : Submodule R N} :
