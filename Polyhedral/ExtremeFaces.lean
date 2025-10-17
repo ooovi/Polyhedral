@@ -49,8 +49,9 @@ def toPointedCone {C : PointedCone 𝕜 M} (f : Face C) := f.toSubmodule
 instance : CoeOut (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
 coe f := f.toSubmodule
 
-instance : CoeHead (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
-coe f := f.toSubmodule
+-- this is already taken care of by the `CoeOut` above
+-- instance : CoeHead (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
+-- coe f := f.toSubmodule
 
 @[simp, norm_cast]
 theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
