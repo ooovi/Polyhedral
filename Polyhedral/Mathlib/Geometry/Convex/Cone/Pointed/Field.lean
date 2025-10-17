@@ -258,6 +258,7 @@ lemma CoFG.fg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : C.FG := by
 -- /-- A finite dimensional cone is FG if and only if it is CoFG. -/
 -- lemma fg_iff_cofg {C : PointedCone 𝕜 N} : C.CoFG p ↔ C.FG := ⟨CoFG.fg, FG.cofg p⟩
 
+variable (p) in
 /-- In finite dimensional space, the dual of and FG cone is itself FG. -/
 lemma FG.dual_fg {C : PointedCone 𝕜 M} (hC : C.FG) : (dual p C).FG := by
   rw [dual_id_map]
@@ -266,6 +267,15 @@ lemma FG.dual_fg {C : PointedCone 𝕜 M} (hC : C.FG) : (dual p C).FG := by
 /-- In finite dimensional space, the dual of and CoFG cone is itself CoFG. -/
 lemma CoFG.dual_cofg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).CoFG p.flip
   := FG.dual_cofg p.flip (CoFG.fg hC)
+
+-- TODO: implement pairing lemmas that allow inference of `Module.Finite 𝕜 M`.
+--  We should preferably assume `Module.Finite 𝕜 N`
+omit [Module.Finite 𝕜 N] in
+variable (p) [Module.Finite 𝕜 M] [Fact p.IsFaithfulPair] in
+lemma FG.exists_fg_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 M, D.FG ∧ dual p D = C := by
+  use dual p.flip C
+  exact ⟨FG.dual_fg p.flip hC, FG.dual_dual_flip p hC⟩
 
 -- -- see `inf_fg` for version not assuming Module.Finite
 -- variable [Module.Finite 𝕜 M] in
@@ -281,20 +291,23 @@ lemma CoFG.dual_cofg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).
 --   exact inf_fg' hC <| restrictedScalars_fg_of_fg _ (IsNoetherian.noetherian S)
 
 -- NOTE: assumption `p.flip.IsFaithfulPair` cannot be dropped!
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable (p) [Fact p.flip.IsFaithfulPair] [Fact p.IsFaithfulPair] [Module.Finite 𝕜 M] in
 private lemma FG.dual_inf_dual_sup_dual' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
+    dual p (C ⊓ D : PointedCone 𝕜 M) = (dual p C) ⊔ (dual p D) := by
+  nth_rw 1 [← FG.dual_flip_dual p hC]
+  nth_rw 1 [← FG.dual_flip_dual p hD]
+  rw [← dual_sup_dual_inf_dual]
+  rw [FG.dual_dual_flip]
+  exact sup_fg (FG.dual_fg p hC) (FG.dual_fg p hD)
+
+-- NOTE: assumption `p.flip.IsFaithfulPair` cannot be dropped!
+variable (p) [Fact p.flip.IsFaithfulPair] in
+private lemma FG.dual_inf_dual_sup_dual'' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ⊓ D : PointedCone 𝕜 M) = (dual p C) ⊔ (dual p D) := by
   obtain ⟨C', hC', rfl⟩ := FG.exists_cofg_dual_flip p hC
   obtain ⟨D', hD', rfl⟩ := FG.exists_cofg_dual_flip p hD
   rw [← dual_sup_dual_inf_dual, CoFG.dual_dual_flip <| sup_fg_cofg (CoFG.fg hC') hD',
     CoFG.dual_dual_flip hC', CoFG.dual_dual_flip hD']
-
-private lemma FG.dual_inf_dual_sup_dual'' {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
-    dual p (C ⊓ D : PointedCone 𝕜 M) = (dual p C) ⊔ (dual p D) := by
-  rw [dual_id_map]; nth_rw 2 [dual_id_map]; nth_rw 3 [dual_id_map]
-  rw [map, Submodule.map_inf]
-  · exact dual_inf_dual_sup_dual' _ (FG.map _ hC) (FG.map _ hD)
-  · sorry -- not true without further assumptions
 
 end Module.Finite
 

@@ -42,6 +42,9 @@ variable {R M N : Type*}
   [AddCommMonoid N] [Module R N]
   {p : M →ₗ[R] N →ₗ[R] R} {s t : Set M} {y : N}
 
+-- TODO: I think `dual` should be renamed to `dualSpan` or so, and `dual` should become a map
+--  from subspaces to subspaces. This allows us to implement it as a `PreDualityOperator`.
+
 variable (p s) in
 /-- The dual cone of a set `s` with respect to a bilinear pairing `p` is the cone consisting of all
 points `y` such that for all points `x ∈ s` we have `0 ≤ p x y`. -/
@@ -62,6 +65,8 @@ lemma dual_univ (hp : Injective p.flip) : dual p univ = 0 := by
   simp [hy (mem_univ x)]
 
 @[gcongr] lemma dual_le_dual (h : t ⊆ s) : dual p s ≤ dual p t := fun _y hy _x hx ↦ hy (h hx)
+
+alias dual_antimono := dual_le_dual
 
 /-- The inner dual cone of a singleton is given by the preimage of the positive cone under the
 linear map `p x`. -/
@@ -110,11 +115,13 @@ lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dual
 
 ------------------
 
-variable (p) in
-def dual' (S : Submodule R M) : Submodule R N := dual p S
+-- variable (p) in
+-- abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
 
-def dual_connection : GaloisConnection (dual' p) (dual' p.flip) :=
-  sorry
+-- lemma dual_mono' {S T : Submodule R M} (hST : S ≤ T) : dual p T ≤ dual p S := by
+--   exact dual_mono hST
+
+------------------
 
 variable {M' N' : Type*}
   [AddCommMonoid M'] [Module R M']

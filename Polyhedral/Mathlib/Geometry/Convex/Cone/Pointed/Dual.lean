@@ -40,7 +40,7 @@ alias coe_dual := dual_eq_submodule_dual
 
 @[simp low + 1] lemma mem_dual'_singleton {x : M} {y : N} : y ∈ dual p {x} ↔ 0 ≤ p x y := by simp
 
-alias dual_mono := dual_le_dual
+alias dual_antimono := dual_le_dual
 
 -- lemma span_sSup_sInf_span (S : Set (PointedCone R M)) :
 --     span R (sSup S : PointedCone R M) = sInf {span R (E:=M) C | C ∈ S} := by
