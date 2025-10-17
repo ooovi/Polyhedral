@@ -107,6 +107,15 @@ lemma dual_span (s : Set M) : dual p (Submodule.span R s) = dual p s := by
 lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dualAnnihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
+
+------------------
+
+variable (p) in
+def dual' (S : Submodule R M) : Submodule R N := dual p S
+
+def dual_connection : GaloisConnection (dual' p) (dual' p.flip) :=
+  sorry
+
 variable {M' N' : Type*}
   [AddCommMonoid M'] [Module R M']
   [AddCommMonoid N'] [Module R N']

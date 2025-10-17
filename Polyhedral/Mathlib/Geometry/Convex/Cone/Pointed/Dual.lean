@@ -50,30 +50,6 @@ alias dual_mono := dual_le_dual
 --     dual p (sSup S) = dual p (⋃ C ∈ S, C) := by
 --   rw [← dual_span, span, Submodule.span_sSup, dual_span]
 
-variable (p) in
-/-- The operation that maps a cone to its double dual. -/
-def dualClosure : ClosureOperator (PointedCone R M) where
-  toFun C := dual p.flip (dual p C)
-  monotone' _ _ hCD := dual_le_dual (dual_le_dual hCD)
-  le_closure' _ := SetLike.coe_subset_coe.mp subset_dual_dual
-  idempotent' _ := by rw [dual_flip_dual_dual_flip]
-  isClosed_iff := by simp
-
-variable (p) in
-/-- The operation that maps a cone to its double dual. -/
-def dualClosure_flip : ClosureOperator (PointedCone R N) where
-  toFun C := dual p (dual p.flip C)
-  monotone' _ _ hCD := dual_le_dual (dual_le_dual hCD)
-  le_closure' _ := SetLike.coe_subset_coe.mp subset_dual_dual
-  idempotent' _ := by rw [dual_flip_dual_dual_flip]
-  isClosed_iff := by simp
-
-variable (p) in
-@[simp] lemma dualClosure_flip_eq : dualClosure p.flip = dualClosure_flip p := by sorry
-
-variable (p) in
-@[simp] lemma dualClosure_eq_flip : dualClosure_flip p.flip = dualClosure p := by sorry
-
 lemma dual_sSup (S : Set (PointedCone R M)) :
     dual p (⋃ C ∈ S, C) = dual p (sSup S : PointedCone R M) := by
   rw [← dual_span, span, Submodule.span_sSup]
