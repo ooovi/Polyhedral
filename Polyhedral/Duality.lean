@@ -9,6 +9,8 @@ open Set
 
 /-! ### Preduality operator -/
 
+/- I am uncertain about the connection of all of this to `GaloisConnections`. -/
+
 variable (α β : Type*) -- {ι : Sort*} {κ : ι → Sort*}
 variable [Preorder α] [Preorder β]
 
@@ -16,7 +18,6 @@ variable [Preorder α] [Preorder β]
 is less than its closure) and idempotent. -/
 structure PreDualityOperator extends α →o β where
   rev' : β →o α
-  /-- A duality operator is weakly order reversing. -/
   antimono'    : ∀ s t, s ≤ t → toFun s ≤ toFun t
   antimonoRev' : ∀ s t, s ≤ t → rev' s ≤ rev' t
   subset'      : ∀ s, s ≤ rev' (toFun s)
@@ -72,6 +73,8 @@ def closureOp (dual : PreDualityOperator α β) : ClosureOperator α where
   monotone' _ _ hCD := dual.rev.antimono (dual.antimono hCD)
   le_closure' := dual.subset_eq
   idempotent' s := dual.triple_rev (dual s)
+
+abbrev IsClosed (dual : PreDualityOperator α β) (s : α) := dual.closureOp.IsClosed s
 
 section PartialOrder
 
@@ -171,6 +174,10 @@ end PartialOrder
 
 end PreDualityOperator
 
+
+
+
+/--
 
 
 
