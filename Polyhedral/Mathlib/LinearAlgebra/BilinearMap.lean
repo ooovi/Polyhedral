@@ -78,8 +78,17 @@ lemma isFaithfulPair_of_eval : IsFaithfulPair (Dual.eval R M)
 
 instance : Fact (Dual.eval R M).IsFaithfulPair := ⟨isFaithfulPair_of_eval⟩
 
-
 end IsReflexive
+
+section Module.Finite
+
+-- instance [Module.Finite R M] [Fact p.IsFaithfulPair] : Module.Finite R N := by
+--   sorry
+
+-- instance [Module.Finite R M] [Fact p.IsFaithfulPair] : p.flip.IsFaithfulPair := by
+--   sorry
+
+end Module.Finite
 
 end Field
 

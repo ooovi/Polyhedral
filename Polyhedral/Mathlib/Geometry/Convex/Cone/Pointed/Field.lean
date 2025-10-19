@@ -340,7 +340,7 @@ lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG)
   rw [restrict_fg_iff_inf_fg]; exact inf_submodule_fg S hC
 
 /-- The intersection of an FG cone and a CoFG cone is FG. -/
-private lemma inf_fg_cofg {C D : PointedCone 𝕜 N}
+lemma inf_fg_cofg {C D : PointedCone 𝕜 N}
     (hC : C.FG) (hD : D.CoFG p) : (C ⊓ D).FG := by
   obtain ⟨C', hCcofg, rfl⟩ := FG.exists_cofg_flip_dual .id hC
   obtain ⟨D', hDfg, rfl⟩ := CoFG.exists_fg_dual (cofg_id hD)

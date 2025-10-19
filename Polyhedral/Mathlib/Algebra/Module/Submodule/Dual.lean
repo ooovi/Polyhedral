@@ -64,6 +64,7 @@ lemma dual_univ (hp : Injective p.flip) : dual p univ = 0 := by
   ext x
   simp [hy (mem_univ x)]
 
+-- SHOULD HAVE: variable (p) in
 @[gcongr] lemma dual_le_dual (h : t ⊆ s) : dual p s ≤ dual p t := fun _y hy _x hx ↦ hy (h hx)
 
 alias dual_antimono := dual_le_dual
@@ -115,11 +116,30 @@ lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dual
 
 ------------------
 
--- variable (p) in
--- abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
+variable (p) in
+abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
 
--- lemma dual_mono' {S T : Submodule R M} (hST : S ≤ T) : dual p T ≤ dual p S := by
---   exact dual_mono hST
+-- variable (p) in
+-- lemma dual_antimono' {S T : Submodule R M} (hST : S ≤ T) : dual p T ≤ dual p S := by
+--   exact dual_antimono hST
+
+open OrderDual
+
+lemma Gal : GaloisConnection (toDual ∘ dual' p) (dual' p.flip ∘ ofDual) := by
+  intro S T
+  simp
+  nth_rw 1 [← toDual_ofDual T]
+  rw [toDual_le_toDual]
+  constructor
+  · intro h
+    unfold dual' at *
+    have h := dual_antimono (p := p.flip) h
+    have h := dual_antimono (p := p) h
+    rw [dual_dual_flip_dual] at h
+    have h := dual_antimono (p := p.flip) h
+    rw [dual_flip_dual_dual_flip] at h
+    exact le_trans subset_dual_dual h
+  · sorry
 
 ------------------
 
