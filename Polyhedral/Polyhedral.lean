@@ -26,8 +26,10 @@ variable {𝕜 M N : Type*}
 variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
   [Module 𝕜 M]
 
-/-- A cone is polyhedral if it has finitely many faces. -/
-abbrev PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) := Finite (Face C)
+/-- A cone is polyhedral if it is dual closed and has finitely many faces. -/
+abbrev PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) where
+  finite : Finite (Face C)
+  closed : C.IsDualClosed
 
 variable (𝕜 M) in
 /-- A polyhedral cone is a pointed cone with finitely many faces. -/

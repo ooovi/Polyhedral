@@ -21,8 +21,8 @@ variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
 variable (p)
 
--- def FG (N : Submodule R M) : Prop :=
---   ∃ S : Finset M, Submodule.span R ↑S = N
+/-- A co-finitely generated (CoFG) submodule is the dual of a finite set. This is in analogy to
+  finitely generated (FG) submodules, which are the span of a finite set. -/
 def CoFG (C : Submodule R N) : Prop := ∃ s : Finset M, dual p s = C
 
 /-- The dual of a `Finset` is co-FG. -/
@@ -39,7 +39,7 @@ lemma cofg_of_fg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG p := by
 
 variable {p}
 
-lemma cofg_inter (S T : Submodule R N) (hS : S.CoFG p) (hT : T.CoFG p) : (S ⊓ T).CoFG p
+lemma cofg_inf (S T : Submodule R N) (hS : S.CoFG p) (hT : T.CoFG p) : (S ⊓ T).CoFG p
     := by classical
   obtain ⟨s, rfl⟩ := hS
   obtain ⟨t, rfl⟩ := hT
@@ -68,6 +68,12 @@ lemma cofg_inter (S T : Submodule R N) (hS : S.CoFG p) (hT : T.CoFG p) : (S ⊓ 
 
 /-- The top submodule is CoFG. -/
 lemma cofg_top : (⊤ : Submodule R N).CoFG p := ⟨⊥, by simp⟩
+
+/-- The top submodule is CoFG. -/
+lemma cofg_bot [Module.Finite R N] : (⊥ : Submodule R N).CoFG p := by
+  -- obtain ⟨s, hs⟩ := fg_top ⊤
+  -- use
+  sorry
 
 /-- The double dual of a CoFG submodule is itself. -/
 lemma cofg_dual_dual_flip {S : Submodule R M} (hS : S.CoFG p.flip) :

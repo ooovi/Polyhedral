@@ -10,6 +10,19 @@ namespace Submodule
 
 section Semiring
 
+variable {M S R : Type*} [Semiring R] [Semiring S] [AddCommMonoid M] [Module R M]
+
+lemma span_gc : GaloisConnection (span R : Set M → Submodule R M) (SetLike.coe) := by
+  --exact gc_Ici_sInf.dual
+  intro s S
+  constructor
+  · intro h
+    sorry
+  · intro h
+    sorry
+
+def span_gi : GaloisCoinsertion (span R : Set M → Submodule R M) (SetLike.coe) := sorry
+
 variable {M S R : Type*} [Semiring R] [Semiring S]
   [AddCommMonoid M] [Module S R] [Module R M] [Module S M] [IsScalarTower S R M]
 
@@ -170,9 +183,9 @@ open LinearMap
 
 variable {M S R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 
-/-- The projection with range and kernel swapped. -/
-def IsProj.flip {S : Submodule R M} {p : M →ₗ[R] M} (hp : IsProj S p) : M →ₗ[R] M
-  := .id - p -- IsCompl.projection hp.isCompl.symm
+-- /-- The projection with range and kernel swapped. -/
+-- def IsProj.flip {S : Submodule R M} {p : M →ₗ[R] M} (hp : IsProj S p) : M →ₗ[R] M
+--   := .id - p -- IsCompl.projection hp.isCompl.symm
 
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
     IsProj S (IsCompl.projection hST) where
@@ -201,32 +214,6 @@ lemma exists_extend {T S : Submodule R M} (hST : S ≤ T) :
 --   sorry
 
 end DivisionRing
-
-section CommSemiring
-
-open LinearMap
-
-variable {M S R : Type*} [CommSemiring R] [AddCommGroup M] [Module R M]
-
-lemma IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
-    IsCompl T.dualAnnihilator S.dualAnnihilator := by
-  sorry
-
-variable {M S R : Type*} [Field R] [AddCommGroup M] [Module R M]
-
-lemma IsProj.dualMap_dual_Annihilator {S : Submodule R M} (p : M →ₗ[R] M) (hp : IsProj S p) :
-    IsProj (ker p).dualAnnihilator p.dualMap where
-  map_mem x := sorry
-  map_id x hx := sorry
-
-lemma IsCompl.projection_dual {S T : Submodule R M} (hST : IsCompl S T) :
-    (projection hST).dualMap = projection (dual hST) := by
-  sorry
-
--- lemma IsProj.dual {S : Submodule R M} {p : M →ₗ[R] M} (hp : LinearMap.IsProj S p) :
---     LinearMap.IsProj (p.ker.dualAnnihilator) p.dualMap := by sorry
-
-end CommSemiring
 
 section Ring
 

@@ -7,23 +7,17 @@ import Mathlib.Order.Closure
 
 open Set OrderDual
 
-/-! ### Preduality operator -/
+/-! ### pre-duality operator -/
 
-/- I am uncertain about the connection of all of this to `GaloisConnections`. -/
-
-variable (α β : Type*) -- {ι : Sort*} {κ : ι → Sort*}
+variable (α β : Type*)
 variable [Preorder α] [Preorder β]
 
-/-- A closure operator on the preorder `α` is a monotone function which is extensive (every `x`
-is less than its closure) and idempotent. -/
+/-- A pre-duality operator between the types `α` and `β`. -/
 structure PreDualityOperator extends α →o β where
+  /-- Reverse map -/
   rev' : β →o α
-  antitone'    : ∀ s t, s ≤ t → toFun s ≤ toFun t
-  antitoneRev' : ∀ s t, s ≤ t → rev' s ≤ rev' t
-  subset'      : ∀ s, s ≤ rev' (toFun s)
-  subsetRev'   : ∀ s, s ≤ toFun (rev' s)
-  triple'      : ∀ s, toFun (rev' (toFun s)) = toFun s
-  tripleRev'   : ∀ s, rev' (toFun (rev' s)) = rev' s
+  /-- Reverse Galois connection -/
+  rgc : ∀ a : α, ∀ b : β, b ≤ toFun a ↔ a ≤ rev' b
 
 namespace PreDualityOperator
 
@@ -43,59 +37,62 @@ def rev (dual : PreDualityOperator α β) : PreDualityOperator β α where
   toFun := dual.rev'
   monotone' := dual.rev'.monotone'
   rev' := dual
-  antitone' := dual.antitoneRev'
-  antitoneRev' := dual.antitone'
-  subset' := dual.subsetRev'
-  subsetRev' := dual.subset'
-  triple' := dual.tripleRev'
-  tripleRev' := dual.triple'
-
-lemma to_GaloisConnection (dual : PreDualityOperator α β)
-    : GaloisConnection (toDual ∘ dual) (dual.rev ∘ ofDual) := by
-  intro S T
-  simp
-  sorry
-  -- nth_rw 1 [← toDual_ofDual T]
-  -- rw [toDual_le_toDual]
-  -- constructor
-  -- · intro h
-  --   unfold dual' at *
-  --   have h := dual_antitone (p := p.flip) h
-  --   have h := dual_antitone (p := p) h
-  --   rw [dual_dual_flip_dual] at h
-  --   have h := dual_antitone (p := p.flip) h
-  --   rw [dual_flip_dual_dual_flip] at h
-  --   exact le_trans subset_dual_dual h
-  -- · sorry
-
-def from_GaloisConnection (l : α → β) (u : β → α) (con : GaloisConnection u l) :
-    PreDualityOperator α β := sorry
-
-lemma antitone (dual : PreDualityOperator α β) {s t : α} (hst : s ≤ t) :
-    dual s ≤ dual t := dual.antitone' s t hst
-
-lemma subset_eq (dual : PreDualityOperator α β) (s : α) : s ≤ dual.rev (dual s) := dual.subset' s
-
-lemma subset_eq_rev (dual : PreDualityOperator α β) (s : β) : s ≤ dual (dual.rev s)
-    := dual.rev.subset' s
-
-@[simp] lemma triple (dual : PreDualityOperator α β) (s : α) :
-    dual (dual.rev (dual s)) = dual s := dual.triple' s
-
-@[simp] lemma triple_rev (dual : PreDualityOperator α β) (s : β) :
-    dual.rev (dual (dual.rev s)) = dual.rev s := dual.rev.triple' s
+  rgc := fun a b => (dual.rgc b a).symm
 
 @[simp] lemma rev_rev (dual : PreDualityOperator α β) : dual.rev.rev = dual := rfl
 
+/-- The underlying Galois connection. Used to derive most duality lemmas. -/
+lemma gc (dual : PreDualityOperator α β)
+    : GaloisConnection (toDual ∘ dual) (dual.rev ∘ ofDual) := by
+  intro a b
+  rw [Function.comp_apply, OrderDual.toDual_le]
+  exact dual.rgc a (ofDual b)
+
+def from_GaloisConnection {l : α → β} {u : β → α} (con : GaloisConnection u l) :
+    PreDualityOperator α β where
+  toFun := l ∘ toDual
+  monotone' := con.monotone_u
+  rev' := ⟨ofDual ∘ u, con.monotone_l⟩
+  rgc := sorry
+
+lemma antitone (dual : PreDualityOperator α β) : Antitone dual := by
+  exact monotone_toDual_comp_iff.mp dual.gc.monotone_l
+
+lemma le_dual_dual (dual : PreDualityOperator α β) (s : α) : s ≤ dual.rev (dual s) :=
+    dual.gc.le_u_l s
+
+example (dual : PreDualityOperator α β) (s : β) : s ≤ dual (dual.rev s) :=
+    dual.rev.le_dual_dual s
+
+section PartialOrder
+
+variable {α β : Type*}
+
+variable [Preorder α] [PartialOrder β] in
+@[simp] lemma dual_dual_dual_eq_dual (dual : PreDualityOperator α β) (s : α) :
+    dual (dual.rev (dual s)) = dual s := dual.gc.l_u_l_eq_l s
+
+-- Needed as a simp lemma
+variable [PartialOrder α] [Preorder β] in
+@[simp] lemma dual_dual_dual_eq_dual_rev (dual : PreDualityOperator α β) (s : β) :
+    dual.rev (dual (dual.rev s)) = dual.rev s := dual.rev.dual_dual_dual_eq_dual s
+
+end PartialOrder
+
 abbrev closure (dual : PreDualityOperator α β) (s : α) := dual.rev (dual s)
 
-def closureOp (dual : PreDualityOperator α β) : ClosureOperator α where
-  toFun := dual.closure
-  monotone' _ _ hCD := dual.rev.antitone (dual.antitone hCD)
-  le_closure' := dual.subset_eq
-  idempotent' s := dual.triple_rev (dual s)
+section PartialOrder
+
+variable {α β : Type*}
+
+variable [PartialOrder α] [Preorder β]
+
+def closureOp (dual : PreDualityOperator α β) : ClosureOperator α
+  := dual.gc.closureOperator
 
 abbrev IsClosed (dual : PreDualityOperator α β) (s : α) := dual.closureOp.IsClosed s
+
+end PartialOrder
 
 section PartialOrder
 
