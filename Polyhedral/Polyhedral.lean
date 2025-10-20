@@ -7,9 +7,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FG
-
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.ExtremeFaces
 
 /-!
@@ -19,23 +17,25 @@ import Polyhedral.ExtremeFaces
 -/
 
 open Function Module
-open Submodule hiding span
+open Submodule hiding span IsDualClosed
+open PointedCone
 
 variable {𝕜 M N : Type*}
 
-variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
-  [Module 𝕜 M]
+variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+variable [AddCommGroup M] [AddCommGroup M] [Module 𝕜 M]
+-- variable [AddCommGroup N] [AddCommGroup N] [Module 𝕜 N]
 
-/-- A cone is polyhedral if it is dual closed and has finitely many faces. -/
-abbrev PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) where
-  finite : Finite (Face C)
-  closed : C.IsDualClosed
+-- /-- A cone is polyhedral if it is dual closed and has finitely many faces. -/
+-- structure PointedCone.IsPolyhedral (C : PointedCone 𝕜 M) where
+--   finite := Finite (Face C)
+--   closed := C.IsDualClosed
 
 variable (𝕜 M) in
-/-- A polyhedral cone is a pointed cone with finitely many faces. -/
+/-- A polyhedral cone is a dual closed cone with finitely many faces. -/
 structure PolyhedralCone extends PointedCone 𝕜 M where
-  isPolyhedral : PointedCone.IsPolyhedral toSubmodule
-  -- TODO: we also need dual-closed (so dual dual C = C)
+  finite : Finite (Face toSubmodule)
+  closed : IsDualClosed (Dual.eval 𝕜 M) toSubmodule
 
 namespace PolyhedralCone
 
@@ -44,14 +44,9 @@ namespace PolyhedralCone
 instance : Coe (PolyhedralCone 𝕜 M) (PointedCone 𝕜 M) where
   coe := toPointedCone
 
-def of_FG {C : PointedCone 𝕜 M} (hC : C.IsPolyhedral) : PolyhedralCone 𝕜 M := ⟨C, hC⟩
-
 lemma toPointedCone_injective :
     Injective (toPointedCone : PolyhedralCone 𝕜 M → PointedCone 𝕜 M) :=
-  fun ⟨_, _⟩ _ ↦ by congr!
-
-instance {C : PolyhedralCone 𝕜 M} :
-    CoeOut (PointedCone.Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
+  sorry -- fun ⟨_, _⟩ _ ↦ by congr!
 
 variable [Module.Finite 𝕜 M]
 
@@ -61,10 +56,19 @@ instance : SetLike (PolyhedralCone 𝕜 M) M where
 
 @[simp] lemma coe_toPointedCone (C : PolyhedralCone 𝕜 M) : (C.toPointedCone : Set M) = C := rfl
 
+--------------------------
+
+def of_FG {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M := ⟨C, sorry, sorry⟩
+
+-- def of_CoFG {C : PointedCone 𝕜 M} (hC : C.CoFG p) : PolyhedralCone 𝕜 M := ⟨C, sorry, sorry⟩
+
 def span (s : Finset M) : PolyhedralCone 𝕜 M := of_FG (Submodule.fg_span <| s.finite_toSet)
 
 def span_of_finite {S : Set M} (hfin : S.Finite) : PolyhedralCone 𝕜 M
   := of_FG (Submodule.fg_span hfin)
+
+instance {C : PolyhedralCone 𝕜 M} :
+    CoeOut (PointedCone.Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
 
 def ray (x : M) : PolyhedralCone 𝕜 M := span {x}
 

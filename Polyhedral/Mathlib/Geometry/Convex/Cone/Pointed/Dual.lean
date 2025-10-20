@@ -141,4 +141,9 @@ lemma span_dual_eq_dual_lineal [p.IsPerfPair] (C : PointedCone R M) :
   -- hence span dual C ≤ span dual C.lin = dual C.lin
   sorry
 
+---------------
+
+variable (p) in
+abbrev IsDualClosed (C : PointedCone R M) := dual p.flip (dual p C) = C
+
 end PointedCone
