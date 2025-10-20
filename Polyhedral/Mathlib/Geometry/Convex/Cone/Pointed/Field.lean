@@ -193,6 +193,9 @@ variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma FG.dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) : dual p.flip (dual p C) = C := by
   rw [← flip_flip p]; exact dual_dual_flip p.flip hC
 
+variable (p) [Fact p.flip.IsFaithfulPair] in
+lemma FG.isDualClosed {C : PointedCone 𝕜 M} (hC : C.FG) : C.IsDualClosed p := FG.dual_flip_dual p hC
+
 variable (p) [Fact p.IsFaithfulPair] in
 /-- The double dual of a finite set is its span. -/
 @[simp]

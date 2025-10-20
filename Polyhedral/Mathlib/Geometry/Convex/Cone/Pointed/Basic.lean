@@ -59,7 +59,7 @@ lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M :
 -- ### Neg
 
 -- TODO: should be built on `Submodule.pointwiseNeg` (I realized too late that this exists)
-instance : Neg (PointedCone R M) := ⟨map (f := -.id)⟩
+instance : Neg (PointedCone R M) := ⟨map (f := -.id)⟩ -- Submodule.pointwiseNeg
 
 @[simp]
 lemma neg_neg (P : PointedCone R M) : - -P = P := by dsimp [Neg.neg]; ext x; simp
@@ -67,7 +67,7 @@ lemma neg_neg (P : PointedCone R M) : - -P = P := by dsimp [Neg.neg]; ext x; sim
 instance : InvolutiveNeg (PointedCone R M) where
   neg_neg := neg_neg
 
-lemma neg_coe {P : PointedCone R M} : (-P : PointedCone R M) = -(P : Set M) := by simp [Neg.neg]
+lemma neg_coe {P : PointedCone R M} : (-P : PointedCone R M) = -(P : Set M) := by simp?
 
 @[simp]
 lemma mem_neg {x : M} {P : PointedCone R M} : x ∈ -P ↔ -x ∈ P := by
@@ -105,9 +105,14 @@ lemma span_union_neg_eq_span_submodule {s : Set M} :
     span R (s ∪ -s) = Submodule.span R s := by
   sorry
 
-lemma span_sup_neg_eq_span_submodule (C : PointedCone R M) :
+lemma sup_neg_eq_submodule_span (C : PointedCone R M) :
     C ⊔ -C = Submodule.span R (C : Set M) := by
-  sorry
+  nth_rw 1 2 [← Submodule.span_eq C]
+  rw [← Submodule.span_union]
+  rw [le_antisymm_iff]
+  constructor
+  · sorry
+  · sorry
 
 lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
     span R s = Submodule.span R s := by
@@ -116,6 +121,8 @@ lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
 lemma neg_self_iff_eq_span_submodule (C : PointedCone R M) :
     C = -C ↔ C = Submodule.span R (C : Set M) := by
   sorry
+
+-- lemma foo {C : PointedCone R M} {x : M} (hx : x ∈ span 𝕜 C)
 
 section Map
 
@@ -127,9 +134,9 @@ lemma map_span (f : M →ₗ[R] E') (s : Set M) : map f (span R s) = span R (f '
 
 end Map
 
-
-
 end Semiring_AddCommGroup
+
+
 
 
 section Ring
@@ -406,18 +413,22 @@ section DivisionRing
 variable {R : Type*} [DivisionRing R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
+/-- A pointed cone can be written as a sup of its lineality space and a complementary
+  salient cone. -/
 lemma exists_salient_disj_sup_lineal (C : PointedCone R M) :
     ∃ D : PointedCone R M, D.Salient
-      ∧ Disjoint C.lineal (Submodule.span R D)
+      ∧ Disjoint C.lineal (.span R D)
       ∧ D ⊔ C.lineal = C := by
   have ⟨S, hDis, hCod⟩ := exists_isCompl C.lineal
   refine ⟨C ⊓ S, inf_salient hDis, Disjoint.mono_right ?_ hDis, inf_sup_lineal hCod⟩
   rw [← Submodule.span_eq (p := S)]
   exact Submodule.span_mono (by simp)
 
+/-- A pointed cone can be written as a sup of a submodule and a complementary
+  salient cone. -/
 lemma exists_salient_submodul_disj_sup (C : PointedCone R M) :
     ∃ D : PointedCone R M, D.Salient ∧
-      ∃ S : Submodule R M, Disjoint S (Submodule.span R D) ∧ D ⊔ S = C := by
+      ∃ S : Submodule R M, Disjoint S (.span R D) ∧ D ⊔ S = C := by
   obtain ⟨D, hSal, hDis, hSup⟩ := exists_salient_disj_sup_lineal C
   exact ⟨D, hSal, C.lineal, hDis, hSup⟩
 

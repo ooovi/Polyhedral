@@ -75,7 +75,7 @@ instance : SetLike (PolyhedralCone 𝕜 M) M where
 --------------------------
 
 def of_FG {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M
-  := ⟨C, Face.finite_of_fg hC, FG.dual_flip_dual (Dual.eval 𝕜 M) hC⟩
+    := ⟨C, Face.finite_of_fg hC, FG.isDualClosed (Dual.eval 𝕜 M) hC⟩
 
 -- def of_CoFG {C : PointedCone 𝕜 M} (hC : C.CoFG p) : PolyhedralCone 𝕜 M := ⟨C, sorry, sorry⟩
 
