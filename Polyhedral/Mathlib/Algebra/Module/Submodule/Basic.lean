@@ -127,7 +127,7 @@ section DivisionRing
 
 open LinearMap
 
-variable {M S R : Type*} [Ring R] [AddCommGroup M] [Module R M]
+variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 
 -- /-- The projection with range and kernel swapped. -/
 -- def IsProj.flip {S : Submodule R M} {p : M →ₗ[R] M} (hp : IsProj S p) : M →ₗ[R] M
@@ -138,7 +138,7 @@ lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
   map_mem := projection_apply_mem hST
   map_id x hx := projection_apply_left hST ⟨x, hx⟩
 
-variable {M S R : Type*} [DivisionRing R] [AddCommGroup M] [Module R M]
+variable {M R : Type*} [DivisionRing R] [AddCommGroup M] [Module R M]
 
 lemma exists_isProj (S : Submodule R M) : ∃ p : M →ₗ[R] M, IsProj S p := by
   have ⟨_, hS'⟩ := exists_isCompl S
