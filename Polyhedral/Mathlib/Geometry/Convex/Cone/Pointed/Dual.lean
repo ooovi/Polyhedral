@@ -9,8 +9,10 @@ namespace PointedCone
 
 open Module LinearMap
 
-variable {R M N : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [AddCommGroup N] [Module R M] [Module R N] {p : M →ₗ[R] N →ₗ[R] R}
+variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 alias dual_bot := dual_zero
 
@@ -50,24 +52,47 @@ alias dual_antimono := dual_le_dual
 --     dual p (sSup S) = dual p (⋃ C ∈ S, C) := by
 --   rw [← dual_span, span, Submodule.span_sSup, dual_span]
 
+@[simp] lemma submodule_span_dual (s : Set M) :
+    Submodule.span R (dual p s) = Submodule.dual p s := sorry
+
+@[simp] lemma dual_submodule_span (s : Set M) :
+    dual p (Submodule.span R s) = Submodule.dual p s := sorry
+
+@[simp] lemma submodule_dual_flip_dual (s : Set M) :
+    Submodule.dual p.flip (dual p s) = Submodule.span R s := by sorry
+
+@[simp] lemma dual_flip_submodule_dual (s : Set M) :
+    dual p.flip (Submodule.dual p s) = Submodule.span R s := by sorry
+
+
+
 lemma dual_sSup (S : Set (PointedCone R M)) :
     dual p (⋃ C ∈ S, C) = dual p (sSup S : PointedCone R M) := by
   rw [← dual_span, span, Submodule.span_sSup]
 
+lemma span_sSup_coe (S : Set (PointedCone R M)) :
+    span R (sSup S : PointedCone R M) = span R (sSup (SetLike.coe '' S)) := by
+  simp
+  sorry
+
+example (S : Set (Set M)) : dual p (sSup S : Set M) = sInf (dual p '' S) := dual_sUnion S
+
 lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
-    dual p (sSup S : PointedCone R M) = sInf (dual p '' (SetLike.coe '' S)) := by
+    -- dual p (sSup S : PointedCone R M) = sInf (dual p '' (SetLike.coe '' S)) := by
+    dual p (sSup S : PointedCone R M) = sInf ((dual p ∘ SetLike.coe) '' S) := by
+  simp
+  rw [← dual_span]
+  simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
   --rw [Submodule.coe_sInf]
   sorry
 
-lemma dual_lineal_span_dual (C : PointedCone R M) : dual p C.lineal = span R (dual p C) := by
-  unfold lineal
-  unfold span Submodule.span
-  rw [← dual_coe_coe_eq_dual_coe]
-  unfold ofSubmodule
-  rw [Submodule.restrictScalars_sSup]
-  simp
-  rw [dual_sSup_sInf_dual]
-  -- rw [Submodule.coe_sInf]
+example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
+    := by simp only [ofSubmodule_coe]
+
+lemma span_dual_le_dual_lineal (C : PointedCone R M):
+    Submodule.span R (dual p C) ≤ Submodule.dual p C.lineal := by
+  -- This should be provable without `Field` and `IsDualClosed`.
+  -- see proof of `dual_lineal_span_dual` below.
   sorry
 
 section Map
@@ -145,5 +170,82 @@ lemma span_dual_eq_dual_lineal [p.IsPerfPair] (C : PointedCone R M) :
 
 variable (p) in
 abbrev IsDualClosed (C : PointedCone R M) := dual p.flip (dual p C) = C
+
+variable (p) in
+@[simp] lemma IsDualClosed.def {S : PointedCone R M} (hS : IsDualClosed p S) :
+     dual p.flip (dual p S) = S := hS
+
+variable (p) in
+@[simp] lemma IsDualClosed.def_flip {S : PointedCone R N} (hS : IsDualClosed p.flip S) :
+     dual p (dual p.flip S) = S := hS
+
+lemma IsDualClosed.def_iff {S : PointedCone R M} :
+    IsDualClosed p S ↔ dual p.flip (dual p S) = S := by rfl
+
+lemma IsDualClosed.def_flip_iff {S : PointedCone R N} :
+    IsDualClosed p.flip S ↔ dual p (dual p.flip S) = S := by rfl
+
+variable (p) in
+lemma dual_IsDualClosed (S : PointedCone R M) : (dual p S).IsDualClosed p.flip := by
+  simp [IsDualClosed, flip_flip, dual_dual_flip_dual]
+
+variable (p) in
+lemma dual_flip_IsDualClosed (S : PointedCone R N) : (dual p.flip S).IsDualClosed p
+    := dual_IsDualClosed p.flip S
+
+lemma IsDualClosed.dual_inj {S T : PointedCone R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p)
+    (hST : dual p S = dual p T) : S = T := by
+  rw [← hS, ← hT, hST]
+
+@[simp] lemma IsDualClosed.dual_inj_iff {S T : PointedCone R M} (hS : S.IsDualClosed p)
+    (hT : T.IsDualClosed p) : dual p S = dual p T ↔ S = T := ⟨dual_inj hS hT, by intro h; congr ⟩
+
+lemma IsDualClosed.exists_of_dual_flip {S : PointedCone R M} (hS : S.IsDualClosed p) :
+    ∃ T : PointedCone R N, T.IsDualClosed p.flip ∧ dual p.flip T = S
+  := ⟨dual p S, by simp [IsDualClosed, hS.def]⟩
+
+lemma IsDualClosed.exists_of_dual {S : PointedCone R N} (hS : S.IsDualClosed p.flip) :
+    ∃ T : PointedCone R M, T.IsDualClosed p ∧ dual p T = S := exists_of_dual_flip hS
+
+---------------
+
+section Field
+
+variable {R : Type*} [Field R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+/-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
+lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
+    Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
+  simp only [lineal, Submodule.span, Submodule.dual_sSup_sInf_dual, Function.comp_apply]
+  congr; ext T
+  rw [Set.mem_image, Set.mem_setOf_eq]
+  constructor
+  · intro h -- this direction needs neither Field nor dual closed
+    obtain ⟨S, hSC, hS⟩ := h
+    rw [← hS]
+    nth_rw 3 [← ofSubmodule_coe]
+    rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
+    exact dual_le_dual hSC
+  · intro h -- this direction needs Field and dual closed; maybe not Field
+    use Submodule.dual p.flip T
+    constructor
+    · rw [Set.mem_setOf_eq, ← hC, ← dual_eq_submodule_dual]
+      exact dual_antimono h
+    · exact T.isDualClosed p.flip
+
+/-- For a dual closed cone, the dual of the submodule span is the lineality space of the dual. -/
+lemma IsDualClosed.dual_span_lineal_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
+    .dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
+  have h := hC.dual_lineal_span_dual.symm
+  obtain ⟨D, hD, rfl⟩ := hC.exists_of_dual_flip
+  --rw [IsDualClosed, flip_flip] at hD
+  rw [hD.def_flip] at *
+  simp at *
+  sorry
+
+end Field
 
 end PointedCone

@@ -30,15 +30,16 @@ abbrev ofSubmodule (S : Submodule R M) : PointedCone R M := S.restrictScalars _
 
 instance : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
 
-lemma ofSubmodule.carrier_eq (S : Submodule R M) : (ofSubmodule S : Set M) = S :=
-  Submodule.coe_restrictScalars R S
+@[simp]
+lemma ofSubmodule_coe (S : Submodule R M) : (ofSubmodule S : Set M) = S := by rfl
+  -- also provable from `Submodule.coe_restrictScalars R S`
 
 end Semiring
 
 section Semiring_AddCommGroup
 
-variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M]
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 
 -- TODO: implement sSup, sInf, sSup_map, sSupHomClass and sInfHomClass also for Submodule
 
@@ -58,77 +59,96 @@ lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M :
 
 -- ### Neg
 
--- TODO: should be built on `Submodule.pointwiseNeg` (I realized too late that this exists)
-instance : Neg (PointedCone R M) := ⟨map (f := -.id)⟩ -- Submodule.pointwiseNeg
+instance : InvolutiveNeg (PointedCone R M) := Submodule.involutivePointwiseNeg -- ⟨map (f := -.id)⟩
 
-@[simp]
-lemma neg_neg (P : PointedCone R M) : - -P = P := by dsimp [Neg.neg]; ext x; simp
-
-instance : InvolutiveNeg (PointedCone R M) where
-  neg_neg := neg_neg
-
-lemma neg_coe {P : PointedCone R M} : (-P : PointedCone R M) = -(P : Set M) := by simp?
-
-@[simp]
-lemma mem_neg {x : M} {P : PointedCone R M} : x ∈ -P ↔ -x ∈ P := by
-  rw [← SetLike.mem_coe, neg_coe]
-  exact Set.mem_neg
-
--- @[simp]
+/- The following lemmas are now automatic. -/
+-- lemma neg_neg (P : PointedCone R M) : - -P = P := by simp
+-- lemma neg_coe {P : PointedCone R M} : (-P : PointedCone R M) = -(P : Set M) := by simp
+-- lemma mem_neg {x : M} {P : PointedCone R M} : x ∈ -P ↔ -x ∈ P := by simp
 -- lemma neg_mem_neg {x : M} {P : PointedCone R M} : -x ∈ -P ↔ x ∈ P := by simp
+-- lemma neg_inj {P Q : PointedCone R M} : -P = -Q ↔ P = Q := by simp
+-- lemma span_neg_eq_neg {s : Set M} : span R (-s) = -(span R s) := Submodule.span_neg_eq_neg s
+-- lemma neg_inf {P Q : PointedCone R M} : -(P ⊓ Q) = -P ⊓ -Q := by simp
+-- lemma neg_sup {P Q : PointedCone R M} : -(P ⊔ Q) = -P ⊔ -Q := by simp
+-- lemma neg_top : -⊤ = (⊤ : PointedCone R M) := by simp
+-- lemma neg_bot : -⊥ = (⊥ : PointedCone R M) := by simp
 
--- @[simp]
--- lemma neg_inj {P Q : PointedCone R M} : -P = -Q ↔ P = Q := _root_.neg_inj -- has simp
+section Ring
 
-@[simp]
-lemma span_neg {s : Set M} : -(span R s) = span R (-s) := by
-  rw [← Set.image_neg_eq_neg];
-  exact Submodule.map_span _ _
-
-@[simp]
-lemma neg_inf {P Q : PointedCone R M} : -(P ⊓ Q) = -P ⊓ -Q := by ext x; simp
-
-@[simp]
-lemma neg_sup {P Q : PointedCone R M} : -(P ⊔ Q) = -P ⊔ -Q := by
-  sorry
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 
 @[simp]
-lemma neg_top : -⊤ = (⊤ : PointedCone R M) := by ext x; simp
+lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
 
-@[simp]
-lemma neg_bot : -⊥ = (⊥ : PointedCone R M) := by ext x; simp
+-- lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} (hC : -C = C) :
+--     Submodule.span R (C : Set M) = C := by
+--   suffices h : ∀ C, Submodule.span R (C : Set M) ≥ C from by
+--     rw [le_antisymm_iff]
+--     constructor
+--     · rw [← Submodule.neg_le_neg]
+--       sorry
+--     · exact h C
+--   intro C
+--   exact Submodule.subset_span
 
 -- NOTE: if this is implemented, it is more general than what mathlib already provides
--- for converting submodules into pointedcones. Especially the proof that R≥0 is a FG
+-- for converting submodules into pointed cones. Especially the proof that R≥0 is an FG
 -- submodule of R should be easiert with this.
-lemma span_union_neg_eq_span_submodule {s : Set M} :
+lemma span_union_neg_eq_span_submodule (s : Set M) :
     span R (s ∪ -s) = Submodule.span R s := by
-  sorry
+  ext x
+  simp only [Set.involutiveNeg, Submodule.mem_span, Set.union_subset_iff, and_imp,
+    Submodule.restrictScalars_mem]
+  constructor
+  · intro h S hsS
+    specialize h S hsS
+    nth_rw 1 [Submodule.coe_restrictScalars, Submodule.restrictScalars_mem,
+      ← Submodule.neg_eq_self S, Submodule.coe_set_neg, Set.neg_subset_neg] at h
+    exact h hsS
+  · intro h S hsS hnsS
+    specialize h (Submodule.span R S)
+    sorry
 
 lemma sup_neg_eq_submodule_span (C : PointedCone R M) :
     C ⊔ -C = Submodule.span R (C : Set M) := by
   nth_rw 1 2 [← Submodule.span_eq C]
-  rw [← Submodule.span_union]
-  rw [le_antisymm_iff]
-  constructor
-  · sorry
-  · sorry
+  rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
+  exact span_union_neg_eq_span_submodule (C : Set M)
 
 lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
     span R s = Submodule.span R s := by
-  sorry
+  nth_rw 1 [← Set.union_self s]
+  nth_rw 2 [hs]
+  exact span_union_neg_eq_span_submodule s
 
-lemma neg_self_iff_eq_span_submodule (C : PointedCone R M) :
-    C = -C ↔ C = Submodule.span R (C : Set M) := by
-  sorry
+lemma neg_le_iff_neg_eq {C : PointedCone R M} : -C ≤ C ↔ -C = C  where
+  mp := by
+    intro h
+    ext x; rw [Submodule.mem_neg]
+    suffices h : ∀ x, -x ∈ C → x ∈ C from by
+      exact ⟨h x, by nth_rw 1 [← neg_neg x]; exact h (-x)⟩
+    exact SetLike.le_def.mp @h
+  mpr := le_of_eq
+
+lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} :
+    -C = C ↔ Submodule.span R (C : Set M) = C := by
+  rw [← sup_neg_eq_submodule_span, sup_eq_left]
+  exact neg_le_iff_neg_eq.symm
+
+lemma neg_self_iff_eq_span_submodule' {C : PointedCone R M} :
+    -C ≤ C ↔ Submodule.span R (C : Set M) = C
+  := Iff.trans neg_le_iff_neg_eq neg_self_iff_eq_span_submodule
+
+end Ring
 
 -- lemma foo {C : PointedCone R M} {x : M} (hx : x ∈ span 𝕜 C)
 
 section Map
 
-variable {E' : Type*} [AddCommMonoid E'] [Module R E']
+variable {M' : Type*} [AddCommMonoid M'] [Module R M']
 
-lemma map_span (f : M →ₗ[R] E') (s : Set M) : map f (span R s) = span R (f '' s) := by
+lemma map_span (f : M →ₗ[R] M') (s : Set M) : map f (span R s) = span R (f '' s) := by
   -- use `Submodule.map_span f s`
   sorry
 

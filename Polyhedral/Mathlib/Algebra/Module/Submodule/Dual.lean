@@ -70,7 +70,7 @@ lemma dual_univ (hp : Injective p.flip) : dual p univ = ⊥ := by
 -- SHOULD HAVE: variable (p) in
 @[gcongr] lemma dual_le_dual (h : t ⊆ s) : dual p s ≤ dual p t := fun _y hy _x hx ↦ hy (h hx)
 
-alias dual_antimono := dual_le_dual
+alias dual_antitone := dual_le_dual
 
 /-- The inner dual cone of a singleton is given by the preimage of the positive cone under the
 linear map `p x`. -/
@@ -128,6 +128,12 @@ lemma dual_dualCoannihilator (S : Submodule R (Dual R M)) : dual .id S = S.dualC
 lemma dual_dualCoannihilator' (S : Submodule R M) : dual p S = (map p S).dualCoannihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
+--------------------
+
+lemma dual_sSup_sInf_dual (S : Set (Submodule R M)) :
+    dual p (sSup S : Submodule R M) = sInf ((dual p ∘ SetLike.coe) '' S) := by
+  sorry
+
 -------------------
 
 variable (p) in
@@ -145,10 +151,10 @@ lemma dual_gc' : GaloisConnection (toDual ∘ dual' p) (dual' p.flip ∘ ofDual)
   constructor
   · intro h
     unfold dual' at *
-    have h := dual_antimono (p := p.flip) h
-    have h := dual_antimono (p := p) h
+    have h := dual_antitone (p := p.flip) h
+    have h := dual_antitone (p := p) h
     rw [dual_dual_flip_dual] at h
-    have h := dual_antimono (p := p.flip) h
+    have h := dual_antitone (p := p.flip) h
     rw [dual_flip_dual_dual_flip] at h
     exact le_trans subset_dual_dual h
   · sorry
@@ -305,7 +311,8 @@ variable {R M N : Type*}
   [AddCommMonoid N] [Module R N]
   {p : M →ₗ[R] N →ₗ[R] R}
 
-variable [Free R M]
+variable (p) in
+/-- Every submodule of a vector space is dual closed. -/
 lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := by
   unfold IsDualClosed
   rw [dual_id_map]
