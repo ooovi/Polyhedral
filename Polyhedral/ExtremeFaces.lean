@@ -43,15 +43,15 @@ namespace Face
 def of_IsFaceOf (hF : F.IsFaceOf C) : Face C := ⟨F, hF⟩
 
 -- we can't have an actual Coe instance because coercion target throws away the information `C`
-@[coe]
+@[coe, simp]
 def toPointedCone {C : PointedCone 𝕜 M} (f : Face C) := f.toSubmodule
 
 instance : CoeOut (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
 coe f := f.toSubmodule
 
--- this is already taken care of by the `CoeOut` above
--- instance : CoeHead (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
--- coe f := f.toSubmodule
+instance : SetLike (Face C) M where
+  coe C := C.toPointedCone
+  coe_injective' := SetLike.coe_injective.comp <| by rintro ⟨_, _⟩ ⟨_, _⟩ _; congr
 
 @[simp, norm_cast]
 theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
@@ -67,7 +67,8 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 -- maybe this is a better definition for lt
 -- private lemma lt_iff_le_not_ge {F₁ F₂ : C.Face} :
 --     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧ F₁ ≠ F₂ ↔
---     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧ ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone) := by
+--     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
+--     ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone) := by
 --   simp; intro hf
 --   constructor <;> intro h <;> by_contra hc
 --   · have := IsExtreme.antisymm hc hf
@@ -75,7 +76,7 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 --   · rw [hc] at h
 --     exact h IsExtreme.rfl
 
-instance : PartialOrder (Face C) where
+instance partialOrder : PartialOrder (Face C) where
 le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
 lt F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
   ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone)
@@ -91,9 +92,18 @@ theorem toPointedCone_le {F₁ F₂ : Face C} (h : F₁ ≤ F₂) :
 
 abbrev le_all {F : Face C} : F.toSubmodule ≤ C := F.isFaceOf.subset
 
+instance : OrderTop (Face C) where
+top := ⟨C, .rfl⟩
+le_top F := F.isFaceOf
+
+/-!
+### Supremum
+
+-/
+
 /-- The supremum of two faces `F₁, F₂` of `C` is the smallest face of `C` that has both `F₁` and
 `F₂` as faces. -/
-def sup (F₁ : Face C) (F₂ : Face C) : Face C := by
+def sup (F₁ F₂ : Face C) : Face C := by
   refine ⟨sInf { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F}, ?_⟩
   constructor
   · intros _ sm
@@ -102,34 +112,46 @@ def sup (F₁ : Face C) (F₂ : Face C) : Face C := by
   · simp; intros _ xc _ yc _ zfs zo F FFs FF₁ FF₂
     exact FFs.left_mem_of_mem_openSegment xc yc (zfs F FFs FF₁ FF₂) zo
 
-lemma sup.symm (F₁ F₂ : Face C) : sup F₁ F₂ = sup F₂ F₁ := by simp [sup, and_comm]
-
--- this is terrible
 private lemma left_mem_of_mem_openSegment {F₁ F₂ : Face C} :
-    ∀ ⦃x : M⦄, x ∈ SetLike.coe F₂.toPointedCone →
-    ∀ ⦃y : M⦄, y ∈ SetLike.coe F₂.toPointedCone →
-    ∀ ⦃z : M⦄, z ∈ SetLike.coe F₁.toPointedCone → z ∈ openSegment 𝕜 x y →
-    x ∈ SetLike.coe F₁.toPointedCone := by
+    ∀ x ∈ F₂, ∀ y ∈ F₂, ∀ z ∈ F₁, z ∈ openSegment 𝕜 x y → x ∈ F₁ := by
   intros _ asup _ bsup _ zF zo
   exact F₁.isFaceOf.left_mem_of_mem_openSegment (le_all asup) (le_all bsup) zF zo
 
-instance : SemilatticeSup (Face C) where
-sup := sup
-le_sup_left F₁ F₂ := by
-  constructor
-  · simp only [SetLike.coe_subset_coe]; exact le_sInf (fun F' F's => F's.2.1)
-  · exact left_mem_of_mem_openSegment
-le_sup_right F₁ F₂ := by
-  constructor
-  · simp only [SetLike.coe_subset_coe]; exact le_sInf (fun F' F's => F's.2.2)
-  · exact left_mem_of_mem_openSegment
-sup_le F₁ F₂ F₃ f₁₂ f₂₃:= by
-  constructor
-  · intros x xs
-    have : F₃.toPointedCone ∈ { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F} :=
-      ⟨F₃.isFaceOf, toPointedCone_le f₁₂, toPointedCone_le f₂₃⟩
-    exact sInf_le this xs
-  · exact left_mem_of_mem_openSegment
+/-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
+def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inter F₁.isFaceOf F₂.isFaceOf⟩
+
+instance : Lattice (Face C) :=
+  { partialOrder with
+    inf := inf
+    inf_le_left F₁ F₂ := by
+      refine ⟨fun _ ai => ai.1, fun _ _ _ _ _ zfs zo => ?_⟩
+      refine (F₁.isFaceOf.inter F₂.isFaceOf).left_mem_of_mem_openSegment ?_ ?_ zfs zo <;>
+      apply F₁.isFaceOf.subset <;> assumption
+    inf_le_right F₁ F₂ := by
+      refine ⟨fun _ ai => ai.2, fun _ _ _ _ _ zfs zo => ?_⟩
+      refine (F₁.isFaceOf.inter F₂.isFaceOf).left_mem_of_mem_openSegment ?_ ?_ zfs zo <;>
+      apply F₂.isFaceOf.subset <;> assumption
+    le_inf  F₁ F₂ F₃ h₁₂ h₂₃:= by
+      simp only [LE.le] at h₁₂ h₂₃
+      refine ⟨fun _ af => ⟨h₁₂.subset af, h₂₃.subset af⟩, fun _ _ _ _ _ zfs zo => ?_⟩
+      refine h₁₂.left_mem_of_mem_openSegment ?_ ?_ zfs zo <;>
+      apply Set.mem_of_mem_inter_left <;> assumption
+    sup := sup
+    le_sup_left F₁ F₂ := by
+      constructor
+      · simp only [SetLike.coe_subset_coe]; exact le_sInf (fun F' F's => F's.2.1)
+      · exact left_mem_of_mem_openSegment
+    le_sup_right F₁ F₂ := by
+      constructor
+      · simp only [SetLike.coe_subset_coe]; exact le_sInf (fun F' F's => F's.2.2)
+      · exact left_mem_of_mem_openSegment
+    sup_le F₁ F₂ F₃ f₁₂ f₂₃:= by
+      constructor
+      · intros x xs
+        have : F₃.toPointedCone ∈ { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F} :=
+          ⟨F₃.isFaceOf, toPointedCone_le f₁₂, toPointedCone_le f₂₃⟩
+        exact sInf_le this xs
+      · exact left_mem_of_mem_openSegment }
 
 end Face
 
@@ -201,11 +223,6 @@ lemma IsFaceOf.susub (h1 : F₁.IsFaceOf C) (h2 : F₂.IsFaceOf C) :
   sorry
 
 end Pair
-
-namespace Face
-
-instance (C : PointedCone 𝕜 M) : Bot (Face C) := ⟨of_IsFaceOf <| .lineal⟩
-instance (C : PointedCone 𝕜 M) : Top (Face C) := ⟨of_IsFaceOf <| .rfl⟩
 
 end Field
 
