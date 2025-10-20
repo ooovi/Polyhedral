@@ -28,31 +28,6 @@ variable {M S R : Type*} [Semiring R] [Semiring S]
 
 section RestrictedScalar
 
-variable (S) in
-lemma restrictedScalars_fg_of_fg [Module.Finite S R] {s : Submodule R M} (hs : s.FG) :
-    (s.restrictScalars S).FG := by
-  rw [← Module.Finite.iff_fg] at *
-  exact Module.Finite.trans R s
-
--- Q: Is there a simpler proof for this?
-lemma fg_of_restrictedScalars_fg [Module.Finite S R] {s : Submodule R M}
-    (hs : (s.restrictScalars S).FG) : s.FG := by
-  obtain ⟨g, hg⟩ := hs
-  use g
-  rw [← SetLike.coe_set_eq, coe_restrictScalars] at hg
-  have hg := congrArg (span R) hg
-  rw [Submodule.span_span_of_tower] at hg
-  simp [hg] -- span_eq
-
-lemma restrictedScalars_fg_iff_fg [Module.Finite S R] {s : Submodule R M} :
-    (s.restrictScalars S).FG ↔ s.FG := ⟨fg_of_restrictedScalars_fg, restrictedScalars_fg_of_fg S⟩
-
-variable (R) in
-lemma span_scalars_FG [Module.Finite S R] {s : Submodule S M} (hfg : s.FG) :
-    (span R (M := M) s).FG := by
-  obtain ⟨t, ht⟩ := hfg
-  use t; rw [← ht, Submodule.span_span_of_tower]
-
 @[simp]
 lemma restrictScalars_inf {s t : Submodule R M} :
     (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
@@ -119,28 +94,6 @@ lemma embed_restrict (S T : Submodule R M) : embed S (restrict S T) = S ⊓ T
 
 lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := submoduleOf_self S
 
-lemma embed_fg_of_fg (S : Submodule R M) {T : Submodule R S} (hC : T.FG) :
-    (embed S T).FG := Submodule.FG.map _ hC
-
-lemma fg_of_embed_fg {S : Submodule R M} {T : Submodule R S} (hT : (embed S T).FG) : T.FG
-    := fg_of_fg_map_injective _ (injective_subtype (S : Submodule R M)) hT
-
-@[simp] lemma embed_fg_iff_fg {S : Submodule R M} {T : Submodule R S} : (embed S T).FG ↔ T.FG
-  := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
-
-lemma restrict_fg_of_fg_le {S T : Submodule R M} (hST : T ≤ S) (hT : T.FG) :
-    (restrict S T).FG := by
-  rw [← (inf_eq_left.mpr hST), inf_comm, ← embed_restrict] at hT
-  exact fg_of_embed_fg hT
-
-lemma fg_of_restrict_le {S T : Submodule R M} (hST : T ≤ S) (hC : (restrict S T).FG) :
-    T.FG := by
-  rw [← (inf_eq_left.mpr hST), inf_comm, ← embed_restrict]
-  exact embed_fg_of_fg S hC
-
-@[simp] lemma fg_iff_restrict_le {S T : Submodule R M} (hST : T ≤ S) :
-    (restrict S T).FG ↔ T.FG := ⟨fg_of_restrict_le hST, restrict_fg_of_fg_le hST⟩
-
 lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hCD : T₁ ≤ T₂) :
     restrict S T₁ ≤ restrict S T₂ := fun _ => (hCD ·)
 
@@ -157,13 +110,6 @@ lemma restrict_embed (S : Submodule R M) (T : Submodule R S) : restrict S (embed
   := by simp [submoduleOf, comap_map_eq]
 
 end Ring
-
-section Field
-
-lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restrict S T).FG := by
-  sorry
-
-end Field
 
 -- section Field
 

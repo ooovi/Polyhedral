@@ -5,7 +5,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 
 namespace PointedCone
@@ -127,6 +127,8 @@ lemma map_span (f : E →ₗ[R] E') (s : Set E) : map f (span R s) = span R (f '
 
 end Map
 
+
+
 end Semiring_AddCommGroup
 
 
@@ -244,7 +246,8 @@ end Ring
 
 section Ring_AddCommGroup
 
-variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup E] [Module R E]
+variable {R E : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid E]
+  [Module R E]
 
 -- ## Lineality
 

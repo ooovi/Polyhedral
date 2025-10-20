@@ -34,6 +34,23 @@ abbrev IsFaceOf.inter (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ 
   IsExtreme.inter h₁ h₂
 
 
+
+lemma foo (C D F G : PointedCone 𝕜 M) (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D) (hCD : C ⊓ D = ⊥) :
+  (F ⊔ D).IsFaceOf (C ⊔ D) := by sorry
+
+lemma span_inter_face_span_inf_face {s : Set M} {F : PointedCone 𝕜 M}
+    (hF : F.IsFaceOf (span 𝕜 s)) :
+      span 𝕜 (s ∩ F) = (span 𝕜 s) ⊓ F := by sorry
+
+lemma exists_span_subset_face {s : Set M} {F : PointedCone 𝕜 M} (hF : F.IsFaceOf (span 𝕜 s)) :
+    ∃ t ⊆ s, span 𝕜 t = F := by
+  use s ∩ F
+  constructor
+  · sorry -- easy
+  · rw [span_inter_face_span_inf_face hF]
+    sorry -- easy
+
+
 /-- A face of a pointed cone `C` is a pointed cone that is an extreme subset of `C`. -/
 structure Face (C : PointedCone 𝕜 M) extends PointedCone 𝕜 M where
   isFaceOf : IsFaceOf toSubmodule C
@@ -75,6 +92,11 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 --     norm_cast at this
 --   · rw [hc] at h
 --     exact h IsExtreme.rfl
+
+/-- An FG cone has finitely many faces. -/
+lemma finite_of_fg {C : PointedCone 𝕜 M} (hC : C.FG) : Finite (Face C) := by
+  -- use `exists_span_subset_face`
+  sorry
 
 instance partialOrder : PartialOrder (Face C) where
 le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
