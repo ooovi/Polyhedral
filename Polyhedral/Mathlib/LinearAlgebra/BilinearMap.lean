@@ -62,7 +62,8 @@ lemma isFaithfulPair_of_toDual {ι : Type*} [DecidableEq ι] (b : Basis ι R M) 
 
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
-lemma isPerfPair_of_isFaithfulPair (hp : p.IsFaithfulPair) (hp' : p.flip.IsFaithfulPair) :
+-- Q : True?
+lemma isPerfPair_of_isFaithfulPair_both (hp : p.IsFaithfulPair) (hp' : p.flip.IsFaithfulPair) :
     p.IsPerfPair := by
   sorry
 

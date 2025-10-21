@@ -69,11 +69,9 @@ variable (p) [Fact p.IsFaithfulPair] in
   rw [le_antisymm_iff, and_comm]
   constructor
   · exact bot_le
-  rw [SetLike.le_def]
-  simp only [mem_dual, mem_univ, forall_const, mem_bot]
-  intro x h
   obtain ⟨g, hg⟩ : p.IsFaithfulPair := Fact.elim inferInstance
-  exact hg x (@h (g x)).symm
+  simp only [SetLike.le_def, mem_dual, mem_univ, forall_const]
+  exact fun x h => hg x (@h (g x)).symm
 
 alias dual_top := dual_univ
 
@@ -105,8 +103,9 @@ lemma dual_eq_iInter_dual_singleton (s : Set M) :
 /-- Any set is a subset of its double dual cone. -/
 lemma subset_dual_dual : s ⊆ dual p.flip (dual p s) := fun _x hx _y hy ↦ hy hx
 
+variable (p) in
 /-- Any cone is a subcone of its double dual cone. -/
-lemma le_dual_dual {S : Submodule R M} : S ≤ dual p.flip (dual p S) := subset_dual_dual
+lemma le_dual_dual (S : Submodule R M) : S ≤ dual p.flip (dual p S) := subset_dual_dual
 
 variable (s) in
 @[simp] lemma dual_dual_flip_dual : dual p (dual p.flip (dual p s)) = dual p s :=
@@ -293,7 +292,7 @@ lemma IsDualClosed.exists_of_dual {S : Submodule R N} (hS : S.IsDualClosed p.fli
 variable (p) in
 lemma isDualClosed_top : IsDualClosed p ⊤ := by
   rw [IsDualClosed, le_antisymm_iff, and_comm]
-  exact ⟨le_dual_dual, by simp⟩
+  exact ⟨le_dual_dual p ⊤, by simp⟩
 
 variable (p) in
 @[simp] lemma dual_dual_top : dual p.flip (dual p ⊤) = ⊤
@@ -338,12 +337,43 @@ lemma dual_inf_dual_sup_dual {S T : Submodule R M} (hS : S.IsDualClosed p) :
     dual p (S ⊓ T : Submodule R M) = dual p S ⊔ dual p T := by
   sorry
 
+---------------------
+
+variable (p) in
+lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
+    dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
+  := fun _ hx y hy => @hx (p.flip y) hy
+
+-- variable (p) in
+-- def DualResidue := dual p.flip (dual p {0})
+
+-- lemma foo (s : Set M) :
+--     dual p.flip (dual p s) ≤ dual .id (dual (Dual.eval R M) s) ⊔ DualResidue p := by
+--   sorry
+
+-- Q: True?
+variable (p) [Fact p.flip.IsFaithfulPair] in
+lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
+    dual p.flip (dual p s) = dual .id (dual (Dual.eval R M) s) := by
+  rw [le_antisymm_iff, and_comm]
+  constructor
+  · exact dual_dual_eval_le_dual_dual_bilin p s
+  simp only [SetLike.le_def, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe, id_eq]
+  obtain ⟨g, hg⟩ : p.flip.IsFaithfulPair := Fact.elim inferInstance
+  simp only [coe_comp, Function.comp_apply, flip_apply] at hg
+  intro x hx y hy
+  specialize @hx -- (g x)
+  -- (p.flip y) hy
+  let z : M := sorry
+  specialize @hy z
+  sorry
+
 variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
   unfold IsDualClosed
   rw [le_antisymm_iff, and_comm]
   constructor
-  · exact le_dual_dual
+  · exact le_dual_dual ..
   rw [SetLike.le_def]
   simp only [dual_span, mem_dual, SetLike.mem_coe, mem_singleton_iff, forall_eq, flip_apply]
   obtain ⟨g, hg⟩ : p.flip.IsFaithfulPair := Fact.elim inferInstance
@@ -359,15 +389,18 @@ lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
 variable (p) in
 lemma IsDualClosed.to_eval {S : Submodule R M} (hS : S.IsDualClosed p)
     : S.IsDualClosed (Dual.eval R M) := by
-  sorry
+  have h := dual_dual_eval_le_dual_dual_bilin p S
+  rw [hS] at h
+  exact le_antisymm h (le_dual_dual (Dual.eval R M) S)
 
 -- **NEEDED** in `Submodule.isDualClosed` below
 variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma IsDualClosed.to_bilin {S : Submodule R M} (hS : S.IsDualClosed (Dual.eval R M))
     : S.IsDualClosed p := by
+
   rw [IsDualClosed, Eq.comm, le_antisymm_iff]
   constructor
-  · exact le_dual_dual
+  · exact le_dual_dual ..
   nth_rw 2 [← hS]
   nth_rw 1 [Dual.eval, flip_flip]
   rw [dual_id]
