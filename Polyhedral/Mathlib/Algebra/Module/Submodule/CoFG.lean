@@ -14,57 +14,81 @@ namespace Submodule
 section CommSemiring
 
 variable {R M N : Type*}
-variable [CommSemiring R]
-variable [AddCommMonoid M] [Module R M]
-variable [AddCommMonoid N] [Module R N]
+variable [CommRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
-variable (p)
+variable (p) in
+/-- A cone is `CoFG` (co-finitely generated) if it is the dual of a finite set.
+  This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
+def CoFG (S : Submodule R N) : Prop := ∃ s : Finset M, dual p s = S
 
-/-- A co-finitely generated (CoFG) submodule is the dual of a finite set. This is in analogy to
-  finitely generated (FG) submodules, which are the span of a finite set. -/
-def CoFG (C : Submodule R N) : Prop := ∃ s : Finset M, dual p s = C
+/-- A CoFG cone is the dual of a finite set. -/
+lemma CoFG.exists_finset_dual {S : Submodule R N} (hS : S.CoFG p) :
+    ∃ s : Finset M, dual p s = S := by
+  obtain ⟨s, hs⟩ := hS; use s
 
+/-- A CoFG cone is the dual of a finite set. -/
+lemma CoFG.exists_finite_dual {S : Submodule R N} (hS : S.CoFG p) :
+    ∃ s : Set M, s.Finite ∧ dual p s = S := by
+  obtain ⟨s, hs⟩ := hS; exact ⟨s, s.finite_toSet, hs⟩
+
+/-- A CoFG cone is the dual of an FG cone. -/
+lemma CoFG.exists_fg_dual {S : Submodule R N} (hS : S.CoFG p) :
+    ∃ T : Submodule R M, T.FG ∧ dual p T = S := by
+  obtain ⟨s, hs⟩ := hS; exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
+
+/-- A CoFG cone is CoFG w.r.t. the standard pairing. -/
+lemma CoFG.to_id {S : Submodule R N} (hS : S.CoFG p) : S.CoFG .id
+    := by classical
+  obtain ⟨s, hs⟩ := hS
+  use Finset.image p s
+  simp [← dual_id, hs]
+
+variable (p) in
 /-- The dual of a `Finset` is co-FG. -/
 lemma cofg_of_finset (s : Finset M) : (dual p s).CoFG p := by use s
 
+variable (p) in
 /-- The dual of a finite set is co-FG. -/
 lemma cofg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).CoFG p := by
   use hs.toFinset; simp
 
+variable (p) in
 /-- The dual of an FG-cone is co-FG. -/
 lemma cofg_of_fg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG p := by
   obtain ⟨s, rfl⟩ := hS
   use s; rw [← dual_span]
 
-variable {p}
+alias FG.dual_cofg := cofg_of_fg
 
-lemma cofg_inf (S T : Submodule R N) (hS : S.CoFG p) (hT : T.CoFG p) : (S ⊓ T).CoFG p
-    := by classical
+/-- The intersection of two CoFG cones i CoFG. -/
+lemma cofg_inf {S T : Submodule R N} (hS : S.CoFG p) (hT : T.CoFG p) :
+    (S ⊓ T).CoFG p := by classical
   obtain ⟨s, rfl⟩ := hS
   obtain ⟨t, rfl⟩ := hT
   use s ∪ t; rw [Finset.coe_union, dual_union]
 
--- We probably want to show stronger that `span R s` and `dual p.flip t` are complementary
--- lemma exists_finite_span_inf_dual_eq_bot (s : Finset M) :
---     ∃ t : Finset N, span R s ⊓ dual p.flip t = ⊥ := by
---   classical
---   induction s using Finset.induction with
---   | empty => use ∅; simp
---   | insert w s hws hs =>
---     obtain ⟨t, ht⟩ := hs
---     by_cases w = 0
---     case pos hw => use t; simp [hw, ht]
---     case neg hw =>
---       have h : p w ≠ 0 := fun h => hw (hp (by simp [h]))
---       have h : ∃ x, p w x ≠ 0 := by
---         by_contra H; apply h; ext x; by_contra hx; apply H; use x; exact hx
---       let r := h.choose
---       have hr : p w r ≠ 0 := Exists.choose_spec h
---       use insert r t
---       rw [Finset.coe_insert, Finset.coe_insert, span_insert, dual_insert]
---       -- distribute, reshuffle and exact `ht`
---       sorry
+/-- The double dual of a CoFG cone is the cone itself. -/
+@[simp]
+lemma CoFG.dual_dual_flip {S : Submodule R N} (hS : S.CoFG p) :
+    dual p (dual p.flip S) = S := by
+  obtain ⟨T, hcofg, rfl⟩ := exists_fg_dual hS
+  exact dual_dual_flip_dual (p := p) T
+
+/-- The double dual of a CoFG cone is the cone itself. -/
+@[simp]
+lemma CoFG.dual_flip_dual {S : Submodule R M} (hS : S.CoFG p.flip) :
+    dual p.flip (dual p S) = S := hS.dual_dual_flip
+
+lemma CoFG.isDualClosed {S : Submodule R M} (hS : S.CoFG p.flip) :
+    S.IsDualClosed p := hS.dual_flip_dual
+
+lemma CoFG.isDualClosed_flip {S : Submodule R N} (hS : S.CoFG p) :
+    S.IsDualClosed p.flip := hS.dual_dual_flip
+
+-----
 
 /-- The top submodule is CoFG. -/
 lemma cofg_top : (⊤ : Submodule R N).CoFG p := ⟨⊥, by simp⟩
@@ -74,17 +98,6 @@ lemma cofg_bot [Module.Finite R N] : (⊥ : Submodule R N).CoFG p := by
   -- obtain ⟨s, hs⟩ := fg_top ⊤
   -- use
   sorry
-
-/-- The double dual of a CoFG submodule is itself. -/
-lemma cofg_dual_dual_flip {S : Submodule R M} (hS : S.CoFG p.flip) :
-    dual p.flip (dual p S) = S := by
-  obtain ⟨s, rfl⟩ := hS
-  rw [dual_flip_dual_dual_flip]
-
-/-- The double dual of a CoFG submodule is itself. -/
-lemma cofg_dual_flip_dual {S : Submodule R N} (hS : S.CoFG p) : dual p (dual p.flip S) = S := by
-  obtain ⟨s, rfl⟩ := hS
-  rw [dual_dual_flip_dual]
 
 end CommSemiring
 

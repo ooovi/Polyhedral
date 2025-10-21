@@ -16,6 +16,20 @@ section CommSemiring
 variable {R : Type*} [CommSemiring R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {N : Type*} [AddCommMonoid N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- variable (p) in
+-- lemma exists_restricted_pairing (S : Submodule R M) :
+--     ∃ T : Submodule R N, ∃ q : S →ₗ[R] T →ₗ[R] R, ∀ s : S, ∀ t : T, q s t = p s t := by
+--   sorry
+
+end CommSemiring
+
+section CommSemiring
+
+variable {R : Type*} [CommSemiring R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+variable {N : Type*} [AddCommMonoid N] [Module R N]
 
 /- For a field this is known as being 'formally real'. This is equivalent to the existence of an
   ordered field structure. This could ve relevant on field with no preferred order, e.g. the

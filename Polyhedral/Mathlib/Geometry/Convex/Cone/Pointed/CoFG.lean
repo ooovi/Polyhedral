@@ -31,7 +31,8 @@ lemma CoFG.exists_fg_dual {C : PointedCone R N} (hC : C.CoFG p) :
     ∃ D : PointedCone R M, D.FG ∧ dual p D = C := by
   obtain ⟨s, hs⟩ := hC; exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
 
-lemma cofg_id {C : PointedCone R N} (hC : C.CoFG p) : C.CoFG .id
+/-- A CoFG cone is CoFG w.r.t. the standard pairing. -/
+lemma CoFG.to_id {C : PointedCone R N} (hC : C.CoFG p) : C.CoFG .id
     := by classical
   obtain ⟨s, hs⟩ := hC
   use Finset.image p s
@@ -71,8 +72,33 @@ lemma CoFG.dual_dual_flip {C : PointedCone R N} (hC : C.CoFG p) :
 /-- The double dual of a CoFG cone is the cone itself. -/
 @[simp]
 lemma CoFG.dual_flip_dual {C : PointedCone R M} (hC : C.CoFG p.flip) :
-    dual p.flip (dual p C) = C := by
-  rw [← LinearMap.flip_flip p]; exact dual_dual_flip hC
+    dual p.flip (dual p C) = C := hC.dual_dual_flip
+
+lemma CoFG.isDualClosed {C : PointedCone R M} (hC : C.CoFG p.flip) :
+    C.IsDualClosed p := hC.dual_flip_dual
+
+lemma CoFG.isDualClosed_flip {C : PointedCone R N} (hC : C.CoFG p) :
+    C.IsDualClosed p.flip := hC.dual_dual_flip
+
+-----
+
+section LinearOrder
+
+variable {R M N : Type*}
+variable [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
+
+lemma CoFG.coe {S : Submodule R N} (hS : S.CoFG p) : (S : PointedCone R N).CoFG p := by
+  obtain ⟨T, hfg, rfl⟩ := hS.exists_fg_dual
+  rw [← coe_dual]
+  exact cofg_of_fg p (coe_fg hfg)
+
+end LinearOrder
+
+lemma CoFG.lineal_cofg {C : PointedCone R N} (hC : C.CoFG p) : C.lineal.CoFG p := by
+  sorry
 
 @[deprecated]
 lemma CoFG.dual_inf_dual_sup_dual {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :

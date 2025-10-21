@@ -296,23 +296,27 @@ lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S :=
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
-lemma span_inter_lineal_eq_lineal {C : PointedCone R M} {s : Set M} (h : span R s = C) :
-    span R (s ∩ C.lineal) = C.lineal := by
+lemma span_inter_lineal_eq_lineal (s : Set M):
+    span R (s ∩ (span R s).lineal) = (span R s).lineal := by
   rw [← antisymm_iff (r := LE.le)]
-  constructor
-  · rw [← Submodule.span_eq (C.lineal : PointedCone R M)]
-    exact Submodule.span_mono (by simp)
-  · rw [← SetLike.coe_subset_coe]
-    rw [Set.subset_def]
-    intro x hx
-    let S:= s ∩ C.lineal
-    let S' := s \ C.lineal
-    have hS : S ∪ S' = s := by simp [S, S']
-    have hS' : S ∩ S' = ∅ := by aesop
+  -- constructor
+  -- · rw [← Submodule.span_eq (C.lineal : PointedCone R M)]
+  --   exact Submodule.span_mono (by simp)
+  -- · rw [← SetLike.coe_subset_coe]
+  --   rw [Set.subset_def]
+  --   intro x hx
+  --   let S:= s ∩ C.lineal
+  --   let S' := s \ C.lineal
+  --   have hS : S ∪ S' = s := by simp [S, S']
+  --   have hS' : S ∩ S' = ∅ := by aesop
 
-    --have hs : s = (s ∩ C.lineal) ∪ ()
-    -- rw [Submodule.mem_span_finite_of_mem_span] at h
-    sorry
+  --   --have hs : s = (s ∩ C.lineal) ∪ ()
+  --   -- rw [Submodule.mem_span_finite_of_mem_span] at h
+    -- sorry
+  sorry
+
+lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
+  sorry
 
 section Ring
 
@@ -480,22 +484,22 @@ lemma exists_pointy_sup_lineal' (C : PointedCone R M) :
 /-- This is a variant of `IsModularLattice.sup_inf_assoc_of_le`. While submodules form a modular
   lattice, pointed cones do in general not. -/
 lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
-    {M : Submodule R M} (hCE : C ≤ M) : C ⊔ (D ⊓ M) = (C ⊔ D) ⊓ M := by
+    {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S := by
   ext x
   simp [Submodule.mem_sup]
   constructor
   · intro h
     obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
     exact ⟨⟨y, hy, z, hz, hyzx⟩, by
-      rw [← hyzx]; exact Submodule.add_mem M (hCE hy) hz' ⟩
+      rw [← hyzx]; exact S.add_mem (hCS hy) hz' ⟩
   · intro h
     obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
     exact ⟨y, hy, z, ⟨hz, by
       rw [← add_left_cancel_iff (a := -y), neg_add_cancel_left] at hyzx
       rw [hyzx]
-      specialize hCE hy
-      rw [Submodule.restrictScalars_mem, ← Submodule.neg_mem_iff] at hCE
-      exact Submodule.add_mem M hCE hx
+      specialize hCS hy
+      rw [Submodule.restrictScalars_mem, ← neg_mem_iff] at hCS
+      exact S.add_mem hCS hx
     ⟩, hyzx⟩
 
 end Ring_AddCommGroup

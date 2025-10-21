@@ -21,8 +21,8 @@ alias dual_bot := dual_zero
 @[simp] lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
   := dual_univ (IsPerfPair.bijective_right p).1
 
-@[simp]
-lemma dual_eq_submodule_dual (S : Submodule R M) : dual p S = Submodule.dual p S := by
+variable (p) in
+@[simp] lemma dual_eq_submodule_dual (S : Submodule R M) : dual p S = Submodule.dual p S := by
   ext x; constructor
   · intro h _ ha
     have h' := h (neg_mem_iff.mpr ha)
@@ -31,11 +31,11 @@ lemma dual_eq_submodule_dual (S : Submodule R M) : dual p S = Submodule.dual p S
   · intro h _ ha
     rw [h ha]
 
+alias coe_dual := dual_eq_submodule_dual
+
 @[simp]
 lemma dual_coe_coe_eq_dual_coe (S : Submodule R M) : dual p (S : PointedCone R M) = dual p S := by
   rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
-
-alias coe_dual := dual_eq_submodule_dual
 
 -- TODO: Replace `dual_span` in Cone/Dual.lean
 @[simp] lemma dual_span' (s : Set M) : dual p (span R s) = dual p s := dual_span ..
@@ -89,6 +89,9 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp only [ofSubmodule_coe]
 
+-- the other direction does not hold in general (consider a cone with lineality space and now
+--  delete every points from that lineality space except for the origin).
+--  It holds for FG (and CoFG?)
 lemma span_dual_le_dual_lineal (C : PointedCone R M):
     Submodule.span R (dual p C) ≤ Submodule.dual p C.lineal := by
   -- This should be provable without `Field` and `IsDualClosed`.
@@ -153,59 +156,47 @@ example {C D : PointedCone R M} : -- (hC : C.FG) (hC' : D.FG) :
     dual p.flip (dual p (C ∪ D)) = C ⊔ D := by
   sorry
 
-
--- the other direction does not hold in general (consider a cone with lineality space and now
---  delete every points from that lineality space except for the origin).
---  It holds for FG (and CoFG?)
--- Q: do I need p.IsPerfPair?
-lemma span_dual_eq_dual_lineal [p.IsPerfPair] (C : PointedCone R M) :
-    Submodule.span R (dual p C) ≤ .dual p C.lineal := by
-  -- simp [lineal_mem]
-  -- C.lin ≤ C
-  -- hence dual C ≤ dual C.lin
-  -- hence span dual C ≤ span dual C.lin = dual C.lin
-  sorry
-
 ---------------
 
 variable (p) in
 abbrev IsDualClosed (C : PointedCone R M) := dual p.flip (dual p C) = C
 
 variable (p) in
-@[simp] lemma IsDualClosed.def {S : PointedCone R M} (hS : IsDualClosed p S) :
-     dual p.flip (dual p S) = S := hS
+@[simp] lemma IsDualClosed.def {C : PointedCone R M} (hC : IsDualClosed p C) :
+     dual p.flip (dual p C) = C := hC
 
 variable (p) in
-@[simp] lemma IsDualClosed.def_flip {S : PointedCone R N} (hS : IsDualClosed p.flip S) :
-     dual p (dual p.flip S) = S := hS
+@[simp] lemma IsDualClosed.def_flip {C : PointedCone R N} (hC : IsDualClosed p.flip C) :
+     dual p (dual p.flip C) = C := hC
 
-lemma IsDualClosed.def_iff {S : PointedCone R M} :
-    IsDualClosed p S ↔ dual p.flip (dual p S) = S := by rfl
+lemma IsDualClosed.def_iff {C : PointedCone R M} :
+    IsDualClosed p C ↔ dual p.flip (dual p C) = C := by rfl
 
-lemma IsDualClosed.def_flip_iff {S : PointedCone R N} :
-    IsDualClosed p.flip S ↔ dual p (dual p.flip S) = S := by rfl
+lemma IsDualClosed.def_flip_iff {C : PointedCone R N} :
+    IsDualClosed p.flip C ↔ dual p (dual p.flip C) = C := by rfl
 
 variable (p) in
-lemma dual_IsDualClosed (S : PointedCone R M) : (dual p S).IsDualClosed p.flip := by
+lemma dual_IsDualClosed (C : PointedCone R M) : (dual p C).IsDualClosed p.flip := by
   simp [IsDualClosed, flip_flip, dual_dual_flip_dual]
 
 variable (p) in
-lemma dual_flip_IsDualClosed (S : PointedCone R N) : (dual p.flip S).IsDualClosed p
-    := dual_IsDualClosed p.flip S
+lemma dual_flip_IsDualClosed (C : PointedCone R N) : (dual p.flip C).IsDualClosed p
+    := dual_IsDualClosed p.flip C
 
-lemma IsDualClosed.dual_inj {S T : PointedCone R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p)
-    (hST : dual p S = dual p T) : S = T := by
-  rw [← hS, ← hT, hST]
+lemma IsDualClosed.dual_inj {C D : PointedCone R M} (hC : C.IsDualClosed p) (hD : D.IsDualClosed p)
+    (hCD : dual p C = dual p D) : C = D := by
+  rw [← hC, ← hD, hCD]
 
-@[simp] lemma IsDualClosed.dual_inj_iff {S T : PointedCone R M} (hS : S.IsDualClosed p)
-    (hT : T.IsDualClosed p) : dual p S = dual p T ↔ S = T := ⟨dual_inj hS hT, by intro h; congr ⟩
+@[simp] lemma IsDualClosed.dual_inj_iff {C D : PointedCone R M} (hC : C.IsDualClosed p)
+    (hD : D.IsDualClosed p) : dual p C = dual p D ↔ C = D := ⟨dual_inj hC hD, by intro h; congr ⟩
 
-lemma IsDualClosed.exists_of_dual_flip {S : PointedCone R M} (hS : S.IsDualClosed p) :
-    ∃ T : PointedCone R N, T.IsDualClosed p.flip ∧ dual p.flip T = S
-  := ⟨dual p S, by simp [IsDualClosed, hS.def]⟩
+lemma IsDualClosed.exists_of_dual_flip {C : PointedCone R M} (hC : C.IsDualClosed p) :
+    ∃ D : PointedCone R N, D.IsDualClosed p.flip ∧ dual p.flip D = C
+  := ⟨dual p C, by simp [IsDualClosed, hC.def]⟩
 
-lemma IsDualClosed.exists_of_dual {S : PointedCone R N} (hS : S.IsDualClosed p.flip) :
-    ∃ T : PointedCone R M, T.IsDualClosed p ∧ dual p T = S := exists_of_dual_flip hS
+lemma IsDualClosed.exists_of_dual {C : PointedCone R N} (hC : C.IsDualClosed p.flip) :
+    ∃ D : PointedCone R M, D.IsDualClosed p ∧ dual p D = C
+  := hC.exists_of_dual_flip
 
 ---------------
 
