@@ -46,8 +46,8 @@ def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
 
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
-instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair
-    := by rw [flip_flip]; exact inst
+instance [Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair
+    := by rw [flip_flip]; exact inferInstance
 
 end CommSemiring
 

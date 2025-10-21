@@ -50,8 +50,10 @@ variable [AddCommGroup M] [AddCommGroup M] [Module 𝕜 M]
 variable (𝕜 M) in
 /-- A polyhedral cone is a dual closed cone with finitely many faces. -/
 structure PolyhedralCone extends PointedCone 𝕜 M where
-  finite : Finite (Face toSubmodule)
-  closed : IsDualClosed (Dual.eval 𝕜 M) toSubmodule
+  /-- A polyhedral cone has finitely many faces. -/
+  finiteFaces : Finite (Face toSubmodule)
+  /-- A polyhedral cone is dual closed. -/
+  dualClosed : IsDualClosed (Dual.eval 𝕜 M) toSubmodule
 
 namespace PolyhedralCone
 
@@ -77,8 +79,6 @@ instance : SetLike (PolyhedralCone 𝕜 M) M where
 def of_FG {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M
     := ⟨C, Face.finite_of_fg hC, FG.isDualClosed (Dual.eval 𝕜 M) hC⟩
 
--- def of_CoFG {C : PointedCone 𝕜 M} (hC : C.CoFG p) : PolyhedralCone 𝕜 M := ⟨C, sorry, sorry⟩
-
 def span (s : Finset M) : PolyhedralCone 𝕜 M := of_FG (Submodule.fg_span <| s.finite_toSet)
 
 def span_of_finite {S : Set M} (hfin : S.Finite) : PolyhedralCone 𝕜 M
@@ -87,39 +87,41 @@ def span_of_finite {S : Set M} (hfin : S.Finite) : PolyhedralCone 𝕜 M
 instance {C : PolyhedralCone 𝕜 M} :
     CoeOut (PointedCone.Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
 
-def ray (x : M) : PolyhedralCone 𝕜 M := span {x}
+instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
 
 instance : Bot (PolyhedralCone 𝕜 M) := ⟨of_FG fg_bot⟩
 instance : Top (PolyhedralCone 𝕜 M) := ⟨of_FG Module.Finite.fg_top⟩
 
+instance : OrderBot (PolyhedralCone 𝕜 M) := ⟨sorry⟩
+instance : OrderTop (PolyhedralCone 𝕜 M) := ⟨sorry⟩
+
 instance : Min (PolyhedralCone 𝕜 M) where
-  min C D := of_FG <| PointedCone.inf_fg C.isFG D.isFG
+  min C D := sorry -- of_FG <| PointedCone.inf_fg C.isFG D.isFG
 instance : Max (PolyhedralCone 𝕜 M) where
-  max C D := of_FG <| PointedCone.sup_fg C.isFG D.isFG
+  max C D := sorry -- of_FG <| PointedCone.sup_fg C.isFG D.isFG
 -- NOTE: on cones, ⊔ also acts as Minkowski sum
 
-lemma sup_is_Msum (C D : PolyhedralCone 𝕜 M) : C ⊔ D = { c + d | (c ∈ C) (d ∈ D) } := by
-  sorry
-
 variable {𝕜 M N : Type*}
-  [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
-  [AddCommGroup M] [Module 𝕜 M] [Module.Finite 𝕜 M]
-  [AddCommGroup N] [Module 𝕜 N] -- [Module.Finite 𝕜 M]
+variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+variable [AddCommGroup M] [Module 𝕜 M]
+variable [AddCommGroup N] [Module 𝕜 N]
+variable {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜}
 
-variable [Module.Finite 𝕜 N]
-variable (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜) [p.IsPerfPair]
+def of_CoFG {C : PointedCone 𝕜 N} (hC : C.CoFG p) : PolyhedralCone 𝕜 N
+    := ⟨C, by sorry, by sorry⟩
 
+variable (p) in
 def dual (C : PolyhedralCone 𝕜 M) : PolyhedralCone 𝕜 N
-  := of_FG (PointedCone.dual_fg p C.isFG)
+  := sorry -- of_FG (PointedCone.dual_fg p C.isFG)
 
 def dual_of_fg (C : PointedCone 𝕜 M) (hC : C.FG) : PolyhedralCone 𝕜 N
-  := dual p (of_FG hC)
+  := sorry -- dual p (of_FG hC)
 
 def dual_of_finset (s : Finset M) : PolyhedralCone 𝕜 N
-  := dual p (of_FG <| Submodule.fg_span s.finite_toSet)
+  := sorry -- dual p (of_FG <| Submodule.fg_span s.finite_toSet)
 
 def dual_of_finite (S : Set M) (hS : S.Finite) : PolyhedralCone 𝕜 N
-  := dual p (of_FG <| Submodule.fg_span hS)
+  := sorry -- dual p (of_FG <| Submodule.fg_span hS)
 
 variable [Module.Finite 𝕜 N]
 variable {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} [p.IsPerfPair]
