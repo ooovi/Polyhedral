@@ -56,7 +56,7 @@ lemma cofg_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).CoFG p := by
 alias FG.dual_cofg := cofg_of_fg
 
 /-- The intersection of two CoFG cones i CoFG. -/
-lemma cofg_inf {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
+lemma inf_cofg {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
     (C ⊓ D).CoFG p := by classical
   obtain ⟨S, rfl⟩ := hC
   obtain ⟨T, rfl⟩ := hD
@@ -95,8 +95,24 @@ lemma CoFG.coe {S : Submodule R N} (hS : S.CoFG p) : (S : PointedCone R N).CoFG 
   rw [← coe_dual]
   exact cofg_of_fg p (coe_fg hfg)
 
+alias coe_cofg := CoFG.coe
+
+-- Q: is this problematic?
+instance {S : Submodule R N} : Coe (S.CoFG p) (CoFG p (S : PointedCone R N)) := ⟨coe_cofg⟩
+
+@[simp] lemma coe_cofg_iff {S : Submodule R N} :
+    (S : PointedCone R N).CoFG p ↔ S.CoFG p := by -- classical
+  -- unfold CoFG Submodule.CoFG
+  constructor
+  · intro hcofg
+    obtain ⟨s, hs⟩ := hcofg
+    use s
+    sorry
+  · exact coe_cofg
+
 end LinearOrder
 
+-- ### HIGH PRIORITY! This is needed in the Field theory!
 lemma CoFG.lineal_cofg {C : PointedCone R N} (hC : C.CoFG p) : C.lineal.CoFG p := by
   sorry
 
@@ -110,19 +126,5 @@ lemma CoFG.dual_inf_dual_sup_dual {C D : PointedCone R N} (hC : C.CoFG p) (hD : 
   rw [dual_flip_dual (by sorry)] -- not true
   rw [dual_flip_dual (by sorry)] -- not true
   -- Maybe we can prove this only with Field (need dual_dual for FG; need p.IsFaithfulPair?)
-
-@[simp]
-lemma coe_cofg {S : Submodule R N} :
-    (S : PointedCone R N).CoFG p ↔ S.CoFG p := by -- classical
-  -- unfold CoFG Submodule.CoFG
-  constructor
-  · intro hcofg
-    obtain ⟨s, hs⟩ := hcofg
-    use s
-    sorry
-  · intro hcofg
-    obtain ⟨s, hs⟩ := hcofg
-    use s
-    sorry
 
 end PointedCone

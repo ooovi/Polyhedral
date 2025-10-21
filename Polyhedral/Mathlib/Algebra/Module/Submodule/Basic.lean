@@ -12,15 +12,7 @@ section Semiring
 
 variable {M S R : Type*} [Semiring R] [Semiring S] [AddCommMonoid M] [Module R M]
 
-lemma span_gc : GaloisConnection (span R : Set M → Submodule R M) (SetLike.coe) := by
-  --exact gc_Ici_sInf.dual
-  intro s S
-  constructor
-  · intro h
-    sorry
-  · intro h
-    sorry
-
+lemma span_gc : GaloisConnection (span R : Set M → Submodule R M) (SetLike.coe) := sorry
 def span_gi : GaloisCoinsertion (span R : Set M → Submodule R M) (SetLike.coe) := sorry
 
 variable {M S R : Type*} [Semiring R] [Semiring S]
@@ -28,18 +20,15 @@ variable {M S R : Type*} [Semiring R] [Semiring S]
 
 section RestrictedScalar
 
-@[simp]
-lemma restrictScalars_inf {s t : Submodule R M} :
+@[simp] lemma restrictScalars_inf {s t : Submodule R M} :
     (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
   ext x; simp
 
-@[simp]
-lemma restrictScalars_sup {s t : Submodule R M} :
+@[simp] lemma restrictScalars_sup {s t : Submodule R M} :
     (s ⊔ t).restrictScalars S = (s.restrictScalars S) ⊔ (t.restrictScalars S):= by
   ext x; simp [mem_sup]
 
-@[simp]
-lemma restrictScalars_sSup {s : Set (Submodule R M)} :
+@[simp] lemma restrictScalars_sSup {s : Set (Submodule R M)} :
     (sSup s).restrictScalars S = sSup (restrictScalars S '' s):= by
   ext x
   simp [mem_sSup]

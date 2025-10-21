@@ -46,6 +46,9 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
     := Submodule.restrictScalars_inf
 
+lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
+    := Submodule.restrictScalars_sup
+
 @[simp]
 lemma sSup_coe (S : Set (Submodule R M)) : sSup S = sSup (ofSubmodule '' S) := by
   ext x
@@ -370,6 +373,9 @@ lemma ofSubmodule_fg_of_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R 
 /- We current struggle to implement the converse, see `fg_of_restrictedScalars_fg`. -/
 alias coe_fg := ofSubmodule_fg_of_fg
 
+-- Q: is this problematic?
+instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
+
 @[simp]
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
   ⟨Submodule.fg_of_restrictedScalars_fg, coe_fg⟩
@@ -381,6 +387,8 @@ lemma fg_top [Module.Finite R M] : (⊤ : PointedCone R M).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
 
 end Ring_LinearOrder
+
+
 
 section Ring_AddCommGroup
 
@@ -457,6 +465,8 @@ lemma exists_salient_submodul_disj_sup (C : PointedCone R M) :
   exact ⟨D, hSal, C.lineal, hDis, hSup⟩
 
 end DivisionRing
+
+
 
 lemma span_diff_lineal_pointy {C : PointedCone R M} {s : Set M} (h : span R s = C) :
     (span R (s \ C.lineal)).Salient := by

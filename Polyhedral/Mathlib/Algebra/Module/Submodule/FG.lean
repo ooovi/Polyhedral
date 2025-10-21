@@ -38,16 +38,9 @@ lemma fg_of_restrict_le {S T : Submodule R M} (hST : T ≤ S) (hC : (restrict S 
 @[simp] lemma fg_iff_restrict_le {S T : Submodule R M} (hST : T ≤ S) :
     (restrict S T).FG ↔ T.FG := ⟨fg_of_restrict_le hST, restrict_fg_of_fg_le hST⟩
 
-section Field
-
-variable {R M : Type*}
-variable [Field R]
-variable [AddCommGroup M] [Module R M]
-
-lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restrict S T).FG := by
-  sorry
-
-end Field
+lemma restrict_fg_iff_inf_fg {S T : Submodule R M} :
+    (restrict S T).FG ↔ (S ⊓ T : Submodule R M).FG := by
+  rw [← embed_restrict, embed_fg_iff_fg]
 
 section RestrictScalars
 
@@ -101,6 +94,10 @@ lemma inf_fg_right (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (S ⊓ 
 /-- The intersection of a submodule with an FG submodule is FG. -/
 lemma inf_fg_left {S : Submodule R M} (hS : S.FG) (T : Submodule R M) : (S ⊓ T).FG := by
   rw [inf_comm]; exact inf_fg_right T hS
+
+/-- The restriction of an FG submodule to an arbitrary submodule is FG. -/
+lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restrict S T).FG := by
+  rw [restrict_fg_iff_inf_fg]; exact inf_fg_right S hT
 
 end IsNoetherianRing
 

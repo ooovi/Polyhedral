@@ -32,10 +32,17 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {N : Type*} [AddCommMonoid N] [Module R N]
 
 /- For a field this is known as being 'formally real'. This is equivalent to the existence of an
-  ordered field structure. This could ve relevant on field with no preferred order, e.g. the
+  ordered field structure. This could be relevant on field with no preferred order, e.g. the
   field of rational functions -/
 def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
     := ∃ g : N →ₗ[R] M, ∀ x : N, (p ∘ₗ g) x x = 0 → x = 0
+
+/- Equivalenty: p is faithful iff there is an embedding of N in M on which p is injective.
+  In prticular, N is smaller than M. So Dual.evel is not faithful for infinite spaces, while
+  .id is always faithful.
+  This is intentionally weaker than a perfect pairing. In this way one direction of the standard
+  duality map can still be faithful, even in infinite dimensions.
+-/
 
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
@@ -52,6 +59,12 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 
 lemma isFaithfulPair_of_toDual {ι : Type*} [DecidableEq ι] (b : Basis ι R M) :
     b.toDual.IsFaithfulPair := ⟨.id, fun _ => Dual.toDual_eq_zero⟩
+
+variable (p : M →ₗ[R] N →ₗ[R] R)
+
+lemma isPerfPair_of_isFaithfulPair (hp : p.IsFaithfulPair) (hp' : p.flip.IsFaithfulPair) :
+    p.IsPerfPair := by
+  sorry
 
 end CommRing
 

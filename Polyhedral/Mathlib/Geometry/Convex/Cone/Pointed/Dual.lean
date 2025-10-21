@@ -177,7 +177,7 @@ lemma IsDualClosed.def_flip_iff {C : PointedCone R N} :
 
 variable (p) in
 lemma dual_IsDualClosed (C : PointedCone R M) : (dual p C).IsDualClosed p.flip := by
-  simp [IsDualClosed, flip_flip, dual_dual_flip_dual]
+  simp [IsDualClosed, dual_dual_flip_dual]
 
 variable (p) in
 lemma dual_flip_IsDualClosed (C : PointedCone R N) : (dual p.flip C).IsDualClosed p
@@ -198,6 +198,14 @@ lemma IsDualClosed.exists_of_dual {C : PointedCone R N} (hC : C.IsDualClosed p.f
     ∃ D : PointedCone R M, D.IsDualClosed p ∧ dual p D = C
   := hC.exists_of_dual_flip
 
+lemma IsDualClosed.inf {S T : PointedCone R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
+    (S ⊓ T).IsDualClosed p := by
+  rw [← hS, ← hT, IsDualClosed, ← dual_sup_dual_inf_dual, dual_flip_dual_dual_flip]
+
+lemma IsDualClosed.lineal {S : PointedCone R M} (hS : S.IsDualClosed p) :
+    S.lineal.IsDualClosed p := by
+  sorry
+
 ---------------
 
 section Field
@@ -207,10 +215,12 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+variable [Fact p.IsFaithfulPair] in
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
     Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
-  simp only [lineal, Submodule.span, Submodule.dual_sSup_sInf_dual, Function.comp_apply]
+  simp only [PointedCone.lineal, Submodule.span, Submodule.dual_sSup_sInf_dual,
+    Function.comp_apply]
   congr; ext T
   rw [Set.mem_image, Set.mem_setOf_eq]
   constructor
@@ -227,6 +237,7 @@ lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClo
       exact dual_antimono h
     · exact T.isDualClosed p.flip
 
+variable [Fact p.IsFaithfulPair] in
 /-- For a dual closed cone, the dual of the submodule span is the lineality space of the dual. -/
 lemma IsDualClosed.dual_span_lineal_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
     .dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by

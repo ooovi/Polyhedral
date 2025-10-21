@@ -64,11 +64,16 @@ lemma cofg_of_fg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG p := by
 alias FG.dual_cofg := cofg_of_fg
 
 /-- The intersection of two CoFG cones i CoFG. -/
-lemma cofg_inf {S T : Submodule R N} (hS : S.CoFG p) (hT : T.CoFG p) :
+lemma inf_cofg {S T : Submodule R N} (hS : S.CoFG p) (hT : T.CoFG p) :
     (S ⊓ T).CoFG p := by classical
   obtain ⟨s, rfl⟩ := hS
   obtain ⟨t, rfl⟩ := hT
   use s ∪ t; rw [Finset.coe_union, dual_union]
+
+-- ### HIGH PRIORITY! This is needed in the cone theory!
+-- variable [Fact p.flip.IsFaithfulPair] in
+lemma sup_cofg {S T : Submodule R N} (hC : S.CoFG p) (hD : T.CoFG p) : (S ⊔ T).CoFG p := by
+  sorry
 
 /-- The double dual of a CoFG cone is the cone itself. -/
 @[simp]
