@@ -31,23 +31,40 @@ variable {R : Type*} [CommSemiring R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {N : Type*} [AddCommMonoid N] [Module R N]
 
+def IsSeparating (p : M →ₗ[R] N →ₗ[R] R)
+    := ∀ x : M, p x = 0 → x = 0 -- equiv: (p x) (g x) = 0 → x = 0
+
 /- For a field this is known as being 'formally real'. This is equivalent to the existence of an
   ordered field structure. This could be relevant on field with no preferred order, e.g. the
   field of rational functions -/
 def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
-    := ∃ g : N →ₗ[R] M, ∀ x : N, (p ∘ₗ g) x x = 0 → x = 0
+    := ∃ g : N →ₗ[R] M, ∀ x : N, (p ∘ₗ g) x x = 0 → x = 0 -- equiv: (p x) (g x) = 0 → x = 0
 
-/- Equivalenty: p is faithful iff there is an embedding of N in M on which p is injective.
-  In prticular, N is smaller than M. So Dual.evel is not faithful for infinite spaces, while
+/- If p is faithful then there is an embedding of N in M on which p is injective.
+  In prticular, N is "smaller" than M. So Dual.evel is not faithful for infinite spaces, while
   .id is always faithful.
   This is intentionally weaker than a perfect pairing. In this way one direction of the standard
   duality map can still be faithful, even in infinite dimensions.
+  This allows to, e.g. consider duality between M and its continuous dual.
 -/
 
-variable (p : M →ₗ[R] N →ₗ[R] R)
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
-instance [Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair
-    := by rw [flip_flip]; exact inferInstance
+lemma IsFaithfulPair.isSeparating (hp : p.IsFaithfulPair) : p.flip.IsSeparating := by
+  intro x hpx
+  obtain ⟨_, hg⟩ := hp
+  exact hg x (by simp [← flip_apply, hpx])
+
+instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair := inst
+
+instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
+
+-- variable {R : Type*} [CommRing R]
+-- variable {M : Type*} [AddCommGroup M] [Module R M]
+-- variable {N : Type*} [AddCommGroup N] [Module R N]
+-- variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- def foo (hp : p.IsPerfPair) : N ≃ₗ[R] Dual R M := sorry
 
 end CommSemiring
 
@@ -59,13 +76,6 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 
 lemma isFaithfulPair_of_toDual {ι : Type*} [DecidableEq ι] (b : Basis ι R M) :
     b.toDual.IsFaithfulPair := ⟨.id, fun _ => Dual.toDual_eq_zero⟩
-
-variable (p : M →ₗ[R] N →ₗ[R] R)
-
--- Q : True?
-lemma isPerfPair_of_isFaithfulPair_both (hp : p.IsFaithfulPair) (hp' : p.flip.IsFaithfulPair) :
-    p.IsPerfPair := by
-  sorry
 
 end CommRing
 
@@ -86,11 +96,15 @@ lemma isFaithfulPair_of_range_top (hp : range p = ⊤)
 lemma isFaithfulPair_of_surjective (hp : Surjective p) : p.IsFaithfulPair
   := isFaithfulPair_of_range_top <| range_eq_top_of_surjective p hp
 
+instance [inst : Fact (Surjective p)] : Fact p.IsFaithfulPair
+    := ⟨isFaithfulPair_of_surjective inst.elim⟩
+
 lemma isFaithfulPair_of_id : IsFaithfulPair (R := R) (N := M) .id
   := isFaithfulPair_of_range_top range_id
 
-instance : Fact (IsFaithfulPair (R := R) (N := M) .id) := ⟨isFaithfulPair_of_id⟩
-instance : Fact (Dual.eval R M).flip.IsFaithfulPair := ⟨isFaithfulPair_of_id⟩
+instance instFactIsFaithfulPairIdId : Fact (IsFaithfulPair (R := R) (N := M) .id)
+  := ⟨isFaithfulPair_of_id⟩
+-- instance : Fact (Dual.eval R M).flip.IsFaithfulPair := instFactIsFaithfulPairIdId
 
 lemma isFaithfulPair_of_isPerfPair [p.IsPerfPair] : p.IsFaithfulPair :=
     isFaithfulPair_of_surjective (IsPerfPair.bijective_left p).surjective

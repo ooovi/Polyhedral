@@ -161,6 +161,10 @@ example {C D : PointedCone R M} : -- (hC : C.FG) (hC' : D.FG) :
 variable (p) in
 abbrev IsDualClosed (C : PointedCone R M) := dual p.flip (dual p C) = C
 
+/-- A cone is bipolar if it is equal to its double dual. -/
+-- Potentially the more canonical name for `IsDualClosed`.
+alias IsBipolar := IsDualClosed
+
 variable (p) in
 @[simp] lemma IsDualClosed.def {C : PointedCone R M} (hC : IsDualClosed p C) :
      dual p.flip (dual p C) = C := hC
@@ -210,12 +214,14 @@ lemma IsDualClosed.lineal {S : PointedCone R M} (hS : S.IsDualClosed p) :
 
 section Field
 
+open Function
+
 variable {R : Type*} [Field R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-variable [Fact p.IsFaithfulPair] in
+variable [Fact (Surjective p)] in
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
     Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
@@ -237,7 +243,7 @@ lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClo
       exact dual_antimono h
     · exact T.isDualClosed p.flip
 
-variable [Fact p.IsFaithfulPair] in
+variable [Fact (Surjective p)] in
 /-- For a dual closed cone, the dual of the submodule span is the lineality space of the dual. -/
 lemma IsDualClosed.dual_span_lineal_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
     .dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by

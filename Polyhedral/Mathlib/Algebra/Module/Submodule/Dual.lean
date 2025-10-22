@@ -258,11 +258,13 @@ end CommSemiring
 variable (p) in
 abbrev IsDualClosed (S : Submodule R M) := dual p.flip (dual p S) = S
 
-variable (p) in
+/-- A submodule is bipolar if it is equal to its double dual. -/
+-- Potentially the more canonical name for `IsDualClosed`.
+alias IsBipolar := IsDualClosed
+
 @[simp] lemma IsDualClosed.def {S : Submodule R M} (hS : IsDualClosed p S) :
      dual p.flip (dual p S) = S := hS
 
-variable (p) in
 lemma IsDualClosed.def_iff {S : Submodule R M} :
     IsDualClosed p S ↔ dual p.flip (dual p S) = S := by rfl
 
@@ -307,8 +309,6 @@ lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
 
 
-
-
 -- NOTE: we want this for only one of the spaces being dual closed. But this version is
 --  useful in the cone case.
 lemma IsDualClosed.inf' {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
@@ -344,48 +344,6 @@ lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
     dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
   := fun _ hx y hy => @hx (p.flip y) hy
 
--- variable (p) in
--- def DualResidue := dual p.flip (dual p {0})
-
--- lemma foo (s : Set M) :
---     dual p.flip (dual p s) ≤ dual .id (dual (Dual.eval R M) s) ⊔ DualResidue p := by
---   sorry
-
--- Q: True?
-variable (p) [Fact p.flip.IsFaithfulPair] in
-lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
-    dual p.flip (dual p s) = dual .id (dual (Dual.eval R M) s) := by
-  rw [le_antisymm_iff, and_comm]
-  constructor
-  · exact dual_dual_eval_le_dual_dual_bilin p s
-  simp only [SetLike.le_def, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe, id_eq]
-  obtain ⟨g, hg⟩ : p.flip.IsFaithfulPair := Fact.elim inferInstance
-  simp only [coe_comp, Function.comp_apply, flip_apply] at hg
-  intro x hx y hy
-  specialize @hx -- (g x)
-  -- (p.flip y) hy
-  let z : M := sorry
-  specialize @hy z
-  sorry
-
-variable (p) [Fact p.flip.IsFaithfulPair] in
-lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
-  unfold IsDualClosed
-  rw [le_antisymm_iff, and_comm]
-  constructor
-  · exact le_dual_dual ..
-  rw [SetLike.le_def]
-  simp only [dual_span, mem_dual, SetLike.mem_coe, mem_singleton_iff, forall_eq, flip_apply]
-  obtain ⟨g, hg⟩ : p.flip.IsFaithfulPair := Fact.elim inferInstance
-  intro y h
-  simp at hg
-  --
-  specialize hg y
-  specialize @h (g y)
-  rw [Eq.comm] at hg
-  have H := hg ∘ h
-  sorry
-
 variable (p) in
 lemma IsDualClosed.to_eval {S : Submodule R M} (hS : S.IsDualClosed p)
     : S.IsDualClosed (Dual.eval R M) := by
@@ -393,34 +351,43 @@ lemma IsDualClosed.to_eval {S : Submodule R M} (hS : S.IsDualClosed p)
   rw [hS] at h
   exact le_antisymm h (le_dual_dual (Dual.eval R M) S)
 
--- **NEEDED** in `Submodule.isDualClosed` below
-variable (p) [Fact p.flip.IsFaithfulPair] in
-lemma IsDualClosed.to_bilin {S : Submodule R M} (hS : S.IsDualClosed (Dual.eval R M))
-    : S.IsDualClosed p := by
+section Surjective
 
-  rw [IsDualClosed, Eq.comm, le_antisymm_iff]
+/- TODO: figure out what are the weakest conditions under which these results are true.
+  is `IsPerfPair` really necessary? -/
+
+variable {R M N : Type*}
+  [CommRing R]
+  [AddCommGroup M] [Module R M]
+  [AddCommGroup N] [Module R N]
+  {p : M →ₗ[R] N →ₗ[R] R} [Fact (Surjective p.flip)]
+
+variable (p) in
+lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
+    dual p.flip (dual p s) = dual .id (dual (Dual.eval R M) s) := by
+  rw [le_antisymm_iff, and_comm]
   constructor
-  · exact le_dual_dual ..
-  nth_rw 2 [← hS]
-  nth_rw 1 [Dual.eval, flip_flip]
-  rw [dual_id]
-  apply dual_antitone
-  rw [← map_coe, SetLike.coe_subset_coe]
-  -- What to do now?
-  --
-  rw [SetLike.le_def]
-  simp only [mem_dual, SetLike.mem_coe, Dual.eval_apply, mem_map]
-  intro x hx
-  obtain ⟨g, hg⟩ : p.flip.IsFaithfulPair := Fact.elim inferInstance
+  · exact dual_dual_eval_le_dual_dual_bilin p s
+  simp only [SetLike.le_def, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe, id_eq]
+  intro x hx y hy
+  obtain ⟨x', hx'⟩ := (Fact.elim inferInstance : Surjective p.flip) y
+  simp only [← hx', flip_apply] at hy
+  specialize @hx x' hy
+  rw [← flip_apply, hx'] at hx
+  exact hx
 
-
-  -- What to do now?
-  ---
-  -- rw [dual_id]
-  -- nth_rw 2 [dual_id]
-
+-- TODO: True without `[Field R]`? Otherwise derive from `FG.isDualClosed`.
+variable (p) [Fact p.flip.IsFaithfulPair] in
+lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
   sorry
 
+variable (p) in
+lemma IsDualClosed.to_bilin {S : Submodule R M} (hS : S.IsDualClosed (Dual.eval R M))
+    : S.IsDualClosed p := by
+  rw [IsDualClosed, dual_dual_bilin_eq_dual_dual_eval]
+  exact hS
+
+end Surjective
 
 section Field
 
@@ -430,17 +397,28 @@ variable {R M N : Type*}
   [AddCommGroup N] [Module R N]
   {p : M →ₗ[R] N →ₗ[R] R}
 
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable (p)
+
+-- TODO: do we need a field, or is PerfPair enough?
+variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is dual closed. -/
-lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := by
+lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := by
   apply IsDualClosed.to_bilin
   nth_rw 1 [IsDualClosed, Dual.eval, flip_flip]
   rw [dual_dualCoannihilator, dual_dualAnnihilator]
   exact Subspace.dualAnnihilator_dualCoannihilator_eq
 
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable [Fact (Surjective p.flip)] in
+/-- Every submodule of a vector space is dual closed. -/
+lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := isDualClosed_flip p.flip S
+
+variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is its own double dual. -/
-lemma dual_dual (S : Submodule R M) : dual p.flip (dual p S) = S := isDualClosed p S
+lemma dual_dual_flip (S : Submodule R N) : dual p (dual p.flip S) = S := isDualClosed_flip p S
+
+variable [Fact (Surjective p.flip)] in
+/-- Every submodule of a vector space is its own double dual. -/
+lemma dual_flip_dual (S : Submodule R M) : dual p.flip (dual p S) = S := dual_dual_flip p.flip S
 
 end Field
 

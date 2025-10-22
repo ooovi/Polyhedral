@@ -17,6 +17,10 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
+/- Intended new name for `PointedCone.span` to better avoid name clashes and confusion
+  with `Submodule.span`. -/
+alias hull := span
+
 -- /-- The span of a set `S` is the smallest pointed cone that contains `S`.
 
 -- Pointed cones being defined as submodules over nonnegative scalars, this is exactly the

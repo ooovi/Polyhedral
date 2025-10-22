@@ -58,8 +58,7 @@ alias FG.dual_cofg := cofg_of_fg
 /-- The intersection of two CoFG cones i CoFG. -/
 lemma inf_cofg {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
     (C ⊓ D).CoFG p := by classical
-  obtain ⟨S, rfl⟩ := hC
-  obtain ⟨T, rfl⟩ := hD
+  obtain ⟨S, rfl⟩ := hC; obtain ⟨T, rfl⟩ := hD
   use S ∪ T; rw [Finset.coe_union, dual_union]
 
 /-- The double dual of a CoFG cone is the cone itself. -/

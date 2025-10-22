@@ -177,19 +177,23 @@ lemma FG.exists_cofg_inf_of_le {S S' : Submodule R N} (hS : S.FG) (hS' : S'.FG) 
   --   exact dual_auxGenSet t.finite_toSet
   --   sorry
 
+section Field
+
 variable {p}
 
-lemma fg_of_cofg_inf_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S ⊓ T).FG :=
+-- ### HIGH PRIORITY! This is needed in the cone theory!
+-- Should be automatic: in a field and with a surjective pairing, every submodule is dual closed
+lemma FG.dual_flip_dual {S : Submodule R M} (hS : S.FG) :
+    dual p.flip (dual p S) = S := sorry -- Submodule.dual_flip_dual p S
+lemma FG.dual_dual_flip {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
+
+lemma inf_cofg_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S ⊓ T).FG :=
   sorry
 
-lemma cofg_of_cofg_inf_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S ⊔ T).CoFG p :=
+lemma sup_cofg_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S ⊔ T).CoFG p :=
   sorry
 
--- ### HIGH PRIORITY! This is needed in the cone theory!
-lemma fg_dual_flip_dual {S : Submodule R M} (hS : S.FG) : dual p.flip (dual p S) = S := by sorry
-
--- ### HIGH PRIORITY! This is needed in the cone theory!
-lemma fg_dual_dual_flip {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
+end Field
 
 end CommRing
 
@@ -200,7 +204,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {M' : Type*} [AddCommGroup M'] [Module R M']
 variable {N' : Type*} [AddCommGroup N'] [Module R N']
-variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {p : M →ₗ[R] N →ₗ[R] R} {p' : M' →ₗ[R] N' →ₗ[R] R}
 
 /- TODO: generalize to arbitrary pairings. -/
 
