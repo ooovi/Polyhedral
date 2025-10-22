@@ -64,6 +64,8 @@ def dual : Submodule R N where
 @[simp] lemma dual_zero : dual p 0 = ⊤ := by ext; simp
 @[simp] lemma dual_bot : dual p {0} = ⊤ := dual_zero
 
+/- TODO: does not need `IsFaithfulPair`, but the weaker `IsSeparating`, which should
+  actually be equivalent to this result. -/
 variable (p) [Fact p.IsFaithfulPair] in
 @[simp] lemma dual_univ : dual p univ = ⊥ := by
   rw [le_antisymm_iff, and_comm]
@@ -399,7 +401,7 @@ variable {R M N : Type*}
 
 variable (p)
 
--- TODO: do we need a field, or is PerfPair enough?
+-- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
 variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is dual closed. -/
 lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := by

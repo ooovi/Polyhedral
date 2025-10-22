@@ -16,6 +16,8 @@ variable {R M : Type*}
 variable [Semiring R]
 variable [AddCommMonoid M] [Module R M]
 
+alias sup_fg := Submodule.FG.sup
+
 lemma embed_fg_of_fg (S : Submodule R M) {T : Submodule R S} (hC : T.FG) :
     (embed S T).FG := Submodule.FG.map _ hC
 
@@ -75,16 +77,12 @@ lemma span_scalars_FG [Module.Finite S R] {s : Submodule S M} (hfg : s.FG) :
 
 end RestrictScalars
 
-section Ring
-
-variable {R M N : Type*}
-variable [Ring R]
-variable [AddCommGroup M] [Module R M]
-variable [AddCommGroup N] [Module R N]
-
 section IsNoetherianRing
 
-variable [IsNoetherianRing R]
+variable {R M N : Type*}
+variable [Ring R] [IsNoetherianRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 /-- The intersection of a submodule with an FG submodule is FG. -/
 lemma inf_fg_right (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (S ⊓ T).FG := by
@@ -100,7 +98,5 @@ lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restric
   rw [restrict_fg_iff_inf_fg]; exact inf_fg_right S hT
 
 end IsNoetherianRing
-
-end Ring
 
 end Submodule

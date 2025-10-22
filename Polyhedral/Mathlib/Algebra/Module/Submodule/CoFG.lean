@@ -6,6 +6,7 @@ Authors: Martin Winter
 
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 
 open Module Function LinearMap
 
@@ -98,7 +99,7 @@ lemma CoFG.isDualClosed_flip {S : Submodule R N} (hS : S.CoFG p) :
 /-- The top submodule is CoFG. -/
 lemma cofg_top : (⊤ : Submodule R N).CoFG p := ⟨⊥, by simp⟩
 
-/-- The top submodule is CoFG. -/
+/-- The bottom submodule is CoFG in finite dimensional space. -/
 lemma cofg_bot [Module.Finite R N] : (⊥ : Submodule R N).CoFG p := by
   -- obtain ⟨s, hs⟩ := fg_top ⊤
   -- use
@@ -177,21 +178,39 @@ lemma FG.exists_cofg_inf_of_le {S S' : Submodule R N} (hS : S.FG) (hS' : S'.FG) 
   --   exact dual_auxGenSet t.finite_toSet
   --   sorry
 
+section IsNoetherianRing
+
+variable {R M N : Type*}
+variable [CommRing R] [IsNoetherianRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- ## PRIORITY
+lemma sup_cofg_fg {S : Submodule R N} (T : Submodule R N) (hS : S.CoFG p) : (S ⊔ T).CoFG p :=
+
+  sorry
+
+lemma FG.exists_cofg_dual {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R M, T.CoFG p.flip ∧ dual p T = S := by
+  use dual p.flip S
+  -- constructor
+  -- · exact sup_fg_cofg hfg <| cofg_of_fg p.flip (ofSubmodule_fg_of_fg hS)
+  -- · simp [dual_sup_dual_inf_dual, Submodule.FG.dual_dual_flip hS]
+  sorry
+
+end IsNoetherianRing
+
 section Field
 
 variable {p}
 
 -- ### HIGH PRIORITY! This is needed in the cone theory!
--- Should be automatic: in a field and with a surjective pairing, every submodule is dual closed
+/- NOTE: in a field and with a surjective pairing, every submodule is dual closed. But maybe
+  if the submodule is FG, we don't need the surjective pairing, but a faithful one suffices. -/
 lemma FG.dual_flip_dual {S : Submodule R M} (hS : S.FG) :
     dual p.flip (dual p S) = S := sorry -- Submodule.dual_flip_dual p S
 lemma FG.dual_dual_flip {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
-
-lemma inf_cofg_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S ⊓ T).FG :=
-  sorry
-
-lemma sup_cofg_fg {S T : Submodule R N} (hS : S.CoFG p) (hT : S.FG) : (S ⊔ T).CoFG p :=
-  sorry
 
 end Field
 
