@@ -5,6 +5,7 @@ Authors: Martin Winter
 -/
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.RingTheory.Ideal.Quotient.Index
+import Mathlib.RingTheory.Finiteness.Prod
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
 
@@ -14,14 +15,15 @@ namespace Submodule
 
 section CommSemiring
 
-variable {R M N : Type*}
-variable [CommRing R]
-variable [AddCommGroup M] [Module R M]
-variable [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
+variable {R M : Type*} [Ring R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 
-/-- A cone is `CoFG` (co-finitely generated) if it is the dual of a finite set.
-  This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
+-- TODO: move to extra file
+@[simp] lemma ker_prod_mkQ_eq_inf (S T : Submodule R M) : ker (S.mkQ.prod T.mkQ) = S ⊓ T := by
+  simp only [LinearMap.ker_prod, Submodule.ker_mkQ]
+
+/-- A submodule `S` is co-finitely generated (CoFG) if the quotient space `M ⧸ S` is
+  finitely generated (`Module.Finite`). -/
 abbrev CoFG' (S : Submodule R M) : Prop := Module.Finite R (M ⧸ S)
 
 /-- The top submodule is CoFG. -/
@@ -49,34 +51,79 @@ lemma sup_cofg' {S : Submodule R M} (hS : S.CoFG') (T : Submodule R M) : (S ⊔ 
 
 alias CoFG'.sup := sup_cofg'
 
+variable [Module.Finite R M] in
+/-- In a finite module every submodule is CoFG. -/
+lemma Finite.cofg' {S : Submodule R M} : S.CoFG' := Module.Finite.quotient R S
+
+noncomputable abbrev corank (S : Submodule R M) : Cardinal := Module.rank R (M ⧸ S)
+  -- ⨅ ι : { T : Submodule R M // S ⊔ T = ⊤ }, (Module.rank R ι.1)
+
+noncomputable abbrev fincorank (S : Submodule R M) : Nat := Module.finrank R (M ⧸ S)
+
 /-
- * introduce corank and cofinrank
+ * corank lemmas
  * CoFG' iff corank is finite
  * generation from finite set
- * If finite dim, then all FG submodules are CoFG
  * relation to CoFG (better in the file CoFG when duality is available)
 -/
 
-variable [Module.Finite R M] in
-lemma FG.cofg'{S : Submodule R M} (hS : S.FG) : S.CoFG' := by
-  -- refine Submodule.finite_quotient_smul ⊤
-  sorry
+open Cardinal
 
-lemma CoFG.exists_finset_map_ker {S : Submodule R N} (hS : S.CoFG p) :
-    ∃ (s : Finset M) (Φ : N →ₗ[R] (s → R)), S = ker Φ := by
-    -- ∃ (ι : Type*) (_ : Fintype ι) (Φ : N →ₗ[R] (ι → R)), S = ker Φ := by
-  obtain ⟨s, rfl⟩ := hS
-  use s
-  sorry
+section StrongRankCondition
+
+variable [StrongRankCondition R]
+
+lemma CoFG'.corank_lt_aleph0 {S : Submodule R M} (hS : S.CoFG') : corank S < ℵ₀
+  := Module.rank_lt_aleph0 R _
+
+lemma corank_lt_aleph0_iff' {S : Submodule R M} [Free R (M ⧸ S)] :
+    corank S < ℵ₀ ↔ CoFG' S := Module.rank_lt_aleph0_iff
+
+end StrongRankCondition
+
+section HasRankNullity
+
+variable [HasRankNullity R]
+
+end HasRankNullity
+
+section IsNoetherianRing
+
+variable [IsNoetherianRing R]
+
+theorem inf_cofg' {S T : Submodule R M} (hS : S.CoFG') (hT : T.CoFG') :
+      (S ⊓ T).CoFG' := by
+  let φ := (mkQ S).prod (mkQ T)
+  rw [← ker_prod_mkQ_eq_inf S T]
+  let ι : range φ →ₗ[R] (M ⧸ S) × (M ⧸ T) := Submodule.subtype _
+  have hι : Function.Injective ι := fun _ _ h => Subtype.ext h
+  exact (Module.Finite.of_injective _ hι).equiv φ.quotKerEquivRange.symm
+
+end IsNoetherianRing
+
+section Field
+
+variable {R : Type*} [Field R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- lemma CoFG.exists_finset_map_ker {S : Submodule R N} (hS : S.CoFG p) :
+--     ∃ (s : Finset M) (Φ : N →ₗ[R] (s → R)), S = ker Φ := by
+--     -- ∃ (ι : Type*) (_ : Fintype ι) (Φ : N →ₗ[R] (ι → R)), S = ker Φ := by
+--   obtain ⟨s, rfl⟩ := hS
+--   use s
+--   sorry
 
 theorem CoFG.cofg' {S : Submodule R N} (hS : S.CoFG p) : S.CoFG' := by
-  obtain ⟨s, Φ, h⟩ := exists_finset_map_ker hS
-
+  -- obtain ⟨s, Φ, h⟩ := exists_finset_map_ker hS
   sorry
 
 variable [IsNoetherianRing R] [Fact p.IsFaithfulPair] in
 theorem CoFG'.cofg {S : Submodule R N} (hS : S.CoFG') : S.CoFG p := by
   sorry
+
+end Field
 
 
 end CommSemiring
