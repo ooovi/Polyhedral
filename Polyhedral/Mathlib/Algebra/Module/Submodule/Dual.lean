@@ -103,7 +103,7 @@ lemma dual_sUnion (S : Set (Set M)) : dual p (⋃₀ S) = sInf (dual p '' S) := 
 
 /-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_iInter_dual_singleton (s : Set M) :
-    dual p s = ⋂  i : s, (dual p {i.val} : Set N) := by ext; simp
+    dual p s = ⋂ i : s, (dual p {i.val} : Set N) := by ext; simp
 
 /-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_Inf_dual_singleton (s : Set M) :
@@ -113,12 +113,43 @@ lemma dual_eq_Inf_dual_singleton (s : Set M) :
 lemma dual_eq_Inf_dual_singleton' (s : Finset M) :
     dual p s = ⨅ x ∈ s, dual p {x} := by ext; simp
 
+/-- The dual is the kernel of a linear map into a free module. -/
+lemma dual_ker_pi (s : Set M) : dual p s = ker (LinearMap.pi fun x : s => p x) := by
+  simp only [dual_eq_Inf_dual_singleton s, ker_pi, dual_singleton, ← sInf_image, sInf_image']
+
+/-- The dual is the kernel of a linear map into a free module. -/
+lemma dual_ker_pi' (s : Finset M) : dual p s = ker (LinearMap.pi fun x : s => p x) := by
+  simp [dual_ker_pi]
+
+/-- The dual is the kernel of a linear map into a free module. -/
+lemma dual_exists_fun_ker (s : Set M) : ∃ f : N →ₗ[R] (s → R), dual p s = ker f
+    := ⟨_, dual_ker_pi s⟩
+
+/-- The dual is the kernel of a linear map into a free module. -/
+lemma dual_exists_fun_ker' (s : Finset M) : ∃ f : N →ₗ[R] (s → R), dual p s = ker f
+    := ⟨_, dual_ker_pi' s⟩
+
 /-- Any set is a subset of its double dual cone. -/
 lemma subset_dual_dual : s ⊆ dual p.flip (dual p s) := fun _x hx _y hy ↦ hy hx
 
+alias le_dual_dual := subset_dual_dual
+
+-- variable (p) in
+-- /-- Any cone is a subcone of its double dual cone. -/
+-- lemma le_dual_dual (S : Submodule R M) : S ≤ dual p.flip (dual p S) := subset_dual_dual
+
+lemma le_dual_of_le_dual {S : Submodule R M} {T : Submodule R N}
+    (hST : T ≤ dual p S) : S ≤ dual p.flip T :=
+  le_trans subset_dual_dual (dual_antitone hST)
+
+lemma dual_le_iff_dual_le {S : Submodule R M} {T : Submodule R N} :
+    S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
+
 variable (p) in
 /-- Any cone is a subcone of its double dual cone. -/
-lemma le_dual_dual (S : Submodule R M) : S ≤ dual p.flip (dual p S) := subset_dual_dual
+lemma dual_dual_mono {s t : Set M} (hST : s ⊆ t) :
+    dual p.flip (dual p s) ≤ dual p.flip (dual p t) := by
+  exact dual_antitone <| dual_antitone hST
 
 variable (s) in
 @[simp] lemma dual_dual_flip_dual : dual p (dual p.flip (dual p s)) = dual p s :=
@@ -142,6 +173,20 @@ lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
 
 lemma dual_id_map (S : Submodule R M) : dual p S = dual .id (map p S) := by ext x; simp
 
+lemma dual_id_surj (s : Set (Dual R N)) (h : Surjective p) :
+    dual p (surjInv h '' s) = dual .id s := by simp [dual_id, image_image,surjInv_eq]
+
+variable [h : Fact (Surjective p)] in
+lemma dual_exists_set_id (s : Set (Dual R N)) : ∃ t : Set M, dual p t = dual .id s := by
+  use surjInv h.out '' s
+  ext x; simp [surjInv_eq]
+
+lemma dual_sup (S T : Submodule R M) : dual p (S ⊔ T : Submodule R M) = dual p (S ∪ T)
+    := by nth_rw 2 [← dual_span]; simp
+
+lemma dual_sup_dual_inf_dual (S T : Submodule R M) :
+    dual p (S ⊔ T : Submodule R M) = dual p S ⊓ dual p T := by rw [dual_sup, dual_union]
+
 /-- The dual submodule w.r.t. the standard dual map is the dual annihilator. -/
 lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dualAnnihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
@@ -152,13 +197,6 @@ lemma dual_dualCoannihilator (S : Submodule R (Dual R M)) : dual .id S = S.dualC
 
 lemma dual_dualCoannihilator' (S : Submodule R M) : dual p S = (map p S).dualCoannihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
-
---------------------
-
--- **NEEDED** for `PointedCone.IsDualClosed.dual_lineal_span_dual`
-lemma dual_sSup_sInf_dual (S : Set (Submodule R M)) :
-    dual p (sSup S : Submodule R M) = sInf ((dual p ∘ SetLike.coe) '' S) := by
-  sorry
 
 -------------------
 
@@ -223,12 +261,16 @@ lemma dual_map' (f : M →ₗ[R] M') (s : Set (Dual R M')) :
 
 --------------
 
-lemma dual_sup (S T : Submodule R M) :
-    dual p (S ⊔ T : Submodule R M) = dual p (S ∪ T) := by
-  nth_rw 2 [←dual_span]; rw [span_union']
+lemma dual_sSup (s : Set (Submodule R M)) :
+    dual p (sSup s : Submodule R M) = dual p (sUnion (SetLike.coe '' s)) := by
+  rw [sUnion_image]; nth_rw 2 [←dual_span]; rw [span_sSup]
 
 lemma dual_sup_dual_eq_inf_dual (S T : Submodule R M) :
     dual p (S ⊔ T : Submodule R M) = dual p S ⊓ dual p T := by rw [dual_sup, dual_union]
+
+lemma dual_sSup_sInf_dual (s : Set (Submodule R M)) :
+    dual p (sSup s : Submodule R M) = sInf (dual p '' (SetLike.coe '' s)) := by
+  rw [dual_sSup, dual_sUnion]
 
 lemma dual_sup_dual_le_dual_inf (S T : Submodule R M) :
     dual p S ⊔ dual p T ≤ dual p (S ⊓ T : Submodule R M) := by
@@ -293,6 +335,21 @@ lemma IsDualClosed.dual_inj {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : 
     (hST : dual p S = dual p T) : S = T := by
   rw [← hS, ← hT, hST]
 
+lemma IsDualClosed.dual_antitone_rev {S T : Submodule R M}
+    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p)
+      (hST : dual p S ≤ dual p T) : T ≤ S := by
+  rw [← hS, ← hT]; exact dual_antitone hST
+
+lemma IsDualClosed.dual_le_of_dual_le {S : Submodule R M} {T : Submodule R N}
+    (hS : S.IsDualClosed p) (hST : dual p S ≤ T) : dual p.flip T ≤ S := by
+  rw [← hS]; exact dual_antitone hST
+
+-- NOTE: This is the characterizing property of an antitone GaloisConnection.
+lemma dual_le_iff_dual_le_of_isDualClosed {S : Submodule R M} {T : Submodule R N}
+    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p.flip) :
+      dual p S ≤ T ↔ dual p.flip T ≤ S
+    := ⟨hS.dual_le_of_dual_le, hT.dual_le_of_dual_le⟩
+
 @[simp] lemma IsDualClosed.dual_inj_iff {S T : Submodule R M} (hS : S.IsDualClosed p)
     (hT : T.IsDualClosed p) : dual p S = dual p T ↔ S = T := ⟨dual_inj hS hT, by intro h; congr ⟩
 
@@ -307,7 +364,7 @@ lemma IsDualClosed.exists_of_dual {S : Submodule R N} (hS : S.IsDualClosed p.fli
 variable (p) in
 lemma isDualClosed_top : IsDualClosed p ⊤ := by
   rw [IsDualClosed, le_antisymm_iff, and_comm]
-  exact ⟨le_dual_dual p ⊤, by simp⟩
+  exact ⟨subset_dual_dual, by simp⟩
 
 variable (p) in
 @[simp] lemma dual_dual_top : dual p.flip (dual p ⊤) = ⊤
@@ -321,14 +378,60 @@ variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
 
-
 -- NOTE: we want this for only one of the spaces being dual closed. But this version is
 --  useful in the cone case.
-lemma IsDualClosed.inf' {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
-    (S ⊓ T).IsDualClosed p := by
+protected lemma IsDualClosed.inf' {S T : Submodule R M}
+    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) : (S ⊓ T).IsDualClosed p := by
   rw [← hS, ← hT, IsDualClosed, ← dual_sup_dual_eq_inf_dual, dual_flip_dual_dual_flip]
 
-lemma IsDualClosed.inf {S T : Submodule R M} (hS : S.IsDualClosed p) :
+-- NOTE: it probably suffices if one is dual closed, but still useful in the cone case.
+protected lemma IsDualClosed.sInf {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClosed p) :
+    (sInf s).IsDualClosed p := by
+  have hs : s = dual p.flip '' (SetLike.coe '' (dual p '' (SetLike.coe '' s))) := by
+    ext T; simp only [mem_image, exists_exists_and_eq_and]
+    constructor
+    · exact fun hT => ⟨T, hT, hS T hT⟩
+    · intro h
+      obtain ⟨t, hts, ht⟩ := h
+      simpa [← ht, hS t hts] using hts
+  rw [hs, ← dual_sSup_sInf_dual]
+  exact dual_IsDualClosed _ _
+
+-- variable (p) in
+-- /-- The span of a set `s ⊆ M` is the smallest submodule of M that contains `s`. -/
+-- def dualClosure (s : Set M) : Submodule R M := dual p.flip (dual p s)
+
+-- lemma dualClosure_isDualClosed (s : Set M) : (dualClosure p s).IsDualClosed p := by
+--   simp [dualClosure, IsDualClosed, dual_dual_flip_dual]
+
+-- variable (p) in
+-- theorem IsDualClosed.dualClosure_eq_sInf (s : Set M) :
+--     dualClosure p s = sInf { S : Submodule R M | S.IsDualClosed p ∧ s ⊆ S } := by
+--   rw [Eq.comm, le_antisymm_iff]
+--   constructor
+--   · exact sInf_le ⟨dual_IsDualClosed _ _, subset_dual_dual⟩
+--   rw [SetLike.le_def]
+--   intro x hx
+--   simp only [mem_sInf, mem_setOf_eq, and_imp]
+--   intro T hT hsT
+--   rw [← hT]
+--   exact (dual_dual_mono p hsT) hx
+
+-- theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
+--     S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
+--   nth_rw 1 [← hS]; exact dualClosure_eq_sInf p S
+
+theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
+    S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
+  rw [Eq.comm, le_antisymm_iff]
+  constructor
+  · exact sInf_le ⟨hS, by simp⟩
+  simp only [SetLike.le_def, mem_sInf, mem_setOf_eq, and_imp]
+  intro x hx T hT hsT
+  rw [← hT]; rw [← hS] at hx
+  exact (dual_dual_mono p hsT) hx
+
+protected lemma IsDualClosed.inf {S T : Submodule R M} (hS : S.IsDualClosed p) :
     (S ⊓ T).IsDualClosed p := by
   rw [← hS]
   sorry
@@ -362,7 +465,7 @@ lemma IsDualClosed.to_eval {S : Submodule R M} (hS : S.IsDualClosed p)
     : S.IsDualClosed (Dual.eval R M) := by
   have h := dual_dual_eval_le_dual_dual_bilin p S
   rw [hS] at h
-  exact le_antisymm h (le_dual_dual (Dual.eval R M) S)
+  exact le_antisymm h subset_dual_dual
 
 section Surjective
 
@@ -432,6 +535,85 @@ lemma dual_dual_flip (S : Submodule R N) : dual p (dual p.flip S) = S := isDualC
 variable [Fact (Surjective p.flip)] in
 /-- Every submodule of a vector space is its own double dual. -/
 lemma dual_flip_dual (S : Submodule R M) : dual p.flip (dual p S) = S := dual_dual_flip p.flip S
+
+variable [Fact (Surjective p)] in
+lemma exists_set_dual (S : Submodule R N) : ∃ s : Set M, dual p s = S := by
+  use dual p.flip S; exact dual_dual_flip p S
+
+------
+
+-- vvvvv Work in Progress
+
+-- **NOTE**: No need no Field so far!!
+
+lemma exists_fun_dual_ker {ι : Type*} (f : M →ₗ[R] ((ι → R) →ₗ[R] R)) :
+    ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id (LinearMap.range g) = ker f := by
+  simp only [dual_dualCoannihilator, dualCoannihilator_range_eq_ker_flip]
+  use f.flip; simp
+
+lemma exists_fun_dual_ker' {ι : Type*} [Fintype ι] (f : M →ₗ[R] (ι → R)) :
+    ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id (LinearMap.range g) = ker f := by
+  let h := (Pi.basisFun R ι).constr (M' := R) R
+  obtain ⟨g, hg⟩ := exists_fun_dual_ker (h.comp f)
+  rw [LinearEquiv.ker_comp] at hg
+  use g
+
+lemma exists_fun_dual_ker'' {ι : Type*} [Fintype ι] (f : M →ₗ[R] (ι → R)) :
+    ∃ g : ι → (Dual R M), dual .id (range g) = ker f := by
+  obtain ⟨g, hg⟩ := exists_fun_dual_ker' f
+  let h := (Pi.basisFun R ι).constr (M' := (Dual R M)) R
+  use h.symm g
+  rw [← hg]
+  rw [← dual_span]
+  unfold h
+  -- rw [Basis.constr_apply]
+  congr
+  ext x
+  simp [mem_span]
+  constructor
+  · intro h
+
+    sorry
+  · sorry
+
+lemma exists_fun_dual_ker'''' {ι : Type*} [Fintype ι] (f : M →ₗ[R] (ι → R)) :
+    ∃ g : ι → (Dual R M), dual .id (range g) = ker f := by classical
+  let g := (Pi.basisFun R ι).constr (M' := R) R
+  let f' := g.comp f
+  use (f'.flip <| (Pi.basisFun R ι) ·)
+  ext x
+  simp
+  -- rw [← flip_flip f']
+  -- simp only [flip_apply f'.flip]
+  -- unfold f'
+  -- dsimp
+  unfold f'; clear f'
+  simp
+  #check Pi.single
+  constructor
+  · intro h
+    unfold g at h
+  -- apply Module.Basis.forall_coord_eq_zero_iff
+    -- rw [Pi.single_a]
+    sorry
+  · intro h
+    rw [h]
+    simp
+
+variable [h : Fact (Surjective p)] in
+lemma exists_fun_dual_ker''' {ι : Type*} [Fintype ι] (f : N →ₗ[R] (ι → R)) :
+    ∃ g : ι → M, dual p (range g) = ker f := by
+  obtain ⟨g, hg⟩ := exists_fun_dual_ker'' f
+  use (surjInv h.out).comp g
+  rw [← hg, range_comp]
+  exact dual_id_surj _ _
+
+variable [Fact (Surjective p)] in
+lemma exists_finset_dual_ker' {ι : Type*} [Fintype ι] (f : N →ₗ[R] (ι → R)) :
+    ∃ s : Finset M, dual p s = ker f := by
+  obtain ⟨g, hg⟩ := exists_fun_dual_ker''' p f
+  use (finite_range g).toFinset
+  simpa using hg
 
 end Field
 

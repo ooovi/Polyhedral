@@ -38,6 +38,11 @@ instance : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
 lemma ofSubmodule_coe (S : Submodule R M) : (ofSubmodule S : Set M) = S := by rfl
   -- also provable from `Submodule.coe_restrictScalars R S`
 
+alias ofSubmodule_toSet_coe := ofSubmodule_coe
+
+@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T
+  := Submodule.restrictScalars_inj ..
+
 end Semiring
 
 section Semiring_AddCommGroup

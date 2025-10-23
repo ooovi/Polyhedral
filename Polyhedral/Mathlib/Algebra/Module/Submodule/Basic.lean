@@ -12,6 +12,8 @@ section Semiring
 
 variable {M S R : Type*} [Semiring R] [Semiring S] [AddCommMonoid M] [Module R M]
 
+alias le_span := subset_span
+
 lemma span_gc : GaloisConnection (span R : Set M → Submodule R M) (SetLike.coe) := sorry
 def span_gi : GaloisCoinsertion (span R : Set M → Submodule R M) (SetLike.coe) := sorry
 
