@@ -170,7 +170,7 @@ lemma FG.exists_cofg_flip_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
   obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
   use C' ⊔ dual p.flip S
   constructor
-  · exact sup_fg_cofg hfg <| cofg_of_fg p.flip (ofSubmodule_fg_of_fg hS)
+  · exact sup_fg_cofg hfg <| cofg_of_fg p.flip (coe_fg hS)
   · simp [dual_sup_dual_inf_dual, Submodule.FG.dual_dual_flip hS]
     -- TODO: prove `Submodule.FG.dual_dual_flip` (the equivalent for cones was already proven here).
 

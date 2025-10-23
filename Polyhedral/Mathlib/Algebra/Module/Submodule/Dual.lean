@@ -84,8 +84,11 @@ alias dual_antitone := dual_le_dual
 
 /-- The inner dual cone of a singleton is given by the preimage of the positive cone under the
 linear map `p x`. -/
-lemma dual_singleton (x : M) : dual p {x} = (⊥ : Submodule R R).comap (p x) := by
-  simp; sorry
+lemma dual_singleton (x : M) : dual p {x} = ker (p x) := by
+  ext x; simp [Eq.comm]
+
+-- lemma dual_singleton' (x : M) : dual p {x} = (⊥ : Submodule R R).comap (p x) := by
+--   simp; sorry
 
 lemma dual_union (s t : Set M) : dual p (s ∪ t) = dual p s ⊓ dual p t := by aesop
 
@@ -100,7 +103,15 @@ lemma dual_sUnion (S : Set (Set M)) : dual p (⋃₀ S) = sInf (dual p '' S) := 
 
 /-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_iInter_dual_singleton (s : Set M) :
-    dual p s = ⋂ i : s, (dual p {i.val} : Set N) := by ext; simp
+    dual p s = ⋂  i : s, (dual p {i.val} : Set N) := by ext; simp
+
+/-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
+lemma dual_eq_Inf_dual_singleton (s : Set M) :
+    dual p s = ⨅ x ∈ s, dual p {x} := by ext; simp
+
+/-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
+lemma dual_eq_Inf_dual_singleton' (s : Finset M) :
+    dual p s = ⨅ x ∈ s, dual p {x} := by ext; simp
 
 /-- Any set is a subset of its double dual cone. -/
 lemma subset_dual_dual : s ⊆ dual p.flip (dual p s) := fun _x hx _y hy ↦ hy hx
