@@ -38,6 +38,8 @@ open PointedCone
 
 
 
+/- This namespace should be in Faces.lean.
+  If copied over, please replace all `subdual'` by `subdual`. -/
 
 namespace PointedCone
 
@@ -46,29 +48,36 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
 
-variable (p) in
+variable (p)
+
 def subdual' (C F : PointedCone R M) : PointedCone R N
     := (dual p C) ⊓ (.dual p F : Submodule R N)
 
 variable {C : PointedCone R M}
 
-variable (p) in
+/-- The subdual is antitone. -/
 lemma subdual_antitone {F₁ F₂ : PointedCone R M} (hF : F₁ ≤ F₂) :
-    subdual' p C F₂ ≤ subdual' p C F₁ := by
-  sorry
+    subdual' p C F₂ ≤ subdual' p C F₁ := sorry
 
 variable (hC : C.IsDualClosed p)
 
-variable (p) in
-lemma subdual_isFaceOf_dual {F : PointedCone R M} (hF : F.IsFaceOf C) :
-    (subdual' p C F).IsFaceOf (dual p C) := by
-  sorry
-
-variable (p) in
+/-- The subdual is injective. -/
 lemma subdual_inj {F₁ F₂ : PointedCone R M}
-    (hF : subdual' p C F₁ = subdual' p C F₂) : F₁ = F₂ := by
-  sorry
+    (hF : subdual' p C F₁ = subdual' p C F₂) : F₁ = F₂ := sorry
 
+/-- The subdual is involutive. -/
+lemma subdual_subdual {F : PointedCone R M} :
+    subdual' p.flip (dual p C) (subdual' p C F) = F := sorry
+
+/-- The subdual of a face is a face. -/
+lemma subdual_isFaceOf_dual {F : PointedCone R M} (hF : F.IsFaceOf C) :
+    (subdual' p C F).IsFaceOf (dual p C) := sorry
+
+/-- The subdual is strictly antitone. -/
+lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
+    subdual' p C F₁ ≤ subdual' p C F₂ ↔ F₂ ≤ F₁ where
+  mpr := subdual_antitone p
+  mp := sorry
 
 end PointedCone
 
