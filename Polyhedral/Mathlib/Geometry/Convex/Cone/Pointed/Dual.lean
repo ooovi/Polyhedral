@@ -198,15 +198,15 @@ lemma dual_span_lineal_dual (C : PointedCone R M) :
   rw [Submodule.coe_set_neg]
   rw [← dual_neg, lineal_inf_neg]
 
-lemma dual_span_lineal_dual' (C : PointedCone R M) :
-    Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
-  rw [← ofSubmodule_inj]
-  rw [← dual_eq_submodule_dual]
-  rw [← PointedCone.ofSubmodule_coe]
-  rw [← sup_neg_eq_submodule_span]
-  rw [dual_sup_dual_inf_dual]
-  rw [Submodule.coe_set_neg]
-  rw [← dual_neg, lineal_inf_neg]
+-- lemma dual_span_lineal_dual' (C : PointedCone R M) :
+--     Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
+--   rw [← ofSubmodule_inj]
+--   rw [← dual_eq_submodule_dual]
+--   rw [← PointedCone.ofSubmodule_coe]
+--   rw [← sup_neg_eq_submodule_span]
+--   rw [dual_sup_dual_inf_dual]
+--   rw [Submodule.coe_set_neg]
+--   rw [← dual_neg, lineal_inf_neg]
 
 
 
