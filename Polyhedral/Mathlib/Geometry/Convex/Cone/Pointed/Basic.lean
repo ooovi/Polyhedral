@@ -308,31 +308,10 @@ lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S :=
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
-lemma span_inter_lineal_eq_lineal (s : Set M):
-    span R (s ∩ (span R s).lineal) = (span R s).lineal := by
-  rw [← antisymm_iff (r := LE.le)]
-  -- constructor
-  -- · rw [← Submodule.span_eq (C.lineal : PointedCone R M)]
-  --   exact Submodule.span_mono (by simp)
-  -- · rw [← SetLike.coe_subset_coe]
-  --   rw [Set.subset_def]
-  --   intro x hx
-  --   let S:= s ∩ C.lineal
-  --   let S' := s \ C.lineal
-  --   have hS : S ∪ S' = s := by simp [S, S']
-  --   have hS' : S ∩ S' = ∅ := by aesop
-
-  --   --have hs : s = (s ∩ C.lineal) ∪ ()
-  --   -- rw [Submodule.mem_span_finite_of_mem_span] at h
-    -- sorry
-  sorry
-
-lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
-  sorry
-
 section Ring
 
-variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 
 -- @[simp] -- no simp because right side has twice as many `x`?
 lemma lineal_mem {x : M} {C : PointedCone R M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
@@ -366,6 +345,62 @@ lemma mem_of_neg_mem_lineal {C : PointedCone R M} {x : M} (hx : -x ∈ C.lineal)
   exact lineal_le C hx
 
 end Ring
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+/- In this section we show properties of lineal that also follow from lineal
+  being a face. But we need this earlier than faces, so we need to prove that
+  lineal is a face here. This can then be resused later.
+
+  Alternatively, lineal can be defined in Faces.lean
+-/
+
+/- NOTE: move somewhere else -/
+lemma submodule_span_of_span {s : Set M} {S : Submodule R M} (hsS : span R s = S) :
+    Submodule.span R s = S := by
+  simpa using congrArg (Submodule.span R ∘ SetLike.coe) hsS
+
+/- NOTE: move somewhere else -/
+lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = S) :
+    span R s = Submodule.span R s := by
+  obtain ⟨S, hS⟩ := h; rw [hS]
+  simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
+
+lemma lineal_isExtreme {C : PointedCone R M} {x y : M} {c : R} (hc : c > 0)
+    (hxy : x + c • y ∈ C.lineal) : x ∈ C.lineal ∧ y ∈ C.lineal := by
+
+  sorry
+
+variable (R) in
+lemma span_inter_lineal_eq_lineal (s : Set M) :
+    span R (s ∩ (span R s).lineal) = (span R s).lineal := by
+  rw [← antisymm_iff (r := LE.le)]
+  -- constructor
+  -- · rw [← Submodule.span_eq (C.lineal : PointedCone R M)]
+  --   exact Submodule.span_mono (by simp)
+  -- · rw [← SetLike.coe_subset_coe]
+  --   rw [Set.subset_def]
+  --   intro x hx
+  --   let S:= s ∩ C.lineal
+  --   let S' := s \ C.lineal
+  --   have hS : S ∪ S' = s := by simp [S, S']
+  --   have hS' : S ∩ S' = ∅ := by aesop
+
+  --   --have hs : s = (s ∩ C.lineal) ∪ ()
+  --   -- rw [Submodule.mem_span_finite_of_mem_span] at h
+    -- sorry
+  sorry
+
+lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classical
+  obtain ⟨s, hs⟩ := hC
+  use (s.finite_toSet.inter_of_left C.lineal).toFinset -- means {x ∈ s | x ∈ C.lineal}
+  rw [submodule_span_of_span]
+  simpa [← hs] using span_inter_lineal_eq_lineal R (s : Set M)
+
+end DivisionRing
 
 end Ring_AddCommGroup
 
