@@ -10,17 +10,93 @@ namespace Submodule
 
 section Semiring
 
-variable {M S R : Type*} [Semiring R] [Semiring S] [AddCommMonoid M] [Module R M]
+variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
+
+-- Is this the better name?
+protected alias span_gi := Submodule.gi
+
+-- Q: Why does the following not exist?
+-- instance {S : Submodule R M} : CoeOut (Submodule R S) (Submodule R M) := ⟨embed S⟩
 
 alias le_span := subset_span
 
-lemma span_gc : GaloisConnection (span R : Set M → Submodule R M) (SetLike.coe) := sorry
-def span_gi : GaloisCoinsertion (span R : Set M → Submodule R M) (SetLike.coe) := sorry
+-- Q: should `Submodule.span_union` be a simp lemma? Yael says possibly
+example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
+  := Submodule.span_union S S'
 
-variable {M S R : Type*} [Semiring R] [Semiring S]
-  [AddCommMonoid M] [Module S R] [Module R M] [Module S M] [IsScalarTower S R M]
+@[simp] lemma span_union' (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
+  := (Submodule.gi R M).l_sup_u S S'
+
+-- span_sup'
+example (S S' : Submodule R M) : span R (S ⊔ S' : Submodule R M) = S ⊔ S' := span_eq _
+
+@[simp] lemma span_inter (S S' : Submodule R M) : span R (S ∩ S') = S ⊓ S'
+    := (Submodule.gi R M).l_inf_u S S'
+
+alias span_inf := span_inter
+
+lemma span_sSup (s : Set (Submodule R M)) :
+    span R (sSup (SetLike.coe '' s)) = sSup s := (Submodule.gi R M).l_sSup_u_image s
+
+lemma span_sInf (s : Set (Submodule R M)) :
+    span R (sInf (SetLike.coe '' s)) = sInf s := (Submodule.gi R M).l_sInf_u_image s
+
+lemma span_biUnion (s : Set (Submodule R M)) :
+    span R (⋃ S ∈ s, S) = sSup s := by simpa using span_sSup s
+
+lemma span_biInter (s : Set (Submodule R M)) :
+    span R (⋂ S ∈ s, S) = sInf s := by simpa using span_sInf s
+
+alias span_iInter := span_biInter
+
+/- I suggest the alternative naming `restrict` for `submoduleOf` for the following reason:
+  we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
+  makes no sense. Using a different name would be inconsistent.
+  Not also that this cannot be an alias of `submoduleOf` because the argument are in the
+  opposite order. This is in order to be consistent with `embed` for which the other order
+  is not possible.
+-/
+
+/-- The restriction of `S ⊓ T` considered as a submodule of `S`. -/
+abbrev restrict (S T : Submodule R M) : Submodule R S := T.submoduleOf S -- T.comap S.subtype
+
+@[simp] lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := submoduleOf_self S
+
+lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hCD : T₁ ≤ T₂) :
+    restrict S T₁ ≤ restrict S T₂ := fun _ => (hCD ·)
+
+lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
+    restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
+  := by ext x; simp [restrict, submoduleOf]
+
+/-- A submodule `T` of a submodule `S` of `M` intepreted as a submodule of `M`. -/
+abbrev embed {S : Submodule R M} (T : Submodule R S) : Submodule R M := T.map S.subtype
+
+@[simp] lemma embed_restrict (S T : Submodule R M) : embed (restrict S T) = S ⊓ T
+  := map_comap_subtype _ _
+
+-- @[simp] lemma restrict_embed {S : Submodule R M} (T : Submodule R S) : restrict S (embed T) = T
+--   := sorry
+
+lemma embed_inj {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed T₁ = embed T₂) :
+    T₁ = T₂ := by sorry
+
+-- lemma embed_mono {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed T₁ ≤ embed T₂) :
+--     T₁ ≤ T₂ := sorry
+
+def embed_orderEmbed (S : Submodule R M) : OrderEmbedding (Submodule R S) (Submodule R M) where
+  toFun := embed
+  inj' := @embed_inj _ _ _ _ _ S
+  map_rel_iff' := by
+    intro T U
+    simp
+    sorry
 
 section RestrictedScalar
+
+variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M]
+
+open Function
 
 @[simp] lemma restrictScalars_inf {s t : Submodule R M} :
     (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
@@ -31,74 +107,34 @@ section RestrictedScalar
   ext x; simp [mem_sup]
 
 @[simp] lemma restrictScalars_sSup {s : Set (Submodule R M)} :
-    (sSup s).restrictScalars S = sSup (restrictScalars S '' s):= by
-  ext x
-  simp [mem_sSup]
-  constructor
-  · intro h T ha
-    specialize h (span R T)
-    sorry
-  · sorry
+    (sSup s).restrictScalars S = sSup (restrictScalars S '' s) :=
+  (restrictScalarsLatticeHom S R M).map_sSup' s
+
+@[simp] lemma restrictScalars_sInf {s : Set (Submodule R M)} :
+    (sInf s).restrictScalars S = sInf (restrictScalars S '' s) :=
+  (restrictScalarsLatticeHom S R M).map_sInf' s
 
 end RestrictedScalar
-
-example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
-  := Submodule.span_union S S' -- should `Submodule.span_union` be a simp lemma? Yael says possibly
-
-@[simp] lemma span_union' (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
-  := by rw [Submodule.span_union]; simp
-@[simp] lemma span_inter (S S' : Submodule R M) : span R (S ∩ S') = S ⊓ S'
-    := by rw [←coe_inf, span_eq]
-
-lemma span_sSup (S : Set (Submodule R M)) :
-    span R (⋃ C ∈ S, C : Set M) = sSup S := by
-  rw [Set.biUnion_eq_iUnion]
-  rw [Submodule.span_iUnion]
-  simp
-  rw [sSup_eq_iSup]
-  --
-  --rw [Submodule.span_iUnion]
-  --
-  -- rw [← span_eq (p := sSup S)]
-  -- apply congr _
-  -- ext x
-  -- simp
-  -- simp
-  sorry
-
--- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
--- alias restrict := submoduleOf
-/-- The restriction of `S ⊓ T` considered as a submodule of `S`. -/
-abbrev restrict (S T : Submodule R M) : Submodule R S := T.submoduleOf S -- T.comap S.subtype
-
-/-- A submodule `T` of a submodule `S` of `M` intepreted as a submodule of `M`. -/
-abbrev embed (S : Submodule R M) (T : Submodule R S) : Submodule R M := T.map S.subtype
-
--- def restrict_set (S : Set M) (T : Submodule R M) : Set T := S.preimage T.subtype
-
--- Q: is this a good idea? It is not in mathlib for a reason.
--- instance {S : Submodule R M} : CoeOut (Submodule R S) (Submodule R M) := ⟨embed S⟩
-
--- @[simp] -- not neede because simp already solves this goal
-lemma embed_restrict (S T : Submodule R M) : embed S (restrict S T) = S ⊓ T
-  := map_comap_subtype _ _
-
-lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := submoduleOf_self S
-
-lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hCD : T₁ ≤ T₂) :
-    restrict S T₁ ≤ restrict S T₂ := fun _ => (hCD ·)
-
-lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
-    restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
-  := by ext x; simp [restrict, submoduleOf]
 
 section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 
-@[simp]
-lemma restrict_embed (S : Submodule R M) (T : Submodule R S) : restrict S (embed S T) = T
+-- Q: Does this really need Ring?
+@[simp] lemma restrict_embed {S : Submodule R M} (T : Submodule R S) : restrict S (embed T) = T
   := by simp [submoduleOf, comap_map_eq]
+
+def embed_gi (S : Submodule R M) : GaloisCoinsertion (embed) (restrict S) where
+  choice := fun T _ => restrict S T
+  gc T U := by
+    constructor
+    · intro h
+      sorry
+    · intro h
+      sorry
+  u_l_le T := le_of_eq (restrict_embed T)
+  choice_eq := by simp
+
 
 end Ring
 

@@ -263,7 +263,7 @@ lemma dual_map' (f : M →ₗ[R] M') (s : Set (Dual R M')) :
 
 lemma dual_sSup (s : Set (Submodule R M)) :
     dual p (sSup s : Submodule R M) = dual p (sUnion (SetLike.coe '' s)) := by
-  rw [sUnion_image]; nth_rw 2 [←dual_span]; rw [span_sSup]
+  rw [sUnion_image]; nth_rw 2 [←dual_span]; rw [span_biUnion]
 
 lemma dual_sup_dual_eq_inf_dual (S T : Submodule R M) :
     dual p (S ⊔ T : Submodule R M) = dual p S ⊓ dual p T := by rw [dual_sup, dual_union]

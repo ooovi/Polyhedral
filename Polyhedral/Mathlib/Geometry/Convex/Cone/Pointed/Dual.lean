@@ -77,7 +77,7 @@ example (s : Set M) : Submodule.span R (dual p s : Set N) = Submodule.dual p s :
 
 lemma dual_sSup (S : Set (PointedCone R M)) :
     dual p (⋃ C ∈ S, C) = dual p (sSup S : PointedCone R M) := by
-  rw [← dual_span, span, Submodule.span_sSup]
+  rw [← dual_span, span, Submodule.span_biUnion]
 
 lemma span_sSup_coe (S : Set (PointedCone R M)) :
     span R (sSup S : PointedCone R M) = span R (sSup (SetLike.coe '' S)) := by
