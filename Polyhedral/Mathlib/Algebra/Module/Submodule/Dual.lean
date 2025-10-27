@@ -64,8 +64,8 @@ def dual : Submodule R N where
 @[simp] lemma dual_zero : dual p 0 = ⊤ := by ext; simp
 @[simp] lemma dual_bot : dual p {0} = ⊤ := dual_zero
 
-/- TODO: does not need `IsFaithfulPair`, but the weaker `IsSeparating`, which should
-  actually be equivalent to this result. -/
+/- TODO: does not need `IsFaithfulPair`, but the weaker `IsSeparating`, which is
+  actually be equivalent to this statement. -/
 variable (p) [Fact p.IsFaithfulPair] in
 @[simp] lemma dual_univ : dual p univ = ⊥ := by
   rw [le_antisymm_iff, and_comm]
@@ -77,7 +77,6 @@ variable (p) [Fact p.IsFaithfulPair] in
 
 alias dual_top := dual_univ
 
--- SHOULD HAVE: variable (p) in
 @[gcongr] lemma dual_le_dual (h : t ⊆ s) : dual p s ≤ dual p t := fun _y hy _x hx ↦ hy (h hx)
 
 alias dual_antitone := dual_le_dual
@@ -169,6 +168,7 @@ lemma dual_span (s : Set M) : dual p (Submodule.span R s) = dual p s := by
 
 -- ----------------
 
+/-- Conversion to the standard algebraic duality operator. -/
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
 
 lemma dual_id_map (S : Submodule R M) : dual p S = dual .id (map p S) := by ext x; simp
@@ -209,19 +209,17 @@ abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
 
 lemma dual_gc' : GaloisConnection (toDual ∘ dual' p) (dual' p.flip ∘ ofDual) := by
   intro S T
-  simp
+  simp only [Function.comp_apply]
   nth_rw 1 [← toDual_ofDual T]
   rw [toDual_le_toDual]
-  constructor
-  · intro h
-    unfold dual' at *
-    have h := dual_antitone (p := p.flip) h
-    have h := dual_antitone (p := p) h
-    rw [dual_dual_flip_dual] at h
-    have h := dual_antitone (p := p.flip) h
-    rw [dual_flip_dual_dual_flip] at h
-    exact le_trans subset_dual_dual h
-  · sorry
+  constructor <;>
+    exact (le_trans subset_dual_dual <| dual_antitone ·)
+
+def dual_gi : GaloisInsertion (dual' p ∘ ofDual) (toDual ∘ dual' p.flip) where
+  choice S _ := toDual (dual' p S)
+  gc := sorry -- dual_gc'
+  le_l_u := fun _ => le_dual_dual
+  choice_eq := by sorry
 
 ------------------
 
@@ -279,34 +277,6 @@ lemma dual_sup_dual_le_dual_inf (S T : Submodule R M) :
   obtain ⟨x', hx', y', hy', hxy⟩ := h
   rw [← hxy, ← zero_add 0]
   nth_rw 1 [hx' hyS, hy' hyT, map_add]
-
--------------------
-
-section CommSemiring
-
-open LinearMap
-
-variable {M S R : Type*} [CommSemiring R] [AddCommGroup M] [Module R M]
-
-lemma IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
-    IsCompl T.dualAnnihilator S.dualAnnihilator := by
-  sorry
-
-variable {M S R : Type*} [Field R] [AddCommGroup M] [Module R M]
-
-lemma IsProj.dualMap_dual_Annihilator {S : Submodule R M} (p : M →ₗ[R] M) (hp : IsProj S p) :
-    IsProj (ker p).dualAnnihilator p.dualMap where
-  map_mem x := sorry
-  map_id x hx := sorry
-
-lemma IsCompl.projection_dual {S T : Submodule R M} (hST : IsCompl S T) :
-    (projection hST).dualMap = projection (dual hST) := by
-  sorry
-
--- lemma IsProj.dual {S : Submodule R M} {p : M →ₗ[R] M} (hp : LinearMap.IsProj S p) :
---     LinearMap.IsProj (p.ker.dualAnnihilator) p.dualMap := by sorry
-
-end CommSemiring
 
 ----------------------
 
@@ -421,6 +391,7 @@ protected lemma IsDualClosed.sInf {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S
 --     S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
 --   nth_rw 1 [← hS]; exact dualClosure_eq_sInf p S
 
+/-- A dual closed submodule is the infiumum of all dual closed submodules that contain it. -/
 theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
     S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
   rw [Eq.comm, le_antisymm_iff]
@@ -492,7 +463,7 @@ lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
   rw [← flip_apply, hx'] at hx
   exact hx
 
--- TODO: True without `[Field R]`? Otherwise derive from `FG.isDualClosed`.
+-- TODO: True without `[Field R]`? If not, then derive from `FG.isDualClosed`.
 variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
   sorry

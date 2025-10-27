@@ -19,12 +19,12 @@ variable [AddCommMonoid M] [Module R M]
 alias sup_fg := Submodule.FG.sup
 
 lemma embed_fg_of_fg (S : Submodule R M) {T : Submodule R S} (hC : T.FG) :
-    (embed S T).FG := Submodule.FG.map _ hC
+    (embed T).FG := Submodule.FG.map _ hC
 
-lemma fg_of_embed_fg {S : Submodule R M} {T : Submodule R S} (hT : (embed S T).FG) : T.FG
+lemma fg_of_embed_fg {S : Submodule R M} {T : Submodule R S} (hT : (embed T).FG) : T.FG
     := fg_of_fg_map_injective _ (injective_subtype (S : Submodule R M)) hT
 
-@[simp] lemma embed_fg_iff_fg {S : Submodule R M} {T : Submodule R S} : (embed S T).FG ↔ T.FG
+@[simp] lemma embed_fg_iff_fg {S : Submodule R M} {T : Submodule R S} : (embed T).FG ↔ T.FG
   := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
 
 lemma restrict_fg_of_fg_le {S T : Submodule R M} (hST : T ≤ S) (hT : T.FG) :

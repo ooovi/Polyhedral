@@ -183,6 +183,9 @@ variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M
 
 open Function
 
+lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
+    s.restrictScalars S ≤ t.restrictScalars S := (restrictScalarsEmbedding S R M).monotone hST
+
 @[simp] lemma restrictScalars_inf {s t : Submodule R M} :
     (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
   ext x; simp

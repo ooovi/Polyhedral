@@ -43,6 +43,12 @@ lemma CoFG'.sup {S : Submodule R M} (hS : S.CoFG') (T : Submodule R M) : (S ⊔ 
 
 alias sup_cofg' := CoFG'.sup
 
+lemma sSup_cofg' {s : Set (Submodule R M)} (hs : ∃ S ∈ s, S.CoFG') :
+    (sSup s).CoFG' := by
+  obtain ⟨S, hS, hcofg⟩ := hs
+  rw [right_eq_sup.mpr <| le_sSup hS]
+  exact hcofg.sup _
+
 variable [Module.Finite R M] in
 /-- In a finite module every submodule is CoFG. -/
 -- Note that not every submodule is necessarily FG. So FG = CoFG needs more hypotheses.
@@ -168,8 +174,6 @@ theorem CoFG'.exists_finset_dual {S : Submodule R M} (hS : S.CoFG') :
   have hh : ker g = S := ker_mkQ S
   simp [dual_ker_pi']
   rw [← hh]
-
-
 
   sorry
 
