@@ -14,15 +14,15 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 namespace PointedCone
 
-variable {𝕜 M N : Type*}
+variable {R M N : Type*}
 
 section Semiring
 
-variable [Semiring 𝕜] [PartialOrder 𝕜] [IsOrderedRing 𝕜] [AddCommGroup M] [Module 𝕜 M]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
-abbrev IsFaceOf (F C : PointedCone 𝕜 M) := IsExtreme 𝕜 (E := M) C F
+abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
 
-variable {C F F₁ F₂ : PointedCone 𝕜 M}
+variable {C F F₁ F₂ : PointedCone R M}
 
 -- TODO does this make sense to have?
 abbrev IsFaceOf.rfl : C.IsFaceOf C := IsExtreme.rfl
@@ -33,26 +33,8 @@ abbrev IsFaceOf.trans (h₁ : F₁.IsFaceOf F) (h₂ : F.IsFaceOf F₂) : F₁.I
 abbrev IsFaceOf.inter (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
   IsExtreme.inter h₁ h₂
 
-
-
-lemma foo (C D F G : PointedCone 𝕜 M) (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D) (hCD : C ⊓ D = ⊥) :
-  (F ⊔ D).IsFaceOf (C ⊔ D) := by sorry
-
-lemma span_inter_face_span_inf_face {s : Set M} {F : PointedCone 𝕜 M}
-    (hF : F.IsFaceOf (span 𝕜 s)) :
-      span 𝕜 (s ∩ F) = (span 𝕜 s) ⊓ F := by sorry
-
-lemma exists_span_subset_face {s : Set M} {F : PointedCone 𝕜 M} (hF : F.IsFaceOf (span 𝕜 s)) :
-    ∃ t ⊆ s, span 𝕜 t = F := by
-  use s ∩ F
-  constructor
-  · sorry -- easy
-  · rw [span_inter_face_span_inf_face hF]
-    sorry -- easy
-
-
 /-- A face of a pointed cone `C` is a pointed cone that is an extreme subset of `C`. -/
-structure Face (C : PointedCone 𝕜 M) extends PointedCone 𝕜 M where
+structure Face (C : PointedCone R M) extends PointedCone R M where
   isFaceOf : IsFaceOf toSubmodule C
 
 namespace Face
@@ -61,9 +43,9 @@ def of_IsFaceOf (hF : F.IsFaceOf C) : Face C := ⟨F, hF⟩
 
 -- we can't have an actual Coe instance because coercion target throws away the information `C`
 @[coe, simp]
-def toPointedCone {C : PointedCone 𝕜 M} (f : Face C) := f.toSubmodule
+def toPointedCone {C : PointedCone R M} (f : Face C) := f.toSubmodule
 
-instance : CoeOut (Face (M := M) (𝕜 := 𝕜) C) (PointedCone 𝕜 M) where
+instance : CoeOut (Face (M := M) (R := R) C) (PointedCone R M) where
 coe f := f.toSubmodule
 
 instance : SetLike (Face C) M where
@@ -81,20 +63,8 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 
 -/
 
--- maybe this is a better definition for lt
--- private lemma lt_iff_le_not_ge {F₁ F₂ : C.Face} :
---     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧ F₁ ≠ F₂ ↔
---     IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
---     ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone) := by
---   simp; intro hf
---   constructor <;> intro h <;> by_contra hc
---   · have := IsExtreme.antisymm hc hf
---     norm_cast at this
---   · rw [hc] at h
---     exact h IsExtreme.rfl
-
 /-- An FG cone has finitely many faces. -/
-lemma finite_of_fg {C : PointedCone 𝕜 M} (hC : C.FG) : Finite (Face C) := by
+lemma finite_of_fg {C : PointedCone R M} (hC : C.FG) : Finite (Face C) := by
   -- use `exists_span_subset_face`
   sorry
 
@@ -126,7 +96,7 @@ le_top F := F.isFaceOf
 /-- The supremum of two faces `F₁, F₂` of `C` is the smallest face of `C` that has both `F₁` and
 `F₂` as faces. -/
 def sup (F₁ F₂ : Face C) : Face C := by
-  refine ⟨sInf { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F}, ?_⟩
+  refine ⟨sInf { F : PointedCone R M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F}, ?_⟩
   constructor
   · intros _ sm
     simp at sm ⊢
@@ -135,7 +105,7 @@ def sup (F₁ F₂ : Face C) : Face C := by
     exact FFs.left_mem_of_mem_openSegment xc yc (zfs F FFs FF₁ FF₂) zo
 
 private lemma left_mem_of_mem_openSegment {F₁ F₂ : Face C} :
-    ∀ x ∈ F₂, ∀ y ∈ F₂, ∀ z ∈ F₁, z ∈ openSegment 𝕜 x y → x ∈ F₁ := by
+    ∀ x ∈ F₂, ∀ y ∈ F₂, ∀ z ∈ F₁, z ∈ openSegment R x y → x ∈ F₁ := by
   intros _ asup _ bsup _ zF zo
   exact F₁.isFaceOf.left_mem_of_mem_openSegment (le_all asup) (le_all bsup) zF zo
 
@@ -170,7 +140,7 @@ instance : Lattice (Face C) :=
     sup_le F₁ F₂ F₃ f₁₂ f₂₃:= by
       constructor
       · intros x xs
-        have : F₃.toPointedCone ∈ { F : PointedCone 𝕜 M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F} :=
+        have : F₃.toPointedCone ∈ { F : PointedCone R M | F.IsFaceOf C ∧ ↑F₁ ≤ F ∧ ↑F₂ ≤ F} :=
           ⟨F₃.isFaceOf, toPointedCone_le f₁₂, toPointedCone_le f₂₃⟩
         exact sInf_le this xs
       · exact left_mem_of_mem_openSegment }
@@ -180,17 +150,148 @@ end Face
 end Semiring
 
 
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+
+lemma sub_eq_sub_of_add_eq_add {a b c d : M} (h : a + b = c + d) : a - c = d - b := by
+  calc a - c = a + b - c - b := by abel
+           _ = c + d - c - b := by rw [h]
+           _ = d - b         := by abel
+
+open Submodule in
+lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
+    (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
+    (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0)
+    (s : xC + xD = yC + yD) :
+    xC = yC ∧ xD = yD := by
+  let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
+    (Submodule.span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+  constructor
+  · refine (sub_eq_zero.mp <| hCD ⟨sub_mem_span mxc myc, ?_⟩).symm
+    simp [sub_eq_sub_of_add_eq_add s.symm]
+    exact sub_mem_span myd mxd
+  · refine (sub_eq_zero.mp <| hCD ⟨?_, sub_mem_span mxd myd⟩).symm
+    simp [← sub_eq_sub_of_add_eq_add s]
+    exact sub_mem_span myc mxc
+
+
+lemma join_isFaceOf_join {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
+    (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0) :
+    (F ⊔ G).IsFaceOf (C ⊔ D) := by
+  -- rw [disjoint_def] at hCD
+  constructor
+  · simp only [SetLike.coe_subset_coe, sup_le_iff]
+    constructor
+    · apply le_trans _ le_sup_left
+      convert hFC.subset
+    · apply le_trans _ le_sup_right
+      convert hGD.subset
+  · simp; intros x xm y ym z zu zo
+
+    wlog h : ¬(x ∈ Submodule.span R (SetLike.coe C) ∧ x ∈ Submodule.span R (SetLike.coe D))
+    · push_neg at h
+      have := hCD h
+      subst this
+      exact zero_mem _
+    · push_neg at h
+      obtain ⟨xC, xCM, xD, xDM, xx⟩ := Submodule.mem_sup.mp xm
+      obtain ⟨yC, yCM, yD, yDM, yy⟩ := Submodule.mem_sup.mp ym
+      obtain ⟨zF, zFM, zG, zGM, zz⟩ := Submodule.mem_sup.mp zu
+
+      have : zF ∈ openSegment R xC yC ∧ zG ∈ openSegment R xD yD := by
+        rw [openSegment, Set.mem_setOf, ← xx, ← yy, ← zz] at zo
+        obtain ⟨a, b, a0, b0, ab1, abz⟩ := zo
+        have : (a • xC + b • yC) + (a • xD + b • yD) = zF + zG := by
+          rw [← abz, smul_add, smul_add]
+          abel
+
+        let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + b • y ∈ C :=
+          C.add_mem (C.smul_mem (le_of_lt a0) xCM) (C.smul_mem (le_of_lt b0) yCM)
+
+        have := uniq_decomp_of_zero_inter
+          (mem xCM yCM) (hFC.subset zFM) (mem xDM yDM) (hGD.subset zGM) hCD this
+        constructor
+        use a, b, a0, b0, ab1, this.1
+        use a, b, a0, b0, ab1, this.2
+
+      apply Submodule.mem_sup.mpr
+      use xC, hFC.left_mem_of_mem_openSegment xCM yCM zFM this.1
+      use xD, hGD.left_mem_of_mem_openSegment xDM yDM zGM this.2
+
+end Ring
+
+
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  {C F F₁ F₂ : PointedCone R M} {s t : Set M}
+
+lemma scale_sum_mem {F : Face C} {x y : M} {c : R} (cpos : 0 < c) (hx : x ∈ C) (hy : y ∈ C)
+   (h : c • y + x ∈ F) : x ∈ F ∧ y ∈ F := by
+  let r := 1 / (1 + c)
+  have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
+  have : r • (c • y + x) ∈ openSegment R x y := by
+      simp [openSegment]
+      use r, rpos, c • r, smul_pos cpos rpos
+      constructor
+      · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r]; exact div_self (by positivity)
+      · simp [← smul_assoc, mul_comm, add_comm]
+  have sf := F.toPointedCone.smul_mem ⟨r, le_of_lt rpos⟩ h
+  constructor
+  · exact F.isFaceOf.left_mem_of_mem_openSegment hx hy sf this
+  · exact F.isFaceOf.right_mem_of_mem_openSegment hx hy sf this
+
+lemma span_nonneg_lc_mem {F : (span R s).Face} {n : ℕ} {c : Fin n → { c : R // 0 ≤ c }}
+    {g : Fin n → s} (h : ∑ i, c i • (g i).val ∈ F.toSubmodule) {i : Fin n} (cpos : 0 < c i) :
+    (g i).val ∈ F := by
+  induction n with
+  | zero => exact isEmptyElim i
+  | succ n ih =>
+      have : ∑ i ∈ {i}ᶜ, c i • (g i).val ∈ span R s :=
+        Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
+      rw [Fintype.sum_eq_add_sum_compl i] at h
+      obtain ⟨l, r⟩ := scale_sum_mem cpos this (subset_span (Subtype.coe_prop _)) h
+      exact r
+
+lemma span_inter_face_span_inf_face (F : Face (span R s)) :
+    span R (s ∩ F) = (span R s) ⊓ F := by
+  ext x; constructor
+  · simp [Submodule.mem_span]
+    exact fun h =>
+      ⟨fun p sp => h p (subset_trans Set.inter_subset_left sp), h F Set.inter_subset_right⟩
+  · intro h
+    apply Submodule.mem_inf.mp at h
+    obtain ⟨n, c, g, xfg⟩ := Submodule.mem_span_set'.mp h.1
+    subst xfg
+    apply Submodule.sum_mem
+    intro i _
+    by_cases hh : c i = 0
+    · rw [hh]; simp
+    · apply Submodule.smul_mem; apply Submodule.subset_span
+      exact Set.mem_inter (Subtype.coe_prop (g i)) (span_nonneg_lc_mem h.2 (pos_of_ne_zero hh))
+
+-- If span R s and span R t are disjoint (only share 0)
+example (h : Submodule.span R s ⊓ Submodule.span R t = ⊥)
+    (hs : s ⊆ Submodule.span R s) (ht : t ⊆ Submodule.span R t) :
+    Submodule.span R (s ∩ t) = Submodule.span R s ⊓ Submodule.span R t := by
+  -- When intersection is ⊥, both sides equal ⊥ if s ∩ t = ∅
+  sorry
+
+lemma exists_span_subset_face (F : Face (span R s)) :
+    ∃ t ⊆ s, span R t = F := by
+  use s ∩ F
+  constructor
+  · exact Set.inter_subset_left
+  · simp [span_inter_face_span_inf_face F]
+    exact F.isFaceOf.subset
+
 
 /-!
 ## Particular Faces
 
 -/
-section Field
 
-variable [Field 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜] [AddCommGroup M] [Module 𝕜 M]
-  {C F F₁ F₂ : PointedCone 𝕜 M}
-
--- TODO moving this to Ring instead of Field entails disaster
 lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
   constructor
   · exact PointedCone.lineal_le C
@@ -202,8 +303,8 @@ lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
     simp [openSegment] at zop
     obtain ⟨a, a0, _, b0, _, zab⟩ := zop
 
-    rw [← one_smul 𝕜 (-x), ← Field.mul_inv_cancel a (ne_of_lt a0).symm, mul_comm, mul_smul]
-    apply C.smul_mem (r := a⁻¹) (inv_nonneg_of_nonneg (G₀ := 𝕜) <| le_of_lt a0)
+    rw [← one_smul R (-x), ← Field.mul_inv_cancel a (ne_of_lt a0).symm, mul_comm, mul_smul]
+    apply C.smul_mem (r := a⁻¹) (inv_nonneg_of_nonneg (G₀ := R) <| le_of_lt a0)
 
     have := congrArg Neg.neg zab
     rw [neg_add, ← smul_neg a] at this
@@ -215,9 +316,9 @@ lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
 
 section Pair
 
-variable [AddCommGroup N] [Module 𝕜 N] (p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜)
+variable [AddCommGroup N] [Module R N] (p : M →ₗ[R] N →ₗ[R] R)
 
-def subdual (C F : PointedCone 𝕜 M) : PointedCone 𝕜 N := dual p F ⊓ dual p C
+def subdual (C F : PointedCone R M) : PointedCone R N := dual p F ⊓ dual p C
 
 lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
@@ -226,23 +327,6 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
   intros x xd
   suffices x ∈ dual p F by simp [this, xd]
   exact mem_dual.mpr <| fun _ xxf => xd <| hF.subset xxf
-
-lemma subdual_inf_sup (C : PointedCone 𝕜 M) :
-    subdual p C F₁ ⊓ subdual p C F₂ = subdual p C (F₁ ⊔ F₂) := by
-    simp [subdual, inf_assoc]
-    rw [← inf_assoc, dual_sup_dual_inf_dual]
-
-lemma IsFaceOf.susub (h1 : F₁.IsFaceOf C) (h2 : F₂.IsFaceOf C) :
-    (subdual .id (dual (Module.Dual.eval 𝕜 M) C)
-  ((subdual (Module.Dual.eval 𝕜 M) C F₁) ⊓ (subdual (Module.Dual.eval 𝕜 M) C F₂))).IsFaceOf C := by
-  -- constructor
-  -- simp only [subdual, dual, SetLike.mem_coe, Module.Dual.eval_apply, Submodule.coe_inf,
-  --   Submodule.coe_set_mk, AddSubmonoid.coe_set_mk, AddSubsemigroup.coe_set_mk, Set.mem_inter_iff,
-  --   Set.mem_setOf_eq, LinearMap.id_coe, id_eq, and_imp]
-  -- intros y ys
-  -- simp at ys
-  -- sorry
-  sorry
 
 end Pair
 
