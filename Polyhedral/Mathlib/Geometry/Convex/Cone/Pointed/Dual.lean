@@ -14,8 +14,6 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-alias le_span := subset_span
-
 alias dual_bot := dual_zero
 
 -- TODO: are there instances missing that should make the proof automatic?
@@ -188,6 +186,13 @@ lemma dual_neg (C : PointedCone R M) : -dual p C = dual p (-C) := by ext x; simp
 
 -----------
 
+section LinearOrder
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
 lemma dual_span_lineal_dual (C : PointedCone R M) :
     Submodule.dual p C = (dual p C).lineal := by
   rw [← ofSubmodule_inj]
@@ -197,6 +202,7 @@ lemma dual_span_lineal_dual (C : PointedCone R M) :
   rw [dual_sup_dual_inf_dual]
   rw [Submodule.coe_set_neg]
   rw [← dual_neg, lineal_inf_neg]
+  try rw [inf_comm]
 
 -- lemma dual_span_lineal_dual' (C : PointedCone R M) :
 --     Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
@@ -207,6 +213,8 @@ lemma dual_span_lineal_dual (C : PointedCone R M) :
 --   rw [dual_sup_dual_inf_dual]
 --   rw [Submodule.coe_set_neg]
 --   rw [← dual_neg, lineal_inf_neg]
+
+end LinearOrder
 
 
 
@@ -291,6 +299,13 @@ lemma IsDualClosed.submodule_span_isDualClosed {C : PointedCone R M} (hC : C.IsD
   --simp only [submodule_span_dual, submodule_dual_flip_dual]
   sorry
 
+section LinearOrder
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
     Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
@@ -298,6 +313,8 @@ lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClo
   nth_rw 1 [← flip_flip p]
   nth_rw 2 [← Submodule.dual_span]
   rw [(dual_isDualClosed p C).submodule_span_isDualClosed, dual_dual_flip_dual]
+
+end LinearOrder
 
 section Field
 

@@ -204,16 +204,6 @@ lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
 
 end RestrictedScalar
 
--- section Field
-
--- variable {M R : Type*} [Ring R] [IsNoetherianRing R] [AddCommGroup M] [Module R M]
-
--- lemma fg_of_submodule_of_finite [Module.Finite R M] (S : Submodule R M) : S.FG := by
---   have h : Module.Finite R S := Module.Finite.of_submodule
---   exact Module.Finite.iff_fg.mp h
-
--- end Field
-
 end Semiring
 
 section DivisionRing
