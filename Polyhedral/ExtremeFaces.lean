@@ -142,17 +142,17 @@ instance : Lattice (Face C) :=
 
 end Face
 
+lemma sub_eq_sub_of_add_eq_add {a b c d : M} (h : a + b = c + d) : a - c = d - b := by
+  calc a - c = a + b - c - b := by abel
+           _ = c + d - c - b := by rw [h]
+           _ = d - b         := by abel
+
 end Semiring
 
 
 section Ring
 
 variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-
-lemma sub_eq_sub_of_add_eq_add {a b c d : M} (h : a + b = c + d) : a - c = d - b := by
-  calc a - c = a + b - c - b := by abel
-           _ = c + d - c - b := by rw [h]
-           _ = d - b         := by abel
 
 open Submodule in
 lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
@@ -221,7 +221,7 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
   {C F F₁ F₂ : PointedCone R M} {s t : Set M}
 
 lemma scale_sum_mem {F : Face C} {x y : M} {c : R} (cpos : 0 < c) (hx : x ∈ C) (hy : y ∈ C)
-   (h : c • y + x ∈ F) : x ∈ F ∧ y ∈ F := by
+   (hc : c • y + x ∈ F) : x ∈ F ∧ y ∈ F := by
   let r := 1 / (1 + c)
   have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
   have : r • (c • y + x) ∈ openSegment R x y := by
@@ -230,7 +230,7 @@ lemma scale_sum_mem {F : Face C} {x y : M} {c : R} (cpos : 0 < c) (hx : x ∈ C)
       constructor
       · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r]; exact div_self (by positivity)
       · simp [← smul_assoc, mul_comm, add_comm]
-  have sf := F.toPointedCone.smul_mem ⟨r, le_of_lt rpos⟩ h
+  have sf := F.toPointedCone.smul_mem ⟨r, le_of_lt rpos⟩ hc
   constructor
   · exact F.isFaceOf.left_mem_of_mem_openSegment hx hy sf this
   · exact F.isFaceOf.right_mem_of_mem_openSegment hx hy sf this
@@ -361,7 +361,7 @@ end Field
 
 section CommRing
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
@@ -377,23 +377,35 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
   refine ⟨by simp, ?_⟩
-  intros x xd
-  suffices x ∈ dual p F by
-    simp [xd]
-    sorry
-  exact mem_dual.mpr <| fun _ xxf => xd <| hF.subset xxf
+  intros _ xd
+  simp [xd]
+  intros _ nC _ n'C mn' n'on _ mF
+  apply eq_of_le_of_ge
+  · exact xd (hF.subset mF)
+  · simp [openSegment] at n'on
+    obtain ⟨_, apos, _, _, -, zxy⟩ := n'on
+    simp_rw [← zxy, LinearMap.map_add, LinearMap.map_smul] at mn'
+    simp [← (inv_mul_eq_iff_eq_mul₀ (ne_of_lt apos).symm).mpr <| tsub_eq_of_eq_add (mn' mF)]
+    have := nC (hF.subset mF)
+    positivity
 
 /-- The subdual is antitone. -/
-lemma subdual_antitone {F₁ F₂ : PointedCone R M} (hF : F₁ ≤ F₂) :
-    subdual p C F₂ ≤ subdual p C F₁ := sorry
+lemma subdual_antitone : Antitone (subdual p C) := by
+  intros _ _ hF
+  unfold subdual
+  gcongr
+  exact Submodule.dual_le_dual hF
+
+section IsDualClosed
 
 variable (hC : C.IsDualClosed p)
 
 /-- The subdual is injective. -/
-lemma subdual_inj {F₁ F₂ : PointedCone R M}
-    (hF : subdual p C F₁ = subdual p C F₂) : F₁ = F₂ := sorry
+-- only for fg
+lemma subdual_inj (hC : C.IsDualClosed p) : Function.Injective (subdual p C) := sorry
 
 /-- The subdual is involutive. -/
+-- only for fg
 lemma subdual_subdual {F : PointedCone R M} :
     subdual p.flip (dual p C) (subdual p C F) = F := sorry
 
@@ -404,8 +416,9 @@ lemma subdual_isFaceOf_dual {F : PointedCone R M} (hF : F.IsFaceOf C) :
 /-- The subdual is strictly antitone. -/
 lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
     subdual p C F₁ ≤ subdual p C F₂ ↔ F₂ ≤ F₁ where
-  mpr := subdual_antitone p
+  mpr := fun h => subdual_antitone p h
   mp := sorry
+end IsDualClosed
 
 end CommRing
 
