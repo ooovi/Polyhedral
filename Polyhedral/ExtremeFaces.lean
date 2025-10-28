@@ -63,11 +63,6 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 
 -/
 
-/-- An FG cone has finitely many faces. -/
-lemma finite_of_fg {C : PointedCone R M} (hC : C.FG) : Finite (Face C) := by
-  -- use `exists_span_subset_face`
-  sorry
-
 instance partialOrder : PartialOrder (Face C) where
 le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
 lt F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
@@ -175,11 +170,9 @@ lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
     simp [← sub_eq_sub_of_add_eq_add s]
     exact sub_mem_span myc mxc
 
-
 lemma join_isFaceOf_join {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
     (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0) :
     (F ⊔ G).IsFaceOf (C ⊔ D) := by
-  -- rw [disjoint_def] at hCD
   constructor
   · simp only [SetLike.coe_subset_coe, sup_le_iff]
     constructor
@@ -286,6 +279,30 @@ lemma exists_span_subset_face (F : Face (span R s)) :
   · simp [span_inter_face_span_inf_face F]
     exact F.isFaceOf.subset
 
+lemma exists_fg_span_subset_face {s : Finset M} (F : Face (span R s.toSet)) :
+    ∃ t ⊆ s, span R t.toSet = F := by
+  use (s.finite_toSet.inter_of_left F).toFinset
+  constructor
+  · simp
+  · simp [span_inter_face_span_inf_face F]
+    exact F.isFaceOf.subset
+
+lemma FG.face_fg_of_fg (hC : C.FG) (F : Face C) : F.FG := by
+  obtain ⟨_, rfl⟩ := hC
+  let ⟨t, _, tt⟩ := exists_fg_span_subset_face F
+  use t, tt
+
+/-- An FG cone has finitely many faces. -/
+instance (hC : C.FG) : Finite (Face C) := by
+  obtain ⟨s, rfl⟩ := hC
+  apply Finite.of_injective (β := Finset.powerset s)
+    fun F => ⟨(exists_fg_span_subset_face F).choose,
+               by simp; exact (exists_fg_span_subset_face _).choose_spec.1⟩
+  intros F F' FF
+  have := congrArg (fun s : s.powerset => span (E := M) R s) FF
+  simp [(exists_fg_span_subset_face _).choose_spec.2] at this
+  exact Face.toPointedCone_eq_iff.mp this
+
 
 /-!
 ## Particular Faces
@@ -314,22 +331,82 @@ lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
 
     exact C.add_mem zlin.2 (C.smul_mem (le_of_lt b0) yC)
 
-section Pair
+lemma span_inter_lineal_eq_lineall (s : Set M) :
+    span R (s ∩ (span R s).lineal) = (span R s).lineal := by
+  convert span_inter_face_span_inf_face ⟨_, IsFaceOf.lineal⟩
+  simp
+  exact IsFaceOf.lineal.subset
 
-variable [AddCommGroup N] [Module R N] (p : M →ₗ[R] N →ₗ[R] R)
+lemma FG.lineal_efg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
+  convert FG.face_fg_of_fg hC ⟨_, IsFaceOf.lineal⟩
+  simp
 
-def subdual (C F : PointedCone R M) : PointedCone R N := dual p F ⊓ dual p C
+-- section Pair
+
+-- variable [AddCommGroup N] [Module R N] (p : M →ₗ[R] N →ₗ[R] R)
+
+-- def subdual (C F : PointedCone R M) : PointedCone R N := dual p F ⊓ dual p C
+
+-- lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
+--     (subdual p C F).IsFaceOf (dual p C) := by
+--   unfold subdual
+--   refine ⟨by simp, ?_⟩
+--   intros x xd
+--   suffices x ∈ dual p F by simp [this, xd]
+--   exact mem_dual.mpr <| fun _ xxf => xd <| hF.subset xxf
+
+-- end Pair
+
+end Field
+
+section CommRing
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
+
+variable (p)
+
+def subdual (C F : PointedCone R M) : PointedCone R N :=
+  (dual p C) ⊓ (.dual p F : Submodule R N)
+
+variable {C F : PointedCone R M}
 
 lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
   refine ⟨by simp, ?_⟩
   intros x xd
-  suffices x ∈ dual p F by simp [this, xd]
+  suffices x ∈ dual p F by
+    simp [xd]
+    sorry
   exact mem_dual.mpr <| fun _ xxf => xd <| hF.subset xxf
 
-end Pair
+/-- The subdual is antitone. -/
+lemma subdual_antitone {F₁ F₂ : PointedCone R M} (hF : F₁ ≤ F₂) :
+    subdual p C F₂ ≤ subdual p C F₁ := sorry
 
-end Field
+variable (hC : C.IsDualClosed p)
+
+/-- The subdual is injective. -/
+lemma subdual_inj {F₁ F₂ : PointedCone R M}
+    (hF : subdual p C F₁ = subdual p C F₂) : F₁ = F₂ := sorry
+
+/-- The subdual is involutive. -/
+lemma subdual_subdual {F : PointedCone R M} :
+    subdual p.flip (dual p C) (subdual p C F) = F := sorry
+
+/-- The subdual of a face is a face. -/
+lemma subdual_isFaceOf_dual {F : PointedCone R M} (hF : F.IsFaceOf C) :
+    (subdual p C F).IsFaceOf (dual p C) := sorry
+
+/-- The subdual is strictly antitone. -/
+lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
+    subdual p C F₁ ≤ subdual p C F₂ ↔ F₂ ≤ F₁ where
+  mpr := subdual_antitone p
+  mp := sorry
+
+end CommRing
 
 end PointedCone
