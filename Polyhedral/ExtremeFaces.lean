@@ -357,7 +357,7 @@ end Field
 
 -/
 
-variable {R M N : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {R M N : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
   [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] (p : M →ₗ[R] N →ₗ[R] R)
 in
 def subdual (C F : PointedCone R M) : PointedCone R N :=

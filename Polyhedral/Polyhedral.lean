@@ -63,7 +63,6 @@ namespace PointedCone
 
 section Face
 
--- This should be CommRing, not Field
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
@@ -93,7 +92,7 @@ end Face
 section IsFaceOf
 
 -- This should be CommRing, not Field
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
