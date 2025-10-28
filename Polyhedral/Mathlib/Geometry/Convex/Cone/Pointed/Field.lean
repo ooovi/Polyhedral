@@ -36,7 +36,7 @@ alias sup_fg := Submodule.FG.sup
 
 section LinearOrder
 
-variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
+variable [Field 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜] [AddCommGroup M] [AddCommGroup N]
   [Module 𝕜 M] [Module 𝕜 N] {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜} {C : PointedCone 𝕜 M} {s : Set M} {w : N}
 
 variable (p s w) in
@@ -46,7 +46,7 @@ private noncomputable abbrev auxGenSet : Set M :=
     .image2 (fun x y ↦ p x w • y - p y w • x) {x ∈ s | 0 ≤ p x w} {y ∈ s | p y w < 0}
 
 variable (w) in
-omit [IsStrictOrderedRing 𝕜] in
+omit [IsOrderedRing 𝕜] in
 private lemma auxGenSet_finite (hs : s.Finite) :
     (auxGenSet p s w).Finite := .union (hs.sep _) <| .image2 _ (hs.sep _) (hs.sep _)
 
