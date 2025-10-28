@@ -27,15 +27,30 @@ variable {C F F₁ F₂ : PointedCone R M}
 -- TODO does this make sense to have?
 abbrev isFaceOf_self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
 
-abbrev IsFaceOf.trans (h₁ : F₁.IsFaceOf F) (h₂ : F.IsFaceOf F₂) : F₁.IsFaceOf F₂ :=
+abbrev isFaceOf.trans (h₁ : F₁.IsFaceOf F) (h₂ : F.IsFaceOf F₂) : F₁.IsFaceOf F₂ :=
   IsExtreme.trans h₂ h₁
 
 abbrev IsFaceOf.inter (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
   IsExtreme.inter h₁ h₂
 
+lemma IsFaceOf.le_self {F : PointedCone R M} (hF : F.IsFaceOf C) : F ≤ C := by sorry
+
+
 /-- A face of a pointed cone `C` is a pointed cone that is an extreme subset of `C`. -/
 structure Face (C : PointedCone R M) extends PointedCone R M where
   isFaceOf : IsFaceOf toSubmodule C
+
+def face_self (C : PointedCone R M) : Face C := ⟨_, isFaceOf_self C⟩
+
+alias face_top := face_self
+
+instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) := ⟨C.face_self⟩
+instance {S : Submodule R M} : CoeDep (Submodule R M) S (Face (S : PointedCone R M)) :=
+    ⟨(S : PointedCone R M).face_self⟩
+
+-- does not work without the second CoeDep
+example {C : Submodule R M} : Face (C : PointedCone R M) := C
+
 
 namespace Face
 
@@ -60,28 +75,27 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 
 /-!
 ## Partial Order and Lattice on Faces
-
 -/
 
 instance partialOrder : PartialOrder (Face C) where
-le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
-lt F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
-  ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone)
-le_refl F := IsExtreme.rfl
-le_trans F₁ F₂ F h₁ h₂ := IsExtreme.trans h₂ h₁
-lt_iff_le_not_ge F C := by simp
-le_antisymm F₁ F₂ h₁ h₂ := by convert IsExtreme.antisymm h₂ h₁; norm_cast
+  le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
+  lt F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
+    ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone)
+  le_refl F := IsExtreme.rfl
+  le_trans F₁ F₂ F h₁ h₂ := IsExtreme.trans h₂ h₁
+  lt_iff_le_not_ge F C := by simp
+  le_antisymm F₁ F₂ h₁ h₂ := by convert IsExtreme.antisymm h₂ h₁; norm_cast
 
 @[simp]
 theorem toPointedCone_le {F₁ F₂ : Face C} (h : F₁ ≤ F₂) :
     F₁.toPointedCone ≤ F₂.toPointedCone := by
   intro x xF₁; simp [LE.le] at h; exact h.subset xF₁
 
-abbrev le_all {F : Face C} : F.toSubmodule ≤ C := F.isFaceOf.subset
+abbrev le_self {F : Face C} : F ≤ C := F.isFaceOf.subset
 
 instance : OrderTop (Face C) where
-top := ⟨C, .rfl⟩
-le_top F := F.isFaceOf
+  top := C
+  le_top F := F.isFaceOf -- Martin: I don't understand how this proof can work!
 
 /-!
 ### Supremum
@@ -95,14 +109,14 @@ def sup (F₁ F₂ : Face C) : Face C := by
   constructor
   · intros _ sm
     simp at sm ⊢
-    exact sm C C.isFaceOf_self F₁.le_all F₂.le_all
+    exact sm C C.isFaceOf_self F₁.le_self F₂.le_self
   · simp; intros _ xc _ yc _ zfs zo F FFs FF₁ FF₂
     exact FFs.left_mem_of_mem_openSegment xc yc (zfs F FFs FF₁ FF₂) zo
 
 private lemma left_mem_of_mem_openSegment {F₁ F₂ : Face C} :
     ∀ x ∈ F₂, ∀ y ∈ F₂, ∀ z ∈ F₁, z ∈ openSegment R x y → x ∈ F₁ := by
   intros _ asup _ bsup _ zF zo
-  exact F₁.isFaceOf.left_mem_of_mem_openSegment (le_all asup) (le_all bsup) zF zo
+  exact F₁.isFaceOf.left_mem_of_mem_openSegment (le_self asup) (le_self bsup) zF zo
 
 /-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
 def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inter F₁.isFaceOf F₂.isFaceOf⟩
@@ -339,6 +353,21 @@ lemma isFaceOf_lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
     rw [this]
 
     exact C.add_mem zlin.2 (C.smul_mem (le_of_lt b0) yC)
+
+def face_lineal (C : PointedCone R M) : Face C := ⟨_, isFaceOf_lineal C⟩
+
+alias face_bot := face_lineal
+
+lemma IsFaceOf.lineal_le {F : PointedCone R M} (hF : F.IsFaceOf C) : C.lineal ≤ F := by sorry
+
+lemma Face.lineal_le {C : PointedCone R M} (F : Face C) : C.face_lineal ≤ F := by sorry
+
+instance : OrderBot (Face C) where
+  bot := C.face_lineal
+  bot_le F := F.lineal_le
+
+
+-- TODO: move the below to the other lineal lemmas.
 
 lemma span_inter_lineal_eq_lineal' (s : Set M) :
     span R (s ∩ (span R s).lineal) = (span R s).lineal := by
