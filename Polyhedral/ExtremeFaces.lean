@@ -78,7 +78,7 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 -/
 
 instance partialOrder : PartialOrder (Face C) where
-  le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone
+  le F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone -- should be F₁ ≤ F₂
   lt F₁ F₂ := IsFaceOf F₁.toPointedCone F₂.toPointedCone ∧
     ¬(IsFaceOf F₂.toPointedCone F₁.toPointedCone)
   le_refl F := IsExtreme.rfl
@@ -86,16 +86,22 @@ instance partialOrder : PartialOrder (Face C) where
   lt_iff_le_not_ge F C := by simp
   le_antisymm F₁ F₂ h₁ h₂ := by convert IsExtreme.antisymm h₂ h₁; norm_cast
 
+example (F G : Face C) (h : F ≤ G) : (F : Set M) ≤ G := sorry -- `h` does not work right now
+
 @[simp]
 theorem toPointedCone_le {F₁ F₂ : Face C} (h : F₁ ≤ F₂) :
     F₁.toPointedCone ≤ F₂.toPointedCone := by
   intro x xF₁; simp [LE.le] at h; exact h.subset xF₁
 
-abbrev le_self {F : Face C} : F ≤ C := F.isFaceOf.subset
+/- Note: `face_le_self` is comparison as pointed cones, `le_self` is comparison as faces. -/
+
+abbrev face_le_self (F : Face C) : F ≤ C := F.isFaceOf.subset
+
+abbrev le_self (F : Face C) : F ≤ (C : Face C) := sorry -- F.isFaceOf.subset
 
 instance : OrderTop (Face C) where
   top := C
-  le_top F := F.isFaceOf -- Martin: I don't understand how this proof can work!
+  le_top F := F.le_self -- Martin: I don't understand how this proof can work!
 
 /-!
 ### Supremum
@@ -109,14 +115,14 @@ def sup (F₁ F₂ : Face C) : Face C := by
   constructor
   · intros _ sm
     simp at sm ⊢
-    exact sm C C.isFaceOf_self F₁.le_self F₂.le_self
+    exact sm C C.isFaceOf_self F₁.face_le_self F₂.face_le_self
   · simp; intros _ xc _ yc _ zfs zo F FFs FF₁ FF₂
     exact FFs.left_mem_of_mem_openSegment xc yc (zfs F FFs FF₁ FF₂) zo
 
 private lemma left_mem_of_mem_openSegment {F₁ F₂ : Face C} :
     ∀ x ∈ F₂, ∀ y ∈ F₂, ∀ z ∈ F₁, z ∈ openSegment R x y → x ∈ F₁ := by
   intros _ asup _ bsup _ zF zo
-  exact F₁.isFaceOf.left_mem_of_mem_openSegment (le_self asup) (le_self bsup) zF zo
+  exact F₁.isFaceOf.left_mem_of_mem_openSegment (face_le_self _ asup) (face_le_self _ bsup) zF zo
 
 /-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
 def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inter F₁.isFaceOf F₂.isFaceOf⟩
