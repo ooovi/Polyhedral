@@ -100,9 +100,17 @@ abbrev face_le_self (F : Face C) : F ≤ C := F.isFaceOf.subset
 
 abbrev le_self (F : Face C) : F ≤ (C : Face C) := sorry -- F.isFaceOf.subset
 
+end Face
+
 instance : OrderTop (Face C) where
   top := C
   le_top F := F.le_self
+
+instance face_nonempty {C : PointedCone R M} : Nonempty (Face C) := ⟨⊤⟩
+
+instance face_inhabited {C : PointedCone R M} : Inhabited (Face C) := ⟨⊤⟩
+
+namespace Face
 
 /-!
 ### Supremum
