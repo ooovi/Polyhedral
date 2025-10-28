@@ -173,7 +173,7 @@ lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
     simp [← sub_eq_sub_of_add_eq_add s]
     exact sub_mem_span myc mxc
 
-lemma join_isFaceOf_join {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
+lemma sup_isFaceOf_sup {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
     (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0) :
     (F ⊔ G).IsFaceOf (C ⊔ D) := by
   constructor
@@ -241,6 +241,9 @@ lemma scale_sum_mem {F : Face C} {x y : M} {c : R} (cpos : 0 < c) (hx : x ∈ C)
   · exact F.isFaceOf.left_mem_of_mem_openSegment hx hy sf this
   · exact F.isFaceOf.right_mem_of_mem_openSegment hx hy sf this
 
+lemma scale_sum_mem_iff : F.IsFaceOf C ↔ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, 0 < c → c • x + y ∈ F → x ∈ F
+  := by sorry
+
 lemma span_nonneg_lc_mem {F : (span R s).Face} {n : ℕ} {c : Fin n → { c : R // 0 ≤ c }}
     {g : Fin n → s} (h : ∑ i, c i • (g i).val ∈ F.toSubmodule) {i : Fin n} (cpos : 0 < c i) :
     (g i).val ∈ F := by
@@ -299,7 +302,7 @@ lemma FG.face_fg_of_fg (hC : C.FG) (F : Face C) : F.FG := by
   use t, tt
 
 /-- An FG cone has finitely many faces. -/
-instance (hC : C.FG) : Finite (Face C) := by
+theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
   obtain ⟨s, rfl⟩ := hC
   apply Finite.of_injective (β := Finset.powerset s)
     fun F => ⟨(exists_fg_span_subset_face F).choose,
@@ -337,13 +340,13 @@ lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
 
     exact C.add_mem zlin.2 (C.smul_mem (le_of_lt b0) yC)
 
-lemma span_inter_lineal_eq_lineall (s : Set M) :
+lemma span_inter_lineal_eq_lineal' (s : Set M) :
     span R (s ∩ (span R s).lineal) = (span R s).lineal := by
   convert span_inter_face_span_inf_face ⟨_, IsFaceOf.lineal⟩
   simp
   exact IsFaceOf.lineal.subset
 
-lemma FG.lineal_efg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
+lemma FG.lineal_fg' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
   convert FG.face_fg_of_fg hC ⟨_, IsFaceOf.lineal⟩
   simp
 
@@ -409,6 +412,7 @@ lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
     subdual p C F₁ ≤ subdual p C F₂ ↔ F₂ ≤ F₁ where
   mpr := fun h => subdual_antitone p h
   mp := sorry
+
 end IsDualClosed
 
 end Field

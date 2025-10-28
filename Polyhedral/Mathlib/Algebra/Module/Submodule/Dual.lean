@@ -347,15 +347,11 @@ variable (p) [Fact p.flip.IsFaithfulPair] in
 -- @[simp]
 lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
-
--- NOTE: we want this for only one of the spaces being dual closed. But this version is
---  useful in the cone case.
-protected lemma IsDualClosed.inf' {S T : Submodule R M}
+lemma inf_isDualClosed {S T : Submodule R M}
     (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) : (S ⊓ T).IsDualClosed p := by
   rw [← hS, ← hT, IsDualClosed, ← dual_sup_dual_eq_inf_dual, dual_flip_dual_dual_flip]
 
--- NOTE: it probably suffices if one is dual closed, but still useful in the cone case.
-protected lemma IsDualClosed.sInf {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClosed p) :
+lemma sInf_isDualClosed {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClosed p) :
     (sInf s).IsDualClosed p := by
   have hs : s = dual p.flip '' (SetLike.coe '' (dual p '' (SetLike.coe '' s))) := by
     ext T; simp only [mem_image, exists_exists_and_eq_and]
@@ -391,6 +387,8 @@ protected lemma IsDualClosed.sInf {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S
 --     S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
 --   nth_rw 1 [← hS]; exact dualClosure_eq_sInf p S
 
+/- NOTE: This seems trivial. Perhaps this should not be its own lemma. 1. Find a shorter proof.
+  Then replace where it is used (somewhere relating lineal). -/
 /-- A dual closed submodule is the infiumum of all dual closed submodules that contain it. -/
 theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
     S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
@@ -402,23 +400,32 @@ theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
   rw [← hT]; rw [← hS] at hx
   exact (dual_dual_mono p hsT) hx
 
-protected lemma IsDualClosed.inf {S T : Submodule R M} (hS : S.IsDualClosed p) :
-    (S ⊓ T).IsDualClosed p := by
-  rw [← hS]
-  sorry
+-- !! Not true: S = ⊤, T = not dual closed
+-- protected lemma IsDualClosed.inf {S T : Submodule R M} (hS : S.IsDualClosed p) :
+--     (S ⊓ T).IsDualClosed p := by
+--   rw [← hS]
+--   sorry
 
 lemma IsDualClosed.sup {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
     (S ⊔ T).IsDualClosed p := by
   obtain ⟨S', hSdc, rfl⟩ := hS.exists_of_dual_flip
   obtain ⟨T', hTdc, rfl⟩ := hT.exists_of_dual_flip
+  unfold IsDualClosed
   sorry
 
 lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.IsDualClosed p)
-    (hT : T.IsDualClosed p) : dual p (S ⊓ T : Submodule R M) = dual p S ⊔ dual p T := by
+    (hT : T.IsDualClosed p) : dual p (S ∩ T) = dual p S ⊔ dual p T := by
+  rw [le_antisymm_iff]
+  constructor
+  · rw [SetLike.le_def]
+    simp [mem_sup]
+    intro x hx
+    sorry
+  · sorry -- easy
+
   -- refine IsDualClosed.dual_inj (p := p) hS hT ?_
   -- rw [← IsDualClosed.dual_inj_iff hS hT]
   -- rw [← hS.def]
-  sorry
 
 lemma dual_inf_dual_sup_dual {S T : Submodule R M} (hS : S.IsDualClosed p) :
     dual p (S ⊓ T : Submodule R M) = dual p S ⊔ dual p T := by

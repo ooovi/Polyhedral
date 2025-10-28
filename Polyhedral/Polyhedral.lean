@@ -16,6 +16,27 @@ import Polyhedral.ExtremeFaces
 ...
 -/
 
+/-
+Next goal: **Polyhedral Cone decomposition**
+ * Over a field every subspace is dual closed, which simplifies some of the below
+ * dual closed subspaces are polyhedral cones
+ * combiantorial equivalence
+ * product face lattices
+ * subspaces have only 1 face (and are the only dual closed ones with this property?)
+ * FG cones have graded face lattices
+   * if F > G are faces and dim F > dim G + 1, then there is a face in between.
+ * ∃ D : PolyhedralCone 𝕜 M, D.FG ∧ ∃ S : Submodule 𝕜 M, S.IsDualClosed .. ∧ D ⊔ S = C
+   * choose S := C.lineal
+   * take a subspace T complementary to S
+   * set D := C ⊓ T
+   * show D is FG
+   * theorem: a dual closed cone with finitely many faces and no lineality is FG.
+     * there are 1-dimensional faces.
+     * idee: the 1-dim faces generate D (Krein-Milmann)
+-/
+
+
+
 /- Next goal: **FG cones are polyhedral**
  * FG cones are dual closed (check)
  * Submodule has a single face
@@ -33,8 +54,82 @@ import Polyhedral.ExtremeFaces
 -/
 
 open Function Module
-open Submodule hiding span IsDualClosed
+open Submodule hiding span dual IsDualClosed
 open PointedCone
+open OrderDual
+
+
+namespace PointedCone
+
+section Face
+
+-- This should be CommRing, not Field
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
+
+variable {C : PointedCone R M}
+
+variable (F : Face C)
+
+def Face.dual : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
+
+lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
+  sorry
+  -- exact subdual_antitone
+
+def Face.sup_orderIso (C D : PointedCone R M) (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
+  Face (C ⊔ D) ≃o Face C × Face D := sorry
+
+def Face.sup_latticeHom (C D : PointedCone R M) (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
+  LatticeHom (Face (C ⊔ D)) (Face C × Face D) := sorry
+
+theorem bar (C : PointedCone R M) (hC : C.IsDualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
+    C.FG := by sorry
+
+end Face
+
+section IsFaceOf
+
+-- This should be CommRing, not Field
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
+
+variable {C F F₁ F₂ : PointedCone R M}
+
+variable [Fact p.IsFaithfulPair] in
+lemma IsFaceOf.dual_dual (hF : F.IsFaceOf C) :
+    dual p.flip (dual p F) = subdual p.flip (dual p C) (C.subdual p F)  := by
+  rw [scale_sum_mem_iff] at *
+  intro x hx y hy c hc hxyc
+  simp [mem_dual] at *
+  intro x' hx'
+  sorry
+
+variable [Fact p.IsFaithfulPair] in
+lemma IsFaceOf.dual_dual (hF : F.IsFaceOf C) :
+    (dual p.flip (dual p F)).IsFaceOf C := by
+  rw [scale_sum_mem_iff] at *
+  intro x hx y hy c hc hxyc
+  simp [mem_dual] at *
+  intro x' hx'
+  sorry
+
+variable (hC : C.IsDualClosed p)
+
+variable [Fact p.IsFaithfulPair] in
+lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
+    F.IsDualClosed p := by sorry
+
+end IsFaceOf
+
+end PointedCone
+
+
+
 
 
 
@@ -67,6 +162,10 @@ instance : Coe (PolyhedralCone 𝕜 M) (PointedCone 𝕜 M) where
 lemma toPointedCone_injective :
     Injective (toPointedCone : PolyhedralCone 𝕜 M → PointedCone 𝕜 M) :=
   sorry -- fun ⟨_, _⟩ _ ↦ by congr!
+
+lemma foo (C : PolyhedralCone 𝕜 M) :
+  ∃ D : PolyhedralCone 𝕜 M, D.FG ∧ ∃ S : Submodule 𝕜 M, S.IsDualClosed (Dual.eval 𝕜 M) ∧ D ⊔ S = C
+  := sorry
 
 variable [Module.Finite 𝕜 M]
 

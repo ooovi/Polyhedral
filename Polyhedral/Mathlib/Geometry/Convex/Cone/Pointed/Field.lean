@@ -242,7 +242,7 @@ variable [Fact p.flip.IsFaithfulPair] in
 lemma CoFG.dual_flip_fg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).FG := by
   rw [← flip_flip p] at hC; exact dual_fg hC
 
-variable [Fact (Surjective p.flip)] in
+variable [Fact p.flip.IsFaithfulPair] in
 lemma CoFG.exists_fg_sup_lineal {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
     ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ C.lineal = C := by
   obtain ⟨C', hcofg, hC'⟩ := FG.exists_cofg_inf_span p.flip hC.dual_flip_fg
@@ -262,7 +262,7 @@ lemma CoFG.exists_fg_sup_lineal {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
   · exact hC.isDualClosed_flip
 
 -- Q: is `p.flip.IsFaithfulPair` necessary?
-variable [Fact (Surjective p.flip)] in
+variable [Fact p.flip.IsFaithfulPair] in
 lemma sup_cofg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.CoFG p) : (C ⊔ D).CoFG p := by
   obtain ⟨C', hCfg, hC'⟩ := hC.exists_fg_sup_lineal
   obtain ⟨D', hDfg, hD'⟩ := hD.exists_fg_sup_lineal
