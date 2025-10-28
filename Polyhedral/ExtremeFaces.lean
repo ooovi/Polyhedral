@@ -93,7 +93,8 @@ theorem toPointedCone_le {F₁ F₂ : Face C} (h : F₁ ≤ F₂) :
     F₁.toPointedCone ≤ F₂.toPointedCone := by
   intro x xF₁; simp [LE.le] at h; exact h.subset xF₁
 
-/- Note: `face_le_self` is comparison as pointed cones, `le_self` is comparison as faces. -/
+/- Note: `face_le_self` is comparison as pointed cones, `le_self` is comparison as faces.
+  We should not need two lemmas. We need to change `partialPrder`. -/
 
 abbrev face_le_self (F : Face C) : F ≤ C := F.isFaceOf.subset
 
@@ -101,7 +102,7 @@ abbrev le_self (F : Face C) : F ≤ (C : Face C) := sorry -- F.isFaceOf.subset
 
 instance : OrderTop (Face C) where
   top := C
-  le_top F := F.le_self -- Martin: I don't understand how this proof can work!
+  le_top F := F.le_self
 
 /-!
 ### Supremum
