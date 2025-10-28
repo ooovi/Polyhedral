@@ -72,50 +72,51 @@ variable {C : PointedCone R M}
 
 variable (F : Face C)
 
+def face_self (C : PointedCone R M) : Face C := ⟨_, isFaceOf_self C⟩
+
+alias face_top := face_self
+
+def face_lineal (C : PointedCone R M) : Face C := ⟨_, isFaceOf_lineal C⟩
+
+alias face_bot := face_lineal
+
+instance : OrderTop (Face C) where
+  top := C.face_self
+  le_top := sorry
+
+instance : OrderBot (Face C) where
+  bot := C.face_lineal
+  bot_le := sorry
+
+def face_nonempty (C : PointedCone R M) : Nonempty (Face C) := ⟨⊥⟩
+
+def face_inhabited (C : PointedCone R M) : Inhabited (Face C) := ⟨⊥⟩
+
+lemma face_submodule {S : Submodule R M} {F : PointedCone R M} (hF : F.IsFaceOf S) :
+    F = S := by sorry
+
+def face_submodule_unique (S : Submodule R M) : Unique (Face (S : PointedCone R M)) where
+  default := ⊥
+  uniq := sorry
+
 def Face.dual : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
 
 lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
   sorry
   -- exact subdual_antitone
 
-def Face.sup_orderIso (C D : PointedCone R M) (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
-  Face (C ⊔ D) ≃o Face C × Face D := sorry
+def Face.sup_orderIso (C D : PointedCone R M)
+    (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
+    Face (C ⊔ D) ≃o Face C × Face D := sorry
 
-def Face.sup_latticeHom (C D : PointedCone R M) (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
-  LatticeHom (Face (C ⊔ D)) (Face C × Face D) := sorry
+def Face.sup_latticeHom (C D : PointedCone R M)
+    (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
+    LatticeHom (Face (C ⊔ D)) (Face C × Face D) := sorry
 
 theorem bar (C : PointedCone R M) (hC : C.IsDualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
     C.FG := by sorry
 
-end Face
-
-section IsFaceOf
-
--- This should be CommRing, not Field
-variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
-
 variable {C F F₁ F₂ : PointedCone R M}
-
-variable [Fact p.IsFaithfulPair] in
-lemma IsFaceOf.dual_dual (hF : F.IsFaceOf C) :
-    dual p.flip (dual p F) = subdual p.flip (dual p C) (C.subdual p F)  := by
-  rw [scale_sum_mem_iff] at *
-  intro x hx y hy c hc hxyc
-  simp [mem_dual] at *
-  intro x' hx'
-  sorry
-
-variable [Fact p.IsFaithfulPair] in
-lemma IsFaceOf.dual_dual (hF : F.IsFaceOf C) :
-    (dual p.flip (dual p F)).IsFaceOf C := by
-  rw [scale_sum_mem_iff] at *
-  intro x hx y hy c hc hxyc
-  simp [mem_dual] at *
-  intro x' hx'
-  sorry
 
 variable (hC : C.IsDualClosed p)
 
@@ -123,7 +124,7 @@ variable [Fact p.IsFaithfulPair] in
 lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
     F.IsDualClosed p := by sorry
 
-end IsFaceOf
+end Face
 
 end PointedCone
 

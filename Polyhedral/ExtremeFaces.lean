@@ -25,7 +25,7 @@ abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
 variable {C F F₁ F₂ : PointedCone R M}
 
 -- TODO does this make sense to have?
-abbrev IsFaceOf.rfl : C.IsFaceOf C := IsExtreme.rfl
+abbrev isFaceOf_self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
 
 abbrev IsFaceOf.trans (h₁ : F₁.IsFaceOf F) (h₂ : F.IsFaceOf F₂) : F₁.IsFaceOf F₂ :=
   IsExtreme.trans h₂ h₁
@@ -95,7 +95,7 @@ def sup (F₁ F₂ : Face C) : Face C := by
   constructor
   · intros _ sm
     simp at sm ⊢
-    exact sm C IsFaceOf.rfl F₁.le_all F₂.le_all
+    exact sm C C.isFaceOf_self F₁.le_all F₂.le_all
   · simp; intros _ xc _ yc _ zfs zo F FFs FF₁ FF₂
     exact FFs.left_mem_of_mem_openSegment xc yc (zfs F FFs FF₁ FF₂) zo
 
@@ -318,7 +318,7 @@ theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
 
 -/
 
-lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
+lemma isFaceOf_lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   constructor
   · exact PointedCone.lineal_le C
   · simp
@@ -342,12 +342,12 @@ lemma IsFaceOf.lineal : IsFaceOf C.lineal C := by
 
 lemma span_inter_lineal_eq_lineal' (s : Set M) :
     span R (s ∩ (span R s).lineal) = (span R s).lineal := by
-  convert span_inter_face_span_inf_face ⟨_, IsFaceOf.lineal⟩
+  convert span_inter_face_span_inf_face ⟨_, isFaceOf_lineal _⟩
   simp
-  exact IsFaceOf.lineal.subset
+  exact (isFaceOf_lineal _).subset
 
 lemma FG.lineal_fg' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
-  convert FG.face_fg_of_fg hC ⟨_, IsFaceOf.lineal⟩
+  convert FG.face_fg_of_fg hC ⟨_, isFaceOf_lineal _⟩
   simp
 
 end Field
