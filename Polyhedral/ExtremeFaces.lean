@@ -149,7 +149,10 @@ lemma sub_eq_sub_of_add_eq_add {a b c d : M} (h : a + b = c + d) : a - c = d - b
 
 end Semiring
 
+/-!
+### Joins
 
+-/
 section Ring
 
 variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
@@ -214,7 +217,10 @@ lemma join_isFaceOf_join {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD :
 
 end Ring
 
+/-!
+### Intersections
 
+-/
 section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
@@ -341,38 +347,27 @@ lemma FG.lineal_efg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
   convert FG.face_fg_of_fg hC ⟨_, IsFaceOf.lineal⟩
   simp
 
--- section Pair
-
--- variable [AddCommGroup N] [Module R N] (p : M →ₗ[R] N →ₗ[R] R)
-
--- def subdual (C F : PointedCone R M) : PointedCone R N := dual p F ⊓ dual p C
-
--- lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
---     (subdual p C F).IsFaceOf (dual p C) := by
---   unfold subdual
---   refine ⟨by simp, ?_⟩
---   intros x xd
---   suffices x ∈ dual p F by simp [this, xd]
---   exact mem_dual.mpr <| fun _ xxf => xd <| hF.subset xxf
-
--- end Pair
-
 end Field
 
-section CommRing
+/-!
+### Faces of the dual cone
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
+-/
 
-variable (p)
-
+variable {R M N : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+  [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] (p : M →ₗ[R] N →ₗ[R] R)
+in
 def subdual (C F : PointedCone R M) : PointedCone R N :=
   (dual p C) ⊓ (.dual p F : Submodule R N)
 
-variable {C F : PointedCone R M}
+section Field
 
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable (p : M →ₗ[R] N →ₗ[R] R) {C F : PointedCone R M}
+
+/-- The subdual of a face is a face of the dual. -/
 lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
@@ -409,10 +404,6 @@ lemma subdual_inj (hC : C.IsDualClosed p) : Function.Injective (subdual p C) := 
 lemma subdual_subdual {F : PointedCone R M} :
     subdual p.flip (dual p C) (subdual p C F) = F := sorry
 
-/-- The subdual of a face is a face. -/
-lemma subdual_isFaceOf_dual {F : PointedCone R M} (hF : F.IsFaceOf C) :
-    (subdual p C F).IsFaceOf (dual p C) := sorry
-
 /-- The subdual is strictly antitone. -/
 lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
     subdual p C F₁ ≤ subdual p C F₂ ↔ F₂ ≤ F₁ where
@@ -420,6 +411,6 @@ lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
   mp := sorry
 end IsDualClosed
 
-end CommRing
+end Field
 
 end PointedCone
