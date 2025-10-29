@@ -37,6 +37,9 @@ import Polyhedral.Halfspace
  * face lattice graded (when??)
 -/
 
+open Function Module OrderDual LinearMap
+open Submodule hiding span dual IsDualClosed
+open PointedCone
 
 variable {𝕜 M N : Type*}
 
@@ -69,12 +72,6 @@ lemma toPointedCone_injective :
     Injective (toPointedCone : PolyhedralCone 𝕜 M → PointedCone 𝕜 M) :=
   sorry -- fun ⟨_, _⟩ _ ↦ by congr!
 
-lemma foo (C : PolyhedralCone 𝕜 M) :
-  ∃ D : PolyhedralCone 𝕜 M, D.FG ∧ ∃ S : Submodule 𝕜 M, S.IsDualClosed (Dual.eval 𝕜 M) ∧ D ⊔ S = C
-  := sorry
-
-variable [Module.Finite 𝕜 M]
-
 instance : SetLike (PolyhedralCone 𝕜 M) M where
   coe C := C.toPointedCone
   coe_injective' := SetLike.coe_injective.comp toPointedCone_injective
@@ -83,24 +80,28 @@ instance : SetLike (PolyhedralCone 𝕜 M) M where
 
 --------------------------
 
+-- variable [Module.Finite 𝕜 M]
+
 def of_FG {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M
-    := ⟨C, Face.finite_of_fg hC, FG.isDualClosed (Dual.eval 𝕜 M) hC⟩
+    := ⟨C, Face.finite_of_fg hC, FG.isDualClosed _ hC⟩
 
 def span (s : Finset M) : PolyhedralCone 𝕜 M := of_FG (Submodule.fg_span <| s.finite_toSet)
 
-def span_of_finite {S : Set M} (hfin : S.Finite) : PolyhedralCone 𝕜 M
-  := of_FG (Submodule.fg_span hfin)
-
 instance {C : PolyhedralCone 𝕜 M} :
-    CoeOut (PointedCone.Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
+    CoeOut (Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
 
-instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) where
+  coe S := ⟨
+    S, inferInstance,
+    sorry -- S.isDualClosed (Dual.eval 𝕜 M)
+  ⟩
 
-instance : Bot (PolyhedralCone 𝕜 M) := ⟨of_FG fg_bot⟩
-instance : Top (PolyhedralCone 𝕜 M) := ⟨of_FG Module.Finite.fg_top⟩
-
-instance : OrderBot (PolyhedralCone 𝕜 M) := ⟨sorry⟩
-instance : OrderTop (PolyhedralCone 𝕜 M) := ⟨sorry⟩
+instance : OrderBot (PolyhedralCone 𝕜 M) where
+  bot := of_FG fg_bot
+  bot_le := sorry
+instance : OrderTop (PolyhedralCone 𝕜 M) where
+  top := (⊤ : Submodule 𝕜 M)
+  le_top := sorry
 
 instance : Min (PolyhedralCone 𝕜 M) where
   min C D := sorry -- of_FG <| PointedCone.inf_fg C.isFG D.isFG
@@ -117,6 +118,10 @@ variable {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜}
 theorem isDualClosed_iff_isDualClosed_lineal (P : PolyhedralCone 𝕜 M) :
   IsDualClosed p P ↔ Submodule.IsDualClosed p (lineal P) := by sorry
 
+
+lemma decomp (C : PolyhedralCone 𝕜 M) :
+    ∃ D : PolyhedralCone 𝕜 M, D.FG ∧ D ⊔ (C : PointedCone 𝕜 M).lineal = C
+  := sorry
 
 
 def of_CoFG {C : PointedCone 𝕜 N} (hC : C.CoFG p) : PolyhedralCone 𝕜 N

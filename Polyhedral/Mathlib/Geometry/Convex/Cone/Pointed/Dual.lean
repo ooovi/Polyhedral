@@ -4,6 +4,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Dual
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 
 namespace PointedCone
 

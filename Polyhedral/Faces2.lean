@@ -111,8 +111,9 @@ end Face
 
 -- ## MISC
 
-lemma isFaceOf_def :
+lemma isFaceOf_def_iff :
     F.IsFaceOf C ↔ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, c > 0 → c • x + y ∈ F → x ∈ F := by sorry
+    -- F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, c > 0 → c • x + y ∈ F → x ∈ F := by sorry
 
 /-- The linear span of the face. -/
 abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
@@ -121,11 +122,11 @@ lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
   constructor
   · exact le_self
-  rw [isFaceOf_def] at ⊢ h₁
+  rw [isFaceOf_def_iff] at ⊢ h₁
   exact fun _ x hx y hy => h₁ x (h₂.le_self hx) y (h₂.le_self hy)
 
--- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
-alias IsFaceOf.embed := IsFaceOf.trans
+lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₂) :
+    F₂.IsFaceOf C ↔ F₂.IsFaceOf F₁ := sorry
 
 
 -- ## DUAL
@@ -141,7 +142,10 @@ lemma Face.dual_antitone : Antitone (dual p : Face C → Face _) := by
 -- ## RESTRICT / EMBED
 
 lemma IsFaceOf.restrict (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
-    (F₁ ⊓ F₂).IsFaceOf F₁ := sorry
+    (F₁ ⊓ F₂).IsFaceOf F₁ := (h₁.of_cone_iff_of_face (le_refl _)).mp (h₁.inf h₂)
+
+-- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
+alias IsFaceOf.embed := IsFaceOf.trans
 
 def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
     ⟨F₁ ⊓ F₂, F₁.isFaceOf.restrict F₂.isFaceOf⟩
@@ -181,30 +185,48 @@ def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sor
 
 -- ## MAP
 
-lemma IsFaceOf.map (f : M →ₗ[R] N) (hf : Injective f) (hF : F.IsFaceOf C) :
-    (map f F).IsFaceOf (map f C) := sorry
+-- analogous lemmas for comap
 
-lemma IsFaceOf.map_iff (f : M →ₗ[R] N) (hf : Injective f) :
-    (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := sorry
+lemma isFaceOf_map_iff_of_injOn {f : M →ₗ[R] N} (hf : ker f ⊓ (Submodule.span R C) = ⊥) :
+    (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
+  sorry
+
+lemma isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Injective f) :
+    (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
+  simp only [isFaceOf_def_iff, mem_map, gt_iff_lt, forall_exists_index, and_imp,
+    forall_apply_eq_imp_iff₂] at *
+  simp only [← map_add, ← map_smul, hf.eq_iff, exists_eq_right]
+  constructor
+  · intro hF x hx y hy c hc hxy
+    exact hF x hx y hy c hc _ hxy rfl
+  · intro hF x hx y hy c hc z hz rfl
+    exact hF x hx y hy c hc hz
+
+lemma IsFaceOf.map {f : M →ₗ[R] N} (hf : Injective f) (hF : F.IsFaceOf C) :
+    (map f F).IsFaceOf (map f C) := (isFaceOf_map_iff hf).mpr hF
 
 lemma IsFaceOf.map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
-    (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) :=
-  hF.map (e : M →ₗ[R] N) e.injective
+    (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
 
-def Face.map (f : M →ₗ[R] N) (hf : Injective f) (F : Face C) : Face (map f C)
-    := ⟨_, F.isFaceOf.map f hf⟩
+def Face.map {f : M →ₗ[R] N} (hf : Injective f) (F : Face C) : Face (map f C)
+    := ⟨_, F.isFaceOf.map hf⟩
 
 def Face.map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M →ₗ[R] N) C)
-    := F.map (e : M →ₗ[R] N) e.injective
+    := F.map e.injective
 
 lemma Face.map_inj (f : M →ₗ[R] N) (hf : Injective f) :
-    Injective (map f hf : Face C → Face _) := sorry
+    Injective (map hf : Face C → Face _) := sorry
 
-def map_face (C : PointedCone R M) (f : M →ₗ[R] N) (hf : Injective f) :
-    Face (map f C) ≃o Face C := sorry
+def map_face (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
+    Face (map f C) ≃o Face C where
+  toFun := sorry
+  invFun := Face.map hf
+  left_inv := sorry
+  right_inv := sorry
+  map_rel_iff' := sorry
 
 def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
-    Face (map (e : M →ₗ[R] N) C) ≃o Face C := C.map_face (e : M →ₗ[R] N) e.injective
+    Face (map (e : M →ₗ[R] N) C) ≃o Face C := C.map_face e.injective
 
 
 -- ## QUOT / FIBER
@@ -449,6 +471,8 @@ lemma Face.eq_top {S : Submodule R M} (F : Face (S : PointedCone R M)) :
 instance face_unique {S : Submodule R M} : Unique (Face (S : PointedCone R M)) where
   default := ⊤
   uniq F := Submodule.Face.eq_top F
+
+example {S : Submodule R M} : Finite (Face (S : PointedCone R M)) := inferInstance
 
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]

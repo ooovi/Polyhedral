@@ -7,7 +7,7 @@ import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Pointed
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Hyperplane
 
 /-!
