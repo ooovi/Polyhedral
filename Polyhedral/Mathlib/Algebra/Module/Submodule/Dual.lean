@@ -438,7 +438,6 @@ lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
     dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
   := fun _ hx y hy => @hx (p.flip y) hy
 
-variable (p) in
 lemma IsDualClosed.to_eval {S : Submodule R M} (hS : S.IsDualClosed p)
     : S.IsDualClosed (Dual.eval R M) := by
   have h := dual_dual_eval_le_dual_dual_bilin p S

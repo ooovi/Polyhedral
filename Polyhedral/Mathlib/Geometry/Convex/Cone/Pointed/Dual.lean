@@ -291,6 +291,19 @@ lemma dual_le_iff_dual_le_of_isDualClosed {C : PointedCone R M} {D : PointedCone
 
 ---------------
 
+variable (p) in
+lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
+    dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
+  := fun _ hx y hy => @hx (p.flip y) hy
+
+lemma IsDualClosed.to_eval {S : PointedCone R M} (hS : S.IsDualClosed p)
+    : S.IsDualClosed (Dual.eval R M) := by
+  have h := dual_dual_eval_le_dual_dual_bilin p S
+  rw [hS] at h
+  exact le_antisymm h subset_dual_dual
+
+---------------
+
 lemma IsDualClosed.submodule_span_isDualClosed {C : PointedCone R M} (hC : C.IsDualClosed p) :
     (Submodule.span R C).IsDualClosed p := by
   unfold Submodule.IsDualClosed
