@@ -119,15 +119,10 @@ abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 
 lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
-  have h₁' := h₁
-  have h₂' := h₂
-  rw [isFaceOf_def] at ⊢ h₁ h₂
   constructor
-  · intro h x hx
-    sorry
-  · intro hF x hx y hy c hc hcxy
-    specialize h₁ x (h₂'.le_self hx)
-    sorry
+  · exact le_self
+  rw [isFaceOf_def] at ⊢ h₁
+  exact fun _ x hx y hy => h₁ x (h₂.le_self hx) y (h₂.le_self hy)
 
 -- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
 alias IsFaceOf.embed := IsFaceOf.trans
