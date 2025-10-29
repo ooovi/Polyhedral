@@ -7,6 +7,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.Order.Partition.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.ExtremeFaces
@@ -40,6 +41,30 @@ Next goal: **Polyhedral Cone decomposition**
     * Every face contains a 1-face.
 -/
 
+/- # Strategy:
+  * A halfspace has two faces (⊥ and ⊤)
+  * Every dual closed cone with two faces (neccessarily ⊥ and ⊤) is a halfspace
+  * every face in a halfspace is exposed
+  * fibers of exposed faces are exposed
+  * intersection of exposed faces is exposed
+  * Assume now that C is a dual closed cone with finitely many faces
+  * every face lies in a co-atom (just walk up until you find one)
+  * Every co-atom is exposed
+    * quotient by co-atom
+    * the quotient has two faces --> is a halfspace
+    * bottom face of halspace is exposed
+    * fiber preserves exposed --> co-atom is exposed
+  * ?? every face is exposed
+    * ?? quotient of a dual closed cone is dual closed?
+    * ?? bottom face of a dual closed cone is exposed
+    * proceed by induction
+      * quotient by any face F (bot face is special case)
+      * quotient cone is dual-closed and has finite and smaller face lattice
+      * by IH bottom face is exposed
+      * fiber of bottom face is F, hence exposed
+  * ?? every face is intersection of top face
+-/
+
 /- What else we need:
  * how faces transform under maps
    * images of faces are faces of the image (gives a face lattice isom)
@@ -70,6 +95,18 @@ variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
+-- ## IMPORTANT
+
+namespace Face
+
+variable {F F₁ F₂ : Face C}
+
+@[simp] lemma mem_toPointedCone (x : M) : x ∈ F ↔ x ∈ F.toPointedCone := .rfl
+
+@[ext] lemma ext (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+
+end Face
+
 
 -- ## MISC
 
@@ -88,9 +125,11 @@ lemma IsFaceOf.restrict (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
 
 -- ## DUAL
 
+variable (p) in
+/-- The face of the dual cone that corresponds to this face. -/
 def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
 
-lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
+lemma Face.dual_antitone : Antitone (dual p : Face C → Face _) := by
   sorry
 
 
@@ -111,9 +150,13 @@ lemma Face.embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
     embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
 
 lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
-    F₁.restrict (embed F₂) = F₂ := sorry
+    F₁.restrict (embed F₂) = F₂ := by
+  unfold restrict embed; congr
+  simpa using face_le_self F₂
 
-lemma Face.embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := sorry
+lemma Face.embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
+  rw [← restrict_embed F₂, embed_restrict]
+  simp only [inf_le_left]
 
 /-- The isomorphism between a face's face lattice and the interval in the cone's face
  lattice below the face. -/
@@ -122,7 +165,7 @@ def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F w
   invFun G := F.restrict G
   left_inv := restrict_embed
   right_inv G := by simp only [embed_restrict_of_le G.2.2]
-  map_rel_iff' := by intro G G'; simp; sorry -- should be easy, maybe its own lemma?
+  map_rel_iff' := @fun _ _ => by simp [embed]
 
 -- can we get this for free from `Face.orderIso`?
 def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
@@ -156,7 +199,7 @@ def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
     Face (map (e : M →ₗ[R] N) C) ≃o Face C := C.map_face (e : M →ₗ[R] N) e.injective
 
 
--- ## QUOTIENT
+-- ## QUOT / FIBER
 
 abbrev Face.quotMap (F : Face C) := mkQ F.span
 
@@ -166,7 +209,7 @@ abbrev Face.quotMap (F : Face C) := mkQ F.span
 abbrev Face.quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
 
 def Face.quotFace (F G : Face C) : Face (F.quot) :=
-    ⟨PointedCone.map F.quotMap G, by sorry⟩
+    ⟨F.quot ⊓ PointedCone.map F.quotMap G, by sorry⟩
 
 def Face.fiberFace {F : Face C} (G : Face (F.quot)) : Face C :=
     ⟨C ⊓ PointedCone.comap F.quotMap G, by sorry⟩
@@ -285,12 +328,70 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
 variable (hC : C.IsDualClosed p)
 
+def faceSet : Set (Face C) := ⊤
+
 variable [Fact p.IsFaithfulPair] in
 lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
     F.IsDualClosed p := by sorry
 
-theorem auxLemma (C : PointedCone R M) (hC : C.IsDualClosed p)
-    (h : Finite (Face C)) (hlin : C.Salient) : C.FG := by sorry
+theorem auxLemma (hC : C.IsDualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
+    C.FG := by sorry
+
+-- ## RELINT
+
+/- A non-topological variant of the relative interior.
+  Below two definitions are given. If they are not equivalent, then the more general one should
+  be chose and equivalence should be proven when it holds.
+-/
+
+def relint (C : PointedCone R M) : ConvexCone R M where
+  carrier := {x ∈ C | ∀ F : Face C, x ∈ F → F = C}
+  smul_mem' c hc x hx := by
+    constructor
+    · sorry
+    · sorry
+  add_mem' x hx y hy := by
+    simp
+    constructor
+    · sorry
+    · sorry
+
+theorem relint_def_sInf (C : PointedCone R M) :
+    C.relint = sInf {s | dual p.flip (dual p s) = C} := sorry
+
+def min_face {x : M} (h : x ∈ C) : Face C := sorry -- sInf {F : Face C | x ∈ F}
+
+theorem relint_def_min (C : PointedCone R M) :
+    C.relint = { x ∈ C | C.min_face (x := x) sorry = C } := sorry
+
+/-- The relative interior is non-empty. -/
+lemma relint_nonempty (C : PointedCone R M) : C.relint ≠ ⊥ := sorry
+
+lemma relint_disj (F₁ F₂ : Face C) :
+    F₁ ≠ F₂ ↔ Disjoint (relint F₁) (relint F₂) (α := ConvexCone R M) := sorry
+
+lemma relint_cover (C : PointedCone R M) :
+    ⋃₀ ((SetLike.coe ∘ relint ∘ Face.toPointedCone) '' C.faceSet) = C := sorry
+
+def relint_partition (C : PointedCone R M) : Partition (C : Set M) where
+  parts := { relint (F : PointedCone R M) | (F : Face C) }
+  sSupIndep' := sorry
+  bot_notMem' := by
+    simp only [Set.bot_eq_empty, Set.mem_setOf_eq, ConvexCone.coe_eq_empty, not_exists]
+    exact fun F => relint_nonempty (F : PointedCone R M)
+  sSup_eq' := by
+    ext x
+    -- simp; exact relint_partition C
+    sorry
+
+-- ## EXPOSED
+
+def Face.IsExposed (F : Face C) : Prop := sorry
+
+theorem bot_isExposed (hC : C.IsDualClosed p) : Face.IsExposed (⊥ : Face C) := by
+  -- reduce to salient case via quotients
+  -- in salient case choose a linear form in `(dual _ C).relint`
+  sorry
 
 end PointedCone
 
