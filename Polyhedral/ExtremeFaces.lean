@@ -25,12 +25,12 @@ abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
 variable {C F F₁ F₂ : PointedCone R M}
 
 -- TODO does this make sense to have?
-abbrev isFaceOf_self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
+lemma isFaceOf_self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
 
-abbrev isFaceOf.trans (h₁ : F₁.IsFaceOf F) (h₂ : F.IsFaceOf F₂) : F₁.IsFaceOf F₂ :=
+lemma IsFaceOf.trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C :=
   IsExtreme.trans h₂ h₁
 
-abbrev IsFaceOf.inter (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
+lemma IsFaceOf.inf (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
   IsExtreme.inter h₁ h₂
 
 lemma IsFaceOf.le_self {F : PointedCone R M} (hF : F.IsFaceOf C) : F ≤ C := by sorry
@@ -134,7 +134,7 @@ private lemma left_mem_of_mem_openSegment {F₁ F₂ : Face C} :
   exact F₁.isFaceOf.left_mem_of_mem_openSegment (face_le_self _ asup) (face_le_self _ bsup) zF zo
 
 /-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
-def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inter F₁.isFaceOf F₂.isFaceOf⟩
+def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inf F₁.isFaceOf F₂.isFaceOf⟩
 
 instance : Lattice (Face C) :=
   { partialOrder with
