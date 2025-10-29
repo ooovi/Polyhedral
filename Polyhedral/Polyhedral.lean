@@ -56,10 +56,9 @@ Next goal: **Polyhedral Cone decomposition**
    * how do projections behave under duality
 -/
 
-open Function Module
+open Function Module OrderDual
 open Submodule hiding span dual IsDualClosed
 open PointedCone
-open OrderDual
 
 
 namespace PointedCone
@@ -69,12 +68,8 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
-variable {C F F₁ F₂ : PointedCone R M}
+variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
-def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
-
-lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
-  sorry
 
 -- ## MISC
 
@@ -83,6 +78,17 @@ abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 
 lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := sorry
+
+
+-- ## DUAL
+
+def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
+
+lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
+  sorry
+
+
+-- ## RESTRICT / EMBED
 
 def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) := sorry
 
@@ -93,11 +99,15 @@ lemma Face.embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₁) = F�
 lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
     F₁.restrict (embed F₂) = F₂ := sorry
 
+/-- A face of a face of C coerces to a face of C. -/
+instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
+
 /-- The isomorphism between a face's face lattice and the interval in the cone's face
  lattice below the face. -/
 def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F := sorry
 
 def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
+
 
 -- ## MAP
 
@@ -145,6 +155,7 @@ def Face.quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ := by sorry
 
 def Face.quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := by sorry
 
+
 -- ## PROD
 
 lemma isFaceOf_prod {C₁ C₂ F₁ F₂ : PointedCone R M} :
@@ -166,6 +177,7 @@ lemma Face.prod_prod_right {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F�
 def prod_face_orderIso (C : PointedCone R M) (D : PointedCone R N) :
     Face (C.prod D) ≃o Face C × Face D := sorry
 
+
 -- ## SUP
 
 def indep (C D : PointedCone R M) :=
@@ -184,10 +196,54 @@ def proper (C : PointedCone R M) :
 -- def exists_map_prod_sup' (C D : PointedCone R M) (h : C.indep D) :
 --     ∃ e : M × M ≃ₗ[R] M, map e (C.prod D) = C ⊔ D := sorry
 
-------------------------
 
+-- ## INF
+
+lemma IsFaceOf.inf_cone (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) :
+    (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) := by sorry
+
+def Face.inf_cone (F₁ : Face C₁) (C₂ : PointedCone R M) : Face (C₁ ⊓ C₂)
+    := ⟨_, F₁.isFaceOf.inf_cone C₂⟩
+
+def Face.inf_cone_orderHom (C₂ : PointedCone R M) : Face C₁ →o Face (C₁ ⊓ C₂) where
+  toFun F := F.inf_cone C₂
+  monotone' := sorry
+
+lemma IsFaceOf.inf_face (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
+    (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by sorry
+
+def Face.inf_face (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁ ⊓ C₂)
+    := ⟨_, F₁.isFaceOf.inf_face F₂.isFaceOf⟩
+
+def Face.inf_face_orderHom (F₂ : Face C₂) : Face C₁ →o Face (C₁ ⊓ C₂) where
+  toFun F := F.inf_face F₂
+  monotone' := sorry
+
+def Face.inf_face_orderHom2 : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) where
+  toFun F := F.1.inf_face F.2
+  monotone' := sorry
+
+-- def Face.inf2_left (F : Face (C₁ ⊓ C₂)) : Face C₁ := sorry -- sInf {F' : Face C₁ | F' ⊓ C₂ = F }
+
+-- def Face.inf2_right (F : Face (C₁ ⊓ C₂)) : Face C₂ := sorry
+
+-- lemma Face.inf2_left_right (F : Face (C₁ ⊓ C₂)) :
+--     inf2 F.inf2_left F.inf2_right = F := sorry
+
+
+end PointedCone
+
+
+
+
+namespace PointedCone
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {C : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
-
 variable (hC : C.IsDualClosed p)
 
 variable [Fact p.IsFaithfulPair] in
