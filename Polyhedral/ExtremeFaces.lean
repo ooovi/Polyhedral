@@ -292,14 +292,14 @@ instance : InfSet (Face C) := ⟨fun S =>
         exact F.isFaceOf.left_mem_of_mem_openSegment xc yc (zfs F Fs) zo
 }⟩
 
-instance : SemilatticeInf (Face C) := {
+instance : SemilatticeInf (Face C) where
   inf := inf
   inf_le_left _ _ _ xi := xi.1
   inf_le_right _ _ _ xi := xi.2
-  le_inf _ _ _ h₁₂ h₂₃ _ xi := ⟨h₁₂ xi, h₂₃ xi⟩ }
+  le_inf _ _ _ h₁₂ h₂₃ _ xi := ⟨h₁₂ xi, h₂₃ xi⟩
 
-instance : CompleteSemilatticeInf (Face C) := {
-  instSemilatticeInf with
+instance : CompleteSemilatticeInf (Face C) where
+  __ := instSemilatticeInf
   sInf_le S f fS := by
     simp only [toPointedCone_le_iff, toPointedCone]
     refine inf_le_of_right_le ?_
@@ -312,19 +312,37 @@ instance : CompleteSemilatticeInf (Face C) := {
     simp [LE.le]
     intro x xf s sm
     exact fS s sm xf
-}
 
 /-- The supremum of two faces `F₁, F₂` of `C` is the smallest face of `C` that has both `F₁` and
 `F₂` as faces. -/
-def sup (F₁ F₂ : Face C) : Face C := sInf { F : Face C | F₁ ≤ F ∧ F₂ ≤ F}
+def sup (F₁ F₂ : Face C) : Face C := sInf {F : Face C | F₁ ≤ F ∧ F₂ ≤ F}
 
-instance : Lattice (Face C) :=
-  { __ := (inferInstance : SemilatticeInf (Face C))
-    sup := sup
-    le_sup_left _ _ := le_sInf (fun _ Fs => Fs.1)
-    le_sup_right _ _ := le_sInf (fun _ Fs => Fs.2)
-    sup_le _ _ _ f₁₂ f₂₃:= sInf_le (Set.mem_sep f₁₂ f₂₃)
-  }
+instance : SemilatticeSup (Face C) where
+  sup := sup
+  le_sup_left _ _ := le_sInf (fun _ Fs => Fs.1)
+  le_sup_right _ _ := le_sInf (fun _ Fs => Fs.2)
+  sup_le _ _ _ h₁₂ h₂₃ := sInf_le (Set.mem_sep h₁₂ h₂₃)
+
+
+/-- `sSup S` of a set `S` of faces of `C` is the smallest face of `C` that has all members of `S` as
+faces. -/
+def sSup (S : Set (Face C)) : Face C := sInf { F : Face C | ∀ F' ∈ S, F' ≤ F}
+
+instance : SupSet (Face C) := ⟨fun S =>
+  { carrier := sSup S
+    add_mem' aS bS := Submodule.add_mem _ aS bS
+    zero_mem' := Submodule.zero_mem _
+    smul_mem' _ _ h := Submodule.smul_mem _ _ h
+    isFaceOf := (sSup S).isFaceOf
+  }⟩
+
+instance : CompleteSemilatticeSup (Face C) where
+  __ := instSemilatticeSup
+  sSup := sSup
+  sSup_le _ _ fS := sInf_le_of_le fS le_rfl
+  le_sSup _ f fS := le_sInf_iff.mpr <| fun _ a ↦ a f fS
+
+instance : Lattice (Face C) where
 
 end Face
 
@@ -434,6 +452,11 @@ lemma Face.lineal_le {C : PointedCone R M} (F : Face C) : C.face_lineal ≤ F :=
 instance : OrderBot (Face C) where
   bot := C.face_lineal
   bot_le F := F.lineal_le
+
+instance : BoundedOrder (Face C) where
+
+instance : CompleteLattice (Face C) where
+
 
 -- TODO: move the below to the other lineal lemmas.
 
