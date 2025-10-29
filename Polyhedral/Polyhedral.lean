@@ -158,21 +158,41 @@ def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
 
 -- ## QUOTIENT
 
-def Face.quotMap (F : Face C) := mkQ F.span
+abbrev Face.quotMap (F : Face C) := mkQ F.span
 
 -- def quotBy (C : PointedCone R M) (F : Face C) : PointedCone R (M ⧸ F.span) := map F.quotMap C
 
 /-- The cone obtained by quotiening by the face's linear span. -/
-def Face.quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
+abbrev Face.quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
 
-def Face.quotFace (F G : Face C) (h : F ≤ G) : Face (F.quot) :=
+def Face.quotFace (F G : Face C) : Face (F.quot) :=
     ⟨PointedCone.map F.quotMap G, by sorry⟩
+
+def Face.fiberFace {F : Face C} (G : Face (F.quot)) : Face C :=
+    ⟨C ⊓ PointedCone.comap F.quotMap G, by sorry⟩
+
+/-- Faces of a quotient cone can naturally be considered as faces of the cone. -/
+instance {F : Face C} : CoeOut (Face F.quot) (Face C) := ⟨Face.fiberFace⟩
+
+lemma Face.fiber_quot (F G : Face C) : fiberFace (F.quotFace G) = F ⊔ G := sorry
+
+lemma Face.fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G :=
+     by simp [fiber_quot, h]
+
+lemma Face.quot_fiber {F : Face C} (G : Face (F.quot)) : F.quotFace (fiberFace G) = G := sorry
+
+lemma Face.le_fiber {F : Face C} (G : Face (F.quot)) : F ≤ fiberFace G := sorry
 
 /-- The isomorphism between a quotient's face lattice and the interval in the cone's face
  lattice above the face. -/
-def Face.quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ := by sorry
+def Face.quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ where
+  toFun G := ⟨G, le_fiber G, le_top⟩
+  invFun G := F.quotFace G
+  left_inv := quot_fiber
+  right_inv G := by simp only [fiber_quot_of_le G.2.1]
+  map_rel_iff' := by intro G G'; simp; sorry
 
-def Face.quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := by sorry
+def Face.quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := sorry
 
 
 -- ## PROD
