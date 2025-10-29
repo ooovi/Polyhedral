@@ -79,6 +79,12 @@ abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := sorry
 
+-- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
+alias IsFaceOf.embed := IsFaceOf.trans
+
+lemma IsFaceOf.restrict (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
+    (F₁ ⊓ F₂).IsFaceOf F₁ := sorry
+
 
 -- ## DUAL
 
@@ -90,22 +96,35 @@ lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
 
 -- ## RESTRICT / EMBED
 
-def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) := sorry
+def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
+    ⟨F₁ ⊓ F₂, F₁.isFaceOf.restrict F₂.isFaceOf⟩
 
-def Face.embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C := sorry
-
-lemma Face.embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₁) = F₁ ⊓ F₂ := sorry
-
-lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
-    F₁.restrict (embed F₂) = F₂ := sorry
+def Face.embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
+    ⟨F₂, F₂.isFaceOf.trans F₁.isFaceOf⟩
 
 /-- A face of a face of C coerces to a face of C. -/
 instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
 
+lemma Face.embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
+
+lemma Face.embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
+    embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
+
+lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
+    F₁.restrict (embed F₂) = F₂ := sorry
+
+lemma Face.embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := sorry
+
 /-- The isomorphism between a face's face lattice and the interval in the cone's face
  lattice below the face. -/
-def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F := sorry
+def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
+  toFun G := ⟨G, bot_le, Face.embed_le G⟩
+  invFun G := F.restrict G
+  left_inv := restrict_embed
+  right_inv G := by simp only [embed_restrict_of_le G.2.2]
+  map_rel_iff' := by intro G G'; simp; sorry -- should be easy, maybe its own lemma?
 
+-- can we get this for free from `Face.orderIso`?
 def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
 
 
