@@ -6,6 +6,7 @@ Authors: Martin Winter
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
+import Mathlib.LinearAlgebra.Quotient.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.ExtremeFaces
@@ -23,6 +24,7 @@ Next goal: **Polyhedral Cone decomposition**
  * combiantorial equivalence
  * product face lattices
  * subspaces have only 1 face (and are the only dual closed ones with this property?)
+ * if a face lattice is finite, then it is graded?
  * FG cones have graded face lattices
    * if F > G are faces and dim F > dim G + 1, then there is a face in between.
  * ∃ D : PolyhedralCone 𝕜 M, D.FG ∧ ∃ S : Submodule 𝕜 M, S.IsDualClosed .. ∧ D ⊔ S = C
@@ -33,7 +35,198 @@ Next goal: **Polyhedral Cone decomposition**
    * theorem: a dual closed cone with finitely many faces and no lineality is FG.
      * there are 1-dimensional faces.
      * idee: the 1-dim faces generate D (Krein-Milmann)
+  * Are the following things true for dual closed cones with finite face lattice?
+    * Every face is contained in a facet.
+    * Every face contains a 1-face.
 -/
+
+/- What else we need:
+ * how faces transform under maps
+   * images of faces are faces of the image (gives a face lattice isom)
+   * ...
+ * faces lattice of a face of C is a lower interval of face lattice of C
+ * projection along a face gives a cone whose face lattice is an upper interval
+   of the face lattice of C
+ * duality flips the face lattice
+ * intervals in a face lattice are a face lattice
+ * exposed faces
+   * bot and top are exposed
+   * if there are finitely many faces, then all faces are exposed
+ * projections with FG ker preserve dual closedness
+   * how do projections behave under duality
+-/
+
+open Function Module
+open Submodule hiding span dual IsDualClosed
+open PointedCone
+open OrderDual
+
+
+namespace PointedCone
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {C : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C F F₁ F₂ : PointedCone R M}
+
+def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
+
+lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
+  sorry
+
+-- ## MISC
+
+/-- The linear span of the face. -/
+abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
+
+lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
+    F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := sorry
+
+def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) := sorry
+
+def Face.embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C := sorry
+
+lemma Face.embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₁) = F₁ ⊓ F₂ := sorry
+
+lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
+    F₁.restrict (embed F₂) = F₂ := sorry
+
+/-- The isomorphism between a face's face lattice and the interval in the cone's face
+ lattice below the face. -/
+def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F := sorry
+
+def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
+
+-- ## MAP
+
+lemma IsFaceOf.map (f : M →ₗ[R] N) (hf : Injective f) (hF : F.IsFaceOf C) :
+    (map f F).IsFaceOf (map f C) := sorry
+
+lemma IsFaceOf.map_iff (f : M →ₗ[R] N) (hf : Injective f) :
+    (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := sorry
+
+lemma IsFaceOf.map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
+    (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) :=
+  hF.map (e : M →ₗ[R] N) e.injective
+
+def Face.map (f : M →ₗ[R] N) (hf : Injective f) (F : Face C) : Face (map f C)
+    := ⟨_, F.isFaceOf.map f hf⟩
+
+def Face.map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M →ₗ[R] N) C)
+    := F.map (e : M →ₗ[R] N) e.injective
+
+lemma Face.map_inj (f : M →ₗ[R] N) (hf : Injective f) :
+    Injective (map f hf : Face C → Face _) := sorry
+
+def map_face (C : PointedCone R M) (f : M →ₗ[R] N) (hf : Injective f) :
+    Face (map f C) ≃o Face C := sorry
+
+def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
+    Face (map (e : M →ₗ[R] N) C) ≃o Face C := C.map_face (e : M →ₗ[R] N) e.injective
+
+
+-- ## QUOTIENT
+
+def Face.quotMap (F : Face C) := mkQ F.span
+
+-- def quotBy (C : PointedCone R M) (F : Face C) : PointedCone R (M ⧸ F.span) := map F.quotMap C
+
+/-- The cone obtained by quotiening by the face's linear span. -/
+def Face.quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
+
+def Face.quotFace (F G : Face C) (h : F ≤ G) : Face (F.quot) :=
+    ⟨PointedCone.map F.quotMap G, by sorry⟩
+
+/-- The isomorphism between a quotient's face lattice and the interval in the cone's face
+ lattice above the face. -/
+def Face.quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ := by sorry
+
+def Face.quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := by sorry
+
+-- ## PROD
+
+lemma isFaceOf_prod {C₁ C₂ F₁ F₂ : PointedCone R M} :
+    F₁.IsFaceOf C₁ ∧ F₂.IsFaceOf C₂ ↔ IsFaceOf (F₁.prod F₂) (C₁.prod C₂) := sorry
+
+def Face.prod {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁.prod C₂) :=
+  ⟨_, isFaceOf_prod.mp ⟨F₁.isFaceOf, F₂.isFaceOf⟩⟩
+
+def Face.prod_left {C₁ C₂ : PointedCone R M} (F : Face (C₁.prod C₂)) : Face C₁ := sorry
+
+def Face.prod_right {C₁ C₂ : PointedCone R M} (F : Face (C₁.prod C₂)) : Face C₂ := sorry
+
+lemma Face.prod_prod_left {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) :
+    (F₁.prod F₂).prod_left = F₁ := sorry
+
+lemma Face.prod_prod_right {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) :
+    (F₁.prod F₂).prod_right = F₂ := sorry
+
+def prod_face_orderIso (C : PointedCone R M) (D : PointedCone R N) :
+    Face (C.prod D) ≃o Face C × Face D := sorry
+
+-- ## SUP
+
+def indep (C D : PointedCone R M) :=
+    Disjoint (Submodule.span R C) (Submodule.span R (D : Set M))
+
+-- NOTE: might already exist for submodules
+def exists_map_prod_sup (C D : PointedCone R M) (h : C.indep D) :
+    ∃ e : M × M →ₗ[R] M, Injective e ∧ map e (C.prod D) = C ⊔ D := sorry
+
+def sup_face_orderIso (C D : PointedCone R M) (h : C.indep D) :
+    Face (C ⊔ D) ≃o Face C × Face D := sorry
+
+def proper (C : PointedCone R M) :
+    PointedCone R (Submodule.span R (C : Set M)) := restrict (Submodule.span (M := M) R C) C
+
+-- def exists_map_prod_sup' (C D : PointedCone R M) (h : C.indep D) :
+--     ∃ e : M × M ≃ₗ[R] M, map e (C.prod D) = C ⊔ D := sorry
+
+------------------------
+
+variable {C F F₁ F₂ : PointedCone R M}
+
+variable (hC : C.IsDualClosed p)
+
+variable [Fact p.IsFaithfulPair] in
+lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
+    F.IsDualClosed p := by sorry
+
+theorem auxLemma (C : PointedCone R M) (hC : C.IsDualClosed p)
+    (h : Finite (Face C)) (hlin : C.Salient) : C.FG := by sorry
+
+end PointedCone
+
+
+
+namespace Submodule
+
+variable {R : Type*} [Semiring R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+lemma face_eq_top {S : Submodule R M} {F : PointedCone R M} (hF : F.IsFaceOf S) :
+    F = S := by sorry
+
+lemma Face.eq_top {S : Submodule R M} (F : Face (S : PointedCone R M)) :
+    F = ⊤ := by sorry
+
+instance face_unique {S : Submodule R M} : Unique (Face (S : PointedCone R M)) where
+  default := ⊤
+  uniq F := Submodule.Face.eq_top F
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {C : PointedCone R M}
+
+lemma face_bot_eq_top {S : Submodule R M} : (⊥ : Face (S : PointedCone R M)) = ⊤ := by sorry
+
+end Submodule
+
+
 
 
 
@@ -53,83 +246,6 @@ Next goal: **Polyhedral Cone decomposition**
  * face lattice graded (when??)
 -/
 
-open Function Module
-open Submodule hiding span dual IsDualClosed
-open PointedCone
-open OrderDual
-
-
-namespace PointedCone
-
-section Face
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- [p.IsPerfPair]
-
-variable {C : PointedCone R M}
-
-variable (F : Face C)
-
-def face_self (C : PointedCone R M) : Face C := ⟨_, isFaceOf_self C⟩
-
-alias face_top := face_self
-
-def face_lineal (C : PointedCone R M) : Face C := ⟨_, isFaceOf_lineal C⟩
-
-alias face_bot := face_lineal
-
-instance : OrderTop (Face C) where
-  top := C.face_self
-  le_top := sorry
-
-instance : OrderBot (Face C) where
-  bot := C.face_lineal
-  bot_le := sorry
-
-def face_nonempty (C : PointedCone R M) : Nonempty (Face C) := ⟨⊥⟩
-
-def face_inhabited (C : PointedCone R M) : Inhabited (Face C) := ⟨⊥⟩
-
-lemma face_submodule {S : Submodule R M} {F : PointedCone R M} (hF : F.IsFaceOf S) :
-    F = S := by sorry
-
-def face_submodule_unique (S : Submodule R M) : Unique (Face (S : PointedCone R M)) where
-  default := ⊥
-  uniq := sorry
-
-def Face.dual : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
-
-lemma Face.dual_antitone : Antitone (dual : Face C → Face (.dual p C)) := by
-  sorry
-  -- exact subdual_antitone
-
-def Face.sup_orderIso (C D : PointedCone R M)
-    (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
-    Face (C ⊔ D) ≃o Face C × Face D := sorry
-
-def Face.sup_latticeHom (C D : PointedCone R M)
-    (h : Submodule.span R C ⊓ Submodule.span R (D : Set M) = ⊥) :
-    LatticeHom (Face (C ⊔ D)) (Face C × Face D) := sorry
-
-theorem bar (C : PointedCone R M) (hC : C.IsDualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
-    C.FG := by sorry
-
-variable {C F F₁ F₂ : PointedCone R M}
-
-variable (hC : C.IsDualClosed p)
-
-variable [Fact p.IsFaithfulPair] in
-lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
-    F.IsDualClosed p := by sorry
-
-end Face
-
-end PointedCone
-
-
-
 
 
 
@@ -137,6 +253,7 @@ variable {𝕜 M N : Type*}
 
 variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 variable [AddCommGroup M] [AddCommGroup M] [Module 𝕜 M]
+variable [AddCommGroup N] [AddCommGroup N] [Module 𝕜 N]
 -- variable [AddCommGroup N] [AddCommGroup N] [Module 𝕜 N]
 
 -- /-- A cone is polyhedral if it is dual closed and has finitely many faces. -/
@@ -207,6 +324,11 @@ variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 variable [AddCommGroup M] [Module 𝕜 M]
 variable [AddCommGroup N] [Module 𝕜 N]
 variable {p : M →ₗ[𝕜] N →ₗ[𝕜] 𝕜}
+
+theorem isDualClosed_iff_isDualClosed_lineal (P : PolyhedralCone 𝕜 M) :
+  IsDualClosed p P ↔ Submodule.IsDualClosed p (lineal P) := by sorry
+
+
 
 def of_CoFG {C : PointedCone 𝕜 N} (hC : C.CoFG p) : PolyhedralCone 𝕜 N
     := ⟨C, by sorry, by sorry⟩
