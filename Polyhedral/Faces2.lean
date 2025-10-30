@@ -164,7 +164,7 @@ lemma Face.embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
 lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
     F₁.restrict (embed F₂) = F₂ := by
   unfold restrict embed; congr
-  simpa using face_le_self F₂
+  simpa using F₂.isFaceOf.le_self
 
 lemma Face.embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
   rw [← restrict_embed F₂, embed_restrict]

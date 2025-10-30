@@ -16,24 +16,27 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+in
+abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
+
+namespace IsFaceOf
+
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-
-abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
-
 variable {C F F₁ F₂ : PointedCone R M}
 
 -- TODO does this make sense to have?
-lemma isFaceOf_self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
+lemma self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
 
-lemma IsFaceOf.trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C :=
+lemma trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C :=
   IsExtreme.trans h₂ h₁
 
-lemma IsFaceOf.inf (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
+lemma inf (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
   IsExtreme.inter h₁ h₂
 
-lemma IsFaceOf.le_self {F : PointedCone R M} (hF : F.IsFaceOf C) : F ≤ C := hF.subset
+lemma le_self {F : PointedCone R M} (hF : F.IsFaceOf C) : F ≤ C := hF.subset
 
 end Semiring
 
@@ -113,6 +116,47 @@ lemma sup_isFaceOf_sup {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G
 
 end Ring
 
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  {C F : PointedCone R M} {s : Set M}
+
+lemma isFaceOf_iff :
+    F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, 0 < c → c • x + y ∈ F → x ∈ F := by
+  constructor
+  · intro f; refine ⟨f.subset, ?_⟩
+    intros x xC y yC c cpos h
+    let r := 1 / (1 + c)
+    have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
+    have : r • (c • x + y) ∈ openSegment R x y := by
+      simp [openSegment]
+      use c • r, smul_pos cpos rpos, r, rpos
+      constructor
+      · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r, add_comm]
+        exact div_self (by positivity)
+      · simp [← smul_assoc, mul_comm, add_comm]
+    have sf := F.smul_mem (le_of_lt rpos) h
+    exact f.left_mem_of_mem_openSegment xC yC sf this
+  · intro h
+    constructor
+    · exact h.1
+    · intros x xC y yC z zF zo
+      obtain ⟨a, b, apos, bpos, _, rfl⟩ := zo
+      exact h.2 x xC (b • y) (C.smul_mem (le_of_lt bpos) yC) a apos zF
+
+lemma span_nonneg_lc_mem {f : F.IsFaceOf (span R s)} {n : ℕ} {c : Fin n → { c : R // 0 ≤ c }}
+    {g : Fin n → s} (h : ∑ i, c i • (g i).val ∈ F) {i : Fin n} (cpos : 0 < c i) :
+    (g i).val ∈ F := by
+  induction n with
+  | zero => exact isEmptyElim i
+  | succ n ih =>
+      have : ∑ i ∈ {i}ᶜ, c i • (g i).val ∈ span R s :=
+        Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
+      rw [Fintype.sum_eq_add_sum_compl i] at h
+      exact (isFaceOf_iff.mp f).2 _ (subset_span (Subtype.coe_prop _)) _ this _ cpos h
+
+end Field
+
 /-!
 ### Faces of the dual cone
 
@@ -131,7 +175,7 @@ variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
 variable (p : M →ₗ[R] N →ₗ[R] R) {C F : PointedCone R M}
 
 /-- The subdual of a face is a face of the dual. -/
-lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
+lemma subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
   refine ⟨by simp, ?_⟩
@@ -176,7 +220,7 @@ lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
 end IsDualClosed
 
 
-lemma isFaceOf_lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
+lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   constructor
   · exact PointedCone.lineal_le C
   · simp
@@ -200,6 +244,8 @@ lemma isFaceOf_lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
 
 end Field
 
+end IsFaceOf
+
 /-!
 ## Bundled Face
 
@@ -214,7 +260,7 @@ variable {C F F₁ F₂ : PointedCone R M}
 structure Face (C : PointedCone R M) extends PointedCone R M where
   isFaceOf : IsFaceOf toSubmodule C
 
-def face_self (C : PointedCone R M) : Face C := ⟨_, isFaceOf_self C⟩
+def face_self (C : PointedCone R M) : Face C := ⟨_, IsFaceOf.self C⟩
 
 alias face_top := face_self
 
@@ -340,48 +386,15 @@ end Face
 
 end Semiring
 
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  {C F : PointedCone R M} {s t : Set M}
+
 /-!
 ### Intersections
 
 -/
-section Field
-
-variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  {C F F₁ F₂ : PointedCone R M} {s t : Set M}
-
-lemma isFaceOf_iff :
-    F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, 0 < c → c • x + y ∈ F → x ∈ F := by
-  constructor
-  · intro f; refine ⟨f.subset, ?_⟩
-    intros x xC y yC c cpos h
-    let r := 1 / (1 + c)
-    have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
-    have : r • (c • x + y) ∈ openSegment R x y := by
-      simp [openSegment]
-      use c • r, smul_pos cpos rpos, r, rpos
-      constructor
-      · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r, add_comm]
-        exact div_self (by positivity)
-      · simp [← smul_assoc, mul_comm, add_comm]
-    have sf := F.smul_mem (le_of_lt rpos) h
-    exact f.left_mem_of_mem_openSegment xC yC sf this
-  · intro h
-    constructor
-    · exact h.1
-    · intros x xC y yC z zF zo
-      obtain ⟨a, b, apos, bpos, _, rfl⟩ := zo
-      exact h.2 x xC (b • y) (C.smul_mem (le_of_lt bpos) yC) a apos zF
-
-lemma span_nonneg_lc_mem {F : (span R s).Face} {n : ℕ} {c : Fin n → { c : R // 0 ≤ c }}
-    {g : Fin n → s} (h : ∑ i, c i • (g i).val ∈ F.toSubmodule) {i : Fin n} (cpos : 0 < c i) :
-    (g i).val ∈ F := by
-  induction n with
-  | zero => exact isEmptyElim i
-  | succ n ih =>
-      have : ∑ i ∈ {i}ᶜ, c i • (g i).val ∈ span R s :=
-        Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
-      rw [Fintype.sum_eq_add_sum_compl i] at h
-      exact (isFaceOf_iff.mp F.isFaceOf).2 _ (subset_span (Subtype.coe_prop _)) _ this _ cpos h
 
 lemma span_inter_face_span_inf_face (F : Face (span R s)) :
     span R (s ∩ F) = (span R s) ⊓ F := by
@@ -398,7 +411,8 @@ lemma span_inter_face_span_inf_face (F : Face (span R s)) :
     by_cases hh : c i = 0
     · rw [hh]; simp
     · apply Submodule.smul_mem; apply Submodule.subset_span
-      exact Set.mem_inter (Subtype.coe_prop (g i)) (span_nonneg_lc_mem h.2 (pos_of_ne_zero hh))
+      have := F.isFaceOf.span_nonneg_lc_mem h.2 (pos_of_ne_zero hh)
+      exact Set.mem_inter (Subtype.coe_prop (g i)) this
 
 -- If span R s and span R t are disjoint (only share 0)
 example (h : Submodule.span R s ⊓ Submodule.span R t = ⊥)
@@ -444,7 +458,7 @@ theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
 
 -/
 
-def face_lineal : Face C := ⟨C.lineal, isFaceOf_lineal C⟩
+def face_lineal : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
 
 lemma Face.lineal_le {C : PointedCone R M} (F : Face C) : C.face_lineal ≤ F := sorry
 
@@ -462,12 +476,12 @@ instance : CompleteLattice (Face C) where
 
 lemma span_inter_lineal_eq_lineal' (s : Set M) :
     span R (s ∩ (span R s).lineal) = (span R s).lineal := by
-  convert span_inter_face_span_inf_face ⟨_, isFaceOf_lineal _⟩
+  convert span_inter_face_span_inf_face ⟨_, IsFaceOf.lineal _⟩
   simp
-  exact (isFaceOf_lineal _).subset
+  exact (IsFaceOf.lineal _).subset
 
 lemma FG.lineal_fg' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
-  convert FG.face_fg_of_fg hC ⟨_, isFaceOf_lineal _⟩
+  convert FG.face_fg_of_fg hC ⟨_, IsFaceOf.lineal _⟩
   simp
 
 end Field
