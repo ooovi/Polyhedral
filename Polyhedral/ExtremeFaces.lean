@@ -175,8 +175,6 @@ lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
 
 end IsDualClosed
 
-lemma scale_sum_mem_iff : F.IsFaceOf C ↔ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, 0 < c → c • x + y ∈ F → x ∈ F
-  := by sorry
 
 lemma isFaceOf_lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   constructor
@@ -259,16 +257,9 @@ example (F G : Face C) (h : F ≤ G) : (F : Set M) ≤ G := h
 theorem toPointedCone_le_iff {F₁ F₂ : Face C} : F₁ ≤ F₂ ↔ F₁.toPointedCone ≤ F₂.toPointedCone := by
   constructor <;> intro h x xF₁ <;> exact h xF₁
 
-/- Note: `face_le_self` is comparison as pointed cones, `le_self` is comparison as faces.
-  We should not need two lemmas. We need to change `partialPrder`. -/
-
-abbrev face_le_self (F : Face C) : F ≤ C := F.isFaceOf.subset
-
-abbrev le_self (F : Face C) : F ≤ (C : Face C) := F.isFaceOf.subset
-
 instance : OrderTop (Face C) where
   top := C
-  le_top F := F.le_self
+  le_top F := F.isFaceOf.subset
 
 instance face_nonempty {C : PointedCone R M} : Nonempty (Face C) := ⟨⊤⟩
 
@@ -308,7 +299,7 @@ instance : CompleteSemilatticeInf (Face C) where
     exact xs f fS
   le_sInf S f fS := by
     simp [sInf]
-    refine ⟨face_le_self f, ?_⟩
+    refine ⟨f.isFaceOf.subset, ?_⟩
     simp [LE.le]
     intro x xf s sm
     exact fS s sm xf
@@ -328,8 +319,9 @@ instance : SemilatticeSup (Face C) where
 faces. -/
 def sSup (S : Set (Face C)) : Face C := sInf { F : Face C | ∀ F' ∈ S, F' ≤ F}
 
-instance : SupSet (Face C) := ⟨fun S =>
-  { carrier := sSup S
+instance : SupSet (Face C) :=
+  ⟨fun S => {
+    carrier := sSup S
     add_mem' aS bS := Submodule.add_mem _ aS bS
     zero_mem' := Submodule.zero_mem _
     smul_mem' _ _ h := Submodule.smul_mem _ _ h
@@ -357,20 +349,28 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F F₁ F₂ : PointedCone R M} {s t : Set M}
 
-lemma scale_sum_mem {F : Face C} {x y : M} {c : R} (cpos : 0 < c) (hx : x ∈ C) (hy : y ∈ C)
-   (hc : c • y + x ∈ F) : x ∈ F ∧ y ∈ F := by
-  let r := 1 / (1 + c)
-  have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
-  have : r • (c • y + x) ∈ openSegment R x y := by
-      simp [openSegment]
-      use r, rpos, c • r, smul_pos cpos rpos
-      constructor
-      · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r]; exact div_self (by positivity)
-      · simp [← smul_assoc, mul_comm, add_comm]
-  have sf := F.toPointedCone.smul_mem ⟨r, le_of_lt rpos⟩ hc
+lemma isFaceOf_iff :
+    F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, 0 < c → c • x + y ∈ F → x ∈ F := by
   constructor
-  · exact F.isFaceOf.left_mem_of_mem_openSegment hx hy sf this
-  · exact F.isFaceOf.right_mem_of_mem_openSegment hx hy sf this
+  · intro f; refine ⟨f.subset, ?_⟩
+    intros x xC y yC c cpos h
+    let r := 1 / (1 + c)
+    have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
+    have : r • (c • x + y) ∈ openSegment R x y := by
+      simp [openSegment]
+      use c • r, smul_pos cpos rpos, r, rpos
+      constructor
+      · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r, add_comm]
+        exact div_self (by positivity)
+      · simp [← smul_assoc, mul_comm, add_comm]
+    have sf := F.smul_mem (le_of_lt rpos) h
+    exact f.left_mem_of_mem_openSegment xC yC sf this
+  · intro h
+    constructor
+    · exact h.1
+    · intros x xC y yC z zF zo
+      obtain ⟨a, b, apos, bpos, _, rfl⟩ := zo
+      exact h.2 x xC (b • y) (C.smul_mem (le_of_lt bpos) yC) a apos zF
 
 lemma span_nonneg_lc_mem {F : (span R s).Face} {n : ℕ} {c : Fin n → { c : R // 0 ≤ c }}
     {g : Fin n → s} (h : ∑ i, c i • (g i).val ∈ F.toSubmodule) {i : Fin n} (cpos : 0 < c i) :
@@ -381,8 +381,7 @@ lemma span_nonneg_lc_mem {F : (span R s).Face} {n : ℕ} {c : Fin n → { c : R 
       have : ∑ i ∈ {i}ᶜ, c i • (g i).val ∈ span R s :=
         Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
       rw [Fintype.sum_eq_add_sum_compl i] at h
-      obtain ⟨l, r⟩ := scale_sum_mem cpos this (subset_span (Subtype.coe_prop _)) h
-      exact r
+      exact (isFaceOf_iff.mp F.isFaceOf).2 _ (subset_span (Subtype.coe_prop _)) _ this _ cpos h
 
 lemma span_inter_face_span_inf_face (F : Face (span R s)) :
     span R (s ∩ F) = (span R s) ⊓ F := by
@@ -447,7 +446,8 @@ theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
 
 def face_lineal : Face C := ⟨C.lineal, isFaceOf_lineal C⟩
 
-lemma Face.lineal_le {C : PointedCone R M} (F : Face C) : C.face_lineal ≤ F := by sorry
+lemma Face.lineal_le {C : PointedCone R M} (F : Face C) : C.face_lineal ≤ F := sorry
+
 
 instance : OrderBot (Face C) where
   bot := C.face_lineal
