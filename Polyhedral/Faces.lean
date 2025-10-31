@@ -121,7 +121,12 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F : PointedCone R M} {s : Set M}
 
-lemma isFaceOf_iff :
+/-!
+### Equivalent definitions of isFaceOf
+
+-/
+
+lemma iff_mem_of_mul_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, 0 < c → c • x + y ∈ F → x ∈ F := by
   constructor
   · intro f; refine ⟨f.subset, ?_⟩
@@ -144,6 +149,18 @@ lemma isFaceOf_iff :
       obtain ⟨a, b, apos, bpos, _, rfl⟩ := zo
       exact h.2 x xC (b • y) (C.smul_mem (le_of_lt bpos) yC) a apos zF
 
+lemma iff_mem_of_add_mem :
+    F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F := by
+  constructor <;> intro h
+  · have := iff_mem_of_mul_add_mem.mp h
+    refine ⟨this.1, fun x xC y yC => ?_⟩
+    convert this.2 x xC y yC 1 (zero_lt_one)
+    simp
+  · apply iff_mem_of_mul_add_mem.mpr ⟨h.1, fun x xC y yC c c0 hcxy => ?_⟩
+    have cxF := h.2 (c • x) (smul_mem _ (le_of_lt c0) xC) y yC hcxy
+    convert smul_mem _ (inv_nonneg.mpr (le_of_lt c0)) cxF
+    simp [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel c (by positivity)]
+
 lemma span_nonneg_lc_mem {f : F.IsFaceOf (span R s)} {n : ℕ} {c : Fin n → { c : R // 0 ≤ c }}
     {g : Fin n → s} (h : ∑ i, c i • (g i).val ∈ F) {i : Fin n} (cpos : 0 < c i) :
     (g i).val ∈ F := by
@@ -153,7 +170,7 @@ lemma span_nonneg_lc_mem {f : F.IsFaceOf (span R s)} {n : ℕ} {c : Fin n → { 
       have : ∑ i ∈ {i}ᶜ, c i • (g i).val ∈ span R s :=
         Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
       rw [Fintype.sum_eq_add_sum_compl i] at h
-      exact (isFaceOf_iff.mp f).2 _ (subset_span (Subtype.coe_prop _)) _ this _ cpos h
+      exact (iff_mem_of_mul_add_mem.mp f).2 _ (subset_span (Subtype.coe_prop _)) _ this _ cpos h
 
 end Field
 

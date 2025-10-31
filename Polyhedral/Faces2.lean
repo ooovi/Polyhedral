@@ -111,10 +111,6 @@ end Face
 
 -- ## MISC
 
-lemma isFaceOf_def_iff :
-    F.IsFaceOf C ↔ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, c > 0 → c • x + y ∈ F → x ∈ F := by sorry
-    -- F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, ∀ c : R, c > 0 → c • x + y ∈ F → x ∈ F := by sorry
-
 /-- The linear span of the face. -/
 abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 
@@ -122,8 +118,8 @@ lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
   constructor
   · exact le_self
-  rw [isFaceOf_def_iff] at ⊢ h₁
-  exact fun _ x hx y hy => h₁ x (h₂.le_self hx) y (h₂.le_self hy)
+  rw [IsFaceOf.iff_mem_of_mul_add_mem] at ⊢ h₁
+  exact fun h => ⟨h, fun x hx y hy => h₁.2 x (h₂.le_self hx) y (h₂.le_self hy)⟩
 
 lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₂) :
     F₂.IsFaceOf C ↔ F₂.IsFaceOf F₁ := sorry
@@ -236,13 +232,19 @@ lemma isFaceOf_map_iff_of_injOn {f : M →ₗ[R] N} (hf : ker f ⊓ (Submodule.s
 
 lemma isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Injective f) :
     (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
-  simp only [isFaceOf_def_iff, mem_map, gt_iff_lt, forall_exists_index, and_imp,
+  simp only [IsFaceOf.iff_mem_of_mul_add_mem, mem_map, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at *
   simp only [← map_add, ← map_smul, hf.eq_iff, exists_eq_right]
   constructor
-  · intro hF x hx y hy c hc hxy
-    exact hF x hx y hy c hc _ hxy rfl
-  · intro hF x hx y hy c hc z hz rfl
+  · intro ⟨sub, hF⟩
+    refine ⟨?_,  fun x hx y hy c hc hxy => hF x hx y hy c hc _ hxy rfl⟩
+    · intro x xf
+      obtain ⟨y, yC, hy⟩ := Submodule.mem_map.mp <| sub (Submodule.mem_map_of_mem xf)
+      rw [hf hy] at yC
+      exact yC
+  · intro ⟨sub, hF⟩
+    refine ⟨Submodule.map_mono sub, fun x hx y hy c hc z hz h => ?_⟩
+    subst h
     exact hF x hx y hy c hc hz
 
 lemma IsFaceOf.map {f : M →ₗ[R] N} (hf : Injective f) (hF : F.IsFaceOf C) :
