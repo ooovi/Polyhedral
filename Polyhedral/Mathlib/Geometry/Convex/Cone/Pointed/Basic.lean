@@ -231,6 +231,31 @@ instance : InvolutiveNeg (PointedCone R M) := Submodule.involutivePointwiseNeg -
 -- lemma neg_sup {P Q : PointedCone R M} : -(P ⊔ Q) = -P ⊔ -Q := by simp
 -- lemma neg_top : -⊤ = (⊤ : PointedCone R M) := by simp
 -- lemma neg_bot : -⊥ = (⊥ : PointedCone R M) := by simp
+end Semiring_AddCommGroup
+
+section RingPartialOrder
+
+variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+
+open Submodule in
+lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
+    (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
+    (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0)
+    (s : xC + xD = yC + yD) :
+    xC = yC ∧ xD = yD := by
+  let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
+    (Submodule.span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+  constructor
+  · refine (sub_eq_zero.mp <| hCD ⟨sub_mem_span mxc myc, ?_⟩).symm
+    rw [add_comm] at s
+    rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
+    exact sub_mem_span myd mxd
+  · refine (sub_eq_zero.mp <| hCD ⟨?_, sub_mem_span mxd myd⟩).symm
+    nth_rewrite 2 [add_comm] at s
+    rw [← sub_eq_sub_iff_add_eq_add.mpr s]
+    exact sub_mem_span myc mxc
+
+end RingPartialOrder
 
 section Ring
 
@@ -284,7 +309,7 @@ lemma span_pm_pair_eq_submodule_span (x : M) :
         exact le_of_lt H, 0, le_refl 0, by simp [h]⟩
 
 -- TODO: move to Submodule/Basic
-omit [LinearOrder R] [IsOrderedRing R] in
+omit [IsOrderedRing R] in
 variable (R) in
 @[simp] lemma submodule_span_pm_pair (x : M) :
     Submodule.span R {-x, x} = Submodule.span R {x} := by
@@ -394,9 +419,6 @@ lemma neg_self_iff_eq_span_submodule' {C : PointedCone R M} :
     -C ≤ C ↔ Submodule.span R (C : Set M) = C
   := Iff.trans neg_le_iff_neg_eq neg_self_iff_eq_span_submodule
 
-end Ring
-
-
 section Map
 
 variable {M' : Type*} [AddCommMonoid M'] [Module R M']
@@ -406,7 +428,7 @@ lemma map_span (f : M →ₗ[R] M') (s : Set M) : map f (span R s) = span R (f '
 
 end Map
 
-end Semiring_AddCommGroup
+end Ring
 
 
 
