@@ -20,19 +20,22 @@ variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Modul
 abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
 
 namespace IsFaceOf
+-- M: I think using a namespae here is bad
 
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C F F₁ F₂ : PointedCone R M}
 
--- TODO does this make sense to have?
 lemma self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
 
 lemma trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C :=
   IsExtreme.trans h₂ h₁
 
 lemma le {F : PointedCone R M} (hF : F.IsFaceOf C) : F ≤ C := hF.subset
+
+-- M: better name?
+alias le_self := le
 
 end Semiring
 
@@ -87,7 +90,10 @@ lemma sup_isFaceOf_sup {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G
       use xC, hFC.left_mem_of_mem_openSegment xCM yCM zFM this.1
       use xD, hGD.left_mem_of_mem_openSegment xDM yDM zGM this.2
 
+-- M: better name
 alias sup := sup_isFaceOf_sup
+
+-- M: Where is inf?
 
 end Ring
 

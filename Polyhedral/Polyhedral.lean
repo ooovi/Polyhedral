@@ -10,8 +10,8 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
-import Polyhedral.Faces
-import Polyhedral.Faces2
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Halfspace
 
 /-!

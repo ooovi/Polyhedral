@@ -99,6 +99,14 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 -- ## MISC
 
+lemma IsFaceOf.def' (hF : F.IsFaceOf C) : ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F :=
+  sorry
+
+lemma IsFaceOf.def'' (hF : F.IsFaceOf C) {s : Finset M} (hs : ∀ S ∈ s, S ∈ C)
+    (hsum : ∑ S ∈ s, S ∈ F) : ∀ S ∈ s, S ∈ F := sorry
+
+lemma IsFaceOf.inf (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C := sorry
+
 /-- The linear span of the face. -/
 abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 
@@ -481,27 +489,27 @@ end PointedCone
 
 namespace Submodule
 
-variable {R : Type*} [Semiring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-
-lemma face_eq_top {S : Submodule R M} {F : PointedCone R M} (hF : F.IsFaceOf S) :
-    F = S := by sorry
-
-lemma Face.eq_top {S : Submodule R M} (F : Face (S : PointedCone R M)) :
-    F = ⊤ := by sorry
-
-instance face_unique {S : Submodule R M} : Unique (Face (S : PointedCone R M)) where
-  default := ⊤
-  uniq F := Submodule.Face.eq_top F
-
-example {S : Submodule R M} : Finite (Face (S : PointedCone R M)) := inferInstance
-
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {S : Submodule R M}
 variable {C : PointedCone R M}
 
-lemma face_bot_eq_top {S : Submodule R M} : (⊥ : Face (S : PointedCone R M)) = ⊤ := by sorry
+lemma face_eq_top {F : PointedCone R M} (hF : F.IsFaceOf S) :
+    F = S := by sorry
+
+lemma Face.eq_top (F : Face (S : PointedCone R M)) :
+    F = ⊤ := by sorry
+
+lemma Face.eq_bot (F : Face (S : PointedCone R M)) :
+    F = ⊥ := by sorry
+
+instance face_unique : Unique (Face (S : PointedCone R M)) where
+  default := ⊤
+  uniq := Face.eq_top
+
+example : Finite (Face (S : PointedCone R M)) := inferInstance
+
+lemma face_bot_eq_top : (⊥ : Face (S : PointedCone R M)) = ⊤ := by sorry
 
 end Submodule
