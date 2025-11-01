@@ -10,7 +10,8 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
-import Polyhedral.Faces
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Halfspace
 
 /-!
@@ -96,19 +97,6 @@ variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
--- ## IMPORTANT
-
-namespace Face
-
-variable {F F₁ F₂ : Face C}
-
-@[simp] lemma mem_toPointedCone (x : M) : x ∈ F ↔ x ∈ F.toPointedCone := .rfl
-
-@[ext] lemma ext (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
-
-end Face
-
-
 -- ## MISC
 
 /-- The linear span of the face. -/
@@ -123,16 +111,6 @@ lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
 
 lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₂) :
     F₂.IsFaceOf C ↔ F₂.IsFaceOf F₁ := sorry
-
-
--- ## DUAL
-
-variable (p) in
-/-- The face of the dual cone that corresponds to this face. -/
-def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
-
-lemma Face.dual_antitone : Antitone (dual p : Face C → Face _) := by
-  sorry
 
 
 -- ## RESTRICT / EMBED

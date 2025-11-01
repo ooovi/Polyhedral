@@ -16,8 +16,7 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-in
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
 abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
 
 namespace IsFaceOf
@@ -87,6 +86,8 @@ lemma sup_isFaceOf_sup {C D F G : PointedCone R M} (hFC : F.IsFaceOf C) (hGD : G
       apply Submodule.mem_sup.mpr
       use xC, hFC.left_mem_of_mem_openSegment xCM yCM zFM this.1
       use xD, hGD.left_mem_of_mem_openSegment xDM yDM zGM this.2
+
+alias sup := sup_isFaceOf_sup
 
 end Ring
 
