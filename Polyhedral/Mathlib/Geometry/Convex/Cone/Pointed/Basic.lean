@@ -150,10 +150,10 @@ lemma coe_restrict (S : Submodule R M) (T : Submodule R M) :
   sorry
 
 /-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
-abbrev embed (S : Submodule R M) (C : PointedCone R S) : PointedCone R M := C.map S.subtype
+abbrev embed {S : Submodule R M} (C : PointedCone R S) : PointedCone R M := C.map S.subtype
 
 lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
-    embed S (restrict S C) = (S ⊓ C : PointedCone R M) := by
+    (C.restrict S).embed = (S ⊓ C : PointedCone R M) := by
   -- unfold embed restrict map comap
   -- -- rw [← Submodule.restrictScalars_]
   -- --rw [Submodule.restrictScalars_s]
@@ -163,16 +163,16 @@ lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
   sorry -- map_comap_subtype _ _
 
 @[simp]
-lemma restrict_embed (S : Submodule R M) (C : PointedCone R S) : restrict S (embed S C) = C
+lemma restrict_embed (S : Submodule R M) (C : PointedCone R S) : restrict S (embed C) = C
   := by sorry -- simp [restrict, embed, pointedConeOf, submoduleOf, map, comap_map_eq]
 
 lemma embed_fg_of_fg (S : Submodule R M) {C : PointedCone R S} (hC : C.FG) :
-    (C.embed S).FG := Submodule.FG.map _ hC
+    C.embed.FG := Submodule.FG.map _ hC
 
-lemma fg_of_embed_fg {S : Submodule R M} {C : PointedCone R S} (hC : (C.embed S).FG) : C.FG
+lemma fg_of_embed_fg {S : Submodule R M} {C : PointedCone R S} (hC : C.embed.FG) : C.FG
     := Submodule.fg_of_fg_map_injective _ (Submodule.injective_subtype (S : PointedCone R M)) hC
 
-@[simp] lemma embed_fg_iff_fg {S : Submodule R M} {C : PointedCone R S} : (C.embed S).FG ↔ C.FG
+@[simp] lemma embed_fg_iff_fg {S : Submodule R M} {C : PointedCone R S} : C.embed.FG ↔ C.FG
   := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
 
 lemma restrict_fg_of_fg_le {S : Submodule R M} {C : PointedCone R M} (hSC : C ≤ S) (hC : C.FG) :

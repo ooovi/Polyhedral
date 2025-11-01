@@ -82,23 +82,33 @@ instance : SetLike (PolyhedralCone 𝕜 M) M where
 
 -- variable [Module.Finite 𝕜 M]
 
+/-- A finitely generated cone is polyhedral. -/
 def of_FG {C : PointedCone 𝕜 M} (hC : C.FG) : PolyhedralCone 𝕜 M
     := ⟨C, Face.finite_of_fg hC, FG.isDualClosed _ hC⟩
 
 def span (s : Finset M) : PolyhedralCone 𝕜 M := of_FG (Submodule.fg_span <| s.finite_toSet)
 
+variable [Module.Finite 𝕜 M]
+/-- A polyhedral cone in a finite dimensional vector space is finitely generated. -/
+def FG_of_Finite {C : PolyhedralCone 𝕜 M} : C.FG := sorry
+
+instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+
+instance : Coe (HalfspaceOrTop 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+
+instance : Coe (Halfspace 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+
+instance : Coe (HyperplaneOrTop 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+
+instance : Coe (Hyperplane 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+
 instance {C : PolyhedralCone 𝕜 M} :
     CoeOut (Face (C : PointedCone 𝕜 M)) (PolyhedralCone 𝕜 M) := sorry
-
-instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) where
-  coe S := ⟨
-    S, inferInstance,
-    sorry -- S.isDualClosed (Dual.eval 𝕜 M)
-  ⟩
 
 instance : OrderBot (PolyhedralCone 𝕜 M) where
   bot := of_FG fg_bot
   bot_le := sorry
+
 instance : OrderTop (PolyhedralCone 𝕜 M) where
   top := (⊤ : Submodule 𝕜 M)
   le_top := sorry

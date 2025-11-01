@@ -183,6 +183,49 @@ def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F w
 def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
 
 
+-- ## EMBED II
+
+lemma IsFaceOf.cone_restrict (S : Submodule R M) {C F : PointedCone R M} (h : F.IsFaceOf C) :
+    (F.restrict S).IsFaceOf (C.restrict S) := by sorry
+
+-- lemma isFaceOf_cone_embed_iff'' {S : Submodule R M} {C : PointedCone R M} {F : PointedCone R S} :
+--     (F.embed).IsFaceOf C ↔ F.IsFaceOf (C.restrict S) := by sorry
+
+def Face.cone_restrict (S : Submodule R M) {C : PointedCone R M} (F : Face C) :
+    Face (C.restrict S) := ⟨_, F.isFaceOf.cone_restrict S⟩
+
+-- def Face.cone_embed'' {S : Submodule R M} {C : PointedCone R M} (F : Face (C.restrict S)) :
+--     Face (C) := ⟨_, isFaceOf_cone_embed_iff''.mpr F.isFaceOf⟩
+
+-- lemma IsFaceOf.cone_embed {S : Submodule R M} {C F : PointedCone R S} (h : F.IsFaceOf C) :
+--     (F.embed).IsFaceOf C.embed := by sorry
+
+@[simp] lemma isFaceOf_cone_embed_iff {S : Submodule R M} {C F : PointedCone R S} :
+    (F.embed).IsFaceOf C.embed ↔ F.IsFaceOf C := by sorry
+
+lemma isFaceOf_of_cone_embed_iff {S : Submodule R M} {C : PointedCone R S} {F : PointedCone R M} :
+    (F.restrict S).IsFaceOf C ↔ F.IsFaceOf (C.embed) := by sorry
+
+def Face.cone_embed {S : Submodule R M} {C : PointedCone R S} (F : Face C) :
+    Face (C.embed) := ⟨_, isFaceOf_cone_embed_iff.mpr F.isFaceOf⟩
+
+def Face.of_cone_embed {S : Submodule R M} {C : PointedCone R S} (F : Face C.embed) :
+    Face (C) := ⟨_, isFaceOf_of_cone_embed_iff.mpr F.isFaceOf⟩
+
+instance {S : Submodule R M} {C : PointedCone R S} : Coe (Face C) (Face C.embed) where
+  coe F := F.cone_embed
+
+instance {S : Submodule R M} {C : PointedCone R S} : Coe (Face C.embed) (Face C) where
+  coe F := F.of_cone_embed
+
+def embed_face_orderIso {S : Submodule R M} (C : PointedCone R S) : Face C ≃o Face C.embed where
+  toFun := .cone_embed
+  invFun := .of_cone_embed
+  left_inv := sorry
+  right_inv := sorry
+  map_rel_iff' := sorry
+
+
 -- ## MAP
 
 -- analogous lemmas for comap
