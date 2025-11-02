@@ -4,6 +4,7 @@ import Mathlib.Geometry.Convex.Cone.Dual
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
+import Mathlib.LinearAlgebra.Quotient.Basic
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
@@ -458,5 +459,29 @@ lemma fg_top [Module.Finite R M] : (⊤ : PointedCone R M).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
 
 end Ring_LinearOrder
+
+
+-- # QUOTIENTS
+
+section Ring
+
+variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
+  [Module R M] {S : Set M}
+
+variable {C : PointedCone R M}
+
+/-- The quotient of a cone along a submodule. -/
+abbrev quot (C : PointedCone R M) (S : Submodule R M) : PointedCone R (M ⧸ S) := C.map S.mkQ
+
+lemma quot_def (C : PointedCone R M) (S : Submodule R M) : C.quot S = C.map S.mkQ := rfl
+
+lemma quot_span : C.quot (.span R C) = ⊥ := by sorry
+
+lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
+
+@[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
+    (C ⊔ S).quot S = C.quot S := sorry
+
+end Ring
 
 end PointedCone

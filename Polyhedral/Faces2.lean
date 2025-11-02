@@ -213,6 +213,13 @@ def embed_face_orderIso {S : Submodule R M} (C : PointedCone R S) : Face C ≃o 
   map_rel_iff' := sorry
 
 
+-- ## LINEAL
+
+lemma IsFaceOf.lineal_eq (hF : F.IsFaceOf C) : F.lineal = C.lineal := sorry
+
+lemma Face.lineal_eq (F : Face C) : PointedCone.lineal F = C.lineal := sorry
+
+
 -- ## MAP
 
 -- analogous lemmas for comap
@@ -512,9 +519,9 @@ def foo (F : Face C) :
 -/
 
 def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.IsDualClosed p) : Face C :=
-  ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
+  sorry -- ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
 
-theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry
+-- theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry
 
 variable (p) in
 lemma Face.dual_neq_bot_of_neq_top {F : Face C} (hF : F ≠ ⊤) :

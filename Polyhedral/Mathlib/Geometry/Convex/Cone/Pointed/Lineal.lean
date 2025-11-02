@@ -30,19 +30,6 @@ lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp [lineal]
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := le_sSup hS
 
-@[simp]
-lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
-  rw [le_antisymm_iff]
-  constructor
-  · --apply ofSubmodule_embedding.strictMono
-    --refine le_trans (lineal_le S) ?_
-    --exact lineal_le S
-    sorry
-  · exact le_lineal (by simp)
-
-@[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
-@[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
-
 section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
@@ -89,12 +76,12 @@ def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [lineal_mem]; aesop
 
-end Ring
+@[simp]
+lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
+  ext x; simp [lineal_mem]
 
-section Semiring
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+@[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
+@[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
 /- In this section we show properties of lineal that also follow from lineal
   being a face. But we need this earlier than faces, so we need to prove that
@@ -137,6 +124,15 @@ lemma lineal_isExtreme_sum {C : PointedCone R M} {xs : Finset M} (hxs : (xs : Se
       Set.mem_insert_iff, forall_eq_or_imp, Finset.sum_insert hy] at *
     have h := lineal_isExtreme hxs.1 (C.sum_mem hxs.2) h
     exact ⟨h.1, H hxs.2 h.2⟩
+
+
+
+lemma sup_lineal (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D).lineal := by
+  sorry
+
+-- lemma sup_lineal (C : PointedCone R M) (S : Submodule R M) : S ≤ (C ⊔ S).lineal := sorry
+
+
 
 section DivisionRing
 
@@ -196,18 +192,18 @@ lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classic
 
 end DivisionRing
 
-end Semiring
+end Ring
 
 end Ring_AddCommGroup
 
 
 
+-- ## SALIENT
+
 section Ring_AddCommGroup
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
-
--- ## Salient
 
 /-- A salient cone has trivial lineality space, see `salient_iff_lineal_bot`. -/
 abbrev Salient (C : PointedCone R M) := C.toConvexCone.Salient
@@ -254,6 +250,27 @@ lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = �
 lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.lineal S) :
     (C ⊓ S).Salient := by
   simp only [salient_iff_lineal_bot, lineal_inf, lineal_submodule, ← disjoint_iff, hCS]
+
+-- ## SALIENT QUOT
+
+variable {C : PointedCone R M}
+
+abbrev salientQuot (C : PointedCone R M) := C.quot C.lineal
+
+lemma salientQuot_def (C : PointedCone R M) : C.salientQuot = C.quot C.lineal := rfl
+
+lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := sorry
+
+@[simp] lemma salientQuot_of_submodule (S : Submodule R M) :
+    (S : PointedCone R M).salientQuot = ⊥ := by
+  unfold salientQuot
+  rw [lineal_submodule, ← Submodule.span_eq S]
+  simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
+  rw [← ofSubmodule_coe, quot_span]
+
+lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
+
+
 
 section DivisionRing
 
