@@ -13,6 +13,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Halfspace
+import Polyhedral.Faces2
 
 /-!
 # Polyhedral cones
@@ -92,7 +93,8 @@ variable [Module.Finite 𝕜 M]
 /-- A polyhedral cone in a finite dimensional vector space is finitely generated. -/
 def FG_of_Finite {C : PolyhedralCone 𝕜 M} : C.FG := sorry
 
-instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
+instance : Coe (Submodule 𝕜 M) (PolyhedralCone 𝕜 M) where
+  coe S := ⟨S, inferInstance, isDualClosed _ S ⟩
 
 instance : Coe (HalfspaceOrTop 𝕜 M) (PolyhedralCone 𝕜 M) := sorry
 

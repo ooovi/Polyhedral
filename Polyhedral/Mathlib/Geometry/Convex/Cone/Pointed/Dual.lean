@@ -243,6 +243,15 @@ lemma IsDualClosed.def_iff {C : PointedCone R M} :
 lemma IsDualClosed.def_flip_iff {C : PointedCone R N} :
     IsDualClosed p.flip C ↔ dual p (dual p.flip C) = C := by rfl
 
+lemma IsDualClosed.coe_iff {S : Submodule R M} :
+    IsDualClosed p S ↔ S.IsDualClosed p := sorry
+
+lemma isDualClosed_coe {S : Submodule R M} (hS : S.IsDualClosed p) :
+    IsDualClosed p S := IsDualClosed.coe_iff.mpr hS
+
+lemma isDualClosed_coe' {S : Submodule R M} (hS : IsDualClosed p S) :
+    S.IsDualClosed p := IsDualClosed.coe_iff.mp hS
+
 variable (p) in
 lemma dual_isDualClosed (C : PointedCone R M) : (dual p C).IsDualClosed p.flip := by
   simp [IsDualClosed, dual_dual_flip_dual]
@@ -407,9 +416,12 @@ lemma IsDualClosed.dual_dual_span {C : PointedCone R M} (hC : C.IsDualClosed p) 
 
 lemma IsDualClosed.lineal {C : PointedCone R M} (hC : C.IsDualClosed p) :
     C.lineal.IsDualClosed p := by
-  by_contra
-
   sorry
+
+variable (p) [Fact (Surjective p.flip)] in
+/-- Every submodule of a vector space is dual closed. -/
+lemma isDualClosed (S : Submodule R M) : IsDualClosed p S :=
+    isDualClosed_coe <| S.isDualClosed p
 
 end Field
 

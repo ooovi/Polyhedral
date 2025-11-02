@@ -205,12 +205,13 @@ def face_self (C : PointedCone R M) : Face C := ⟨_, IsFaceOf.self C⟩
 
 alias face_top := face_self
 
-instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) := ⟨C.face_self⟩
+instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) :=
+    ⟨C.face_self⟩
 instance {S : Submodule R M} : CoeDep (Submodule R M) S (Face (S : PointedCone R M)) :=
     ⟨(S : PointedCone R M).face_self⟩
 
 -- does not work without the second CoeDep
-example {C : Submodule R M} : Face (C : PointedCone R M) := C
+example {S : Submodule R M} : Face (S : PointedCone R M) := S
 
 namespace Face
 
@@ -222,7 +223,7 @@ namespace Face
 def toPointedCone {C : PointedCone R M} (F : Face C) := F.toSubmodule
 
 instance : CoeOut (Face (M := M) (R := R) C) (PointedCone R M) where
-coe f := f.toSubmodule
+  coe := toPointedCone
 
 instance : SetLike (Face C) M where
   coe C := C.toPointedCone

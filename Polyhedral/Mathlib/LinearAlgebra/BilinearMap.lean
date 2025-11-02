@@ -102,8 +102,11 @@ instance [inst : Fact (Surjective p)] : Fact p.IsFaithfulPair
 lemma isFaithfulPair_of_id : IsFaithfulPair (R := R) (N := M) .id
   := isFaithfulPair_of_range_top range_id
 
-instance : Fact (Surjective (LinearMap.id (R := R) (M := M)))
+instance instFactSurjectiveCoeIdId : Fact (Surjective (LinearMap.id (R := R) (M := M)))
   := ⟨surjective_id⟩
+instance : Fact (Surjective (Dual.eval R M).flip)
+  := instFactSurjectiveCoeIdId
+
 instance instFactIsFaithfulPairIdId : Fact (IsFaithfulPair (R := R) (N := M) .id)
   := inferInstance -- ⟨isFaithfulPair_of_id⟩
 instance : Fact (Dual.eval R M).flip.IsFaithfulPair := instFactIsFaithfulPairIdId

@@ -107,6 +107,11 @@ lemma IsFaceOf.def'' (hF : F.IsFaceOf C) {s : Finset M} (hs : ∀ S ∈ s, S ∈
 
 lemma IsFaceOf.inf (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C := sorry
 
+abbrev Face.Proper (F : Face C) := F ≠ ⊤
+
+abbrev Face.Trivial (F : Face C) := F = ⊥ ∨ F = ⊤
+abbrev Face.Nontrivial (F : Face C) := ⊥ < F ∧ F < ⊤
+
 /-- The linear span of the face. -/
 abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 
@@ -435,7 +440,7 @@ lemma relint_disj (F₁ F₂ : Face C) :
     F₁ ≠ F₂ ↔ Disjoint (relint F₁) (relint F₂) (α := ConvexCone R M) := sorry
 
 lemma relint_cover (C : PointedCone R M) :
-    ⋃₀ ((SetLike.coe ∘ relint ∘ Face.toPointedCone) '' C.faceSet) = C := sorry
+    ⋃ F : Face C, (relint F : ConvexCone R M) = (C : Set M) := sorry
 
 def relint_partition (C : PointedCone R M) : Partition (C : Set M) where
   parts := { relint (F : PointedCone R M) | (F : Face C) }
@@ -479,6 +484,54 @@ theorem IsExposed.of_isExposed_face_quot {F : Face C} {G : Face (F.quot)} (hG : 
     F.IsExposed := by
   -- idea: the comap of a supporting halfspace is again a supporting halfspace.
   sorry
+
+variable (p) [Fact (Surjective p.flip)] in
+lemma HyperplaneOrTop.isDualClosed (H : HyperplaneOrTop R M) : IsDualClosed p H := sorry
+
+variable [Fact (Surjective p.flip)] in
+theorem IsExposed.isDualClosed (hC : C.IsDualClosed p) {F : Face C} (hF : F.IsExposed) :
+    IsDualClosed p F := by
+  obtain ⟨H, h, hH⟩ := hF
+  rw [← hH]
+  exact IsDualClosed.inf hC (HyperplaneOrTop.isDualClosed p _)
+
+/-- The dual of a face is an exposed face. -/
+def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
+  sorry -- obvious by definition of dual face
+
+def foo (F : Face C) :
+    ∃ φ ∈ dual (Dual.eval R M) C, φ ∉ (dual (Dual.eval R M) C).lineal ∧ F.span ≤ ker φ :=
+  sorry
+
+/-
+ * The double dual face of F gives a face F' that is exposed and contains F.
+ * The dual of a proper face cannot be bot (true?)
+ * The double dual F' is then not top.
+ * The double dual is then a proper exposed face that contains F
+ * In particula, all top proper faces are exposed
+-/
+
+def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.IsDualClosed p) : Face C :=
+  ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
+
+theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry
+
+variable (p) in
+lemma Face.dual_neq_bot_of_neq_top {F : Face C} (hF : F ≠ ⊤) :
+    F.dual p ≠ ⊥ := sorry
+
+theorem Face.exists_proper_exposed_le (F : Face C) (hF : F ≠ ⊤) :
+    ∃ F' : Face C, F' ≠ ⊤ ∧ F'.IsExposed ∧ F ≤ F' := by
+  -- Since F not top, dual face is not bot (??, use Face.Nontrivial.dual)
+  -- choose a non-zero point from the dual face
+  -- this yield a supporting hyperplane to C
+  -- this defines a face F'
+  -- this face contains F
+  -- this face is exposed by def
+  -- this face is not top by def
+  sorry
+
+
 
 theorem IsDualClosed.quot (hC : C.IsDualClosed p) (F : Face C) :
     F.quot.IsDualClosed (Dual.eval R (M ⧸ F.span)) := sorry
