@@ -133,6 +133,35 @@ lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = 
   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
 
+section Ring
+
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+/-- This is a variant of `IsModularLattice.sup_inf_assoc_of_le`. While submodules form a modular
+  lattice, pointed cones do in general not. -/
+lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
+    {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S := by
+  ext x
+  simp [Submodule.mem_sup]
+  constructor
+  · intro h
+    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
+    exact ⟨⟨y, hy, z, hz, hyzx⟩, by
+      rw [← hyzx]; exact S.add_mem (hCS hy) hz' ⟩
+  · intro h
+    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
+    exact ⟨y, hy, z, ⟨hz, by
+      rw [← add_left_cancel_iff (a := -y), neg_add_cancel_left] at hyzx
+      rw [hyzx]
+      specialize hCS hy
+      rw [Submodule.restrictScalars_mem, ← neg_mem_iff] at hCS
+      exact S.add_mem hCS hx
+    ⟩, hyzx⟩
+
+end Ring
+
+
 --------------------------
 
 /- TODO: generalize these restrict/embed lemmas to general case where we restrict a
@@ -232,6 +261,7 @@ instance : InvolutiveNeg (PointedCone R M) := Submodule.involutivePointwiseNeg -
 -- lemma neg_sup {P Q : PointedCone R M} : -(P ⊔ Q) = -P ⊔ -Q := by simp
 -- lemma neg_top : -⊤ = (⊤ : PointedCone R M) := by simp
 -- lemma neg_bot : -⊥ = (⊥ : PointedCone R M) := by simp
+
 end Semiring_AddCommGroup
 
 section RingPartialOrder
@@ -433,6 +463,25 @@ end Ring
 
 
 
+-- -- ## LINEAR EQUIV
+
+-- variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+-- variable {M : Type*} [AddCommGroup M] [Module R M]
+-- variable {N : Type*} [AddCommGroup N] [Module R N]
+
+-- local notation "R≥0" => {c : R // 0 ≤ c}
+
+-- noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
+--     {C : PointedCone R M} (hSC : S ≤ C) : map S.mkQ C ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
+--   Submodule.IsCompl.map_mkQ_equiv_inf hST hSC
+
+-- structure LinearlyEquiv (s : Set M) (t : Set N) where
+--   toFun : M →ₗ[R] N
+--   toInv : N →ₗ[R] M
+--   inv_fun : ∀ x ∈ s, toInv (toFun x) = x
+--   fun_inv : ∀ x ∈ t, toFun (toInv x) = x
+-- example (S : PointedCone R M) (T : PointedCone R N) : S ≃ₗ[R≥0] T := sorry
+
 section Ring_LinearOrder
 
 -- we have LinearOrder because then Module.Finite { c // 0 ≤ c } R
@@ -475,7 +524,9 @@ abbrev quot (C : PointedCone R M) (S : Submodule R M) : PointedCone R (M ⧸ S) 
 
 lemma quot_def (C : PointedCone R M) (S : Submodule R M) : C.quot S = C.map S.mkQ := rfl
 
-lemma quot_span : C.quot (.span R C) = ⊥ := by sorry
+lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := sorry
+
+lemma quot_span : C.quot (.span R C) = ⊥ := quot_bot_of_le Submodule.le_span
 
 lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 

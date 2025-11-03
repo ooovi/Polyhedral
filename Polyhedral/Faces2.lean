@@ -506,9 +506,9 @@ theorem IsExposed.isDualClosed (hC : C.IsDualClosed p) {F : Face C} (hF : F.IsEx
 def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
   sorry -- obvious by definition of dual face
 
-def foo (F : Face C) :
-    ∃ φ ∈ dual (Dual.eval R M) C, φ ∉ (dual (Dual.eval R M) C).lineal ∧ F.span ≤ ker φ :=
-  sorry
+-- def foo''''' (F : Face C) :
+--     ∃ φ ∈ dual (Dual.eval R M) C, φ ∉ (dual (Dual.eval R M) C).lineal ∧ F.span ≤ ker φ :=
+--   sorry
 
 /-
  * The double dual face of F gives a face F' that is exposed and contains F.

@@ -66,6 +66,15 @@ lemma lineal_mem {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ 
     have hxS : x ∈ S := Submodule.mem_span_of_mem (by simp)
     exact hSC hxS -- maybe we could use the lemma that s ∪ -s spans a linear space (see above)
 
+lemma submodule_le_lineal {C : PointedCone R M} {S : Submodule R M} (hSC : S ≤ C) :
+    S ≤ C.lineal := by
+  intro _ hx
+  have hx' := neg_mem hx
+  exact lineal_mem.mpr ⟨hSC hx, hSC hx'⟩
+
+lemma submodule_le_lineal_iff {C : PointedCone R M} {S : Submodule R M} :
+  S ≤ C ↔ S ≤ C.lineal := ⟨submodule_le_lineal, fun h _ hx => C.lineal_le (h hx)⟩
+
 def lineal_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by
   ext x; simp [lineal_mem]
 
@@ -216,6 +225,7 @@ lemma Salient.mem_neg_mem_zero {C : PointedCone R M} (hC : C.Salient)
   rw [not_imp_not] at hC
   exact hC hx'
 
+-- move somewhere further up
 lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
   rw [le_antisymm_iff]
@@ -250,6 +260,10 @@ lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = �
 lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.lineal S) :
     (C ⊓ S).Salient := by
   simp only [salient_iff_lineal_bot, lineal_inf, lineal_submodule, ← disjoint_iff, hCS]
+
+lemma inf_salient_of_disjoint {C : PointedCone R M}
+    {S : Submodule R M} (hS : C.lineal ⊓ S = ⊥) : (C ⊓ S).Salient := by
+  simpa [salient_iff_lineal_bot] using hS
 
 -- ## SALIENT QUOT
 
@@ -321,27 +335,6 @@ lemma exists_pointy_sup_lineal' (C : PointedCone R M) :
     ∃ D : PointedCone R M, (Submodule.span R D) ⊓ C.lineal = ⊥ ∧ D ⊔ C.lineal = C := by
 
   sorry
-
-/-- This is a variant of `IsModularLattice.sup_inf_assoc_of_le`. While submodules form a modular
-  lattice, pointed cones do in general not. -/
-lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
-    {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S := by
-  ext x
-  simp [Submodule.mem_sup]
-  constructor
-  · intro h
-    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
-    exact ⟨⟨y, hy, z, hz, hyzx⟩, by
-      rw [← hyzx]; exact S.add_mem (hCS hy) hz' ⟩
-  · intro h
-    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
-    exact ⟨y, hy, z, ⟨hz, by
-      rw [← add_left_cancel_iff (a := -y), neg_add_cancel_left] at hyzx
-      rw [hyzx]
-      specialize hCS hy
-      rw [Submodule.restrictScalars_mem, ← neg_mem_iff] at hCS
-      exact S.add_mem hCS hx
-    ⟩, hyzx⟩
 
 end Ring_AddCommGroup
 

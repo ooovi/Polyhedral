@@ -93,6 +93,9 @@ lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
     restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
   := by ext x; simp [restrict, submoduleOf]
 
+def restrict_equiv (S T : Submodule R M) : (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T :=
+  sorry
+
 /-- A submodule `T` of a submodule `S` of `M` reintepreted as a submodule of `M`. -/
 abbrev embed {S : Submodule R M} (T : Submodule R S) : Submodule R M := T.map S.subtype
 
@@ -149,6 +152,14 @@ lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed
 lemma embed_le {S : Submodule R M} (T : Submodule R S) : embed T ≤ S := by
   simpa using embed_mono le_top
 
+def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T where
+  toFun x := ⟨S.subtype x, by simp⟩
+  invFun x := ⟨_, (mem_embed_iff (T:=T) ⟨_, mem_of_mem_embed x.2⟩).mp x.2⟩
+  map_add' x y := by simp
+  map_smul' r x := by simp
+  left_inv x := by simp
+  right_inv x := by simp
+
 def embed_orderEmbed (S : Submodule R M) : Submodule R S ↪o Submodule R M where
   toFun := embed
   inj' := embed_injective
@@ -202,7 +213,72 @@ lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
     (sInf s).restrictScalars S = sInf (restrictScalars S '' s) :=
   (restrictScalarsLatticeHom S R M).map_sInf' s
 
+
+variable {R : Type*} [Ring R]
+variable {S : Type*} [Semiring S] [Module S R]
+variable {M : Type*} [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
+
+-- lemma foo {p q : Submodule R M} (hpq : IsCompl p q) :
+--     (quotientEquivOfIsCompl _ _ hpq) ∘ₗ p.mkQ ∘ₗ q.subtype = .id := by
+--   ext x; simp
+
+-- lemma foo' {p q : Submodule R M} (hpq : IsCompl p q) :
+--     p.mkQ ∘ₗ q.subtype ∘ₗ (quotientEquivOfIsCompl _ _ hpq) = .id := by
+--   ext x; simp
+
+-- I think this is not the best lemma. There should be something more fundamental about
+-- quotients that and IsCompl that should make this easy.
+/-- A linear equivalence between `s / p` and `s ⊓ q`. -/
+noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl p q)
+    {s : Submodule S M} (hps : p.restrictScalars S ≤ s) :
+    map (p.mkQ : M →ₗ[S] M ⧸ p) s ≃ₗ[S] (s ⊓ q.restrictScalars S : Submodule S M) where
+  toFun x := ⟨quotientEquivOfIsCompl _ _ hpq x, by
+    obtain ⟨y, hys, hy⟩ := x.2; rw [← hy]
+    obtain ⟨yp, yq, rfl, _⟩ := existsUnique_add_of_isCompl hpq y
+    rw [← Submodule.quotientEquivOfIsCompl_apply_mk_coe _ _ hpq yq]
+    simp only [quotientEquivOfIsCompl_apply_mk_coe, LinearMap.coe_restrictScalars, mkQ_apply,
+      map_add, coe_add, mem_inf, restrictScalars_mem, (Quotient.mk_eq_zero p).mpr yp.2]
+    simpa using add_mem (hps <| neg_mem (S := Submodule R M) yp.2) hys
+  ⟩
+  invFun x := ⟨p.mkQ x, x, by simpa using x.2.1⟩
+  map_add' x y := by simp
+  map_smul' r x := by simp; sorry
+  left_inv x := by simp
+  right_inv x := by
+    have H : (x : M) = (⟨x.1, x.2.2⟩ : q) := rfl
+    ext; simp only [mkQ_apply]; rw [H]; congr
+    exact Submodule.quotientEquivOfIsCompl_apply_mk_coe ..
+
+noncomputable example {p q : Submodule R M} (hpq : IsCompl p q)
+    {s : Submodule R M} (hps : p ≤ s) :
+    map p.mkQ s ≃ₗ[R] (s ⊓ q : Submodule R M) := IsCompl.map_mkQ_equiv_inf hpq hps
+
 end RestrictedScalar
+
+
+-- -- ## QUOTIENTS
+
+-- lemma mkQ_sup (S T : Submodule R M) :
+--     (map S.mkQ T).mkQ ∘ S.mkQ = S.mkQ := sorry
+
+-- lemma mkQ_sup (S T : Submodule R M) (hST : T ≤ S) :
+--     (map S.mkQ T).mkQ ∘ S.mkQ = S.mkQ := sorry
+
+
+-- -- ## LINEAR EQUIV
+
+-- variable {R : Type*} [Semiring R]
+-- variable {M : Type*} [AddCommMonoid M] [Module R M]
+-- variable {N : Type*} [AddCommMonoid N] [Module R N]
+
+-- structure LinearlyEquiv (s : Set M) (t : Set N) where
+--   toFun : M →ₗ[R] N
+--   toInv : N →ₗ[R] M
+--   inv_fun : ∀ x ∈ s, toInv (toFun x) = x
+--   fun_inv : ∀ x ∈ t, toFun (toInv x) = x
+
+-- example (S : Submodule R M) (T : Submodule R N) : S ≃ₗ[R] T := sorry
+
 
 end Semiring
 

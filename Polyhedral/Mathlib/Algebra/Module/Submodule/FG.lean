@@ -12,11 +12,21 @@ open Module
 
 namespace Submodule
 
-variable {R M : Type*}
+variable {R M N : Type*}
 variable [Semiring R]
 variable [AddCommMonoid M] [Module R M]
+variable [AddCommMonoid N] [Module R N]
 
 alias sup_fg := Submodule.FG.sup
+
+-- This seems to be the more appropriate version of `Submodule.fg_of_linearEquiv`.
+-- The current one should be `Module.fg_of_linearEquiv` or so.
+lemma FG.linearEquiv {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T) (hS : S.FG) :
+    T.FG := by -- T.fg_top.mp <| fg_of_linearEquiv e.symm (S.fg_top.mpr hS)
+  rw [← fg_top] at *
+  exact fg_of_linearEquiv e.symm hS
+
+-- ## RESTRICT / EMBED
 
 lemma embed_fg_of_fg (S : Submodule R M) {T : Submodule R S} (hC : T.FG) :
     (embed T).FG := Submodule.FG.map _ hC
