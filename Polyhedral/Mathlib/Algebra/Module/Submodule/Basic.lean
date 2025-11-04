@@ -214,20 +214,81 @@ lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
   (restrictScalarsLatticeHom S R M).map_sInf' s
 
 
+-- ## MODULAR
+
 variable {R : Type*} [Ring R]
 variable {S : Type*} [Semiring S] [Module S R]
 variable {M : Type*} [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
 
--- lemma foo {p q : Submodule R M} (hpq : IsCompl p q) :
---     (quotientEquivOfIsCompl _ _ hpq) ∘ₗ p.mkQ ∘ₗ q.subtype = .id := by
---   ext x; simp
+-- TODO: quotientEquivOfIsCompl should not have explicit `p` and `q`
 
--- lemma foo' {p q : Submodule R M} (hpq : IsCompl p q) :
---     p.mkQ ∘ₗ q.subtype ∘ₗ (quotientEquivOfIsCompl _ _ hpq) = .id := by
---   ext x; simp
+/-- Submodules over a ring are right modular in the lattice of submodules over a semiring.
+  This is a version f `IsModularLattice.sup_inf_assoc_of_le` for the non-modular lattice
+  of submodules over a semiring. -/
+lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M)
+    {p : Submodule R M} (hsp : s ≤ p.restrictScalars S) :
+    s ⊔ (t ⊓ p.restrictScalars S) = (s ⊔ t) ⊓ p.restrictScalars S := by
+  ext x
+  simp only [mem_sup, mem_inf, restrictScalars_mem]
+  constructor
+  · intro h
+    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
+    refine ⟨⟨y, hy, z, hz, hyzx⟩, ?_⟩
+    simpa [← hyzx] using p.add_mem (hsp hy) hz'
+  · intro h
+    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
+    refine ⟨y, hy, z, ⟨hz, ?_⟩, hyzx⟩
+    rw [← add_right_inj (-y), neg_add_cancel_left] at hyzx
+    rw [hyzx]
+    specialize hsp hy
+    rw [restrictScalars_mem, ← neg_mem_iff] at hsp
+    exact p.add_mem hsp hx
+
+/-- Submodules over a ring are left modular in the lattice of submodules over a semiring.
+  This is a version f `IsModularLattice.inf_sup_assoc_of_le` for the non-modular lattice
+  of submodules over a semiring. -/
+lemma inf_sup_assoc_of_restrictScalars_le {s : Submodule S M} (t : Submodule S M)
+    {p : Submodule R M} (hsp : p.restrictScalars S ≤ s) :
+    s ⊓ (t ⊔ p.restrictScalars S) = (s ⊓ t) ⊔ p.restrictScalars S := by
+  ext x
+  simp only [mem_inf, mem_sup, restrictScalars_mem]
+  constructor
+  · intro h
+    obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
+    use y
+    constructor
+    · refine ⟨?_, hyt⟩
+      rw [← add_left_inj (-z), add_neg_cancel_right] at hyzx
+      simpa [hyzx] using add_mem hxs <| hsp <| neg_mem (S := Submodule R M) hzp
+    · use z
+  · intro h
+    obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
+    exact ⟨by simpa [← hyzx] using add_mem hys (hsp hzp), ⟨y, hyt, z, hzp, hyzx⟩⟩
+
+/-- A version of `IsCompl.IicOrderIsoIci` for submodules with restricted scalars. -/
+def IsCompl.IicOrderIsoIci_restrictScalars {p q : Submodule R M} (hpq : IsCompl p q) :
+    Set.Iic (p.restrictScalars S) ≃o Set.Ici (q.restrictScalars S) where
+  toFun s := ⟨s ⊔ q.restrictScalars S, by simp⟩
+  invFun s := ⟨s ⊓ p.restrictScalars S, by simp⟩
+  left_inv s := by
+    simp [← sup_inf_assoc_of_le_restrictScalars _ s.2, ← restrictScalars_inf,
+      disjoint_iff.mp hpq.symm.disjoint]
+  right_inv s := by
+    simp [← inf_sup_assoc_of_restrictScalars_le _ s.2, ← restrictScalars_sup,
+      codisjoint_iff.mp hpq.codisjoint]
+  map_rel_iff' := by
+    simp only [Equiv.coe_fn_mk, Subtype.mk_le_mk, sup_le_iff, le_sup_right, and_true,
+      Subtype.forall, Set.mem_Iic]
+    intro s hs t ht
+    constructor
+    · intro h
+      simpa [inf_eq_left.mpr hs, ← sup_inf_assoc_of_le_restrictScalars _ ht,
+        ← restrictScalars_inf, inf_comm, disjoint_iff.mp hpq.disjoint]
+        using inf_le_inf_right (p.restrictScalars S) h
+    · exact (le_trans · le_sup_left)
 
 -- I think this is not the best lemma. There should be something more fundamental about
--- quotients that and IsCompl that should make this easy.
+-- quotients and IsCompl that should make this easy.
 /-- A linear equivalence between `s / p` and `s ⊓ q`. -/
 noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl p q)
     {s : Submodule S M} (hps : p.restrictScalars S ≤ s) :

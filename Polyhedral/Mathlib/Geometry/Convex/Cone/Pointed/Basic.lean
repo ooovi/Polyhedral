@@ -96,6 +96,8 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
   rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
 
 
+-- ## SPAN
+
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
   obtain ⟨s, rfl⟩ := hC; use s; simp
@@ -122,7 +124,7 @@ lemma le_submodule_span_self (C : PointedCone R M) : C ≤ Submodule.span R (C :
 
 alias le_span := subset_span
 
-
+-- should be in `Submodule.Basic`
 lemma submodule_span_of_span {s : Set M} {S : Submodule R M} (hsS : span R s = S) :
     Submodule.span R s = S := by
   simpa using congrArg (Submodule.span R ∘ SetLike.coe) hsS
@@ -132,32 +134,22 @@ lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = 
   obtain ⟨S, hS⟩ := h; rw [hS]
   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
+lemma span_union (s t : Set M) : span R (s ∪ t) = span R s ⊔ span R t :=
+    Submodule.span_union s t
+
 
 section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
-/-- This is a variant of `IsModularLattice.sup_inf_assoc_of_le`. While submodules form a modular
-  lattice, pointed cones do in general not. -/
 lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
-    {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S := by
-  ext x
-  simp [Submodule.mem_sup]
-  constructor
-  · intro h
-    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
-    exact ⟨⟨y, hy, z, hz, hyzx⟩, by
-      rw [← hyzx]; exact S.add_mem (hCS hy) hz' ⟩
-  · intro h
-    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
-    exact ⟨y, hy, z, ⟨hz, by
-      rw [← add_left_cancel_iff (a := -y), neg_add_cancel_left] at hyzx
-      rw [hyzx]
-      specialize hCS hy
-      rw [Submodule.restrictScalars_mem, ← neg_mem_iff] at hCS
-      exact S.add_mem hCS hx
-    ⟩, hyzx⟩
+    {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S :=
+  Submodule.sup_inf_assoc_of_le_restrictScalars D hCS
+
+lemma inf_sup_assoc_of_submodule_le {C : PointedCone R M} (D : PointedCone R M)
+    {S : Submodule R M} (hSC : S ≤ C) : C ⊓ (D ⊔ S) = (C ⊓ D) ⊔ S :=
+  Submodule.inf_sup_assoc_of_restrictScalars_le D hSC
 
 end Ring
 

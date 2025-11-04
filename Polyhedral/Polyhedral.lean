@@ -35,6 +35,8 @@ open PointedCone
  * dual closed
 -/
 
+
+
 namespace PointedCone
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
@@ -80,10 +82,22 @@ lemma isPolyhedral_of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quo
   exact FG.map _ hC
 
 lemma IsPolyhedral.exists_finset_sup_lineal (hC : C.IsPolyhedral) :
+    ∃ s : Finset M, span R s ⊔ C.lineal = C := by classical
+  obtain ⟨s, hs⟩ := hC
+  let f := surjInv (mkQ_surjective C.lineal)
+  use Finset.image f s
+  simp
+  ext x
+  simp [mem_sup]
+  sorry
+
+lemma IsPolyhedral.exists_finset_sup_lineal' (hC : C.IsPolyhedral) :
     ∃ s : Finset M, span R (s ∪ C.lineal) = C := by classical
   obtain ⟨s, hs⟩ := hC
   let f := surjInv (mkQ_surjective C.lineal)
   use Finset.image f s
+  rw [span_union]
+  simp
   sorry
 
 lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
@@ -94,9 +108,7 @@ lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
   · exact fg_span (Finset.finite_toSet _)
   constructor
   · sorry -- idea: filter by generators that are not in C.lineal (before `use`)
-  · unfold span at hs
-    rw [span_union] at hs
-    sorry -- exact hs
+  · simpa [span_union, span_coe_eq_restrictScalars] using hs
 
 private lemma isPolyhedral_of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
     (C ⊔ S).IsPolyhedral := by
