@@ -525,6 +525,12 @@ lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
     (C ⊔ S).quot S = C.quot S := sorry
 
+local notation "R≥0" => {c : R // 0 ≤ c}
+
+noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
+    {C : PointedCone R M} (hSC : S ≤ C) : C.quot S ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
+  Submodule.IsCompl.map_mkQ_equiv_inf hST hSC
+
 end Ring
 
 end PointedCone
