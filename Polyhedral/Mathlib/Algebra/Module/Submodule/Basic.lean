@@ -8,7 +8,7 @@ import Mathlib.RingTheory.Noetherian.Defs
 
 namespace Submodule
 
-open Function
+open Function LinearMap
 
 section Semiring
 
@@ -214,6 +214,102 @@ lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
   (restrictScalarsLatticeHom S R M).map_sInf' s
 
 
+-- ## QUOTIENT
+
+/- TODO: in general, when dealing with quotients there is no need to have the module we
+  factor and the submodule we factor by over the same (semi)ring. It is then possible to
+  have the module we factor over a semiring, while the submodule we factor by stays a
+  ring, which is necessary for the existence of quotients. -/
+
+variable {R : Type*} [Ring R]
+variable {S : Type*} [Semiring S] [Module S R]
+variable {M : Type*} [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
+
+/-- Restricted scalars version of `Submodule.range_mkQ`. -/
+theorem range_mkQ' (p : Submodule R M) : range (p.mkQ.restrictScalars S) = ⊤ :=
+  eq_top_iff'.2 <| by rintro ⟨x⟩; exact ⟨x, rfl⟩
+
+#check range_mkQ
+example (p : Submodule R M) : range p.mkQ = ⊤ := range_mkQ' p
+
+/-- Restricted scalars version of `Submodule.ker_mkQ`. -/
+@[simp]
+theorem ker_mkQ' (p : Submodule R M) : ker (p.mkQ.restrictScalars S) = p.restrictScalars S :=
+  by ext; simp
+
+/-- Restricted scalars version of `Submodule.le_comap_mkQ`. -/
+theorem le_comap_mkQ' {p : Submodule R M} (p' : Submodule S (M ⧸ p)) :
+    p.restrictScalars S ≤ comap (p.mkQ.restrictScalars S) p' := by
+  simpa using (comap_mono bot_le : ker (p.mkQ.restrictScalars S)
+    ≤ comap (p.mkQ.restrictScalars S) p')
+
+/-- Restricted scalars version of `Submodule.mkQ_map_self`. -/
+@[simp] theorem mkQ_map_self' (p : Submodule R M) :
+    map (p.mkQ.restrictScalars S) (p.restrictScalars S) = ⊥ := by
+  rw [eq_bot_iff, map_le_iff_le_comap, comap_bot, ker_mkQ']
+
+/-- Restricted scalars version of `Submodule.comap_map_mkQ`. -/
+@[simp] theorem comap_map_mkQ' (p : Submodule R M) (p' : Submodule S M) :
+    comap (p.mkQ.restrictScalars S) (map (p.mkQ.restrictScalars S) p')
+      = p.restrictScalars S ⊔ p' := by simp [comap_map_eq, sup_comm]
+
+#check comap_map_mkQ
+example (p : Submodule R M) (p' : Submodule R M) :
+  comap p.mkQ (map p.mkQ p') = p ⊔ p' := comap_map_mkQ p p'
+
+/-- Restricted scalars version of `Submodule.comap_map_mkQ`. -/
+@[simp] theorem map_comap_mkQ (p : Submodule R M) (p' : Submodule S (M ⧸ p)) :
+    map (p.mkQ.restrictScalars S) (comap (p.mkQ.restrictScalars S) p') = p' := by
+  simp [map_comap_eq, LinearMap.range_restrictScalars]
+
+@[simp] lemma map_mkQ_le_iff_sup_le {p : Submodule R M} {s t : Submodule S M} :
+    map (p.mkQ.restrictScalars S) s ≤ map (p.mkQ.restrictScalars S) t
+      ↔ s ⊔ p.restrictScalars S ≤ t ⊔ p.restrictScalars S where
+  mp h := by simpa [sup_comm] using comap_mono (f := p.mkQ.restrictScalars S) h
+  mpr h := by simpa using map_mono (f := p.mkQ.restrictScalars S) h
+
+@[simp] lemma map_mkQ_eq_iff_sup_eq {p : Submodule R M} {s t : Submodule S M} :
+    map (p.mkQ.restrictScalars S) s = map (p.mkQ.restrictScalars S) t
+      ↔ s ⊔ p.restrictScalars S = t ⊔ p.restrictScalars S where
+  mp h := by simpa [sup_comm] using congrArg (comap <| p.mkQ.restrictScalars S) h
+  mpr h := by simpa using congrArg (map <| p.mkQ.restrictScalars S) h
+
+def mkQ_orderHom (p : Submodule R M) : Submodule S M →o Submodule S (M ⧸ p) where
+  toFun := map (p.mkQ.restrictScalars S)
+  monotone' := fun _ _ h => map_mono h
+
+/-- `mkQ` as an order isomorphism between the submodules of M ⧸ p and the submodules of
+  M that contain p. -/
+def mkQ_orderIso (p : Submodule R M) : Set.Ici (p.restrictScalars S) ≃o Submodule S (M ⧸ p) where
+  toFun s := s.1.map (p.mkQ.restrictScalars S)
+  invFun s := ⟨s.comap (p.mkQ.restrictScalars S), le_comap_mkQ' s⟩
+  left_inv s := by
+    simp only [comap_map_mkQ']; congr
+    exact (right_eq_sup.mpr (Set.mem_Ici.mp s.2)).symm
+  right_inv s := by simp [map_comap_eq, range_mkQ']
+  map_rel_iff' := by
+    intro s t
+    constructor
+    · intro h
+      replace h := comap_mono h (f := p.mkQ.restrictScalars S)
+      simp only [Equiv.coe_fn_mk, comap_map_mkQ', sup_le_iff, le_sup_left, true_and] at h
+      rw [← right_eq_sup.mpr t.2] at h
+      exact h
+    · exact (map_mono ·)
+
+@[simp]
+lemma mkQ_orderIso_apply {p : Submodule R M} (s : Set.Ici (p.restrictScalars S)) :
+    p.mkQ_orderIso s = map (p.mkQ.restrictScalars S) s := rfl
+
+@[simp]
+lemma mkQ_orderIso_symm_apply {p : Submodule R M} (s : Submodule S (M ⧸ p)) :
+    p.mkQ_orderIso.symm s = s.comap (p.mkQ.restrictScalars S) := rfl
+
+lemma IsCompl.inf_eq_iff_sup_eq {p q : Submodule R M} {s t : Submodule S M} (hpq : IsCompl p q) :
+    s ⊓ q.restrictScalars S = t ⊓ q.restrictScalars S
+      ↔ s ⊔ p.restrictScalars S = t ⊔ p.restrictScalars S := by sorry
+
+
 -- ## MODULAR
 
 variable {R : Type*} [Ring R]
@@ -223,7 +319,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S
 -- TODO: quotientEquivOfIsCompl should not have explicit `p` and `q`
 
 /-- Submodules over a ring are right modular in the lattice of submodules over a semiring.
-  This is a version f `IsModularLattice.sup_inf_assoc_of_le` for the non-modular lattice
+  This is a version of `IsModularLattice.sup_inf_assoc_of_le` for the non-modular lattice
   of submodules over a semiring. -/
 lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M)
     {p : Submodule R M} (hsp : s ≤ p.restrictScalars S) :
@@ -245,7 +341,7 @@ lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M
     exact p.add_mem hsp hx
 
 /-- Submodules over a ring are left modular in the lattice of submodules over a semiring.
-  This is a version f `IsModularLattice.inf_sup_assoc_of_le` for the non-modular lattice
+  This is a version of `IsModularLattice.inf_sup_assoc_of_le` for the non-modular lattice
   of submodules over a semiring. -/
 lemma inf_sup_assoc_of_restrictScalars_le {s : Submodule S M} (t : Submodule S M)
     {p : Submodule R M} (hsp : p.restrictScalars S ≤ s) :
@@ -286,6 +382,16 @@ def IsCompl.IicOrderIsoIci_restrictScalars {p q : Submodule R M} (hpq : IsCompl 
         ← restrictScalars_inf, inf_comm, disjoint_iff.mp hpq.disjoint]
         using inf_le_inf_right (p.restrictScalars S) h
     · exact (le_trans · le_sup_left)
+
+-- Submodule.mapIic
+-- orderIsoMapComap
+
+noncomputable def IsCompl.foo {p q : Submodule R M} (hpq : IsCompl p q) :
+    Submodule S (M ⧸ p) ≃o Submodule S q :=
+  orderIsoMapComap <| (quotientEquivOfIsCompl _ _ hpq).restrictScalars S
+
+def IsCompl.bar (p : Submodule R M) :
+    Submodule S p ≃o Set.Iic (p.restrictScalars S) := Submodule.mapIic (p.restrictScalars S)
 
 -- I think this is not the best lemma. There should be something more fundamental about
 -- quotients and IsCompl that should make this easy.
@@ -386,14 +492,14 @@ section Ring
 variable {M S R : Type*} [Ring R] [Ring S]
   [AddCommGroup M] [Module S R] [Module R M] [Module S M] [IsScalarTower S R M]
 
-lemma IsCompl.foo (S₁ S₂ T : Submodule R M) (hS : IsCompl S₁ S₂) :
+lemma IsCompl.foo' (S₁ S₂ T : Submodule R M) (hS : IsCompl S₁ S₂) :
     IsCompl (T.restrict S₁) (T.restrict S₂) := by
   constructor
   · intro Q hQQ hQT
     sorry
   · sorry
 
-lemma IsCompl.foo' (A B C D : Submodule R M) (hAB : Disjoint A B) (hCD : Disjoint C D)
+lemma IsCompl.foo'' (A B C D : Submodule R M) (hAB : Disjoint A B) (hCD : Disjoint C D)
     (h : IsCompl (A ⊔ B) (C ⊔ D)) : IsCompl (A ⊔ C) (B ⊔ D) := by
   sorry
 
