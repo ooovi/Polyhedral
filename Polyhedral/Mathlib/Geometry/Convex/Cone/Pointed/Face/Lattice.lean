@@ -24,9 +24,9 @@ instance : InfSet (Face C) := ⟨fun S =>
     isFaceOf := by
       constructor
       · exact fun _ sm => sm.1
-      · simp; intros _ xc _ yc _ _ zfs zo
+      · simp; intros _ xc _ yc a a0 b b0 _ h
         simp [xc]; intros F Fs
-        exact F.isFaceOf.left_mem_of_mem_openSegment xc yc (zfs F Fs) zo
+        exact F.isFaceOf.left_mem_of_smul_add_mem _ xc _ yc _ a0 _ b0 (h F Fs)
 }⟩
 
 instance : SemilatticeInf (Face C) where

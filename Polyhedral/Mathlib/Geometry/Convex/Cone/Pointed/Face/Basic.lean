@@ -19,8 +19,12 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
-abbrev IsFaceOf (F C : PointedCone R M) := IsExtreme R (E := M) C F
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+in
+structure IsFaceOf (F C : PointedCone R M) where
+  subset : (F : Set M) ⊆ C
+  left_mem_of_smul_add_mem :
+    ∀ x ∈ C, ∀ y ∈ C, ∀ a > (0 : R), ∀ b > (0 : R), a • x + b • y ∈ F → x ∈ F
 
 namespace IsFaceOf
 -- M: I think using a namespae here is bad
@@ -30,18 +34,33 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
-lemma self (C : PointedCone R M) : C.IsFaceOf C := IsExtreme.rfl
+@[refl]
+lemma refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun _ hx _ _ _ _ _ _  _ ↦ hx⟩
+lemma rfl {C : PointedCone R M} : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun _ hx _ _ _ _ _ _ _ ↦ hx⟩
 
-lemma trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C :=
-  IsExtreme.trans h₂ h₁
 
--- lemma transn (h₁ : F₂ ≤ F₁ ∧ ∀ x ∈ F₁, ∀ y ∈ F₁, x + y ∈ F₂ → x ∈ F₂)
---  (h₂ : F₁ ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F₁ → x ∈ F₁) :
---   ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F₂ → x ∈ F₂ := by
---   intros x xc y yc xyf
---   have := h₂.2 x xc y yc (h₁.1 xyf)
---   have t := h₂.2 y yc x xc (h₁.1 (sorry))
---   exact h₁.2 _ this _ t xyf
+-- theorem inter (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂) :
+--     F.IsFaceOf (C₁ ⊓ C₂) := by
+--   use fun x xf => Submodule.mem_inf.mpr ⟨h₁.subset xf, h₂.subset xf⟩
+--   intro x xi y yi a a0 b b0 h
+--   refine h₁.left_mem_of_smul_add_mem x ?_ y ?_ a a0 b b0 h
+--   · exact (Submodule.mem_inf.mp xi).1
+--   · exact (Submodule.mem_inf.mp yi).1
+
+theorem inter (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C := by
+  use fun x xi => h₁.subset (Submodule.mem_inf.mp xi).1
+  intro x xi y yi a a0 b b0 h
+  refine Submodule.mem_inf.mpr ⟨?_, ?_⟩
+  · exact h₁.left_mem_of_smul_add_mem x xi y yi a a0 b b0 (Submodule.mem_inf.mp h).1
+  · exact h₂.left_mem_of_smul_add_mem x xi y yi a a0 b b0 (Submodule.mem_inf.mp h).2
+
+
+lemma trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C := by
+  refine ⟨h₁.subset.trans h₂.subset, fun x hx y hy a a0 b b0 h ↦ ?_⟩
+  refine h₁.2 _ (h₂.2 _ hx _ hy a a0 b b0 (h₁.subset h)) y ?_ a a0 b b0 h
+  refine h₂.left_mem_of_smul_add_mem _ hy _ hx b b0 a a0 ?_
+  rw [add_comm] at h
+  exact h₁.subset h
 
 lemma le {F : PointedCone R M} (hF : F.IsFaceOf C) : F ≤ C := hF.subset
 
@@ -53,17 +72,22 @@ alias le_self := le
 
 lemma face_inf_isFaceOf_inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
+  use le_inf_iff.mpr ⟨Set.inter_subset_left.trans h₁.subset, Set.inter_subset_right.trans h₂.subset⟩
+  simp only [Submodule.mem_inf, gt_iff_lt, and_imp]
+  intros x xc₁ xc₂ y yc₁ yc₂ a a0 b b0 hz₁ hz₂
   constructor
-  · simp
-    exact ⟨Set.inter_subset_left.trans h₁.subset, Set.inter_subset_right.trans h₂.subset⟩
-  · simp
-    intros _ xc₁ xc₂ _ yc₁ yc₂ _ zf₁ zf₂ zo
-    exact
-      ⟨h₁.left_mem_of_mem_openSegment xc₁ yc₁ zf₁ zo, h₂.left_mem_of_mem_openSegment xc₂ yc₂ zf₂ zo⟩
+  · exact h₁.left_mem_of_smul_add_mem x xc₁ y yc₁ a a0 b b0 hz₁
+  · exact h₂.left_mem_of_smul_add_mem x xc₂ y yc₂ a a0 b b0 hz₂
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) :
     (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
-  face_inf_isFaceOf_inf h (self C₂)
+  face_inf_isFaceOf_inf h rfl
+
+lemma isExtreme (h : F.IsFaceOf C) : IsExtreme R (E := M) C F := by
+  refine ⟨h.subset, ?_⟩
+  rintro x xc y yc z zf ⟨a, b, a0, b0, -, hz⟩
+  apply h.left_mem_of_smul_add_mem x xc y yc a a0 b b0
+  rwa [← hz] at zf
 
 end Semiring
 
@@ -86,44 +110,45 @@ lemma sup_isFaceOf_sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
       convert hFC.subset
     · apply le_trans _ le_sup_right
       convert hGD.subset
-  · simp; intros x xm y ym z zu zo
+  · simp; intros x xm y ym a a0 b b0 hab _ _
+    sorry
 
-    wlog h : ¬(x ∈ Submodule.span R (SetLike.coe C) ∧ x ∈ Submodule.span R (SetLike.coe D))
-    · push_neg at h
-      have := hCD h
-      subst this
-      exact zero_mem _
-    · push_neg at h
-      obtain ⟨xC, xCM, xD, xDM, xx⟩ := Submodule.mem_sup.mp xm
-      obtain ⟨yC, yCM, yD, yDM, yy⟩ := Submodule.mem_sup.mp ym
-      obtain ⟨zF, zFM, zG, zGM, zz⟩ := Submodule.mem_sup.mp zu
+    -- wlog h : ¬(x ∈ Submodule.span R (SetLike.coe C) ∧ x ∈ Submodule.span R (SetLike.coe D))
+    -- · push_neg at h
+    --   have := hCD h
+    --   subst this
+    --   exact zero_mem _
+    -- · push_neg at h
+    --   obtain ⟨xC, xCM, xD, xDM, xx⟩ := Submodule.mem_sup.mp xm
+    --   obtain ⟨yC, yCM, yD, yDM, yy⟩ := Submodule.mem_sup.mp ym
+    --   obtain ⟨zF, zFM, zG, zGM, zz⟩ := Submodule.mem_sup.mp zu
 
-      have : zF ∈ openSegment R xC yC ∧ zG ∈ openSegment R xD yD := by
-        rw [openSegment, Set.mem_setOf, ← xx, ← yy, ← zz] at zo
-        obtain ⟨a, b, a0, b0, ab1, abz⟩ := zo
-        have : (a • xC + b • yC) + (a • xD + b • yD) = zF + zG := by
-          rw [← abz, smul_add, smul_add]
-          abel
+    --   have : zF ∈ openSegment R xC yC ∧ zG ∈ openSegment R xD yD := by
+    --     rw [openSegment, Set.mem_setOf, ← xx, ← yy, ← zz] at zo
+    --     obtain ⟨a, b, a0, b0, ab1, abz⟩ := zo
+    --     have : (a • xC + b • yC) + (a • xD + b • yD) = zF + zG := by
+    --       rw [← abz, smul_add, smul_add]
+    --       abel
 
-        let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + b • y ∈ C :=
-          C.add_mem (C.smul_mem (le_of_lt a0) xCM) (C.smul_mem (le_of_lt b0) yCM)
+    --     let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + b • y ∈ C :=
+    --       C.add_mem (C.smul_mem (le_of_lt a0) xCM) (C.smul_mem (le_of_lt b0) yCM)
 
-        have := uniq_decomp_of_zero_inter
-          (mem xCM yCM) (hFC.subset zFM) (mem xDM yDM) (hGD.subset zGM) hCD this
-        constructor
-        use a, b, a0, b0, ab1, this.1
-        use a, b, a0, b0, ab1, this.2
+    --     have := uniq_decomp_of_zero_inter
+    --       (mem xCM yCM) (hFC.subset zFM) (mem xDM yDM) (hGD.subset zGM) hCD this
+    --     constructor
+    --     use a, b, a0, b0, ab1, this.1
+    --     use a, b, a0, b0, ab1, this.2
 
-      apply Submodule.mem_sup.mpr
-      use xC, hFC.left_mem_of_mem_openSegment xCM yCM zFM this.1
-      use xD, hGD.left_mem_of_mem_openSegment xDM yDM zGM this.2
+    --   apply Submodule.mem_sup.mpr
+    --   use xC, hFC.left_mem_of_smul_add_mem xCM yCM zFM this.1
+    --   use xD, hGD.left_mem_of_smul_add_mem xDM yDM zGM this.2
 
 -- lemma iff_mem_of_add_mem' :
 --     F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F := by
 --   constructor <;> intro h
 --   · refine ⟨h.subset, ?_⟩
 --     intros x xC y yC xy
---     -- have := h.left_mem_of_mem_openSegment xC yC (smul_mem _ _ xy)
+--     have := h.left_mem_of_smul_add_mem xC yC (z := ((one : M) + 1)⁻¹ * (x + y))
 --     sorry
 --   · refine ⟨h.1, ?_⟩
 --     intros x xC y yC z zF zo
@@ -146,6 +171,27 @@ alias sup := sup_isFaceOf_sup
 
 end Ring
 
+section foo
+variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  {C F F₁ F₂ : PointedCone R M} {s : Set M}
+
+/-- The lineal space of a cone `C` is a face of `C`. -/
+lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
+  suffices ∀ x ∈ C, ∀ y ∈ C, x + y ∈ ↑C.lineal → x ∈ ↑C.lineal by
+    sorry -- exact iff_mem_of_add_mem.mpr ⟨PointedCone.lineal_le C, this⟩
+  intros _ xc _ yc xyf
+  simp only [lineal_mem, neg_add_rev, xc, true_and] at xyf ⊢
+  have := add_mem xyf.2 yc
+  simp only [neg_add_cancel_comm] at this
+  assumption
+
+lemma lineal_le {C : PointedCone R M} (h : ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F ) : C.lineal ≤ F := by
+  intro x xl
+  apply lineal_mem.mp at xl
+  exact h x xl.1 (-x) xl.2 (by simp only [add_neg_cancel, zero_mem])
+
+end foo
+
 section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
@@ -160,23 +206,13 @@ lemma iff_mem_of_mul_add_mem :
   constructor
   · intro f; refine ⟨f.subset, ?_⟩
     intros x xC y yC c cpos h
-    let r := 1 / (1 + c)
-    have rpos := div_pos zero_lt_one (add_pos zero_lt_one cpos)
-    have : r • (c • x + y) ∈ openSegment R x y := by
-      simp [openSegment]
-      use c • r, smul_pos cpos rpos, r, rpos
-      constructor
-      · simp only [smul_eq_mul, mul_div, mul_one, ← add_div, r, add_comm]
-        exact div_self (by positivity)
-      · simp [← smul_assoc, mul_comm, add_comm]
-    have sf := F.smul_mem (le_of_lt rpos) h
-    exact f.left_mem_of_mem_openSegment xC yC sf this
+    apply f.left_mem_of_smul_add_mem x xC y yC c cpos 1 zero_lt_one
+    simp [h]
   · intro h
     constructor
     · exact h.1
-    · intros x xC y yC z zF zo
-      obtain ⟨a, b, apos, bpos, _, rfl⟩ := zo
-      exact h.2 x xC (b • y) (C.smul_mem (le_of_lt bpos) yC) a apos zF
+    · intros x xC y yC a a0 b b0 hab
+      exact h.2 x xC (b • y) (Submodule.smul_mem C ⟨b, le_of_lt b0⟩ yC) a a0 hab
 
 lemma iff_mem_of_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F := by
@@ -219,22 +255,13 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] {C F : PointedCone R M}
 
-/-- The lineal space of a cone `C` is a face of `C`. -/
-lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
-  apply iff_mem_of_add_mem.mpr ⟨PointedCone.lineal_le C, _⟩
-  intros _ xc _ yc xyf
-  simp [lineal_mem, xc] at xyf ⊢
-  have := add_mem xyf.2 yc
-  simp at this
-  assumption
-
 /-- Mapping a face using an injective linear map yields a face of the image of `C`. -/
 lemma map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
     (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
   simp only [iff_mem_of_add_mem, mem_map, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂, ← map_add, hf.eq_iff, exists_eq_right]
   constructor <;> intro ⟨sub, hF⟩
-  · refine ⟨fun x xf => ?_, fun x hx y hy hxy => hF x hx y hy _ hxy rfl⟩
+  · refine ⟨fun x xf => ?_, fun x hx y hy hxy => hF x hx y hy _ hxy (hf (Eq.refl _))⟩
     obtain ⟨y, yC, hy⟩ := Submodule.mem_map.mp <| sub (Submodule.mem_map_of_mem xf)
     rw [hf hy] at yC
     assumption
@@ -260,7 +287,7 @@ lemma comap_iff {f : N →ₗ[R] M} (hf : Function.Surjective f) :
       simp only [Submodule.mem_map, mem_comap, LinearMap.coe_restrictScalars]
       use Function.invFun f x
       rw [ec]
-      exact ⟨xF, rfl⟩
+      exact ⟨xF, Eq.refl _⟩
     · intro x xC y yC h
       rw [← ec x] at h xC ⊢
       rw [← ec y] at h yC
@@ -295,7 +322,7 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M} {F F₁ F₂ : Face C}
 
-def self (C : PointedCone R M) : Face C := ⟨_, IsFaceOf.self C⟩
+def self (C : PointedCone R M) : Face C := ⟨_, IsFaceOf.refl C⟩
 
 instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) :=
     ⟨Face.self C⟩
@@ -341,7 +368,7 @@ variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Modul
 variable {C : PointedCone R M}
 
 /-- The face of `C` obtained by intersecting two of `C`'s faces. -/
-def inter (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inter F₂.isFaceOf⟩
+def inter (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inter F₁.isFaceOf F₂.isFaceOf⟩
 
 /-- The face of `C` obtained by embedding a face of a face of `C`. -/
 def embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
@@ -362,12 +389,12 @@ def prod (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁.prod C₂) := by
   refine ⟨Submodule.prod F₁ F₂, ⟨?_, ?_⟩⟩
   · simp only [Submodule.prod_coe, Set.prod_subset_iff, SetLike.mem_coe, Set.mem_prod]
     exact fun _ a _ b => ⟨F₁.isFaceOf.subset a, F₂.isFaceOf.subset b⟩
-  · simp only [Submodule.prod_coe, Set.mem_prod, SetLike.mem_coe, and_imp, Prod.forall]
-    intros x y xc yc xx yy xxc yyc z zz zf zzf zo
-    have := Prod.openSegment_subset (𝕜 := R) (x, y) (xx, yy) zo
+  · simp only [Submodule.mem_prod, gt_iff_lt, Prod.fst_add, Prod.smul_fst, Prod.snd_add,
+    Prod.smul_snd, and_imp, Prod.forall]
+    intros x₁ x₂ xc₁ xc₂ y₁ y₂ yc₁ yc₂ a a0 b b0 hab₁ hab₂
     constructor
-    · exact F₁.isFaceOf.left_mem_of_mem_openSegment xc xxc zf this.1
-    · exact F₂.isFaceOf.left_mem_of_mem_openSegment yc yyc zzf this.2
+    · exact F₁.isFaceOf.left_mem_of_smul_add_mem _ xc₁ _ yc₁ a a0 b b0 hab₁
+    · exact F₂.isFaceOf.left_mem_of_smul_add_mem _ xc₂ _ yc₂ a a0 b b0 hab₂
 
 /-- The face of `C₁` obtained by projecting to the left component of a face `F ≤ C₁ × C₂`. -/
 def prod_left (F : Face (C₁.prod C₂)) : Face C₁ := {
@@ -377,13 +404,13 @@ def prod_left (F : Face (C₁.prod C₂)) : Face C₁ := {
     · simp only [Submodule.map_coe, LinearMap.fst_apply, Set.image_subset_iff]
       exact le_trans F.isFaceOf.subset (fun _ xc => (Set.mem_prod.mp xc).1)
     · simp
-      intros x xc y yc _ zz zf zo
-      have zzc : zz ∈ C₂ := (Set.mem_prod.mpr (F.isFaceOf.subset zf)).2
-      refine ⟨zz, F.isFaceOf.left_mem_of_mem_openSegment (y := (y, zz)) ?_ ?_ zf ?_⟩
-      · exact Set.mem_prod.mpr ⟨xc, zzc⟩
-      · exact Set.mem_prod.mpr ⟨yc, zzc⟩
-      · rw [← Prod.image_mk_openSegment_left x y zz]
-        exact ⟨_, zo, rfl⟩
+      intros x xc y yc a a0 b b0 z hab
+      use z
+      -- have zzc : zz ∈ C₂ := (Set.mem_prod.mpr (F.isFaceOf.subset zf)).2
+      refine F.isFaceOf.left_mem_of_smul_add_mem (y := (y, z)) _ ?_ ?_ a a0 b b0 ?_
+      · exact Set.mem_prod.mpr ⟨xc, sorry⟩
+      · exact Set.mem_prod.mpr ⟨yc, sorry⟩
+      · sorry
 }
 
 /-- The face of `C₂` obtained by projecting to the right component of a face `F ≤ C₁ × C₂`. -/
@@ -394,13 +421,14 @@ def prod_right (F : Face (C₁.prod C₂)) : Face C₂ := {
     · simp only [Submodule.map_coe, LinearMap.snd_apply, Set.image_subset_iff]
       exact le_trans F.isFaceOf.subset (fun _ xc => (Set.mem_prod.mp xc).2)
     · simp
-      intros x xc y yc _ zz zf zo
-      have zzc : zz ∈ C₁ := (Set.mem_prod.mpr (F.isFaceOf.subset zf)).1
-      refine ⟨zz, F.isFaceOf.left_mem_of_mem_openSegment (y := (zz, y)) ?_ ?_ zf ?_⟩
-      · exact Set.mem_prod.mpr ⟨zzc, xc⟩
-      · exact Set.mem_prod.mpr ⟨zzc, yc⟩
-      · rw [← Prod.image_mk_openSegment_right zz x y]
-        exact ⟨_, zo, rfl⟩
+      intros x xc y yc a a0 b b0 h
+      sorry
+      -- have zzc : zz ∈ C₁ := (Set.mem_prod.mpr (F.isFaceOf.subset sorry)).1
+      -- refine ⟨zz, F.isFaceOf.left_mem_of_smul_add_mem (y := (zz, y)) ?_ ?_ zf ?_⟩
+      -- · exact Set.mem_prod.mpr ⟨zzc, xc⟩
+      -- · exact Set.mem_prod.mpr ⟨zzc, yc⟩
+      -- · rw [← Prod.image_mk_openSegment_right zz x y]
+      --   exact ⟨_, zo, rfl⟩
   }
 
 @[simp]
@@ -422,8 +450,7 @@ lemma prod_left_prod_right (G : Face (C₁.prod C₂)) : G.prod_left.prod G.prod
     obtain ⟨a', b, c⟩ := c
     have : x = (a.1, a'.2) := by exact Prod.ext (Eq.symm c') (Eq.symm c)
     rw [this]
-    have := G.isFaceOf.left_mem_of_mem_openSegment (show (a.1, 0) ∈ (Submodule.prod C₁ C₂) by sorry)
-      (G.isFaceOf.subset b')
+    -- have := G.isFaceOf.left_mem_of_smul_add_mem sorry (G.isFaceOf.subset b')
     -- have := (Submodule.mem_prod.mp <| G.isFaceOf.subset d).2
     sorry
   · simp; intro h; exact ⟨⟨x.2, h⟩, ⟨x.1, h⟩⟩
