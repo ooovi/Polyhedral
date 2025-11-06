@@ -10,23 +10,10 @@ variable {R M N : Type*}
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-variable {C F F₁ F₂ : PointedCone R M}
-
-/-!
-## Partial Order and Lattice on Faces
--/
-
-instance partialOrder : PartialOrder (Face C) := inferInstance
-
-example (F G : Face C) (h : F ≤ G) : (F : Set M) ≤ G := h
-
-@[simp]
-theorem toPointedCone_le_iff {F₁ F₂ : Face C} : F₁ ≤ F₂ ↔ F₁.toPointedCone ≤ F₂.toPointedCone := by
-  constructor <;> intro h x xF₁ <;> exact h xF₁
+variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 /-!
 ### Infimum, supremum and lattice
-
 -/
 
 /-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
@@ -94,17 +81,41 @@ instance : CompleteSemilatticeSup (Face C) where
 
 instance : Lattice (Face C) where
 
-end Semiring
-
 /-!
-## Complete Lattice
-
+### `OrderHom` for some operations
 -/
 
-section Field
+/-- Mapping a face `F₁` of `C₁` to the face `F₁ ⊓ F₂ ≤ C₁ ⊓ C₂` for some face `F₂` of `C₂` preserves
+the face lattice. -/
+def face_inf_orderHom (F₂ : Face C₂) : Face C₁ →o Face (C₁ ⊓ C₂) where
+  toFun F := ⟨_, F.isFaceOf.face_inf_isFaceOf_inf F₂.isFaceOf⟩
+  monotone' F₁ F₂ h x := by simp; exact fun xF₁ xC₂ => ⟨h.subset xF₁, xC₂⟩
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  {C F : PointedCone R M} {s t : Set M}
+/-- Mapping a face `F` of `C₁` to the face `F ⊓ C₂ ≤ C₁ ⊓ C₂` preserves the face lattice. -/
+def inf_orderHom (C₂ : PointedCone R M) : Face C₁ →o Face (C₁ ⊓ C₂) :=
+  face_inf_orderHom (self C₂)
+
+/-- Mapping the product of faces `F₁ ≤ C₁` and `F₂ ≤ C₂` to the face `F₁ ⊓ F₂ ≤ C₁ ⊓ C₂` preserves
+the face lattice. -/
+def prod_face_inf_orderHom : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) where
+  toFun F := ⟨_, F.1.isFaceOf.face_inf_isFaceOf_inf F.2.isFaceOf⟩
+  monotone' F₁ F₂ h x := by
+    simp
+    intros xF₁ xF₂
+    simp [LE.le] at h
+    exact ⟨h.1 xF₁, h.2 xF₂⟩
+
+def prod_orderIso (C : PointedCone R M) (D : PointedCone R N) :
+    Face (C.prod D) ≃o Face C × Face D where
+  toFun G := ⟨prod_left G, prod_right G⟩
+  invFun G := G.1.prod G.2
+  left_inv G := by sorry
+  right_inv G := by simp [prod_left, prod_right, prod]
+  map_rel_iff' := sorry
+
+/-!
+### Complete Lattice
+-/
 
 /-- The top element of the partial order on faces of `C` is `C` itself. -/
 instance : OrderTop (Face C) where
@@ -114,6 +125,14 @@ instance : OrderTop (Face C) where
 instance nonempty {C : PointedCone R M} : Nonempty (Face C) := ⟨⊤⟩
 
 instance inhabited {C : PointedCone R M} : Inhabited (Face C) := ⟨⊤⟩
+
+end Semiring
+
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+  {C F : PointedCone R M} {s t : Set M}
 
 /-- The face of a pointed cone `C` that is its lineal space. It contained in all faces of `C`. -/
 def lineal : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
@@ -131,6 +150,37 @@ instance : OrderBot (Face C) where
 instance : BoundedOrder (Face C) where
 
 instance : CompleteLattice (Face C) where
+
+/-!
+### Embed and restrict
+-/
+
+lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
+
+lemma embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
+    embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
+
+lemma restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
+    F₁.restrict (embed F₂) = F₂ := by
+  unfold restrict embed; congr
+  simpa using F₂.isFaceOf.le
+
+lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
+  rw [← restrict_embed F₂, embed_restrict]
+  simp only [inf_le_left]
+
+/-- The isomorphism between a face's face lattice and the interval in the cone's face
+ lattice below the face. -/
+def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
+  toFun G := ⟨G, bot_le, Face.embed_le G⟩
+  invFun G := F.restrict G
+  left_inv := restrict_embed
+  right_inv G := by simp only [embed_restrict_of_le G.2.2]
+  map_rel_iff' := @fun _ _ => by simp [embed]
+
+/-- The embedding of a face's face lattice into the cone's face lattice. -/
+def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=
+  (embed_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
 
 end Field
 
