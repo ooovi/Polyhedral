@@ -22,7 +22,7 @@ variable {R M N : Type*}
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 in
 structure IsFaceOf (F C : PointedCone R M) where
-  subset : (F : Set M) ⊆ C
+  subset : (F : Set M) ⊆ C -- better F ≤ C ?
   left_mem_of_smul_add_mem :
     ∀ x ∈ C, ∀ y ∈ C, ∀ a > (0 : R), ∀ b > (0 : R), a • x + b • y ∈ F → x ∈ F
 
@@ -445,7 +445,8 @@ lemma prod_left_prod_right (G : Face (C₁.prod C₂)) : G.prod_left.prod G.prod
   ext x
   constructor
   · rintro ⟨a, c⟩
-    simp only [Submodule.map_coe, LinearMap.fst_apply, LinearMap.snd_apply, Set.mem_image] at a c
+    simp only [mem_toPointedCone, toPointedCone]
+    --simp only [Submodule.map_coe, LinearMap.fst_apply, LinearMap.snd_apply, Set.mem_image] at a c
     obtain ⟨a, b', c'⟩ := a
     obtain ⟨a', b, c⟩ := c
     have : x = (a.1, a'.2) := by exact Prod.ext (Eq.symm c') (Eq.symm c)

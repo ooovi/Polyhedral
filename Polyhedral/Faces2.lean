@@ -113,14 +113,14 @@ abbrev Face.Trivial (F : Face C) := F = ⊥ ∨ F = ⊤
 abbrev Face.Nontrivial (F : Face C) := ⊥ < F ∧ F < ⊤
 
 /-- The linear span of the face. -/
-abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
+-- abbrev Face.span (F : Face C) : Submodule R M := Submodule.span R F
 
-lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
-    F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
-  constructor
-  · exact le_self
-  rw [IsFaceOf.iff_mem_of_mul_add_mem] at ⊢ h₁
-  exact fun h => ⟨h, fun x hx y hy => h₁.2 x (h₂.le_self hx) y (h₂.le_self hy)⟩
+-- lemma IsFaceOf.iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
+--     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
+--   constructor
+--   · exact le_self
+--   rw [IsFaceOf.iff_mem_of_mul_add_mem] at ⊢ h₁
+--   exact fun h => ⟨h, fun x hx y hy => h₁.2 x (h₂.le_self hx) y (h₂.le_self hy)⟩
 
 lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₂) :
     F₂.IsFaceOf C ↔ F₂.IsFaceOf F₁ := sorry
@@ -134,28 +134,28 @@ lemma IsFaceOf.restrict (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
 -- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
 alias IsFaceOf.embed := IsFaceOf.trans
 
-def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
-    ⟨F₁ ⊓ F₂, F₁.isFaceOf.restrict F₂.isFaceOf⟩
+-- def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
+--     ⟨F₁ ⊓ F₂, F₁.isFaceOf.restrict F₂.isFaceOf⟩
 
-def Face.embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
-    ⟨F₂, F₂.isFaceOf.trans F₁.isFaceOf⟩
+-- def Face.embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
+--     ⟨F₂, F₂.isFaceOf.trans F₁.isFaceOf⟩
 
-/-- A face of a face of C coerces to a face of C. -/
-instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
+-- /-- A face of a face of C coerces to a face of C. -/
+-- instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
 
-lemma Face.embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
+-- lemma Face.embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
 
-lemma Face.embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
-    embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
+-- lemma Face.embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
+--     embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
 
-lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
-    F₁.restrict (embed F₂) = F₂ := by
-  unfold restrict embed; congr
-  simpa using F₂.isFaceOf.le_self
+-- lemma Face.restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
+--     F₁.restrict (embed F₂) = F₂ := by
+--   unfold restrict embed; congr
+--   simpa using F₂.isFaceOf.le_self
 
-lemma Face.embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
-  rw [← restrict_embed F₂, embed_restrict]
-  simp only [inf_le_left]
+-- lemma Face.embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
+--   rw [← restrict_embed F₂, embed_restrict]
+--   simp only [inf_le_left]
 
 /-- The isomorphism between a face's face lattice and the interval in the cone's face
  lattice below the face. -/
@@ -245,20 +245,20 @@ lemma isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Injective f) :
     subst h
     exact hF x hx y hy c hc hz
 
-lemma IsFaceOf.map {f : M →ₗ[R] N} (hf : Injective f) (hF : F.IsFaceOf C) :
-    (map f F).IsFaceOf (map f C) := (isFaceOf_map_iff hf).mpr hF
+-- lemma IsFaceOf.map {f : M →ₗ[R] N} (hf : Injective f) (hF : F.IsFaceOf C) :
+--     (map f F).IsFaceOf (map f C) := (isFaceOf_map_iff hf).mpr hF
 
-lemma IsFaceOf.map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
-    (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
+-- lemma IsFaceOf.map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
+--     (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
 
-def Face.map {f : M →ₗ[R] N} (hf : Injective f) (F : Face C) : Face (map f C)
-    := ⟨_, F.isFaceOf.map hf⟩
+-- def Face.map {f : M →ₗ[R] N} (hf : Injective f) (F : Face C) : Face (map f C)
+--     := ⟨_, F.isFaceOf.map hf⟩
 
-def Face.map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M →ₗ[R] N) C)
-    := F.map e.injective
+-- def Face.map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M →ₗ[R] N) C)
+--     := F.map e.injective
 
-lemma Face.map_inj (f : M →ₗ[R] N) (hf : Injective f) :
-    Injective (map hf : Face C → Face _) := sorry
+-- lemma Face.map_inj (f : M →ₗ[R] N) (hf : Injective f) :
+--     Injective (map hf : Face C → Face _) := sorry
 
 def map_face (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
     Face (map f C) ≃o Face C where
@@ -316,18 +316,18 @@ def Face.quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := sorry
 lemma isFaceOf_prod {C₁ C₂ F₁ F₂ : PointedCone R M} :
     F₁.IsFaceOf C₁ ∧ F₂.IsFaceOf C₂ ↔ IsFaceOf (F₁.prod F₂) (C₁.prod C₂) := sorry
 
-def Face.prod {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁.prod C₂) :=
-  ⟨_, isFaceOf_prod.mp ⟨F₁.isFaceOf, F₂.isFaceOf⟩⟩
+-- def Face.prod {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁.prod C₂) :=
+--   ⟨_, isFaceOf_prod.mp ⟨F₁.isFaceOf, F₂.isFaceOf⟩⟩
 
-def Face.prod_left {C₁ C₂ : PointedCone R M} (F : Face (C₁.prod C₂)) : Face C₁ := sorry
+-- def Face.prod_left {C₁ C₂ : PointedCone R M} (F : Face (C₁.prod C₂)) : Face C₁ := sorry
 
-def Face.prod_right {C₁ C₂ : PointedCone R M} (F : Face (C₁.prod C₂)) : Face C₂ := sorry
+-- def Face.prod_right {C₁ C₂ : PointedCone R M} (F : Face (C₁.prod C₂)) : Face C₂ := sorry
 
-lemma Face.prod_prod_left {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) :
-    (F₁.prod F₂).prod_left = F₁ := sorry
+-- lemma Face.prod_prod_left {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) :
+--     (F₁.prod F₂).prod_left = F₁ := sorry
 
-lemma Face.prod_prod_right {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) :
-    (F₁.prod F₂).prod_right = F₂ := sorry
+-- lemma Face.prod_prod_right {C₁ C₂ : PointedCone R M} (F₁ : Face C₁) (F₂ : Face C₂) :
+--     (F₁.prod F₂).prod_right = F₂ := sorry
 
 def prod_face_orderIso (C : PointedCone R M) (D : PointedCone R N) :
     Face (C.prod D) ≃o Face C × Face D := sorry

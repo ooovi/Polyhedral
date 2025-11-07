@@ -9,9 +9,11 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
+import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG'
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.Halfspace
 import Polyhedral.Faces2
 
@@ -54,21 +56,8 @@ lemma Submodule.isPolyhedral (S : Submodule R M) : (S : PointedCone R M).IsPolyh
 
 lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := salientQuot_fg hC
 
-lemma IsPolyhedral.FG_of_salient (hC : C.Salient) (hC' : C.IsPolyhedral) : C.FG := by
-  rw [salient_iff_lineal_bot] at hC
-  rw [isPolyhedral_def] at *
-  have h := quotEquivOfEqBot _ hC
-  -- rw [hC] at hC'
-  sorry
-
 lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : C.salientQuot.IsPolyhedral :=
     FG.isPolyhedral hC
-
-lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) : (C.quot S).IsPolyhedral :=
-    sorry
-
-lemma isPolyhedral_iff_FG_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
-  ⟨IsPolyhedral.FG_of_salient hC, FG.isPolyhedral⟩
 
 lemma IsPolyhedral.fg_inf_of_isCompl (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : IsCompl C.lineal S) : FG (C ⊓ S) :=
@@ -81,44 +70,106 @@ lemma isPolyhedral_of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quo
     ← factor_comp_mk <| submodule_le_lineal hS, restrictScalars_comp, map_comp]
   exact FG.map _ hC
 
+lemma IsPolyhedral.exists_finset_span_quot_lineal (hC : C.IsPolyhedral) :
+    ∃ s : Finset M, (span R s).quot C.lineal = C.salientQuot := by classical
+  obtain ⟨s, hs⟩ := hC
+  use Finset.image (surjInv <| mkQ_surjective _) s
+  simp only [map_span, Finset.coe_image, Set.image_image, surjInv_eq, Set.image_id', hs]
+
+lemma IsPolyhedral.exists_finset_inter_span_quot_lineal (hC : C.IsPolyhedral) :
+    ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (span R s).quot C.lineal = C.salientQuot := by
+  classical
+  obtain ⟨s, hs⟩ := exists_finset_span_quot_lineal hC
+  use {x ∈ s | x ∉ C.lineal}
+  constructor
+  · ext; simp
+  · rw [← hs]
+    simp
+    ext x
+    simp [mem_sup]
+    sorry
+
 lemma IsPolyhedral.exists_finset_sup_lineal (hC : C.IsPolyhedral) :
     ∃ s : Finset M, span R s ⊔ C.lineal = C := by classical
-  obtain ⟨s, hs⟩ := hC
-  let f := surjInv (mkQ_surjective C.lineal)
-  use Finset.image f s
-  simp
-  ext x
-  simp [mem_sup]
-  sorry
+  obtain ⟨s, hs⟩ := exists_finset_span_quot_lineal hC
+  use s
+  simpa [quot_eq_iff_sup_eq] using hs
 
-lemma IsPolyhedral.exists_finset_sup_lineal' (hC : C.IsPolyhedral) :
-    ∃ s : Finset M, span R (s ∪ C.lineal) = C := by classical
-  obtain ⟨s, hs⟩ := hC
-  let f := surjInv (mkQ_surjective C.lineal)
-  use Finset.image f s
-  rw [span_union]
-  simp
-  sorry
+structure PolyhedralDecomposition (hC : C.IsPolyhedral) where
+  core : PointedCone R M
+  coreFG : core.FG
+  coreSalient : core.Salient
+  coreSupLineal : core ⊔ C.lineal = C
+
+-- lemma IsPolyhedral.exists_finset_sup_lineal' (hC : C.IsPolyhedral) :
+--     ∃ s : Finset M, span R (s ∪ C.lineal) = C := by classical
+--   obtain ⟨s, hs⟩ := hC
+--   let f := surjInv (mkQ_surjective C.lineal)
+--   use Finset.image f s
+--   rw [span_union]
+--   simp
+--   sorry
+
+lemma IsPolyhedral.exists_fg_sup_lineal (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R M, D.FG ∧ D ⊔ C.lineal = C := by
+  obtain ⟨s, hs⟩ := hC.exists_finset_sup_lineal
+  use span R s
+  exact ⟨fg_span s.finite_toSet, hs⟩
+
+lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (hlin : FG C.lineal) : C.FG := by
+  obtain ⟨D, hD, hD'⟩ := hC.exists_fg_sup_lineal
+  rw [← hD']
+  exact sup_fg hD hlin
+
+lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
+  ⟨FG.lineal_fg, hC.fg_of_fg_lineal⟩
+
+lemma IsPolyhedral.fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG :=
+  hC.fg_of_fg_lineal (by simpa [salient_iff_lineal_bot.mp hsal] using fg_bot)
+
+lemma isPolyhedral_iff_FG_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
+  ⟨(IsPolyhedral.fg_of_salient · hC), FG.isPolyhedral⟩
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C C₁ C₂ F : PointedCone R M}
 
 lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
-  obtain ⟨s, hs⟩ := hC.exists_finset_sup_lineal
+  obtain ⟨s, hs', hs⟩ := hC.exists_finset_inter_span_quot_lineal
   use span R s
   constructor
   · exact fg_span (Finset.finite_toSet _)
   constructor
-  · sorry -- idea: filter by generators that are not in C.lineal (before `use`)
+  · rw [salient_iff_lineal_bot]
+    rw [← ofSubmodule_inj]
+    rw [← span_inter_lineal_eq_lineal]
+    simp at hs
+    rw [← hs] at hs'
+    have hh := lineal_sup_le (M := M) (span R s) C.lineal
+    simp only [lineal_submodule, -sup_le_iff] at hh
+    have hh := Set.inter_subset_inter_right s hh
+    rw [hs'] at hh
+    simp at hh
+    -- rw [Set.sup_eq_union] at hh
+    -- rw [lineal_sup]
+    -- simp at hs'
+    sorry -- use hs'
   · simpa [span_union, span_coe_eq_restrictScalars] using hs
 
-private lemma isPolyhedral_of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
+end DivisionRing
+
+lemma isPolyhedral_of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
     (C ⊔ S).IsPolyhedral := by
   refine isPolyhedral_of_quot_fg le_sup_right ?_
   simpa [sup_quot_eq_quot] using quot_fg hC S
 
 lemma IsPolyhedral.sup (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
     (C₁ ⊔ C₂).IsPolyhedral := by
-  obtain ⟨D₁, hD₁, _, hD₁'⟩ := h₁.exists_fg_salient_sup_lineal
-  obtain ⟨D₂, hD₂, _, hD₂'⟩ := h₂.exists_fg_salient_sup_lineal
+  obtain ⟨D₁, hD₁, hD₁'⟩ := h₁.exists_fg_sup_lineal
+  obtain ⟨D₂, hD₂, hD₂'⟩ := h₂.exists_fg_sup_lineal
   rw [← hD₁', ← hD₂', sup_assoc]
   nth_rw 2 [sup_comm]
   rw [sup_assoc, ← sup_assoc, ← coe_sup]
@@ -139,18 +190,29 @@ variable {C C₁ C₂ F : PointedCone R M}
 end DivisionRing
 
 lemma IsPolyhedral.fg_of_inf_fg (hC : C.IsPolyhedral)
-    {S : Submodule R M} (hS : FG S) : FG (C ⊓ S) := sorry
+    {S : Submodule R M} (hS : FG S) : FG (C ⊓ S) := by
+
+  sorry
 
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
     (C₁ ⊓ C₂).IsPolyhedral := sorry
 
-lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := sorry
-
-lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsPolyhedral := sorry
+lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsPolyhedral := by
+  unfold IsPolyhedral PointedCone.salientQuot PointedCone.quot PointedCone.map
+  -- simp
+  sorry
 
 lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f).IsPolyhedral := sorry
 
-lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := sorry
+lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by
+  have H : -C = PointedCone.map (-.id) C := sorry
+  simpa [H] using hC.map _
+
+lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := sorry
+
+
+lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) : (C.quot S).IsPolyhedral :=
+    sorry
 
 section CommRing
 
@@ -160,8 +222,49 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PointedCone R M}
 
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C C₁ C₂ F : PointedCone R M}
+
 variable (p) in
-lemma IsPolyhedral.dual (hC : C.IsPolyhedral) : (dual p C).IsPolyhedral := sorry
+lemma isPolyhedral_dual_of_finset (s : Finset M) : (dual p s).IsPolyhedral := by
+  obtain ⟨D, hfg, hD⟩ := exists_fg_sup_dual p s
+  rw [← hD]
+  exact isPolyhedral_of_fg_sup_submodule hfg _
+
+variable (p) in
+lemma isPolyhedral_dual_of_fg (hC : C.FG) : (dual p C).IsPolyhedral := by
+  obtain ⟨D, hfg, hD⟩ := FG.exists_fg_sup_dual p hC
+  rw [← hD]
+  exact isPolyhedral_of_fg_sup_submodule hfg _
+
+variable (p) in
+lemma IsPolyhedral.dual (hC : C.IsPolyhedral) : (dual p C).IsPolyhedral := by
+  obtain ⟨D, hfg, hD⟩ := hC.exists_fg_sup_lineal
+  rw [← hD]
+  rw [dual_sup_dual_inf_dual]
+  obtain ⟨E, hfg, hE⟩ := (isPolyhedral_dual_of_fg p hfg).exists_fg_sup_lineal
+  rw [← hE]
+  simp only [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
+  rw [← sup_inf_assoc_of_le_submodule]
+  · rw [← PointedCone.coe_inf]
+    exact isPolyhedral_of_fg_sup_submodule hfg _
+  · rw [dual_span_lineal_dual] at hE
+    -- rw [right_eq_sup] at hE
+    ----
+    rw [← hD]
+    --rw [dual_sup_dual_eq_inf_dual]
+    rw [IsDualClosed.dual_lineal_span_dual]
+    ·
+      sorry
+    · sorry
+    -- exact left_eq_sup.mp hE.symm
+
+end Field
 
 end CommRing
 
@@ -287,8 +390,8 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PolyhedralCone R M}
 
-variable (p) in
-def dual (C : PolyhedralCone R M) : PolyhedralCone R N := ⟨_, C.isPolyhedral.dual p⟩
+-- variable (p) in
+-- def dual (C : PolyhedralCone R M) : PolyhedralCone R N := ⟨_, C.isPolyhedral.dual p⟩
 
 variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma isDualClosed (C : PolyhedralCone R M) : IsDualClosed p C := sorry

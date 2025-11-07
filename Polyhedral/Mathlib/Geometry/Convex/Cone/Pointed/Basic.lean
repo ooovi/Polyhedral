@@ -504,6 +504,8 @@ end Ring_LinearOrder
 
 -- # QUOTIENTS
 
+/- Most, if not everything, from this section should be proven for general restricted scalars. -/
+
 section Ring
 
 variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
@@ -524,6 +526,17 @@ lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
     (C ⊔ S).quot S = C.quot S := sorry
+
+
+@[simp]
+lemma quot_eq_iff_sup_eq {S : Submodule R M} {C D : PointedCone R M} :
+    C.quot S = D.quot S ↔ C ⊔ S = D ⊔ S := Submodule.map_mkQ_eq_iff_sup_eq
+
+@[simp] lemma map_mkQ_le_iff_sup_le {p : Submodule R M} {s t : PointedCone R M} :
+    map p.mkQ s ≤ map p.mkQ t ↔ s ⊔ p ≤ t ⊔ p := Submodule.map_mkQ_le_iff_sup_le
+
+@[simp] lemma map_mkQ_eq_iff_sup_eq {p : Submodule R M} {s t : PointedCone R M} :
+    map p.mkQ s = map p.mkQ t ↔ s ⊔ p = t ⊔ p := Submodule.map_mkQ_eq_iff_sup_eq
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 

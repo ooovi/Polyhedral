@@ -133,6 +133,9 @@ theorem sInf_cofg'' {s : Set (Submodule R M)} (hs : s.Finite) (hcofg : ∀ S ∈
     (sInf s).CoFG' := by
   rw [← hs.coe_toFinset] at hcofg ⊢; exact sInf_cofg' hcofg
 
+
+-- ## DUAL
+
 variable {R : Type*} [CommRing R] [IsNoetherianRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
@@ -147,8 +150,13 @@ theorem dual_finset_cofg' (s : Finset M) : (dual p s).CoFG' := by
   rw [dual_ker_pi']; exact ker_cofg' _
 
 variable (p) in
-theorem dual_finset_cofg'' {s : Set M} (hs : s.Finite) : (dual p s).CoFG' := by
+theorem dual_finite_cofg' {s : Set M} (hs : s.Finite) : (dual p s).CoFG' := by
   rw [← hs.coe_toFinset]; exact dual_finset_cofg' p hs.toFinset
+
+variable (p) in
+theorem dual_fg_cofg' {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG' := by
+  obtain ⟨s, rfl⟩ := hS
+  simpa using dual_finset_cofg' p s
 
 theorem CoFG.cofg' {S : Submodule R N} (hS : S.CoFG p) : S.CoFG' := by
   obtain ⟨s, rfl⟩ := hS.exists_finset_dual

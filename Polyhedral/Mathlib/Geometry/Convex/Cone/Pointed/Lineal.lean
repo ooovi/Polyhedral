@@ -6,8 +6,8 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+-- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Faces.Basic
 
 namespace PointedCone
 
@@ -19,6 +19,10 @@ variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 -- ## Lineality
+
+-- TODO: maybe lineal should be defined only over rings and via x ∈ C.lineal → -x ∈ C.lineal.
+--   The given definition of lineal gives weird results over semiring such as the positive
+--   elements of a ring.
 
 /-- The lineality space of a cone. -/
 def lineal (C : PointedCone R M) : Submodule R M := sSup {S : Submodule R M | S ≤ C }
@@ -134,13 +138,35 @@ lemma lineal_isExtreme_sum {C : PointedCone R M} {xs : Finset M} (hxs : (xs : Se
     have h := lineal_isExtreme hxs.1 (C.sum_mem hxs.2) h
     exact ⟨h.1, H hxs.2 h.2⟩
 
+@[simp] lemma sup_lineal_eq (C : PointedCone R M) : C ⊔ C.lineal = C :=
+    sup_of_le_left (lineal_le C)
 
-
-lemma sup_lineal (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D).lineal := by
+lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D).lineal := by
   sorry
 
 -- lemma sup_lineal (C : PointedCone R M) (S : Submodule R M) : S ≤ (C ⊔ S).lineal := sorry
 
+-- !! only holds over fields or archimedean rings! Not in general.
+lemma mem_lineal_of_smul_mem_lineal' {C : PointedCone R M} :
+  (∀ c > 0, ∃ d > 0, d * c ≥ 1) ↔ (∀ x ∈ C, ∀ c > 0, c • x ∈ C.lineal → x ∈ C.lineal) := sorry
+
+-- !! only holds over fields or archimedean rings! Not in general.
+lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
+    (hx : x ∈ C) (hcx : c • x ∈ C.lineal) : x ∈ C.lineal := by
+  wlog h0c : 0 ≤ c
+  · sorry
+  · wlog h1c : 1 ≤ c with H
+    · --have H := @H _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (1+1) hx
+      sorry
+    · have h : c = c - 1 + 1 := by simp
+      rw [h] at hcx
+      clear h
+      rw [add_smul] at hcx
+      simp at hcx
+      have h' : 1 ≤ c ↔ 0 ≤ c - 1 := by simp
+      rw [h'] at h1c
+      replace h' := smul_mem C h1c hx
+      exact lineal_isExtreme_right h' hx hcx
 
 
 section DivisionRing
@@ -193,13 +219,16 @@ lemma span_inter_lineal_eq_lineal (s : Set M) :
   --   -- rw [Submodule.mem_span_finite_of_mem_span] at h
     -- sorry
 
-lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classical
+lemma FG.lineal_fg'' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classical
   obtain ⟨s, hs⟩ := hC
   use (s.finite_toSet.inter_of_left C.lineal).toFinset -- means {x ∈ s | x ∈ C.lineal}
   rw [submodule_span_of_span]
   simpa [← hs] using span_inter_lineal_eq_lineal R (s : Set M)
 
 end DivisionRing
+
+-- implement this from the face theory.
+lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := sorry
 
 end Ring
 
@@ -317,24 +346,10 @@ lemma span_diff_lineal_pointy {C : PointedCone R M} {s : Set M} (h : span R s = 
     (span R (s \ C.lineal)).Salient := by
   sorry
 
-/-- A cone is a sum of a pointed cone and its lineality space. -/
--- NOTE: I just realzed that this is true in a boring sense: let D := span C \ C.lineal ∪ {0}
-lemma exists_pointy_sup_lineal (C : PointedCone R M) :
-    ∃ D : PointedCone R M, D.Salient ∧ D ⊔ C.lineal = C := by
-  have hT : ∃ T : Submodule R M, IsCompl C.lineal T := sorry
-    -- Submodule.exists_isCompl (K := R) (V := M) C.lineal
-  obtain ⟨CoLin, h⟩ := hT
-  use (C ⊓ CoLin)
-  constructor
-  · sorry
-  · sorry
-
-/-- A cone is a sum of a pointed cone and its lineality space. -/
--- NOTE: I just realzed that this is true in a boring sense: let D := span C \ C.lineal ∪ {0}
-lemma exists_pointy_sup_lineal' (C : PointedCone R M) :
-    ∃ D : PointedCone R M, (Submodule.span R D) ⊓ C.lineal = ⊥ ∧ D ⊔ C.lineal = C := by
-
-  sorry
+lemma inf_sup_lineal_eq_of_isCompl {C : PointedCone R M} {S : Submodule R M}
+    (hCS : IsCompl S C.lineal) : (C ⊓ S) ⊔ C.lineal = C := by
+  simp [← inf_sup_assoc_of_submodule_le S (lineal_le C), ← coe_sup,
+    codisjoint_iff.mp hCS.codisjoint]
 
 end Ring_AddCommGroup
 

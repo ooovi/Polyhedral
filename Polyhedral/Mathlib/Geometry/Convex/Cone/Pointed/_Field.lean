@@ -9,7 +9,6 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG'
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.CoFG
 
 /-!
@@ -243,6 +242,72 @@ variable [Fact p.flip.IsFaithfulPair] in
 lemma CoFG.dual_flip_fg {C : PointedCone 𝕜 N} (hC : C.CoFG p) : (dual p.flip C).FG := by
   rw [← flip_flip p] at hC; exact dual_fg hC
 
+-- variable [Fact p.flip.IsFaithfulPair] in
+variable (p) in
+lemma FG.foo {C : PointedCone 𝕜 M} (hC : C.FG) :
+    ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ Submodule.dual (R := 𝕜) p C = dual p C := by
+  -- have hC := CoFG.to_id hC
+  -- obtain ⟨C', hcofg, hC'⟩ := FG.exists_cofg_inf_span p.flip hC.dual_flip_fg
+  -- obtain ⟨C'', hfg, rfl⟩ := hcofg.exists_fg_dual
+  -- use C''
+  -- constructor
+  -- · exact hfg
+  -- /- NOTE: this proof does not rely on `p.IsFaithfulPair` because in the next line it uses
+  --   `IsDualClosed.dual_inj_iff` instead of `FG.dual_inj_iff`. It is not clear to me how this
+  --   avoids the assumption. Maybe `IsDualClosed.dual_inj_iff` (or something it relies on) is
+  --   not completely implemented yet. -/
+  -- rw [← IsDualClosed.dual_inj_iff (p := p.flip)]
+  -- · rw [dual_sup_dual_inf_dual, ofSubmodule_coe, coe_dual, IsDualClosed.dual_lineal_span_dual]
+  --   · exact hC'
+  --   · exact hC.isDualClosed_flip
+  -- · exact CoFG.isDualClosed <| sup_fg_cofg hfg (CoFG.coe <| CoFG.lineal_cofg hC)
+  -- · exact hC.isDualClosed_flip
+  sorry
+
+variable [Fact p.flip.IsFaithfulPair] in
+lemma CoFG.exists_fg_sup_lineal {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
+    ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ C.lineal = C := by
+  -- have hC := CoFG.to_id hC
+  obtain ⟨C', hcofg, hC'⟩ := FG.exists_cofg_inf_span p.flip hC.dual_flip_fg
+  obtain ⟨C'', hfg, rfl⟩ := hcofg.exists_fg_dual
+  use C''
+  constructor
+  · exact hfg
+  /- NOTE: this proof does not rely on `p.IsFaithfulPair` because in the next line it uses
+    `IsDualClosed.dual_inj_iff` instead of `FG.dual_inj_iff`. It is not clear to me how this
+    avoids the assumption. Maybe `IsDualClosed.dual_inj_iff` (or something it relies on) is
+    not completely implemented yet. -/
+  rw [← IsDualClosed.dual_inj_iff (p := p.flip)]
+  · rw [dual_sup_dual_inf_dual, ofSubmodule_coe, coe_dual, IsDualClosed.dual_lineal_span_dual]
+    · exact hC'
+    · exact hC.isDualClosed_flip
+  · exact CoFG.isDualClosed <| sup_fg_cofg hfg (CoFG.coe <| CoFG.lineal_cofg hC)
+  · exact hC.isDualClosed_flip
+
+-- Q: is `p.flip.IsFaithfulPair` necessary?
+variable [Fact p.flip.IsFaithfulPair] in
+lemma sup_cofg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.CoFG p) : (C ⊔ D).CoFG p := by
+  obtain ⟨C', hCfg, hC'⟩ := hC.exists_fg_sup_lineal
+  obtain ⟨D', hDfg, hD'⟩ := hD.exists_fg_sup_lineal
+  rw [← hC', ← hD', sup_assoc]
+  nth_rw 2 [sup_comm]
+  rw [sup_assoc, ← sup_assoc]
+  refine sup_fg_cofg (sup_fg hCfg hDfg) ?_
+  rw [← coe_sup, coe_cofg_iff]
+  exact Submodule.sup_cofg hD.lineal_cofg hC.lineal_cofg
+
+-- variable [Fact p.flip.IsFaithfulPair] in
+-- lemma inf_cofg_submodule {C : PointedCone 𝕜 N} {S : Submodule 𝕜 N} (hC : C.CoFG p) (hS : S.FG) :
+--     (C ⊓ S).FG := by
+--   obtain ⟨D, hfg, hD⟩ := hC.exists_fg_sup_lineal
+--   rw [← hD]
+--   rw [← sup_inf_assoc_of_le_submodule]
+--   refine sup_fg hfg ?_
+--   rw [← coe_inf]
+--   exact coe_fg (inf_fg_right _ hS)
+--   --rw []
+--   sorry
+
 section Module.Finite
 
 variable [Module.Finite 𝕜 N]
@@ -355,52 +420,6 @@ lemma inf_fg_cofg {C D : PointedCone 𝕜 N}
 /-- The intersection of a CoFG cone and an FG cone is FG. -/
 lemma inf_cofg_fg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.FG) : (C ⊓ D).FG
     := by rw [inf_comm]; exact inf_fg_cofg hD hC
-
-variable (p) in
-lemma exists_fg_sup_dual (s : Finset M) :
-    ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ Submodule.dual (R := 𝕜) p s = dual p s := by
-  obtain ⟨S, hS⟩ := Submodule.exists_isCompl (dual p s).lineal
-  use (dual p s) ⊓ S
-  constructor
-  · rw [dual_span_lineal_dual] at hS
-    have h := CoFG'.isCompl_fg hS (dual_finset_cofg' p s)
-    exact inf_cofg_fg (cofg_of_finset p s) (coe_fg h) -- h instead if coe_fg h would work
-  · rw [← dual_span_lineal_dual]
-    exact inf_sup_lineal_eq_of_isCompl hS.symm
-
-variable (p) in
-lemma FG.exists_fg_sup_dual {C : PointedCone 𝕜 M} (hC : C.FG) :
-    ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ Submodule.dual (R := 𝕜) p C = dual p C := by
-  obtain ⟨s, rfl⟩ := hC
-  simpa using PointedCone.exists_fg_sup_dual p s
-
-lemma CoFG.exists_fg_sup_lineal {C : PointedCone 𝕜 N} (hC : C.CoFG p) :
-    ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ C.lineal = C := by
-  obtain ⟨s, rfl⟩ := hC
-  rw [dual_span_lineal_dual]
-  exact PointedCone.exists_fg_sup_dual p s
-
-lemma sup_cofg {C D : PointedCone 𝕜 N} (hC : C.CoFG p) (hD : D.CoFG p) : (C ⊔ D).CoFG p := by
-  obtain ⟨C', hCfg, hC'⟩ := hC.exists_fg_sup_lineal
-  obtain ⟨D', hDfg, hD'⟩ := hD.exists_fg_sup_lineal
-  rw [← hC', ← hD', sup_assoc]
-  nth_rw 2 [sup_comm]
-  rw [sup_assoc, ← sup_assoc]
-  refine sup_fg_cofg (sup_fg hCfg hDfg) ?_
-  rw [← coe_sup, coe_cofg_iff]
-  exact Submodule.sup_cofg hD.lineal_cofg hC.lineal_cofg
-
--- variable [Fact p.flip.IsFaithfulPair] in
--- lemma inf_cofg_submodule {C : PointedCone 𝕜 N} {S : Submodule 𝕜 N} (hC : C.CoFG p) (hS : S.FG) :
---     (C ⊓ S).FG := by
---   obtain ⟨D, hfg, hD⟩ := hC.exists_fg_sup_lineal
---   rw [← hD]
---   rw [← sup_inf_assoc_of_le_submodule]
---   refine sup_fg hfg ?_
---   rw [← coe_inf]
---   exact coe_fg (inf_fg_right _ hS)
---   --rw []
---   sorry
 
 -- TODO: Should not need to rely on `p.flip.IsFaithfulPair`.
 variable (p) [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in

@@ -71,6 +71,10 @@ lemma dual_le_iff_dual_le {S : PointedCone R M} {T : PointedCone R N} :
     dual p (Submodule.span R s) = Submodule.dual p s := by
   ext x; simp
 
+@[simp] lemma submodule_dual_span (s : Set M) :
+    Submodule.dual p (span R s) = Submodule.dual p s := by
+  rw [← Submodule.dual_span]; simp
+
 -- NOT TRUE
 example (s : Set M) : Submodule.span R (dual p s : Set N) = Submodule.dual p s := by sorry
 
@@ -181,9 +185,9 @@ lemma submodule_dual_le_dual {s : Set M} : Submodule.dual p s ≤ dual p s := by
 
 -- ## Neg
 
-lemma dual_neg (C : PointedCone R M) : -dual p C = dual p (-C) := by ext x; simp
+lemma dual_neg (s : Set M) : -dual p s = dual p (-s) := by ext x; simp
 
-@[simp] lemma dual_neg_neg (C : PointedCone R M) : -dual p (-C) = dual p C := by ext x; simp
+@[simp] lemma dual_neg_neg (s : Set M) : -dual p (-s) = dual p s := by ext x; simp
 
 -----------
 
@@ -194,14 +198,15 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma dual_span_lineal_dual (C : PointedCone R M) :
-    Submodule.dual p C = (dual p C).lineal := by
+lemma dual_span_lineal_dual (s : Set M) :
+    (dual p s).lineal = Submodule.dual p s := by
+  rw [Eq.comm]
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
   rw [← PointedCone.ofSubmodule_coe]
-  rw [← sup_neg_eq_submodule_span]
-  rw [dual_sup_dual_inf_dual]
-  rw [Submodule.coe_set_neg]
+  rw [← span_union_neg_eq_span_submodule]
+  rw [Set.involutiveNeg, dual_span]
+  rw [dual_union]
   rw [← dual_neg, lineal_inf_neg]
   try rw [inf_comm]
 
@@ -332,7 +337,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClosed p) :
     Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
-  rw [← hC, ← dual_span_lineal_dual]
+  rw [← hC, dual_span_lineal_dual]
   nth_rw 1 [← flip_flip p]
   nth_rw 2 [← Submodule.dual_span]
   rw [(dual_isDualClosed p C).submodule_span_isDualClosed, dual_dual_flip_dual]
