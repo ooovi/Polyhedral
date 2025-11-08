@@ -582,7 +582,6 @@ lemma span_inter_lineal_eq_lineal' (s : Set M) :
     span R (s ∩ (span R s).lineal) = (span R s).lineal := by
   convert span_inter_face_span_inf_face ⟨_, IsFaceOf.lineal _⟩
   simp
-  exact (IsFaceOf.lineal _).subset
 
 lemma FG.lineal_fg' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by
   convert FG.face_fg_of_fg hC ⟨_, IsFaceOf.lineal _⟩
