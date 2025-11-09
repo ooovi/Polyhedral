@@ -6,6 +6,7 @@ Authors: Martin Winter
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.RingTheory.Ideal.Quotient.Index
 import Mathlib.RingTheory.Finiteness.Prod
+import Mathlib.RingTheory.Finiteness.Quotient
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
 
@@ -17,6 +18,13 @@ section CommSemiring
 
 variable {R : Type*} [Ring R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+
+-- this should be somewhere in mathlib
+theorem quot_finite_of_finite [Module.Finite R M] (S : Submodule R M) :
+    Module.Finite R (M ⧸ S) := by
+  rw [finite_def, ← Finite.iff_fg, ← LinearMap.range_eq_top_of_surjective _ S.mkQ_surjective]
+  exact Module.Finite.range S.mkQ
+
 
 /-- A submodule `S` is co-finitely generated (CoFG) if the quotient space `M ⧸ S` is
   finitely generated (`Module.Finite`). -/
@@ -31,10 +39,34 @@ lemma cofg_bot' [Module.Finite R M] : (⊥ : Submodule R M).CoFG' := inferInstan
 lemma Module.Finite.of_cofg_bot' (h : (⊥ : Submodule R M).CoFG') : Module.Finite R M
     := Finite.equiv (quotEquivOfEqBot ⊥ rfl)
 
+lemma FG.codisjoint_cofg' {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG' := by
+  haveI := Finite.iff_fg.mpr hS
+  unfold CoFG'
+  haveI : Module.Finite R ((⊤ : Submodule R M) ⧸ restrict ⊤ S) := sorry
+  -- Idea: use second isomorphism theorem: M / T = (S + T) / T ≃ S / (S ⊓ T) is FG
+  --   also use `quot_finite_of_finite` above.
+  --
+  -- refine Finite.equiv Submodule.topEquiv
+  -- Submodule.topEquiv
+  -- refine module_finite_of_liesOver ?_ ?_
+  -- apply LinearMap.quotientInfEquivSupQuotient
+  sorry
+
+-- it should suffice to assume Codisjoint S T
 lemma FG.isCompl_cofg' {S T : Submodule R M} (hST : IsCompl S T) (hS : S.FG) : T.CoFG' := by
-  have : Module.Finite R S := Finite.iff_fg.mpr hS
+  haveI := Finite.iff_fg.mpr hS
   exact Finite.equiv (quotientEquivOfIsCompl T S hST.symm).symm
 
+
+lemma CoFG'.disjoint_fg [IsNoetherianRing R] {S T : Submodule R M}
+    (hST : Disjoint S T) (hS : S.CoFG') : T.FG := by
+  unfold CoFG' at hS
+  have f := S.mkQ
+  -- Idea: use that mkQ embeds T into M ⧸ S. Since the latter is FG and the ring is Noetherian,
+  -- every submodule is FG. Hence T is FG.
+  sorry
+
+-- it should suffice to assume Disjoint S T
 lemma CoFG'.isCompl_fg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.CoFG') : T.FG
   := Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
 
@@ -171,7 +203,25 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-theorem CoFG'.exists_finset_dual {S : Submodule R M} (hS : S.CoFG') :
+variable (p) [Fact (Surjective p)] in -- [Fact p.IsFaithfulPair] in
+theorem CoFG'.exists_finset_dual {S : Submodule R N} (hS : S.CoFG') :
+    ∃ s : Finset M, dual p s = S := by classical
+  -- let Q := M ⧸ S
+  -- obtain ⟨s, ⟨b⟩⟩ := Module.Basis.exists_basis R Q
+  -- have h := Module.Finite.finite_basis b
+  -- let f := b.equivFun
+  -- let g := mkQ S
+  -- unfold Q at *
+  -- have hh : ker g = S := ker_mkQ S
+  -- simp [dual_ker_pi']
+  -- rw [← hh]
+  sorry
+
+variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not sure yet
+theorem CoFG'.cofg {S : Submodule R N} (hS : S.CoFG') : S.CoFG p := by
+  obtain ⟨s, hs⟩ := exists_finset_dual p hS; use s
+
+theorem CoFG'.exists_finset_dual' {S : Submodule R M} (hS : S.CoFG') :
     ∃ s : Finset (Dual R M), dual .id s = S := by classical
   let Q := M ⧸ S
   obtain ⟨s, ⟨b⟩⟩ := Module.Basis.exists_basis R Q
@@ -182,10 +232,9 @@ theorem CoFG'.exists_finset_dual {S : Submodule R M} (hS : S.CoFG') :
   have hh : ker g = S := ker_mkQ S
   simp [dual_ker_pi']
   rw [← hh]
-
   sorry
 
-theorem CoFG'.cofg {S : Submodule R M} (hS : S.CoFG') : S.CoFG .id := by
+theorem CoFG'.cofg' {S : Submodule R M} (hS : S.CoFG') : S.CoFG .id := by
   sorry
 
 end Field

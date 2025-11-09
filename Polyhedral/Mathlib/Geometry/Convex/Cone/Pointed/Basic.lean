@@ -98,13 +98,12 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 
 -- ## SPAN
 
-/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
-lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
-  obtain ⟨s, rfl⟩ := hC; use s; simp
+-- /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
+-- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
+--   obtain ⟨s, rfl⟩ := hC; use s; simp
 
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
-    Submodule.span R ((C : Set M) ⊔ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
-  simp only [Set.sup_eq_union]
+    Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
   rw [← span_submodule_span]
   congr; simp only [Submodule.span_union']
 
@@ -119,8 +118,11 @@ lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) :
   nth_rw 1 [← Submodule.span_eq C]
   exact span_le_submodule_span_of_le hCD
 
-lemma le_submodule_span_self (C : PointedCone R M) : C ≤ Submodule.span R (C : Set M)
+lemma le_submodule_span (C : PointedCone R M) : C ≤ Submodule.span R (C : Set M)
   := le_submodule_span_of_le (le_refl C)
+
+@[deprecated le_submodule_span (since := "")]
+alias le_submodule_span_self := le_submodule_span
 
 alias le_span := subset_span
 
@@ -151,8 +153,14 @@ lemma inf_sup_assoc_of_submodule_le {C : PointedCone R M} (D : PointedCone R M)
     {S : Submodule R M} (hSC : S ≤ C) : C ⊓ (D ⊔ S) = (C ⊓ D) ⊔ S :=
   Submodule.inf_sup_assoc_of_restrictScalars_le D hSC
 
-end Ring
+-- TODO: write version with `restrictScalars` instead.
+lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R M}
+  (hS : Disjoint (Submodule.span R C) S) : (C ⊔ S) ⊓ Submodule.span R (C : Set M) = C := by
+  rw [← sup_inf_assoc_of_le_submodule]
+  · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
+  · exact le_submodule_span C
 
+end Ring
 
 --------------------------
 
@@ -254,6 +262,45 @@ instance : InvolutiveNeg (PointedCone R M) := Submodule.involutivePointwiseNeg -
 -- lemma neg_top : -⊤ = (⊤ : PointedCone R M) := by simp
 -- lemma neg_bot : -⊥ = (⊥ : PointedCone R M) := by simp
 
+-- TODO: Does this not already exist?
+lemma map_id_eq_neg (C : PointedCone R M) : C.map (-.id) = -C := by
+  ext x
+  simp only [Submodule.mem_neg, mem_map, LinearMap.neg_apply, LinearMap.id_coe, id_eq]
+  constructor
+  · intro h
+    obtain ⟨y, hyC, rfl⟩ := h
+    simpa using hyC
+  · exact fun h => by use -x; simp [h]
+
+lemma comap_id_eq_neg (C : PointedCone R M) : C.comap (-.id) = -C := by
+  ext x; simp
+
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+lemma map_neg (C : PointedCone R M) (f : M →ₗ[R] N) : map (-f) C = map f (-C) := by
+  ext x
+  simp only [mem_map, LinearMap.neg_apply, Submodule.mem_neg]
+  constructor <;> {
+    intro h
+    obtain ⟨x, hx⟩ := h
+    exact ⟨-x, by simpa using hx⟩
+  }
+
+lemma map_neg_apply (C : PointedCone R M) (f : M →ₗ[R] N) : - map f C = map f (-C) := by
+  ext x
+  simp
+  constructor <;> {
+    intro h
+    obtain ⟨x, hx⟩ := h
+    exact ⟨-x, by simpa [neg_eq_iff_eq_neg] using hx⟩
+  }
+
+lemma comap_neg (C : PointedCone R M) (f : N →ₗ[R] M) : comap (-f) C = comap f (-C) := by
+  ext x; simp
+
+lemma comap_neg_apply (C : PointedCone R M) (f : N →ₗ[R] M) : -comap f C = comap f (-C) := by
+  ext x; simp
+
 end Semiring_AddCommGroup
 
 section RingPartialOrder
@@ -313,6 +360,7 @@ lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
 --     sorry
 --   · sorry
 
+-- Does this theorem need linear order? If not, then neither a lot of things downstream
 variable (R) in
 lemma span_pm_pair_eq_submodule_span (x : M) :
     span R {-x, x} = Submodule.span R {-x, x} := by
@@ -493,8 +541,12 @@ instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
   ⟨Submodule.fg_of_restrictedScalars_fg, coe_fg⟩
 
-lemma span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (M := M) C).FG :=
+/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
+lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (M := M) C).FG :=
   Submodule.span_scalars_FG R hC
+
+@[deprecated submodule_span_fg (since := "...")]
+alias span_fg := submodule_span_fg
 
 lemma fg_top [Module.Finite R M] : (⊤ : PointedCone R M).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top

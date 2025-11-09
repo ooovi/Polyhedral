@@ -15,6 +15,8 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+-- `PointedCone.map` should be an abbrev
+
 alias dual_bot := dual_zero
 
 -- TODO: are there instances missing that should make the proof automatic?
@@ -27,7 +29,7 @@ variable (p) in
   ext x; constructor
   · intro h _ ha
     have h' := h (neg_mem_iff.mpr ha)
-    simp only [map_neg, neg_apply, Left.nonneg_neg_iff] at h'
+    simp only [LinearMap.map_neg, neg_apply, Left.nonneg_neg_iff] at h'
     exact le_antisymm (h ha) h'
   · intro h _ ha
     rw [h ha]
@@ -143,15 +145,16 @@ end Map
 @[simp]
 lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
   ext x -- TODO: make this proof an application of `map_dual`
-  simp
+  simp only [Submodule.mem_neg, mem_dual, _root_.map_neg, Left.nonneg_neg_iff,
+    Set.involutiveNeg, Set.mem_neg]
   constructor
   · intro hy y hy'
     specialize hy hy'
-    simp_all only [map_neg, LinearMap.neg_apply, Left.neg_nonpos_iff]
+    simp_all only [LinearMap.map_neg, LinearMap.neg_apply, Left.neg_nonpos_iff]
   · intro hy y hy'
     rw [← _root_.neg_neg y] at hy'
     specialize hy hy'
-    simp_all only [_root_.neg_neg, map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff]
+    simp_all only [_root_.neg_neg, LinearMap.map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff]
 
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
 
@@ -163,6 +166,8 @@ example (C D : PointedCone R M) : dual p (C ⊔ D) = dual p (C ∪ D) := rfl
 
 lemma dual_sup (C D : PointedCone R M) : dual p (C ⊔ D : PointedCone R M) = dual p (C ∪ D)
   := by nth_rw 2 [←dual_span]; simp
+
+alias dual_sup_dual_union := dual_sup
 
 -- TODO: simp lemma?
 lemma dual_sup_dual_inf_dual (C D : PointedCone R M) :

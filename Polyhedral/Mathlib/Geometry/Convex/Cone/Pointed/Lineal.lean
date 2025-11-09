@@ -29,7 +29,7 @@ def lineal (C : PointedCone R M) : Submodule R M := sSup {S : Submodule R M | S 
 
 def lineal_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C } := by rfl
 
-lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp [lineal]
+@[simp] lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp [lineal]
 
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := le_sSup hS
@@ -169,6 +169,67 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
       exact lineal_isExtreme_right h' hx hcx
 
 
+-- Q: Can we shorten the proof, see `inf_sup_lineal_eq_of_isCompl` below.
+lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
+    (C ⊓ S) ⊔ C.lineal = C := by
+  rw [le_antisymm_iff]
+  constructor
+  · exact sup_le_iff.mpr ⟨inf_le_left, lineal_le C⟩
+  · intro x hx
+    rw [Submodule.codisjoint_iff_exists_add_eq] at hCS
+    obtain ⟨y, z, hy, hz, hyz⟩ := hCS x
+    rw [Submodule.mem_sup]
+    have hzC : z ∈ C := by
+      have h := Submodule.add_mem C hx (neg_mem_of_mem_lineal hy)
+      rw [← hyz, add_neg_cancel_comm] at h
+      exact h
+    exact ⟨z, by simp; exact ⟨hzC, hz⟩, y, hy, by rw [add_comm]; exact hyz⟩
+
+@[deprecated inf_sup_lineal (since := "2025-11-07")]
+lemma inf_sup_lineal_eq_of_isCompl {C : PointedCone R M} {S : Submodule R M}
+    (hCS : IsCompl S C.lineal) : (C ⊓ S) ⊔ C.lineal = C := by
+  simp [← inf_sup_assoc_of_submodule_le S (lineal_le C), ← coe_sup,
+    codisjoint_iff.mp hCS.codisjoint]
+
+
+
+-- ## MAP
+
+open Function LinearMap
+
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+lemma map_lineal_le (C : PointedCone R M) (f : M →ₗ[R] N) :
+    Submodule.map f C.lineal ≤ (C.map f).lineal := by
+  intro y
+  simp [lineal_mem]
+  intro x hx hmx hfxy
+  exact ⟨⟨x, hx, hfxy⟩, ⟨-x, hmx, by rw [← hfxy, LinearMap.map_neg]⟩⟩
+
+lemma map_lineal (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
+    (C.map f).lineal = Submodule.map f C.lineal := by
+  rw [le_antisymm_iff]
+  constructor
+  · intro x
+    simp [lineal_mem]
+    intro y hy hfxy z hz hfxz
+    use y
+    · constructor
+      · constructor
+        · exact hy
+        rw [← hfxy, ← LinearMap.map_neg] at hfxz
+        simpa [← hf hfxz] using hz
+      · exact hfxy
+  · exact map_lineal_le C f
+
+lemma comap_lineal (C : PointedCone R M) {f : N →ₗ[R] M} :
+    (C.comap f).lineal = Submodule.comap f C.lineal := by
+  ext x; simp [lineal_mem]
+
+@[simp] lemma neg_lineal (C : PointedCone R M) : (-C).lineal = C.lineal := by
+  simp [← comap_id_eq_neg, comap_lineal]
+
+
 section DivisionRing
 
 variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -254,22 +315,6 @@ lemma Salient.mem_neg_mem_zero {C : PointedCone R M} (hC : C.Salient)
   rw [not_imp_not] at hC
   exact hC hx'
 
--- move somewhere further up
-lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
-    (C ⊓ S) ⊔ C.lineal = C := by
-  rw [le_antisymm_iff]
-  constructor
-  · exact sup_le_iff.mpr ⟨inf_le_left, lineal_le C⟩
-  · intro x hx
-    rw [Submodule.codisjoint_iff_exists_add_eq] at hCS
-    obtain ⟨y, z, hy, hz, hyz⟩ := hCS x
-    rw [Submodule.mem_sup]
-    have hzC : z ∈ C := by
-      have h := Submodule.add_mem C hx (neg_mem_of_mem_lineal hy)
-      rw [← hyz, add_neg_cancel_comm] at h
-      exact h
-    exact ⟨z, by simp; exact ⟨hzC, hz⟩, y, hy, by rw [add_comm]; exact hyz⟩
-
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
@@ -286,18 +331,87 @@ lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = �
     rw [h] at hlin
     exact hlin
 
+/-- If `S` is a submodule disjoint to the lineality space of a cone `C`, then `C ⊓ S`
+  is salient. -/
 lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.lineal S) :
     (C ⊓ S).Salient := by
   simp only [salient_iff_lineal_bot, lineal_inf, lineal_submodule, ← disjoint_iff, hCS]
 
+@[deprecated inf_salient (since := "...")]
 lemma inf_salient_of_disjoint {C : PointedCone R M}
     {S : Submodule R M} (hS : C.lineal ⊓ S = ⊥) : (C ⊓ S).Salient := by
   simpa [salient_iff_lineal_bot] using hS
+
+-- ## MAP
+
+open Function
+
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+omit [LinearOrder R] [IsOrderedRing R] in
+-- TODO: generalize and move to the right place
+@[simp] lemma injective_neg {f : N →ₗ[R] M} : Injective (-f) ↔ Injective f := by
+  simp [Injective]
+
+omit [LinearOrder R] [IsOrderedRing R] in
+@[simp] lemma surjective_neg {f : N →ₗ[R] M} : Surjective (-f) ↔ Surjective f := by
+  constructor
+  · exact fun h x => by simpa using h (-x)
+  · intro h x
+    obtain ⟨y, hy⟩ := h (-x)
+    exact ⟨y, by simp [hy]⟩
+
+---
+
+lemma salient_map {C : PointedCone R M} {f : M →ₗ[R] N} (hC : C.Salient) (hf : Injective f) :
+    (C.map f).Salient := by
+  rw [salient_iff_lineal_bot] at *
+  simp [map_lineal _ hf, hC]
+
+lemma salient_comap {C : PointedCone R M} {f : N →ₗ[R] M} (hC : C.Salient) (hf : Injective f) :
+    (C.comap f).Salient := by
+  rw [salient_iff_lineal_bot] at *
+  simpa [comap_lineal, hC] using LinearMap.ker_eq_bot_of_injective hf
+
+lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
+  simpa [← map_id_eq_neg] using salient_map hC (injective_neg.mpr injective_id)
+
+
+
+-- section DivisionRing
+
+-- variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+-- variable {M : Type*} [AddCommGroup M] [Module R M]
+
+-- /-- A pointed cone can be written as a sup of its lineality space and a complementary
+--   salient cone. -/
+-- lemma exists_salient_disj_sup_lineal (C : PointedCone R M) :
+--     ∃ D : PointedCone R M, D.Salient
+--       ∧ Disjoint C.lineal (.span R D)
+--       ∧ D ⊔ C.lineal = C := by
+--   have ⟨S, hDis, hCod⟩ := exists_isCompl C.lineal
+--   refine ⟨C ⊓ S, inf_salient hDis, Disjoint.mono_right ?_ hDis, inf_sup_lineal hCod⟩
+--   rw [← Submodule.span_eq (p := S)]
+--   exact Submodule.span_mono (by simp)
+
+-- /-- A pointed cone can be written as a sup of a submodule and a complementary
+--   salient cone. -/
+-- lemma exists_salient_submodul_disj_sup (C : PointedCone R M) :
+--     ∃ D : PointedCone R M, D.Salient ∧
+--       ∃ S : Submodule R M, Disjoint S (.span R D) ∧ D ⊔ S = C := by
+--   obtain ⟨D, hSal, hDis, hSup⟩ := exists_salient_disj_sup_lineal C
+--   exact ⟨D, hSal, C.lineal, hDis, hSup⟩
+
+-- end DivisionRing
+
+
+
 
 -- ## SALIENT QUOT
 
 variable {C : PointedCone R M}
 
+/-- The quotient of a cone by its lineality space. -/
 abbrev salientQuot (C : PointedCone R M) := C.quot C.lineal
 
 lemma salientQuot_def (C : PointedCone R M) : C.salientQuot = C.quot C.lineal := rfl
@@ -313,43 +427,7 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := sorry
 
 lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 
-
-
-section DivisionRing
-
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
-/-- A pointed cone can be written as a sup of its lineality space and a complementary
-  salient cone. -/
-lemma exists_salient_disj_sup_lineal (C : PointedCone R M) :
-    ∃ D : PointedCone R M, D.Salient
-      ∧ Disjoint C.lineal (.span R D)
-      ∧ D ⊔ C.lineal = C := by
-  have ⟨S, hDis, hCod⟩ := exists_isCompl C.lineal
-  refine ⟨C ⊓ S, inf_salient hDis, Disjoint.mono_right ?_ hDis, inf_sup_lineal hCod⟩
-  rw [← Submodule.span_eq (p := S)]
-  exact Submodule.span_mono (by simp)
-
-/-- A pointed cone can be written as a sup of a submodule and a complementary
-  salient cone. -/
-lemma exists_salient_submodul_disj_sup (C : PointedCone R M) :
-    ∃ D : PointedCone R M, D.Salient ∧
-      ∃ S : Submodule R M, Disjoint S (.span R D) ∧ D ⊔ S = C := by
-  obtain ⟨D, hSal, hDis, hSup⟩ := exists_salient_disj_sup_lineal C
-  exact ⟨D, hSal, C.lineal, hDis, hSup⟩
-
-end DivisionRing
-
-
-lemma span_diff_lineal_pointy {C : PointedCone R M} {s : Set M} (h : span R s = C) :
-    (span R (s \ C.lineal)).Salient := by
-  sorry
-
-lemma inf_sup_lineal_eq_of_isCompl {C : PointedCone R M} {S : Submodule R M}
-    (hCS : IsCompl S C.lineal) : (C ⊓ S) ⊔ C.lineal = C := by
-  simp [← inf_sup_assoc_of_submodule_le S (lineal_le C), ← coe_sup,
-    codisjoint_iff.mp hCS.codisjoint]
+-- def salientQuot_neg (C : PointedCone R M) : C.salientQuot ≃ₗ[R] (-C).salientQuot := sorry
 
 end Ring_AddCommGroup
 

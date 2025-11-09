@@ -316,6 +316,11 @@ private lemma FG.dual_inf_dual_sup_dual' {C D : PointedCone 𝕜 M} (hC : C.FG) 
 
 end Module.Finite
 
+/- NOTE: the below theorem is the basis for generalizations to certain rings. If R is an
+  ordered ring that embeds discretelety in its fraction field (essentually ℤ), then
+  intersections of FG cones stay FG (Gordan's lemma).
+  recall at https://chatgpt.com/c/691078e5-7f50-8326-8f04-98ae7185da74 -/
+
 /-- The intersection of two FG cones is an FG cone. -/
 lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
   wlog _ : Module.Finite 𝕜 M with h

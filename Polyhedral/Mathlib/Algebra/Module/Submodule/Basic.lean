@@ -35,6 +35,9 @@ example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
 -- span_sup'
 example (S S' : Submodule R M) : span R (S ⊔ S' : Submodule R M) = S ⊔ S' := span_eq _
 
+@[simp] lemma span_inter_le (s t : Set M) : span R (s ∩ t) ≤ span R s ⊓ span R t :=
+    le_inf (span_mono Set.inter_subset_left) (span_mono Set.inter_subset_right)
+
 @[simp] lemma span_inter (S S' : Submodule R M) : span R (S ∩ S') = S ⊓ S'
     := (Submodule.gi R M).l_inf_u S S'
 
@@ -97,7 +100,7 @@ def restrict_equiv (S T : Submodule R M) : (S ⊓ T : Submodule R M) ≃ₗ[R] S
   sorry
 
 /-- A submodule `T` of a submodule `S` of `M` reintepreted as a submodule of `M`. -/
-abbrev embed {S : Submodule R M} (T : Submodule R S) : Submodule R M := T.map S.subtype
+@[coe] abbrev embed {S : Submodule R M} (T : Submodule R S) : Submodule R M := T.map S.subtype
 
 -- Q: Shoud have `embed` as an order embedding? If yes, use the code below.
 def embed' {S : Submodule R M} : Submodule R S ↪o Submodule R M where

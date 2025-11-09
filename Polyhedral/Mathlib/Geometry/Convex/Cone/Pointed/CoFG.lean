@@ -109,11 +109,12 @@ instance {S : Submodule R N} : Coe (S.CoFG p) (CoFG p (S : PointedCone R N)) := 
     sorry
   · exact coe_cofg
 
-end LinearOrder
-
--- ### HIGH PRIORITY! This is needed in the Field theory!
 lemma CoFG.lineal_cofg {C : PointedCone R N} (hC : C.CoFG p) : C.lineal.CoFG p := by
-  sorry
+  obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
+  rw [dual_span_lineal_dual, ← Submodule.dual_span]
+  exact Submodule.cofg_of_fg p (submodule_span_fg hfg)
+
+end LinearOrder
 
 @[deprecated]
 lemma CoFG.dual_inf_dual_sup_dual {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
