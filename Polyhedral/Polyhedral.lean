@@ -576,8 +576,8 @@ def FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.FG
 
 -- ## TOP / BOT
 
-def bot : PolyhedralCone R M := ⟨_, Submodule.isPolyhedral ⊥⟩
-def top : PolyhedralCone R M := ⟨_, Submodule.isPolyhedral ⊤⟩
+def bot : PolyhedralCone R M := ⟨_, isPolyhedral_of_submdule ⊥⟩
+def top : PolyhedralCone R M := ⟨_, isPolyhedral_of_submdule ⊤⟩
 
 -- alias lineal := bot
 
@@ -677,7 +677,7 @@ end CommRing
 -- ## SUBMODULE
 
 instance : Coe (Submodule R M) (PolyhedralCone R M) where
-  coe S := ⟨_, S.isPolyhedral⟩
+  coe S := ⟨_, isPolyhedral_of_submdule S⟩
 
 -- instance : Coe (HalfspaceOrTop R M) (PolyhedralCone R M) := sorry
 
