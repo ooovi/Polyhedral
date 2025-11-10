@@ -17,16 +17,16 @@ variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R 
 -/
 
 /-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
-def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inter F₂.isFaceOf⟩
+def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inf_left F₂.isFaceOf⟩
 
 instance : InfSet (Face C) := ⟨fun S =>
   { toSubmodule := C ⊓ sInf {s.1 | s ∈ S}
     isFaceOf := by
       constructor
       · exact fun _ sm => sm.1
-      · simp; intros _ xc _ yc a a0 b b0 _ h
+      · simp; intros _ _ a b xc yc a0 b0 _ h
         simp [xc]; intros F Fs
-        exact F.isFaceOf.left_mem_of_smul_add_mem _ xc _ yc _ a0 _ b0 (h F Fs)
+        exact F.isFaceOf.left_mem_of_smul_add_mem xc yc a0 b0 (h F Fs)
 }⟩
 
 instance : SemilatticeInf (Face C) where
@@ -88,7 +88,7 @@ instance : Lattice (Face C) where
 /-- Mapping a face `F₁` of `C₁` to the face `F₁ ⊓ F₂ ≤ C₁ ⊓ C₂` for some face `F₂` of `C₂` preserves
 the face lattice. -/
 def face_inf_orderHom (F₂ : Face C₂) : Face C₁ →o Face (C₁ ⊓ C₂) where
-  toFun F := ⟨_, F.isFaceOf.face_inf_isFaceOf_inf F₂.isFaceOf⟩
+  toFun F := ⟨_, F.isFaceOf.inf F₂.isFaceOf⟩
   monotone' F₁ F₂ h x := by simp; exact fun xF₁ xC₂ => ⟨h.subset xF₁, xC₂⟩
 
 /-- Mapping a face `F` of `C₁` to the face `F ⊓ C₂ ≤ C₁ ⊓ C₂` preserves the face lattice. -/
@@ -98,20 +98,12 @@ def inf_orderHom (C₂ : PointedCone R M) : Face C₁ →o Face (C₁ ⊓ C₂) 
 /-- Mapping the product of faces `F₁ ≤ C₁` and `F₂ ≤ C₂` to the face `F₁ ⊓ F₂ ≤ C₁ ⊓ C₂` preserves
 the face lattice. -/
 def prod_face_inf_orderHom : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) where
-  toFun F := ⟨_, F.1.isFaceOf.face_inf_isFaceOf_inf F.2.isFaceOf⟩
+  toFun F := ⟨_, F.1.isFaceOf.inf F.2.isFaceOf⟩
   monotone' F₁ F₂ h x := by
     simp
     intros xF₁ xF₂
     simp [LE.le] at h
     exact ⟨h.1 xF₁, h.2 xF₂⟩
-
-def prod_orderIso (C : PointedCone R M) (D : PointedCone R N) :
-    Face (C.prod D) ≃o Face C × Face D where
-  toFun G := ⟨prod_left G, prod_right G⟩
-  invFun G := G.1.prod G.2
-  left_inv G := by sorry
-  right_inv G := by simp [prod_left, prod_right, prod]
-  map_rel_iff' := sorry
 
 /-!
 ### Complete Lattice
@@ -134,13 +126,21 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 variable [AddCommGroup N] [Module R N]
   {C F : PointedCone R M} {s t : Set M}
 
+def prod_orderIso (C : PointedCone R M) (D : PointedCone R N) :
+    Face (C.prod D) ≃o Face C × Face D where
+  toFun G := ⟨prod_left G, prod_right G⟩
+  invFun G := G.1.prod G.2
+  left_inv G := by sorry
+  right_inv G := by simp [prod_left, prod_right, prod]; sorry
+  map_rel_iff' := sorry
+
 /-- The face of a pointed cone `C` that is its lineal space. It contained in all faces of `C`. -/
 def lineal : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
 
 lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := by
   intro x xl
   apply lineal_mem.mp at xl
-  exact (IsFaceOf.iff_mem_of_add_mem.mp F.isFaceOf).2 x xl.1 (-x) xl.2 (by simp)
+  exact (IsFaceOf.iff_mem_of_add_mem.mp F.isFaceOf).2 xl.1 xl.2 (by simp)
 
 /-- The bottom element of the partial order on faces of `C` is `C.lineal`. -/
 instance : OrderBot (Face C) where
@@ -163,7 +163,7 @@ lemma embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
 lemma restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
     F₁.restrict (embed F₂) = F₂ := by
   unfold restrict embed; congr
-  simpa using F₂.isFaceOf.le
+  simpa using F₂.isFaceOf.subset
 
 lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
   rw [← restrict_embed F₂, embed_restrict]
