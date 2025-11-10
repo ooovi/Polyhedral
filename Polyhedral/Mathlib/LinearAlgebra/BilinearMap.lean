@@ -56,6 +56,7 @@ lemma IsFaithfulPair.isSeparating (hp : p.IsFaithfulPair) : p.flip.IsSeparating 
   exact hg x (by simp [← flip_apply, hpx])
 
 instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair := inst
+-- instance [inst : Fact p.flip.flip.IsFaithfulPair] : Fact p.IsFaithfulPair := inst
 
 instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
 
@@ -115,6 +116,9 @@ lemma isFaithfulPair_of_isPerfPair [p.IsPerfPair] : p.IsFaithfulPair :=
     isFaithfulPair_of_surjective (IsPerfPair.bijective_left p).surjective
 
 instance [p.IsPerfPair] : Fact p.IsFaithfulPair := ⟨isFaithfulPair_of_isPerfPair⟩
+
+instance [inst : p.IsPerfPair] : Fact (Surjective p) := ⟨inst.bijective_left.surjective⟩
+instance [inst : p.IsPerfPair] : Fact (Surjective p.flip) := ⟨inst.bijective_right.surjective⟩
 
 section IsReflexive
 

@@ -11,10 +11,14 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
+-- TODO: rename `CoFG` to `FGDual` everywhere
+
 variable (p) in
-/-- A cone is `CoFG` (co-finitely generated) if it is the dual of a finite set.
+/-- A cone is `FGDual` if it is the dual of a finite set.
   This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
-def CoFG (C : PointedCone R N) : Prop := ∃ s : Finset M, dual p s = C
+def FGDual (C : PointedCone R N) : Prop := ∃ s : Finset M, dual p s = C
+
+alias CoFG := FGDual
 
 /-- A CoFG cone is the dual of a finite set. -/
 lemma CoFG.exists_finset_dual {C : PointedCone R N} (hC : C.CoFG p) :
@@ -117,7 +121,7 @@ lemma CoFG.lineal_cofg {C : PointedCone R N} (hC : C.CoFG p) : C.lineal.CoFG p :
 end LinearOrder
 
 @[deprecated]
-lemma CoFG.dual_inf_dual_sup_dual {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
+lemma CoFG.dual_inf_dual_sup_dual' {C D : PointedCone R N} (hC : C.CoFG p) (hD : D.CoFG p) :
     dual p.flip (C ⊓ D : PointedCone R N) = (dual p.flip C) ⊔ (dual p.flip D) := by
   have ⟨C', hCfg, hC'⟩ := CoFG.exists_fg_dual hC
   have ⟨D', hDfg, hD'⟩ := CoFG.exists_fg_dual hD

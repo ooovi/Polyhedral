@@ -334,7 +334,7 @@ lemma IsDualClosed.exists_of_dual {S : Submodule R N} (hS : S.IsDualClosed p.fli
 variable (p) in
 lemma isDualClosed_top : IsDualClosed p ⊤ := by
   rw [IsDualClosed, le_antisymm_iff, and_comm]
-  exact ⟨subset_dual_dual, by simp⟩
+  exact ⟨subset_dual_dual, by simp only [top_coe, le_top]⟩
 
 variable (p) in
 @[simp] lemma dual_dual_top : dual p.flip (dual p ⊤) = ⊤

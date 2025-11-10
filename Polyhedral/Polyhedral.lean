@@ -3,19 +3,7 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.Quotient.Basic
-import Mathlib.Order.Partition.Basic
-
-import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG'
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
-import Polyhedral.Halfspace
-import Polyhedral.Faces2
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual IsDualClosed
@@ -243,9 +231,10 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PointedCone R M}
 
 /- Crucial sorry's that need to be fixed asap:
- * `aux`
- * CoFG' --> CoFG aka `CoFG'.cofg`
- * -C ⊔ C = Submodule.span C
+ * `aux` (see below)
+ * CoFG' --> CoFG aka `Submodule.CoFG'.cofg`
+ * -C ⊔ C = Submodule.span C (somewhere in Lineal.lean)
+ * `Submodule.sup_cofg_fg` and `Submodule.FG.dual_flip_dual`
 -/
 
 /-- Auxiliarty lemma used for reducing polyhedral intersections to FG intersections. -/
@@ -268,9 +257,9 @@ lemma IsPolyhedral.cofg_iff_lineal_cofg {C : PointedCone R N} {hC : C.IsPolyhedr
 variable (p) [Fact (Surjective p)] in
 /-- If `C` is a polyhedral cone and `S` is a subspace codisjoint to the linear span of `C`,
   then `C ⊔ S` is CoFG. This is the counterpart to `IsPolyhedral.cofg_inf_of_disjoint_lineal`. -/
-lemma IsPolyhedral.cofg_sup_of_codisjoint {C : PointedCone R N} (hC : C.IsPolyhedral)
+lemma IsPolyhedral.cofg_sup_of_codisjoint_span {C : PointedCone R N} (hC : C.IsPolyhedral)
     {S : Submodule R N} (hS : Codisjoint (Submodule.span R C) S) : CoFG p (C ⊔ S) := by
-  refine (hC.sup <| isPolyhedral_of_submdule S).cofg_of_lineal_cofg (CoFG'.cofg p ?_)
+  refine cofg_of_lineal_cofg (hC.sup_submodule S) (CoFG'.cofg p ?_)
   refine cofg_lineal_of_span_top (hC.sup_submodule _) ?_
   simpa [← coe_sup_submodule_span, Submodule.span_union] using codisjoint_iff.mp hS
 
@@ -280,7 +269,7 @@ variable (p) [Fact (Surjective p)] in
 lemma IsPolyhedral.exists_cofg_inf_span {C : PointedCone R N} (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R N, D.CoFG p ∧ D ⊓ Submodule.span (M := N) R C = C := by
   have ⟨S, hS⟩ := Submodule.exists_isCompl (Submodule.span (M := N) R C)
-  exact ⟨C ⊔ S, hC.cofg_sup_of_codisjoint p hS.codisjoint,
+  exact ⟨C ⊔ S, hC.cofg_sup_of_codisjoint_span p hS.codisjoint,
     sup_inf_submodule_span_of_disjoint hS.disjoint⟩
 
 variable (p) in
@@ -374,15 +363,34 @@ lemma IsPolyhedral.isDualClosed (hC : C.IsPolyhedral) : C.IsDualClosed p := by
   exact IsDualClosed.inf (CoFG.isDualClosed hcofg)
     (isDualClosed_coe <| Submodule.isDualClosed p _)
 
+-- This doubling of theorems should be unnecessary if we define `[Fact (Surjective p)]` correctly.
+variable (p) [Fact (Surjective p)] in
+lemma IsPolyhedral.isDualClosed_flip {C : PointedCone R N} (hC : C.IsPolyhedral) :
+    C.IsDualClosed p.flip := by
+  rw [← flip_flip p]; exact hC.isDualClosed p.flip
+
 variable (p) [Fact (Surjective p.flip)] in
-lemma IsPolyhedral.dual_dual (hC : C.IsPolyhedral) :
+lemma IsPolyhedral.dual_flip_dual (hC : C.IsPolyhedral) :
   PointedCone.dual p.flip (PointedCone.dual p C) = C := hC.isDualClosed p
 
-variable (p) [Fact (Surjective p.flip)] in
-lemma IsPolyhedral.dual_inf_dual_sup_dual (hC₁ : C.IsPolyhedral) (hC₂ : C.IsPolyhedral) :
-    PointedCone.dual p (C₁ ⊓ C₂) = PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂ := sorry
+-- This doubling of theorems should be unnecessary if we define `[Fact (Surjective p)]` correctly.
+variable (p) [Fact (Surjective p)] in
+lemma IsPolyhedral.dual_dual_flip {C : PointedCone R N} (hC : C.IsPolyhedral) :
+    PointedCone.dual p (PointedCone.dual p.flip C) = C := hC.isDualClosed_flip p
 
-/- Widhlist:
+/- NOTE: some restriction like `IsPerfPair` is necessary. Consider two subspaces S, T that are not
+  dual closed and with S ⊓ T = ⊥. The left side is ⊤. But the right side is ⊥ ⊔ ⊥ = ⊥.
+  Alterantively, we can assume that C₁ and C₂ are dual closed. But this version must stay
+  because type inference makes its assumptions automatic in finite dimensions. Maybe a weaker
+  assumoption suffices though (it seems to be the case for FG and CoFG). -/
+variable (p) [p.IsPerfPair] in
+lemma IsPolyhedral.dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhedral) :
+    PointedCone.dual p (C₁ ∩ C₂) = PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂ := by
+  nth_rw 1 [← hC₁.dual_flip_dual p, ← hC₂.dual_flip_dual p,
+    ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
+  exact dual_dual_flip p <| (hC₁.dual p).sup (hC₂.dual p)
+
+/- Wishlist:
   * polyhedra are dual closed
   * dual (C ⊓ D) = dual C ⊔ dual D
 -/
