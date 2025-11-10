@@ -19,8 +19,8 @@ variable [AddCommMonoid N] [Module R N]
 
 alias sup_fg := Submodule.FG.sup
 
--- This seems to be the more appropriate version of `Submodule.fg_of_linearEquiv`.
--- The current one should be `Module.fg_of_linearEquiv` or so.
+-- This seems to be the more appropriate version of `Submodule.fg_of_linearEquiv` which
+-- is probably better called `Module.fg_of_linearEquiv` or so.
 lemma FG.linearEquiv {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T) (hS : S.FG) :
     T.FG := by -- T.fg_top.mp <| fg_of_linearEquiv e.symm (S.fg_top.mpr hS)
   rw [← fg_top] at *

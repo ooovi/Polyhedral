@@ -169,14 +169,15 @@ end Ring
 
 -- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
 /-- The intersection `C ⊓ S` considered as a cone in `S`. -/
-abbrev pointedConeOf (S : Submodule R M) (C : PointedCone R M) : PointedCone R S
+abbrev restrict (S : Submodule R M) (C : PointedCone R M) : PointedCone R S
   := C.submoduleOf S -- C.comap S.subtype
 
-alias restrict := pointedConeOf
+-- alias pointedConeOf := restrict
 
 -- @[simp]
 lemma coe_restrict (S : Submodule R M) (T : Submodule R M) :
     restrict S T = Submodule.restrict S T := by
+  unfold restrict Submodule.restrict Submodule.submoduleOf
   sorry
 
 /-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
@@ -232,12 +233,12 @@ lemma restrict_inf (S : Submodule R M) {C D : PointedCone R M} :
 @[simp]
 lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
     (C ⊓ S).restrict S = C.restrict S := by
-  simp [restrict_inf, coe_restrict, Submodule.restrict_self]
+  simp [restrict_inf, Submodule.restrict_self]
 
 @[simp]
 lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
     (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by
-  simp [restrict_inf, coe_restrict, Submodule.restrict_self]
+  simp [restrict_inf, Submodule.restrict_self]
 
 -- lemma foo (S : Submodule R M) {T : Submodule R M} {C : PointedCone R M} (hCT : C ≤ T):
 --   restrict (.restrict T S) (restrict T C) = restrict T (restrict S C) := sorry
@@ -360,7 +361,8 @@ lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
 --     sorry
 --   · sorry
 
--- Does this theorem need linear order? If not, then neither a lot of things downstream
+-- Does this theorem need linear order (as opposed to a partial order)?
+-- If not, then neither a lot of things downstream.
 variable (R) in
 lemma span_pm_pair_eq_submodule_span (x : M) :
     span R {-x, x} = Submodule.span R {-x, x} := by
@@ -380,7 +382,7 @@ lemma span_pm_pair_eq_submodule_span (x : M) :
         exact le_of_lt H, 0, le_refl 0, by simp [h]⟩
 
 -- TODO: move to Submodule/Basic
-omit [IsOrderedRing R] in
+omit [IsOrderedRing R] [LinearOrder R] in
 variable (R) in
 @[simp] lemma submodule_span_pm_pair (x : M) :
     Submodule.span R {-x, x} = Submodule.span R {x} := by

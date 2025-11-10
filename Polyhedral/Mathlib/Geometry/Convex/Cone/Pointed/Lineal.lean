@@ -1,24 +1,17 @@
 
-import Mathlib.Geometry.Convex.Cone.Pointed
-import Mathlib.Geometry.Convex.Cone.Dual
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
-import Mathlib.Algebra.Module.Submodule.Pointwise
-
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
--- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Faces.Basic
 
 namespace PointedCone
 
 open Module
 
-section Ring_AddCommGroup
+
+section Semiring
 
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 
--- ## Lineality
+-- ## LINEAL
 
 -- TODO: maybe lineal should be defined only over rings and via x ∈ C.lineal → -x ∈ C.lineal.
 --   The given definition of lineal gives weird results over semiring such as the positive
@@ -33,6 +26,9 @@ def lineal_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S �
 
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := le_sSup hS
+
+end Semiring
+
 
 section Ring
 
@@ -230,6 +226,12 @@ lemma comap_lineal (C : PointedCone R M) {f : N →ₗ[R] M} :
   simp [← comap_id_eq_neg, comap_lineal]
 
 
+-- implement this from the face theory.
+lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := sorry
+
+end Ring
+
+
 section DivisionRing
 
 variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -288,18 +290,11 @@ lemma FG.lineal_fg'' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by class
 
 end DivisionRing
 
--- implement this from the face theory.
-lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := sorry
-
-end Ring
-
-end Ring_AddCommGroup
 
 
+section Ring
 
 -- ## SALIENT
-
-section Ring_AddCommGroup
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
@@ -406,7 +401,6 @@ lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
 
 
 
-
 -- ## SALIENT QUOT
 
 variable {C : PointedCone R M}
@@ -429,6 +423,6 @@ lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 
 -- def salientQuot_neg (C : PointedCone R M) : C.salientQuot ≃ₗ[R] (-C).salientQuot := sorry
 
-end Ring_AddCommGroup
+end Ring
 
 end PointedCone

@@ -398,7 +398,7 @@ def IsCompl.bar (p : Submodule R M) :
 
 -- I think this is not the best lemma. There should be something more fundamental about
 -- quotients and IsCompl that should make this easy.
-/-- A linear equivalence between `s / p` and `s ⊓ q`. -/
+/-- The linear equivalence between `s / p` and `s ⊓ q`. -/
 noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl p q)
     {s : Submodule S M} (hps : p.restrictScalars S ≤ s) :
     map (p.mkQ : M →ₗ[S] M ⧸ p) s ≃ₗ[S] (s ⊓ q.restrictScalars S : Submodule S M) where
@@ -489,38 +489,5 @@ lemma exists_extend {T S : Submodule R M} (hST : S ≤ T) :
 --   sorry
 
 end DivisionRing
-
-section Ring
-
-variable {M S R : Type*} [Ring R] [Ring S]
-  [AddCommGroup M] [Module S R] [Module R M] [Module S M] [IsScalarTower S R M]
-
-lemma IsCompl.foo' (S₁ S₂ T : Submodule R M) (hS : IsCompl S₁ S₂) :
-    IsCompl (T.restrict S₁) (T.restrict S₂) := by
-  constructor
-  · intro Q hQQ hQT
-    sorry
-  · sorry
-
-lemma IsCompl.foo'' (A B C D : Submodule R M) (hAB : Disjoint A B) (hCD : Disjoint C D)
-    (h : IsCompl (A ⊔ B) (C ⊔ D)) : IsCompl (A ⊔ C) (B ⊔ D) := by
-  sorry
-
-lemma IsCompl.inf_sup (S₁ S₂ T₁ T₂ : Submodule R M) (hS : IsCompl S₁ S₂) (hT : IsCompl T₁ T₂) :
-    IsCompl (T₁ ⊓ S₁) (S₂ ⊔ T₂) := by
-  sorry
-  -- ## Proof via projections
-  -- let projS := Submodule.IsCompl.projection hS
-  -- let projT := Submodule.IsCompl.projection hT
-  -- let proj := projS ∘ₗ projT
-  -- --have hprojS := IsCompl.IsPorj
-  -- have hST₂: LinearMap.ker proj = T₁ ⊓ S₁ :=
-  --   sorry
-  -- have hST₂: Set.range proj = S₂ ⊔ T₂ :=
-  --   sorry
-  -- -- apply LinearMap.IsProj.isCompl (f := proj)
-  -- sorry
-
-end Ring
 
 end Submodule
