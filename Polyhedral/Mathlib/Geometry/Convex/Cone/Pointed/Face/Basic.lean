@@ -4,11 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig
 -- -/
 import Mathlib.Analysis.Convex.Extreme
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Mathlib.LinearAlgebra.Quotient.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
-import Polyhedral.Halfspace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+-- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
+-- import Polyhedral.Halfspace
 
 
 /-!
