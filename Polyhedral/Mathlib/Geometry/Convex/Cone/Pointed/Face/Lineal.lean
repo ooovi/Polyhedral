@@ -5,9 +5,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
--- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Faces.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
 namespace PointedCone
 
@@ -294,6 +292,10 @@ lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := sorry
 end Ring
 
 end Ring_AddCommGroup
+
+
+
+-- ## DUAL
 
 
 
