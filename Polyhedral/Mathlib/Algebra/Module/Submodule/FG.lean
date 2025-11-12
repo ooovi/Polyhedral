@@ -107,6 +107,9 @@ lemma inf_fg_left {S : Submodule R M} (hS : S.FG) (T : Submodule R M) : (S ⊓ T
 lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restrict S T).FG := by
   rw [restrict_fg_iff_inf_fg]; exact inf_fg_right S hT
 
+lemma fg_of_le_fg {S T : Submodule R M} (hT : T.FG) (hST : S ≤ T) : S.FG := by
+  rw [← inf_eq_left.mpr hST]; exact S.inf_fg_right hT
+
 end IsNoetherianRing
 
 end Submodule

@@ -4,7 +4,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 import Mathlib.Order.ModularLattice
-import Mathlib.RingTheory.Noetherian.Defs
+import Mathlib.RingTheory.Noetherian.Basic
 
 namespace Submodule
 
@@ -13,7 +13,6 @@ open Function LinearMap
 section Semiring
 
 variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
-
 
 -- ## SPAN
 
