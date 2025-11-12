@@ -203,19 +203,48 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+variable (p) [Fact (Surjective p)] in
+theorem cofg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
+    T.CoFG p := by classical
+  obtain ⟨s, ⟨b⟩⟩ := Module.Basis.exists_basis R S
+  haveI : Module.Finite R S := Module.Finite.iff_fg.mpr hS
+  have h := Module.Finite.finite_basis b -- uses hS implicitly
+  let b' := Basis.dualBasis b
+  let proj := linearProjOfIsCompl S T hST
+  let b'' : s → (N →ₗ[R] R) := fun i => (b' i) ∘ₗ proj
+  have hp : Surjective p := Fact.elim inferInstance
+  let s'' := fun i => surjInv hp (b'' i)
+  let s' := Set.range s''
+  have hs' : s'.Finite := Set.finite_range _
+  use hs'.toFinset
+  simp [s', s'', b'']
+  ext x
+  constructor
+  · intro h
+    simp only [mem_dual, Set.mem_range, -Subtype.exists, forall_exists_index] at h
+    have h' := (h · rfl)
+    simp only [surjInv_eq hp] at h'
+    simp only [coe_comp, Function.comp_apply, -Subtype.forall] at h'
+    rw [← linearProjOfIsCompl_ker hST]
+    rw [mem_ker]
+    unfold b' at h'
+    simp only [Basis.coe_dualBasis, -Basis.coord_apply, -Subtype.forall] at h'
+    have h' := fun x => (h' x).symm
+    rw [Basis.forall_coord_eq_zero_iff] at h'
+    exact h'
+  · simp
+    intro h y z hzs hzs' rfl
+    rw [surjInv_eq hp]
+    simp only [coe_comp, Function.comp_apply]
+    rw [linearProjOfIsCompl_apply_right' _ _ h]
+    simp
+
 variable (p) [Fact (Surjective p)] in -- [Fact p.IsFaithfulPair] in
 theorem CoFG'.exists_finset_dual {S : Submodule R N} (hS : S.CoFG') :
-    ∃ s : Finset M, dual p s = S := by classical
-  -- let Q := M ⧸ S
-  -- obtain ⟨s, ⟨b⟩⟩ := Module.Basis.exists_basis R Q
-  -- have h := Module.Finite.finite_basis b
-  -- let f := b.equivFun
-  -- let g := mkQ S
-  -- unfold Q at *
-  -- have hh : ker g = S := ker_mkQ S
-  -- simp [dual_ker_pi']
-  -- rw [← hh]
-  sorry
+    ∃ s : Finset M, dual p s = S := by
+  obtain ⟨T, hST⟩ := exists_isCompl S
+  have h := disjoint_fg hST.disjoint hS
+  exact cofg_of_isCompl_fg p hST.symm h
 
 variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not sure yet
 theorem CoFG'.cofg {S : Submodule R N} (hS : S.CoFG') : S.CoFG p := by

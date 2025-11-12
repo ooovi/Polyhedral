@@ -20,12 +20,17 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 /-- The lineality space of a cone. -/
 def lineal (C : PointedCone R M) : Submodule R M := sSup {S : Submodule R M | S ≤ C }
 
-def lineal_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C } := by rfl
+def lineal_def (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C } := by rfl
 
 @[simp] lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp [lineal]
 
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := le_sSup hS
+
+alias submodule_le_lineal := le_lineal
+
+lemma submodule_le_lineal_iff {C : PointedCone R M} {S : Submodule R M} :
+  S ≤ C ↔ S ≤ C.lineal := ⟨submodule_le_lineal, fun h _ hx => C.lineal_le (h hx)⟩
 
 end Semiring
 
@@ -66,15 +71,6 @@ lemma lineal_mem {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ 
     have hxS : x ∈ S := Submodule.mem_span_of_mem (by simp)
     exact hSC hxS -- maybe we could use the lemma that s ∪ -s spans a linear space (see above)
 
-lemma submodule_le_lineal {C : PointedCone R M} {S : Submodule R M} (hSC : S ≤ C) :
-    S ≤ C.lineal := by
-  intro _ hx
-  have hx' := neg_mem hx
-  exact lineal_mem.mpr ⟨hSC hx, hSC hx'⟩
-
-lemma submodule_le_lineal_iff {C : PointedCone R M} {S : Submodule R M} :
-  S ≤ C ↔ S ≤ C.lineal := ⟨submodule_le_lineal, fun h _ hx => C.lineal_le (h hx)⟩
-
 def lineal_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by
   ext x; simp [lineal_mem]
 
@@ -85,12 +81,11 @@ def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [lineal_mem]; aesop
 
-@[simp]
-lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
+@[simp] lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
   ext x; simp [lineal_mem]
 
-@[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
-@[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
+-- @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
+-- @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
 /- In this section we show properties of lineal that also follow from lineal
   being a face. But we need this earlier than faces, so we need to prove that
