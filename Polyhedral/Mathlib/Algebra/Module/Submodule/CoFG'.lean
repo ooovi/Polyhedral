@@ -7,6 +7,7 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.RingTheory.Ideal.Quotient.Index
 import Mathlib.RingTheory.Finiteness.Prod
 import Mathlib.RingTheory.Finiteness.Quotient
+import Mathlib.LinearAlgebra.Projection
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
 
