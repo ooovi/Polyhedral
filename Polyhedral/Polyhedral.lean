@@ -130,14 +130,14 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C C₁ C₂ F : PointedCone R M}
 
 -- Q: Is DivisionRing necessary?
-/-- The lineality space of a full-dimensional cone is CoFG'. -/
+/-- The lineality space of a full-dimensional cone is CoFG. -/
 lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
-    (h : Submodule.span R (C : Set M) = ⊤) : CoFG' C.lineal := by
+    (h : Submodule.span R (C : Set M) = ⊤) : CoFG C.lineal := by
   obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
   simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
     Submodule.span_union, span_coe_eq_restrictScalars, restrictScalars_self] at hh
-  refine FG.codisjoint_cofg' (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
+  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
 
 -- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
 --     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
@@ -233,9 +233,9 @@ variable {C C₁ C₂ F : PointedCone R M}
 
 /- Crucial sorry's that need to be fixed asap:
  * `aux` (see below)
- * CoFG' --> CoFG aka `Submodule.CoFG'.cofg`
+ * CoFG --> FGDual aka `Submodule.CoFG.fgdual`
  * -C ⊔ C = Submodule.span C (somewhere in Lineal.lean)
- * `Submodule.sup_cofg_fg` and `Submodule.FG.dual_flip_dual`
+ * `Submodule.sup_fgdual_fg` and `Submodule.FG.dual_flip_dual`
 -/
 
 /-- Auxiliarty lemma used for reducing polyhedral intersections to FG intersections. -/
@@ -244,33 +244,34 @@ private lemma aux {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) 
   #check fg_of_fg_map_of_fg_inf_ker -- maybe useful
   sorry
 
-/-- A polyhedral cone with CoFG linearlity space is itself CoFG. -/
-lemma IsPolyhedral.cofg_of_lineal_cofg {C : PointedCone R N}
-    (hC : C.IsPolyhedral) (hlin : C.lineal.CoFG p) : CoFG p C := by
+/-- A polyhedral cone with FGDual linearlity space is itself FGDual. -/
+lemma IsPolyhedral.fgdual_of_lineal_fgdual {C : PointedCone R N}
+    (hC : C.IsPolyhedral) (hlin : C.lineal.FGDual p) : FGDual p C := by
   obtain ⟨_, hfg, hD⟩ := hC.exists_fg_sup_lineal
   rw [← hD]
-  exact sup_fg_cofg hfg hlin
+  exact sup_fg_fgdual hfg hlin
 
-/-- A polyhedral cone is CoFG if and only if its lineality space is CoFG. -/
-lemma IsPolyhedral.cofg_iff_lineal_cofg {C : PointedCone R N} {hC : C.IsPolyhedral} :
-    C.CoFG p ↔ C.lineal.CoFG p := ⟨CoFG.lineal_cofg, hC.cofg_of_lineal_cofg⟩
+/-- A polyhedral cone is FGDual if and only if its lineality space is FGDual. -/
+lemma IsPolyhedral.fgdual_iff_lineal_fgdual {C : PointedCone R N} {hC : C.IsPolyhedral} :
+    C.FGDual p ↔ C.lineal.FGDual p := ⟨FGDual.lineal_fgdual, hC.fgdual_of_lineal_fgdual⟩
 
 variable (p) [Fact (Surjective p)] in
 /-- If `C` is a polyhedral cone and `S` is a subspace codisjoint to the linear span of `C`,
-  then `C ⊔ S` is CoFG. This is the counterpart to `IsPolyhedral.cofg_inf_of_disjoint_lineal`. -/
-lemma IsPolyhedral.cofg_sup_of_codisjoint_span {C : PointedCone R N} (hC : C.IsPolyhedral)
-    {S : Submodule R N} (hS : Codisjoint (Submodule.span R C) S) : CoFG p (C ⊔ S) := by
-  refine cofg_of_lineal_cofg (hC.sup_submodule S) (CoFG'.cofg p ?_)
+  then `C ⊔ S` is FGDual. This is the counterpart to `IsPolyhedral.fgdual_inf_of_disjoint_lineal`.
+-/
+lemma IsPolyhedral.fgdual_sup_of_codisjoint_span {C : PointedCone R N} (hC : C.IsPolyhedral)
+    {S : Submodule R N} (hS : Codisjoint (Submodule.span R C) S) : FGDual p (C ⊔ S) := by
+  refine fgdual_of_lineal_fgdual (hC.sup_submodule S) (CoFG.fgdual p ?_)
   refine cofg_lineal_of_span_top (hC.sup_submodule _) ?_
   simpa [← coe_sup_submodule_span, Submodule.span_union] using codisjoint_iff.mp hS
 
 variable (p) [Fact (Surjective p)] in
-/-- A polyhedral cone `C` can be written as the intersection of a CoFG cone with the
+/-- A polyhedral cone `C` can be written as the intersection of a FGDual cone with the
   linear span of `C`. -/
-lemma IsPolyhedral.exists_cofg_inf_span {C : PointedCone R N} (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R N, D.CoFG p ∧ D ⊓ Submodule.span (M := N) R C = C := by
+lemma IsPolyhedral.exists_fgdual_inf_span {C : PointedCone R N} (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R N, D.FGDual p ∧ D ⊓ Submodule.span (M := N) R C = C := by
   have ⟨S, hS⟩ := Submodule.exists_isCompl (Submodule.span (M := N) R C)
-  exact ⟨C ⊔ S, hC.cofg_sup_of_codisjoint_span p hS.codisjoint,
+  exact ⟨C ⊔ S, hC.fgdual_sup_of_codisjoint_span p hS.codisjoint,
     sup_inf_submodule_span_of_disjoint hS.disjoint⟩
 
 variable (p) in
@@ -287,17 +288,17 @@ lemma isPolyhedral_dual_of_fg (hC : C.FG) : (dual p C).IsPolyhedral := by
   rw [← hD]
   exact isPolyhedral_of_fg_sup_submodule hfg _
 
-/-- CoFG cones are polyhedral. -/
-lemma isPolyhedral_cofg {C : PointedCone R N} (hC : C.CoFG p) : C.IsPolyhedral := by
+/-- FGDual cones are polyhedral. -/
+lemma isPolyhedral_of_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.IsPolyhedral := by
   obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
   exact isPolyhedral_dual_of_fg p hfg
 
 /-- The intersection of a polyhedral cone with an FG cone is FG. -/
 lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : FG S) : FG (C ⊓ S) := by
-  obtain ⟨D, hcofg, hD⟩ := hC.exists_cofg_inf_span .id
+  obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span .id
   rw [← hD, inf_assoc, ← coe_inf]
-  exact inf_cofg_fg hcofg <| coe_fg <| Submodule.inf_fg_right _ hS
+  exact inf_fgdual_fg hcofg <| coe_fg <| Submodule.inf_fg_right _ hS
 
 /-- The intersection of two polyhedral cones is polyhdral. -/
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
@@ -359,9 +360,9 @@ lemma IsPolyhedral.isDualClosed_iff_lineal (hC : C.IsPolyhedral) :
 
 variable (p) [Fact (Surjective p.flip)] in
 lemma IsPolyhedral.isDualClosed (hC : C.IsPolyhedral) : C.IsDualClosed p := by
-  obtain ⟨D, hcofg, hD⟩ := hC.exists_cofg_inf_span p.flip
+  obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span p.flip
   rw [← hD]
-  exact IsDualClosed.inf (CoFG.isDualClosed hcofg)
+  exact IsDualClosed.inf (FGDual.isDualClosed hcofg)
     (isDualClosed_coe <| Submodule.isDualClosed p _)
 
 -- This doubling of theorems should be unnecessary if we define `[Fact (Surjective p)]` correctly.
@@ -383,7 +384,7 @@ lemma IsPolyhedral.dual_dual_flip {C : PointedCone R N} (hC : C.IsPolyhedral) :
   dual closed and with S ⊓ T = ⊥. The left side is ⊤. But the right side is ⊥ ⊔ ⊥ = ⊥.
   Alterantively, we can assume that C₁ and C₂ are dual closed. But this version must stay
   because type inference makes its assumptions automatic in finite dimensions. Maybe a weaker
-  assumoption suffices though (it seems to be the case for FG and CoFG). -/
+  assumoption suffices though (it seems to be the case for FG and FGDual). -/
 variable (p) [p.IsPerfPair] in
 lemma IsPolyhedral.dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhedral) :
     PointedCone.dual p (C₁ ∩ C₂) = PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂ := by
@@ -403,18 +404,18 @@ lemma IsPolyhedral.dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C
 
 -- variable (p) [Fact p.IsFaithfulPair] in
 -- private lemma IsPolyhedral.dual_fg_of_lineal_cofg' {C : PointedCone R M}
---     (hC : C.IsPolyhedral) (hlin : CoFG' C.lineal) : FG (dual p C) := by
+--     (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) : FG (dual p C) := by
 --   obtain ⟨_, hfg, hD⟩ := hC.exists_fg_sup_lineal
 --   rw [← hD]
---   exact CoFG.dual_fg (sup_fg_cofg hfg <| CoFG'.cofg p.flip hlin)
+--   exact FGDual.dual_fg (sup_fg_cofg hfg <| CoFG.cofg p.flip hlin)
 
 variable (p) [Fact (Surjective p)] in
-@[deprecated cofg_of_lineal_cofg (since := "...")]
-private lemma IsPolyhedral.cofg_of_lineal_cofg' {C : PointedCone R N}
-    (hC : C.IsPolyhedral) (hlin : CoFG' C.lineal) : CoFG p C := by
+@[deprecated fgdual_of_lineal_cofg (since := "...")]
+private lemma IsPolyhedral.fgdual_of_lineal_cofg {C : PointedCone R N}
+    (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) : FGDual p C := by
   obtain ⟨_, hfg, hD⟩ := hC.exists_fg_sup_lineal
   rw [← hD]
-  exact sup_fg_cofg hfg (CoFG'.cofg p hlin)
+  exact sup_fg_fgdual hfg (CoFG.fgdual p hlin)
 
 variable (p) [Fact (Surjective p.flip)] in -- [Fact p.IsFaithfulPair]
 lemma IsPolyhedral.exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
@@ -433,10 +434,10 @@ lemma IsPolyhedral.exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
   have h : C = C' ⊓ Submodule.span R (C : Set M) := sorry
   rw [h]
   have hh : Submodule.span R (C' : Set M) = ⊤ := sorry
-  have h := hC'.cofg_of_lineal_cofg' p.flip (hC'.cofg_lineal_of_span_top hh)
-  --have h' := CoFG.dual_fg h -- we dont' need FG, we need polyhedral
-  have h' : (PointedCone.dual p C').IsPolyhedral := sorry -- FG.isPolyhedral (CoFG.dual_fg h)
-  have h'' := CoFG.isDualClosed h
+  have h := hC'.fgdual_of_lineal_cofg p.flip (hC'.cofg_lineal_of_span_top hh)
+  --have h' := FGDual.dual_fg h -- we dont' need FG, we need polyhedral
+  have h' : (PointedCone.dual p C').IsPolyhedral := sorry -- FG.isPolyhedral (FGDual.dual_fg h)
+  have h'' := FGDual.isDualClosed h
   rw [← h'']
   have h'' := Submodule.isDualClosed p (Submodule.span R C)
   rw [← h'']
@@ -456,7 +457,7 @@ lemma IsPolyhedral.exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
 
 
 -- private lemma IsPolyhedral.dual_fg_of_lineal_cofg {C : PointedCone R N}
---     (hC : C.IsPolyhedral) (hlin : CoFG' C.lineal) :
+--     (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) :
 --       ∃ D : PointedCone R M, D.IsPolyhedral ∧ PointedCone.dual p D = C := by
 --   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
 

@@ -8,8 +8,9 @@ import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Projection
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap -- imports Cardinal ... somehow
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
 
 /-!
 # The algebraic dual of a cone
@@ -624,5 +625,66 @@ lemma exists_finset_dual_ker' {ι : Type*} [Fintype ι] (f : N →ₗ[R] (ι →
   simpa using hg
 
 end Field
+
+
+-- ## COFG
+
+section IsNoetherianRing
+
+variable {R : Type*} [CommRing R] [IsNoetherianRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+variable (p) in
+theorem dual_singleton_cofg (x : M) : (dual p {x}).CoFG := by
+  rw [dual_singleton]; exact ker_cofg _
+
+variable (p) in
+theorem dual_finset_cofg (s : Finset M) : (dual p s).CoFG := by
+  rw [dual_ker_pi']; exact ker_cofg _
+
+variable (p) in
+theorem dual_finite_cofg {s : Set M} (hs : s.Finite) : (dual p s).CoFG := by
+  rw [← hs.coe_toFinset]; exact dual_finset_cofg p hs.toFinset
+
+variable (p) in
+theorem dual_fg_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := by
+  obtain ⟨s, rfl⟩ := hS
+  simpa using dual_finset_cofg p s
+
+end IsNoetherianRing
+
+
+section Field
+
+variable {R : Type*} [Field R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+variable (p) [Fact p.IsFaithfulPair] in
+theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
+    Disjoint (dual p S) (dual p T) := by
+  rw [disjoint_iff]
+  rw [← dual_sup_dual_inf_dual]
+  rw [codisjoint_iff.mp hST]
+  exact dual_univ p
+
+variable (p) [p.IsPerfPair] in -- [Fact (Surjective p)] in
+theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
+    Codisjoint (dual p S) (dual p T) := by
+  rw [codisjoint_iff]
+  rw [← dual_inf_dual_sup_dual, ← coe_inf]
+  rw [disjoint_iff.mp hST]
+  simp only [bot_coe, dual_bot]
+
+variable (p) [p.IsPerfPair] [Fact p.IsFaithfulPair] in -- [Fact (Surjective p)] in
+theorem IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
+    IsCompl (dual p S) (dual p T) :=
+  ⟨disjoint_dual_of_codisjoint p hST.codisjoint, codisjoint_dual_of_disjoint p hST.disjoint⟩
+
+end Field
+
 
 end Submodule

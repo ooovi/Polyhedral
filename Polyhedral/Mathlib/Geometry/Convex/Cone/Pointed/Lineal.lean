@@ -84,8 +84,8 @@ lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lin
 @[simp] lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
   ext x; simp [lineal_mem]
 
--- @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
--- @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
+@[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
+@[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
 /- In this section we show properties of lineal that also follow from lineal
   being a face. But we need this earlier than faces, so we need to prove that

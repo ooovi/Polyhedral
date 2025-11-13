@@ -9,8 +9,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Field
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Halfspace
 
@@ -105,7 +104,7 @@ lemma IsFaceOf.def' (hF : F.IsFaceOf C) : ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F 
 lemma IsFaceOf.def'' (hF : F.IsFaceOf C) {s : Finset M} (hs : ∀ S ∈ s, S ∈ C)
     (hsum : ∑ S ∈ s, S ∈ F) : ∀ S ∈ s, S ∈ F := sorry
 
-lemma IsFaceOf.inf (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C := sorry
+lemma IsFaceOf.inf' (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C := sorry
 
 abbrev Face.Proper (F : Face C) := F ≠ ⊤
 
@@ -129,7 +128,7 @@ lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F�
 -- ## RESTRICT / EMBED
 
 lemma IsFaceOf.restrict (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
-    (F₁ ⊓ F₂).IsFaceOf F₁ := (h₁.of_cone_iff_of_face (le_refl _)).mp (h₁.inf h₂)
+    (F₁ ⊓ F₂).IsFaceOf F₁ := (h₁.of_cone_iff_of_face (le_refl _)).mp (h₁.inf' h₂)
 
 -- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
 alias IsFaceOf.embed := IsFaceOf.trans
@@ -232,18 +231,19 @@ lemma isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Injective f) :
     (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
   simp only [IsFaceOf.iff_mem_of_mul_add_mem, mem_map, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at *
-  simp only [← map_add, ← map_smul, hf.eq_iff, exists_eq_right]
-  constructor
-  · intro ⟨sub, hF⟩
-    refine ⟨?_,  fun x hx y hy c hc hxy => hF x hx y hy c hc _ hxy rfl⟩
-    · intro x xf
-      obtain ⟨y, yC, hy⟩ := Submodule.mem_map.mp <| sub (Submodule.mem_map_of_mem xf)
-      rw [hf hy] at yC
-      exact yC
-  · intro ⟨sub, hF⟩
-    refine ⟨Submodule.map_mono sub, fun x hx y hy c hc z hz h => ?_⟩
-    subst h
-    exact hF x hx y hy c hc hz
+  sorry
+  -- simp only [← map_add, ← map_smul, hf.eq_iff, exists_eq_right]
+  -- constructor
+  -- · intro ⟨sub, hF⟩
+  --   refine ⟨?_,  fun x hx y hy c hc hxy => hF x hx y hy c hc _ hxy rfl⟩
+  --   · intro x xf
+  --     obtain ⟨y, yC, hy⟩ := Submodule.mem_map.mp <| sub (Submodule.mem_map_of_mem xf)
+  --     rw [hf hy] at yC
+  --     exact yC
+  -- · intro ⟨sub, hF⟩
+  --   refine ⟨Submodule.map_mono sub, fun x hx y hy c hc z hz h => ?_⟩
+  --   subst h
+  --   exact hF x hx y hy c hc hz
 
 -- lemma IsFaceOf.map {f : M →ₗ[R] N} (hf : Injective f) (hF : F.IsFaceOf C) :
 --     (map f F).IsFaceOf (map f C) := (isFaceOf_map_iff hf).mpr hF
