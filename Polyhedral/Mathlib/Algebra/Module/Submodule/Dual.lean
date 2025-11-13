@@ -347,9 +347,11 @@ variable (p) [Fact p.flip.IsFaithfulPair] in
 -- @[simp]
 lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
-lemma inf_isDualClosed {S T : Submodule R M}
+lemma IsDualClosed.inf {S T : Submodule R M}
     (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) : (S ⊓ T).IsDualClosed p := by
   rw [← hS, ← hT, IsDualClosed, ← dual_sup_dual_eq_inf_dual, dual_flip_dual_dual_flip]
+
+alias inf_isDualClosed := IsDualClosed.inf
 
 lemma sInf_isDualClosed {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClosed p) :
     (sInf s).IsDualClosed p := by
@@ -413,6 +415,8 @@ lemma IsDualClosed.sup {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsD
   unfold IsDualClosed
   sorry
 
+alias sup_isDualClosed := IsDualClosed.sup
+
 lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.IsDualClosed p)
     (hT : T.IsDualClosed p) : dual p (S ∩ T) = dual p S ⊔ dual p T := by
   rw [le_antisymm_iff]
@@ -427,8 +431,10 @@ lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.IsDualClosed p)
   -- rw [← IsDualClosed.dual_inj_iff hS hT]
   -- rw [← hS.def]
 
-lemma dual_inf_dual_sup_dual {S T : Submodule R M} (hS : S.IsDualClosed p) :
+lemma dual_inf_dual_sup_dual_of_isDualClosed {S T : Submodule R M}
+    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
     dual p (S ⊓ T : Submodule R M) = dual p S ⊔ dual p T := by
+
   sorry
 
 ---------------------
@@ -492,30 +498,55 @@ variable {R M N : Type*}
 
 variable (p)
 
--- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
-variable [Fact (Surjective p)] in
+-- -- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
+variable [Fact (Surjective p.flip)] in
 /-- Every submodule of a vector space is dual closed. -/
-lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := by
+lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := by
   apply IsDualClosed.to_bilin
   nth_rw 1 [IsDualClosed, Dual.eval, flip_flip]
   rw [dual_dualCoannihilator, dual_dualAnnihilator]
   exact Subspace.dualAnnihilator_dualCoannihilator_eq
 
-variable [Fact (Surjective p.flip)] in
+variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is dual closed. -/
-lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := isDualClosed_flip p.flip S
+@[deprecated isDualClosed (since := "")]
+lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := isDualClosed _ S
+
+-- -- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
+-- variable [Fact (Surjective p)] in
+-- /-- Every submodule of a vector space is dual closed. -/
+-- lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := by
+--   apply IsDualClosed.to_bilin
+--   nth_rw 1 [IsDualClosed, Dual.eval, flip_flip]
+--   rw [dual_dualCoannihilator, dual_dualAnnihilator]
+--   exact Subspace.dualAnnihilator_dualCoannihilator_eq
+
+-- variable [Fact (Surjective p.flip)] in
+-- /-- Every submodule of a vector space is dual closed. -/
+-- lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := isDualClosed_flip p.flip S
 
 variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is its own double dual. -/
-lemma dual_dual_flip (S : Submodule R N) : dual p (dual p.flip S) = S := isDualClosed_flip p S
+@[simp] lemma dual_dual_flip (S : Submodule R N) : dual p (dual p.flip S) = S :=
+    isDualClosed p.flip S
 
 variable [Fact (Surjective p.flip)] in
 /-- Every submodule of a vector space is its own double dual. -/
-lemma dual_flip_dual (S : Submodule R M) : dual p.flip (dual p S) = S := dual_dual_flip p.flip S
+@[simp] lemma dual_flip_dual (S : Submodule R M) : dual p.flip (dual p S) = S :=
+    dual_dual_flip p.flip S
 
 variable [Fact (Surjective p)] in
 lemma exists_set_dual (S : Submodule R N) : ∃ s : Set M, dual p s = S := by
   use dual p.flip S; exact dual_dual_flip p S
+
+variable [p.IsPerfPair] in -- do we really need perf pair?
+lemma dual_inf_dual_sup_dual (S T : Submodule R M) :
+    dual p (S ∩ T) = dual p S ⊔ dual p T := by
+  nth_rw 1 [← dual_flip_dual p S]
+  nth_rw 1 [← dual_flip_dual p T]
+  rw [← coe_inf]
+  rw [← dual_sup_dual_inf_dual]
+  exact dual_dual_flip p _
 
 ------
 

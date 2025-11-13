@@ -39,6 +39,25 @@ lemma cofg_bot' [Module.Finite R M] : (⊥ : Submodule R M).CoFG' := inferInstan
 lemma Module.Finite.of_cofg_bot' (h : (⊥ : Submodule R M).CoFG') : Module.Finite R M
     := Finite.equiv (quotEquivOfEqBot ⊥ rfl)
 
+lemma cofg_of_le' {S T : Submodule R M} {hST : S ≤ T} (hS : S.CoFG') : T.CoFG' := by
+  sorry
+
+lemma CoFG'.isCompl_fg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.CoFG') : T.FG
+  := Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
+
+-- Needs DivisionRing
+lemma CoFG'.disjoint_fg [IsNoetherianRing R] {S T : Submodule R M}
+    (hST : Disjoint S T) (hS : S.CoFG') : T.FG := by
+  -- obtain ⟨U, hSU, hUT⟩ := isCompl_of_disjoint hST
+  wlog hST : IsCompl S T with H
+  · sorry
+  exact Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
+
+lemma FG.isCompl_cofg' {S T : Submodule R M} (hST : IsCompl S T) (hS : S.FG) : T.CoFG' := by
+  haveI := Finite.iff_fg.mpr hS
+  exact Finite.equiv (quotientEquivOfIsCompl T S hST.symm).symm
+
+-- needs division ring
 lemma FG.codisjoint_cofg' {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG' := by
   haveI := Finite.iff_fg.mpr hS
   unfold CoFG'
@@ -51,24 +70,6 @@ lemma FG.codisjoint_cofg' {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.F
   -- refine module_finite_of_liesOver ?_ ?_
   -- apply LinearMap.quotientInfEquivSupQuotient
   sorry
-
--- it should suffice to assume Codisjoint S T
-lemma FG.isCompl_cofg' {S T : Submodule R M} (hST : IsCompl S T) (hS : S.FG) : T.CoFG' := by
-  haveI := Finite.iff_fg.mpr hS
-  exact Finite.equiv (quotientEquivOfIsCompl T S hST.symm).symm
-
-
-lemma CoFG'.disjoint_fg [IsNoetherianRing R] {S T : Submodule R M}
-    (hST : Disjoint S T) (hS : S.CoFG') : T.FG := by
-  unfold CoFG' at hS
-  have f := S.mkQ
-  -- Idea: use that mkQ embeds T into M ⧸ S. Since the latter is FG and the ring is Noetherian,
-  -- every submodule is FG. Hence T is FG.
-  sorry
-
--- it should suffice to assume Disjoint S T
-lemma CoFG'.isCompl_fg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.CoFG') : T.FG
-  := Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
 
 lemma CoFG'.sup {S : Submodule R M} (hS : S.CoFG') (T : Submodule R M) : (S ⊔ T).CoFG'
   := Finite.equiv (quotientQuotientEquivQuotientSup S T)
@@ -203,41 +204,79 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+variable (p) [Fact p.IsFaithfulPair] in
+theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
+    Disjoint (dual p S) (dual p T) := by
+  rw [disjoint_iff]
+  rw [← dual_sup_dual_inf_dual]
+  rw [codisjoint_iff.mp hST]
+  exact dual_univ p
+
+variable (p) [p.IsPerfPair] in -- [Fact (Surjective p)] in
+theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
+    Codisjoint (dual p S) (dual p T) := by
+  rw [codisjoint_iff]
+  rw [← dual_inf_dual_sup_dual, ← coe_inf]
+  rw [disjoint_iff.mp hST]
+  simp only [bot_coe, dual_bot]
+
+variable (p) [p.IsPerfPair] [Fact p.IsFaithfulPair] in -- [Fact (Surjective p)] in
+theorem IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
+    IsCompl (dual p S) (dual p T) :=
+  ⟨disjoint_dual_of_codisjoint p hST.codisjoint, codisjoint_dual_of_disjoint p hST.disjoint⟩
+
+theorem fg_of_isCompl_cofg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.CoFG p) :
+    T.FG := CoFG'.isCompl_fg hST (CoFG.cofg' hS)
+
+theorem fg_of_isCompl_cofg' {S T : Submodule R N} (hST : Disjoint S T) (hS : S.CoFG p) :
+    T.FG := CoFG'.disjoint_fg hST (CoFG.cofg' hS)
+
+variable (p) [Fact p.flip.IsFaithfulPair] [p.IsPerfPair] in
+theorem cofg_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) : T.CoFG p := by
+  have hST := IsCompl.dual p.flip hST
+  have hS := FG.dual_cofg p.flip hS
+  simpa [Submodule.dual_dual_flip] using cofg_of_fg p (fg_of_isCompl_cofg hST hS)
+
+variable (p) [Fact (Surjective p)] [Fact p.flip.IsFaithfulPair] in
+theorem cofg_of_isCompl_fg'' {S T : Submodule R N} (hST : Codisjoint S T) (hS : S.FG) :
+    T.CoFG p := by
+  have hST := disjoint_dual_of_codisjoint p.flip hST
+  have hS := FG.dual_cofg p.flip hS
+  simpa [Submodule.dual_dual_flip] using cofg_of_fg p (fg_of_isCompl_cofg' hST hS)
+
+-- example {S T : Submodule R (Dual R M)} (hST : Codisjoint S T) (hS : S.FG) :
+--   T.CoFG .id := cofg_of_isCompl_fg'' _ hST hS
+
+example {ι : Type*} [DecidableEq ι] [Finite ι] (b : Basis ι R M) (s : Set ι) :
+  IsCompl (span R ((fun i => b i )'' s)) (dual .id ((fun i => b.dualBasis i) '' sᶜ))
+  := sorry
+
+-- The proof can be much shorter, see above
 variable (p) [Fact (Surjective p)] in
+/-- A complement of an FG submodule is CoFG. -/
 theorem cofg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
     T.CoFG p := by classical
-  obtain ⟨s, ⟨b⟩⟩ := Module.Basis.exists_basis R S
-  haveI : Module.Finite R S := Module.Finite.iff_fg.mpr hS
-  have h := Module.Finite.finite_basis b -- uses hS implicitly
-  let b' := Basis.dualBasis b
+  obtain ⟨s, ⟨b⟩⟩ := Basis.exists_basis R S
+  haveI := Module.Finite.iff_fg.mpr hS
+  haveI := Module.Finite.finite_basis b
   let proj := linearProjOfIsCompl S T hST
-  let b'' : s → (N →ₗ[R] R) := fun i => (b' i) ∘ₗ proj
   have hp : Surjective p := Fact.elim inferInstance
-  let s'' := fun i => surjInv hp (b'' i)
-  let s' := Set.range s''
-  have hs' : s'.Finite := Set.finite_range _
-  use hs'.toFinset
-  simp [s', s'', b'']
+  let f := fun i => surjInv hp (Basis.dualBasis b i ∘ₗ proj)
+  use (Set.finite_range f).toFinset
   ext x
+  simp only [Set.Finite.coe_toFinset, mem_dual, Set.mem_range, forall_exists_index]
   constructor
   · intro h
-    simp only [mem_dual, Set.mem_range, -Subtype.exists, forall_exists_index] at h
-    have h' := (h · rfl)
-    simp only [surjInv_eq hp] at h'
-    simp only [coe_comp, Function.comp_apply, -Subtype.forall] at h'
-    rw [← linearProjOfIsCompl_ker hST]
-    rw [mem_ker]
-    unfold b' at h'
-    simp only [Basis.coe_dualBasis, -Basis.coord_apply, -Subtype.forall] at h'
-    have h' := fun x => (h' x).symm
-    rw [Basis.forall_coord_eq_zero_iff] at h'
-    exact h'
-  · simp
-    intro h y z hzs hzs' rfl
+    replace h := fun x => Eq.symm (h x rfl)
+    simp only [f, surjInv_eq hp] at h
+    simp only [coe_comp, Function.comp_apply, Basis.coe_dualBasis] at h
+    rw [← linearProjOfIsCompl_ker hST, mem_ker]
+    exact b.forall_coord_eq_zero_iff.mp h
+  · intro hxT y z rfl
     rw [surjInv_eq hp]
-    simp only [coe_comp, Function.comp_apply]
-    rw [linearProjOfIsCompl_apply_right' _ _ h]
-    simp
+    rw [coe_comp, Function.comp_apply]
+    rw [linearProjOfIsCompl_apply_right' _ _ hxT]
+    rw [map_zero]
 
 variable (p) [Fact (Surjective p)] in -- [Fact p.IsFaithfulPair] in
 theorem CoFG'.exists_finset_dual {S : Submodule R N} (hS : S.CoFG') :
@@ -250,24 +289,7 @@ variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not su
 theorem CoFG'.cofg {S : Submodule R N} (hS : S.CoFG') : S.CoFG p := by
   obtain ⟨s, hs⟩ := exists_finset_dual p hS; use s
 
-theorem CoFG'.exists_finset_dual' {S : Submodule R M} (hS : S.CoFG') :
-    ∃ s : Finset (Dual R M), dual .id s = S := by classical
-  let Q := M ⧸ S
-  obtain ⟨s, ⟨b⟩⟩ := Module.Basis.exists_basis R Q
-  have h := Module.Finite.finite_basis b
-  let f := b.equivFun
-  let g := mkQ S
-  unfold Q at *
-  have hh : ker g = S := ker_mkQ S
-  simp [dual_ker_pi']
-  rw [← hh]
-  sorry
-
-theorem CoFG'.cofg' {S : Submodule R M} (hS : S.CoFG') : S.CoFG .id := by
-  sorry
-
 end Field
-
 
 end CommSemiring
 

@@ -82,7 +82,7 @@ end CommRing
 
 section Field
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
@@ -128,6 +128,8 @@ lemma isFaithfulPair_of_eval : IsFaithfulPair (Dual.eval R M)
   := isFaithfulPair_of_surjective (bijective_dual_eval R M).surjective
 
 instance : Fact (Dual.eval R M).IsFaithfulPair := ⟨isFaithfulPair_of_eval⟩
+-- instance : Fact (IsFaithfulPair (R := R) (M := M) (flip .id)) :=
+--     ⟨isFaithfulPair_of_eval⟩
 
 end IsReflexive
 

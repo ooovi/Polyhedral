@@ -8,7 +8,7 @@ import Mathlib.RingTheory.Noetherian.Basic
 
 namespace Submodule
 
-open Function LinearMap
+open Function LinearMap Module
 
 section Semiring
 
@@ -425,6 +425,7 @@ noncomputable example {p q : Submodule R M} (hpq : IsCompl p q)
 end RestrictedScalar
 
 
+
 -- -- ## QUOTIENTS
 
 -- lemma mkQ_sup (S T : Submodule R M) :
@@ -451,11 +452,22 @@ end RestrictedScalar
 
 end Semiring
 
-section DivisionRing
 
-open LinearMap
+section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
+
+lemma disjoint_sup_of_disjoint_disjoint_sup {S T U : Submodule R M}
+    (hST : Disjoint S T) (hSTU : Disjoint (S ⊔ T) U) : Disjoint S (T ⊔ U) := by
+  intro V hVS hVTU x hxV
+  have hxS := hVS hxV
+  obtain ⟨y, hyT, z, hzU, rfl⟩ := mem_sup.mp (hVTU hxV)
+  have h := add_mem
+    ((SetLike.le_def.mp le_sup_left) (neg_mem hyT))
+    ((SetLike.le_def.mp le_sup_right) hxS)
+  simp only [sup_comm, neg_add_cancel_left] at h
+  simp only [disjoint_def.mp hSTU _ h hzU, add_zero, mem_bot] at ⊢ hxS
+  exact disjoint_def.mp hST _ hxS hyT
 
 -- /-- The projection with range and kernel swapped. -/
 -- def IsProj.flip {S : Submodule R M} {p : M →ₗ[R] M} (hp : IsProj S p) : M →ₗ[R] M
@@ -466,11 +478,37 @@ lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
   map_mem := projection_apply_mem hST
   map_id x hx := projection_apply_left hST ⟨x, hx⟩
 
+end Ring
+
+
+
+section DivisionRing
+
+open LinearMap
+
 variable {M R : Type*} [DivisionRing R] [AddCommGroup M] [Module R M]
 
 lemma exists_isProj (S : Submodule R M) : ∃ p : M →ₗ[R] M, IsProj S p := by
   have ⟨_, hS'⟩ := exists_isCompl S
   exact ⟨_, IsCompl.projection_isProj hS'⟩
+
+lemma isCompl_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
+    ∃ S' : Submodule R M, S ≤ S' ∧ IsCompl S' T := by
+  obtain ⟨U, hU⟩ := exists_isCompl (S ⊔ T)
+  use S ⊔ U
+  constructor
+  · exact le_sup_left
+  constructor
+  · rw [sup_comm] at hU
+    rw [disjoint_comm] at hST
+    have h := disjoint_sup_of_disjoint_disjoint_sup hST hU.disjoint
+    exact disjoint_comm.mp h
+  · rw [codisjoint_assoc, codisjoint_comm, codisjoint_assoc, codisjoint_comm, sup_comm]
+    exact hU.codisjoint
+
+lemma isCompl_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
+    ∃ S' : Submodule R M, S' ≤ S ∧ IsCompl S' T := by
+  sorry -- analogous to `isCompl_of_disjoint`
 
 lemma exists_extend {T S : Submodule R M} (hST : S ≤ T) :
     ∃ S' : Submodule R M, S' ⊔ T = ⊤ ∧ S' ⊓ T = S := by
