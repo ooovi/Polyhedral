@@ -161,6 +161,8 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
 
 
 -- Q: Can we shorten the proof, see `inf_sup_lineal_eq_of_isCompl` below.
+/-- If `C` is a cone and `S` is complementary to the cone's linealiry space, then `C` can
+  be written as `(C ⊓ S) ⊔ C.lineal`. -/
 lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
   rw [le_antisymm_iff]

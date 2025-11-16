@@ -30,15 +30,23 @@ theorem quot_finite_of_finite [Module.Finite R M] (S : Submodule R M) :
 abbrev CoFG (S : Submodule R M) : Prop := Module.Finite R (M ⧸ S)
 
 /-- The top submodule is CoFG. -/
-lemma cofg_top : (⊤ : Submodule R M).CoFG := inferInstance
+@[simp] lemma cofg_top : (⊤ : Submodule R M).CoFG := inferInstance
 
 /-- The bottom submodule of a finite module is CoFG. -/
-lemma cofg_bot [Module.Finite R M] : (⊥ : Submodule R M).CoFG := inferInstance
+@[simp] lemma cofg_bot [Module.Finite R M] : (⊥ : Submodule R M).CoFG := inferInstance
 
 lemma _root_.Module.Finite.of_cofg_bot (h : (⊥ : Submodule R M).CoFG) : Module.Finite R M
     := Finite.equiv (quotEquivOfEqBot ⊥ rfl)
 
 lemma cofg_of_le {S T : Submodule R M} {hST : S ≤ T} (hS : S.CoFG) : T.CoFG := by
+  classical
+  -- -- Register `Module.Finite R (M ⧸ S)` as an instance
+  -- haveI := hS
+  -- -- The canonical surjection (m + S) ↦ (m + T)
+  -- let f : (M ⧸ S) →ₗ[R] (M ⧸ T) := Submodule.quotientMap _ _ hST
+  -- have hf : Function.Surjective f := Submodule.quotientMap_surjective _ _ hST
+  -- -- Images of finitely generated modules are finitely generated
+  -- exact Module.Finite.of_surjective f hf
   sorry
 
 lemma CoFG.isCompl_fg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.CoFG) : T.FG

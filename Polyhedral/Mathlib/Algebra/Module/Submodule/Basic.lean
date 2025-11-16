@@ -71,9 +71,9 @@ alias span_iInter := span_biInter
 abbrev restrict (S T : Submodule R M) : Submodule R S := T.submoduleOf S -- T.comap S.subtype
 
 -- Q: Shoud have `restrict` as an order hom? If yes, use the code below.
-def restrict' (S : Submodule R M) : Submodule R M →o Submodule R S where
-  toFun := (submoduleOf · S)
-  monotone' := fun _ _ h _ => (h ·)
+-- def restrict' (S : Submodule R M) : Submodule R M →o Submodule R S where
+--   toFun := (submoduleOf · S)
+--   monotone' := fun _ _ h _ => (h ·)
 
 @[simp] lemma restrict_top (S : Submodule R M) : restrict S ⊤ = ⊤ := by
   simp only [submoduleOf, comap_top]
@@ -95,19 +95,43 @@ lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
     restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
   := by ext x; simp [restrict, submoduleOf]
 
+lemma restrict_disjoint (U : Submodule R M) {S T : Submodule R M} (hST : Disjoint S T) :
+    Disjoint (restrict U S) (restrict U T) := by
+  rw [disjoint_iff] at *
+  rw [← restrict_inf, hST, restrict_bot]
+
+lemma codisjoint_restrict_sup (S T : Submodule R M) :
+    Codisjoint (restrict (S ⊔ T) S) (restrict (S ⊔ T) T) := by
+  rw [codisjoint_iff_exists_add_eq]
+  intro x
+  obtain ⟨y, hy, z, hz, h⟩ := mem_sup.mp x.2
+  use ⟨y, mem_sup_left hy⟩
+  use ⟨z, mem_sup_right hz⟩
+  constructor
+  · simp only [mem_restrict_iff, hy]
+  constructor
+  · simp only [mem_restrict_iff, hz]
+  · simp only [AddMemClass.mk_add_mk, h]
+
+example (S : Submodule R M) : Submodule R S ≃o Set.Iic S := Submodule.mapIic S
+
 def restrict_equiv (S T : Submodule R M) : (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T :=
   sorry
+
+def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S where
+  toFun := restrict S
+  monotone' _ _ := restrict_mono S
 
 /-- A submodule `T` of a submodule `S` of `M` reintepreted as a submodule of `M`. -/
 @[coe] abbrev embed {S : Submodule R M} (T : Submodule R S) : Submodule R M := T.map S.subtype
 
 -- Q: Shoud have `embed` as an order embedding? If yes, use the code below.
-def embed' {S : Submodule R M} : Submodule R S ↪o Submodule R M where
-  toFun := map S.subtype
-  inj' := map_injective_of_injective S.subtype_injective
-  map_rel_iff' := ⟨fun h x => by simpa using @h x, Submodule.map_mono⟩
+-- def embed' {S : Submodule R M} : Submodule R S ↪o Submodule R M where
+--   toFun := map S.subtype
+--   inj' := map_injective_of_injective S.subtype_injective
+--   map_rel_iff' := ⟨fun h x => by simpa using @h x, Submodule.map_mono⟩
 
-lemma mem_embed_iff {S : Submodule R M} {T : Submodule R S} (x : S) :
+@[simp] lemma mem_embed_iff {S : Submodule R M} {T : Submodule R S} {x : S} :
     (x : M) ∈ embed T ↔ x ∈ T := by simp
 
 lemma mem_of_mem_embed {S : Submodule R M} {T : Submodule R S} {x : M} (hx : x ∈ embed T) :
@@ -128,8 +152,15 @@ lemma of_mem_embed_mem {S : Submodule R M} {T : Submodule R S} {x : M} (hx : x �
 @[simp] lemma embed_restrict (S T : Submodule R M) : embed (restrict S T) = S ⊓ T
   := map_comap_subtype _ _
 
+lemma embed_restrict_of_le {S T : Submodule R M} (hST : T ≤ S) :
+    embed (restrict S T) = T := by
+  nth_rw 2 [← inf_eq_right.mpr hST]
+  exact embed_restrict S T
+
 @[simp] lemma restrict_embed {S : Submodule R M} (T : Submodule R S) : restrict S (embed T) = T
     := by ext x; simp [submoduleOf]
+
+def restrict_surjective (S : Submodule R M) : Surjective (restrict S) := (⟨_, restrict_embed ·⟩)
 
 lemma embed_injective {S : Submodule R M} : Injective (embed (S := S))
   := map_injective_of_injective S.subtype_injective
@@ -148,15 +179,50 @@ lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed
   mp := embed_mono_rev
   mpr := embed_mono
 
-@[simp] lemma embed_top (S : Submodule R M) : embed (⊤ : Submodule R S) = S := by simp
-@[simp] lemma embed_bot (S : Submodule R M) : embed (⊥ : Submodule R S) = ⊥ := map_bot _
+@[simp] lemma embed_top {S : Submodule R M} : embed (⊤ : Submodule R S) = S := by simp
+@[simp] lemma embed_bot {S : Submodule R M} : embed (⊥ : Submodule R S) = ⊥ := map_bot _
 
 lemma embed_le {S : Submodule R M} (T : Submodule R S) : embed T ≤ S := by
   simpa using embed_mono le_top
 
+lemma embed_sup {U : Submodule R M} (S T : Submodule R U) :
+    embed (S ⊔ T) = embed S ⊔ embed T := map_sup ..
+
+lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
+    embed (S ⊓ T) = embed S ⊓ embed T := by
+  ext x
+  rw [mem_inf]
+  constructor
+  · intro h
+    have h := of_mem_embed_mem h
+    simp only [mem_inf, ← mem_embed_iff] at h
+    exact h
+  · intro h
+    have h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
+    rw [← mem_inf, ← mem_embed_iff] at h
+    exact h
+
+lemma embed_disjoint {U : Submodule R M} {S T : Submodule R U} (hST : Disjoint S T) :
+    Disjoint (embed S) (embed T) := by
+  rw [disjoint_def] at ⊢ hST
+  intro x hxS hxT
+  simpa using hST (of_mem_embed hxS) (of_mem_embed_mem hxS) (of_mem_embed_mem hxT)
+
+lemma embed_disjoint_iff {U : Submodule R M} {S T : Submodule R U} :
+    Disjoint S T ↔ Disjoint (embed S) (embed T) := by
+  constructor
+  · exact embed_disjoint
+  intro hST
+  rw [disjoint_def] at ⊢ hST
+  intro x hxS hxT
+  simpa using hST x (mem_embed_iff.mpr hxS) (mem_embed_iff.mpr hxT)
+
+lemma embed_codisjoint {U : Submodule R M} {S T : Submodule R U} (hST : Codisjoint S T) :
+    embed S ⊔ embed T = U := by rw [← embed_sup, codisjoint_iff.mp hST, embed_top]
+
 def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T where
   toFun x := ⟨S.subtype x, by simp⟩
-  invFun x := ⟨_, (mem_embed_iff (T:=T) ⟨_, mem_of_mem_embed x.2⟩).mp x.2⟩
+  invFun x := ⟨⟨_, mem_of_mem_embed x.2⟩, mem_embed_iff.mp x.2⟩
   map_add' x y := by simp
   map_smul' r x := by simp
   left_inv x := by simp
@@ -457,7 +523,7 @@ section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 
-lemma disjoint_sup_of_disjoint_disjoint_sup {S T U : Submodule R M}
+lemma disjoint_sup_assoc_of_disjoint {S T U : Submodule R M}
     (hST : Disjoint S T) (hSTU : Disjoint (S ⊔ T) U) : Disjoint S (T ⊔ U) := by
   intro V hVS hVTU x hxV
   have hxS := hVS hxV
@@ -469,9 +535,20 @@ lemma disjoint_sup_of_disjoint_disjoint_sup {S T U : Submodule R M}
   simp only [disjoint_def.mp hSTU _ h hzU, add_zero, mem_bot] at ⊢ hxS
   exact disjoint_def.mp hST _ hxS hyT
 
--- /-- The projection with range and kernel swapped. -/
--- def IsProj.flip {S : Submodule R M} {p : M →ₗ[R] M} (hp : IsProj S p) : M →ₗ[R] M
---   := .id - p -- IsCompl.projection hp.isCompl.symm
+lemma codisjoint_inf_assoc_of_codisjoint {S T U : Submodule R M}
+    (hST : Codisjoint S T) (hSTU : Codisjoint (S ⊓ T) U) : Codisjoint S (T ⊓ U) := by
+  intro V hSV hTUV x
+  simp only [mem_top, forall_const]
+  obtain ⟨s, t, hsS, htT, rfl⟩ := codisjoint_iff_exists_add_eq.mp hST x
+  obtain ⟨st, u, hstST, huU, H⟩ := codisjoint_iff_exists_add_eq.mp hSTU t
+  rw [← H, ← add_assoc]
+  rw [mem_inf] at hstST
+  have hu : u ∈ T := by
+    rw [add_comm] at H
+    rw [eq_add_neg_of_add_eq H]
+    exact add_mem htT (neg_mem hstST.2)
+  refine add_mem (hSV <| add_mem hsS hstST.1) (hTUV ?_)
+  exact mem_inf.mpr ⟨hu, huU⟩
 
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
     IsProj S (IsCompl.projection hST) where
@@ -492,7 +569,8 @@ lemma exists_isProj (S : Submodule R M) : ∃ p : M →ₗ[R] M, IsProj S p := b
   have ⟨_, hS'⟩ := exists_isCompl S
   exact ⟨_, IsCompl.projection_isProj hS'⟩
 
-lemma isCompl_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
+/-- Disjoint submodules can be extended to complementary submodules. -/
+lemma exists_isCompl_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
     ∃ S' : Submodule R M, S ≤ S' ∧ IsCompl S' T := by
   obtain ⟨U, hU⟩ := exists_isCompl (S ⊔ T)
   use S ⊔ U
@@ -501,14 +579,34 @@ lemma isCompl_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
   constructor
   · rw [sup_comm] at hU
     rw [disjoint_comm] at hST
-    have h := disjoint_sup_of_disjoint_disjoint_sup hST hU.disjoint
+    have h := disjoint_sup_assoc_of_disjoint hST hU.disjoint
     exact disjoint_comm.mp h
-  · rw [codisjoint_assoc, codisjoint_comm, codisjoint_assoc, codisjoint_comm, sup_comm]
+  · rw [codisjoint_comm, ← codisjoint_assoc, sup_comm]
     exact hU.codisjoint
 
-lemma isCompl_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
+lemma exists_isCompl_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
     ∃ S' : Submodule R M, S' ≤ S ∧ IsCompl S' T := by
-  sorry -- analogous to `isCompl_of_disjoint`
+  obtain ⟨U, hU⟩ := exists_isCompl (S ⊓ T)
+  use S ⊓ U
+  constructor
+  · exact inf_le_left
+  constructor
+  · rw [disjoint_comm, ← disjoint_assoc, inf_comm]
+    exact hU.disjoint
+  · rw [inf_comm] at hU
+    rw [codisjoint_comm] at hST
+    have h := codisjoint_inf_assoc_of_codisjoint hST hU.codisjoint
+    exact codisjoint_comm.mp h
+
+lemma exists_le_disjoint_sup_self (S T : Submodule R M) :
+    ∃ S' : Submodule R M, S' ≤ S ∧ Disjoint S' T ∧ S' ⊔ T = S ⊔ T := by
+  obtain ⟨S', hSS', hST'⟩ := exists_isCompl_of_codisjoint (codisjoint_restrict_sup S T)
+  use embed S'
+  constructor
+  · simpa [embed_restrict_of_le le_sup_left] using embed_mono hSS'
+  constructor
+  · simpa using embed_disjoint hST'.disjoint
+  · simpa using embed_codisjoint hST'.codisjoint
 
 lemma exists_extend {T S : Submodule R M} (hST : S ≤ T) :
     ∃ S' : Submodule R M, S' ⊔ T = ⊤ ∧ S' ⊓ T = S := by

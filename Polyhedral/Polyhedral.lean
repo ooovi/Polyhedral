@@ -52,8 +52,8 @@ lemma isPolyhedral_of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPol
 lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhedral :=
   isPolyhedral_of_span_finite s.finite_toSet
 
-/-- If `C` is polyhedral and `S`is a submodule complementary to `C`'s linearlity spacen,
-  then `C ⊓ S` is FG. A stronger version that only requires `S`to be disjoint to the lineality
+/-- If `C` is polyhedral and `S` is a submodule complementary to `C`'s linearlity spacen,
+  then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
   is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
 lemma IsPolyhedral.fg_inf_of_isCompl (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : IsCompl C.lineal S) : FG (C ⊓ S) :=
@@ -232,12 +232,17 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PointedCone R M}
 
 /- Crucial sorry's that need to be fixed asap:
- * `aux` (see below)
- * CoFG --> FGDual aka `Submodule.CoFG.fgdual`
+ * ~~ `aux` (see below)
+ * ~~ CoFG --> FGDual aka `Submodule.CoFG.fgdual`
  * -C ⊔ C = Submodule.span C (somewhere in Lineal.lean)
  * `Submodule.sup_fgdual_fg` and `Submodule.FG.dual_flip_dual`
 -/
 
+-- #check Submodule.FG.sup_fgdual_fg
+#check Submodule.FG.dual_flip_dual
+
+-- TODO: move
+omit [LinearOrder R] [IsOrderedRing R] in
 lemma ker_compl_fg {X P : Submodule R M} {C : Submodule R X} (f : X →ₗ[R] M) (rg_le : range f ≤ P)
     (fg : P.FG) (hC : IsCompl (ker f) C) : C.FG := by
   have : Module.Finite R (↥X ⧸ ker f) := by -- iso thm
@@ -247,7 +252,8 @@ lemma ker_compl_fg {X P : Submodule R M} {C : Submodule R X} (f : X →ₗ[R] M)
   have := quotientEquivOfIsCompl _ _ hC
   exact (Submodule.fg_top _).mp (Module.finite_def.mp (Finite.equiv this))
 
-/-- Auxiliarty lemma used for reducing polyhedral intersections to FG intersections. -/
+omit [LinearOrder R] [IsOrderedRing R] in
+/- Auxiliarty lemma used for reducing polyhedral intersections to FG intersections. -/
 private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG)
     (hM₁ : P₁ ≤ M₁) (hM₂ : P₂ ≤ M₂) (hc₁ : IsCompl L₁ M₁) (hc₂ : IsCompl L₂ M₂) :
     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
@@ -295,17 +301,54 @@ private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.
       simp [← e, hc₁.projection_isProj.map_id _ d.1, hc₂.projection_isProj.map_id _ d.2,
         cmem_zero b.1.2 hc₁, cmem_zero b.2.2 hc₂]
 
+omit [LinearOrder R] [IsOrderedRing R] in
 private lemma aux'' {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M)
     (hd₁ : Disjoint P₁ L₁) (hd₂ : Disjoint P₂ L₂) :
     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
-  obtain ⟨M₁, ⟨hle₁, hM₁⟩⟩ := isCompl_of_disjoint hd₁
-  obtain ⟨M₂, ⟨hle₂, hM₂⟩⟩ := isCompl_of_disjoint hd₂
+  obtain ⟨M₁, ⟨hle₁, hM₁⟩⟩ := exists_isCompl_of_disjoint hd₁
+  obtain ⟨M₂, ⟨hle₂, hM₂⟩⟩ := exists_isCompl_of_disjoint hd₂
   have h₁ : (P₁ ⊓ M₁).FG := fg_of_le_fg h₁ inf_le_left
   have h₂ : (P₂ ⊓ M₂).FG := fg_of_le_fg h₂ inf_le_left
   obtain ⟨P, ⟨Pfg, Pdist⟩⟩ := aux' h₁ h₂ inf_le_right inf_le_right hM₁.symm hM₂.symm
   use P
   simp [← Pdist, Pfg]
   congr <;> simpa
+
+omit [LinearOrder R] [IsOrderedRing R] in
+private lemma aux {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M) :
+    ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
+  obtain ⟨P₁', hle₁, hdis₁, hP₁⟩ := exists_le_disjoint_sup_self P₁ L₁
+  obtain ⟨P₂', hle₂, hdis₂, hP₂⟩ := exists_le_disjoint_sup_self P₂ L₂
+  have h := aux'' (fg_of_le_fg h₁ hle₁) (fg_of_le_fg h₂ hle₂) L₁ L₂ hdis₁ hdis₂
+  simpa [hP₁, hP₂] using h
+
+-- exists_le_disjoint_sup_self
+
+-- omit [LinearOrder R] [IsOrderedRing R] in
+-- private lemma aux {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M)
+--     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
+--   obtain ⟨M₁, hM₁⟩ := Submodule.exists_isCompl L₁
+--   obtain ⟨M₂, hM₂⟩ := Submodule.exists_isCompl L₂
+--   let P₁ := P₁ ⊓ M₁
+--   let P₂ := P₂ ⊓ M₂
+--   have h₁ : P₁.FG := fg_of_le_fg h₁ inf_le_left
+--   have h₂ : P₂.FG := fg_of_le_fg h₂ inf_le_left
+--   have hPL₁ : Disjoint P₁ L₁ := hM₁.symm.disjoint.inf_left' _
+--   have hPL₂ : Disjoint P₂ L₂ := hM₂.symm.disjoint.inf_left' _
+--   let f₁ := hM₁.projection
+--   let f₂ := hM₂.projection
+--   let f := f₁ - f₂
+--   let g₁ := hM₁.symm.projection
+--   let g₂ := hM₂.symm.projection
+--   let g := g₂ - g₁
+--   have hfg : f = g := sorry
+--   have hker : ker f = (P₁ ⊓ P₂) ⊔ (L₁ ⊓ L₂) := sorry
+--   have him : FG (range g) := sorry
+--   have iso := LinearMap.quotKerEquivRange f
+
+--   obtain ⟨M, hM⟩ := Submodule.exists_isCompl (L₁ ⊔ L₂)
+--   let P := (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) ⊓ M
+
 
 /-- A polyhedral cone with FGDual linearlity space is itself FGDual. -/
 lemma IsPolyhedral.fgdual_of_lineal_fgdual {C : PointedCone R N}
@@ -363,6 +406,60 @@ lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
   rw [← hD, inf_assoc, ← coe_inf]
   exact inf_fgdual_fg hcofg <| coe_fg <| Submodule.inf_fg_right _ hS
 
+-- /-- The intersection of two polyhedral cones is polyhdral. -/
+-- lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
+--     (C₁ ⊓ C₂).IsPolyhedral := by
+--   -- The proof reduces the problem to the case of intersecting FG cones using the aux lemma.
+--   -- Then we can use `inf_fg` from the FG theory.
+--   obtain ⟨M₁, hM₁⟩ := Submodule.exists_isCompl C₁.lineal
+--   obtain ⟨M₂, hM₂⟩ := Submodule.exists_isCompl C₂.lineal
+--   let D₁ := C₁ ⊓ M₁
+--   let D₂ := C₂ ⊓ M₂
+--   have hfg₁ := h₁.fg_inf_of_isCompl hM₁
+--   have hfg₂ := h₂.fg_inf_of_isCompl hM₂
+--   have hD₁ := inf_sup_lineal hM₁.codisjoint
+--   have hD₂ := inf_sup_lineal hM₂.codisjoint
+--   have hDC₁ : Disjoint (Submodule.span R D₁) C₁.lineal := by
+--     have h : C₁ ⊓ M₁ ≤ M₁ := inf_le_right
+--     have h := inf_le_inf_right C₁.lineal (Submodule.span_mono h)
+--     rw [disjoint_iff, ← le_bot_iff]
+--     refine le_trans h ?_
+--     rw [ofSubmodule_coe, span_eq, le_bot_iff]
+--     exact disjoint_iff.mp hM₁.disjoint.symm
+--   have hDC₂ : Disjoint (Submodule.span R D₂) C₂.lineal := by
+--     have h : C₂ ⊓ M₂ ≤ M₂ := inf_le_right
+--     have h := inf_le_inf_right C₂.lineal (Submodule.span_mono h)
+--     rw [disjoint_iff, ← le_bot_iff]
+--     refine le_trans h ?_
+--     rw [ofSubmodule_coe, span_eq, le_bot_iff]
+--     exact disjoint_iff.mp hM₂.disjoint.symm
+--   have hD₁' := congrArg (Submodule.span R ∘ SetLike.coe) hD₁
+--   have hD₂' := congrArg (Submodule.span R ∘ SetLike.coe) hD₂
+--   simp only [Function.comp_apply] at hD₁' hD₂'
+--   rw [← PointedCone.coe_sup_submodule_span, Submodule.span_union] at hD₁' hD₂'
+--   simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars,
+--     restrictScalars_self] at hD₁' hD₂'
+--   --
+--   have h := Submodule.le_span (R := R) (M := M) (s := (C₁ ⊓ C₂ : PointedCone R M))
+--   replace h := le_trans h (span_inter_le _ _)
+--   rw [← hD₁', ← hD₂'] at h
+--   --
+--   obtain ⟨P, hPfg, hP⟩ :=
+--       aux'' (submodule_span_fg hfg₁) (submodule_span_fg hfg₂) C₁.lineal C₂.lineal hDC₁ hDC₂
+--   rw [hP] at h
+--   nth_rw 2 [← ofSubmodule_coe] at h
+--   rw [Set.le_iff_subset] at h
+--   rw [SetLike.coe_subset_coe] at h
+--   --
+--   rw [← inf_eq_left.mpr h]
+--   have H := inf_le_inf (lineal_le C₁) (lineal_le C₂)
+--   rw [coe_sup, inf_sup_assoc_of_submodule_le _ H]
+--   --
+--   rw [← inf_idem P, inf_assoc, inf_comm, coe_inf, ← inf_assoc, inf_assoc]
+--   refine isPolyhedral_of_fg_sup_submodule (inf_fg ?_ ?_) _
+--   · exact h₂.fg_of_inf_fg_submodule hPfg
+--   · simpa [inf_comm] using h₁.fg_of_inf_fg_submodule hPfg
+
 /-- The intersection of two polyhedral cones is polyhdral. -/
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
     (C₁ ⊓ C₂).IsPolyhedral := by
@@ -381,8 +478,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   replace h := le_trans h (span_inter_le _ _)
   rw [← hD₁', ← hD₂'] at h
   --
-  obtain ⟨P, hPfg, hP⟩ :=
-      aux'' (submodule_span_fg hfg₁) (submodule_span_fg hfg₂) C₁.lineal C₂.lineal sorry sorry
+  obtain ⟨P, hPfg, hP⟩ := aux (submodule_span_fg hfg₁) (submodule_span_fg hfg₂) C₁.lineal C₂.lineal
   rw [hP] at h
   nth_rw 2 [← ofSubmodule_coe] at h
   rw [Set.le_iff_subset] at h
