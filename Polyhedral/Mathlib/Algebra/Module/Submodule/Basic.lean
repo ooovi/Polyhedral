@@ -62,9 +62,10 @@ alias span_iInter := span_biInter
 /- I suggest the alternative naming `restrict` for `submoduleOf` for the following reason:
   we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
   makes no sense. Using the same name is preferred for consistency.
-  Not also that this cannot be an alias of `submoduleOf` because the argument are in the
+  Note also that this cannot be an alias of `submoduleOf` because the argument are in the
   opposite order. This is in order to be consistent with `embed` for which the other order
   is not possible. This also allows us to view `restrict S` as the restriction operator.
+  Finally, the "restrict" terminology is also used for e.g. `LinearMap.restrict`.
 -/
 
 /-- The restriction of `S ⊓ T` reinterpreted as a submodule of `S`. -/

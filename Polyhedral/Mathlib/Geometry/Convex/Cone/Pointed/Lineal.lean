@@ -15,7 +15,8 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 -- TODO: maybe lineal should be defined only over rings and via x ∈ C.lineal → -x ∈ C.lineal.
 --   The given definition of lineal gives weird results over semiring such as the positive
---   elements of a ring.
+--   elements of a ring. However, the current definition makes it very easy to se that it
+--   is a submodule.
 
 /-- The lineality space of a cone. -/
 def lineal (C : PointedCone R M) : Submodule R M := sSup {S : Submodule R M | S ≤ C }
@@ -50,6 +51,18 @@ lemma mem_of_neg_mem_lineal {C : PointedCone R M} {x : M} (hx : -x ∈ C.lineal)
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+
+-- Q: Is this the better definition of `lineal`?
+/-- The lineality space of a cone. -/
+def lineal' (C : PointedCone R M) : Submodule R M where
+  carrier := {x : M | x ∈ C ∧ (-x) ∈ C}
+  add_mem' hx hy := by simpa [neg_add_rev] using ⟨C.add_mem hx.1 hy.1, C.add_mem hy.2 hx.2⟩
+  zero_mem' := by simp
+  smul_mem' r _ hx := by
+    by_cases hr : 0 ≤ r
+    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
+    · have hr := le_of_lt <| neg_pos_of_neg <| lt_of_not_ge hr
+      simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
 -- @[simp] -- no simp because right side has twice as many `x`?
 lemma lineal_mem {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
