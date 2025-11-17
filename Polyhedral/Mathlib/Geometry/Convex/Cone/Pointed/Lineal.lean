@@ -87,6 +87,11 @@ lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lin
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
+lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal := by
+  intro x hx
+  rw [lineal_mem] at *
+  exact ⟨h hx.1, h hx.2⟩
+
 /- In this section we show properties of lineal that also follow from lineal
   being a face. But we need this earlier than faces, so we need to prove that
   lineal is a face here. This can then be resused later.

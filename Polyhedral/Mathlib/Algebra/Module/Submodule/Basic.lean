@@ -601,12 +601,10 @@ lemma exists_isCompl_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) 
 lemma exists_le_disjoint_sup_self (S T : Submodule R M) :
     ∃ S' : Submodule R M, S' ≤ S ∧ Disjoint S' T ∧ S' ⊔ T = S ⊔ T := by
   obtain ⟨S', hSS', hST'⟩ := exists_isCompl_of_codisjoint (codisjoint_restrict_sup S T)
-  use embed S'
-  constructor
-  · simpa [embed_restrict_of_le le_sup_left] using embed_mono hSS'
-  constructor
-  · simpa using embed_disjoint hST'.disjoint
-  · simpa using embed_codisjoint hST'.codisjoint
+  exact ⟨embed S',
+    by simpa [embed_restrict_of_le le_sup_left] using embed_mono hSS',
+    by simpa using embed_disjoint hST'.disjoint,
+    by simpa using embed_codisjoint hST'.codisjoint⟩
 
 lemma exists_extend {T S : Submodule R M} (hST : S ≤ T) :
     ∃ S' : Submodule R M, S' ⊔ T = ⊤ ∧ S' ⊓ T = S := by

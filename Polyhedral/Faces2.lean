@@ -214,7 +214,11 @@ def embed_face_orderIso {S : Submodule R M} (C : PointedCone R S) : Face C ≃o 
 
 -- ## LINEAL
 
-lemma IsFaceOf.lineal_eq (hF : F.IsFaceOf C) : F.lineal = C.lineal := sorry
+lemma IsFaceOf.lineal_eq (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
+  have h := lineal_mono hF.subset
+  have h' : C.lineal ≤ F := sorry
+  sorry
+
 
 lemma Face.lineal_eq (F : Face C) : PointedCone.lineal F = C.lineal := sorry
 

@@ -38,7 +38,7 @@ lemma inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
   use le_inf_iff.mpr ⟨Set.inter_subset_left.trans h₁.subset, Set.inter_subset_right.trans h₂.subset⟩
   simp only [Submodule.mem_inf, and_imp]
-  intros x y a b xc₁ xc₂ yc₁ yc₂ a0 b0 hz₁ hz₂
+  intro x y a b xc₁ xc₂ yc₁ yc₂ a0 b0 hz₁ hz₂
   constructor
   · exact h₁.left_mem_of_smul_add_mem xc₁ yc₁ a0 b0 hz₁
   · exact h₂.left_mem_of_smul_add_mem xc₂ yc₂ a0 b0 hz₂
@@ -88,7 +88,7 @@ lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
       convert hFC.subset
     · apply le_trans _ le_sup_right
       convert hGD.subset
-  · intros _ _ a b xs ys a0 b0 h
+  · intro _ _ a b xs ys a0 b0 h
     simp [Submodule.mem_sup] at h xs ys ⊢
     obtain ⟨xf, hxf, yg, hyg, hfg⟩ := h
     obtain ⟨x', hx', y', hy', hfx⟩ := xs
@@ -120,13 +120,13 @@ lemma iff_mem_of_mul_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M} {c : R}, x ∈ C → y ∈ C → 0 < c → c • x + y ∈ F → x ∈ F := by
   constructor
   · intro f; refine ⟨f.subset, ?_⟩
-    intros x y c xC yC cpos h
+    intro x y c xC yC cpos h
     apply f.left_mem_of_smul_add_mem xC yC cpos zero_lt_one
     simp [h]
   · intro h
     constructor
     · exact h.1
-    · intros x y a b xC yC a0 b0 hab
+    · intro x y a b xC yC a0 b0 hab
       exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
 
 lemma iff_mem_of_add_mem :
@@ -174,7 +174,7 @@ variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] {C F : Poin
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   suffices ∀ {x y : M}, x ∈ C → y ∈ C → x + y ∈ ↑C.lineal → x ∈ ↑C.lineal by
     exact iff_mem_of_add_mem.mpr ⟨PointedCone.lineal_le C, this⟩
-  intros _ _ xc yc xyf
+  intro _ _ xc yc xyf
   simp only [lineal_mem, neg_add_rev, xc, true_and] at xyf ⊢
   have := add_mem xyf.2 yc
   simp only [neg_add_cancel_comm] at this
@@ -320,12 +320,12 @@ variable {N : Type*} [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C�
 /-- The face of `C₁ × C₂` obtained by taking the product of faces `F₁ ≤ C₁` and `F₂ ≤ C₂`. -/
 def prod (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁.prod C₂) := by
   refine ⟨Submodule.prod F₁ F₂, ⟨?_, ?_⟩⟩
-  · intros x xp
+  · intro x xp
     rw [Submodule.mem_prod] at xp ⊢
     exact ⟨F₁.isFaceOf.subset xp.1, F₂.isFaceOf.subset xp.2⟩
   · simp only [Submodule.mem_prod, Prod.fst_add, Prod.smul_fst, Prod.snd_add,
     Prod.smul_snd, and_imp, Prod.forall]
-    intros _ _ _ _ _ _ xc₁ xc₂ yc₁ yc₂ a0 b0 hab₁ hab₂
+    intro _ _ _ _ _ _ xc₁ xc₂ yc₁ yc₂ a0 b0 hab₁ hab₂
     constructor
     · exact F₁.isFaceOf.left_mem_of_smul_add_mem xc₁ yc₁ a0 b0 hab₁
     · exact F₂.isFaceOf.left_mem_of_smul_add_mem xc₂ yc₂ a0 b0 hab₂
@@ -353,7 +353,7 @@ def prod_left (F : Face (C₁.prod C₂)) : Face C₁ := {
       convert (Set.mem_prod.mp <| F.isFaceOf.subset xm.choose_spec).1
     · simp only [toPointedCone, mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right,
       exists_eq_right, forall_exists_index]
-      intros x y _ b xc yc a0 b0 z h
+      intro x y _ b xc yc a0 b0 z h
       use 0
       refine F.isFaceOf.left_mem_of_smul_add_mem (x := (x, 0)) (y := (y, b⁻¹ • z)) ?_ ?_ a0 b0 ?_
       · exact mem_prod.mp ⟨xc, zero_mem C₂⟩
@@ -371,7 +371,7 @@ def prod_right (F : Face (C₁.prod C₂)) : Face C₂ := {
       convert (Set.mem_prod.mp <| F.isFaceOf.subset xm.choose_spec).2
     · simp only [toPointedCone, mem_map, LinearMap.snd_apply, Prod.exists, exists_eq_right,
       forall_exists_index]
-      intros x y _ b xc yc a0 b0 z h
+      intro x y _ b xc yc a0 b0 z h
       use 0
       refine F.isFaceOf.left_mem_of_smul_add_mem (x := (0, x)) (y := (b⁻¹ • z, y)) ?_ ?_ a0 b0 ?_
       · exact mem_prod.mp ⟨zero_mem C₁, xc⟩
@@ -425,7 +425,7 @@ def map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M �
 
 lemma map_inj (f : M →ₗ[R] N) (hf : Function.Injective f) :
     Function.Injective (map hf : Face C → Face _) := by
-  intros F₁ F₂ h
+  intro F₁ F₂ h
   simp [map] at h
   ext x; constructor <;> intro hx
   · have : f x ∈ PointedCone.map f F₁.toSubmodule := mem_map.mpr ⟨x, ⟨hx, rfl⟩⟩
@@ -509,7 +509,7 @@ theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
   apply Finite.of_injective (β := Finset.powerset s)
     fun F => ⟨(exists_fg_span_subset_face F).choose,
                by simp; exact (exists_fg_span_subset_face _).choose_spec.1⟩
-  intros F F' FF
+  intro F F' FF
   have := congrArg (fun s : s.powerset => PointedCone.span (E := M) R s) FF
   simp [(exists_fg_span_subset_face _).choose_spec.2] at this
   exact Face.toPointedCone_eq_iff.mp this
@@ -529,7 +529,7 @@ def subdual (C F : PointedCone R M) : PointedCone R N :=
   (dual p C) ⊓ (.dual p F : Submodule R N)
 
 lemma subdual_antitone : Antitone (subdual p C) := by
-  intros _ _ hF
+  intro _ _ hF
   unfold subdual
   gcongr
   exact Submodule.dual_le_dual hF
@@ -547,10 +547,10 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
   apply iff_mem_of_add_mem.mpr ⟨by simp, ?_⟩
-  intros x y xd
+  intro x y xd
   simp only [mem_dual, SetLike.mem_coe, Submodule.mem_inf, map_add, Submodule.restrictScalars_mem,
     Submodule.mem_dual, xd, true_and, and_imp]
-  intros yC _ n'on _ mF
+  intro yC _ n'on _ mF
   apply eq_of_le_of_ge
   · exact xd (hF.subset mF)
   · rw [n'on mF]
