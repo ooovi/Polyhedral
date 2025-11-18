@@ -32,7 +32,9 @@ variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R 
 
 @[refl]
 lemma refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun hx _ _ _ _ ↦ hx⟩
-lemma rfl {C : PointedCone R M} : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun hx _ _ _ _ ↦ hx⟩
+lemma rfl {C : PointedCone R M} : C.IsFaceOf C := refl C
+
+alias isFaceOf_self := refl
 
 lemma inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
@@ -79,6 +81,7 @@ variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
   {C D F G : PointedCone R M}
 
 lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
+    -- TODO: hCD should be `Disjoint _ _`
     (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0) :
     (F ⊔ G).IsFaceOf (C ⊔ D) := by
   constructor
@@ -176,15 +179,7 @@ lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
     exact iff_mem_of_add_mem.mpr ⟨PointedCone.lineal_le C, this⟩
   intro _ _ xc yc xyf
   simp only [lineal_mem, neg_add_rev, xc, true_and] at xyf ⊢
-  have := add_mem xyf.2 yc
-  simp only [neg_add_cancel_comm] at this
-  assumption
-
--- lemma lineal_le {C : PointedCone R M} (h : ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F) :
---   C.lineal ≤ F := by
---   intro x xl
---   apply lineal_mem.mp at xl
---   exact h x xl.1 (-x) xl.2 (by simp only [add_neg_cancel, zero_mem])
+  simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
 
 /-- Mapping a face using an injective linear map yields a face of the image of `C`. -/
 lemma map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :

@@ -23,7 +23,6 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C C₁ C₂ F : PointedCone R M}
 
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
-
   sorry
 
 -- lemma IsPolyhedral.face_exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :

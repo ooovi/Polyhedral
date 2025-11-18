@@ -75,10 +75,10 @@ variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
-    := Submodule.restrictScalars_inf
+    := Submodule.restrictScalars_inf _
 
 lemma sInf_coe (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
-  Submodule.restrictScalars_sInf
+  Submodule.restrictScalars_sInf _
 
 lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf, iInf_image]
@@ -87,10 +87,10 @@ lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : Po
 --   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf]
 
 lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
-    := Submodule.restrictScalars_sup
+    := Submodule.restrictScalars_sup _
 
 lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
-  Submodule.restrictScalars_sSup
+  Submodule.restrictScalars_sSup _
 
 lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : PointedCone R M) := by
   rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]

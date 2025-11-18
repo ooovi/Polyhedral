@@ -142,6 +142,8 @@ lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := by
   apply lineal_mem.mp at xl
   exact (IsFaceOf.iff_mem_of_add_mem.mp F.isFaceOf).2 xl.1 xl.2 (by simp)
 
+-- lemma lineal_le' {C F : PointedCone R M} (hF : F.IsFaceOf C) : C.lineal ≤ F := lineal_le ⟨F, hF⟩
+
 /-- The bottom element of the partial order on faces of `C` is `C.lineal`. -/
 instance : OrderBot (Face C) where
   bot := lineal

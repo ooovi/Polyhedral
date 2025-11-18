@@ -96,6 +96,10 @@ lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
     restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
   := by ext x; simp [restrict, submoduleOf]
 
+lemma restrict_sInf (S : Submodule R M) {t : Set (Submodule R M)} :
+    restrict S (sInf t) = sInf (restrict S '' t)
+  := by ext x; simp [restrict, submoduleOf]
+
 lemma restrict_disjoint (U : Submodule R M) {S T : Submodule R M} (hST : Disjoint S T) :
     Disjoint (restrict U S) (restrict U T) := by
   rw [disjoint_iff] at *
@@ -114,10 +118,8 @@ lemma codisjoint_restrict_sup (S T : Submodule R M) :
   · simp only [mem_restrict_iff, hz]
   · simp only [AddMemClass.mk_add_mk, h]
 
+-- `Submodule.mapIic` is a weird and hard to look up name.
 example (S : Submodule R M) : Submodule R S ≃o Set.Iic S := Submodule.mapIic S
-
-def restrict_equiv (S T : Submodule R M) : (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T :=
-  sorry
 
 def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S where
   toFun := restrict S
@@ -187,7 +189,18 @@ lemma embed_le {S : Submodule R M} (T : Submodule R S) : embed T ≤ S := by
   simpa using embed_mono le_top
 
 lemma embed_sup {U : Submodule R M} (S T : Submodule R U) :
-    embed (S ⊔ T) = embed S ⊔ embed T := map_sup ..
+    embed (S ⊔ T) = embed S ⊔ embed T := map_sup _ _ _
+
+lemma embed_iSup {ι : Type*} {U : Submodule R M} (f : ι → Submodule R U) :
+    embed (⨆ i, f i) = ⨆ i, embed (f i) := map_iSup _ _
+
+lemma embed_sSup {U : Submodule R M} (s : Set (Submodule R U)) :
+    embed (sSup s) = sSup (embed '' s) := by
+  -- rw [sSup_eq_iSup]
+  -- rw [sSup_eq_iSup]
+  -- rw [embed_iSup]
+  -- simp
+  sorry
 
 lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
     embed (S ⊓ T) = embed S ⊓ embed T := by
@@ -202,6 +215,9 @@ lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
     have h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
     rw [← mem_inf, ← mem_embed_iff] at h
     exact h
+
+lemma embed_sInf {U : Submodule R M} (s : Set (Submodule R U)) :
+    embed (sInf s) = sInf (embed '' s) := by sorry
 
 lemma embed_disjoint {U : Submodule R M} {S T : Submodule R U} (hST : Disjoint S T) :
     Disjoint (embed S) (embed T) := by
@@ -229,6 +245,14 @@ def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T wh
   left_inv x := by simp
   right_inv x := by simp
 
+def restrict_equiv (S T : Submodule R M) : (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T where
+  toFun x := sorry
+  invFun x := sorry
+  map_add' := sorry
+  map_smul' := sorry
+  left_inv := sorry
+  right_inv := sorry
+
 def embed_orderEmbed (S : Submodule R M) : Submodule R S ↪o Submodule R M where
   toFun := embed
   inj' := embed_injective
@@ -237,14 +261,8 @@ def embed_orderEmbed (S : Submodule R M) : Submodule R S ↪o Submodule R M wher
 def embed_CompleteLatticeHom (S : Submodule R M) :
     CompleteLatticeHom (Submodule R S) (Submodule R M) where
   toFun := embed
-  map_sInf' := by
-    intro s
-    unfold embed
-    sorry
-  map_sSup' := by
-    intro s
-    unfold embed
-    sorry
+  map_sInf' := embed_sInf
+  map_sSup' := embed_sSup
 
 def embed_gi (S : Submodule R M) : GaloisCoinsertion (embed) (restrict S) where
   choice := fun T _ => restrict S T
@@ -262,6 +280,8 @@ section RestrictedScalar
 variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M]
 
 open Function
+
+variable (S)
 
 lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
     s.restrictScalars S ≤ t.restrictScalars S := (restrictScalarsEmbedding S R M).monotone hST
@@ -281,6 +301,12 @@ lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
 @[simp] lemma restrictScalars_sInf {s : Set (Submodule R M)} :
     (sInf s).restrictScalars S = sInf (restrictScalars S '' s) :=
   (restrictScalarsLatticeHom S R M).map_sInf' s
+
+@[simps]
+def restrictScalars_CompleteLatticeHom : CompleteLatticeHom (Submodule R M) (Submodule S M) where
+  toFun := restrictScalars S
+  map_sInf' _ := restrictScalars_sInf S
+  map_sSup' _ := restrictScalars_sSup S
 
 
 -- ## QUOTIENT
