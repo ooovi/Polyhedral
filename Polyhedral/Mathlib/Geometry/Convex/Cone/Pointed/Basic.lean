@@ -393,74 +393,52 @@ lemma span_sign_pair_eq_submodule_span_singleton (x : M) :
     span R {-x, x} = Submodule.span R {x} := by
   simpa [← submodule_span_pm_pair] using span_pm_pair_eq_submodule_span R x
 
+lemma submodule_span_eq_add_span_neg (s : Set M) : Submodule.span R s = span R s ⊔ span R (-s) := by
+  ext x; constructor <;> intros h
+  · simp only [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
+    obtain ⟨_, f, g, h⟩ := h
+    simp only [Set.involutiveNeg, Submodule.mem_sup]
+    rw[← h, ← Finset.sum_filter_add_sum_filter_not _ (fun i => 0 ≤ f i)]
+    use ∑ x with 0 ≤ f x, f x • g x
+    simp only [not_le, add_right_inj, exists_eq_right]
+    constructor <;> apply sum_mem
+    · exact fun x xm => smul_mem _ ((Finset.mem_filter.mp xm).2) (subset_span (g x).property)
+    · intros x xm
+      rw [← neg_smul_neg]
+      apply smul_mem
+      · exact Left.nonneg_neg_iff.mpr (le_of_lt (Finset.mem_filter.mp xm).2)
+      · apply subset_span
+        simp
+  · simp_all [Submodule.mem_sup]
+    obtain ⟨_, hy, _, hz, h⟩ := h
+    rw [← h]
+    apply add_mem
+    · exact Submodule.mem_span.mpr (fun p hp => Submodule.mem_span.mp hy p hp)
+    · refine Submodule.mem_span.mpr (fun p hp => Submodule.mem_span.mp hz p ?_)
+      intro x xs
+      convert p.neg_mem <| hp <| Set.mem_neg.mp xs
+      exact (InvolutiveNeg.neg_neg x).symm
+
 -- NOTE: if this is implemented, it is more general than what mathlib already provides
 -- for converting submodules into pointed cones. Especially the proof that R≥0 is an FG
 -- submodule of R should be easier with this.
 lemma span_union_neg_eq_span_submodule (s : Set M) :
     span R (-s ∪ s) = Submodule.span R s := by
-  rw [Submodule.span_eq_iSup_of_singleton_spans]
-  have H : ⨆ x ∈ s, Submodule.span R {x} = ⨆ x ∈ s, (Submodule.span R {x} : PointedCone R M) := by
-    sorry -- rw [map_iSup (ofSubmodule (R:=R) (M:=M))
-      -- (fun x => Submodule.span R (M:=M) {x}) (β := PointedCone R M)]
-  rw [H]
-  simp only [← span_sign_pair_eq_submodule_span_singleton]
-  have H : ⨆ x ∈ s, span R {-x, x} = span R (⨆ x ∈ s, {-x, x}) := by
-    sorry
-  rw [H]
-  congr; ext x
-  simp only [Set.involutiveNeg, Set.mem_union, Set.mem_neg, Set.iSup_eq_iUnion, Set.mem_iUnion,
-    Set.mem_insert_iff, Set.mem_singleton_iff, exists_prop]
-  constructor
-  · intro h
-    obtain (h | h) := h
-    · exact ⟨-x, h, by simp⟩
-    · exact ⟨x, h, by simp⟩
-  · intro h
-    obtain ⟨y, hy, hxy | hxy⟩ := h
-    · rw [hxy]
-      simp only [neg_neg]
-      left; exact hy
-    · rw [hxy]
-      right; exact hy
-
-  -- rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
-  -- ext x
-  -- simp only [Set.involutiveNeg, Submodule.mem_span, Set.union_subset_iff, and_imp,
-  --   Submodule.restrictScalars_mem]
-  -- constructor
-  -- · intro h S hsS
-  --   specialize h S hsS
-  --   nth_rw 1 [Submodule.coe_restrictScalars, Submodule.restrictScalars_mem,
-  --     ← Submodule.neg_eq_self S, Submodule.coe_set_neg, Set.neg_subset_neg] at h
-  --   exact h hsS
-  -- · intro h C hsC hnsC
-  --   have hh := subset_trans hsC (Submodule.subset_span (R := R))
-  --   specialize h (Submodule.span R C) hh
-  --   sorry
-
--- lemma span_union_neg_eq_span_submodule' (s : Set M) :
---     span R (s ∪ -s) = Submodule.span R s := by classical
---   rw [le_antisymm_iff]
---   constructor
---   · have h : Submodule.span R s = ↑(Submodule.span R (s ∪ -s)) := by
---       rw [Submodule.span_union]; simp
---     simpa [h] using span_le_submodule_span _
---   intro x hx
---   simp [Submodule.mem_span_iff_exists_finset_subset] at *
---   -- rw [Finsupp.mem_span_iff_linearCombination] at *
---   obtain ⟨f, t, hts, hft, hsum⟩ := hx
---   use fun x => ⟨if x ∈ t ∨ -x ∈ t then max 0 (f x) else 0, by sorry⟩
---   use t ∪ (Finset.image Neg.neg t)
---   simp
---   constructor
---   · constructor
---     · exact subset_trans hts (by simp)
---     · rw [← Set.neg_subset_neg]
---       simpa using subset_trans hts (by simp)
---   · constructor
---     · intro y hfy
---       sorry
---     · sorry
+  ext x
+  simp [Submodule.mem_span]
+  constructor <;> intros h B sB
+  · refine h (Submodule.restrictScalars {c // 0 ≤ c} B) ?_ sB
+    rw [Submodule.coe_restrictScalars]
+    exact fun _ tm => neg_mem_iff.mp (sB tm)
+  · intro nsB
+    have : x ∈ (Submodule.span R s : PointedCone R M) :=
+      h (Submodule.span R s) Submodule.subset_span
+    rw [submodule_span_eq_add_span_neg s] at this
+    obtain ⟨_, h₁, _, h₂, h⟩ := Submodule.mem_sup.mp this
+    rw [← h]
+    apply add_mem
+    · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr nsB) h₁
+    · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr sB) h₂
 
 lemma sup_neg_eq_submodule_span (C : PointedCone R M) :
     -C ⊔ C = Submodule.span R (C : Set M) := by
