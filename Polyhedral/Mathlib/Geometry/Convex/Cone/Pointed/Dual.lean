@@ -347,6 +347,22 @@ lemma IsDualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.IsDualClo
   nth_rw 2 [← Submodule.dual_span]
   rw [(dual_isDualClosed p C).submodule_span_isDualClosed, dual_dual_flip_dual]
 
+---------------
+
+-- ## FARKAS
+
+variable (p) in
+lemma farkas (C : PointedCone R M) (hC : C.IsDualClosed p) (x : M) :
+    x ∈ C ∨ ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
+  by_cases h : x ∈ C
+  case pos => left; exact h
+  case neg =>
+    right
+    rw [← hC.def] at h
+    simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at h
+    obtain ⟨φ, _, _⟩ := h
+    use φ
+
 end LinearOrder
 
 section Field

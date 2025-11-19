@@ -506,6 +506,20 @@ lemma FG.is_dual_dual_of_fgdual (hC : C.FG) :
 --     dual p (dual p.flip (C ∩ C')) = C ⊓ C' := by
 --   rw [← dual_dual_flip (p := p) <| inf_fg hC hC']; simp
 
+
+
+
+-- ## FARKAS
+
+
+
+
+
+
+
+
+
+
 end LinearOrder
 
 end PointedCone

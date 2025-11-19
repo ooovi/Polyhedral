@@ -16,8 +16,7 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-in
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
 structure IsFaceOf (F C : PointedCone R M) where
   subset : F ≤ C
   left_mem_of_smul_add_mem :
@@ -181,6 +180,15 @@ lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   simp only [lineal_mem, neg_add_rev, xc, true_and] at xyf ⊢
   simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
 
+lemma lineal_le {C F : PointedCone R M} (hF : F.IsFaceOf C) :
+    C.lineal ≤ F := by
+  intro x hx
+  apply lineal_mem.mp at hx
+  exact (IsFaceOf.iff_mem_of_add_mem.mp hF).2 hx.1 hx.2 (by simp)
+
+lemma lineal_eq {C F : PointedCone R M} (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
+  sorry
+
 /-- Mapping a face using an injective linear map yields a face of the image of `C`. -/
 lemma map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
     (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
@@ -331,10 +339,13 @@ end Semiring
 
 section Field
 
-section Prod
-
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N] {C C₁ F : PointedCone R M} {C₂ : PointedCone R N}
+
+/-- The face of a pointed cone `C` that is its lineal space. It contains in all faces of `C`. -/
+def lineal {C : PointedCone R M} : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
+
+section Prod
 
 open Submodule
 

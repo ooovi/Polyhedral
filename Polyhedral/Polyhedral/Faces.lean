@@ -1,5 +1,7 @@
 
 import Polyhedral.Polyhedral.Basic
+import Polyhedral.Polyhedral.Faces2
+import Polyhedral.Polyhedral.Exposed
 
 namespace PointedCone
 
@@ -22,12 +24,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C C₁ C₂ F : PointedCone R M}
 
-lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
-  sorry
-
--- lemma IsPolyhedral.face_exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
---     F.IsExposedFaceOf C := by
---   sorry
+-- ...
 
 end Ring
 
@@ -38,9 +35,22 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C C₁ C₂ F : PointedCone R M}
 
--- ...
+lemma IsPolyhedral.face_exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+    F.IsExposedFaceOf C := by
+  sorry
+
+lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
+  unfold IsPolyhedral salientQuot
+  rw [hF.lineal_eq]
+  sorry
+
+
+-- ## KREIN MILMAN
+
 
 end Field
+
+
 
 
 -- ## FACE

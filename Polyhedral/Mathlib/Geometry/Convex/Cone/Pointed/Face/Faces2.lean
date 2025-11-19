@@ -214,12 +214,6 @@ def embed_face_orderIso {S : Submodule R M} (C : PointedCone R S) : Face C ≃o 
 
 -- ## LINEAL
 
-lemma IsFaceOf.lineal_eq (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
-  have h := lineal_mono hF.subset
-  have h' : C.lineal ≤ F := sorry
-  sorry
-
-
 lemma Face.lineal_eq (F : Face C) : PointedCone.lineal F = C.lineal := sorry
 
 
@@ -277,6 +271,12 @@ def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
 
 
 -- ## QUOT / FIBER
+
+-- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
+
+-- lemma foo (C F₁ F₂ : PointedCone R M) (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf F₁) :
+--     IsFaceOf (hF₂.quot) (hF₁.quot) := by
+--   sorry
 
 abbrev Face.quotMap (F : Face C) := mkQ F.span
 
@@ -463,89 +463,6 @@ def relint_partition (C : PointedCone R M) : Partition (C : Set M) where
     ext x
     -- simp; exact relint_partition C
     sorry
-
--- ## EXPOSED
-
-def HalfspaceOrTop.IsSupportAt (H : HalfspaceOrTop R M) (F : Face C) :=
-    C ≤ H ∧ C ⊓ H.boundary = F
-
-def HyperplaneOrTop.IsSupportAt (H : HyperplaneOrTop R M) (F : Face C) :=
-    ∃ H' : HalfspaceOrTop R M, H'.boundary = H ∧ C ≤ H' ∧ C ⊓ H = F
-
-def Face.IsExposed (F : Face C) := ∃ H : HalfspaceOrTop R M, H.IsSupportAt F
--- def Face.IsExposed (F : Face C) := ∃ H : HalfspaceOrTop R M, C ≤ H ∧ C ⊓ H.boundary = F
-
-lemma Face.isExpose_def (F : Face C) :
-    F.IsExposed ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := sorry
-
-theorem bot_isExposed (hC : C.IsDualClosed p) : (⊥ : Face C).IsExposed := by
-  -- reduce to salient case via quotients
-  wlog h : C.Salient
-  · sorry
-  rw [Face.isExpose_def]
-  have hC : C.IsDualClosed (Dual.eval R M) := hC.to_eval
-  obtain ⟨D, hD, hDC⟩ := hC.exists_of_dual_flip
-  let φ := D.relint_nonempty'.some
-  use φ
-  constructor
-  · sorry
-  · sorry
-
-theorem IsExposed.of_isExposed_face_quot {F : Face C} {G : Face (F.quot)} (hG : G.IsExposed) :
-    F.IsExposed := by
-  -- idea: the comap of a supporting halfspace is again a supporting halfspace.
-  sorry
-
-variable (p) [Fact (Surjective p.flip)] in
-lemma HyperplaneOrTop.isDualClosed (H : HyperplaneOrTop R M) : IsDualClosed p H := sorry
-
-variable [Fact (Surjective p.flip)] in
-theorem IsExposed.isDualClosed (hC : C.IsDualClosed p) {F : Face C} (hF : F.IsExposed) :
-    IsDualClosed p F := by
-  obtain ⟨H, h, hH⟩ := hF
-  rw [← hH]
-  exact IsDualClosed.inf hC (HyperplaneOrTop.isDualClosed p _)
-
-/-- The dual of a face is an exposed face. -/
-def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
-  sorry -- obvious by definition of dual face
-
--- def foo''''' (F : Face C) :
---     ∃ φ ∈ dual (Dual.eval R M) C, φ ∉ (dual (Dual.eval R M) C).lineal ∧ F.span ≤ ker φ :=
---   sorry
-
-/-
- * The double dual face of F gives a face F' that is exposed and contains F.
- * The dual of a proper face cannot be bot (true?)
- * The double dual F' is then not top.
- * The double dual is then a proper exposed face that contains F
- * In particula, all top proper faces are exposed
--/
-
-def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.IsDualClosed p) : Face C :=
-  sorry -- ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
-
--- theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry
-
-variable (p) in
-lemma Face.dual_neq_bot_of_neq_top {F : Face C} (hF : F ≠ ⊤) :
-    F.dual p ≠ ⊥ := sorry
-
-theorem Face.exists_proper_exposed_le (F : Face C) (hF : F ≠ ⊤) :
-    ∃ F' : Face C, F' ≠ ⊤ ∧ F'.IsExposed ∧ F ≤ F' := by
-  -- Since F not top, dual face is not bot (??, use Face.Nontrivial.dual)
-  -- choose a non-zero point from the dual face
-  -- this yield a supporting hyperplane to C
-  -- this defines a face F'
-  -- this face contains F
-  -- this face is exposed by def
-  -- this face is not top by def
-  sorry
-
-
-
-theorem IsDualClosed.quot (hC : C.IsDualClosed p) (F : Face C) :
-    F.quot.IsDualClosed (Dual.eval R (M ⧸ F.span)) := sorry
 
 end PointedCone
 

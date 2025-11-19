@@ -134,13 +134,7 @@ def prod_orderIso (C : PointedCone R M) (D : PointedCone R N) :
   right_inv G := by simp [prod_left, prod_right, prod]; sorry
   map_rel_iff' := sorry
 
-/-- The face of a pointed cone `C` that is its lineal space. It contained in all faces of `C`. -/
-def lineal : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
-
-lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := by
-  intro x xl
-  apply lineal_mem.mp at xl
-  exact (IsFaceOf.iff_mem_of_add_mem.mp F.isFaceOf).2 xl.1 xl.2 (by simp)
+lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := F.isFaceOf.lineal_le
 
 -- lemma lineal_le' {C F : PointedCone R M} (hF : F.IsFaceOf C) : C.lineal ≤ F := lineal_le ⟨F, hF⟩
 
