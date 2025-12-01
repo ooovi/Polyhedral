@@ -17,6 +17,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- `PointedCone.map` should be an abbrev
 
+@[deprecated dual_zero (since := "")]
 alias dual_bot := dual_zero
 
 -- TODO: are there instances missing that should make the proof automatic?

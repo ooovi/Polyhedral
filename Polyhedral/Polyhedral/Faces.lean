@@ -1,10 +1,12 @@
 
 import Polyhedral.Polyhedral.Basic
-import Polyhedral.Polyhedral.Faces2
-import Polyhedral.Polyhedral.Exposed
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 
 namespace PointedCone
 
+open Module
 
 /- Wishlist:
  * all faces are polyhedral
@@ -33,12 +35,46 @@ section Field
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C C₁ C₂ F : PointedCone R M}
+variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
+-- TODO: weaken p assumption
+variable (p) [p.IsPerfPair] in
+@[simp] lemma IsPolyhedral.subdual_subdual (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+    subdual p.flip (PointedCone.dual p C) (subdual p C F) = F := by
+  repeat rw [subdual_def]
+  rw [dual_flip_dual p hC]
+  rw [← dual_span_lineal_dual]
+  rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
+  nth_rw 3 [← PointedCone.ofSubmodule_coe]
+  rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (isPolyhedral_of_submdule _)]
+  rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
+  rw [dual_flip_dual p hC]
+  nth_rw 2 [← Submodule.dual_span]
+  rw [Submodule.dual_flip_dual p]
+  have H : (C ⊔ Submodule.span R (F : Set M)).lineal = Submodule.span R F := by
+    sorry
+  rw [H]
+  exact IsFaceOf.inf_submodule hF
+
+-- TODO: remove the finiteness assumption
+variable [Module.Finite R M] in
+/-- Every face of a polyhedral cone is exposed. -/
 lemma IsPolyhedral.face_exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
-  sorry
+  rw [← hC.dual_flip_dual (Dual.eval R M)]
+  rw [← hC.subdual_subdual (Dual.eval R M) hF]
+  exact IsExposedFaceOf.subdual_dual _ <| IsFaceOf.subdual_dual _ hF
 
+-- TODO: weaken p assumption
+variable [p.IsPerfPair] in
+lemma IsPolyhedral.subdual_inj (hC : C.IsPolyhedral) (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
+    (h : subdual p C F₁ = subdual p C F₂) : F₁ = F₂ := by
+  rw [← hC.subdual_subdual p hF₁]
+  rw [← hC.subdual_subdual p hF₂]
+  rw [h]
+
+/-- The face of a polyhedral one is itself polyhedral. -/
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
   unfold IsPolyhedral salientQuot
   rw [hF.lineal_eq]

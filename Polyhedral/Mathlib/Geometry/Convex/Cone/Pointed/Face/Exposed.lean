@@ -11,8 +11,11 @@ import Mathlib.Order.Partition.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Hyperplane
 import Polyhedral.Halfspace
+
+open Module
 
 namespace PointedCone
 
@@ -27,15 +30,92 @@ variable {C F F₁ F₂ : PointedCone R M}
 
 def IsExposedFaceOf (F C : PointedCone R M) :=
   ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
+  -- ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
 
-lemma isExposedFaceOf_self (C : PointedCone R M) : C.IsExposedFaceOf C := sorry
+lemma IsExposedFaceOf.def_iff :
+    F.IsExposedFaceOf C ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := by rfl
 
-lemma isExposedFaceOf_inf {hF₁ : F₁.IsExposedFaceOf C} {hF₂ : F₂.IsExposedFaceOf C} :
-  (F₁ ⊓ F₂).IsExposedFaceOf C := sorry
+@[refl] lemma IsExposedFaceOf.refl (C : PointedCone R M) : C.IsExposedFaceOf C := ⟨0, by simp⟩
+lemma IsExposedFaceOf.rfl {C : PointedCone R M} : C.IsExposedFaceOf C := refl C
 
-lemma isExposedFaceOf_lineal (C : PointedCone R M) : IsExposedFaceOf C.lineal C := sorry
+lemma IsExposedFaceOf.le (hF : F.IsExposedFaceOf C) : F ≤ C := sorry
 
-lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := sorry
+-- TODO: find mathlib lemma or add to mathlib
+lemma zero_left_of_le_add_zero {a b : R} (ha : 0 ≤ a) (hb : 0 ≤ b) (h : a + b = 0) : a = 0 := sorry
+
+lemma IsExposedFaceOf.inf {hF₁ : F₁.IsExposedFaceOf C} {hF₂ : F₂.IsExposedFaceOf C} :
+    (F₁ ⊓ F₂).IsExposedFaceOf C := by
+  obtain ⟨φ₁, hφ₁, hφ₁'⟩ := hF₁
+  obtain ⟨φ₂, hφ₂, hφ₂'⟩ := hF₂
+  use φ₁ + φ₂
+  simp only [LinearMap.add_apply, ge_iff_le, Submodule.mem_inf]
+  constructor
+  · intro x hx
+    exact add_nonneg (hφ₁ x hx) (hφ₂ x hx)
+  · intro x hx
+    constructor
+    · intro H
+      have h := zero_left_of_le_add_zero (hφ₁ x hx) (hφ₂ x hx) H
+      simp only [h, zero_add] at H
+      exact ⟨(hφ₁' x hx).mp h, (hφ₂' x hx).mp H⟩
+    · intro H
+      have h₁ := (hφ₁' x hx).mpr H.1
+      have h₂ := (hφ₂' x hx).mpr H.2
+      linarith
+
+variable (p) in
+lemma IsExposedFaceOf.subdual_dual (hF : F.IsFaceOf C) :
+    (subdual p C F).IsExposedFaceOf (dual p C) := by
+  obtain ⟨φ, hφ⟩ := F.relint_nonempty
+  use p φ
+  constructor
+  · intro x hx
+    exact hx <| hF.subset (F.relint_le hφ)
+  · intro x hx
+    constructor
+    · intro h
+      unfold subdual
+      rw [Submodule.mem_inf]
+      constructor
+      · exact hx
+      simp only [Submodule.restrictScalars_mem, Submodule.mem_dual, SetLike.mem_coe]
+      intro ψ hψ
+      -- here we need to use that φ is in the relint. I think we need more relint lemmas first!
+      replace hφ := F.relint_le hφ
+      simp at hφ
+      sorry
+    · intro h
+      simpa using (h.2 <| F.relint_le hφ).symm
+
+/-- The lineality space of a dual closed cone is an exposed face. -/
+lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.IsDualClosed p) :
+    IsExposedFaceOf C.lineal C := by classical
+  rw [← hC]
+  nth_rw 1 [← subdual_self]
+  apply subdual_dual
+  rfl
+
+/-- An exposed face is a face. -/
+lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
+  rw [IsFaceOf.iff_mem_of_mul_add_mem]
+  constructor
+  · exact hF.le
+  intro _ _ _ hx hy hc hcxy
+  let ⟨φ, hφ, H⟩ := hF
+  rw [← H _ hx]
+  have h := (H _ <| hF.le hcxy).mpr hcxy
+  rw [map_add, map_smul, smul_eq_mul] at h
+  have H := mul_nonneg (le_of_lt hc) (hφ _ hx)
+  rw [← mul_eq_zero_iff_left (ne_of_lt hc).symm]
+  exact zero_left_of_le_add_zero H (hφ _ hy) h -- I think something like `foo` should be in mathlib, no?
+
+
+
+
+
+
+
+
 
 
 

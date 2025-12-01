@@ -14,6 +14,55 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Hyperplane
 import Polyhedral.Halfspace
 
+
+
+-- ## PREDICATE
+
+namespace PointedCone
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C F F₁ F₂ : PointedCone R M}
+
+variable
+  [Fact p.flip.IsFaithfulPair]
+  [Fact p.IsFaithfulPair]
+  [Fact (Function.Surjective ⇑p.flip)]
+  in
+@[simp] lemma IsFaceOf.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
+    subdual p.flip (dual p C) (subdual p C F) = F := by
+  repeat rw [subdual_def]
+  rw [FG.dual_flip_dual p hC]
+  rw [← dual_span_lineal_dual]
+  rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
+  nth_rw 3 [← PointedCone.ofSubmodule_coe]
+  rw [FGDual.dual_inf_dual_sup_dual ?_ ?_]
+  · rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
+    rw [FG.dual_flip_dual p hC]
+    nth_rw 2 [← Submodule.dual_span]
+    rw [Submodule.dual_flip_dual p]
+    have H : (C ⊔ Submodule.span R (F : Set M)).lineal = Submodule.span R F := by
+      sorry
+    rw [H]
+    exact IsFaceOf.inf_submodule hF
+  · simpa using FG.dual_fgdual _ hC
+  · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
+    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg hC)
+
+
+end PointedCone
+
+
+
+
+
+
+
+
+-- ## BUNDLES STRUCTURE
+
 namespace PointedCone
 
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
@@ -23,6 +72,13 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
 
 variable (hC : C.FG)
+
+
+
+-- lemma Face.dual_dual (F : Face C) : dual p.flip (dual p F) = F := sorry
+
+
+-- ## RANK
 
 noncomputable def Face.rank (F : Face C) := Module.rank R F.span
 

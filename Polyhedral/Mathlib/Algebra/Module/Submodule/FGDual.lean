@@ -71,10 +71,12 @@ lemma inf_fgdual {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FGDual p) :
   obtain ⟨t, rfl⟩ := hT
   use s ∪ t; rw [Finset.coe_union, dual_union]
 
--- ### HIGH PRIORITY! This is needed in the cone theory!
--- variable [Fact p.flip.IsFaithfulPair] in
-lemma sup_fgdual {S T : Submodule R N} (hC : S.FGDual p) (hD : T.FGDual p) : (S ⊔ T).FGDual p := by
-  sorry
+-- -- ### HIGH PRIORITY! This is needed in the cone theory!
+-- -- variable [Fact p.flip.IsFaithfulPair] in
+-- lemma sup_fgdual {S T : Submodule R N} (hC : S.FGDual p) (hD : T.FGDual p) : (S ⊔ T).FGDual p := by
+--   unfold FGDual
+
+--   sorry
 
 /-- The double dual of a FGDual cone is the cone itself. -/
 @[simp]
@@ -116,8 +118,8 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p)
 
-variable [Fact p.IsFaithfulPair] in
-/-- For an FG submodule `S`, there exists a FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
+variable [Fact p.IsFaithfulPair] in -- Separating should suffice, no?
+/-- For an FG submodule `S`, there exists an FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
 lemma FG.exists_fgdual_inf_bot {S : Submodule R N} (hS : S.FG) :
     ∃ T : Submodule R N, T.FGDual p ∧ S ⊓ T = ⊥ := by classical
   obtain ⟨g, hg⟩ : Fact p.IsFaithfulPair := inferInstance
@@ -128,10 +130,12 @@ lemma FG.exists_fgdual_inf_bot {S : Submodule R N} (hS : S.FG) :
     ext x
     simp only [mem_inf, mem_dual, SetLike.mem_coe, mem_bot]
     constructor
-    · intro hS; exact (hg x) (hS.2 hS.1).symm
+    · intro hS
+      exact (hg x) (hS.2 hS.1).symm
     · simp +contextual
 
-lemma fgdual_of_fg_sup_fgdual {C D : Submodule R N} (hC : C.FG) (hD : D.FGDual p) : (C ⊔ D).FGDual p := by
+-- lemma fgdual_of_fg_sup_fgdual {C D : Submodule R N} (hC : C.FG) (hD : D.FGDual p) :
+    -- (C ⊔ D).FGDual p := by
   -- classical
   -- obtain ⟨_, b⟩ := Free.exists_basis R M
   -- obtain ⟨s, rfl⟩ := hC
@@ -145,7 +149,7 @@ lemma fgdual_of_fg_sup_fgdual {C D : Submodule R N} (hC : C.FG) (hD : D.FGDual p
   --   rw [← dual_union]
   --   ext x
   --   simp
-    sorry
+    -- sorry
 -- omit [Free R M] [LinearOrder R] [IsStrictOrderedRing R] in
 -- lemma FGDual.fgdual_id_of_fgdual_toDual {ι : Type*} [DecidableEq ι] {S : Submodule R M}
 --      {b : Basis ι R M} (hS : S.FGDual b.toDual) : S.FGDual .id := by classical
@@ -186,10 +190,10 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
--- ## PRIORITY
-lemma sup_fgdual_fg {S : Submodule R N} (T : Submodule R N) (hS : S.FGDual p) : (S ⊔ T).FGDual p :=
+-- -- ## PRIORITY
+-- lemma sup_fgdual_fg {S : Submodule R N} (T : Submodule R N) (hS : S.FGDual p) : (S ⊔ T).FGDual p :=
 
-  sorry
+--   sorry
 
 lemma FG.exists_fgdual_dual {S : Submodule R N} (hS : S.FG) :
     ∃ T : Submodule R M, T.FGDual p.flip ∧ dual p T = S := by
@@ -201,16 +205,14 @@ lemma FG.exists_fgdual_dual {S : Submodule R N} (hS : S.FG) :
 
 end IsNoetherianRing
 
+
 section Field
 
-variable {p}
-
--- ### HIGH PRIORITY! This is needed in the cone theory!
-/- NOTE: in a field and with a surjective pairing, every submodule is dual closed. But maybe
-  if the submodule is FG, we don't need the surjective pairing, but a faithful one suffices. -/
-lemma FG.dual_flip_dual {S : Submodule R M} (hS : S.FG) :
-    dual p.flip (dual p S) = S := sorry -- Submodule.dual_flip_dual p S
-lemma FG.dual_dual_flip {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
+variable {R M N : Type*}
+variable [Field R] [IsNoetherianRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 end Field
 
@@ -251,11 +253,8 @@ theorem FGDual.cofg {S : Submodule R N} (hS : S.FGDual p) : S.CoFG := by
   obtain ⟨s, rfl⟩ := hS.exists_finset_dual
   exact dual_finset_cofg p s
 
-theorem fg_of_disjoint_fgdual {S T : Submodule R N} (hST : Disjoint S T) (hS : S.FGDual p) :
-    T.FG := CoFG.disjoint_fg hST (FGDual.cofg hS)
-
 theorem fg_of_isCompl_fgdual {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FGDual p) :
-    T.FG := fg_of_disjoint_fgdual hST.disjoint hS
+    T.FG := CoFG.isCompl_fg hST (FGDual.cofg hS)
 
 end IsNoetherianRing
 
@@ -266,6 +265,11 @@ variable {R : Type*} [Field R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- WARNING: CoFG.disjoint_fg is not yet proven
+-- Does this need Field?
+theorem fg_of_disjoint_fgdual {S T : Submodule R N} (hST : Disjoint S T) (hS : S.FGDual p) :
+    T.FG := CoFG.disjoint_fg hST (FGDual.cofg hS)
 
 variable (p) [Fact p.flip.IsFaithfulPair] [p.IsPerfPair] in
 theorem fgdual_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
@@ -325,6 +329,16 @@ theorem CoFG.exists_finset_dual {S : Submodule R N} (hS : S.CoFG) :
 variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not sure yet
 theorem CoFG.fgdual {S : Submodule R N} (hS : S.CoFG) : S.FGDual p := by
   obtain ⟨s, hs⟩ := exists_finset_dual p hS; use s
+
+-- variable (p) [Fact (Surjective p)] in
+-- /-- For an FG submodule `S`, there exists a FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
+-- lemma FG.exists_fgdual_inf_bot' {S : Submodule R N} (hS : S.FG) :
+--     ∃ T : Submodule R N, T.FGDual p ∧ S ⊓ T = ⊥ := by
+--   obtain ⟨T, hT⟩ := exists_isCompl S
+--   use T
+--   constructor
+--   · exact fgdual_of_isCompl_fg p hT hS
+--   · exact hT.disjoint.eq_bot
 
 end Field
 

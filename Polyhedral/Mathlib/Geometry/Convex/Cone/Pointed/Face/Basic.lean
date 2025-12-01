@@ -16,6 +16,9 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
+-- NOTE: I think we should assume [Ring] from the start. There is little meaning for
+-- working in a semiring ambient space.
+
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
 structure IsFaceOf (F C : PointedCone R M) where
   subset : F ≤ C
@@ -29,11 +32,13 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
-@[refl]
+@[refl, simp]
 lemma refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun hx _ _ _ _ ↦ hx⟩
 lemma rfl {C : PointedCone R M} : C.IsFaceOf C := refl C
 
-alias isFaceOf_self := refl
+alias self := refl
+
+alias le := subset
 
 lemma inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
@@ -80,8 +85,7 @@ variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
   {C D F G : PointedCone R M}
 
 lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
-    -- TODO: hCD should be `Disjoint _ _`
-    (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0) :
+    (hCD : Disjoint (α := Submodule R M) (Submodule.span R C) (Submodule.span R D)) :
     (F ⊔ G).IsFaceOf (C ⊔ D) := by
   constructor
   · simp only [sup_le_iff]
@@ -107,6 +111,8 @@ lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
     · exact hFC.left_mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
     · exact hGD.left_mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
 
+lemma inf_submodule (hF : F.IsFaceOf C) : C ⊓ (Submodule.span R (F : Set M)) = F := sorry
+
 end Ring
 
 section Field
@@ -118,6 +124,7 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 ### Equivalent definitions of isFaceOf on fields
 -/
 
+-- Q: This is true without field, no?
 lemma iff_mem_of_mul_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M} {c : R}, x ∈ C → y ∈ C → 0 < c → c • x + y ∈ F → x ∈ F := by
   constructor
@@ -172,7 +179,7 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] {C F : PointedCone R M}
 
-/-- The lineal space of a cone `C` is a face of `C`. -/
+/-- The lineality space of a cone `C` is a face of `C`. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   suffices ∀ {x y : M}, x ∈ C → y ∈ C → x + y ∈ ↑C.lineal → x ∈ ↑C.lineal by
     exact iff_mem_of_add_mem.mpr ⟨PointedCone.lineal_le C, this⟩
@@ -240,10 +247,15 @@ end Field
 
 end IsFaceOf
 
+
+
+
+
+
+
 /-!
 ## Bundled Face
 -/
-
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 in
@@ -258,7 +270,7 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M} {F F₁ F₂ : Face C}
 
-def self (C : PointedCone R M) : Face C := ⟨_, IsFaceOf.refl C⟩
+def self (C : PointedCone R M) : Face C := ⟨C, IsFaceOf.refl C⟩
 
 instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) :=
     ⟨Face.self C⟩
@@ -460,6 +472,9 @@ end Face
 -/
 section Field
 
+-- TODO: most of the lemmas below should be written for `IsFaceOf` instead of `Face`
+--  and version for `Face` should be implemented only when necessary.
+
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F : PointedCone R M} {s t : Set M}
 
@@ -509,6 +524,8 @@ lemma FG.face_fg_of_fg (hC : C.FG) (F : Face C) : F.FG := by
   let ⟨t, _, tt⟩ := exists_fg_span_subset_face F
   use t, tt
 
+lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := FG.face_fg_of_fg hC ⟨F, hF⟩
+
 /-- An FG cone has finitely many faces. -/
 theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
   obtain ⟨s, rfl⟩ := hC
@@ -534,6 +551,10 @@ variable [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Modul
 def subdual (C F : PointedCone R M) : PointedCone R N :=
   (dual p C) ⊓ (.dual p F : Submodule R N)
 
+variable {p} in
+lemma subdual_def {C F : PointedCone R M} :
+    subdual p C F = (dual p C) ⊓ (.dual p F : Submodule R N) := rfl
+
 lemma subdual_antitone : Antitone (subdual p C) := by
   intro _ _ hF
   unfold subdual
@@ -546,7 +567,7 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
-variable (p : M →ₗ[R] N →ₗ[R] R) {C F : PointedCone R M}
+variable (p : M →ₗ[R] N →ₗ[R] R) {C F F₁ F₂ : PointedCone R M}
 
 /-- The subdual of a face is a face of the dual. -/
 lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
@@ -561,6 +582,13 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
   · exact xd (hF.subset mF)
   · rw [n'on mF]
     exact (le_add_iff_nonneg_right _).mpr <| yC (hF.subset mF)
+
+@[simp] lemma subdual_lineal : subdual p C C.lineal = dual p C := sorry
+@[simp] lemma subdual_bot : subdual p C ⊥ = dual p C := sorry
+
+lemma subdual_self : subdual p C C = (dual p C).lineal := sorry
+
+
 
 /-- The face of the dual cone that corresponds to this face. -/
 def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩

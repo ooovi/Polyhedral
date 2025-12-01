@@ -28,14 +28,14 @@ lemma FG.linearEquiv {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T)
 
 -- ## RESTRICT / EMBED
 
-lemma embed_fg_of_fg (S : Submodule R M) {T : Submodule R S} (hC : T.FG) :
+lemma embed_fg_of_fg {S : Submodule R M} {T : Submodule R S} (hC : T.FG) :
     (embed T).FG := Submodule.FG.map _ hC
 
 lemma fg_of_embed_fg {S : Submodule R M} {T : Submodule R S} (hT : (embed T).FG) : T.FG
     := fg_of_fg_map_injective _ (injective_subtype (S : Submodule R M)) hT
 
 @[simp] lemma embed_fg_iff_fg {S : Submodule R M} {T : Submodule R S} : (embed T).FG ↔ T.FG
-  := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
+  := ⟨fg_of_embed_fg, embed_fg_of_fg⟩
 
 lemma restrict_fg_of_fg_le {S T : Submodule R M} (hST : T ≤ S) (hT : T.FG) :
     (restrict S T).FG := by
@@ -45,7 +45,7 @@ lemma restrict_fg_of_fg_le {S T : Submodule R M} (hST : T ≤ S) (hT : T.FG) :
 lemma fg_of_restrict_le {S T : Submodule R M} (hST : T ≤ S) (hC : (restrict S T).FG) :
     T.FG := by
   rw [← (inf_eq_left.mpr hST), inf_comm, ← embed_restrict]
-  exact embed_fg_of_fg S hC
+  exact embed_fg_of_fg hC
 
 @[simp] lemma fg_iff_restrict_le {S T : Submodule R M} (hST : T ≤ S) :
     (restrict S T).FG ↔ T.FG := ⟨fg_of_restrict_le hST, restrict_fg_of_fg_le hST⟩

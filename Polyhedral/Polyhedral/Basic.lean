@@ -383,8 +383,8 @@ variable (p) [Fact (Surjective p)] in
 /-- A polyhedral cone `C` can be written as the intersection of a FGDual cone with the
   linear span of `C`. -/
 lemma IsPolyhedral.exists_fgdual_inf_span {C : PointedCone R N} (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R N, D.FGDual p ∧ D ⊓ Submodule.span (M := N) R C = C := by
-  have ⟨S, hS⟩ := Submodule.exists_isCompl (Submodule.span (M := N) R C)
+    ∃ D : PointedCone R N, D.FGDual p ∧ D ⊓ Submodule.span R (C : Set N) = C := by
+  have ⟨S, hS⟩ := Submodule.exists_isCompl (Submodule.span R (C : Set N))
   exact ⟨C ⊔ S, hC.fgdual_sup_of_codisjoint_span p hS.codisjoint,
     sup_inf_submodule_span_of_disjoint hS.disjoint⟩
 

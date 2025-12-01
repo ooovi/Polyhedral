@@ -65,16 +65,21 @@ def dual : Submodule R N where
 @[simp] lemma dual_zero : dual p 0 = ⊤ := by ext; simp
 @[simp] lemma dual_bot : dual p {0} = ⊤ := dual_zero
 
-/- TODO: does not need `IsFaithfulPair`, but the weaker `IsSeparating`, which is
-  actually be equivalent to this statement. -/
-variable (p) [Fact p.IsFaithfulPair] in
+lemma dual_univ_ker : dual p univ = ker p.flip := by
+  ext x; simpa [Eq.comm] using (funext_iff (f := (0 : M →ₗ[R] R)) (g := p.flip x)).symm
+
+variable [inst : Fact p.SeparatingRight] in
 @[simp] lemma dual_univ : dual p univ = ⊥ := by
-  rw [le_antisymm_iff, and_comm]
-  constructor
-  · exact bot_le
-  obtain ⟨g, hg⟩ : p.IsFaithfulPair := Fact.elim inferInstance
-  simp only [SetLike.le_def, mem_dual, mem_univ, forall_const]
-  exact fun x h => hg x (@h (g x)).symm
+  simpa [dual_univ_ker, separatingRight_iff_flip_ker_eq_bot] using inst.elim
+
+-- variable (p) [Fact p.IsFaithfulPair] in
+-- @[simp] lemma dual_univ' : dual p univ = ⊥ := by
+--   rw [le_antisymm_iff, and_comm]
+--   constructor
+--   · exact bot_le
+--   obtain ⟨g, hg⟩ : p.IsFaithfulPair := Fact.elim inferInstance
+--   simp only [SetLike.le_def, mem_dual, mem_univ, forall_const]
+--   exact fun x h => hg x (@h (g x)).symm
 
 alias dual_top := dual_univ
 
@@ -112,6 +117,8 @@ lemma dual_eq_Inf_dual_singleton (s : Set M) :
 /-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_Inf_dual_singleton' (s : Finset M) :
     dual p s = ⨅ x ∈ s, dual p {x} := by ext; simp
+
+lemma dual_singleton_ker (x : M) : dual p {x} = ker (p x) := by ext; simp [Eq.comm]
 
 /-- The dual is the kernel of a linear map into a free module. -/
 lemma dual_ker_pi (s : Set M) : dual p s = ker (LinearMap.pi fun x : s => p x) := by
@@ -295,11 +302,11 @@ lemma IsDualClosed.def_iff {S : Submodule R M} :
     IsDualClosed p S ↔ dual p.flip (dual p S) = S := by rfl
 
 variable (p) in
-lemma dual_IsDualClosed (S : Submodule R M) : (dual p S).IsDualClosed p.flip := by
+@[simp] lemma dual_IsDualClosed (s : Set M) : (dual p s).IsDualClosed p.flip := by
   simp [IsDualClosed, flip_flip, dual_dual_flip_dual]
 
 variable (p) in
-lemma dual_flip_IsDualClosed (S : Submodule R N) : (dual p.flip S).IsDualClosed p
+@[simp] lemma dual_flip_IsDualClosed (s : Set N) : (dual p.flip s).IsDualClosed p
     := by simp [IsDualClosed]
 
 lemma IsDualClosed.dual_inj {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p)
@@ -341,10 +348,10 @@ variable (p) in
 @[simp] lemma dual_dual_top : dual p.flip (dual p ⊤) = ⊤
     := isDualClosed_top p
 
-variable (p) [Fact p.flip.IsFaithfulPair] in
-lemma isDualClosed_bot : IsDualClosed p ⊥ := by simp [IsDualClosed]
+variable [Fact p.SeparatingLeft] in
+@[simp] lemma isDualClosed_bot : IsDualClosed p ⊥ := by simp [IsDualClosed]
 
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingLeft] in
 -- @[simp]
 lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
@@ -409,14 +416,15 @@ theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
 --   rw [← hS]
 --   sorry
 
-lemma IsDualClosed.sup {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
-    (S ⊔ T).IsDualClosed p := by
-  obtain ⟨S', hSdc, rfl⟩ := hS.exists_of_dual_flip
-  obtain ⟨T', hTdc, rfl⟩ := hT.exists_of_dual_flip
-  unfold IsDualClosed
-  sorry
+-- This seems to be NOT TRUE!
+-- lemma IsDualClosed.sup {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
+--     (S ⊔ T).IsDualClosed p := by
+--   obtain ⟨S', hSdc, rfl⟩ := hS.exists_of_dual_flip
+--   obtain ⟨T', hTdc, rfl⟩ := hT.exists_of_dual_flip
+--   unfold IsDualClosed
+--   sorry
 
-alias sup_isDualClosed := IsDualClosed.sup
+-- alias sup_isDualClosed := IsDualClosed.sup
 
 lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.IsDualClosed p)
     (hT : T.IsDualClosed p) : dual p (S ∩ T) = dual p S ⊔ dual p T := by
@@ -476,11 +484,6 @@ lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
   rw [← flip_apply, hx'] at hx
   exact hx
 
--- TODO: True without `[Field R]`? If not, then derive from `FG.isDualClosed`.
-variable (p) [Fact p.flip.IsFaithfulPair] in
-lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
-  sorry
-
 variable (p) in
 lemma IsDualClosed.to_bilin {S : Submodule R M} (hS : S.IsDualClosed (Dual.eval R M))
     : S.IsDualClosed p := by
@@ -499,9 +502,9 @@ variable {R M N : Type*}
 
 variable (p)
 
--- -- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
+-- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
 variable [Fact (Surjective p.flip)] in
-/-- Every submodule of a vector space is dual closed. -/
+/-- A submodule of a vector space is dual closed. -/
 lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := by
   apply IsDualClosed.to_bilin
   nth_rw 1 [IsDualClosed, Dual.eval, flip_flip]
@@ -540,7 +543,9 @@ variable [Fact (Surjective p)] in
 lemma exists_set_dual (S : Submodule R N) : ∃ s : Set M, dual p s = S := by
   use dual p.flip S; exact dual_dual_flip p S
 
-variable [p.IsPerfPair] in -- do we really need perf pair?
+-- do we really need perf pair?
+-- We need something, but maybe faithful suffices
+variable [p.IsPerfPair] in
 lemma dual_inf_dual_sup_dual (S T : Submodule R M) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
   nth_rw 1 [← dual_flip_dual p S]
@@ -548,6 +553,76 @@ lemma dual_inf_dual_sup_dual (S T : Submodule R M) :
   rw [← coe_inf]
   rw [← dual_sup_dual_inf_dual]
   exact dual_dual_flip p _
+
+
+
+-- ### HIGH PRIORITY! This is needed in the cone theory!
+
+lemma exists_smul_of_ker_le_ker {p q : M →ₗ[R] R} (h : ker p ≤ ker q) :
+    ∃ a : R, q = a • p := by
+  by_cases H : p = 0
+  · exact ⟨0, by simpa [H] using h⟩
+  rw [LinearMap.ext_iff] at H
+  simp at H
+  obtain ⟨x, hx⟩ := H
+  use q x / p x
+  ext y
+  simp
+  -- using hx, rewrite goal to
+  --   qy px - qx py = 0
+  --   q (y px - x py) = 0
+  -- which, via h, follows from
+  --   p (y px - x px) = 0
+  -- which is true because this is just
+  --   px py - py px = 0
+  sorry
+
+variable [Fact (Injective p)] in -- ! satisfied by both Dual.eval and .id
+lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} := by
+  ext y
+  simp
+  rw [mem_span_singleton]
+  constructor
+  · intro h
+    obtain ⟨a, ha⟩ := exists_smul_of_ker_le_ker (fun _ hx => (h hx.symm).symm)
+    use a
+    rw [← LinearMap.map_smul] at ha
+    have inj : Injective p := Fact.elim inferInstance
+    replace ha := inj ha
+    exact ha.symm
+  · intro h _ hz
+    obtain ⟨_, rfl⟩ := h
+    simp [← hz]
+
+-- variable [Fact (Injective p)] in
+-- lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
+--   sorry -- TODO: derive from `singleton_dual_flip_dual` above
+
+-- variable [Fact p.IsFaithfulPair] in
+-- /- NOTE: in a field and with a surjective pairing, every submodule is dual closed. But maybe
+--   if the submodule is FG, we don't need the surjective pairing, but a faithful one suffices. -/
+-- lemma FG.dual_flip_dual_of_finite (s : Finset M) :
+--     dual p.flip (dual p s) = span R s := sorry -- Submodule.dual_flip_dual p S
+
+-- variable [Fact p.IsFaithfulPair] in
+-- /- NOTE: in a field and with a surjective pairing, every submodule is dual closed. But maybe
+--   if the submodule is FG, we don't need the surjective pairing, but a faithful one suffices. -/
+-- lemma FG.dual_flip_dual {S : Submodule R M} (hS : S.FG) :
+--     dual p.flip (dual p S) = S := sorry -- Submodule.dual_flip_dual p S
+
+-- variable [Fact p.IsFaithfulPair] in
+-- lemma FG.dual_dual_flip {S : Submodule R N} (hS : S.FG) : dual p (dual p.flip S) = S := by sorry
+
+-- variable [Fact p.flip.IsFaithfulPair] in
+-- /-- The span of a finite set is dual closed. -/
+-- lemma isDualClosed_of_finite (s : Finset M) : IsDualClosed p (span R s) := by
+
+--   sorry
+
+-- variable [Fact p.flip.IsFaithfulPair] in
+-- /-- An FG submodule is dual closed. -/
+-- lemma FG.isDualClosed {S : Submodule R M} (hS : S.FG) : S.IsDualClosed p := by
+--   sorry
 
 ------
 
@@ -663,15 +738,15 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
     Disjoint (dual p S) (dual p T) := by
   rw [disjoint_iff]
   rw [← dual_sup_dual_inf_dual]
   rw [codisjoint_iff.mp hST]
-  exact dual_univ p
+  exact dual_univ
 
-variable (p) [p.IsPerfPair] in -- [Fact (Surjective p)] in
+variable (p) [p.IsPerfPair] in
 theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
     Codisjoint (dual p S) (dual p T) := by
   rw [codisjoint_iff]
@@ -679,10 +754,14 @@ theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
   rw [disjoint_iff.mp hST]
   simp only [bot_coe, dual_bot]
 
-variable (p) [p.IsPerfPair] [Fact p.IsFaithfulPair] in -- [Fact (Surjective p)] in
+variable (p) [p.IsPerfPair] in
 theorem IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
     IsCompl (dual p S) (dual p T) :=
   ⟨disjoint_dual_of_codisjoint p hST.codisjoint, codisjoint_dual_of_disjoint p hST.disjoint⟩
+
+
+-- true ??
+lemma dual_cofg_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := sorry
 
 end Field
 

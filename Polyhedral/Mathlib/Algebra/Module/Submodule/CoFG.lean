@@ -6,8 +6,12 @@ Authors: Martin Winter
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Dimension.RankNullity
+import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.Algebra.Exact
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Corank
 
 open Module Function LinearMap
 
@@ -28,6 +32,14 @@ theorem quot_finite_of_finite [Module.Finite R M] (S : Submodule R M) :
 /-- A submodule `S` is co-finitely generated (CoFG) if the quotient space `M ⧸ S` is
   finitely generated (`Module.Finite`). -/
 abbrev CoFG (S : Submodule R M) : Prop := Module.Finite R (M ⧸ S)
+
+lemma CoFG.finite_quot {S : Submodule R M} (hS : S.CoFG) : Module.Finite R (M ⧸ S) := hS
+lemma CoFG.finite_quot_iff {S : Submodule R M} : S.CoFG = Module.Finite R (M ⧸ S) := rfl
+
+lemma CoFG.fg_quot_iff {S : Submodule R M} : S.CoFG ↔ FG (⊤ : Submodule R (M ⧸ S)) := by
+  rw [← finite_def]
+lemma CoFG.fg_quot {S : Submodule R M} (hS : S.CoFG) :
+    FG (⊤ : Submodule R (M ⧸ S)) := fg_quot_iff.mp hS
 
 /-- The top submodule is CoFG. -/
 @[simp] lemma cofg_top : (⊤ : Submodule R M).CoFG := inferInstance
@@ -52,14 +64,6 @@ lemma cofg_of_le {S T : Submodule R M} {hST : S ≤ T} (hS : S.CoFG) : T.CoFG :=
 lemma CoFG.isCompl_fg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.CoFG) : T.FG
   := Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
 
--- Needs DivisionRing
-lemma CoFG.disjoint_fg [IsNoetherianRing R] {S T : Submodule R M}
-    (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
-  -- obtain ⟨U, hSU, hUT⟩ := isCompl_of_disjoint hST
-  wlog hST : IsCompl S T with H
-  · sorry
-  exact Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
-
 lemma FG.isCompl_cofg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.FG) : T.CoFG := by
   haveI := Finite.iff_fg.mpr hS
   exact Finite.equiv (quotientEquivOfIsCompl T S hST.symm).symm
@@ -78,6 +82,15 @@ lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG
   -- apply LinearMap.quotientInfEquivSupQuotient
   sorry
 
+lemma CoFG.exists_fg_compl {S : Submodule R M} (hS : S.CoFG) :
+    ∃ T : Submodule R M, T.FG ∧ IsCompl S T := by
+  obtain ⟨s, hs⟩ := hS
+  -- just take preimage of generators `s` to span the rest of ⊤, right?
+  sorry
+  -- use (Module.Finite.compl R S).some
+  -- exact ⟨Finite.iff_fg.mpr (Module.Finite.compl R S).some_spec.1,
+  --   (Module.Finite.compl R S).some_spec.2⟩
+
 lemma CoFG.sup {S : Submodule R M} (hS : S.CoFG) (T : Submodule R M) : (S ⊔ T).CoFG
   := Finite.equiv (quotientQuotientEquivQuotientSup S T)
 
@@ -94,10 +107,11 @@ variable [Module.Finite R M] in
 -- Note that not every submodule is necessarily FG. So FG = CoFG needs more hypotheses.
 lemma Finite.cofg {S : Submodule R M} : S.CoFG := Module.Finite.quotient R S
 
-noncomputable abbrev corank (S : Submodule R M) : Cardinal := Module.rank R (M ⧸ S)
-  -- ⨅ ι : { T : Submodule R M // S ⊔ T = ⊤ }, (Module.rank R ι.1)
+open Cardinal
 
-noncomputable abbrev fincorank (S : Submodule R M) : Nat := Module.finrank R (M ⧸ S)
+lemma Submodule.corank_eq_inf_linearIndep (S : Submodule R M) :
+    corank S = ⨅ ι : { s : Set M // S ⊔ span R s = ⊤}, (#ι.1) := by
+  sorry
 
 section StrongRankCondition
 
@@ -108,10 +122,17 @@ variable [StrongRankCondition R]
 lemma CoFG.corank_lt_aleph0 {S : Submodule R M} (hS : S.CoFG) : corank S < ℵ₀
   := Module.rank_lt_aleph0 R _
 
-lemma corank_lt_aleph0_iff {S : Submodule R M} [Free R (M ⧸ S)] :
+lemma CoFG.corank_lt_aleph0_iff {S : Submodule R M} [Free R (M ⧸ S)] :
     corank S < ℵ₀ ↔ CoFG S := Module.rank_lt_aleph0_iff
 
 end StrongRankCondition
+
+lemma rank_add_corank (S : Submodule R M) : Module.rank R S + corank S = Module.rank R M := sorry
+
+lemma rank_eq_corank_of_isCompl {S T : Submodule R M} (h : IsCompl S T) :
+    Module.rank R S = corank T :=
+
+  sorry
 
 variable {N : Type*} [AddCommGroup N] [Module R N]
 
@@ -164,7 +185,7 @@ theorem inf_cofg {S T : Submodule R M} (hS : S.CoFG) (hT : T.CoFG) :
 theorem sInf_cofg {s : Finset (Submodule R M)} (hs : ∀ S ∈ s, S.CoFG) :
     (sInf (s : Set (Submodule R M))).CoFG := by classical
   induction s using Finset.induction with
-  | empty => simpa using cofg_top
+  | empty => simp
   | insert w s hws hs' =>
     simp only [Finset.mem_insert, forall_eq_or_imp, Finset.coe_insert, sInf_insert] at *
     exact inf_cofg hs.1 (hs' hs.2)
@@ -173,8 +194,51 @@ theorem sInf_cofg' {s : Set (Submodule R M)} (hs : s.Finite) (hcofg : ∀ S ∈ 
     (sInf s).CoFG := by
   rw [← hs.coe_toFinset] at hcofg ⊢; exact sInf_cofg hcofg
 
+/-- The restriction of a CoFG submodule is CoFG. -/
+lemma CoFG.restrict (S : Submodule R M) {T : Submodule R M} (hT : T.CoFG) :
+    CoFG (restrict S T) := by
+  rw [fg_quot_iff]
+  apply fg_of_linearEquiv (quot_restrict_iso_sup_quot_restrict S T)
+  exact fg_of_injective _ (quot_restrict_linearMap_quot_injective (S ⊔ T) T)
+
+-- TODO: move out of Noetherian section
+/-- The embedding of a CoFG submodule of a CoFG submodule is CoFG. -/
+lemma CoFG.embed {S : Submodule R M} {T : Submodule R S} (hS : S.CoFG) (hT : T.CoFG) :
+    CoFG (embed T) := by
+  rw [fg_quot_iff] at ⊢ hS
+  have h := fg_of_linearEquiv
+    (quotientQuotientEquivQuotient (Submodule.embed T) S embed_le) hS
+  rw [← finite_def] at h
+  rw [← finite_def]
+  haveI : Module.Finite R ↥(map (Submodule.embed T).mkQ S) := by
+    rw [Module.Finite.iff_fg]
+    haveI : Module.Finite R (M ⧸ Submodule.embed T) := sorry
+    exact IsNoetherian.noetherian _
+    -- exact fg_of_le_fg sorry sorry
+    -- sorry
+  exact Finite.of_submodule_quotient (map (Submodule.embed T).mkQ S)
+
+
 end IsNoetherianRing
 
+-- ## EMBED / RESTRICT
+
 end CommSemiring
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+-- ## PRIORITY
+-- Needs DivisionRing
+lemma CoFG.disjoint_fg [IsNoetherianRing R] {S T : Submodule R M}
+    (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
+  -- obtain ⟨U, hSU, hUT⟩ := isCompl_of_disjoint hST
+  wlog hST : IsCompl S T with H
+  · sorry
+  exact Finite.iff_fg.mp <| Finite.equiv <| quotientEquivOfIsCompl S T hST
+
+end DivisionRing
 
 end Submodule

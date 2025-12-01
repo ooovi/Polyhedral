@@ -414,56 +414,6 @@ lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
 theorem auxLemma (hC : C.IsDualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
     C.FG := by sorry
 
--- ## RELINT
-
-/- A non-topological variant of the relative interior.
-  Below two definitions are given. If they are not equivalent, then the more general one should
-  be chose and equivalence should be proven when it holds.
--/
-
-def relint (C : PointedCone R M) : ConvexCone R M where
-  carrier := {x ∈ C | ∀ F : Face C, x ∈ F → F = C}
-  smul_mem' c hc x hx := by
-    constructor
-    · sorry
-    · sorry
-  add_mem' x hx y hy := by
-    simp
-    constructor
-    · sorry
-    · sorry
-
-theorem relint_def_sInf (C : PointedCone R M) :
-    C.relint = sInf {s | dual p.flip (dual p s) = C} := sorry
-
-def min_face {x : M} (h : x ∈ C) : Face C := sorry -- sInf {F : Face C | x ∈ F}
-
-theorem relint_def_min (C : PointedCone R M) :
-    C.relint = { x ∈ C | C.min_face (x := x) sorry = C } := sorry
-
-/-- The relative interior is non-empty. -/
-lemma relint_nonempty (C : PointedCone R M) : C.relint ≠ ⊥ := sorry
-
-/-- The relative interior is non-empty. -/
-lemma relint_nonempty' (C : PointedCone R M) : Nonempty C.relint := sorry
-
-lemma relint_disj (F₁ F₂ : Face C) :
-    F₁ ≠ F₂ ↔ Disjoint (relint F₁) (relint F₂) (α := ConvexCone R M) := sorry
-
-lemma relint_cover (C : PointedCone R M) :
-    ⋃ F : Face C, (relint F : ConvexCone R M) = (C : Set M) := sorry
-
-def relint_partition (C : PointedCone R M) : Partition (C : Set M) where
-  parts := { relint (F : PointedCone R M) | (F : Face C) }
-  sSupIndep' := sorry
-  bot_notMem' := by
-    simp only [Set.bot_eq_empty, Set.mem_setOf_eq, ConvexCone.coe_eq_empty, not_exists]
-    exact fun F => relint_nonempty (F : PointedCone R M)
-  sSup_eq' := by
-    ext x
-    -- simp; exact relint_partition C
-    sorry
-
 end PointedCone
 
 

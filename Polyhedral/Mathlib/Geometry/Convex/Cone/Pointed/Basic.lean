@@ -308,20 +308,22 @@ section RingPartialOrder
 
 variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
+-- This lemma is used in Faces/Basic.lean. It should probably be moved there.
 open Submodule in
 lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
     (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
-    (hCD : ∀ {x}, x ∈ Submodule.span R C ∧ x ∈ Submodule.span (M := M) R D → x = 0)
+    (hCD : Disjoint (Submodule.span R C) (Submodule.span (M := M) R D))
     (s : xC + xD = yC + yD) :
     xC = yC ∧ xD = yD := by
   let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
     (Submodule.span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+  replace hCD := disjoint_def.mp hCD
   constructor
-  · refine (sub_eq_zero.mp <| hCD ⟨sub_mem_span mxc myc, ?_⟩).symm
+  · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
     rw [add_comm] at s
     rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
     exact sub_mem_span myd mxd
-  · refine (sub_eq_zero.mp <| hCD ⟨?_, sub_mem_span mxd myd⟩).symm
+  · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
     nth_rewrite 2 [add_comm] at s
     rw [← sub_eq_sub_iff_add_eq_add.mpr s]
     exact sub_mem_span myc mxc

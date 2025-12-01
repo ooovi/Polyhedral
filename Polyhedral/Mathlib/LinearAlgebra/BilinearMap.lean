@@ -31,8 +31,13 @@ variable {R : Type*} [CommSemiring R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {N : Type*} [AddCommMonoid N] [Module R N]
 
-def IsSeparating (p : M →ₗ[R] N →ₗ[R] R)
-    := ∀ x : M, p x = 0 → x = 0 -- equiv: (p x) (g x) = 0 → x = 0
+-- def Radical (p : M →ₗ[R] N →ₗ[R] R) := ker p.flip
+-- def Radical' (p : M →ₗ[R] N →ₗ[R] R) := ker p
+
+-- def IsSeparating (p : M →ₗ[R] N →ₗ[R] R)
+--     := ∀ x : M, p x = 0 → x = 0
+
+-- alias IsSeparating := SeparatingLeft
 
 /- For a field this is known as being 'formally real'. This is equivalent to the existence of an
   ordered field structure. This could be relevant on field with no preferred order, e.g. the
@@ -41,7 +46,7 @@ def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
     := ∃ g : N →ₗ[R] M, ∀ x : N, (p ∘ₗ g) x x = 0 → x = 0 -- equiv: (p x) (g x) = 0 → x = 0
 
 /- If p is faithful then there is an embedding of N in M on which p is injective.
-  In prticular, N is "smaller" than M. So Dual.evel is not faithful for infinite spaces, while
+  In prticular, N is "smaller" than M. So Dual.eval is not faithful for infinite spaces, while
   .id is always faithful.
   This is intentionally weaker than a perfect pairing. In this way one direction of the standard
   duality map can still be faithful, even in infinite dimensions.
@@ -50,15 +55,75 @@ def IsFaithfulPair (p : M →ₗ[R] N →ₗ[R] R)
 
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma IsFaithfulPair.isSeparating (hp : p.IsFaithfulPair) : p.flip.IsSeparating := by
-  intro x hpx
-  obtain ⟨_, hg⟩ := hp
-  exact hg x (by simp [← flip_apply, hpx])
+-- lemma funext_zero {α : Type*} {β : Type*} {f : Type*} [Zero α] [Zero β] [FunLike f α β]
+--     (hf : ∀ x, f x = 0) : f = 0 := funext hf
+-- lemma funext_zero {α : Type*} {β : Type*} [Zero α] [Zero β] {f : α → β}
+--     (hf : ∀ x, f x = 0) : f = 0 := funext hf
+-- lemma funext_zero_iff {α : Type*} {β : Type*} [Zero α] [Zero β] (f : α → β) :
+--     f = 0 ↔ ∀ x, f x = 0 := funext_iff
 
-instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair := inst
--- instance [inst : Fact p.flip.flip.IsFaithfulPair] : Fact p.IsFaithfulPair := inst
+-- ## SeparatingLeft
 
-instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
+-- lemma SeparatingLeft.iff_zero_of_forall_zero : p.SeparatingLeft ↔ ∀ x, p x = 0 → x = 0 where
+--   mp h x hx := by simpa [hx] using h x
+--   mpr h x hx := h x (ext hx)
+-- lemma SeparatingLeft.zero_of_forall_zero (hp : p.SeparatingLeft) :
+--     ∀ x, p x = 0 → x = 0 := iff_zero_of_forall_zero.mp hp
+
+-- lemma SeparatingLeft.iff_ker_eq_bot : p.SeparatingLeft ↔ ker p = ⊥ := by
+--   simpa only [iff_zero_of_forall_zero] using ker_eq_bot'.symm
+-- lemma SeparatingLeft.ker_eq_bot (hp : p.SeparatingLeft) : ker p = ⊥ := iff_ker_eq_bot.mp hp
+
+lemma SeparatingLeft.of_injective (hp : Injective p) : p.SeparatingLeft := by
+  simpa [separatingLeft_iff_ker_eq_bot] using ker_eq_bot_of_injective hp
+instance [inst : Fact (Injective p)] : Fact p.SeparatingLeft :=
+    ⟨SeparatingLeft.of_injective inst.elim⟩
+
+-- instance [inst : Fact p.SeparatingLeft] : Fact p.flip.flip.SeparatingLeft := inst
+
+lemma SeparatingLeft.flip_of_isFaithfulPair (hp : p.IsFaithfulPair) : p.SeparatingRight := by
+  obtain ⟨g, hg⟩ := hp
+  intro x hx
+  simpa [hx] using hg x
+
+instance [inst : Fact p.IsFaithfulPair] : Fact p.SeparatingRight :=
+    ⟨SeparatingLeft.flip_of_isFaithfulPair inst.elim⟩
+instance [inst : Fact p.flip.IsFaithfulPair] : Fact p.SeparatingLeft :=
+    ⟨SeparatingLeft.flip_of_isFaithfulPair inst.elim⟩
+
+variable [Module.Projective R M] in
+instance : Fact (Dual.eval R M).SeparatingLeft :=
+    ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
+instance : Fact (Dual.eval R M).SeparatingRight :=
+    ⟨by simp [Dual.eval, separatingLeft_iff_linear_nontrivial]⟩
+
+-- instance [inst : Fact p.flip.SeparatingLeft] : Fact p.SeparatingRight :=
+--     ⟨flip_separatingLeft.mp inst.elim⟩
+-- instance [inst : Fact p.flip.SeparatingRight] : Fact p.SeparatingLeft :=
+--     ⟨flip_separatingRight.mp inst.elim⟩
+
+instance [inst : Fact p.SeparatingLeft] : Fact p.flip.SeparatingRight :=
+    ⟨flip_separatingLeft.mp inst.elim⟩
+instance [inst : Fact p.SeparatingRight] : Fact p.flip.SeparatingLeft :=
+    ⟨flip_separatingRight.mp inst.elim⟩
+
+instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingLeft := ⟨inst.elim.1⟩
+instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.2⟩
+
+
+-- ## IsSeparating
+
+-- lemma IsSeparating.iff_ker_eq_bot : p.IsSeparating ↔ ker p = ⊥ := ker_eq_bot'.symm
+-- lemma IsSeparating.ker_eq_bot (hp : p.IsSeparating) : ker p = ⊥ := iff_ker_eq_bot.mp hp
+
+-- lemma IsFaithfulPair.isSeparating (hp : p.IsFaithfulPair) : p.flip.IsSeparating := by
+--   intro x hpx
+--   obtain ⟨_, hg⟩ := hp
+--   exact hg x (by simp [← flip_apply, hpx])
+
+-- @[deprecated SeparatingLeft (since := "")]
+-- instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair := inst
+-- -- instance [inst : Fact p.flip.flip.IsFaithfulPair] : Fact p.IsFaithfulPair := inst
 
 -- variable {R : Type*} [CommRing R]
 -- variable {M : Type*} [AddCommGroup M] [Module R M]
@@ -67,9 +132,60 @@ instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
 
 -- def foo (hp : p.IsPerfPair) : N ≃ₗ[R] Dual R M := sorry
 
+-- lemma IsSeparating.of_injective (hp : Injective p) : p.IsSeparating := by
+--   simpa [IsSeparating.iff_ker_eq_bot] using ker_eq_bot_of_injective hp
+-- instance [inst : Fact (Injective p)] : Fact p.IsSeparating := ⟨IsSeparating.of_injective inst.elim⟩
+
+-- instance [inst : Fact p.IsSeparating] : Fact p.flip.flip.IsSeparating := inst
+
+-- lemma isSeparating_flip_of_isFaithfulPair (hp : p.IsFaithfulPair) : p.flip.IsSeparating := by
+--   obtain ⟨g, hg⟩ := hp
+--   intro x hx
+--   simpa [← flip_apply p, hx] using hg x
+
+-- instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.IsSeparating :=
+--     ⟨isSeparating_flip_of_isFaithfulPair inst.elim⟩
+-- instance [inst : Fact p.flip.IsFaithfulPair] : Fact p.IsSeparating :=
+--     ⟨isSeparating_flip_of_isFaithfulPair inst.elim⟩
+
+-- variable [Module.Projective R M] in
+-- instance : Fact (Dual.eval R M).IsSeparating := ⟨by simp [IsSeparating, eval_apply_eq_zero_iff]⟩
+
+-- instance : Fact (Dual.eval R M).flip.IsSeparating := ⟨by simp [Dual.eval, IsSeparating]⟩
+
+instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
+
+instance [inst : Fact (Injective p)] : Fact (Injective p.flip.flip) := inst
+
 end CommSemiring
 
 section CommRing
+
+variable {R : Type*} [CommRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M] -- NOTE: AddCommMonoid suffices for some below
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- ## PRIORITY!
+instance [inst : p.IsPerfPair] : Fact p.Nondegenerate := ⟨sorry⟩
+
+
+
+lemma injective_flip_of_isFaithfulPair (hp : p.IsFaithfulPair) : Injective p.flip := by
+  obtain ⟨g, hg⟩ := hp
+  intro x y hxy
+  simpa [← flip_apply p, hxy, sub_eq_zero] using hg (x - y)
+
+instance [inst : Fact p.IsFaithfulPair] : Fact (Injective p.flip) :=
+    ⟨injective_flip_of_isFaithfulPair inst.elim⟩
+
+-- instance [inst : Fact p.flip.IsFaithfulPair] : Fact (Injective p) :=
+--     ⟨injective_flip_of_isFaithfulPair inst.elim⟩
+
+instance [inst : p.IsPerfPair] : Fact (Injective p) := ⟨inst.bijective_left.injective⟩
+instance [inst : p.IsPerfPair] : Fact (Injective p.flip) := ⟨inst.bijective_right.injective⟩
+instance [inst : p.flip.IsPerfPair] : Fact (Injective p) := ⟨inst.bijective_right.injective⟩
+-- instance [inst : p.flip.IsPerfPair] : Fact (Injective p.flip) := inferInstance
 
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
