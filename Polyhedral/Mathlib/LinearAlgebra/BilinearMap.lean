@@ -110,6 +110,10 @@ instance [inst : Fact p.SeparatingRight] : Fact p.flip.SeparatingLeft :=
 instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingLeft := ⟨inst.elim.1⟩
 instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.2⟩
 
+variable [inst : Fact p.SeparatingLeft] in
+@[simp] lemma SeparatingLeft.ker_eq_bot : ker p = ⊥ :=
+  separatingLeft_iff_ker_eq_bot.mp inst.elim
+
 
 -- ## IsSeparating
 
@@ -134,7 +138,8 @@ instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.
 
 -- lemma IsSeparating.of_injective (hp : Injective p) : p.IsSeparating := by
 --   simpa [IsSeparating.iff_ker_eq_bot] using ker_eq_bot_of_injective hp
--- instance [inst : Fact (Injective p)] : Fact p.IsSeparating := ⟨IsSeparating.of_injective inst.elim⟩
+-- instance [inst : Fact (Injective p)] : Fact p.IsSeparating :=
+    -- ⟨IsSeparating.of_injective inst.elim⟩
 
 -- instance [inst : Fact p.IsSeparating] : Fact p.flip.flip.IsSeparating := inst
 

@@ -416,7 +416,6 @@ lemma FGDual.exists_fg_sup_lineal {C : PointedCone 𝕜 N} (hC : C.FGDual p) :
   rw [dual_span_lineal_dual]
   exact PointedCone.exists_fg_sup_dual p s
 
-variable [Fact p.Nondegenerate] in -- is Nondegenerate necessary?
 /-- The sum of FGDual cones is FGDual. -/
 lemma sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FGDual p) :
     (C ⊔ D).FGDual p := by
@@ -427,14 +426,13 @@ lemma sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FGDual p) 
   rw [sup_assoc, ← sup_assoc]
   refine sup_fg_fgdual (sup_fg hCfg hDfg) ?_
   rw [← coe_sup, coe_fgdual_iff]
-  exact Submodule.sup_fgdual hD.lineal_fgdual hC.lineal_fgdual
+  exact Submodule.sup_fgdual hD.lineal_fgdual _
 
 -- TODO: should maybe not depend on `IsFaithfulPair`. But removing it could be tricky.
 -- an alternative proof is given below in the comment `dual_inf_fgdual_dual_sup_dual`, but
 -- it uses even more assumptions.
 -- To prove this we likely need to prove a bunch of lemmas that show how duality interacts
 -- with restriction to subspaces. This is rather subtle.
-variable [Fact p.Nondegenerate] in -- is Nondegenerate necessary?
 variable (p) [Fact p.flip.IsFaithfulPair] in
 lemma FG.dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ∩ D) = (dual p C) ⊔ (dual p D) := by

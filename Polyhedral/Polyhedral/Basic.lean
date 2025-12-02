@@ -7,7 +7,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
-open Submodule hiding span dual IsDualClosed
+open Submodule hiding span dual DualClosed
 open PointedCone
 
 
@@ -469,19 +469,19 @@ variable (p) in
 -- However, the assumption `[Fact (Surjective p)]` is preferable because it can be
 -- inferred automatically in the finite dimensional case.
 lemma IsPolyhedral.isDualClosed_iff_lineal (hC : C.IsPolyhedral) :
-  C.IsDualClosed p ↔ C.lineal.IsDualClosed p := by sorry
+  C.DualClosed p ↔ C.lineal.DualClosed p := by sorry
 
 variable (p) [Fact (Surjective p.flip)] in
-lemma IsPolyhedral.isDualClosed (hC : C.IsPolyhedral) : C.IsDualClosed p := by
+lemma IsPolyhedral.isDualClosed (hC : C.IsPolyhedral) : C.DualClosed p := by
   obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span p.flip
   rw [← hD]
-  exact IsDualClosed.inf (FGDual.isDualClosed hcofg)
-    (isDualClosed_coe <| Submodule.isDualClosed p _)
+  exact DualClosed.inf (FGDual.isDualClosed hcofg)
+    (dualClosed_coe <| Submodule.dualClosed p _)
 
 -- This doubling of theorems should be unnecessary if we define `[Fact (Surjective p)]` correctly.
 variable (p) [Fact (Surjective p)] in
 lemma IsPolyhedral.isDualClosed_flip {C : PointedCone R N} (hC : C.IsPolyhedral) :
-    C.IsDualClosed p.flip := by
+    C.DualClosed p.flip := by
   rw [← flip_flip p]; exact hC.isDualClosed p.flip
 
 variable (p) [Fact (Surjective p.flip)] in
@@ -552,7 +552,7 @@ lemma IsPolyhedral.exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
   have h' : (PointedCone.dual p C').IsPolyhedral := sorry -- FG.isPolyhedral (FGDual.dual_fg h)
   have h'' := FGDual.isDualClosed h
   rw [← h'']
-  have h'' := Submodule.isDualClosed p (Submodule.span R C)
+  have h'' := Submodule.dualClosed p (Submodule.span R C)
   rw [← h'']
   rw [← dual_eq_submodule_dual]
   have h (S : Submodule R N) : ((S : PointedCone R N) : Set N) = (S : Set N) := by simp
@@ -599,7 +599,7 @@ lemma IsPolyhedral.exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
 --     ----
 --     rw [← hD]
 --     --rw [dual_sup_dual_eq_inf_dual]
---     rw [IsDualClosed.dual_lineal_span_dual]
+--     rw [DualClosed.dual_lineal_span_dual]
 --     ·
 --       sorry
 --     · sorry
@@ -723,12 +723,12 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PolyhedralCone R M}
 
 variable (p) [Fact (Surjective p.flip)] in
-lemma isDualClosed (C : PolyhedralCone R M) : IsDualClosed p C :=
+lemma dualClosed (C : PolyhedralCone R M) : DualClosed p C :=
   sorry -- C.isPolyhedral.isDualClosed p
 
 -- variable (p) in
 -- lemma isDualClosed_iff (C : PolyhedralCone R M) :
---   IsDualClosed p C ↔ (lineal C).IsDualClosed p := sorry
+--   DualClosed p C ↔ (lineal C).DualClosed p := sorry
 
 -- Duality flips the face lattice
 

@@ -90,11 +90,20 @@ lemma FGDual.dual_dual_flip {S : Submodule R N} (hS : S.FGDual p) :
 lemma FGDual.dual_flip_dual {S : Submodule R M} (hS : S.FGDual p.flip) :
     dual p.flip (dual p S) = S := hS.dual_dual_flip
 
-lemma FGDual.isDualClosed {S : Submodule R M} (hS : S.FGDual p.flip) :
-    S.IsDualClosed p := hS.dual_flip_dual
+lemma FGDual.dualClosed {S : Submodule R M} (hS : S.FGDual p.flip) :
+    S.DualClosed p := hS.dual_flip_dual
 
-lemma FGDual.isDualClosed_flip {S : Submodule R N} (hS : S.FGDual p) :
-    S.IsDualClosed p.flip := hS.dual_dual_flip
+lemma FGDual.dualClosed_flip {S : Submodule R N} (hS : S.FGDual p) :
+    S.DualClosed p.flip := hS.dual_dual_flip
+
+@[simp] lemma FGDual.ker_le {S : Submodule R N} (hS : S.FGDual p) : ker p.flip ≤ S := by
+  rw [← dual_dual_flip hS]
+  exact ker_le_dual _
+
+-- lemma FGDual.sup_ker {S : Submodule R N} (hS : S.FGDual p) : (S ⊔ ker p.flip).FGDual p := by
+--   obtain ⟨s, rfl⟩ := hS
+--   use s
+--   simp [ker_le_dual]
 
 -----
 
@@ -253,6 +262,10 @@ theorem FGDual.cofg {S : Submodule R N} (hS : S.FGDual p) : S.CoFG := by
   obtain ⟨s, rfl⟩ := hS.exists_finset_dual
   exact dual_finset_cofg p s
 
+theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
+    S.FGDual p := by
+  sorry
+
 theorem fg_of_isCompl_fgdual {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FGDual p) :
     T.FG := CoFG.isCompl_fg hST (FGDual.cofg hS)
 
@@ -292,7 +305,7 @@ example {ι : Type*} [DecidableEq ι] [Finite ι] (b : Basis ι R M) (s : Set ι
   IsCompl (span R ((fun i => b i )'' s)) (dual .id ((fun i => b.dualBasis i) '' sᶜ))
   := sorry
 
--- The proof can be much shorter, see above
+-- The proof can maybe be much shorter, see above
 variable (p) [Fact (Surjective p)] in
 /-- A complement of an FG submodule is FGDual. -/
 theorem fgdual_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :

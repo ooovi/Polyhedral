@@ -64,9 +64,12 @@ def dual : Submodule R N where
 @[simp] lemma dual_empty : dual p ∅ = ⊤ := by ext; simp
 @[simp] lemma dual_zero : dual p 0 = ⊤ := by ext; simp
 @[simp] lemma dual_bot : dual p {0} = ⊤ := dual_zero
+@[simp] lemma dual_ker : dual p (ker p) = ⊤ := by ext; simp +contextual
 
 lemma dual_univ_ker : dual p univ = ker p.flip := by
   ext x; simpa [Eq.comm] using (funext_iff (f := (0 : M →ₗ[R] R)) (g := p.flip x)).symm
+lemma dual_flip_univ_ker : dual p.flip univ = ker p := by
+  nth_rw 2 [← flip_flip p]; exact dual_univ_ker
 
 variable [inst : Fact p.SeparatingRight] in
 @[simp] lemma dual_univ : dual p univ = ⊥ := by
@@ -87,6 +90,11 @@ alias dual_top := dual_univ
 
 alias dual_antitone := dual_le_dual
 
+lemma ker_le_dual (s : Set M) : ker p.flip ≤ dual p s := by
+  simp [← dual_flip_univ_ker, dual_antitone]
+lemma ker_le_dual_flip (s : Set N) : ker p ≤ dual p.flip s := by
+  simp [← dual_flip_univ_ker, dual_antitone]
+
 /-- The inner dual cone of a singleton is given by the preimage of the positive cone under the
 linear map `p x`. -/
 lemma dual_singleton (x : M) : dual p {x} = ker (p x) := by
@@ -96,6 +104,10 @@ lemma dual_singleton (x : M) : dual p {x} = ker (p x) := by
 --   simp; sorry
 
 lemma dual_union (s t : Set M) : dual p (s ∪ t) = dual p s ⊓ dual p t := by aesop
+
+variable (p) in
+lemma dual_union_ker (s : Set M) : dual p (s ∪ ker p) = dual p s := by
+  simp [dual_union]
 
 lemma dual_insert (x : M) (s : Set M) : dual p (insert x s) = dual p {x} ⊓ dual p s := by
   rw [insert_eq, dual_union]
@@ -208,26 +220,26 @@ lemma dual_dualCoannihilator' (S : Submodule R M) : dual p S = (map p S).dualCoa
 
 -------------------
 
-variable (p) in
-abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
-
 -- variable (p) in
--- lemma dual_antimono' {S T : Submodule R M} (hST : S ≤ T) : dual p T ≤ dual p S := by
---   exact dual_antimono hST
+-- abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
 
-lemma dual_gc' : GaloisConnection (toDual ∘ dual' p) (dual' p.flip ∘ ofDual) := by
-  intro S T
-  simp only [Function.comp_apply]
-  nth_rw 1 [← toDual_ofDual T]
-  rw [toDual_le_toDual]
-  constructor <;>
-    exact (le_trans subset_dual_dual <| dual_antitone ·)
+-- -- variable (p) in
+-- -- lemma dual_antimono' {S T : Submodule R M} (hST : S ≤ T) : dual p T ≤ dual p S := by
+-- --   exact dual_antimono hST
 
-def dual_gi : GaloisInsertion (dual' p ∘ ofDual) (toDual ∘ dual' p.flip) where
-  choice S _ := toDual (dual' p S)
-  gc := sorry -- dual_gc'
-  le_l_u := fun _ => le_dual_dual
-  choice_eq := by sorry
+-- lemma dual_gc' : GaloisConnection (toDual ∘ dual' p) (dual' p.flip ∘ ofDual) := by
+--   intro S T
+--   simp only [Function.comp_apply]
+--   nth_rw 1 [← toDual_ofDual T]
+--   rw [toDual_le_toDual]
+--   constructor <;>
+--     exact (le_trans subset_dual_dual <| dual_antitone ·)
+
+-- def dual_gi : GaloisInsertion (dual' p ∘ ofDual) (toDual ∘ dual' p.flip) where
+--   choice S _ := toDual (dual' p S)
+--   gc := sorry -- dual_gc'
+--   le_l_u := fun _ => le_dual_dual
+--   choice_eq := by sorry
 
 ------------------
 
@@ -288,81 +300,92 @@ lemma dual_sup_dual_le_dual_inf (S T : Submodule R M) :
 
 ----------------------
 
+-- Consider redefining dual closed as dual dual S = S ⊔ ker p
+-- This gives dual dual S = S if p.SeparatingLeft
+-- But can now be used to prove things that do not rely on separating or ker.
+
 variable (p) in
-abbrev IsDualClosed (S : Submodule R M) := dual p.flip (dual p S) = S
+abbrev DualClosed (S : Submodule R M) := dual p.flip (dual p S) = S
 
-/-- A submodule is bipolar if it is equal to its double dual. -/
--- Potentially the more canonical name for `IsDualClosed`.
-alias IsBipolar := IsDualClosed
+@[deprecated DualClosed (since := "")]
+alias IsDualClosed := DualClosed
 
-@[simp] lemma IsDualClosed.def {S : Submodule R M} (hS : IsDualClosed p S) :
+@[simp] lemma DualClosed.def {S : Submodule R M} (hS : DualClosed p S) :
      dual p.flip (dual p S) = S := hS
 
-lemma IsDualClosed.def_iff {S : Submodule R M} :
-    IsDualClosed p S ↔ dual p.flip (dual p S) = S := by rfl
+lemma DualClosed.def_iff {S : Submodule R M} :
+    DualClosed p S ↔ dual p.flip (dual p S) = S := by rfl
 
 variable (p) in
-@[simp] lemma dual_IsDualClosed (s : Set M) : (dual p s).IsDualClosed p.flip := by
-  simp [IsDualClosed, flip_flip, dual_dual_flip_dual]
+@[simp] lemma dual_dualClosed (s : Set M) : (dual p s).DualClosed p.flip := by
+  simp [DualClosed, flip_flip, dual_dual_flip_dual]
 
 variable (p) in
-@[simp] lemma dual_flip_IsDualClosed (s : Set N) : (dual p.flip s).IsDualClosed p
-    := by simp [IsDualClosed]
+@[simp] lemma dual_flip_IsDualClosed (s : Set N) : (dual p.flip s).DualClosed p
+    := by simp [DualClosed]
 
-lemma IsDualClosed.dual_inj {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p)
+lemma DualClosed.dual_inj {S T : Submodule R M} (hS : S.DualClosed p) (hT : T.DualClosed p)
     (hST : dual p S = dual p T) : S = T := by
   rw [← hS, ← hT, hST]
 
-lemma IsDualClosed.dual_antitone_rev {S T : Submodule R M}
-    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p)
+lemma DualClosed.dual_antitone_rev {S T : Submodule R M}
+    (hS : S.DualClosed p) (hT : T.DualClosed p)
       (hST : dual p S ≤ dual p T) : T ≤ S := by
   rw [← hS, ← hT]; exact dual_antitone hST
 
-lemma IsDualClosed.dual_le_of_dual_le {S : Submodule R M} {T : Submodule R N}
-    (hS : S.IsDualClosed p) (hST : dual p S ≤ T) : dual p.flip T ≤ S := by
+lemma DualClosed.dual_le_of_dual_le {S : Submodule R M} {T : Submodule R N}
+    (hS : S.DualClosed p) (hST : dual p S ≤ T) : dual p.flip T ≤ S := by
   rw [← hS]; exact dual_antitone hST
 
 -- NOTE: This is the characterizing property of an antitone GaloisConnection.
-lemma dual_le_iff_dual_le_of_isDualClosed {S : Submodule R M} {T : Submodule R N}
-    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p.flip) :
+lemma dual_le_iff_dual_le_of_dualClosed {S : Submodule R M} {T : Submodule R N}
+    (hS : S.DualClosed p) (hT : T.DualClosed p.flip) :
       dual p S ≤ T ↔ dual p.flip T ≤ S
     := ⟨hS.dual_le_of_dual_le, hT.dual_le_of_dual_le⟩
 
-@[simp] lemma IsDualClosed.dual_inj_iff {S T : Submodule R M} (hS : S.IsDualClosed p)
-    (hT : T.IsDualClosed p) : dual p S = dual p T ↔ S = T := ⟨dual_inj hS hT, by intro h; congr ⟩
+@[simp] lemma DualClosed.dual_inj_iff {S T : Submodule R M} (hS : S.DualClosed p)
+    (hT : T.DualClosed p) : dual p S = dual p T ↔ S = T := ⟨dual_inj hS hT, by intro h; congr ⟩
 
-lemma IsDualClosed.exists_of_dual_flip {S : Submodule R M} (hS : S.IsDualClosed p) :
-    ∃ T : Submodule R N, T.IsDualClosed p.flip ∧ dual p.flip T = S
-  := ⟨dual p S, by simp [IsDualClosed, hS.def]⟩
+lemma DualClosed.exists_of_dual_flip {S : Submodule R M} (hS : S.DualClosed p) :
+    ∃ T : Submodule R N, T.DualClosed p.flip ∧ dual p.flip T = S
+  := ⟨dual p S, by simp [DualClosed, hS.def]⟩
 
-lemma IsDualClosed.exists_of_dual {S : Submodule R N} (hS : S.IsDualClosed p.flip) :
-    ∃ T : Submodule R M, T.IsDualClosed p ∧ dual p T = S := by
+lemma DualClosed.exists_of_dual {S : Submodule R N} (hS : S.DualClosed p.flip) :
+    ∃ T : Submodule R M, T.DualClosed p ∧ dual p T = S := by
   rw [← flip_flip p]; exact hS.exists_of_dual_flip
 
 variable (p) in
-lemma isDualClosed_top : IsDualClosed p ⊤ := by
-  rw [IsDualClosed, le_antisymm_iff, and_comm]
+lemma dualClosed_top : DualClosed p ⊤ := by
+  rw [DualClosed, le_antisymm_iff, and_comm]
   exact ⟨subset_dual_dual, by simp only [top_coe, le_top]⟩
 
 variable (p) in
 @[simp] lemma dual_dual_top : dual p.flip (dual p ⊤) = ⊤
-    := isDualClosed_top p
+    := dualClosed_top p
 
 variable [Fact p.SeparatingLeft] in
-@[simp] lemma isDualClosed_bot : IsDualClosed p ⊥ := by simp [IsDualClosed]
+@[simp] lemma dualClosed_bot : DualClosed p ⊥ := by simp [DualClosed]
 
 variable (p) [Fact p.SeparatingLeft] in
 -- @[simp]
 lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
-lemma IsDualClosed.inf {S T : Submodule R M}
-    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) : (S ⊓ T).IsDualClosed p := by
-  rw [← hS, ← hT, IsDualClosed, ← dual_sup_dual_eq_inf_dual, dual_flip_dual_dual_flip]
+@[simp] lemma dualClosed_ker : DualClosed p (ker p) := by
+  simpa [← dual_flip_univ_ker] using dual_flip_IsDualClosed p _
 
-alias inf_isDualClosed := IsDualClosed.inf
+lemma DualClosed.ker_le {S : Submodule R M} (hS : S.DualClosed p) : ker p ≤ S := by
+  rw [← hS]; exact ker_le_dual_flip _
 
-lemma sInf_isDualClosed {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClosed p) :
-    (sInf s).IsDualClosed p := by
+@[simp] lemma dual_dual_ker : dual p.flip (dual p (ker p)) = ker p := by simp [dual_univ_ker]
+
+lemma DualClosed.inf {S T : Submodule R M}
+    (hS : S.DualClosed p) (hT : T.DualClosed p) : (S ⊓ T).DualClosed p := by
+  rw [← hS, ← hT, DualClosed, ← dual_sup_dual_eq_inf_dual, dual_flip_dual_dual_flip]
+
+alias inf_dualClosed := DualClosed.inf
+
+lemma sInf_dualClosed {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.DualClosed p) :
+    (sInf s).DualClosed p := by
   have hs : s = dual p.flip '' (SetLike.coe '' (dual p '' (SetLike.coe '' s))) := by
     ext T; simp only [mem_image, exists_exists_and_eq_and]
     constructor
@@ -371,18 +394,18 @@ lemma sInf_isDualClosed {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClo
       obtain ⟨t, hts, ht⟩ := h
       simpa [← ht, hS t hts] using hts
   rw [hs, ← dual_sSup_sInf_dual]
-  exact dual_IsDualClosed _ _
+  exact dual_dualClosed _ _
 
 -- variable (p) in
 -- /-- The span of a set `s ⊆ M` is the smallest submodule of M that contains `s`. -/
 -- def dualClosure (s : Set M) : Submodule R M := dual p.flip (dual p s)
 
--- lemma dualClosure_isDualClosed (s : Set M) : (dualClosure p s).IsDualClosed p := by
---   simp [dualClosure, IsDualClosed, dual_dual_flip_dual]
+-- lemma dualClosure_dualClosed (s : Set M) : (dualClosure p s).DualClosed p := by
+--   simp [dualClosure, DualClosed, dual_dual_flip_dual]
 
 -- variable (p) in
--- theorem IsDualClosed.dualClosure_eq_sInf (s : Set M) :
---     dualClosure p s = sInf { S : Submodule R M | S.IsDualClosed p ∧ s ⊆ S } := by
+-- theorem DualClosed.dualClosure_eq_sInf (s : Set M) :
+--     dualClosure p s = sInf { S : Submodule R M | S.DualClosed p ∧ s ⊆ S } := by
 --   rw [Eq.comm, le_antisymm_iff]
 --   constructor
 --   · exact sInf_le ⟨dual_IsDualClosed _ _, subset_dual_dual⟩
@@ -393,15 +416,15 @@ lemma sInf_isDualClosed {s : Set (Submodule R M)} (hS : ∀ S ∈ s, S.IsDualClo
 --   rw [← hT]
 --   exact (dual_dual_mono p hsT) hx
 
--- theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
---     S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
+-- theorem DualClosed.eq_sInf {S : Submodule R M} (hS : S.DualClosed p) :
+--     S = sInf { T : Submodule R M | T.DualClosed p ∧ S ≤ T } := by
 --   nth_rw 1 [← hS]; exact dualClosure_eq_sInf p S
 
 /- NOTE: This seems trivial. Perhaps this should not be its own lemma. 1. Find a shorter proof.
   Then replace where it is used (somewhere relating lineal). -/
 /-- A dual closed submodule is the infiumum of all dual closed submodules that contain it. -/
-theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
-    S = sInf { T : Submodule R M | T.IsDualClosed p ∧ S ≤ T } := by
+theorem DualClosed.eq_sInf {S : Submodule R M} (hS : S.DualClosed p) :
+    S = sInf { T : Submodule R M | T.DualClosed p ∧ S ≤ T } := by
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hS, by simp⟩
@@ -411,23 +434,23 @@ theorem IsDualClosed.eq_sInf {S : Submodule R M} (hS : S.IsDualClosed p) :
   exact (dual_dual_mono p hsT) hx
 
 -- !! Not true: S = ⊤, T = not dual closed
--- protected lemma IsDualClosed.inf {S T : Submodule R M} (hS : S.IsDualClosed p) :
---     (S ⊓ T).IsDualClosed p := by
+-- protected lemma DualClosed.inf {S T : Submodule R M} (hS : S.DualClosed p) :
+--     (S ⊓ T).DualClosed p := by
 --   rw [← hS]
 --   sorry
 
 -- This seems to be NOT TRUE!
--- lemma IsDualClosed.sup {S T : Submodule R M} (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
---     (S ⊔ T).IsDualClosed p := by
+-- lemma DualClosed.sup {S T : Submodule R M} (hS : S.DualClosed p) (hT : T.DualClosed p) :
+--     (S ⊔ T).DualClosed p := by
 --   obtain ⟨S', hSdc, rfl⟩ := hS.exists_of_dual_flip
 --   obtain ⟨T', hTdc, rfl⟩ := hT.exists_of_dual_flip
---   unfold IsDualClosed
+--   unfold DualClosed
 --   sorry
 
--- alias sup_isDualClosed := IsDualClosed.sup
+-- alias sup_dualClosed := DualClosed.sup
 
-lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.IsDualClosed p)
-    (hT : T.IsDualClosed p) : dual p (S ∩ T) = dual p S ⊔ dual p T := by
+lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.DualClosed p)
+    (hT : T.DualClosed p) : dual p (S ∩ T) = dual p S ⊔ dual p T := by
   rw [le_antisymm_iff]
   constructor
   · rw [SetLike.le_def]
@@ -436,15 +459,47 @@ lemma dual_inf_dual_sup_dual' {S T : Submodule R M} (hS : S.IsDualClosed p)
     sorry
   · sorry -- easy
 
-  -- refine IsDualClosed.dual_inj (p := p) hS hT ?_
-  -- rw [← IsDualClosed.dual_inj_iff hS hT]
+  -- refine DualClosed.dual_inj (p := p) hS hT ?_
+  -- rw [← DualClosed.dual_inj_iff hS hT]
   -- rw [← hS.def]
 
-lemma dual_inf_dual_sup_dual_of_isDualClosed {S T : Submodule R M}
-    (hS : S.IsDualClosed p) (hT : T.IsDualClosed p) :
+lemma dual_inf_dual_sup_dual_of_dualClosed {S T : Submodule R M}
+    (hS : S.DualClosed p) (hT : T.DualClosed p) :
     dual p (S ⊓ T : Submodule R M) = dual p S ⊔ dual p T := by
 
   sorry
+
+lemma dual_inf_dual_sup_dual_of_dualClosed' (S T : Submodule R M)
+    (hS : S.DualClosed p) (hT : T.DualClosed p) (hST : (dual p S ⊔ dual p T).DualClosed p.flip) :
+      dual p (S ⊓ T) = dual p S ⊔ dual p T := by
+  nth_rw 1 [← hS, ← hT]
+  simp only [inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
+  nth_rw 1 [← flip_flip p]
+  rw [hST]
+
+variable (p) in
+abbrev WeakDualClosed (S : Submodule R M) := dual p.flip (dual p S) = S ⊔ ker p
+-- equivalently (but not trivially so): DualClosed p (S ⊔ ker p)
+
+section CommRing
+
+variable {R M N : Type*}
+  [CommRing R]
+  [AddCommGroup M] [Module R M]
+  [AddCommMonoid N] [Module R N]
+  {p : M →ₗ[R] N →ₗ[R] R}
+
+/- This can be useful because it is the more abstract version of the one for FG/FGDual cones. -/
+lemma dual_inf_dual_sup_dual_of_dualClosed'' (S T : Submodule R M)
+    (hS : S.DualClosed p) (hT : T.WeakDualClosed p)
+    (hST : (dual p S ⊔ dual p T).WeakDualClosed p.flip) :
+      dual p (S ∩ T) = dual p S ⊔ dual p T := by
+  rw [← dual_union_ker, ← coe_inf, ← dual_sup, inf_sup_assoc_of_le]
+  · nth_rw 1 [← hS, ← hT, ← flip_flip p]
+    simp only [← dual_union, ← dual_sup, hST, sup_assoc, ker_le_dual, sup_of_le_left]
+  exact hS.ker_le
+
+end CommRing
 
 ---------------------
 
@@ -453,8 +508,8 @@ lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
     dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
   := fun _ hx y hy => @hx (p.flip y) hy
 
-lemma IsDualClosed.to_eval {S : Submodule R M} (hS : S.IsDualClosed p)
-    : S.IsDualClosed (Dual.eval R M) := by
+lemma DualClosed.to_eval {S : Submodule R M} (hS : S.DualClosed p)
+    : S.DualClosed (Dual.eval R M) := by
   have h := dual_dual_eval_le_dual_dual_bilin p S
   rw [hS] at h
   exact le_antisymm h subset_dual_dual
@@ -485,9 +540,9 @@ lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
   exact hx
 
 variable (p) in
-lemma IsDualClosed.to_bilin {S : Submodule R M} (hS : S.IsDualClosed (Dual.eval R M))
-    : S.IsDualClosed p := by
-  rw [IsDualClosed, dual_dual_bilin_eq_dual_dual_eval]
+lemma DualClosed.to_bilin {S : Submodule R M} (hS : S.DualClosed (Dual.eval R M))
+    : S.DualClosed p := by
+  rw [DualClosed, dual_dual_bilin_eq_dual_dual_eval]
   exact hS
 
 end Surjective
@@ -505,34 +560,34 @@ variable (p)
 -- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
 variable [Fact (Surjective p.flip)] in
 /-- A submodule of a vector space is dual closed. -/
-lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := by
-  apply IsDualClosed.to_bilin
-  nth_rw 1 [IsDualClosed, Dual.eval, flip_flip]
+lemma dualClosed (S : Submodule R M) : S.DualClosed p := by
+  apply DualClosed.to_bilin
+  nth_rw 1 [DualClosed, Dual.eval, flip_flip]
   rw [dual_dualCoannihilator, dual_dualAnnihilator]
   exact Subspace.dualAnnihilator_dualCoannihilator_eq
 
 variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is dual closed. -/
-@[deprecated isDualClosed (since := "")]
-lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := isDualClosed _ S
+@[deprecated dualClosed (since := "")]
+lemma dualClosed_flip (S : Submodule R N) : S.DualClosed p.flip := dualClosed _ S
 
 -- -- TODO: do we need a `[Field R]`, or is `Surjective p` enough?
 -- variable [Fact (Surjective p)] in
 -- /-- Every submodule of a vector space is dual closed. -/
--- lemma isDualClosed_flip (S : Submodule R N) : S.IsDualClosed p.flip := by
---   apply IsDualClosed.to_bilin
---   nth_rw 1 [IsDualClosed, Dual.eval, flip_flip]
+-- lemma dualClosed_flip (S : Submodule R N) : S.DualClosed p.flip := by
+--   apply DualClosed.to_bilin
+--   nth_rw 1 [DualClosed, Dual.eval, flip_flip]
 --   rw [dual_dualCoannihilator, dual_dualAnnihilator]
 --   exact Subspace.dualAnnihilator_dualCoannihilator_eq
 
 -- variable [Fact (Surjective p.flip)] in
 -- /-- Every submodule of a vector space is dual closed. -/
--- lemma isDualClosed (S : Submodule R M) : S.IsDualClosed p := isDualClosed_flip p.flip S
+-- lemma dualClosed (S : Submodule R M) : S.DualClosed p := dualClosed_flip p.flip S
 
 variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is its own double dual. -/
 @[simp] lemma dual_dual_flip (S : Submodule R N) : dual p (dual p.flip S) = S :=
-    isDualClosed p.flip S
+    dualClosed p.flip S
 
 variable [Fact (Surjective p.flip)] in
 /-- Every submodule of a vector space is its own double dual. -/
@@ -577,7 +632,7 @@ lemma exists_smul_of_ker_le_ker {p q : M →ₗ[R] R} (h : ker p ≤ ker q) :
   --   px py - py px = 0
   sorry
 
-variable [Fact (Injective p)] in -- ! satisfied by both Dual.eval and .id
+variable [inst : Fact p.SeparatingLeft] in -- ! satisfied by both Dual.eval and .id
 lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} := by
   ext y
   simp
@@ -587,7 +642,8 @@ lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} :
     obtain ⟨a, ha⟩ := exists_smul_of_ker_le_ker (fun _ hx => (h hx.symm).symm)
     use a
     rw [← LinearMap.map_smul] at ha
-    have inj : Injective p := Fact.elim inferInstance
+    have inj := inst.elim
+    rw [separatingLeft_iff_ker_eq_bot, ker_eq_bot] at inj
     replace ha := inj ha
     exact ha.symm
   · intro h _ hz
@@ -595,7 +651,7 @@ lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} :
     simp [← hz]
 
 -- variable [Fact (Injective p)] in
--- lemma IsDualClosed.singleton (x : M) : (span R {x}).IsDualClosed p := by
+-- lemma DualClosed.singleton (x : M) : (span R {x}).DualClosed p := by
 --   sorry -- TODO: derive from `singleton_dual_flip_dual` above
 
 -- variable [Fact p.IsFaithfulPair] in
@@ -615,13 +671,13 @@ lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} :
 
 -- variable [Fact p.flip.IsFaithfulPair] in
 -- /-- The span of a finite set is dual closed. -/
--- lemma isDualClosed_of_finite (s : Finset M) : IsDualClosed p (span R s) := by
+-- lemma dualClosed_of_finite (s : Finset M) : DualClosed p (span R s) := by
 
 --   sorry
 
 -- variable [Fact p.flip.IsFaithfulPair] in
 -- /-- An FG submodule is dual closed. -/
--- lemma FG.isDualClosed {S : Submodule R M} (hS : S.FG) : S.IsDualClosed p := by
+-- lemma FG.dualClosed {S : Submodule R M} (hS : S.FG) : S.DualClosed p := by
 --   sorry
 
 ------
