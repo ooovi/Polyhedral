@@ -262,7 +262,10 @@ theorem FGDual.cofg {S : Submodule R N} (hS : S.FGDual p) : S.CoFG := by
   obtain ⟨s, rfl⟩ := hS.exists_finset_dual
   exact dual_finset_cofg p s
 
-theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
+variable (p) in
+theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := (hS.dual_fgdual p).cofg
+
+theorem CoFG._fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
     S.FGDual p := by
   sorry
 
@@ -284,7 +287,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 theorem fg_of_disjoint_fgdual {S T : Submodule R N} (hST : Disjoint S T) (hS : S.FGDual p) :
     T.FG := CoFG.disjoint_fg hST (FGDual.cofg hS)
 
-variable (p) [Fact p.flip.IsFaithfulPair] [p.IsPerfPair] in
+variable (p) [p.IsPerfPair] in
 theorem fgdual_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
     T.FGDual p := by
   have hST := IsCompl.dual p.flip hST

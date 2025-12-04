@@ -6,6 +6,7 @@ import Mathlib.LinearAlgebra.Basis.VectorSpace
 import Mathlib.Order.ModularLattice
 import Mathlib.RingTheory.Noetherian.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.Algebra.Module.SpanRank
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 
@@ -190,6 +191,80 @@ lemma mkQ_orderIso_symm_apply {p : Submodule R M} (s : Submodule S (M ⧸ p)) :
 lemma IsCompl.inf_eq_iff_sup_eq {p q : Submodule R M} {s t : Submodule S M} (hpq : IsCompl p q) :
     s ⊓ q.restrictScalars S = t ⊓ q.restrictScalars S
       ↔ s ⊔ p.restrictScalars S = t ⊔ p.restrictScalars S := by sorry
+
+-- variable [HasRankNullity R] in
+-- lemma exists_rank_le_codisjoint (S : Submodule R M) : ∃ T : Submodule R M,
+--     Module.rank R T ≤ Module.rank R (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
+--   obtain ⟨s, hcard, hs⟩ := exists_set_linearIndependent R (M ⧸ S)
+--   let inv := surjInv S.mkQ_surjective
+--   use span R (inv '' s)
+--   constructor
+--   · rw[← hcard]
+--     exact le_trans (spanRank_span_le_card _) Cardinal.mk_image_le
+--   rw [codisjoint_iff, ← map_mkQ_eq_top]
+--   ext x
+--   simp only [mem_map, mem_top, iff_true]
+--   have hx : x ∈ span R s := by simp only [hs, mem_top]
+--   obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
+--   use ∑ i, f i • inv (g i)
+--   constructor
+--   · apply sum_mem
+--     intro y _
+--     refine smul_mem _ _ (mem_span_of_mem ?_)
+--     simpa using ⟨g y, by simp⟩
+--   · simp [inv, surjInv_eq S.mkQ_surjective]
+
+/-- Replacement for `exists_isCompl` if `R` is not a Field. We can still always find a
+  codisjoint submodule whose spanRank is equal the quotient's spanRank. -/
+lemma exists_spanRank_codisjoint (S : Submodule R M) : ∃ T : Submodule R M,
+    spanRank T = spanRank (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
+  obtain ⟨s, hcard, hs⟩ := (⊤ : Submodule R (M ⧸ S)).exists_span_set_card_eq_spanRank
+  let inv := surjInv S.mkQ_surjective
+  use span R (inv '' s)
+  constructor
+  · rw[← hcard]
+    rw [le_antisymm_iff]
+    constructor
+    · exact le_trans (spanRank_span_le_card _) Cardinal.mk_image_le
+    -- Function.injective_surjInv
+    -- Submodule.spanRank_span_of_linearIndepOn
+    -- Submodule.spanRank_span_le_card
+    sorry
+  rw [codisjoint_iff, ← map_mkQ_eq_top]
+  ext x
+  simp only [mem_map, mem_top, iff_true]
+  have hx : x ∈ span R s := by simp only [hs, mem_top]
+  obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
+  use ∑ i, f i • inv (g i)
+  constructor
+  · apply sum_mem
+    intro y _
+    refine smul_mem _ _ (mem_span_of_mem ?_)
+    simpa using ⟨g y, by simp⟩
+  · simp [inv, surjInv_eq S.mkQ_surjective]
+
+/-- Replacement for `exists_isCompl` if `R` is not a Field. We can still always find a
+  codisjoint submodule whose spanRank is at most the quotient's spanRank. -/
+lemma exists_spanRank_le_codisjoint (S : Submodule R M) : ∃ T : Submodule R M,
+    spanRank T ≤ spanRank (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
+  obtain ⟨s, hcard, hs⟩ := (⊤ : Submodule R (M ⧸ S)).exists_span_set_card_eq_spanRank
+  let inv := surjInv S.mkQ_surjective
+  use span R (inv '' s)
+  constructor
+  · rw[← hcard]
+    exact le_trans (spanRank_span_le_card _) Cardinal.mk_image_le
+  rw [codisjoint_iff, ← map_mkQ_eq_top]
+  ext x
+  simp only [mem_map, mem_top, iff_true]
+  have hx : x ∈ span R s := by simp only [hs, mem_top]
+  obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
+  use ∑ i, f i • inv (g i)
+  constructor
+  · apply sum_mem
+    intro y _
+    refine smul_mem _ _ (mem_span_of_mem ?_)
+    simpa using ⟨g y, by simp⟩
+  · simp [inv, surjInv_eq S.mkQ_surjective]
 
 
 

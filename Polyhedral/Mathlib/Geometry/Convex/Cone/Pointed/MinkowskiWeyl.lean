@@ -186,7 +186,7 @@ lemma sup_fg_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) : (
 lemma sup_fgdual_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) : (C ⊔ D).FGDual p
     := by rw [sup_comm]; exact sup_fg_fgdual hD hC
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
 lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
     {S : Submodule 𝕜 N} (hS : S.FG) (hCS : C ≤ S) :
@@ -195,23 +195,23 @@ lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
   · specialize h p fg_bot hS bot_le rfl
     obtain ⟨D, hfgdual, hD⟩ := h
     exact ⟨_, sup_fg_fgdual hC hfgdual, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
-  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_inf_bot p
-    exact ⟨_, coe_fgdual_iff.mpr hfgdual, by simp [← restrictScalars_inf, inf_comm, hD, hC']⟩
+  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p
+    exact ⟨_, coe_fgdual_iff.mpr hfgdual, by simp [← restrictScalars_inf, inf_comm, hC', hD.eq_bot]⟩
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of its linear span with a FGDual cone. -/
 lemma FG.exists_fgdual_inf_span {C : PointedCone 𝕜 N} (hC : C.FG) :
       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ Submodule.span 𝕜 (M := N) C = C :=
   exists_fgdual_inf_submodule p hC (submodule_span_fg hC) Submodule.subset_span
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
 lemma FG.exists_fgdual_inf_fg_submodule {C : PointedCone 𝕜 N} (hC : C.FG) :
       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ ∃ S : Subspace 𝕜 N, S.FG ∧ D ⊓ S = C := by
   obtain ⟨D, hfgdual, hD⟩ := exists_fgdual_inf_span p hC
   exact ⟨D, hfgdual, Submodule.span 𝕜 C, submodule_span_fg hC, hD⟩
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone is the dual of a FGDual cone. -/
 lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
     ∃ D : PointedCone 𝕜 M, D.FGDual p.flip ∧ dual p D = C := by
@@ -222,7 +222,6 @@ lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
   · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hS)
   · rw [dual_sup_dual_inf_dual]
     simp [Submodule.FG.dual_dual_flip _ hS]
-    -- TODO: prove `Submodule.FG.dual_dual_flip` (the equivalent for cones was already proven here).
 
 @[deprecated FG.exists_fgdual_dual (since := "")]
 alias FG.exists_fgdual_flip_dual := FG.exists_fgdual_dual
@@ -232,35 +231,35 @@ alias FG.exists_fgdual_flip_dual := FG.exists_fgdual_dual
 -- lemma FG.exists_fgdual_dual_flip {C : PointedCone 𝕜 M} (hC : C.FG) :
 --     ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ dual p.flip D = C := exists_fgdual_flip_dual p.flip hC
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- The double dual of an FG cone is the cone itself. -/
 @[simp] lemma FG.dual_dual_flip {C : PointedCone 𝕜 N} (hC : C.FG) : dual p (dual p.flip C) = C := by
   obtain ⟨D, hfgdual, rfl⟩ := exists_fgdual_dual p hC
   exact dual_dual_flip_dual (p := p) D
 
 -- NOTE: we keep this flipped version because it is a simp lemma.
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingLeft] in
 /-- The double dual of an FG cone is the cone itself. -/
 @[simp] lemma FG.dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) : dual p.flip (dual p C) = C :=
   FG.dual_dual_flip p.flip hC
 
 variable (p) [Fact p.flip.IsFaithfulPair] in
-lemma FG.isDualClosed {C : PointedCone 𝕜 M} (hC : C.FG) : C.IsDualClosed p
+lemma FG.isDualClosed {C : PointedCone 𝕜 M} (hC : C.FG) : C.DualClosed p
     := FG.dual_flip_dual p hC
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- The double dual of a finite set is its span. -/
 @[simp] lemma FG.dual_dual_flip_eq_span (s : Finset N) : dual p (dual p.flip s) = span 𝕜 s := by
   nth_rw 2 [← dual_span]
   exact dual_dual_flip p (fg_span s.finite_toSet)
 
 -- NOTE: we keep this flipped version because it is a simp lemma.
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingLeft] in
 /-- The double dual of a finite set is its span. -/
 @[simp] lemma FG.dual_flip_dual_eq_span (s : Finset M) : dual p.flip (dual p s) = span 𝕜 s :=
     dual_dual_flip_eq_span p.flip s
 
-variable [Fact p.flip.IsFaithfulPair] in
+variable [Fact p.SeparatingLeft] in
 lemma FG.dual_inj {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG)
     (h : dual p C = dual p D) : C = D := by
   have h := congrArg (dual p.flip) <| congrArg SetLike.coe h
@@ -270,7 +269,7 @@ lemma FG.dual_inj {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG)
 -- lemma FG.dual_flip_inj {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FG)
 --     (h : dual p.flip C = dual p.flip D) : C = D := dual_inj hC hD h
 
-variable [Fact p.flip.IsFaithfulPair] in
+variable [Fact p.SeparatingLeft] in
 @[simp] lemma FG.dual_inj_iff {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p C = dual p D ↔ C = D := ⟨dual_inj hC hD, by simp +contextual⟩
 
@@ -278,7 +277,7 @@ variable [Fact p.flip.IsFaithfulPair] in
 -- @[simp] lemma FG.dual_flip_inj_iff {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FG) :
 --     dual p.flip C = dual p.flip D ↔ C = D := dual_inj_iff hC hD
 
-variable [Fact p.IsFaithfulPair] in
+variable [Fact p.SeparatingRight] in
 /-- The dual of a FGDual cone is FG. -/
 lemma FGDual.dual_fg {C : PointedCone 𝕜 M} (hC : C.FGDual p.flip) : (dual p C).FG := by
   obtain ⟨D, hfg, rfl⟩ := exists_fg_dual hC
@@ -290,23 +289,21 @@ lemma FGDual.dual_fg {C : PointedCone 𝕜 M} (hC : C.FGDual p.flip) : (dual p C
 -- lemma FGDual.dual_flip_fg {C : PointedCone 𝕜 N} (hC : C.FGDual p) :
 --    (dual p.flip C).FG := dual_fg hC
 
-
-/- NOTE: some restriction like `IsFaithfulPair` is necessary. Consider two subspaces S, T that
-  are not dual closed and with S ⊓ T = ⊥. The left side is ⊤. But the right side is ⊥ ⊔ ⊥ = ⊥.
-  Alterantively, we can assume that C₁ and C₂ are dual closed. But this version must stay
-  because type inference makes its assumptions automatic in finite dimensions. -/
-variable [Fact p.IsFaithfulPair] in
+/- TODO: For submodules we have an alternative proof that avoids `p.SeparatingRight`.
+  Can we have this here as well? -/
+variable [Fact p.SeparatingRight] in
 lemma FGDual.dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M}
     (hC : C.FGDual p.flip) (hD : D.FGDual p.flip) : dual p (C ∩ D) = (dual p C) ⊔ (dual p D) := by
   nth_rw 1 [← FGDual.dual_flip_dual hC, ← FGDual.dual_flip_dual hD,
     ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
   exact FG.dual_dual_flip p <| sup_fg (FGDual.dual_fg hC) (FGDual.dual_fg hD)
 
+
 section Module.Finite
 
 variable [Module.Finite 𝕜 N]
 
-variable (p) [Fact p.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingRight] in
 /-- A finite dimensional FG cone is also FGDual. -/
 lemma FG.fgdual {C : PointedCone 𝕜 N} (hC : C.FG) : C.FGDual p := by
   obtain ⟨D, hfgdual, rfl⟩ := exists_fgdual_inf_submodule p hC Finite.fg_top (by simp)
@@ -317,7 +314,7 @@ lemma FGDual.fg {C : PointedCone 𝕜 N} (hC : C.FGDual p) : C.FG := by
   obtain ⟨D, hfg, rfl⟩ := hC.to_id.exists_fg_dual
   exact FGDual.dual_fg <| FG.fgdual _ hfg
 
-variable [Fact p.IsFaithfulPair] in
+variable [Fact p.SeparatingRight] in
 /-- A cone in finite dimensional space is FG if and only if it is FGDual. -/
 lemma fg_iff_fgdual {C : PointedCone 𝕜 N} : C.FG ↔ C.FGDual p := ⟨FG.fgdual p, FGDual.fg⟩
 
@@ -428,12 +425,8 @@ lemma sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FGDual p) 
   rw [← coe_sup, coe_fgdual_iff]
   exact Submodule.sup_fgdual hD.lineal_fgdual _
 
--- TODO: should maybe not depend on `IsFaithfulPair`. But removing it could be tricky.
--- an alternative proof is given below in the comment `dual_inf_fgdual_dual_sup_dual`, but
--- it uses even more assumptions.
--- To prove this we likely need to prove a bunch of lemmas that show how duality interacts
--- with restriction to subspaces. This is rather subtle.
-variable (p) [Fact p.flip.IsFaithfulPair] in
+-- NOTE: Assumption `p.SeparatingLeft` cannot be avoided, see analogous proof for submodules. -/
+variable (p) [Fact p.SeparatingLeft] in
 lemma FG.dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ∩ D) = (dual p C) ⊔ (dual p D) := by
   nth_rw 1 [← FG.dual_flip_dual p hC, ← FG.dual_flip_dual p hD,
@@ -453,8 +446,9 @@ lemma FG.dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.F
 --   --rw []
 --   sorry
 
--- TODO: Should not need to rely on `p.flip.IsFaithfulPair`. Or maybe actually it should?
-variable (p) [Fact p.IsFaithfulPair] [Fact p.flip.IsFaithfulPair] in
+/- TODO: For submodules we have an alternative proof that avoids `p.Nondegenerate`.
+  Can we have this here as well? -/
+variable (p) [Fact p.Nondegenerate] in
 lemma dual_fg_inf_fgdual_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG)
     (hD : D.FGDual p.flip) : dual p (C ∩ D) = (dual p C) ⊔ (dual p D) := by
   obtain ⟨C', hC', rfl⟩ := FG.exists_fgdual_dual p.flip hC

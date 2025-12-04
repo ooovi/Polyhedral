@@ -802,7 +802,7 @@ theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T)
   rw [codisjoint_iff.mp hST]
   exact dual_univ
 
-variable (p) [p.IsPerfPair] in
+variable (p) [p.IsPerfPair] in -- can we do with less assumptions?
 theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
     Codisjoint (dual p S) (dual p T) := by
   rw [codisjoint_iff]
@@ -810,7 +810,7 @@ theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
   rw [disjoint_iff.mp hST]
   simp only [bot_coe, dual_bot]
 
-variable (p) [p.IsPerfPair] in
+variable (p) [p.IsPerfPair] in -- can we do with less assumptions?
 theorem IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
     IsCompl (dual p S) (dual p T) :=
   ⟨disjoint_dual_of_codisjoint p hST.codisjoint, codisjoint_dual_of_disjoint p hST.disjoint⟩

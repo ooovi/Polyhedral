@@ -57,12 +57,56 @@ lemma FG.isCompl_cofg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.FG) : T.
   haveI := Finite.iff_fg.mpr hS
   exact Finite.equiv (quotientEquivOfIsCompl T S hST.symm).symm
 
-lemma CoFG.exists_fg_compl {S : Submodule R M} (hS : S.CoFG) :
+lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
+    ∃ T : Submodule R M, T.FG ∧ Codisjoint S T := by classical
+  obtain ⟨T, hT, hST⟩ := exists_spanRank_le_codisjoint S
+  use T; constructor
+  · simp only [finite_def, ← Submodule.spanRank_finite_iff_fg] at ⊢ hS
+    --simpa only [hT] using hS
+    exact lt_of_le_of_lt hT hS
+  · exact hST
+
+-- lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
+--     ∃ T : Submodule R M, T.FG ∧ Codisjoint S T := by classical
+--   obtain ⟨s, hs⟩ := hS
+--   let inv := surjInv S.mkQ_surjective
+--   use span R (s.image inv)
+--   constructor
+--   · exact fg_span (Finset.finite_toSet _)
+--   rw [codisjoint_iff, ← map_mkQ_eq_top]
+--   ext x
+--   simp only [mem_map, mem_top, iff_true, Finset.coe_image]
+--   have hx : x ∈ span R s := by simp only [hs, mem_top]
+--   obtain ⟨f, hxf, hf⟩ := mem_span_finset'.mp hx
+--   use ∑ y, f y • inv y
+--   constructor
+--   · apply sum_mem
+--     intro y _
+--     refine smul_mem _ _ (mem_span_of_mem ?_)
+--     simpa using ⟨y, by simp⟩
+--   · simp [inv, surjInv_eq S.mkQ_surjective]
+
+-- This needs Field for th Codisjoint part.
+-- (see : https://chatgpt.com/c/69300596-3280-832f-8916-3b4b07c432d8)
+lemma CoFG._exists_fg_compl {S : Submodule R M} (hS : S.CoFG) :
     ∃ T : Submodule R M, T.FG ∧ IsCompl S T := by
   obtain ⟨s, hs⟩ := hS
+  use span R (surjInv S.mkQ_surjective '' s)
+  constructor
+  · exact fg_span <| Set.Finite.image _ <| s.finite_toSet
+  constructor
+  · rw [disjoint_def]
+    intro x hxS hx
+    have x' := S.mkQ x
+
+    sorry
+  · rw [codisjoint_iff_exists_add_eq]
+    intro x
+    have x' := S.mkQ x
+    sorry
   -- just take preimage of generators `s` to span the rest of ⊤, right?
   -- Q: do we also have the converse: given FG, we find complementary CoFG?
-  sorry
+
   -- use (Module.Finite.compl R S).some
   -- exact ⟨Finite.iff_fg.mpr (Module.Finite.compl R S).some_spec.1,
   --   (Module.Finite.compl R S).some_spec.2⟩
