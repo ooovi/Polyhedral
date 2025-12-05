@@ -127,11 +127,23 @@ lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F�
 
 -- ## RESTRICT / EMBED
 
-lemma IsFaceOf.restrict (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
+-- TODO: move to Faces lean file
+
+lemma IsFaceOf.restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
+    (restrict S F).IsFaceOf (restrict S C) := by
+  sorry
+
+lemma IsFaceOf.embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
+    (embed F).IsFaceOf (embed C) := by
+  sorry
+
+----
+
+lemma IsFaceOf.restrict' (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     (F₁ ⊓ F₂).IsFaceOf F₁ := (h₁.of_cone_iff_of_face (le_refl _)).mp (h₁.inf' h₂)
 
 -- Change order of arguments in `IsFaceOf.trans` because currently inconsistent with `embed`?
-alias IsFaceOf.embed := IsFaceOf.trans
+alias IsFaceOf.embed' := IsFaceOf.trans
 
 -- def Face.restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
 --     ⟨F₁ ⊓ F₂, F₁.isFaceOf.restrict F₂.isFaceOf⟩

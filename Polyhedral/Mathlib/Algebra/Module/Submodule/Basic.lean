@@ -351,6 +351,13 @@ noncomputable def IsCompl.foo {p q : Submodule R M} (hpq : IsCompl p q) :
 def IsCompl.bar (p : Submodule R M) :
     Submodule S p ≃o Set.Iic (p.restrictScalars S) := Submodule.mapIic (p.restrictScalars S)
 
+
+section Experiment
+
+variable {S R M N : Type*}
+  [CommSemiring S] [CommRing R] [Algebra S R]
+  [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
+
 -- I think this is not the best lemma. There should be something more fundamental about
 -- quotients and IsCompl that should make this easy.
 /-- The linear equivalence between `s / p` and `s ⊓ q`. -/
@@ -367,7 +374,7 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
   ⟩
   invFun x := ⟨p.mkQ x, x, by simpa using x.2.1⟩
   map_add' x y := by simp
-  map_smul' r x := by simp; sorry
+  map_smul' r x := by simp [← algebraMap_smul R, map_smul]
   left_inv x := by simp
   right_inv x := by
     have H : (x : M) = (⟨x.1, x.2.2⟩ : q) := rfl
@@ -377,6 +384,8 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
 noncomputable example {p q : Submodule R M} (hpq : IsCompl p q)
     {s : Submodule R M} (hps : p ≤ s) :
     map p.mkQ s ≃ₗ[R] (s ⊓ q : Submodule R M) := IsCompl.map_mkQ_equiv_inf hpq hps
+
+end Experiment
 
 end RestrictedScalar
 

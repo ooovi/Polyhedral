@@ -593,6 +593,11 @@ lemma subdual_self : subdual p C C = (dual p C).lineal := sorry
 /-- The face of the dual cone that corresponds to this face. -/
 def Face.dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
 
+-- def Face.dual_flip (F : Face (.dual p C)) : Face C := ⟨subdual p.flip (.dual p C) F, by
+--   nth_rw 2 [← LinearMap.flip_flip p]
+--   exact F.isFaceOf.subdual_dual
+--   ⟩
+
 lemma Face.dual_antitone : Antitone (dual p : Face C → Face _) :=
   fun _ _ hF _ xd => subdual_antitone p (toPointedCone_le_iff.mpr hF) xd
 

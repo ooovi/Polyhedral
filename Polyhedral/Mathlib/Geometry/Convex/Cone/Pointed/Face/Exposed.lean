@@ -107,12 +107,16 @@ lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   rw [map_add, map_smul, smul_eq_mul] at h
   have H := mul_nonneg (le_of_lt hc) (hφ _ hx)
   rw [← mul_eq_zero_iff_left (ne_of_lt hc).symm]
-  exact zero_left_of_le_add_zero H (hφ _ hy) h -- I think something like `foo` should be in mathlib, no?
+  exact zero_left_of_le_add_zero H (hφ _ hy) h
 
+variable {S : Submodule R M}
 
+variable (S) in
+lemma IsExposedFaceOf.restrict (hF : F.IsExposedFaceOf C) :
+    (restrict S F).IsExposedFaceOf (restrict S C) := sorry
 
-
-
+lemma IsExposedFaceOf.embed {C F : PointedCone R S} (hF : F.IsExposedFaceOf C) :
+    (embed F).IsExposedFaceOf (embed C) := sorry
 
 
 

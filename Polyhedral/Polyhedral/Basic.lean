@@ -52,13 +52,6 @@ lemma isPolyhedral_of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPol
 lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhedral :=
   isPolyhedral_of_span_finite s.finite_toSet
 
-/-- If `C` is polyhedral and `S` is a submodule complementary to `C`'s linearlity spacen,
-  then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
-  is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
-lemma IsPolyhedral.fg_inf_of_isCompl (hC : C.IsPolyhedral)
-    {S : Submodule R M} (hS : IsCompl C.lineal S) : FG (C ⊓ S) :=
-  hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
-
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
 lemma isPolyhedral_of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
     C.IsPolyhedral := by
@@ -122,48 +115,22 @@ lemma IsPolyhedral.fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG
 lemma isPolyhedral_iff_FG_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_salient · hC), FG.isPolyhedral⟩
 
+section CommRing
 
-section DivisionRing
-
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C C₁ C₂ F : PointedCone R M}
 
--- Q: Is DivisionRing necessary?
-/-- The lineality space of a full-dimensional cone is CoFG. -/
-lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
-    (h : Submodule.span R (C : Set M) = ⊤) : CoFG C.lineal := by
-  obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
-  have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
-  simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
-    Submodule.span_union, span_coe_eq_restrictScalars, restrictScalars_self] at hh
-  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
+-- FIX: Needs CommRing
+/-- If `C` is polyhedral and `S` is a submodule complementary to `C`'s linearlity spacen,
+  then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
+  is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
+lemma IsPolyhedral.fg_inf_of_isCompl (hC : C.IsPolyhedral)
+    {S : Submodule R M} (hS : IsCompl C.lineal S) : FG (C ⊓ S) :=
+  hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
 
--- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
---     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
---   obtain ⟨s, hs', hs⟩ := hC.exists_finset_inter_span_quot_lineal
---   use span R s
---   constructor
---   · exact fg_span (Finset.finite_toSet _)
---   constructor
---   · rw [salient_iff_lineal_bot]
---     rw [← ofSubmodule_inj]
---     rw [← span_inter_lineal_eq_lineal]
---     simp at hs
---     rw [← hs] at hs'
---     have hh := lineal_sup_le (M := M) (span R s) C.lineal
---     simp only [lineal_submodule, -sup_le_iff] at hh
---     have hh := Set.inter_subset_inter_right s hh
---     rw [hs'] at hh
---     simp at hh
---     -- rw [Set.sup_eq_union] at hh
---     -- rw [lineal_sup]
---     -- simp at hs'
---     sorry -- use hs'
---   · simpa [span_union, span_coe_eq_restrictScalars] using hs
-
-end DivisionRing
-
+end CommRing
 
 -- ## SUP
 
@@ -231,12 +198,39 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PointedCone R M}
 
-/- Crucial sorry's that need to be fixed asap:
- * ~~ `aux` (see below)
- * ~~ CoFG --> FGDual aka `Submodule.CoFG.fgdual`
- * -C ⊔ C = Submodule.span C (somewhere in Lineal.lean)
- * `Submodule.sup_fgdual_fg` and `Submodule.FG.dual_flip_dual`
--/
+-- FIX: fix `fg_inf_of_isCompl` first
+-- Q: Is DivisionRing necessary?
+/-- The lineality space of a full-dimensional cone is CoFG. -/
+lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
+    (h : Submodule.span R (C : Set M) = ⊤) : CoFG C.lineal := by
+  obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
+  have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
+  simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
+    Submodule.span_union, span_coe_eq_restrictScalars, restrictScalars_self] at hh
+  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
+
+-- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
+--     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
+--   obtain ⟨s, hs', hs⟩ := hC.exists_finset_inter_span_quot_lineal
+--   use span R s
+--   constructor
+--   · exact fg_span (Finset.finite_toSet _)
+--   constructor
+--   · rw [salient_iff_lineal_bot]
+--     rw [← ofSubmodule_inj]
+--     rw [← span_inter_lineal_eq_lineal]
+--     simp at hs
+--     rw [← hs] at hs'
+--     have hh := lineal_sup_le (M := M) (span R s) C.lineal
+--     simp only [lineal_submodule, -sup_le_iff] at hh
+--     have hh := Set.inter_subset_inter_right s hh
+--     rw [hs'] at hh
+--     simp at hh
+--     -- rw [Set.sup_eq_union] at hh
+--     -- rw [lineal_sup]
+--     -- simp at hs'
+--     sorry -- use hs'
+--   · simpa [span_union, span_coe_eq_restrictScalars] using hs
 
 -- TODO: move
 omit [LinearOrder R] [IsOrderedRing R] in
@@ -498,7 +492,9 @@ lemma IsPolyhedral.dual_dual_flip {C : PointedCone R N} (hC : C.IsPolyhedral) :
   Alterantively, we can assume that C₁ and C₂ are dual closed. But this version must stay
   because type inference makes its assumptions automatic in finite dimensions. Maybe a weaker
   assumoption suffices though (it seems to be the case for FG and FGDual). -/
-variable (p) [p.IsPerfPair] in
+-- variable (p) [p.IsPerfPair] in
+variable (p) [Fact (Surjective p)] in
+variable [Fact (Surjective p.flip)] in
 lemma IsPolyhedral.dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhedral) :
     PointedCone.dual p (C₁ ∩ C₂) = PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂ := by
   nth_rw 1 [← hC₁.dual_flip_dual p, ← hC₂.dual_flip_dual p,

@@ -13,6 +13,21 @@ namespace PointedCone
 
 open Module
 
+section CommSemiring
+
+variable {R : Type*} [CommSemiring R] [PartialOrder R] [IsOrderedRing R]
+
+local notation "R≥0" => {c : R // 0 ≤ c}
+
+instance : Algebra R≥0 R where
+  algebraMap := Nonneg.coeRingHom
+  commutes' r x := mul_comm ..
+  smul_def' r x := by aesop
+
+example : CommSemiring R≥0 := inferInstance
+
+end CommSemiring
+
 section Semiring
 
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
@@ -183,7 +198,7 @@ lemma coe_restrict (S : Submodule R M) (T : Submodule R M) :
 /-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
 abbrev embed {S : Submodule R M} (C : PointedCone R S) : PointedCone R M := C.map S.subtype
 
-lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
+@[simp] lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
     (C.restrict S).embed = (S ⊓ C : PointedCone R M) := by
   -- unfold embed restrict map comap
   -- -- rw [← Submodule.restrictScalars_]
@@ -572,11 +587,18 @@ lemma quot_eq_iff_sup_eq {S : Submodule R M} {C D : PointedCone R M} :
 @[simp] lemma map_mkQ_eq_iff_sup_eq {p : Submodule R M} {s t : PointedCone R M} :
     map p.mkQ s = map p.mkQ t ↔ s ⊔ p = t ⊔ p := Submodule.map_mkQ_eq_iff_sup_eq
 
+section CommRing
+
+variable {R M : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
+  [Module R M] {S : Set M}
+
 local notation "R≥0" => {c : R // 0 ≤ c}
 
 noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
     {C : PointedCone R M} (hSC : S ≤ C) : C.quot S ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
   Submodule.IsCompl.map_mkQ_equiv_inf hST hSC
+
+end CommRing
 
 end Ring
 

@@ -120,22 +120,6 @@ lemma dual_span (s : Set M) : dual C p (Submodule.span S s) = dual C p s := by
       rw [← algebraMap_smul R, map_smul, algebraMap_smul, smul_apply]
       exact C.smul_mem t hy
 
--- lemma dual_gc : GaloisConnection (toDual ∘ dual C p) (dual C p.flip ∘ ofDual) := by
---   intro S T
---   simp
---   nth_rw 1 [← toDual_ofDual T]
---   rw [toDual_le_toDual]
---   constructor
---   · intro h
---     unfold dual' at *
---     have h := dual_antimono (p := p.flip) h
---     have h := dual_antimono (p := p) h
---     rw [dual_dual_flip_dual] at h
---     have h := dual_antimono (p := p.flip) h
---     rw [dual_flip_dual_dual_flip] at h
---     exact le_trans subset_dual_dual h
---   · sorry
-
 variable (p) in
 /-- Duality of submodules. -/
 abbrev dual' := dual (⊥ : Submodule R R) p
