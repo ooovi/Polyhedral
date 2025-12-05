@@ -32,6 +32,11 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
+variable [NeZero (1 : R)] in
+lemma mem_of_add_mem (hF : F.IsFaceOf C) {x y : M}
+    (hx : x ∈ C) (hy : y ∈ C) (hxy : x + y ∈ F) : x ∈ F := by
+  simpa [hxy] using hF.left_mem_of_smul_add_mem hx hy zero_lt_one zero_lt_one
+
 @[refl, simp]
 lemma refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun hx _ _ _ _ ↦ hx⟩
 lemma rfl {C : PointedCone R M} : C.IsFaceOf C := refl C
@@ -160,6 +165,11 @@ lemma span_nonneg_lc_mem {f : F.IsFaceOf (span R s)} {n : ℕ} {c : Fin n → { 
         Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
       rw [Fintype.sum_eq_add_sum_compl i] at h
       exact (iff_mem_of_mul_add_mem.mp f).2 (subset_span (Subtype.coe_prop _)) this cpos h
+
+lemma mem_of_sum_mem (hF : F.IsFaceOf C) {s : Finset M} (hsC : (s : Set M) ⊆ C)
+    (hs : ∑ x ∈ s, x ∈ F) : ∀ x ∈ s, x ∈ F := sorry
+lemma mem_of_sum_mem' (hF : F.IsFaceOf C) {ι : Type*} [Fintype ι] {f : ι → M}
+    (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, f i ∈ F) : ∀ i : ι, f i ∈ F := sorry
 
 lemma iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
@@ -554,6 +564,10 @@ def subdual (C F : PointedCone R M) : PointedCone R N :=
 variable {p} in
 lemma subdual_def {C F : PointedCone R M} :
     subdual p C F = (dual p C) ⊓ (.dual p F : Submodule R N) := rfl
+
+variable {p} in
+lemma mem_subdual {C F : PointedCone R M} {x : N} :
+    x ∈ subdual p C F ↔ x ∈ dual p C ∧ x ∈ Submodule.dual p F := by simp [subdual_def]
 
 lemma subdual_antitone : Antitone (subdual p C) := by
   intro _ _ hF

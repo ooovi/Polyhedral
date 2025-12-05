@@ -438,6 +438,18 @@ lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 
 -- def salientQuot_neg (C : PointedCone R M) : C.salientQuot ≃ₗ[R] (-C).salientQuot := sorry
 
+variable (R M) in
+/-- Salient rank of a cone. -/
+noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
+    -- Module.rank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
+
+variable (R M) in
+/-- Salient rank of a cone. -/
+noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
+    -- Module.finrank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
+
+abbrev FinSalRank (C : PointedCone R M) := Module.Finite R C.salientQuot.linSpan
+
 end Ring
 
 end PointedCone

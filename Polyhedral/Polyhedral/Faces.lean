@@ -4,6 +4,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
 
 namespace PointedCone
 
@@ -47,7 +48,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
     * etc.
 -/
 
--- ## TODO: remove `isPerfPair` from everythibg below.
+-- ## TODO: remove `isPerfPair` from everything below.
 
 variable (p) [p.IsPerfPair] in
 -- variable [Fact (Surjective p.flip)] in
@@ -68,14 +69,24 @@ variable (p) [p.IsPerfPair] in
   rw [H]
   exact IsFaceOf.inf_submodule hF
 
--- TODO: remove the finiteness assumption by reducing to the finite dim case
-variable [Module.Finite R M] in
 /-- Every face of a polyhedral cone is exposed. -/
-lemma IsPolyhedral.face_exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
-  rw [← hC.dual_flip_dual (Dual.eval R M)]
-  rw [← hC.subdual_subdual (Dual.eval R M) hF]
-  exact IsExposedFaceOf.subdual_dual _ <| IsFaceOf.subdual_dual _ hF
+  wlog h : C.FG with exposed -- reduction to salient case
+  · have h' := hF.quot (.lineal C) hF.lineal_le
+    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le]
+    rw [submodule_linSpan] at ⊢ h'
+    exact exposed hC.salientQuot h' hC.salientQuot_fg
+  exact IsFaceOf.FG.exposed h hF
+
+-- -- TODO: remove the finiteness assumption by reducing to the finite dim case
+-- variable [Module.Finite R M] in
+-- /-- Every face of a polyhedral cone is exposed. -/
+-- lemma IsPolyhedral.face_exposed' (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+--     F.IsExposedFaceOf C := by
+--   rw [← hC.dual_flip_dual (Dual.eval R M)]
+--   rw [← hC.subdual_subdual (Dual.eval R M) hF]
+--   exact IsExposedFaceOf.subdual_dual _ <| IsFaceOf.subdual_dual _ hF
 
 -- TODO: weaken p assumption
 variable [p.IsPerfPair] in
@@ -93,7 +104,7 @@ lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCo
 
 /-- The face of a polyhedral one is itself polyhedral. -/
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
-  unfold IsPolyhedral salientQuot
+  unfold IsPolyhedral PointedCone.salientQuot
   rw [hF.lineal_eq]
   sorry
 

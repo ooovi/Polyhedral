@@ -36,6 +36,8 @@ abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
 
 lemma isPolyhedral_def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
 
+lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
+
 /-- Submodules are polyhedral cones. -/
 @[simp] lemma isPolyhedral_of_submdule (S : Submodule R M) :
     (S : PointedCone R M).IsPolyhedral := by
@@ -43,6 +45,9 @@ lemma isPolyhedral_def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
 
 /-- FG cones are polyhedral. -/
 lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := salientQuot_fg hC
+
+lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
+    FG.isPolyhedral hC.salientQuot_fg
 
 /-- The span of a finite set is polyhedral. -/
 lemma isPolyhedral_of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPolyhedral :=
@@ -170,7 +175,7 @@ lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsP
   · simp [← restrictScalars_map]
 
 lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f).IsPolyhedral := by
-  unfold IsPolyhedral salientQuot quot at *
+  unfold IsPolyhedral PointedCone.salientQuot quot at *
   -- apply FG.map
   rw [comap_lineal]
   sorry

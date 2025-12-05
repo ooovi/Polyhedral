@@ -5,6 +5,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.SetTheory.Cardinal.Defs
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
@@ -59,7 +60,6 @@ lemma ofSubmodule_sInf (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule ''
 lemma ofSubmodule_sSup (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
   ofSubmodule_latticeHom.map_sSup' s
 
-
 -- ## SPAN
 
 /- Intended new name for `PointedCone.span` to better avoid name clashes and confusion
@@ -78,6 +78,28 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 -- lemma span_inf_left (s t : Set M) : span R (s ∩ t) ≤ span R s := by
 --   apply Submodule.span_mono
 --   simp only [Set.inter_subset_left]
+
+
+-- ## LINSPAN
+
+abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
+
+@[simp] lemma submodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+    by simp [linSpan]
+
+alias linSpan_eq := submodule_linSpan
+
+
+-- ## RANK
+
+open Cardinal
+
+noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
+-- ⨆ ι : { s : Set M // LinearIndepOn R id s }, (#ι.1)
+
+noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
+
+abbrev FinRank (C : PointedCone R M) := Module.Finite R C.linSpan
 
 end Semiring
 

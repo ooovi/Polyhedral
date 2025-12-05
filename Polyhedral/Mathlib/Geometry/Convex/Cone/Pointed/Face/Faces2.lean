@@ -286,9 +286,9 @@ def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
 
 -- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
 
--- lemma foo (C F₁ F₂ : PointedCone R M) (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf F₁) :
---     IsFaceOf (hF₂.quot) (hF₁.quot) := by
---   sorry
+lemma IsFaceOf.quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
+    (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
+  sorry
 
 abbrev Face.quotMap (F : Face C) := mkQ F.span
 

@@ -55,9 +55,8 @@ private lemma auxGenSet_subset_span :
     (auxGenSet p s w : Set M) ⊆ span 𝕜 (s : Set M) := by
   simp only [Set.union_subset_iff, Set.image2_subset_iff, Set.mem_setOf_eq, and_imp]
   refine ⟨subset_trans (fun x hx ↦ hx.1) subset_span, fun x hxS hxw y hyS hyw ↦ ?_⟩
-  -- simpa [sub_eq_add_neg] using add_mem (smul_mem (span 𝕜 s) ⟨p x w, hxw⟩ (subset_span hyS))
-  --   (smul_mem _ ⟨-p y w, neg_nonneg.mpr hyw.le⟩ (subset_span hxS))
-  sorry -- this code broke on mathlib/Lean update ...
+  simpa [sub_eq_add_neg, ← neg_smul] using add_mem (smul_mem (span 𝕜 s) hxw (subset_span hyS))
+    (smul_mem _ (neg_nonneg.mpr hyw.le) (subset_span hxS))
 
 private lemma span_singleton_le_dual_auxGenSet :
     span 𝕜 {w} ≤ dual p (auxGenSet p s w) := by

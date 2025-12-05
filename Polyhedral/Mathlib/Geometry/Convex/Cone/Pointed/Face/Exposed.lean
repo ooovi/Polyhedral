@@ -16,6 +16,7 @@ import Polyhedral.Hyperplane
 import Polyhedral.Halfspace
 
 open Module
+open Submodule
 
 namespace PointedCone
 
@@ -63,32 +64,32 @@ lemma IsExposedFaceOf.inf {hF₁ : F₁.IsExposedFaceOf C} {hF₂ : F₂.IsExpos
       have h₂ := (hφ₂' x hx).mpr H.2
       linarith
 
+-- NOTE: Consider the dual of the finite support cone in ℝ^ω.
+--  Here the lineality space is {0} and is exposed, but not using a linear form of
+--  the form p x. There are too few linear forms with finite support.
 variable (p) in
 lemma IsExposedFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsExposedFaceOf (dual p C) := by
-  obtain ⟨φ, hφ⟩ := F.relint_nonempty
+  obtain ⟨φ, hφ⟩ := F.relint_nonempty sorry
   use p φ
-  constructor
-  · intro x hx
-    exact hx <| hF.subset (F.relint_le hφ)
-  · intro x hx
+  constructor <;> intro x hx
+  · exact hx <| hF.subset (F.relint_le hφ)
+  constructor <;> intro h
+  · rw [mem_subdual]
     constructor
-    · intro h
-      unfold subdual
-      rw [Submodule.mem_inf]
-      constructor
-      · exact hx
-      simp only [Submodule.restrictScalars_mem, Submodule.mem_dual, SetLike.mem_coe]
-      intro ψ hψ
-      -- here we need to use that φ is in the relint. I think we need more relint lemmas first!
-      replace hφ := F.relint_le hφ
-      simp at hφ
-      sorry
-    · intro h
-      simpa using (h.2 <| F.relint_le hφ).symm
+    · exact hx
+    simp only [Submodule.mem_dual, SetLike.mem_coe]
+    intro ψ hψ
+    -- here we need to use that φ is in the relint. I think we need more relint lemmas first!
+    replace hφ := F.relint_le hφ
+    simp at hφ
+    sorry
+  · simpa using (h.2 <| F.relint_le hφ).symm
+
+alias subdual_exposed := IsExposedFaceOf.subdual_dual
 
 /-- The lineality space of a dual closed cone is an exposed face. -/
-lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.IsDualClosed p) :
+lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
     IsExposedFaceOf C.lineal C := by classical
   rw [← hC]
   nth_rw 1 [← subdual_self]
@@ -108,6 +109,9 @@ lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   have H := mul_nonneg (le_of_lt hc) (hφ _ hx)
   rw [← mul_eq_zero_iff_left (ne_of_lt hc).symm]
   exact zero_left_of_le_add_zero H (hφ _ hy) h
+
+lemma IsExposedFaceOf.quot_iff (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C) (hF : F₂ ≤ F₁) :
+    F₁.IsExposedFaceOf C ↔ (F₁.quot F₂.linSpan).IsExposedFaceOf (C.quot F₂.linSpan) := sorry
 
 variable {S : Submodule R M}
 

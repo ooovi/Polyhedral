@@ -29,15 +29,7 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
 
-variable (R M) in
-/-- Salient rank of a cone. -/
-noncomputable def salRank (C : PointedCone R M) :=
-    Module.rank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
-
-variable (R M) in
-/-- Salient rank of a cone. -/
-noncomputable def salFinrank (C : PointedCone R M) :=
-    Module.finrank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
+-- ...
 
 end PointedCone
 
