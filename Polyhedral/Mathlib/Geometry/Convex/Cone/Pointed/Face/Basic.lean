@@ -90,7 +90,7 @@ variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
   {C D F G : PointedCone R M}
 
 lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
-    (hCD : Disjoint (α := Submodule R M) (Submodule.span R C) (Submodule.span R D)) :
+    (hCD : Disjoint (.span R C) (.span R D : Submodule R M)) :
     (F ⊔ G).IsFaceOf (C ⊔ D) := by
   constructor
   · simp only [sup_le_iff]
@@ -294,7 +294,7 @@ example {S : Submodule R M} : Face (S : PointedCone R M) := S
 @[coe, simp]
 def toPointedCone {C : PointedCone R M} (F : Face C) := F.toSubmodule
 
-instance : CoeOut (Face (M := M) (R := R) C) (PointedCone R M) where
+instance : CoeOut (Face (C : PointedCone R M)) (PointedCone R M) where
   coe := toPointedCone
 
 instance : SetLike (Face C) M where
@@ -364,7 +364,7 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N] {C C₁ F : PointedCone R M} {C₂ : PointedCone R N}
 
-/-- The face of a pointed cone `C` that is its lineal space. It contains in all faces of `C`. -/
+/-- The face of a pointed cone `C` that is its lineal space. It is contained in all faces of `C`. -/
 def lineal {C : PointedCone R M} : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
 
 section Prod
@@ -617,7 +617,7 @@ lemma Face.dual_antitone : Antitone (dual p : Face C → Face _) :=
 
 section IsDualClosed
 
-variable (hC : C.IsDualClosed p)
+variable (hC : C.DualClosed p)
 
 /-- The subdual is injective. -/
 -- only for fg

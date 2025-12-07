@@ -92,9 +92,9 @@ namespace PointedCone
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C : PointedCone R M}
-variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {S : Submodule R M}
 variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- ## MISC
 
@@ -402,6 +402,64 @@ def Face.inf_face_orderHom2 : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) w
 --     inf2 F.inf2_left F.inf2_right = F := sorry
 
 
+-- ## COMB EQUIV
+
+/-- Two cones are combinatorially equivalent if their face posets are ordfer isomorphic. -/
+abbrev CombEquiv (C D : PointedCone R M) := Nonempty (Face C ≃o Face D)
+
+/-- Denotes combinatorial equivalence of pointed cones. Notation for an `CombEquiv`. -/
+infixl:100 " ≃c " => CombEquiv
+
+
+-- We use the term `combEquiv` for `OrderEquiv` if it is between the face posets
+/-- The combinatorial equivalence between a pointed cone `C` and the pointed cone `C ⊓ S`, where
+  `S` is a submodule complementary to the lineality of `C`. The existence of this isomorphism is
+  crucial because it shows that the face structure can be studied on the salient part. In the
+  case of polyhedral cones, this yields a reduction to FG cones. -/
+def inf_combEquiv_of_isCompl_lineal (hS : IsCompl S C.lineal) :
+    Face (C ⊓ S) ≃o Face C where
+  toFun F := ⟨F ⊔ C.lineal, by -- TODO: this construction should exist on the level of `Face`.
+    have h := F.isFaceOf.sup (.refl C.lineal) ?_
+    · rw [← inf_sup_assoc_of_submodule_le] at h
+      · simpa [← coe_sup, hS.codisjoint.eq_top] using h
+      · exact lineal_le C
+    · simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars, restrictScalars_self]
+      refine Disjoint.mono_left ?_ hS.disjoint
+      nth_rw 2 [← span_eq S]
+      exact span_monotone (by simp) ⟩
+  invFun F := ⟨F ⊓ S, F.isFaceOf.inf .rfl⟩
+    -- TODO: this construction should already exist on the level of `Face`.
+  left_inv F := by
+    simp only [Face.toPointedCone]; congr
+    rw [← sup_inf_assoc_of_le_submodule]
+    · simp [← coe_inf, inf_comm, hS.disjoint.eq_bot]
+    · exact le_trans F.isFaceOf.le inf_le_right
+  right_inv F := by
+    simp only [Face.toPointedCone]; congr
+    rw [← inf_sup_assoc_of_submodule_le]
+    · simp [← coe_sup, hS.codisjoint.eq_top]
+    · exact F.isFaceOf.lineal_le
+  map_rel_iff' := by
+    intro F G
+    simp only [Face.toPointedCone, Equiv.coe_fn_mk, Face.toPointedCone_le_iff, sup_le_iff,
+      le_sup_right, and_true]
+    constructor <;> intro h
+    · have h := inf_le_inf_right (S : PointedCone R M) h
+      rw [← sup_inf_assoc_of_le_submodule] at h
+      · have h' := le_trans F.isFaceOf.le inf_le_right
+        simpa [h', ← coe_inf, inf_comm, hS.disjoint.eq_bot] using h
+      · exact le_trans G.isFaceOf.le inf_le_right
+    · exact le_trans h le_sup_left
+
+lemma exists_salient_combEquiv : ∃ D : PointedCone R M, D.Salient ∧ D ≃c C := by
+  obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
+  exact ⟨_, inf_salient hS.disjoint, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
+
+
+
+
+
+
 end PointedCone
 
 
@@ -415,15 +473,15 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
-variable (hC : C.IsDualClosed p)
+variable (hC : C.DualClosed p)
 
 def faceSet : Set (Face C) := ⊤
 
 variable [Fact p.IsFaithfulPair] in
 lemma IsFaceOf.isDualClosed_of_isDualClosed (hF : F.IsFaceOf C) :
-    F.IsDualClosed p := by sorry
+    F.DualClosed p := by sorry
 
-theorem auxLemma (hC : C.IsDualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
+theorem auxLemma (hC : C.DualClosed p) (h : Finite (Face C)) (hlin : C.Salient) :
     C.FG := by sorry
 
 end PointedCone
@@ -438,14 +496,23 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {S : Submodule R M}
 variable {C : PointedCone R M}
 
-lemma face_eq_top {F : PointedCone R M} (hF : F.IsFaceOf S) :
-    F = S := by sorry
+lemma IsFaceOf.Submodule.eq_self {F : PointedCone R M} (hF : F.IsFaceOf S) :
+    F = S := by
+  rw [le_antisymm_iff]
+  constructor
+  · exact hF.subset
+  intro x hx
+  have hy : -x ∈ S := by simpa using hx
+  exact hF.mem_of_add_mem hx hy (by simp)
 
-lemma Face.eq_top (F : Face (S : PointedCone R M)) :
-    F = ⊤ := by sorry
+lemma Face.eq_top (F : Face (S : PointedCone R M)) : F = ⊤ := by
+  rw [← Face.toPointedCone_eq_iff]
+  simp
+  have h := IsFaceOf.Submodule.eq_self F.isFaceOf
+  rw [h]
+  sorry
 
-lemma Face.eq_bot (F : Face (S : PointedCone R M)) :
-    F = ⊥ := by sorry
+lemma Face.eq_bot (F : Face (S : PointedCone R M)) : F = ⊥ := by sorry
 
 instance face_unique : Unique (Face (S : PointedCone R M)) where
   default := ⊤
@@ -454,5 +521,13 @@ instance face_unique : Unique (Face (S : PointedCone R M)) where
 example : Finite (Face (S : PointedCone R M)) := inferInstance
 
 lemma face_bot_eq_top : (⊥ : Face (S : PointedCone R M)) = ⊤ := by sorry
+
+lemma eq_lineal_of_forall_face_eq_self (h : ∀ F : PointedCone R M, F.IsFaceOf C → F = C) :
+    C = C.lineal := by rw [h _ (IsFaceOf.lineal C)]
+
+lemma foo (h : Unique (Face C)) : C = C.lineal := by
+  have h' := h.uniq Face.lineal
+  have h'' := h.uniq C
+  sorry
 
 end Submodule

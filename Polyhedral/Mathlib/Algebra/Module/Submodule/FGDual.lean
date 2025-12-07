@@ -265,10 +265,6 @@ theorem FGDual.cofg {S : Submodule R N} (hS : S.FGDual p) : S.CoFG := by
 variable (p) in
 theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := (hS.dual_fgdual p).cofg
 
-theorem CoFG._fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
-    S.FGDual p := by
-  sorry
-
 theorem fg_of_isCompl_fgdual {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FGDual p) :
     T.FG := CoFG.isCompl_fg hST (FGDual.cofg hS)
 

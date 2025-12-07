@@ -135,6 +135,7 @@ section Field
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {S : Submodule R M}
 variable {C C₁ C₂ F : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 

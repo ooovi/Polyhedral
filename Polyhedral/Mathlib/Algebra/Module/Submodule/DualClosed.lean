@@ -7,6 +7,8 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
+import Mathlib.LinearAlgebra.Dual.Lemmas
+import Mathlib.RingTheory.Finiteness.Basic
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FGDual
 
@@ -364,6 +366,77 @@ lemma FGDual.dual_fg_sup_ker {S : Submodule R N} (hS : S.FGDual p) :
   obtain ⟨T, hfg, rfl⟩ := hS.exists_fg_dual
   use T
   simpa [hfg, Eq.comm] using hfg.dual_flip_dual_sup_ker p
+
+----- vvvvvv experimental
+-- TODO: move to correct file
+
+lemma mkQ_eq_zero_of_mem {S : Submodule R M} {x : M} (hx : x ∈ S) : S.mkQ x = 0 := by
+  simpa only [← S.ker_mkQ, mem_ker] using hx
+
+def dualAnnihilator_linearEquiv_dual_quot (S : Submodule R M) :
+    S.dualAnnihilator ≃ₗ[R] Dual R (M ⧸ S)  where
+  toFun f := S.liftQ f.1 (le_ker_of_mem_dualAnnihilator f.2)
+  invFun f := ⟨f ∘ₗ S.mkQ, by
+    simp only [mem_dualAnnihilator, coe_comp, Function.comp_apply]
+    exact fun _ h => by simp [mkQ_eq_zero_of_mem h]⟩
+  map_add' _ _ := by ext; simp
+  map_smul' _ _ := by ext; simp
+  left_inv _ := by ext; simp
+  right_inv _ := by ext; simp
+
+-- #check Subspace.quotDualEquivAnnihilator -- this is similar to the below, but restricted to finite dim
+-- def dual_eval_linearEquiv_dual_quot (S : Submodule R M) :
+--     dual (Dual.eval R M) S ≃ₗ[R] Dual R (M ⧸ S)  where
+--   toFun f := S.liftQ f.1 (subset_ker_of_mem_dual f.2)
+--   invFun f := ⟨f ∘ₗ S.mkQ, by
+--     simp only [mem_dual, SetLike.mem_coe, Dual.eval_apply, coe_comp, Function.comp_apply]
+--     exact fun _ h => by simp [mkQ_eq_zero_of_mem h]⟩
+--   map_add' _ _ := by ext; simp
+--   map_smul' _ _ := by ext; simp
+--   left_inv _ := by ext; simp
+--   right_inv _ := by ext; simp
+
+-- lemma CoFG.dual_fg' {S : Submodule R M} (hS : S.CoFG) : (dual (Dual.eval R M) S).FG := by
+--   rw [← fg_top]
+--   refine fg_of_linearEquiv S.dual_eval_linearEquiv_dual_quot ?_
+--   simpa [← finite_def, Module.finite_dual_iff] using hS
+
+lemma CoFG.dualAnnihilator_fg {S : Submodule R M} (hS : S.CoFG) : FG S.dualAnnihilator := by
+  rw [← fg_top]
+  refine fg_of_linearEquiv S.dualAnnihilator_linearEquiv_dual_quot ?_
+  simpa [← finite_def, Module.finite_dual_iff] using hS
+
+variable (p) [Fact p.SeparatingRight] in
+lemma CoFG.dual_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := by
+  apply fg_of_fg_map_injective p.flip SeparatingRight.injective
+  rw [S.dual_dualAnnihilator', map_comap_eq]
+  exact inf_fg_right _ hS.dualAnnihilator_fg
+
+/- Not true!! Consider M = N the space finitely supported sequences. Let S be the subspace of
+    sequences with sum x_i = 0. Then S^* = bot and S^** = top. -/
+example {S : Submodule R M} (hS : S.CoFG) : (S ⊔ ker p).DualClosed p := sorry
+
+-- ChatGPT says this is true and gives a proof.
+-- https://chatgpt.com/c/6934b9d9-d210-832c-b723-a0d0adeb0749
+variable (p) in
+lemma CoFG._exists_fg_sup_ker_eq_dual {S : Submodule R M} (hS : S.CoFG) :
+    ∃ T : Submodule R N, T.FG ∧ T ⊔ ker p.flip = dual p S := by
+  have h := hS.fgdual .id
+  sorry
+
+theorem CoFG._fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
+    S.FGDual p := by
+  obtain ⟨T, hfg, hT⟩ := hS._exists_fg_sup_ker_eq_dual p.flip -- unproven!
+  rw [← hS', ← hT, dual_sup, dual_union_ker]
+  exact hfg.dual_fgdual _
+
+variable [Fact p.SeparatingLeft] in -- TODO: remove assumption
+theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
+    S.FGDual p := by
+  rw [← hS', flip_flip]
+  exact FG.dual_fgdual _ (hS.dual_fg _)
+
+----------- ^^^^^^ experimental
 
 -- variable [Fact p.IsFaithfulPair] in
 -- lemma FGDual.dual_fg (hS : S.FGDual p.flip) : FG (dual p S) := dual_flip_fg hS

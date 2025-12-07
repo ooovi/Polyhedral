@@ -189,12 +189,15 @@ lemma dual_span (s : Set M) : dual p (Submodule.span R s) = dual p s := by
 -- ----------------
 
 /-- Conversion to the standard algebraic duality operator. -/
-lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp
 
-lemma dual_id_map (S : Submodule R M) : dual p S = dual .id (map p S) := by ext x; simp
+lemma dual_id_map (S : Submodule R M) : dual p S = dual .id (map p S) := by ext; simp
 
 lemma dual_id_surj (s : Set (Dual R N)) (h : Surjective p) :
     dual p (surjInv h '' s) = dual .id s := by simp [dual_id, image_image,surjInv_eq]
+
+lemma dual_eval (s : Set M) :
+    dual p s = comap p.flip (dual (Dual.eval R M) s) := by ext; simp
 
 variable [h : Fact (Surjective p)] in
 lemma dual_exists_set_id (s : Set (Dual R N)) : ∃ t : Set M, dual p t = dual .id s := by
@@ -211,12 +214,41 @@ lemma dual_sup_dual_inf_dual (S T : Submodule R M) :
 lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dualAnnihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
+variable (p) in
+lemma dual_dualAnnihilator' (S : Submodule R M) :
+    dual p S = comap p.flip S.dualAnnihilator := by rw [← dual_dualAnnihilator, dual_eval]
+
 /-- The dual submodule w.r.t. the standard dual map is the dual annihilator. -/
 lemma dual_dualCoannihilator (S : Submodule R (Dual R M)) : dual .id S = S.dualCoannihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
+variable (p) in
 lemma dual_dualCoannihilator' (S : Submodule R M) : dual p S = (map p S).dualCoannihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
+
+-- theorem mem_dualAnnihilator' {S : Submodule R M} (φ : Module.Dual R M) :
+--     φ ∈ S.dualAnnihilator ↔ S ≤ ker φ := by
+--   rw [le_ker]
+--   -- mem_dualAnnihilator'
+--   sorry
+
+lemma le_ker_of_mem_dualAnnihilator {S : Submodule R M} {φ : Dual R M}
+    (hφ : φ ∈ S.dualAnnihilator) : S ≤ ker φ := by
+  intro x hxS
+  rw [mem_dualAnnihilator] at hφ
+  exact hφ x hxS
+
+lemma subset_ker_of_mem_dual {s : Set M} {φ : Dual R M} (hφ : φ ∈ dual (Dual.eval R M) s) :
+    s ⊆ ker φ := by
+  intro x hxS
+  rw [← dual_span, dual_dualAnnihilator, mem_dualAnnihilator] at hφ
+  exact hφ x (le_span hxS)
+
+lemma le_ker_of_mem_dual {S : Submodule R M} {φ : Dual R M} (hφ : φ ∈ dual (Dual.eval R M) S) :
+    S ≤ ker φ := by
+  intro x hxS
+  rw [S.dual_dualAnnihilator, mem_dualAnnihilator] at hφ
+  exact hφ x hxS
 
 -------------------
 
@@ -815,9 +847,6 @@ theorem IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
     IsCompl (dual p S) (dual p T) :=
   ⟨disjoint_dual_of_codisjoint p hST.codisjoint, codisjoint_dual_of_disjoint p hST.disjoint⟩
 
-
--- true ??
-lemma dual_cofg_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := sorry
 
 end Field
 

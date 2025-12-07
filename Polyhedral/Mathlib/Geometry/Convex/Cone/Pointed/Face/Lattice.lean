@@ -114,9 +114,9 @@ instance : OrderTop (Face C) where
   top := C
   le_top F := F.isFaceOf.subset
 
-instance nonempty {C : PointedCone R M} : Nonempty (Face C) := ⟨⊤⟩
-
 instance inhabited {C : PointedCone R M} : Inhabited (Face C) := ⟨⊤⟩
+
+instance nonempty {C : PointedCone R M} : Nonempty (Face C) := ⟨⊤⟩
 
 end Semiring
 

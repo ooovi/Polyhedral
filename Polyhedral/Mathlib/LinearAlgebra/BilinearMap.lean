@@ -91,11 +91,21 @@ instance [inst : Fact p.IsFaithfulPair] : Fact p.SeparatingRight :=
 instance [inst : Fact p.flip.IsFaithfulPair] : Fact p.SeparatingLeft :=
     ⟨SeparatingLeft.flip_of_isFaithfulPair inst.elim⟩
 
+
+variable [Module.Projective R N] in
+instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] (N →ₗ[R] R)).SeparatingRight :=
+    ⟨fun x hx => by simpa using (forall_dual_apply_eq_zero_iff R x).mp hx⟩
+
 variable [Module.Projective R M] in
 instance : Fact (Dual.eval R M).SeparatingLeft :=
     ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
+
+instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] (N →ₗ[R] R)).SeparatingLeft :=
+    ⟨fun x hx => by ext y; exact hx y⟩
+
 instance : Fact (Dual.eval R M).SeparatingRight :=
     ⟨by simp [Dual.eval, separatingLeft_iff_linear_nontrivial]⟩
+
 
 -- instance [inst : Fact p.flip.SeparatingLeft] : Fact p.SeparatingRight :=
 --     ⟨flip_separatingLeft.mp inst.elim⟩
@@ -113,6 +123,9 @@ instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.
 variable [inst : Fact p.SeparatingLeft] in
 @[simp] lemma SeparatingLeft.ker_eq_bot : ker p = ⊥ :=
   separatingLeft_iff_ker_eq_bot.mp inst.elim
+
+-- variable [Fact p.SeparatingRight] in
+-- lemma SeparatingRight.ker_eq_bot : ker p.flip = ⊥ := by simp
 
 
 -- ## IsSeparating
@@ -199,6 +212,15 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 lemma isFaithfulPair_of_toDual {ι : Type*} [DecidableEq ι] (b : Basis ι R M) :
     b.toDual.IsFaithfulPair := ⟨.id, fun _ => Dual.toDual_eq_zero⟩
 
+
+-- ## SEPARATING
+
+variable [Fact p.SeparatingLeft] in
+@[simp] lemma SeparatingLeft.injective : Injective p := LinearMap.ker_eq_bot.mp ker_eq_bot
+
+variable [Fact p.SeparatingRight] in
+lemma SeparatingRight.injective : Injective p.flip := by simp
+
 end CommRing
 
 section Field
@@ -240,6 +262,7 @@ instance [p.IsPerfPair] : Fact p.IsFaithfulPair := ⟨isFaithfulPair_of_isPerfPa
 
 instance [inst : p.IsPerfPair] : Fact (Surjective p) := ⟨inst.bijective_left.surjective⟩
 instance [inst : p.IsPerfPair] : Fact (Surjective p.flip) := ⟨inst.bijective_right.surjective⟩
+
 
 section IsReflexive
 
