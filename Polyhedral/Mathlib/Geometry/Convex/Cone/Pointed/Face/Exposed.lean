@@ -33,6 +33,10 @@ def IsExposedFaceOf (F C : PointedCone R M) :=
   ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
   -- ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
 
+-- variable (p) in
+-- def IsExposedFaceOf' (F C : PointedCone R M) :=
+--   ∃ φ : N, (∀ x ∈ C, p x φ ≥ 0) ∧ (∀ x ∈ C, p x φ = 0 ↔ x ∈ F)
+
 lemma IsExposedFaceOf.def_iff :
     F.IsExposedFaceOf C ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := by rfl
 
@@ -64,13 +68,14 @@ lemma IsExposedFaceOf.inf {hF₁ : F₁.IsExposedFaceOf C} {hF₂ : F₂.IsExpos
       have h₂ := (hφ₂' x hx).mpr H.2
       linarith
 
--- NOTE: Consider the dual of the finite support cone in ℝ^ω.
+-- NOTE: Consider the dual of positive orthant in the space of finitely supported sequences.
 --  Here the lineality space is {0} and is exposed, but not using a linear form of
 --  the form p x. There are too few linear forms with finite support.
+-- TODO: add FinRank (or FinSalRank) as condition.
 variable (p) in
 lemma IsExposedFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsExposedFaceOf (dual p C) := by
-  obtain ⟨φ, hφ⟩ := F.relint_nonempty sorry
+  obtain ⟨φ, hφ⟩ := F.relint_nonempty sorry -- currently requires FinRank (or FinSalRank later)
   use p φ
   constructor <;> intro x hx
   · exact hx <| hF.subset (F.relint_le hφ)
@@ -98,7 +103,7 @@ lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
-  rw [IsFaceOf.iff_mem_of_mul_add_mem]
+  rw [IsFaceOf.iff_mem_of_smul_add_mem] -- this is probably the wrong lemma to use here!
   constructor
   · exact hF.le
   intro _ _ _ hx hy hc hcxy

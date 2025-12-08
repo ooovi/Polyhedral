@@ -15,8 +15,8 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 -- TODO: maybe lineal should be defined only over rings and via x ∈ C.lineal → -x ∈ C.lineal.
 --   The given definition of lineal gives weird results over semiring such as the positive
---   elements of a ring. However, the current definition makes it very easy to se that it
---   is a submodule.
+--   elements of a ring. However, the current definition makes it very easy to see that it
+--   is a submodule. The better definition is given as `lineal'` below.
 
 /-- The lineality space of a cone. -/
 def lineal (C : PointedCone R M) : Submodule R M := sSup {S : Submodule R M | S ≤ C }

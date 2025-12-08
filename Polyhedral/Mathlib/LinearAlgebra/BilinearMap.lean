@@ -62,7 +62,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 -- lemma funext_zero_iff {α : Type*} {β : Type*} [Zero α] [Zero β] (f : α → β) :
 --     f = 0 ↔ ∀ x, f x = 0 := funext_iff
 
--- ## SeparatingLeft
+-- ## SEPARATING
 
 -- lemma SeparatingLeft.iff_zero_of_forall_zero : p.SeparatingLeft ↔ ∀ x, p x = 0 → x = 0 where
 --   mp h x hx := by simpa [hx] using h x
@@ -123,53 +123,6 @@ instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.
 variable [inst : Fact p.SeparatingLeft] in
 @[simp] lemma SeparatingLeft.ker_eq_bot : ker p = ⊥ :=
   separatingLeft_iff_ker_eq_bot.mp inst.elim
-
--- variable [Fact p.SeparatingRight] in
--- lemma SeparatingRight.ker_eq_bot : ker p.flip = ⊥ := by simp
-
-
--- ## IsSeparating
-
--- lemma IsSeparating.iff_ker_eq_bot : p.IsSeparating ↔ ker p = ⊥ := ker_eq_bot'.symm
--- lemma IsSeparating.ker_eq_bot (hp : p.IsSeparating) : ker p = ⊥ := iff_ker_eq_bot.mp hp
-
--- lemma IsFaithfulPair.isSeparating (hp : p.IsFaithfulPair) : p.flip.IsSeparating := by
---   intro x hpx
---   obtain ⟨_, hg⟩ := hp
---   exact hg x (by simp [← flip_apply, hpx])
-
--- @[deprecated SeparatingLeft (since := "")]
--- instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.flip.IsFaithfulPair := inst
--- -- instance [inst : Fact p.flip.flip.IsFaithfulPair] : Fact p.IsFaithfulPair := inst
-
--- variable {R : Type*} [CommRing R]
--- variable {M : Type*} [AddCommGroup M] [Module R M]
--- variable {N : Type*} [AddCommGroup N] [Module R N]
--- variable {p : M →ₗ[R] N →ₗ[R] R}
-
--- def foo (hp : p.IsPerfPair) : N ≃ₗ[R] Dual R M := sorry
-
--- lemma IsSeparating.of_injective (hp : Injective p) : p.IsSeparating := by
---   simpa [IsSeparating.iff_ker_eq_bot] using ker_eq_bot_of_injective hp
--- instance [inst : Fact (Injective p)] : Fact p.IsSeparating :=
-    -- ⟨IsSeparating.of_injective inst.elim⟩
-
--- instance [inst : Fact p.IsSeparating] : Fact p.flip.flip.IsSeparating := inst
-
--- lemma isSeparating_flip_of_isFaithfulPair (hp : p.IsFaithfulPair) : p.flip.IsSeparating := by
---   obtain ⟨g, hg⟩ := hp
---   intro x hx
---   simpa [← flip_apply p, hx] using hg x
-
--- instance [inst : Fact p.IsFaithfulPair] : Fact p.flip.IsSeparating :=
---     ⟨isSeparating_flip_of_isFaithfulPair inst.elim⟩
--- instance [inst : Fact p.flip.IsFaithfulPair] : Fact p.IsSeparating :=
---     ⟨isSeparating_flip_of_isFaithfulPair inst.elim⟩
-
--- variable [Module.Projective R M] in
--- instance : Fact (Dual.eval R M).IsSeparating := ⟨by simp [IsSeparating, eval_apply_eq_zero_iff]⟩
-
--- instance : Fact (Dual.eval R M).flip.IsSeparating := ⟨by simp [Dual.eval, IsSeparating]⟩
 
 instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
 

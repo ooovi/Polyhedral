@@ -67,7 +67,7 @@ variable (p) [p.IsPerfPair] in
   have H : (C ⊔ Submodule.span R (F : Set M)).lineal = .span R F := by
     sorry
   rw [H]
-  exact IsFaceOf.inf_submodule hF
+  exact hF.inf_linSpan
 
 /-- Every face of a polyhedral cone is exposed. -/
 lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
@@ -138,6 +138,11 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {S : Submodule R M}
 variable {C C₁ C₂ F : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
+
+lemma IsPolyhedral.exists_fg_combEquiv (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R M, D.FG ∧ D ≃c C := by
+  obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
+  exact ⟨_, hC.fg_inf_of_isCompl hS, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
 
 -- ## TODO: remove `isPerfPair` from everything below.
 

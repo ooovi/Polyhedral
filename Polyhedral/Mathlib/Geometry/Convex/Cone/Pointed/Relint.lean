@@ -79,7 +79,7 @@ lemma IsFaceOf.self_of_le_linSpan (hF : F.IsFaceOf C) (h : C.linSpan ≤ F.linSp
     F = C := sorry
 
 -- NOTE: in infinite dimensions, there are cones with an empty relative interior!
--- Consider e.g. the cone of finitely supported vectors in ℝ^ω.
+-- Consider e.g. the positive orthant in the space of finitely supported vectors.
 -- TODO: generalize to cones with `FinSalRank`
 /-- The relative interior is non-empty. -/
 lemma relint_nonempty (C : PointedCone R M) (hC : C.FinRank) : Nonempty C.relint := by

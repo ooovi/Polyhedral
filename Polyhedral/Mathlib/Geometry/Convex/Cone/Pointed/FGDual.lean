@@ -76,11 +76,11 @@ lemma FGDual.dual_dual_flip {C : PointedCone R N} (hC : C.FGDual p) :
 lemma FGDual.dual_flip_dual {C : PointedCone R M} (hC : C.FGDual p.flip) :
     dual p.flip (dual p C) = C := hC.dual_dual_flip
 
-lemma FGDual.isDualClosed {C : PointedCone R M} (hC : C.FGDual p.flip) :
-    C.IsDualClosed p := hC.dual_flip_dual
+lemma FGDual.dualClosed {C : PointedCone R M} (hC : C.FGDual p.flip) :
+    C.DualClosed p := hC.dual_flip_dual
 
-lemma FGDual.isDualClosed_flip {C : PointedCone R N} (hC : C.FGDual p) :
-    C.IsDualClosed p.flip := hC.dual_dual_flip
+lemma FGDual.dualClosed_flip {C : PointedCone R N} (hC : C.FGDual p) :
+    C.DualClosed p.flip := hC.dual_dual_flip
 
 -----
 

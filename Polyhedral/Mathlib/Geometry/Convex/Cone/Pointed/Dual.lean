@@ -106,9 +106,8 @@ example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
 
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
-lemma span_dual_le_dual_lineal {C : PointedCone R M} :
-    Submodule.span R (dual p C) ≤ Submodule.dual p C.lineal := by
-  simp only [Submodule.span, lineal, Submodule.dual_sSup_sInf_dual]
+lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .dual p C.lineal := by
+  simp only [lineal, Submodule.dual_sSup_sInf_dual]
   refine sInf_le_sInf ?_
   intro T
   simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
@@ -205,7 +204,7 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 lemma dual_span_lineal_dual (s : Set M) :
-    (dual p s).lineal = Submodule.dual p s := by
+    (dual p s).lineal = .dual p s := by
   rw [Eq.comm]
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
@@ -344,7 +343,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed p) :
-    Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
+    .dual p C.lineal = (dual p C).linSpan := by
   rw [← hC, dual_span_lineal_dual]
   nth_rw 1 [← flip_flip p]
   nth_rw 2 [← Submodule.dual_span]
@@ -434,17 +433,20 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   sorry
 
 
-lemma DualClosed.dual_dual_lineal {C : PointedCone R M} (hC : C.DualClosed p) :
-    Submodule.span R (dual p.flip (dual p C)) =
-      Submodule.dual p.flip (Submodule.dual p (Submodule.span R (C : Set M))) := by
+lemma DualClosed.dual_dual_linSpan {C : PointedCone R M} (hC : C.DualClosed p) :
+    (dual p.flip (dual p C)).linSpan = .dual p.flip (Submodule.dual p C.linSpan) := by
   sorry
 
-lemma DualClosed.dual_dual_span {C : PointedCone R M} (hC : C.DualClosed p) :
-    (dual p.flip (dual p C)).lineal = Submodule.dual p.flip (Submodule.dual p C.lineal) := by
+lemma DualClosed.dual_dual_lineal {C : PointedCone R M} (hC : C.DualClosed p) :
+    (dual p.flip (dual p C)).lineal = .dual p.flip (Submodule.dual p C.lineal) := by
   sorry
 
 lemma DualClosed.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
     C.lineal.DualClosed p := by
+  sorry
+
+lemma DualClosed.linSpan {C : PointedCone R M} (hC : C.DualClosed p) :
+    C.linSpan.DualClosed p := by
   sorry
 
 variable (p) [Fact (Surjective p.flip)] in

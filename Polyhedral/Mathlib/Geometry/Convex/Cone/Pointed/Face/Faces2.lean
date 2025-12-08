@@ -239,7 +239,7 @@ lemma isFaceOf_map_iff_of_injOn {f : M →ₗ[R] N} (hf : ker f ⊓ (Submodule.s
 
 lemma isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Injective f) :
     (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
-  simp only [IsFaceOf.iff_mem_of_mul_add_mem, mem_map, forall_exists_index, and_imp,
+  simp only [IsFaceOf.iff_mem_of_smul_add_mem, mem_map, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at *
   sorry
   -- simp only [← map_add, ← map_smul, hf.eq_iff, exists_eq_right]
@@ -407,7 +407,7 @@ def Face.inf_face_orderHom2 : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) w
 /-- Two cones are combinatorially equivalent if their face posets are ordfer isomorphic. -/
 abbrev CombEquiv (C D : PointedCone R M) := Nonempty (Face C ≃o Face D)
 
-/-- Denotes combinatorial equivalence of pointed cones. Notation for an `CombEquiv`. -/
+/-- Denotes combinatorial equivalence of pointed cones. Notation for `CombEquiv`. -/
 infixl:100 " ≃c " => CombEquiv
 
 
@@ -423,7 +423,7 @@ def inf_combEquiv_of_isCompl_lineal (hS : IsCompl S C.lineal) :
     · rw [← inf_sup_assoc_of_submodule_le] at h
       · simpa [← coe_sup, hS.codisjoint.eq_top] using h
       · exact lineal_le C
-    · simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars, restrictScalars_self]
+    · rw [submodule_linSpan]
       refine Disjoint.mono_left ?_ hS.disjoint
       nth_rw 2 [← span_eq S]
       exact span_monotone (by simp) ⟩
@@ -451,7 +451,8 @@ def inf_combEquiv_of_isCompl_lineal (hS : IsCompl S C.lineal) :
       · exact le_trans G.isFaceOf.le inf_le_right
     · exact le_trans h le_sup_left
 
-lemma exists_salient_combEquiv : ∃ D : PointedCone R M, D.Salient ∧ D ≃c C := by
+lemma exists_salient_combEquiv (C : PointedCone R M) :
+    ∃ D : PointedCone R M, D.Salient ∧ D ≃c C := by
   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
   exact ⟨_, inf_salient hS.disjoint, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
 

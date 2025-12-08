@@ -45,6 +45,21 @@ alias self := refl
 
 alias le := subset
 
+lemma trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C := by
+  refine ⟨h₁.subset.trans h₂.subset, fun hx hy a0 b0 h ↦ ?_⟩
+  refine h₁.2 (h₂.2 hx hy a0 b0 (h₁.subset h)) ?_ a0 b0 h
+  refine h₂.left_mem_of_smul_add_mem hy hx b0 a0 ?_
+  rw [add_comm] at h
+  exact h₁.subset h
+
+lemma isExtreme (h : F.IsFaceOf C) : IsExtreme R (C : Set M) F := by
+  refine ⟨h.subset, ?_⟩
+  rintro x xc y yc z zf ⟨a, b, a0, b0, -, hz⟩
+  apply h.left_mem_of_smul_add_mem xc yc a0 b0
+  rwa [← hz] at zf
+
+-- ## INF
+
 lemma inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
   use le_inf_iff.mpr ⟨Set.inter_subset_left.trans h₁.subset, Set.inter_subset_right.trans h₂.subset⟩
@@ -62,27 +77,18 @@ theorem inf_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂) : F.IsFaceOf
   refine Eq.mp ?_ (inf h₁ h₂)
   simp
 
-lemma trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C := by
-  refine ⟨h₁.subset.trans h₂.subset, fun hx hy a0 b0 h ↦ ?_⟩
-  refine h₁.2 (h₂.2 hx hy a0 b0 (h₁.subset h)) ?_ a0 b0 h
-  refine h₂.left_mem_of_smul_add_mem hy hx b0 a0 ?_
-  rw [add_comm] at h
-  exact h₁.subset h
+-- ## PRIORITY
+lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := sorry
+
+@[deprecated (since := "")]
+alias inf_submodule := inf_linSpan
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h rfl
 
-lemma isExtreme (h : F.IsFaceOf C) : IsExtreme R (E := M) C F := by
-  refine ⟨h.subset, ?_⟩
-  rintro x xc y yc z zf ⟨a, b, a0, b0, -, hz⟩
-  apply h.left_mem_of_smul_add_mem xc yc a0 b0
-  rwa [← hz] at zf
-
 end Semiring
 
-/-!
-### Joins
--/
+-- ## SUP
 
 section Ring
 
@@ -90,8 +96,7 @@ variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
   {C D F G : PointedCone R M}
 
 lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
-    (hCD : Disjoint (.span R C) (.span R D : Submodule R M)) :
-    (F ⊔ G).IsFaceOf (C ⊔ D) := by
+    (hCD : Disjoint C.linSpan D.linSpan) : (F ⊔ G).IsFaceOf (C ⊔ D) := by
   constructor
   · simp only [sup_le_iff]
     constructor
@@ -116,7 +121,7 @@ lemma sup (hFC : F.IsFaceOf C) (hGD : G.IsFaceOf D)
     · exact hFC.left_mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
     · exact hGD.left_mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
 
-lemma inf_submodule (hF : F.IsFaceOf C) : C ⊓ (Submodule.span R (F : Set M)) = F := sorry
+-- TODO: left and right lemmas for sup; see inf equivalents above.
 
 end Ring
 
@@ -130,7 +135,7 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 -/
 
 -- Q: This is true without field, no?
-lemma iff_mem_of_mul_add_mem :
+lemma iff_mem_of_smul_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M} {c : R}, x ∈ C → y ∈ C → 0 < c → c • x + y ∈ F → x ∈ F := by
   constructor
   · intro f; refine ⟨f.subset, ?_⟩
@@ -146,11 +151,11 @@ lemma iff_mem_of_mul_add_mem :
 lemma iff_mem_of_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M}, x ∈ C → y ∈ C → x + y ∈ F → x ∈ F := by
   constructor <;> intro h
-  · have := iff_mem_of_mul_add_mem.mp h
+  · have := iff_mem_of_smul_add_mem.mp h
     refine ⟨this.1, fun xC yC => ?_⟩
     convert this.2 xC yC (zero_lt_one)
     simp
-  · apply iff_mem_of_mul_add_mem.mpr ⟨h.1, fun xC yC c0 hcxy => ?_⟩
+  · apply iff_mem_of_smul_add_mem.mpr ⟨h.1, fun xC yC c0 hcxy => ?_⟩
     have cxF := h.2 (smul_mem _ (le_of_lt c0) xC) yC hcxy
     convert smul_mem _ (inv_nonneg.mpr (le_of_lt c0)) cxF
     simp [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel _ (ne_of_lt c0).symm]
@@ -164,8 +169,9 @@ lemma span_nonneg_lc_mem {f : F.IsFaceOf (span R s)} {n : ℕ} {c : Fin n → { 
       have : ∑ i ∈ {i}ᶜ, c i • (g i).val ∈ span R s :=
         Submodule.sum_smul_mem _ _ (fun _ _ => subset_span (Subtype.coe_prop _))
       rw [Fintype.sum_eq_add_sum_compl i] at h
-      exact (iff_mem_of_mul_add_mem.mp f).2 (subset_span (Subtype.coe_prop _)) this cpos h
+      exact (iff_mem_of_smul_add_mem.mp f).2 (subset_span (Subtype.coe_prop _)) this cpos h
 
+-- ## PRIORITY
 lemma mem_of_sum_mem (hF : F.IsFaceOf C) {s : Finset M} (hsC : (s : Set M) ⊆ C)
     (hs : ∑ x ∈ s, x ∈ F) : ∀ x ∈ s, x ∈ F := sorry
 lemma mem_of_sum_mem' (hF : F.IsFaceOf C) {ι : Type*} [Fintype ι] {f : ι → M}
@@ -175,7 +181,7 @@ lemma iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
   constructor
   · exact IsFaceOf.subset
-  · rw [iff_mem_of_mul_add_mem] at ⊢ h₁
+  · rw [iff_mem_of_smul_add_mem] at ⊢ h₁
     exact fun h => ⟨h, fun hx hy => h₁.2 (h₂.subset hx) (h₂.subset hy)⟩
 
 lemma iff_of_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₁) :
@@ -188,6 +194,11 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] {C F : PointedCone R M}
+
+-- ## LINEAL
+
+-- I am somewhat confident that we can prove the lineal lemmas without field.
+-- I think so because `iff_mem_of_add_mem` can be proven under weaker conditions as well.
 
 /-- The lineality space of a cone `C` is a face of `C`. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
@@ -205,6 +216,9 @@ lemma lineal_le {C F : PointedCone R M} (hF : F.IsFaceOf C) :
 
 lemma lineal_eq {C F : PointedCone R M} (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
   sorry
+
+
+-- ## MAP
 
 /-- Mapping a face using an injective linear map yields a face of the image of `C`. -/
 lemma map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
@@ -488,6 +502,7 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F : PointedCone R M} {s t : Set M}
 
+-- TODO: prove this for IsFaceOf first!
 lemma span_inter_face_span_inf_face (F : Face (span R s)) :
     span R (s ∩ F) = (span R s) ⊓ F := by
   ext x; constructor
@@ -597,6 +612,7 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
   · rw [n'on mF]
     exact (le_add_iff_nonneg_right _).mpr <| yC (hF.subset mF)
 
+-- ## RPIORITY
 @[simp] lemma subdual_lineal : subdual p C C.lineal = dual p C := sorry
 @[simp] lemma subdual_bot : subdual p C ⊥ = dual p C := sorry
 

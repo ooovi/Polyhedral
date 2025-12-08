@@ -330,6 +330,83 @@ lemma dual_sup_dual_le_dual_inf (S T : Submodule R M) :
   rw [← hxy, ← zero_add 0]
   nth_rw 1 [hx' hyS, hy' hyT, map_add]
 
+
+-----------------------
+
+-- ## BILIN
+
+section Ring
+
+variable {R M N : Type*}
+  [CommRing R]
+  [AddCommGroup M] [Module R M]
+  [AddCommGroup N] [Module R N]
+  {p : M →ₗ[R] N →ₗ[R] R}
+
+abbrev quot (S T : Submodule R M) := map T.mkQ S
+
+variable (p) in
+/-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
+def _root_.LinearMap.rp (S : Submodule R M) : S →ₗ[R] (N ⧸ dual p S) →ₗ[R] R where
+  toFun x := liftQ (dual p S) (p x.1) (fun _ hy => (hy x.2).symm)
+  map_add' _ _ := by ext; simp
+  map_smul' _ _ := by ext; simp
+
+variable (p) in
+@[simp] lemma _root_.LinearMap.rp_apply {S : Submodule R M} (x : S) (y : N) :
+    (p.rp S) x ((dual p S).mkQ y) = p x.1 y := by simp [rp]
+
+variable (p) in
+lemma dual_embed_quot_dual (S : Submodule R M) (T : Submodule R S) :
+    (dual p (embed T)).quot (dual p S) = dual (p.rp S) T := by
+  ext x
+  simp only [mem_dual, SetLike.mem_coe, map_coe, subtype_apply,
+    mem_map, mem_image, forall_exists_index]
+  constructor <;> intro h
+  · obtain ⟨y, hy, hy'⟩ := h
+    intro z hz
+    simpa only [mem_restrict_iff, ← hy', rp_apply] using hy z ⟨hz, rfl⟩
+  · use surjInv (dual p S).mkQ_surjective x
+    constructor
+    · intro y z ⟨hz, rfl⟩
+      specialize h hz
+      rw [← surjInv_eq (dual p S).mkQ_surjective x] at h
+      simpa only [rp_apply] using h
+    · rw [surjInv_eq (dual p S).mkQ_surjective]
+
+variable (p) in
+lemma dual_quot_dual (S T : Submodule R M) :
+    (dual p (S ∩ T)).quot (dual p S) = dual (p.rp S) (restrict S T) := by
+  simp only [← coe_inf, ← embed_restrict S T, dual_embed_quot_dual]
+
+alias dual_restrict := dual_quot_dual
+
+variable (p) in
+lemma dual_quot_dual_of_le (S T : Submodule R M) (hST : T ≤ S) :
+    (dual p T).quot (dual p S) = dual (p.rp S) (restrict S T) := by
+  rw [← inter_eq_right.mpr hST]
+  exact dual_quot_dual ..
+
+alias dual_restrict_of_le := dual_quot_dual_of_le
+
+variable (p) in
+lemma comap_dual_mkQ_dual (S : Submodule R M) (T : Submodule R S) :
+    comap (dual p S).mkQ (dual (p.rp S) T) = dual p (embed T) := by
+  simpa only [← dual_embed_quot_dual, comap_map_mkQ, sup_eq_right] using dual_antitone embed_le
+
+alias dual_embed := comap_dual_mkQ_dual
+
+lemma comap_dual_mkQ_dual_restrict (S T : Submodule R M) :
+    comap (dual p S).mkQ (dual (p.rp S) (restrict S T)) = dual p (S ∩ T) := by
+  simp only [← coe_inf, ← embed_restrict S T, dual_embed]
+
+lemma comap_dual_mkQ_dual_restrict_of_le (S T : Submodule R M) (hST : T ≤ S) :
+    comap (dual p S).mkQ (dual (p.rp S) (restrict S T)) = dual p T := by
+  rw [← inter_eq_right.mpr hST]
+  exact comap_dual_mkQ_dual_restrict ..
+
+end Ring
+
 ----------------------
 
 -- Consider redefining dual closed as dual dual S = S ⊔ ker p

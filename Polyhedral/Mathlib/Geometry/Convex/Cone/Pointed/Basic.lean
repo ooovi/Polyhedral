@@ -82,6 +82,7 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 
 -- ## LINSPAN
 
+/-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
 @[simp] lemma submodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
@@ -99,6 +100,7 @@ noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
 
 noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 
+-- NOTE: this is not the same as Module.Finite or FG!
 abbrev FinRank (C : PointedCone R M) := Module.Finite R C.linSpan
 
 end Semiring
