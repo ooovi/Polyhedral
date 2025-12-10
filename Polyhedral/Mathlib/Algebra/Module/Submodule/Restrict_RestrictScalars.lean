@@ -15,7 +15,11 @@ open Function LinearMap Module
 
 section Semiring
 
-variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
+variable
+  {S : Type*} [Semiring S]
+  {R : Type*} [Semiring R] [Module S R]
+  {M : Type*} [AddCommMonoid M] [Module S M] [Module R M] [IsScalarTower S R M]
+  -- {M : Type*} [AddCommMonoid M] [SMul S M] [Module R M] [IsScalarTower S R M]
 
 /- I suggest the alternative naming `restrict` for `submoduleOf` for the following reason:
   we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
@@ -29,23 +33,18 @@ variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
 -- NOTE: Something fundamental like this should probably be implemted somewhere more upstream
 --  starting from monoids or so.
 
+variable (p : Submodule R M) (q : Submodule S M)
+
 /-- The restriction of `S ⊓ T` reinterpreted as a submodule of `S`. -/
-abbrev restrict (S T : Submodule R M) : Submodule R S := T.submoduleOf S -- T.comap S.subtype
+abbrev restrict : Submodule S p := q.comap (p.subtype.restrictScalars S)
 
--- Q: Shoud have `restrict` as an order hom? If yes, use the code below.
--- def restrict' (S : Submodule R M) : Submodule R M →o Submodule R S where
---   toFun := (submoduleOf · S)
---   monotone' := fun _ _ h _ => (h ·)
+-- lemma restrict_eq_comap_subtype :
+--     restrict p q = q.comap (p.subtype.restrictScalars S) := rfl
 
-lemma restrict_eq_comap_subtype (S T : Submodule R M) :
-    restrict S T = Submodule.comap S.subtype T := rfl
+@[simp] lemma restrict_top : restrict p (⊤ : Submodule S M) = ⊤ := by simp [comap_top]
+@[simp] lemma restrict_bot : restrict p (⊥ : Submodule S M) = ⊥ := by simp [comap_bot]
 
-@[simp] lemma restrict_top (S : Submodule R M) : restrict S ⊤ = ⊤ := by
-  simp only [submoduleOf, comap_top]
-@[simp] lemma restrict_bot (S : Submodule R M) : restrict S ⊥ = ⊥ := by
-  simp only [submoduleOf, comap_bot, ker_subtype]
-
-@[simp] lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := submoduleOf_self S
+@[simp] lemma restrict_self : restrict p p = ⊤ := submoduleOf_self p
 
 lemma mem_restrict {S : Submodule R M} {T : Submodule R M} {x : S} (h : x ∈ restrict S T) :
     (x : M) ∈ T := by simpa using h

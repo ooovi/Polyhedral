@@ -5,6 +5,9 @@ Authors: Olivia Röhrig
 -- -/
 import Mathlib.Analysis.Convex.Extreme
 import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.Order.Atoms
+import Mathlib.Order.Atoms.Finite
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 
@@ -24,6 +27,17 @@ structure IsFaceOf (F C : PointedCone R M) where
   subset : F ≤ C
   left_mem_of_smul_add_mem :
     ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F
+
+section
+
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+
+lemma IsFaceOf.def : F.IsFaceOf C ↔
+    F ≤ C ∧ ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F := by
+  constructor <;> exact fun h => ⟨h.1, h.2⟩
+
+end
 
 namespace IsFaceOf
 
@@ -343,11 +357,11 @@ variable {C : PointedCone R M}
 def inter (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, IsFaceOf.inf_left F₁.isFaceOf F₂.isFaceOf⟩
 
 /-- The face of `C` obtained by embedding a face of a face of `C`. -/
-def embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
+def embed' {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
     ⟨F₂, F₂.isFaceOf.trans F₁.isFaceOf⟩
 
 /-- A face of a face of `C` coerces to a face of `C`. -/
-instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
+instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed'⟩
 
 /-!
 #### Product
@@ -451,7 +465,7 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 abbrev span (F : Face C) : Submodule R M := Submodule.span R F
 
 /-- The face of `F₁` obtained by intersecting `F₁` with another of `C`'s faces. -/
-def restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
+def restrict' (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
   ⟨F₁ ⊓ F₂, (F₁.isFaceOf.iff_of_le inf_le_left).mp (F₁.isFaceOf.inf_left F₂.isFaceOf)⟩
 
 /-!
@@ -502,8 +516,7 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F : PointedCone R M} {s t : Set M}
 
--- TODO: prove this for IsFaceOf first!
-lemma span_inter_face_span_inf_face (F : Face (span R s)) :
+lemma span_inter_face_span_inf_face' (hF : F.IsFaceOf (span R s)) :
     span R (s ∩ F) = (span R s) ⊓ F := by
   ext x; constructor
   · simp [Submodule.mem_span]
@@ -518,8 +531,35 @@ lemma span_inter_face_span_inf_face (F : Face (span R s)) :
     by_cases hh : c i = 0
     · rw [hh]; simp
     · apply Submodule.smul_mem; apply Submodule.subset_span
-      have := F.isFaceOf.span_nonneg_lc_mem h.2 (pos_of_ne_zero hh)
+      have := hF.span_nonneg_lc_mem h.2 (pos_of_ne_zero hh)
       exact Set.mem_inter (Subtype.coe_prop (g i)) this
+
+-- TODO: delete the above theorem, this one is the better version.
+lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
+    span R (s ∩ F) = F := by
+  simpa [hF.le] using span_inter_face_span_inf_face' hF
+
+lemma exists_span_subset_face {s : Set M} (hF : F.IsFaceOf (span R s)) :
+    ∃ t ⊆ s, span R t = F := ⟨_, Set.inter_subset_left, span_inter_face_span_inf_face hF⟩
+
+-- ... eg this one
+-- lemma span_inter_face_span_inf_face (F : Face (span R s)) :
+--     span R (s ∩ F) = (span R s) ⊓ F := by
+--   ext x; constructor
+--   · simp [Submodule.mem_span]
+--     exact fun h =>
+--       ⟨fun p sp => h p (subset_trans Set.inter_subset_left sp), h F Set.inter_subset_right⟩
+--   · intro h
+--     apply Submodule.mem_inf.mp at h
+--     obtain ⟨n, c, g, xfg⟩ := Submodule.mem_span_set'.mp h.1
+--     subst xfg
+--     apply Submodule.sum_mem
+--     intro i _
+--     by_cases hh : c i = 0
+--     · rw [hh]; simp
+--     · apply Submodule.smul_mem; apply Submodule.subset_span
+--       have := F.isFaceOf.span_nonneg_lc_mem h.2 (pos_of_ne_zero hh)
+--       exact Set.mem_inter (Subtype.coe_prop (g i)) this
 
 -- If span R s and span R t are disjoint (only share 0)
 example (h : Submodule.span R s ⊓ Submodule.span R t = ⊥)
@@ -527,40 +567,6 @@ example (h : Submodule.span R s ⊓ Submodule.span R t = ⊥)
     Submodule.span R (s ∩ t) = Submodule.span R s ⊓ Submodule.span R t := by
   -- When intersection is ⊥, both sides equal ⊥ if s ∩ t = ∅
   sorry
-
-lemma exists_span_subset_face (F : Face (span R s)) :
-    ∃ t ⊆ s, span R t = F := by
-  use s ∩ F
-  constructor
-  · exact Set.inter_subset_left
-  · simp [span_inter_face_span_inf_face F]
-    exact F.isFaceOf.subset
-
-lemma exists_fg_span_subset_face {s : Finset M} (F : Face (span R s.toSet)) :
-    ∃ t ⊆ s, span R t.toSet = F := by
-  use (s.finite_toSet.inter_of_left F).toFinset
-  constructor
-  · simp
-  · simp [span_inter_face_span_inf_face F]
-    exact F.isFaceOf.subset
-
-lemma FG.face_fg_of_fg (hC : C.FG) (F : Face C) : F.FG := by
-  obtain ⟨_, rfl⟩ := hC
-  let ⟨t, _, tt⟩ := exists_fg_span_subset_face F
-  use t, tt
-
-lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := FG.face_fg_of_fg hC ⟨F, hF⟩
-
-/-- An FG cone has finitely many faces. -/
-theorem Face.finite_of_fg (hC : C.FG) : Finite (Face C) := by
-  obtain ⟨s, rfl⟩ := hC
-  apply Finite.of_injective (β := Finset.powerset s)
-    fun F => ⟨(exists_fg_span_subset_face F).choose,
-               by simp; exact (exists_fg_span_subset_face _).choose_spec.1⟩
-  intro F F' FF
-  have := congrArg (fun s : s.powerset => PointedCone.span (E := M) R s) FF
-  simp [(exists_fg_span_subset_face _).choose_spec.2] at this
-  exact Face.toPointedCone_eq_iff.mp this
 
 end Field
 

@@ -151,14 +151,14 @@ instance : CompleteLattice (Face C) where
 ### Embed and restrict
 -/
 
-lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
+lemma embed_restrict (F₁ F₂ : Face C) : embed' (F₁.restrict' F₂) = F₁ ⊓ F₂ := rfl
 
 lemma embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
-    embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
+    embed' (F₁.restrict' F₂) = F₂ := by simp [embed_restrict, hF]
 
 lemma restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
-    F₁.restrict (embed F₂) = F₂ := by
-  unfold restrict embed; congr
+    F₁.restrict' (embed' F₂) = F₂ := by
+  unfold restrict' embed'; congr
   simpa using F₂.isFaceOf.subset
 
 lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
@@ -169,10 +169,10 @@ lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤
  lattice below the face. -/
 def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
   toFun G := ⟨G, bot_le, Face.embed_le G⟩
-  invFun G := F.restrict G
+  invFun G := F.restrict' G
   left_inv := restrict_embed
   right_inv G := by simp only [embed_restrict_of_le G.2.2]
-  map_rel_iff' := @fun _ _ => by simp [embed]
+  map_rel_iff' := @fun _ _ => by simp [embed']
 
 /-- The embedding of a face's face lattice into the cone's face lattice. -/
 def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=

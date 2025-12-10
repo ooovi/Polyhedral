@@ -108,6 +108,8 @@ variable {R : Type*} [Ring R]
 variable {S : Type*} [Semiring S] [Module S R]
 variable {M : Type*} [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
 
+abbrev quot (S T : Submodule R M) := map T.mkQ S
+
 /-- Restricted scalars version of `Submodule.range_mkQ`. -/
 theorem range_mkQ' (p : Submodule R M) : range (p.mkQ.restrictScalars S) = ⊤ :=
   eq_top_iff'.2 <| by rintro ⟨x⟩; exact ⟨x, rfl⟩

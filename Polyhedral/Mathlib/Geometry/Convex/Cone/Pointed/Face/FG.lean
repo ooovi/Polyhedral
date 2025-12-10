@@ -28,6 +28,19 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
 
+lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
+    ∃ t ⊆ s, span R t.toSet = F := by
+  use (s.finite_toSet.inter_of_left F).toFinset
+  simp [span_inter_face_span_inf_face hF]
+
+/-- Faces of FG cones are FG. -/
+lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
+  obtain ⟨_, rfl⟩ := hC
+  let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
+  use t, tt
+
+
+
 -- TODO: can we reduce assumptions?
 variable (p) [Fact (Function.Surjective p.flip)] in
 lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
@@ -105,7 +118,8 @@ variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
-variable {C F F₁ F₂ : PointedCone R M}
+variable {C : PointedCone R M}
+variable {F F₁ F₂ : Face C}
 
 variable (hC : C.FG)
 
@@ -128,14 +142,43 @@ noncomputable def Face.rank (F : Face C) := Module.rank R F.span
 -- def coatoms : Set (Face C) := {F : Face C | IsCoatom F}
 -- alias facets := coatoms
 
+/-- An FG cone has finitely many faces. -/
+theorem FG.finite_face (hC : C.FG) : Finite (Face C) := by
+  obtain ⟨s, rfl⟩ := hC
+  apply Finite.of_injective (β := Finset.powerset s)
+    fun F => ⟨(exists_fg_span_subset_face F.isFaceOf).choose, by
+      simpa using (exists_fg_span_subset_face F.isFaceOf).choose_spec.1 ⟩
+  intro F F' hF
+  have h := congrArg (fun s : s.powerset => PointedCone.span R (s : Set M)) hF
+  simp only [(exists_fg_span_subset_face F.isFaceOf).choose_spec] at h
+  exact Face.toPointedCone_eq_iff.mp sorry -- h
+
+lemma FG.face_atomic (hC : C.FG) : IsAtomic (Face C) :=
+  letI := FG.finite_face hC; Finite.to_isAtomic
+
+lemma FG.face_coatomic (hC : C.FG) : IsCoatomic (Face C) :=
+  letI := FG.finite_face hC; Finite.to_isCoatomic
+
+
+-- atoms are 1D
+
+lemma foobarfoo'' (hF : IsAtom F) :
+    ∃ x : M, F = (C.lineal : PointedCone R M) ⊔ span R {x} :=
+
+  sorry
+
+lemma foobarfoo' (hF : IsAtom F) :
+    PointedCone.rank (F : PointedCone R M) = Module.rank R C.lineal + 1 :=
+  sorry
+
+lemma foobarfoo (hC : C.Salient) (hF : IsAtom F) :
+    PointedCone.rank (F : PointedCone R M) = 1 := sorry
+
+
 
 -- ## KREIN MILMAN
 
-lemma atomic_of_fg (hC : C.FG) : IsAtomic (Face C) := sorry
-
 lemma atomistic_of_fg (hC : C.FG) : IsAtomistic (Face C) := sorry
-
-lemma coatomic_of_fg (hC : C.FG) : IsCoatomic (Face C) := sorry
 
 lemma coatomistic_of_fg (hC : C.FG) : IsCoatomistic (Face C) := sorry
 

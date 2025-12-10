@@ -343,8 +343,6 @@ variable {R M N : Type*}
   [AddCommGroup N] [Module R N]
   {p : M →ₗ[R] N →ₗ[R] R}
 
-abbrev quot (S T : Submodule R M) := map T.mkQ S
-
 variable (p) in
 /-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
 def _root_.LinearMap.rp (S : Submodule R M) : S →ₗ[R] (N ⧸ dual p S) →ₗ[R] R where
@@ -355,6 +353,9 @@ def _root_.LinearMap.rp (S : Submodule R M) : S →ₗ[R] (N ⧸ dual p S) →�
 variable (p) in
 @[simp] lemma _root_.LinearMap.rp_apply {S : Submodule R M} (x : S) (y : N) :
     (p.rp S) x ((dual p S).mkQ y) = p x.1 y := by simp [rp]
+
+-- TODO: Lemmas that prove how properties of pairing are preserved under restriction.
+--  Most relevant are separation, nondegeneracy, surjectivity and perfectness.
 
 variable (p) in
 lemma dual_embed_quot_dual (S : Submodule R M) (T : Submodule R S) :
@@ -382,7 +383,7 @@ lemma dual_quot_dual (S T : Submodule R M) :
 alias dual_restrict := dual_quot_dual
 
 variable (p) in
-lemma dual_quot_dual_of_le (S T : Submodule R M) (hST : T ≤ S) :
+lemma dual_quot_dual_of_le {S T : Submodule R M} (hST : T ≤ S) :
     (dual p T).quot (dual p S) = dual (p.rp S) (restrict S T) := by
   rw [← inter_eq_right.mpr hST]
   exact dual_quot_dual ..
@@ -400,7 +401,11 @@ lemma comap_dual_mkQ_dual_restrict (S T : Submodule R M) :
     comap (dual p S).mkQ (dual (p.rp S) (restrict S T)) = dual p (S ∩ T) := by
   simp only [← coe_inf, ← embed_restrict S T, dual_embed]
 
-lemma comap_dual_mkQ_dual_restrict_of_le (S T : Submodule R M) (hST : T ≤ S) :
+-- This is a crucial lemma. It helps restricting duality statement. We can use it to show that
+-- properties that are preserved under duality in finite dim, and that are closed under adding
+-- linear subspaces, are also closed under duality in arbitrary dim. An example is the property
+-- of being polyhedral. So this will help lifting statements from FG to polyhedral.
+lemma comap_dual_mkQ_dual_restrict_of_le {S T : Submodule R M} (hST : T ≤ S) :
     comap (dual p S).mkQ (dual (p.rp S) (restrict S T)) = dual p T := by
   rw [← inter_eq_right.mpr hST]
   exact comap_dual_mkQ_dual_restrict ..

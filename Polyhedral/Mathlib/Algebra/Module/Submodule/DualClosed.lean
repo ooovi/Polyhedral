@@ -384,6 +384,15 @@ def dualAnnihilator_linearEquiv_dual_quot (S : Submodule R M) :
   left_inv _ := by ext; simp
   right_inv _ := by ext; simp
 
+-- TODO: this is an equivalence when p is surjective, I think; see
+--  `dualAnnihilator_linearEquiv_dual_quot` above.
+def dual_linearMap_dual_quot (S : Submodule R M) :
+    dual p S →ₗ[R] Dual R (M ⧸ S)  where
+  toFun f := S.liftQ (p.flip f.1) <| le_ker_of_mem_dualAnnihilator (by
+    simpa using fun _ hx => (f.2 hx).symm )
+  map_add' _ _ := by ext; simp
+  map_smul' _ _ := by ext; simp
+
 -- #check Subspace.quotDualEquivAnnihilator -- this is similar to the below, but restricted to finite dim
 -- def dual_eval_linearEquiv_dual_quot (S : Submodule R M) :
 --     dual (Dual.eval R M) S ≃ₗ[R] Dual R (M ⧸ S)  where
@@ -430,7 +439,7 @@ theorem CoFG._fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.Du
   rw [← hS', ← hT, dual_sup, dual_union_ker]
   exact hfg.dual_fgdual _
 
-variable [Fact p.SeparatingLeft] in -- TODO: remove assumption
+variable [Fact p.SeparatingLeft] in -- TODO: remove assumption, see above
 theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
     S.FGDual p := by
   rw [← hS', flip_flip]

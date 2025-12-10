@@ -33,6 +33,8 @@ alias submodule_le_lineal := le_lineal
 lemma submodule_le_lineal_iff {C : PointedCone R M} {S : Submodule R M} :
   S ≤ C ↔ S ≤ C.lineal := ⟨submodule_le_lineal, fun h _ hx => C.lineal_le (h hx)⟩
 
+
+
 end Semiring
 
 
@@ -239,6 +241,18 @@ lemma comap_lineal (C : PointedCone R M) {f : N →ₗ[R] M} :
 
 @[simp] lemma neg_lineal (C : PointedCone R M) : (-C).lineal = C.lineal := by
   simp [← comap_id_eq_neg, comap_lineal]
+
+
+
+lemma lineal_restrict (S : Submodule R M) (C : PointedCone R M) :
+    (restrict S C).lineal = .restrict S C.lineal := by
+  sorry
+
+lemma lineal_embed (S : Submodule R M) (C : PointedCone R S) :
+    (embed C).lineal = .embed C.lineal := by
+  sorry
+
+
 
 
 -- implement this from the face theory.

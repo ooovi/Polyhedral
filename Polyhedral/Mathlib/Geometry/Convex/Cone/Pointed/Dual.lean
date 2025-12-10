@@ -50,13 +50,13 @@ alias dual_antitone := dual_le_dual
 
 variable (p) in
 /-- Any cone is a subcone of its double dual cone. -/
-lemma dual_dual_mono {s t : Set M} (hST : s ⊆ t) :
+lemma dual_dual_mono {s t : Set M} (hSC : s ⊆ t) :
     dual p.flip (dual p s) ≤ dual p.flip (dual p t) := by
-  exact dual_antitone <| dual_antitone hST
+  exact dual_antitone <| dual_antitone hSC
 
 lemma le_dual_of_le_dual {S : PointedCone R M} {T : PointedCone R N}
-    (hST : T ≤ dual p S) : S ≤ dual p.flip T :=
-  le_trans subset_dual_dual (dual_antitone hST)
+    (hSC : T ≤ dual p S) : S ≤ dual p.flip T :=
+  le_trans subset_dual_dual (dual_antitone hSC)
 
 -- NOTE: This is the characterizing property of an antitone GaloisConnection.
 lemma dual_le_iff_dual_le {S : PointedCone R M} {T : PointedCone R N} :
@@ -226,6 +226,94 @@ lemma dual_span_lineal_dual (s : Set M) :
 --   rw [← dual_neg, lineal_inf_neg]
 
 end LinearOrder
+
+
+
+-- ## BILIN
+
+section Ring
+
+open Function
+
+variable {R M N : Type*}
+  [CommRing R] [PartialOrder R] [IsOrderedRing R]
+  [AddCommGroup M] [Module R M]
+  [AddCommGroup N] [Module R N]
+  {p : M →ₗ[R] N →ₗ[R] R}
+
+variable (p) in
+lemma dual_embed_quot_dual (S : Submodule R M) (C : PointedCone R S) :
+    (dual p (embed C)).quot (.dual p S) = dual (p.rp S) C := by
+  ext x
+  simp only [coe_map, mem_map, mem_dual, Set.mem_image, forall_exists_index]
+  constructor <;> intro h
+  · obtain ⟨y, hy, hy'⟩ := h
+    intro z hz
+    simpa only [mem_restrict_iff, ← hy', rp_apply] using hy z ⟨hz, rfl⟩
+  · use surjInv (Submodule.dual p S).mkQ_surjective x
+    constructor
+    · intro y z ⟨hz, rfl⟩
+      specialize h hz
+      rw [← surjInv_eq (Submodule.dual p S).mkQ_surjective x] at h
+      simpa only [rp_apply] using h
+    · rw [surjInv_eq (Submodule.dual p S).mkQ_surjective]
+
+variable (p) in
+lemma dual_quot_dual (S : Submodule R M) (C : PointedCone R M) :
+    (dual p (S ∩ C)).quot (.dual p S) = dual (p.rp S) (restrict S C) := by
+  simp only [← ofSubmodule_coe S, ← Submodule.coe_inf, ← embed_restrict S C, dual_embed_quot_dual]
+
+alias dual_restrict := dual_quot_dual
+
+variable (p) in
+lemma dual_quot_dual_of_le {S : Submodule R M} {C : PointedCone R M} (hSC : C ≤ S) :
+    (dual p C).quot (.dual p S) = dual (p.rp S) (restrict S C) := by
+  rw [← Set.inter_eq_right.mpr hSC]
+  exact dual_quot_dual ..
+
+alias dual_restrict_of_le := dual_quot_dual_of_le
+
+local notation "R≥0" => {c : R // 0 ≤ c}
+
+variable (p) in
+lemma comap_dual_mkQ_dual (S : Submodule R M) (C : PointedCone R S) :
+    comap (Submodule.dual p S).mkQ (dual (p.rp S) C) = dual p (embed C) := by
+  rw[← dual_embed_quot_dual]
+  unfold embed comap quot map -- remove when map and comap become abbrevs
+  simpa [Submodule.comap_map_mkQ', ← dual_eq_submodule_dual] using dual_antitone embed_le
+
+alias dual_embed := comap_dual_mkQ_dual
+
+lemma comap_dual_mkQ_dual_restrict (S : Submodule R M) (C : PointedCone R M) :
+    comap (Submodule.dual p S).mkQ (dual (p.rp S) (restrict S C)) = dual p (S ∩ C) := by
+  simp only [← ofSubmodule_coe S, ← Submodule.coe_inf, ← embed_restrict S C, dual_embed]
+
+-- This is a crucial lemma. It helps restricting duality statement. We can use it to show that
+-- properties that are preserved under duality in finite dim, and that are closed under adding
+-- linear subspaces, are also closed under duality in arbitrary dim. An example is the property
+-- of being polyhedral. So this will help lifting statements from FG to polyhedral.
+lemma comap_dual_mkQ_dual_restrict_of_le {S : Submodule R M} {C : PointedCone R M} (hSC : C ≤ S) :
+    comap (Submodule.dual p S).mkQ (dual (p.rp S) (restrict S C)) = dual p C := by
+  rw [← Set.inter_eq_right.mpr hSC]
+  exact comap_dual_mkQ_dual_restrict ..
+
+-- variable (p) in
+-- /-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
+-- def _root_.LinearMap.rp' (C : PointedCone R M) : C.linSpan →ₗ[R] (N ⧸ (dual p C).lineal) →ₗ[R] R where
+--   toFun x := liftQ (dual p S) (p x.1) (fun _ hy => (hy x.2).symm)
+--   map_add' _ _ := by ext; simp
+--   map_smul' _ _ := by ext; simp
+
+-- variable (p) in
+-- @[simp] lemma _root_.LinearMap.rp_apply {S : Submodule R M} (x : S) (y : N) :
+--     (p.rp S) x ((dual p S).mkQ y) = p x.1 y := by simp [rp]
+
+-- lemma comap_dual_mkQ_dual_restrict_of_le' (C : PointedCone R M) :
+--     comap (dual p C).lineal.mkQ (dual (p.rp' C) (restrict C.linSpan C)) = dual p C := by
+--   rw [← Set.inter_eq_right.mpr hSC]
+--   exact comap_dual_mkQ_dual_restrict ..
+
+end Ring
 
 
 
@@ -455,5 +543,7 @@ lemma dualClosed (S : Submodule R M) : DualClosed p S :=
     dualClosed_coe <| S.dualClosed p
 
 end Field
+
+
 
 end PointedCone

@@ -130,12 +130,10 @@ lemma IsFaceOf.of_cone_iff_of_face (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F�
 -- TODO: move to Faces lean file
 
 lemma IsFaceOf.restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
-    (restrict S F).IsFaceOf (restrict S C) := by
-  sorry
+    (restrict S F).IsFaceOf (restrict S C) := ⟨restrict_mono S hF.1, hF.2⟩ -- hF.comap S.subtype
 
 lemma IsFaceOf.embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
-    (embed F).IsFaceOf (embed C) := by
-  sorry
+    (embed F).IsFaceOf (embed C) := hF.map S.subtype_injective
 
 ----
 
@@ -172,10 +170,10 @@ alias IsFaceOf.embed' := IsFaceOf.trans
  lattice below the face. -/
 def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
   toFun G := ⟨G, bot_le, Face.embed_le G⟩
-  invFun G := F.restrict G
+  invFun G := F.restrict' G
   left_inv := restrict_embed
   right_inv G := by simp only [embed_restrict_of_le G.2.2]
-  map_rel_iff' := @fun _ _ => by simp [embed]
+  map_rel_iff' := @fun _ _ => by simp [embed']
 
 -- can we get this for free from `Face.orderIso`?
 def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
@@ -282,6 +280,8 @@ def map_face_equiv (C : PointedCone R M) (e : M ≃ₗ[R] N) :
     Face (map (e : M →ₗ[R] N) C) ≃o Face C := C.map_face e.injective
 
 
+
+
 -- ## QUOT / FIBER
 
 -- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
@@ -325,6 +325,48 @@ def Face.quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ where
   map_rel_iff' := by intro G G'; simp; sorry
 
 def Face.quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := sorry
+
+lemma fooo (S : Submodule R M) (hF : F.IsFaceOf (C ⊔ S)) : (F ⊓ C.linSpan).IsFaceOf C := sorry
+
+lemma fooo' (S : Submodule R M) (hF : F.IsFaceOf (C ⊔ S)) : (F ⊓ C.linSpan) ⊔ S = F := sorry
+
+/- Likely theory already exists here: cones >= S and cones in M⧸S are known to be orderIso. -/
+def Face.sup_orderIso_quot (S : Submodule R M) : Face (C ⊔ S) ≃o Face (C.quot S) where
+  toFun F := ⟨PointedCone.map S.mkQ F.1, sorry⟩
+  invFun F := ⟨PointedCone.comap S.mkQ F.1, sorry⟩
+  left_inv F := by
+    simp
+    congr
+    sorry
+  right_inv F := by
+    simp
+    congr
+    sorry
+  map_rel_iff' := by
+    intro F G
+    simp only [Equiv.coe_fn_mk, toPointedCone_le_iff, toPointedCone, map_mkQ_le_iff_sup_le]
+    constructor <;> intro h
+    · simp only [sup_le_iff, le_sup_right, and_true] at h
+      have : G.1 ⊔ S ≤ G.1 := by
+        sorry
+      exact le_trans h this
+    · exact sup_le_sup_right h S
+
+def Face.sup_orderIso (F : Face C) : Face (C ⊔ linSpan F.1) ≃o Set.Icc F ⊤ where
+  toFun G := ⟨⟨G ⊓ C, sorry⟩, sorry⟩
+  invFun G := ⟨G ⊔ linSpan F.1, sorry⟩
+  left_inv G := by
+    simp
+    congr
+    sorry
+  right_inv G := by
+    simp
+    congr
+    sorry
+  map_rel_iff' := by
+    intro G H
+    simp
+    sorry
 
 
 -- ## PROD
@@ -404,12 +446,90 @@ def Face.inf_face_orderHom2 : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) w
 
 -- ## COMB EQUIV
 
+def Face.restrict (S : Submodule R M) (F : Face C) : Face (C.restrict S) :=
+  ⟨_, F.isFaceOf.restrict S⟩
+
+@[simp] lemma Face.restrict_def (S : Submodule R M) (F : Face C) :
+    F.restrict S = PointedCone.restrict S F := rfl
+
+@[coe] def Face.embed {S : Submodule R M} {C : PointedCone R S} (F : Face C) : Face (C.embed) :=
+  ⟨_, F.isFaceOf.embed⟩
+
+@[simp] lemma Face.embed_def (S : Submodule R M) {C : PointedCone R S} (F : Face C) :
+    F.embed = PointedCone.embed F.1 := rfl
+
+@[simp] lemma Face.coe_embed (S : Submodule R M) {C : PointedCone R S} (F : Face C) :
+    (F.embed : PointedCone R M) = PointedCone.embed (F : PointedCone R S) := rfl
+
 /-- Two cones are combinatorially equivalent if their face posets are ordfer isomorphic. -/
 abbrev CombEquiv (C D : PointedCone R M) := Nonempty (Face C ≃o Face D)
 
 /-- Denotes combinatorial equivalence of pointed cones. Notation for `CombEquiv`. -/
 infixl:100 " ≃c " => CombEquiv
 
+def embed_combEquiv (C : PointedCone R S) : Face (embed C) ≃o Face C where
+  toFun F := ⟨PointedCone.restrict S F, sorry⟩ -- F.isFaceOf.restrict S⟩
+  invFun := .embed
+  left_inv F := by simp [Face.embed, embed_restrict, le_trans F.isFaceOf.le embed_le]
+  right_inv F := by simp [Face.embed]
+  map_rel_iff' := by
+    intro F G
+    simp
+    constructor <;> intro h
+    · sorry
+    · exact restrict_mono S h
+
+-- def restrict_combEquiv_of_codisjoint_lineal' (hCS : Codisjoint S C.lineal) :
+--     Face (restrict S C) ≃o Face C := by
+--   let e := embed_combEquiv (restrict S C)
+--   rw [embed_restrict] at e
+--   -- seems to require Face (C ⊓ S) ≃o Face C
+--   sorry
+
+def restrict_combEquiv_of_codisjoint_lineal (hCS : Codisjoint S C.lineal) :
+    Face (restrict S C) ≃o Face C where
+  toFun F := ⟨embed F.1 ⊔ C.lineal, by
+    have h : C = C ⊔ C := by simp only [le_refl, sup_of_le_left]
+    nth_rw 3 [h]
+    sorry⟩
+  invFun := Face.restrict S
+  left_inv F := by
+    simp [Face.restrict, ← Face.toPointedCone_eq_iff]
+    apply embed_injective
+    simp
+    rw [inf_comm]
+    rw [← sup_inf_assoc_of_le_restrictScalars]
+    · simp only [sup_eq_left]
+      refine le_trans inf_le_left ?_
+      --unfold Face.embed'
+      sorry
+    · simp
+  right_inv F := by
+    simp only [Face.restrict, Face.toPointedCone, embed_restrict, inf_comm,
+      ← Face.toPointedCone_eq_iff]
+    rw [← inf_sup_assoc_of_submodule_le]
+    · simp [← restrictScalars_sup, hCS.eq_top]
+    · exact F.isFaceOf.lineal_le
+  map_rel_iff' := by
+    simp
+    intro F G
+    constructor <;> intro h
+    · sorry
+    · sorry
+
+-- def embed_combEquiv' (C : PointedCone R S) : Face (embed C) ≃o Face C := by
+--   let e := restrict_combEquiv_of_codisjoint_lineal (S := S) (C := embed C) ?_
+--   · rw [restrict_embed] at e
+--     exact e.symm
+--   -- seems to not work
+--   sorry
+
+def inf_combEquiv_of_codisjoint_lineal' (hSC : Codisjoint S C.lineal) :
+    Face (C ⊓ S) ≃o Face C := by
+  let er := restrict_combEquiv_of_codisjoint_lineal hSC
+  let ee := embed_combEquiv (restrict S C)
+  rw [embed_restrict, inf_comm] at ee
+  exact ee.trans er
 
 -- We use the term `combEquiv` for `OrderEquiv` if it is between the face posets
 /-- The combinatorial equivalence between a pointed cone `C` and the pointed cone `C ⊓ S`, where
@@ -526,9 +646,14 @@ lemma face_bot_eq_top : (⊥ : Face (S : PointedCone R M)) = ⊤ := by sorry
 lemma eq_lineal_of_forall_face_eq_self (h : ∀ F : PointedCone R M, F.IsFaceOf C → F = C) :
     C = C.lineal := by rw [h _ (IsFaceOf.lineal C)]
 
-lemma foo (h : Unique (Face C)) : C = C.lineal := by
-  have h' := h.uniq Face.lineal
-  have h'' := h.uniq C
-  sorry
+-- lemma foo (h : Unique (Face C)) : C = C.lineal := by
+--   have h' := h.uniq Face.lineal
+--   have h'' := h.uniq C
+--   sorry
+
+-- lemma foo (h : ∀ F, F.IsFaceOf C → F = C.lineal) : C = C.lineal := by
+--   have h' := h.uniq Face.lineal
+--   have h'' := h.uniq C
+--   sorry
 
 end Submodule

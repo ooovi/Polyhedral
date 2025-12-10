@@ -12,7 +12,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 
 namespace PointedCone
 
-open Module
+open Module Function
 
 section CommSemiring
 
@@ -203,10 +203,17 @@ end Ring
 
 --------------------------
 
+-- ## RESTRICT / EMBED
+
+-- TODO: move to a separate file Restrict.lean like we did for submodules
+
 /- TODO: generalize these restrict/embed lemmas to general case where we restrict a
   restrictScalar subspace to a normal subspace. -/
 
--- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ T`?
+-- TODO: generalize to restrict using restrictScalar, so we can need to write only one instead
+--  of two for submodules and pointed cones.
+
+-- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ C`?
 /-- The intersection `C ⊓ S` considered as a cone in `S`. -/
 abbrev restrict (S : Submodule R M) (C : PointedCone R M) : PointedCone R S
   := C.submoduleOf S -- C.comap S.subtype
@@ -214,13 +221,51 @@ abbrev restrict (S : Submodule R M) (C : PointedCone R M) : PointedCone R S
 -- alias pointedConeOf := restrict
 
 -- @[simp]
-lemma coe_restrict (S : Submodule R M) (T : Submodule R M) :
+lemma coe_restrict (S T : Submodule R M) :
     restrict S T = Submodule.restrict S T := by
   unfold restrict Submodule.restrict Submodule.submoduleOf
   sorry
 
+lemma restrict_eq_comap_subtype (S : Submodule R M) (T : PointedCone R M) :
+    restrict S T = comap S.subtype T := rfl
+
+-- @[simp] lemma restrict_top (S : Submodule R M) : restrict S ⊤ = ⊤ := Submodule.restrict_top _
+-- @[simp] lemma restrict_bot (S : Submodule R M) : restrict S ⊥ = ⊥ := Submodule.restrict_bot _
+
+-- @[simp] lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := Submodule.restrict_self _
+
+lemma mem_restrict {S : Submodule R M} {T : PointedCone R M} {x : S} (h : x ∈ restrict S T) :
+    (x : M) ∈ T := by simpa only using h
+
+lemma mem_restrict_iff {S : Submodule R M} {T : PointedCone R M} {x : S} :
+    x ∈ restrict S T ↔ (x : M) ∈ T := ⟨mem_restrict, (by simpa using ·)⟩
+
 /-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
-abbrev embed {S : Submodule R M} (C : PointedCone R S) : PointedCone R M := C.map S.subtype
+@[coe] abbrev embed {S : Submodule R M} (C : PointedCone R S) : PointedCone R M := C.map S.subtype
+
+lemma embed_injective {S : Submodule R M} : Injective (embed : PointedCone R S → PointedCone R M)
+  := Submodule.map_injective_of_injective S.subtype_injective
+
+@[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : PointedCone R S} :
+    embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
+
+-- TODO: use `Monotone`
+lemma embed_mono {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hT : C₁ ≤ C₂) :
+    embed C₁ ≤ embed C₂ := Submodule.map_mono hT
+
+lemma embed_mono_rev {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hC : embed C₁ ≤ embed C₂) :
+    C₁ ≤ C₂ := (by simpa using @hC ·)
+
+@[simp] lemma embed_mono_iff {S : Submodule R M} {C₁ C₂ : PointedCone R S} :
+    embed C₁ ≤ embed C₂ ↔ C₁ ≤ C₂ where
+  mp := embed_mono_rev
+  mpr := embed_mono
+
+-- this should have higher priority than `map_top`
+@[simp] lemma embed_top {S : Submodule R M} : embed (⊤ : PointedCone R S) = S := by sorry
+@[simp] lemma embed_bot {S : Submodule R M} : embed (⊥ : PointedCone R S) = ⊥ := by sorry
+
+@[simp] lemma embed_le {S : Submodule R M} {C : PointedCone R S} : embed C ≤ S := by sorry
 
 @[simp] lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
     (C.restrict S).embed = (S ⊓ C : PointedCone R M) := by
@@ -276,8 +321,7 @@ lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
 
 @[simp]
 lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
-    (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by
-  simp [restrict_inf, Submodule.restrict_self]
+    (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by simp
 
 -- lemma foo (S : Submodule R M) {T : Submodule R M} {C : PointedCone R M} (hCT : C ≤ T):
 --   restrict (.restrict T S) (restrict T C) = restrict T (restrict S C) := sorry
