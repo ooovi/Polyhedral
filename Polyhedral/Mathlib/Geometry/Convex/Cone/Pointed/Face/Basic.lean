@@ -19,12 +19,25 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
+/-
+  Cleanup for PR:
+    * move Face stuff to Face/Lattice.lean
+    * move lineal stuff to Face/Lineal.lean
+    * move dual stuff to Face/Dual.lean
+    * prove the priority stuff
+    * prove sorry-s
+    * replace Submodule.span by linSpan
+    * something else to add?
+-/
+
 -- NOTE: I think we should assume [Ring] from the start. There is little meaning for
 -- working in a semiring ambient space.
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
 structure IsFaceOf (F C : PointedCone R M) where
   subset : F ≤ C
+  -- left_mem_of_smul_add_mem' :
+  --   ∀ x ∈ C, ∀ y ∈ C, ∀ c > (0 : R), ∀ d > (0 : R), c • x + d • y ∈ F → x ∈ F
   left_mem_of_smul_add_mem :
     ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F
 
@@ -36,6 +49,10 @@ variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R 
 lemma IsFaceOf.def : F.IsFaceOf C ↔
     F ≤ C ∧ ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F := by
   constructor <;> exact fun h => ⟨h.1, h.2⟩
+
+-- lemma IsFaceOf.left_mem_of_smul_add_smul (hF : F.IsFaceOf C) {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+--     {c d : R} (hc : 0 < c) (hd : 0 < d) (H : c • x + d • y ∈ F) : x ∈ F :=
+--   hF.left_mem_of_smul_add_mem' x hx y hy c hc d hd H
 
 end
 
@@ -284,6 +301,9 @@ lemma comap_equiv (e : N ≃ₗ[R] M) (hF : F.IsFaceOf C) :
 end Field
 
 end IsFaceOf
+
+
+
 
 
 

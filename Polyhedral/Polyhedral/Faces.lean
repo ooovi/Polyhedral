@@ -64,7 +64,7 @@ variable (p) [p.IsPerfPair] in
   rw [dual_flip_dual p hC]
   nth_rw 2 [← Submodule.dual_span]
   rw [Submodule.dual_flip_dual p]
-  have H : (C ⊔ Submodule.span R (F : Set M)).lineal = .span R F := by
+  have H : (C ⊔ F.linSpan).lineal = F.linSpan := by
     sorry
   rw [H]
   exact hF.inf_linSpan

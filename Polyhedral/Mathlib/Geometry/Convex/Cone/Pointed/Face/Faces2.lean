@@ -332,8 +332,22 @@ lemma fooo' (S : Submodule R M) (hF : F.IsFaceOf (C ⊔ S)) : (F ⊓ C.linSpan) 
 
 /- Likely theory already exists here: cones >= S and cones in M⧸S are known to be orderIso. -/
 def Face.sup_orderIso_quot (S : Submodule R M) : Face (C ⊔ S) ≃o Face (C.quot S) where
-  toFun F := ⟨PointedCone.map S.mkQ F.1, sorry⟩
-  invFun F := ⟨PointedCone.comap S.mkQ F.1, sorry⟩
+  toFun F := ⟨PointedCone.map S.mkQ F.1, by
+    rw [IsFaceOf.def]
+    constructor
+    · simp [F.isFaceOf.le]
+    · intro x y c d hx hy hc hd H
+      -- let f := surjInv S.mkQ_surjective
+      -- let x' := f x
+      -- let y' := f y
+      simp at hx hy
+      obtain ⟨x', hxC, hx'⟩ := hx
+      obtain ⟨y', hyC, hy'⟩ := hy
+      -- have hF := F.isFaceOf.left_mem_of_smul_add_mem x y hxC hyC hc hd
+      sorry
+  ⟩
+  invFun F := ⟨PointedCone.comap S.mkQ F.1, by
+    sorry⟩
   left_inv F := by
     simp
     congr
