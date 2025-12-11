@@ -1,5 +1,6 @@
 
 import Polyhedral.Polyhedral.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
@@ -41,7 +42,7 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 /- TODO: Many things proven in this section might be true much more generally. Maybe for
-  facially exosed cones or something like this:
+  facially semi-exposed cones or something like this:
     * all faces are exposed
     * face lattice of C and C* are anti-isomorphic
     * all faces are duals of faces
@@ -49,6 +50,20 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 -/
 
 -- ## TODO: remove `isPerfPair` from everything below.
+
+lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) : (C ⊔ F.linSpan).lineal = F.linSpan := by
+  rw [sup_comm]
+  rw [_lineal_sup_eq] <;> simp -- WARNING: is `_lineal_sup_eq` even true?
+  simpa using le_trans hF.lineal_le (le_submodule_span F)
+  -- ext x
+  -- simp [mem_lineal, mem_linSpan, Submodule.mem_sup]
+  -- constructor
+  -- · intro ⟨h, h'⟩
+  --   obtain ⟨y, hy, z, ⟨p, hp, n, hn, h⟩, H⟩ := h
+  --   obtain ⟨y', hy', z', ⟨p', hp', n', hn', h'⟩, H'⟩ := h'
+  --   -- obtain ⟨y', hy', z', hz', b', hb', h'⟩ := h'
+  --   sorry
+  -- · sorry
 
 variable (p) [p.IsPerfPair] in
 -- variable [Fact (Surjective p.flip)] in
@@ -64,9 +79,7 @@ variable (p) [p.IsPerfPair] in
   rw [dual_flip_dual p hC]
   nth_rw 2 [← Submodule.dual_span]
   rw [Submodule.dual_flip_dual p]
-  have H : (C ⊔ F.linSpan).lineal = F.linSpan := by
-    sorry
-  rw [H]
+  rw [hF.sup_linspan_lineal] -- not proven yet
   exact hF.inf_linSpan
 
 /-- Every face of a polyhedral cone is exposed. -/
@@ -139,8 +152,7 @@ variable {S : Submodule R M}
 variable {C C₁ C₂ F : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma IsPolyhedral.exists_fg_combEquiv (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R M, D.FG ∧ D ≃c C := by
+lemma IsPolyhedral.exists_fg_combEquiv (hC : C.IsPolyhedral) : ∃ D, D.FG ∧ D ≃c C := by
   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
   exact ⟨_, hC.fg_inf_of_isCompl hS, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
 
@@ -196,7 +208,11 @@ instance {C : PolyhedralCone R M} :
     CoeOut (Face (C : PointedCone R M)) (PolyhedralCone R M) where
   coe F := ⟨F, C.isPolyhedral.face F.isFaceOf⟩
 
-instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) := sorry
+instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) := by
+  obtain ⟨_, hfg, ⟨e⟩⟩ := C.isPolyhedral.exists_fg_combEquiv
+  rw [Function.Bijective.finite_iff]
+  · exact FG.finite_face hfg
+  · exact e.symm.bijective
 
 /-- Ideas:
   * `atoms` gives the lowest dimensional non-trivial faces

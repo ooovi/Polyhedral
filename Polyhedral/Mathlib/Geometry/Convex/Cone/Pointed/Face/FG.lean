@@ -58,7 +58,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     have H : (C ⊔ F.linSpan).lineal = F.linSpan := by
       sorry
     rw [H]
-    exact IsFaceOf.inf_submodule hF
+    exact hF.inf_linSpan
   · simpa using FG.dual_fgdual _ hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
     exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg hC)

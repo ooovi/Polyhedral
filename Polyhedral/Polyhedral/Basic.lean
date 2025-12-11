@@ -5,6 +5,7 @@ Authors: Martin Winter
 -/
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
@@ -105,10 +106,6 @@ lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : FG C.lineal) : C.F
   rw [← hD']
   exact sup_fg hD h
 
-/-- A polyhedral cone is FG if and only if its lineality space is FG. -/
-lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
-  ⟨FG.lineal_fg, hC.fg_of_fg_lineal⟩
-
 /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
 lemma isPolyhedral_iff_fg_of_fg_lineal {h : FG C.lineal} : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_fg_lineal · h), FG.isPolyhedral⟩
@@ -193,7 +190,6 @@ lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
 lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
 
 
--- ## DUAL
 
 section Field
 
@@ -202,6 +198,13 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C C₁ C₂ F : PointedCone R M}
+
+/-- A polyhedral cone is FG if and only if its lineality space is FG. -/
+lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
+  ⟨FG.lineal_fg, hC.fg_of_fg_lineal⟩
+
+
+-- ## DUAL
 
 -- FIX: fix `fg_inf_of_isCompl` first
 -- Q: Is DivisionRing necessary?

@@ -21,6 +21,9 @@ variable
   {M : Type*} [AddCommMonoid M] [Module S M] [Module R M] [IsScalarTower S R M]
   -- {M : Type*} [AddCommMonoid M] [SMul S M] [Module R M] [IsScalarTower S R M]
 
+lemma subtype_restrictScalars (p : Submodule R M) :
+    p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
+
 /- I suggest the alternative naming `restrict` for `submoduleOf` for the following reason:
   we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
   makes no sense. Using the same name is preferred for consistency.
@@ -33,146 +36,138 @@ variable
 -- NOTE: Something fundamental like this should probably be implemted somewhere more upstream
 --  starting from monoids or so.
 
-variable (p : Submodule R M) (q : Submodule S M)
+/-- The intersection `p ⊓ q` as a submodule of `p`. -/
+abbrev restrict (p : Submodule R M) (q : Submodule S M) :
+    Submodule S p := q.comap (p.subtype.restrictScalars S)
 
-/-- The restriction of `S ⊓ T` reinterpreted as a submodule of `S`. -/
-abbrev restrict : Submodule S p := q.comap (p.subtype.restrictScalars S)
+@[simp] lemma restrict_top (p : Submodule R M) :
+    restrict p (⊤ : Submodule S M) = ⊤ := by simp [comap_top]
+@[simp] lemma restrict_bot (p : Submodule R M) :
+    restrict p (⊥ : Submodule S M) = ⊥ := by simp [comap_bot]
 
--- lemma restrict_eq_comap_subtype :
---     restrict p q = q.comap (p.subtype.restrictScalars S) := rfl
+@[simp] lemma restrict_self (p : Submodule R M) :
+    restrict p (p.restrictScalars S) = ⊤ := by ext; simp
 
-@[simp] lemma restrict_top : restrict p (⊤ : Submodule S M) = ⊤ := by simp [comap_top]
-@[simp] lemma restrict_bot : restrict p (⊥ : Submodule S M) = ⊥ := by simp [comap_bot]
+lemma mem_restrict {p : Submodule R M} {q : Submodule S M} {x : p} (h : x ∈ restrict p q) :
+    (x : M) ∈ q := by simpa using h
 
-@[simp] lemma restrict_self : restrict p p = ⊤ := submoduleOf_self p
+lemma mem_restrict_iff {p : Submodule R M} {q : Submodule S M} {x : p} :
+    x ∈ restrict p q ↔ (x : M) ∈ q := by simp
 
-lemma mem_restrict {S : Submodule R M} {T : Submodule R M} {x : S} (h : x ∈ restrict S T) :
-    (x : M) ∈ T := by simpa using h
+lemma restrict_mono (p : Submodule R M) :
+    Monotone (restrict p : Submodule S M → Submodule S p) := fun _ _ hrs => comap_mono hrs
 
-lemma mem_restrict_iff {S : Submodule R M} {T : Submodule R M} {x : S} :
-    x ∈ restrict S T ↔ (x : M) ∈ T := by simp [submoduleOf]
+lemma restrict_inf (p : Submodule R M) (q₁ q₂ : Submodule S M) :
+    restrict p (q₁ ⊓ q₂) = (restrict p q₁) ⊓ (restrict p q₂)
+  := by ext; simp
 
--- TODO: use `Monotone`
-lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hCD : T₁ ≤ T₂) :
-    restrict S T₁ ≤ restrict S T₂ := fun _ => (hCD ·)
+lemma restrict_sInf (p : Submodule R M) {s : Set (Submodule S M)} :
+    restrict p (sInf s) = sInf (restrict p '' s)
+  := by ext; simp
 
-lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
-    restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
-  := by ext x; simp [restrict, submoduleOf]
+@[simp] lemma restrict_inf_self (p : Submodule R M) (q : Submodule S M) :
+    restrict p (p.restrictScalars S ⊓ q) = restrict p q := by simp
 
-lemma restrict_sInf (S : Submodule R M) {t : Set (Submodule R M)} :
-    restrict S (sInf t) = sInf (restrict S '' t)
-  := by ext x; simp [restrict, submoduleOf]
+lemma disjoint_restrict (p : Submodule R M) {q r : Submodule S M} (hqr : Disjoint q r) :
+    Disjoint (restrict p q) (restrict p r) := by
+  rw [disjoint_iff] at ⊢ hqr
+  rw [← restrict_inf, hqr, restrict_bot]
 
-@[simp] lemma restrict_inf_self (S T : Submodule R M) :
-    restrict S (S ⊓ T) = restrict S T := by simp [restrict_inf]
-
-lemma restrict_disjoint (U : Submodule R M) {S T : Submodule R M} (hST : Disjoint S T) :
-    Disjoint (restrict U S) (restrict U T) := by
-  rw [disjoint_iff] at *
-  rw [← restrict_inf, hST, restrict_bot]
-
-lemma codisjoint_restrict_sup (S T : Submodule R M) :
-    Codisjoint (restrict (S ⊔ T) S) (restrict (S ⊔ T) T) := by
+lemma codisjoint_restrict_sup (p : Submodule R M) (q : Submodule R M) :
+    Codisjoint (restrict (p ⊔ q) p) (restrict (p ⊔ q) q) := by
   rw [codisjoint_iff_exists_add_eq]
   intro x
   obtain ⟨y, hy, z, hz, h⟩ := mem_sup.mp x.2
-  use ⟨y, mem_sup_left hy⟩
-  use ⟨z, mem_sup_right hz⟩
+  use ⟨y, mem_sup_left hy⟩, ⟨z, mem_sup_right hz⟩
   constructor
   · simp only [mem_restrict_iff, hy]
   constructor
   · simp only [mem_restrict_iff, hz]
   · simp only [AddMemClass.mk_add_mk, h]
 
--- `Submodule.mapIic` is a weird and hard to look up name.
-example (S : Submodule R M) : Submodule R S ≃o Set.Iic S := Submodule.mapIic S
-
-def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S where
-  toFun := restrict S
-  monotone' _ _ := restrict_mono S
+def restrict_orderHom (p : Submodule R M) : Submodule S M →o Submodule S p where
+  toFun := restrict p
+  monotone' := restrict_mono p
 
 
 
--- TODO: remove the `abbrev`? It should never be unfolded I think
-/-- A submodule `T` of a submodule `S` of `M` reintepreted as a submodule of `M`. -/
-@[coe] abbrev embed {S : Submodule R M} (T : Submodule R S) : Submodule R M := T.map S.subtype
 
--- Q: Shoud have `embed` as an order embedding? If yes, use the code below.
--- def embed_orderEmbed {S : Submodule R M} : Submodule R S ↪o Submodule R M where
---   toFun := map S.subtype
---   inj' := map_injective_of_injective S.subtype_injective
---   map_rel_iff' := ⟨fun h x => by simpa using @h x, Submodule.map_mono⟩
+/-- A submodule `q` of a submodule `p` of `M` as a submodule of `M`. -/
+@[coe] abbrev embed {p : Submodule R M} (q : Submodule S p) : Submodule S M :=
+    q.map (p.subtype.restrictScalars S)
 
-@[simp] lemma mem_embed_iff {S : Submodule R M} {T : Submodule R S} {x : S} :
-    (x : M) ∈ embed T ↔ x ∈ T := by simp
+@[simp] lemma mem_embed_iff {p : Submodule R M} {q : Submodule S p} {x : p} :
+    (x : M) ∈ embed q ↔ x ∈ q := by simp
 
-lemma mem_of_mem_embed {S : Submodule R M} {T : Submodule R S} {x : M} (hx : x ∈ embed T) :
-    x ∈ S := by
-  simp only [mem_map, subtype_apply, Subtype.exists, exists_and_right, exists_eq_right] at hx
-  obtain ⟨hxS, _⟩ := hx
-  exact hxS
+lemma mem_of_mem_embed {p : Submodule R M} {q : Submodule S p} {x : M} (hx : x ∈ embed q) :
+    x ∈ p := by
+  simp only [mem_map, LinearMap.coe_restrictScalars, subtype_apply, Subtype.exists,
+    exists_and_right, exists_eq_right] at hx
+  exact hx.choose
 
-abbrev of_mem_embed {S : Submodule R M} {T : Submodule R S} {x : M} (hx : x ∈ embed T) : S :=
+def of_mem_embed {p : Submodule R M} {q : Submodule S p} {x : M} (hx : x ∈ embed q) : p :=
   ⟨x, mem_of_mem_embed hx⟩
 
-lemma of_mem_embed_mem {S : Submodule R M} {T : Submodule R S} {x : M} (hx : x ∈ embed T) :
-    of_mem_embed hx ∈ T := by
-  simp only [mem_map, subtype_apply, Subtype.exists, exists_and_right, exists_eq_right] at hx
-  obtain ⟨_, h⟩ := hx
-  exact h
+lemma of_mem_embed_mem {p : Submodule R M} {Q : Submodule S p} {x : M} (hx : x ∈ embed Q) :
+    of_mem_embed hx ∈ Q := by
+  simp only [mem_map, LinearMap.coe_restrictScalars, subtype_apply, Subtype.exists,
+    exists_and_right, exists_eq_right] at hx
+  exact hx.choose_spec
 
-@[simp] lemma embed_restrict (S T : Submodule R M) : embed (restrict S T) = S ⊓ T
-  := map_comap_subtype _ _
+@[simp] lemma embed_restrict (p : Submodule R M) (q : Submodule S M) :
+    embed (restrict p q) = p.restrictScalars S ⊓ q := by
+  simp [embed, restrict, subtype_restrictScalars, map_comap_subtype]
 
-lemma embed_restrict_of_le {S T : Submodule R M} (hST : T ≤ S) :
-    embed (restrict S T) = T := by
-  nth_rw 2 [← inf_eq_right.mpr hST]
-  exact embed_restrict S T
+lemma embed_restrict_of_le {p : Submodule R M} {q : Submodule S M}
+    (hpq : q ≤ p.restrictScalars S) : embed (restrict p q) = q := by
+  nth_rw 2 [← inf_eq_right.mpr hpq]
+  exact embed_restrict _ _
 
-@[simp] lemma restrict_embed {S : Submodule R M} (T : Submodule R S) : restrict S (embed T) = T
-    := by ext x; simp [submoduleOf]
+@[simp] lemma restrict_embed {p : Submodule R M} (q : Submodule S p) : restrict p (embed q) = q
+    := by ext; simp
 
-def restrict_surjective (S : Submodule R M) : Surjective (restrict S) := (⟨_, restrict_embed ·⟩)
+lemma restrict_surjective (p : Submodule R M) :
+    Surjective (restrict p : Submodule S M → Submodule S p) := fun h => ⟨_, restrict_embed h⟩
 
-lemma embed_injective {S : Submodule R M} : Injective (embed : Submodule R S → Submodule R M)
-  := map_injective_of_injective S.subtype_injective
+lemma embed_injective {p : Submodule R M} : Injective (embed : Submodule S p → Submodule S M) :=
+  map_injective_of_injective p.subtype_injective
 
-@[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : Submodule R S} :
-    embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
+@[simp] lemma embed_inj {p : Submodule R M} {q₁ q₂ : Submodule S p} :
+    embed q₁ = embed q₂ ↔ q₁ = q₂ := Injective.eq_iff embed_injective
 
--- TODO: use `Monotone`
-lemma embed_mono {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : T₁ ≤ T₂) :
-    embed T₁ ≤ embed T₂ := Submodule.map_mono hT
+lemma embed_mono (p : Submodule R M) : Monotone (embed : Submodule S p → Submodule S M) :=
+    fun _ _ h => Submodule.map_mono h
 
-lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed T₁ ≤ embed T₂) :
-    T₁ ≤ T₂ := (by simpa using @hT ·)
+lemma embed_mono_rev {p : Submodule R M} {q₁ q₂ : Submodule S p} (hq : embed q₁ ≤ embed q₂) :
+    q₁ ≤ q₂ := (by simpa using @hq ·)
 
-@[simp] lemma embed_mono_iff {S : Submodule R M} {T₁ T₂ : Submodule R S} :
-    embed T₁ ≤ embed T₂ ↔ T₁ ≤ T₂ where
+@[simp] lemma embed_mono_iff {p : Submodule R M} {q₁ q₂ : Submodule S p} :
+    embed q₁ ≤ embed q₂ ↔ q₁ ≤ q₂ where
   mp := embed_mono_rev
-  mpr := embed_mono
+  mpr h := embed_mono p h
 
 -- this should have higher priority than `map_top`
-@[simp] lemma embed_top {S : Submodule R M} : embed (⊤ : Submodule R S) = S := by simp
-@[simp] lemma embed_bot {S : Submodule R M} : embed (⊥ : Submodule R S) = ⊥ := map_bot _
+@[simp] lemma embed_top {p : Submodule R M} :
+    embed (⊤ : Submodule S p) = p.restrictScalars S := by simp [subtype_restrictScalars]
+@[simp] lemma embed_bot {p : Submodule R M} : embed (⊥ : Submodule S p) = ⊥ := map_bot _
 
-@[simp] lemma embed_le {S : Submodule R M} {T : Submodule R S} : embed T ≤ S := by
-  simpa using embed_mono le_top
+@[simp] lemma embed_le {p : Submodule R M} {q : Submodule S p} :
+    embed q ≤ p.restrictScalars S := by
+  simpa [subtype_restrictScalars] using embed_mono p (le_top : q ≤ ⊤)
 
 -- TODO: given this higher priority than `map_sup`
-@[simp] lemma embed_sup {U : Submodule R M} (S T : Submodule R U) :
-    embed (S ⊔ T) = embed S ⊔ embed T := map_sup _ _ _
+@[simp] lemma embed_sup {p : Submodule R M} (q r : Submodule S p) :
+    embed (q ⊔ r) = embed q ⊔ embed r := map_sup _ _ _
 
-@[simp] lemma embed_sup_left (S : Submodule R M) (T : Submodule R S) :
-    embed T ⊔ S = S := sup_eq_right.mpr embed_le
-@[simp] lemma embed_sup_right (S : Submodule R M) (T : Submodule R S) :
-    S ⊔ embed T = S := sup_eq_left.mpr embed_le
+@[simp] lemma embed_sup_left (p : Submodule R M) (q : Submodule S p) :
+    embed q ⊔ p.restrictScalars S = p.restrictScalars S := sup_eq_right.mpr embed_le
+@[simp] lemma embed_sup_right (p : Submodule R M) (q : Submodule S p) :
+    p.restrictScalars S ⊔ embed q = p.restrictScalars S := sup_eq_left.mpr embed_le
 
-lemma embed_iSup {ι : Type*} {U : Submodule R M} (f : ι → Submodule R U) :
+lemma embed_iSup {ι : Type*} {p : Submodule R M} (f : ι → Submodule S p) :
     embed (⨆ i, f i) = ⨆ i, embed (f i) := map_iSup _ _
 
-lemma embed_sSup {U : Submodule R M} (s : Set (Submodule R U)) :
+lemma embed_sSup {p : Submodule R M} (s : Set (Submodule S p)) :
     embed (sSup s) = sSup (embed '' s) := by
   -- rw [sSup_eq_iSup]
   -- rw [sSup_eq_iSup]
@@ -180,17 +175,16 @@ lemma embed_sSup {U : Submodule R M} (s : Set (Submodule R U)) :
   -- simp
   sorry
 
-lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
-    embed (S ⊓ T) = embed S ⊓ embed T := by
+    ---- <<< DONE UNTIL HERE
+
+lemma embed_inf {p : Submodule R M} (q r : Submodule R p) :
+    embed (q ⊓ r) = embed q ⊓ embed r := by
   ext x
   rw [mem_inf]
-  constructor
-  · intro h
-    have h := of_mem_embed_mem h
-    simp only [mem_inf, ← mem_embed_iff] at h
-    exact h
-  · intro h
-    have h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
+  constructor <;> intro h
+  · simpa only [mem_inf, ← mem_embed_iff] using of_mem_embed_mem h
+  · have h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
+    --rw [← mem_inf (x := of_mem_embed _)] at h
     rw [← mem_inf, ← mem_embed_iff] at h
     exact h
 

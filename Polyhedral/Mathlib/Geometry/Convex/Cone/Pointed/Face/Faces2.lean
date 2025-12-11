@@ -99,7 +99,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- ## MISC
 
-lemma IsFaceOf.def' (hF : F.IsFaceOf C) : ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F :=
+lemma IsFaceOf.def''' (hF : F.IsFaceOf C) : ∀ x ∈ C, ∀ y ∈ C, x + y ∈ F → x ∈ F :=
   sorry
 
 lemma IsFaceOf.def'' (hF : F.IsFaceOf C) {s : Finset M} (hs : ∀ S ∈ s, S ∈ C)
@@ -331,7 +331,54 @@ lemma fooo (S : Submodule R M) (hF : F.IsFaceOf (C ⊔ S)) : (F ⊓ C.linSpan).I
 
 lemma fooo' (S : Submodule R M) (hF : F.IsFaceOf (C ⊔ S)) : (F ⊓ C.linSpan) ⊔ S = F := sorry
 
+lemma isAtom_iff_span_singleton (C : PointedCone R M) : IsAtom C ↔ ∃ x ≠ 0, span R {x} = C := by
+  constructor <;> intro H
+  · sorry
+  · obtain ⟨x, hx, rfl⟩ := H
+    unfold IsAtom
+    constructor
+    · simp [hx]
+    · intro D hD
+      ext y
+      simp
+      constructor <;> intro hy
+      · have hD' := (le_of_lt hD) hy
+        simp [mem_span_singleton] at hD'
+        sorry
+      · sorry
+
+lemma IsFaceOf.def' : F.IsFaceOf C ↔
+    F ≤ C ∧ ∀ a ≤ C, ∀ b ≤ C, IsAtom a → IsAtom b → (a ⊔ b) ⊓ F ≠ ⊥ → a ≤ F := by
+  constructor <;> intro H <;> constructor
+  · exact H.1
+  · sorry
+  · exact H.1
+  · intro x y c d hx hy hc hd h
+    have H' := H.2 (span R {x}) (by simp [hx]) (span R {y}) (by simp [hy])
+    -- have : span R {x} ⊔ span R {y} ≤ F := by
+    --   intro z hz
+    --   simp [mem_sup] at hz
+    --   obtain ⟨x', hx', y', hy', rfl⟩ := hz
+    --   rw [mem_span_singleton] at hx' hy'
+    --   obtain ⟨c', hc'⟩ := hx'
+    --   obtain ⟨d', hd'⟩ := hy'
+    --   -- have H := H.2 (span R {x}) (by simp [hx]) (span R {y}) (by simp [hy])
+    --   sorry
+    have : c • x + d • y ∈ span R {x} ⊔ span R {y} := by
+      simp [mem_sup]
+      use c • x
+      constructor
+      · sorry
+      use d • y
+      constructor
+      · sorry
+      rfl
+
+    sorry
+
 /- Likely theory already exists here: cones >= S and cones in M⧸S are known to be orderIso. -/
+#check Submodule.quot_orderIso_Ici_restrictScalars
+
 def Face.sup_orderIso_quot (S : Submodule R M) : Face (C ⊔ S) ≃o Face (C.quot S) where
   toFun F := ⟨PointedCone.map S.mkQ F.1, by
     rw [IsFaceOf.def]
@@ -341,12 +388,19 @@ def Face.sup_orderIso_quot (S : Submodule R M) : Face (C ⊔ S) ≃o Face (C.quo
       -- let f := surjInv S.mkQ_surjective
       -- let x' := f x
       -- let y' := f y
-      simp at hx hy
-      obtain ⟨x', hxC, hx'⟩ := hx
-      obtain ⟨y', hyC, hy'⟩ := hy
-      -- have hF := F.isFaceOf.left_mem_of_smul_add_mem x y hxC hyC hc hd
-      sorry
-  ⟩
+      simp only [mem_map, -mkQ_apply] at hx hy
+      obtain ⟨x', hx, rfl⟩ := hx
+      obtain ⟨y', hy, rfl⟩ := hy
+      have h : C ≤ C ⊔ S := le_sup_left
+      have hx : x' ∈ C ⊔ S := h hx
+      have hy : y' ∈ C ⊔ S := h hy
+      have hF := F.isFaceOf.left_mem_of_smul_add_mem hx hy hc hd
+      repeat rw [← map_smul] at H
+      rw [← map_add] at H
+      rw [mem_map] at H
+      obtain ⟨z, hzF, hz⟩ := H
+      simp only [-mkQ_apply, mem_map]
+      sorry ⟩
   invFun F := ⟨PointedCone.comap S.mkQ F.1, by
     sorry⟩
   left_inv F := by
@@ -476,7 +530,7 @@ def Face.restrict (S : Submodule R M) (F : Face C) : Face (C.restrict S) :=
 @[simp] lemma Face.coe_embed (S : Submodule R M) {C : PointedCone R S} (F : Face C) :
     (F.embed : PointedCone R M) = PointedCone.embed (F : PointedCone R S) := rfl
 
-/-- Two cones are combinatorially equivalent if their face posets are ordfer isomorphic. -/
+/-- Two cones are combinatorially equivalent if their face posets are order isomorphic. -/
 abbrev CombEquiv (C D : PointedCone R M) := Nonempty (Face C ≃o Face D)
 
 /-- Denotes combinatorial equivalence of pointed cones. Notation for `CombEquiv`. -/

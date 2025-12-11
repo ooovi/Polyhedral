@@ -43,6 +43,10 @@ instance : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
 lemma ofSubmodule_coe (S : Submodule R M) : (ofSubmodule S : Set M) = S := by rfl
   -- also provable from `Submodule.coe_restrictScalars R S`
 
+@[simp]
+lemma mem_coe {S : Submodule R M} {x : M} : x ∈ (S : PointedCone R M) ↔ x ∈ S := by rfl
+  -- also provable from `Submodule.coe_restrictScalars R S`
+
 alias ofSubmodule_toSet_coe := ofSubmodule_coe
 
 @[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T
@@ -89,6 +93,16 @@ abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
     by simp [linSpan]
 
 alias linSpan_eq := submodule_linSpan
+
+-- section Ring
+
+-- variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
+--   [Module R M] {S : Set M}
+
+-- lemma exists_sub_of_mem_linSpan (C : PointedCone R M) {x : M} (h : x ∈ C.linSpan) :
+--     ∃ xp ∈ C, ∃ xm ∈ C, xp - xm = x := sorry
+
+-- end Ring
 
 
 -- ## RANK
@@ -554,6 +568,16 @@ lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} :
 lemma neg_self_iff_eq_span_submodule' {C : PointedCone R M} :
     -C ≤ C ↔ Submodule.span R (C : Set M) = C
   := Iff.trans neg_le_iff_neg_eq neg_self_iff_eq_span_submodule
+
+lemma mem_linSpan (C : PointedCone R M) {x : M} :
+    x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
+  rw [← mem_coe, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
+  simp only [Submodule.mem_neg]
+  constructor <;> intro h
+  · obtain ⟨y, hy', z, hz, rfl⟩ := h
+    exact ⟨z, hz, -y, hy', by simp⟩
+  · obtain ⟨p, hp, n, hn, rfl⟩ := h
+    exact ⟨-n, by simp [hn], x + n, hp, by simp⟩
 
 section Map
 

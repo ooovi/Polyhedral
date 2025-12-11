@@ -185,13 +185,9 @@ lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
     embed (S ⊓ T) = embed S ⊓ embed T := by
   ext x
   rw [mem_inf]
-  constructor
-  · intro h
-    have h := of_mem_embed_mem h
-    simp only [mem_inf, ← mem_embed_iff] at h
-    exact h
-  · intro h
-    have h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
+  constructor <;> intro h
+  · simpa only [mem_inf, ← mem_embed_iff] using of_mem_embed_mem h
+  · replace h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
     rw [← mem_inf, ← mem_embed_iff] at h
     exact h
 

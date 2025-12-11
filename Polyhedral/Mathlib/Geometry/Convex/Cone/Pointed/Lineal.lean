@@ -67,7 +67,7 @@ def lineal' (C : PointedCone R M) : Submodule R M where
       simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
 -- @[simp] -- no simp because right side has twice as many `x`?
-lemma lineal_mem {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
+lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
   constructor
   · intro h
     have h' := neg_mem_iff.mpr h
@@ -86,25 +86,28 @@ lemma lineal_mem {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ 
     have hxS : x ∈ S := Submodule.mem_span_of_mem (by simp)
     exact hSC hxS -- maybe we could use the lemma that s ∪ -s spans a linear space (see above)
 
+@[deprecated (since:="")]
+alias lineal_mem := mem_lineal
+
 def lineal_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by
-  ext x; simp [lineal_mem]
+  ext x; simp [mem_lineal]
 
 def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
-  ext x; simp; exact lineal_mem
+  ext x; simp; exact mem_lineal
 
 @[simp]
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
-  ext x; simp [lineal_mem]; aesop
+  ext x; simp [mem_lineal]; aesop
 
 @[simp] lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
-  ext x; simp [lineal_mem]
+  ext x; simp [mem_lineal]
 
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
 
 lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal := by
   intro x hx
-  rw [lineal_mem] at *
+  rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
 
 /- In this section we show properties of lineal that also follow from lineal
@@ -119,7 +122,7 @@ lemma lineal_isExtreme_left {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy :
   have hxy' := neg_mem_of_mem_lineal hxy
   have hx' := C.add_mem hy hxy'
   simp only [neg_add_rev, add_neg_cancel_left] at hx'
-  exact lineal_mem.mpr ⟨hx, hx'⟩
+  exact mem_lineal.mpr ⟨hx, hx'⟩
 
 lemma lineal_isExtreme_right {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     (hxy : x + y ∈ C.lineal) : y ∈ C.lineal := by
@@ -152,8 +155,26 @@ lemma lineal_isExtreme_sum {C : PointedCone R M} {xs : Finset M} (hxs : (xs : Se
 @[simp] lemma sup_lineal_eq (C : PointedCone R M) : C ⊔ C.lineal = C :=
     sup_of_le_left (lineal_le C)
 
+-- NOTE: equality holds, e.g., if D is a face of C
 lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D).lineal := by
-  sorry
+  intro x
+  simp only [Submodule.mem_sup, mem_lineal, forall_exists_index, and_imp]
+  intro y hy hy' z hz hz' rfl
+  exact ⟨⟨y, hy, by use z⟩, -y, hy', -z, hz', by simp [add_comm]⟩
+
+-- ## PRIORITY
+lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : C.linSpan ⊓ D.lineal ≤ C.lineal) :
+    (C ⊔ D).lineal = C.lineal ⊔ D.lineal := by
+  rw [le_antisymm_iff]
+  constructor
+  · intro x
+    simp [Submodule.mem_sup, mem_lineal]
+    simp [SetLike.le_def, mem_lineal, mem_linSpan] at hCD
+    intro y hy z hz hyz w hw v hv hwv
+    have h := hCD
+    sorry
+  · exact lineal_sup_le ..
+
 
 -- lemma sup_lineal (C : PointedCone R M) (S : Submodule R M) : S ≤ (C ⊔ S).lineal := sorry
 
@@ -213,18 +234,18 @@ open Function LinearMap
 variable {N : Type*} [AddCommGroup N] [Module R N]
 
 lemma map_lineal_le (C : PointedCone R M) (f : M →ₗ[R] N) :
-    Submodule.map f C.lineal ≤ (C.map f).lineal := by
+    C.lineal.map f ≤ (C.map f).lineal := by
   intro y
-  simp [lineal_mem]
+  simp [mem_lineal]
   intro x hx hmx hfxy
   exact ⟨⟨x, hx, hfxy⟩, ⟨-x, hmx, by rw [← hfxy, LinearMap.map_neg]⟩⟩
 
 lemma map_lineal (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
-    (C.map f).lineal = Submodule.map f C.lineal := by
+    (C.map f).lineal = C.lineal.map f := by
   rw [le_antisymm_iff]
   constructor
   · intro x
-    simp [lineal_mem]
+    simp [mem_lineal]
     intro y hy hfxy z hz hfxz
     use y
     · constructor
@@ -236,8 +257,8 @@ lemma map_lineal (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
   · exact map_lineal_le C f
 
 lemma comap_lineal (C : PointedCone R M) {f : N →ₗ[R] M} :
-    (C.comap f).lineal = Submodule.comap f C.lineal := by
-  ext x; simp [lineal_mem]
+    (C.comap f).lineal = C.lineal.comap f := by
+  ext x; simp [mem_lineal]
 
 @[simp] lemma neg_lineal (C : PointedCone R M) : (-C).lineal = C.lineal := by
   simp [← comap_id_eq_neg, comap_lineal]
@@ -246,17 +267,13 @@ lemma comap_lineal (C : PointedCone R M) {f : N →ₗ[R] M} :
 
 lemma lineal_restrict (S : Submodule R M) (C : PointedCone R M) :
     (restrict S C).lineal = .restrict S C.lineal := by
-  sorry
+  simp only [Submodule.submoduleOf, ← comap_lineal, ← Submodule.subtype_restrictScalars, comap]
 
 lemma lineal_embed (S : Submodule R M) (C : PointedCone R S) :
-    (embed C).lineal = .embed C.lineal := by
-  sorry
+    (embed C).lineal = .embed C.lineal := by simp [map_lineal]
 
 
 
-
--- implement this from the face theory.
-lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := sorry
 
 end Ring
 
@@ -311,7 +328,7 @@ lemma span_inter_lineal_eq_lineal (s : Set M) :
   --   -- rw [Submodule.mem_span_finite_of_mem_span] at h
     -- sorry
 
-lemma FG.lineal_fg'' {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classical
+lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classical
   obtain ⟨s, hs⟩ := hC
   use (s.finite_toSet.inter_of_left C.lineal).toFinset -- means {x ∈ s | x ∈ C.lineal}
   rw [submodule_span_of_span]
@@ -346,12 +363,12 @@ lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = �
   constructor
   · intro h
     ext x
-    simp only [lineal_mem, Submodule.mem_bot]
+    simp only [mem_lineal, Submodule.mem_bot]
     exact ⟨fun H => h.mem_neg_mem_zero H.1 H.2, by simp +contextual⟩
   · intro h x hx
     rw [not_imp_not]
     intro hnx
-    have hlin := lineal_mem.mpr ⟨hx, hnx⟩
+    have hlin := mem_lineal.mpr ⟨hx, hnx⟩
     rw [h] at hlin
     exact hlin
 

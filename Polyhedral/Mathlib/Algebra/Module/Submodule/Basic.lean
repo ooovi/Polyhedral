@@ -69,6 +69,9 @@ variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M
 
 open Function
 
+lemma subtype_restrictScalars (p : Submodule R M) :
+    p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
+
 variable (S)
 
 lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
@@ -352,6 +355,21 @@ noncomputable def IsCompl.foo {p q : Submodule R M} (hpq : IsCompl p q) :
 
 def IsCompl.bar (p : Submodule R M) :
     Submodule S p ≃o Set.Iic (p.restrictScalars S) := Submodule.mapIic (p.restrictScalars S)
+
+def quot_orderIso_Ici_restrictScalars (p : Submodule R M) :
+    Submodule S (M ⧸ p) ≃o Set.Ici (p.restrictScalars S) where
+  toFun q := ⟨comap (p.mkQ.restrictScalars S) q, le_comap_mkQ' q⟩
+  invFun q := map (p.mkQ.restrictScalars S) q
+  left_inv _ := by simp
+  right_inv q := by
+    have hq := q.2
+    rw [Set.mem_Ici] at hq
+    simp [hq]
+  map_rel_iff' := by
+    intro q r
+    constructor <;> intro H
+    · simpa using map_mono (f := p.mkQ.restrictScalars S) H
+    · exact comap_mono H
 
 
 section Experiment
