@@ -108,8 +108,8 @@ lemma mem_of_mem_embed {p : Submodule R M} {q : Submodule S p} {x : M} (hx : x �
 def of_mem_embed {p : Submodule R M} {q : Submodule S p} {x : M} (hx : x ∈ embed q) : p :=
   ⟨x, mem_of_mem_embed hx⟩
 
-lemma of_mem_embed_mem {p : Submodule R M} {Q : Submodule S p} {x : M} (hx : x ∈ embed Q) :
-    of_mem_embed hx ∈ Q := by
+lemma of_mem_embed_mem {p : Submodule R M} {q : Submodule S p} {x : M} (hx : x ∈ embed q) :
+    of_mem_embed hx ∈ q := by
   simp only [mem_map, LinearMap.coe_restrictScalars, subtype_apply, Subtype.exists,
     exists_and_right, exists_eq_right] at hx
   exact hx.choose_spec
@@ -169,38 +169,36 @@ lemma embed_iSup {ι : Type*} {p : Submodule R M} (f : ι → Submodule S p) :
 
 lemma embed_sSup {p : Submodule R M} (s : Set (Submodule S p)) :
     embed (sSup s) = sSup (embed '' s) := by
+  unfold embed
+  rw [subtype_restrictScalars]
+  --rw [Submodule.map_iSup]
+  --exact map_sSup
+  --
   -- rw [sSup_eq_iSup]
   -- rw [sSup_eq_iSup]
   -- rw [embed_iSup]
   -- simp
   sorry
 
-    ---- <<< DONE UNTIL HERE
-
 lemma embed_inf {p : Submodule R M} (q r : Submodule R p) :
     embed (q ⊓ r) = embed q ⊓ embed r := by
-  ext x
-  rw [mem_inf]
-  constructor <;> intro h
-  · simpa only [mem_inf, ← mem_embed_iff] using of_mem_embed_mem h
-  · have h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
-    --rw [← mem_inf (x := of_mem_embed _)] at h
-    rw [← mem_inf, ← mem_embed_iff] at h
-    exact h
+  simpa only [subtype_restrictScalars] using map_inf _ (subtype_injective _)
 
-@[simp] lemma embed_inf_left (S : Submodule R M) (T : Submodule R S) :
-    embed T ⊓ S = embed T := inf_eq_left.mpr embed_le
-@[simp] lemma embed_inf_right (S : Submodule R M) (T : Submodule R S) :
-    S ⊓ embed T = embed T := inf_eq_right.mpr embed_le
+@[simp] lemma embed_inf_left (p : Submodule R M) (q : Submodule S p) :
+    embed q ⊓ p.restrictScalars S = embed q := inf_eq_left.mpr embed_le
+@[simp] lemma embed_inf_right (p : Submodule R M) (q : Submodule S p) :
+    p.restrictScalars S ⊓ embed q = embed q := inf_eq_right.mpr embed_le
 
-lemma embed_sInf {U : Submodule R M} (s : Set (Submodule R U)) :
+lemma embed_sInf {p : Submodule R M} (s : Set (Submodule S p)) :
     embed (sInf s) = sInf (embed '' s) := by sorry
 
-lemma embed_disjoint {U : Submodule R M} {S T : Submodule R U} (hST : Disjoint S T) :
-    Disjoint (embed S) (embed T) := by
-  rw [disjoint_def] at ⊢ hST
-  intro x hxS hxT
-  simpa using hST (of_mem_embed hxS) (of_mem_embed_mem hxS) (of_mem_embed_mem hxT)
+    ---- <<< DONE UNTIL HERE
+
+lemma embed_disjoint {p : Submodule R M} {q r : Submodule S p} (hqr : Disjoint q r) :
+    Disjoint (embed q) (embed r) := by
+  rw [disjoint_def] at ⊢ hqr
+  intro x hxq hxr
+  simpa using hqr (of_mem_embed hxq) (of_mem_embed_mem hxq) (of_mem_embed_mem hxr)
 
 lemma embed_disjoint_iff {U : Submodule R M} {S T : Submodule R U} :
     Disjoint S T ↔ Disjoint (embed S) (embed T) := by
@@ -213,6 +211,12 @@ lemma embed_disjoint_iff {U : Submodule R M} {S T : Submodule R U} :
 
 lemma embed_codisjoint {U : Submodule R M} {S T : Submodule R U} (hST : Codisjoint S T) :
     embed S ⊔ embed T = U := by rw [← embed_sup, codisjoint_iff.mp hST, embed_top]
+
+-- Q: Can this be expressed using LinearEquiv.ofInjective and subtype_injective?
+def embed_equiv {p : Submodule R M} (q : Submodule S p) : q ≃ₗ[S] embed q := by
+  let e := LinearEquiv.ofInjective _ p.subtype_injective
+  exact e.restrictScalars S
+  sorry
 
 -- Q: Can this be expressed using LinearEquiv.ofInjective and subtype_injective?
 def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T where

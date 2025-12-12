@@ -182,14 +182,7 @@ lemma embed_sSup {U : Submodule R M} (s : Set (Submodule R U)) :
   sorry
 
 lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
-    embed (S ⊓ T) = embed S ⊓ embed T := by
-  ext x
-  rw [mem_inf]
-  constructor <;> intro h
-  · simpa only [mem_inf, ← mem_embed_iff] using of_mem_embed_mem h
-  · replace h := And.intro (of_mem_embed_mem h.1) (of_mem_embed_mem h.2)
-    rw [← mem_inf, ← mem_embed_iff] at h
-    exact h
+    embed (S ⊓ T) = embed S ⊓ embed T := map_inf _ (subtype_injective _)
 
 @[simp] lemma embed_inf_left (S : Submodule R M) (T : Submodule R S) :
     embed T ⊓ S = embed T := inf_eq_left.mpr embed_le

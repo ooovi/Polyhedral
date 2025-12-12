@@ -115,7 +115,10 @@ noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
 noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 
 -- NOTE: this is not the same as Module.Finite or FG!
-abbrev FinRank (C : PointedCone R M) := Module.Finite R C.linSpan
+abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
+
+lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := by
+  sorry
 
 end Semiring
 

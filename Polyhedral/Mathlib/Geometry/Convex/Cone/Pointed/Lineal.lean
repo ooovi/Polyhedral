@@ -165,15 +165,15 @@ lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D
 -- ## PRIORITY
 lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : C.linSpan ⊓ D.lineal ≤ C.lineal) :
     (C ⊔ D).lineal = C.lineal ⊔ D.lineal := by
-  rw [le_antisymm_iff]
+  rw [le_antisymm_iff, and_comm]
   constructor
-  · intro x
-    simp [Submodule.mem_sup, mem_lineal]
-    simp [SetLike.le_def, mem_lineal, mem_linSpan] at hCD
-    intro y hy z hz hyz w hw v hv hwv
-    have h := hCD
-    sorry
   · exact lineal_sup_le ..
+  intro x
+  simp [Submodule.mem_sup, mem_lineal]
+  simp [SetLike.le_def, mem_lineal, mem_linSpan] at hCD
+  intro y hy z hz hyz w hw v hv hwv
+  have h := hCD
+  sorry
 
 
 -- lemma sup_lineal (C : PointedCone R M) (S : Submodule R M) : S ≤ (C ⊔ S).lineal := sorry
@@ -469,17 +469,17 @@ lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 
 -- def salientQuot_neg (C : PointedCone R M) : C.salientQuot ≃ₗ[R] (-C).salientQuot := sorry
 
-variable (R M) in
+--variable (R M) in
 /-- Salient rank of a cone. -/
 noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
     -- Module.rank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
 
-variable (R M) in
+--variable (R M) in
 /-- Salient rank of a cone. -/
 noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
     -- Module.finrank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
 
-abbrev FinSalRank (C : PointedCone R M) := Module.Finite R C.salientQuot.linSpan
+abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
 
 end Ring
 
