@@ -48,14 +48,13 @@ variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R 
 @[refl, simp]
 theorem refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun hx _ _ _ _ ↦ hx⟩
 
-theorem rfl {C : PointedCone R M} : C.IsFaceOf C := refl C
-
+@[trans]
 theorem trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C := by
   refine ⟨h₁.le.trans h₂.le, fun hx hy a0 b0 h ↦ ?_⟩
-  refine h₁.2 (h₂.2 hx hy a0 b0 (h₁.le h)) ?_ a0 b0 h
-  refine h₂.left_mem_of_smul_add_mem hy hx b0 a0 ?_
-  rw [add_comm] at h
-  exact h₁.le h
+  exact h₁.left_mem_of_smul_add_mem
+    (h₂.left_mem_of_smul_add_mem hx hy a0 b0 (h₁.le h))
+    (h₂.left_mem_of_smul_add_mem hy hx b0 a0 (by rw [add_comm]; exact h₁.le h))
+    a0 b0 h
 
 /- A face of a pointed cone is an extreme subset of the cone. -/
 theorem isExtreme (h : F.IsFaceOf C) : IsExtreme R (C : Set M) F := by
@@ -69,19 +68,15 @@ theorem inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
   use le_inf_iff.mpr ⟨Set.inter_subset_left.trans h₁.le, Set.inter_subset_right.trans h₂.le⟩
   simp only [Submodule.mem_inf, and_imp]
-  intro x y a b xc₁ xc₂ yc₁ yc₂ a0 b0 hz₁ hz₂
-  constructor
+  refine fun xc₁ xc₂ yc₁ yc₂ a0 b0 hz₁ hz₂ => ⟨?_, ?_⟩
   · exact h₁.left_mem_of_smul_add_mem xc₁ yc₁ a0 b0 hz₁
   · exact h₂.left_mem_of_smul_add_mem xc₂ yc₂ a0 b0 hz₂
 
-/- The infimum of two faces of a cone is again a face of the cone. -/
-theorem inf_left (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C := by
-  refine Eq.mp ?_ (inf h₁ h₂)
-  simp
+theorem inf_left (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
+  inf_idem C ▸ inf h₁ h₂
 
-theorem inf_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂) : F.IsFaceOf (C₁ ⊓ C₂) := by
-  refine Eq.mp ?_ (inf h₁ h₂)
-  simp
+theorem inf_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂) : F.IsFaceOf (C₁ ⊓ C₂) :=
+  inf_idem F ▸ inf h₁ h₂
 
 section Nontrivial
 
@@ -99,10 +94,8 @@ lemma iff_mem_of_smul_add_mem :
     apply f.left_mem_of_smul_add_mem xC yC cpos zero_lt_one
     simp [h]
   · intro h
-    constructor
-    · exact h.1
-    · intro x y a b xC yC a0 b0 hab
-      exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
+    refine ⟨h.1, fun xC yC a0 b0 hab => ?_⟩
+    exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
 
 end Nontrivial
 
@@ -113,9 +106,7 @@ section Field
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F F₁ F₂ : PointedCone R M} {s : Set M}
 
-/- An equivalent characterization of the faces of a pointed cone over a field: if the sum of two
-points of the cone lies in a face, so do both summands. This is often used as the definition of a
-face. -/
+/- An equivalent characterization of the faces of a pointed cone over a field. -/
 theorem iff_mem_of_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M}, x ∈ C → y ∈ C → x + y ∈ F → x ∈ F := by
   constructor <;> intro h
@@ -133,7 +124,7 @@ theorem mem_of_sum_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι → { c 
   classical
   have := (Finset.univ (α:= ι)).add_sum_erase (a := i) (fun i : ι => c i • f i) (Finset.mem_univ _)
   simp_rw [← this] at hs
-  convert smul_mem F (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr cpos)) _
+  convert smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr cpos)) _
   · rw [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel]
     · exact (MulAction.one_smul (f i)).symm
     · exact Ne.symm (ne_of_lt cpos)
@@ -164,20 +155,14 @@ theorem iff_map {f : M →ₗ[R] N} (hf : Function.Injective f) :
 theorem iff_comap {f : N →ₗ[R] M} (hf : Function.Surjective f) :
     F.IsFaceOf C ↔ (PointedCone.comap f F).IsFaceOf (.comap f C) := by
   simp only [iff_mem_of_add_mem, mem_comap, map_add]
-  have ec (x : M) := Function.invFun_eq (hf x)
-  constructor <;> intro ⟨sub, hF⟩
-  · exact ⟨Submodule.comap_mono sub, hF⟩
-  · constructor
-    · intro x xF
-      apply Submodule.map_le_iff_le_comap.mpr sub
-      simp only [Submodule.mem_map, mem_comap, LinearMap.coe_restrictScalars]
-      use Function.invFun f x
-      rw [ec]
-      exact ⟨xF, Eq.refl _⟩
-    · intro x y xC yC h
-      rw [← ec x] at h xC ⊢
-      rw [← ec y] at h yC
-      exact hF xC yC h
+  have ec := fun x => Function.invFun_eq (hf x)
+  refine ⟨fun ⟨s, h⟩ => ⟨Submodule.comap_mono s, h⟩, fun ⟨s, h⟩ => ?_⟩
+  constructor
+  · intro x xF; rw [← ec x] at xF ⊢; exact s xF
+  · intro x y xC yC hab
+    rw [← ec x] at xC hab ⊢; rw [← ec y] at yC hab
+    exact h xC yC hab
+
 end Map
 
 end Field
@@ -185,12 +170,6 @@ end Field
 end IsFaceOf
 
 end PointedCone
-
-
-
-
-
-
 
 
 
@@ -254,7 +233,7 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := sorry
 alias inf_submodule := inf_linSpan
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
-  inf h rfl
+  inf h (refl _)
 
 end Semiring
 
