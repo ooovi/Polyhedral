@@ -6,7 +6,7 @@ Authors: Olivia Röhrig
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
 /-!
-## Bundled Face
+## Face
 
 This file defines a bundled object for a face of a pointed cone and a complete lattice structure on
 them.
@@ -42,7 +42,7 @@ variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Modul
 variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 
 /-- A pointed cone `C` as a face of itself. -/
-def self (C : PointedCone R M) : Face C := ⟨C, IsFaceOf.rfl⟩
+def self (C : PointedCone R M) : Face C := ⟨C, IsFaceOf.refl _⟩
 
 instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) :=
   ⟨Face.self C⟩
@@ -72,19 +72,20 @@ theorem mem_toPointedCone {F : Face C} (x : M) : x ∈ F ↔ x ∈ F.toPointedCo
 ### Infimum, supremum and lattice
 -/
 
-/-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the submodules `F₁` and `F₂`. -/
+/-- The infimum of two faces `F₁, F₂` of `C` is the infimum of the cones `F₁` and `F₂`. -/
 def inf (F₁ F₂ : Face C) : Face C := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inf_left F₂.isFaceOf⟩
 
-instance : InfSet (Face C) := ⟨fun S =>
+instance : InfSet (Face C) :=
+⟨fun S =>
   { toSubmodule := C ⊓ sInf {s.1 | s ∈ S}
     isFaceOf := by
       constructor
       · exact fun _ sm => sm.1
       · simp only [Submodule.mem_inf, Submodule.mem_sInf, Set.mem_setOf_eq, forall_exists_index,
         and_imp, forall_apply_eq_imp_iff₂]
-        intros _ _ a b xc yc a0 b0 _ h
+        intros _ _ a xc yc a0 _ h
         simp only [xc, true_and]; intros F Fs
-        exact F.isFaceOf.left_mem_of_smul_add_mem xc yc a0 b0 (h F Fs)
+        exact F.isFaceOf.mem_of_smul_add_mem xc yc a0 (h F Fs)
 }⟩
 
 instance : SemilatticeInf (Face C) where
@@ -123,16 +124,7 @@ instance : SemilatticeSup (Face C) where
 
 /-- `sSup S` of a set `S` of faces of `C` is the smallest face of `C` that has all members of `S` as
 faces. -/
-def sSup (S : Set (Face C)) : Face C := sInf { F : Face C | ∀ F' ∈ S, F' ≤ F}
-
-instance : SupSet (Face C) :=
-  ⟨fun S => {
-    carrier := sSup S
-    add_mem' aS bS := Submodule.add_mem _ aS bS
-    zero_mem' := Submodule.zero_mem _
-    smul_mem' _ _ h := Submodule.smul_mem _ _ h
-    isFaceOf := (sSup S).isFaceOf
-  }⟩
+instance : SupSet (Face C) := ⟨fun (S : Set (Face C)) => sInf { F : Face C | ∀ F' ∈ S, F' ≤ F}⟩
 
 instance : CompleteSemilatticeSup (Face C) where
   __ := instSemilatticeSup
@@ -189,6 +181,8 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 -/
 section Prod
 
+-- TODO make IsFaceOf lemmas
+
 open Submodule
 
 /-- The face of `C₁ × C₂` obtained by taking the (submodule) product of faces `F₁ ≤ C₁` and
@@ -200,45 +194,45 @@ def prod (F₁ : Face C₁) (F₂ : Face C₂) : Face (C₁.prod C₂) := by
     exact ⟨F₁.isFaceOf.le xp.1, F₂.isFaceOf.le xp.2⟩
   · simp only [Submodule.mem_prod, Prod.fst_add, Prod.smul_fst, Prod.snd_add,
     Prod.smul_snd, and_imp, Prod.forall]
-    intro _ _ _ _ _ _ xc₁ xc₂ yc₁ yc₂ a0 b0 hab₁ hab₂
+    intro _ _ _ _ _ xc₁ xc₂ yc₁ yc₂ a0 hab₁ hab₂
     constructor
-    · exact F₁.isFaceOf.left_mem_of_smul_add_mem xc₁ yc₁ a0 b0 hab₁
-    · exact F₂.isFaceOf.left_mem_of_smul_add_mem xc₂ yc₂ a0 b0 hab₂
+    · exact F₁.isFaceOf.mem_of_smul_add_mem xc₁ yc₁ a0 hab₁
+    · exact F₂.isFaceOf.mem_of_smul_add_mem xc₂ yc₂ a0 hab₂
 
 /-- The face of `C₁` obtained by projecting to the left component of a face `F ≤ C₁ × C₂`. -/
 def prod_left (F : Face (C₁.prod C₂)) : Face C₁ := {
   map (LinearMap.fst _ M N) F with
-  isFaceOf := by
-    constructor
-    · intro x xm
-      simp [LinearMap.fst_apply] at xm
-      convert (Set.mem_prod.mp <| F.isFaceOf.le xm.choose_spec).1
-    · simp only [toPointedCone, mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right,
-      exists_eq_right, forall_exists_index]
-      intro x y _ b xc yc a0 b0 z h
-      use 0
-      refine F.isFaceOf.left_mem_of_smul_add_mem (x := (x, 0)) (y := (y, b⁻¹ • z)) ?_ ?_ a0 b0 ?_
-      · exact mem_prod.mp ⟨xc, zero_mem C₂⟩
-      · exact mem_prod.mp ⟨yc, smul_mem C₂ (le_of_lt (inv_pos_of_pos b0)) (F.isFaceOf.le h).2⟩
-      · simpa [← smul_assoc, mul_inv_cancel₀ (ne_of_lt b0).symm]
+  isFaceOf := by sorry
+    -- constructor
+    -- · intro x xm
+    --   simp [LinearMap.fst_apply] at xm
+    --   convert (Set.mem_prod.mp <| F.isFaceOf.le xm.choose_spec).1
+    -- · simp only [toPointedCone, mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right,
+    --   exists_eq_right, forall_exists_index]
+    --   intro x y _ xc yc a0 z h
+    --   use 0
+    --   refine F.isFaceOf.mem_of_smul_add_mem (x := (x, 0)) (y := (y, b⁻¹ • z)) ?_ ?_ a0 ?_
+    --   · exact mem_prod.mp ⟨xc, zero_mem C₂⟩
+    --   · exact mem_prod.mp ⟨yc, smul_mem C₂ (le_of_lt (inv_pos_of_pos b0)) (F.isFaceOf.le h).2⟩
+    --   · simpa [← smul_assoc, mul_inv_cancel₀ (ne_of_lt b0).symm]
 }
 
 /-- The face of `C₂` obtained by projecting to the right component of a face `F ≤ C₁ × C₂`. -/
 def prod_right (F : Face (C₁.prod C₂)) : Face C₂ := {
   map (LinearMap.snd _ M N) F with
-  isFaceOf := by
-    constructor
-    · intro x xm
-      simp [LinearMap.snd_apply] at xm
-      convert (Set.mem_prod.mp <| F.isFaceOf.le xm.choose_spec).2
-    · simp only [toPointedCone, mem_map, LinearMap.snd_apply, Prod.exists, exists_eq_right,
-      forall_exists_index]
-      intro x y _ b xc yc a0 b0 z h
-      use 0
-      refine F.isFaceOf.left_mem_of_smul_add_mem (x := (0, x)) (y := (b⁻¹ • z, y)) ?_ ?_ a0 b0 ?_
-      · exact mem_prod.mp ⟨zero_mem C₁, xc⟩
-      · exact mem_prod.mp ⟨smul_mem C₁ (le_of_lt (inv_pos_of_pos b0)) (F.isFaceOf.le h).1, yc⟩
-      · simpa [← smul_assoc, mul_inv_cancel₀ (ne_of_lt b0).symm]
+  isFaceOf := by sorry
+    -- constructor
+    -- · intro x xm
+    --   simp [LinearMap.snd_apply] at xm
+    --   convert (Set.mem_prod.mp <| F.isFaceOf.le xm.choose_spec).2
+    -- · simp only [toPointedCone, mem_map, LinearMap.snd_apply, Prod.exists, exists_eq_right,
+    --   forall_exists_index]
+    --   intro x y _ b xc yc a0 b0 z h
+    --   use 0
+    --   refine F.isFaceOf.left_mem_of_smul_add_mem (x := (0, x)) (y := (b⁻¹ • z, y)) ?_ ?_ a0 b0 ?_
+    --   · exact mem_prod.mp ⟨zero_mem C₁, xc⟩
+    --   · exact mem_prod.mp ⟨smul_mem C₁ (le_of_lt (inv_pos_of_pos b0)) (F.isFaceOf.le h).1, yc⟩
+    --   · simpa [← smul_assoc, mul_inv_cancel₀ (ne_of_lt b0).symm]
   }
 
 @[simp]
@@ -325,8 +319,8 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 
-instance {S : Submodule R M} : CoeDep (Submodule R M) S (Face (S : PointedCone R M)) :=
-  ⟨(S : PointedCone R M)⟩
+-- instance {S : Submodule R M} : CoeDep (Submodule R M) S (Face (S : PointedCone R M)) :=
+--   ⟨(S : PointedCone R M)⟩
 
 @[simp, norm_cast]
 theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
@@ -383,7 +377,7 @@ instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.
 
 /-- The face of `F₁` obtained by intersecting `F₁` with another of `C`'s faces. -/
 def restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
-  ⟨F₁ ⊓ F₂, (F₁.isFaceOf.iff_of_le inf_le_left).mp (F₁.isFaceOf.inf_left F₂.isFaceOf)⟩
+  ⟨F₁ ⊓ F₂, (F₁.isFaceOf.inf_left F₂.isFaceOf).iff_le F₁.isFaceOf inf_le_left⟩
 
 lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
 
@@ -457,12 +451,11 @@ def map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M �
     := F.map e.injective
 
 /-- The face `comap f F` of `comap f C`. -/
-def comap {f : N →ₗ[R] M} (hf : Function.Surjective f) (F : Face C) : Face (comap f C)
-    := ⟨_, F.isFaceOf.comap hf⟩
+def comap {f : N →ₗ[R] M} (F : Face C) : Face (comap f C) := ⟨_, F.isFaceOf.comap⟩
 
-/-- The face `comap e F` of `comap e C`. -/
-def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
-    := F.comap e.surjective
+-- /-- The face `comap e F` of `comap e C`. -/
+-- def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
+--     := F.comap
 
 end Field
 

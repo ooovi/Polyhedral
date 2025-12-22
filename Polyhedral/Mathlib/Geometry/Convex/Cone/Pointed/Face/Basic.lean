@@ -35,8 +35,8 @@ variable {R M N : Type*}
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
 structure IsFaceOf (F C : PointedCone R M) where
   le : F ≤ C
-  left_mem_of_smul_add_mem :
-    ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F
+  mem_of_smul_add_mem :
+    ∀ {x y : M} {a : R}, x ∈ C → y ∈ C → 0 < a → a • x + y ∈ F → x ∈ F
 
 namespace IsFaceOf
 
@@ -46,21 +46,39 @@ variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Modul
 variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 @[refl, simp]
-theorem refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun ⦃_⦄ a ↦ a, fun hx _ _ _ _ ↦ hx⟩
+theorem refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun _ a => a, fun hx _ _ _ => hx⟩
+
+lemma iff_mem_of_smul_add_mem : F.IsFaceOf C ↔
+    F ≤ C ∧ ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F := by
+  · constructor
+    · intro h
+      refine ⟨h.1, fun xC yC a0 b0 hab => ?_⟩
+      exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
+    · intro f
+      refine ⟨f.1, ?_⟩
+      by_cases hc : 0 < (1 : R)
+      · intros xc yc a0 haxy
+        refine f.2 xc yc a0 hc ?_
+        simpa
+      · have := subsingleton_of_zero_eq_one (zero_le_one.eq_or_lt.resolve_right hc)
+        simp [this.eq_zero]
 
 @[trans]
 theorem trans (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) : F₂.IsFaceOf C := by
-  refine ⟨h₁.le.trans h₂.le, fun hx hy a0 b0 h ↦ ?_⟩
-  exact h₁.left_mem_of_smul_add_mem
-    (h₂.left_mem_of_smul_add_mem hx hy a0 b0 (h₁.le h))
-    (h₂.left_mem_of_smul_add_mem hy hx b0 a0 (by rw [add_comm]; exact h₁.le h))
-    a0 b0 h
+  simp [iff_mem_of_smul_add_mem] at h₁ h₂ ⊢
+  refine ⟨h₁.1.trans h₂.1, fun hx hy a0 b0 h ↦ ?_⟩
+  exact h₁.2 (h₂.2 hx hy a0 b0 (h₁.1 h)) (h₂.2 hy hx b0 a0 (by rw [add_comm]; exact h₁.1 h)) a0 b0 h
+
+lemma iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) (h : F₁ ≤ F₂) : F₁.IsFaceOf F₂ := by
+  rw [iff_mem_of_smul_add_mem] at ⊢ h₁
+  exact ⟨h, fun hx hy => h₁.2 (h₂.le hx) (h₂.le hy)⟩
 
 /- A face of a pointed cone is an extreme subset of the cone. -/
 theorem isExtreme (h : F.IsFaceOf C) : IsExtreme R (C : Set M) F := by
-  refine ⟨h.le, ?_⟩
+  apply iff_mem_of_smul_add_mem.mp at h
+  refine ⟨h.1, ?_⟩
   rintro x xc y yc z zf ⟨a, b, a0, b0, -, hz⟩
-  apply h.left_mem_of_smul_add_mem xc yc a0 b0
+  apply h.2 xc yc a0 b0
   rwa [← hz] at zf
 
 /- The infimum of two faces of two cones is a face of the infimum of the cones. -/
@@ -68,9 +86,9 @@ theorem inf (h₁ : F₁.IsFaceOf C₁) (h₂ : F₂.IsFaceOf C₂) :
     (F₁ ⊓ F₂).IsFaceOf (C₁ ⊓ C₂) := by
   use le_inf_iff.mpr ⟨Set.inter_subset_left.trans h₁.le, Set.inter_subset_right.trans h₂.le⟩
   simp only [Submodule.mem_inf, and_imp]
-  refine fun xc₁ xc₂ yc₁ yc₂ a0 b0 hz₁ hz₂ => ⟨?_, ?_⟩
-  · exact h₁.left_mem_of_smul_add_mem xc₁ yc₁ a0 b0 hz₁
-  · exact h₂.left_mem_of_smul_add_mem xc₂ yc₂ a0 b0 hz₂
+  refine fun xc₁ xc₂ yc₁ yc₂ a0 hz₁ hz₂ => ⟨?_, ?_⟩
+  · exact h₁.mem_of_smul_add_mem xc₁ yc₁ a0 hz₁
+  · exact h₂.mem_of_smul_add_mem xc₂ yc₂ a0 hz₂
 
 theorem inf_left (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) : (F₁ ⊓ F₂).IsFaceOf C :=
   inf_idem C ▸ inf h₁ h₂
@@ -84,18 +102,12 @@ variable [NeZero (1 : R)]
 
 lemma mem_of_add_mem (hF : F.IsFaceOf C) {x y : M}
     (hx : x ∈ C) (hy : y ∈ C) (hxy : x + y ∈ F) : x ∈ F := by
-  simpa [hxy] using hF.left_mem_of_smul_add_mem hx hy zero_lt_one zero_lt_one
+  simpa [hxy] using hF.mem_of_smul_add_mem hx hy zero_lt_one
 
-lemma iff_mem_of_smul_add_mem :
-    F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M} {c : R}, x ∈ C → y ∈ C → 0 < c → c • x + y ∈ F → x ∈ F := by
-  constructor
-  · intro f; refine ⟨f.le, ?_⟩
-    intro x y c xC yC cpos h
-    apply f.left_mem_of_smul_add_mem xC yC cpos zero_lt_one
-    simp [h]
-  · intro h
-    refine ⟨h.1, fun xC yC a0 b0 hab => ?_⟩
-    exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
+lemma mem_of_sum_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
+    (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, f i ∈ F) (i : ι) : f i ∈ F := by
+  refine hF.mem_of_add_mem (hsC i) (sum_mem (fun j (_ : j ∈ Finset.univ.erase i) => hsC j)) ?_
+  simp [hs]
 
 end Nontrivial
 
@@ -111,33 +123,29 @@ theorem iff_mem_of_add_mem :
     F.IsFaceOf C ↔ F ≤ C ∧ ∀ {x y : M}, x ∈ C → y ∈ C → x + y ∈ F → x ∈ F := by
   constructor <;> intro h
   · exact ⟨h.le, mem_of_add_mem h⟩
-  · apply iff_mem_of_smul_add_mem.mpr ⟨h.1, fun xC yC c0 hcxy => ?_⟩
+  · refine ⟨h.1, fun xC yC c0 hcxy => ?_⟩
     have cxF := h.2 (smul_mem _ (le_of_lt c0) xC) yC hcxy
     convert smul_mem _ (inv_nonneg.mpr (le_of_lt c0)) cxF
     simp [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel _ (ne_of_lt c0).symm]
 
 /- For any positive combination of points of a cone that is in a face, all the points are also in
 the face. -/
-theorem mem_of_sum_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι → { c : R // 0 ≤ c }}
-    (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, c i • f i ∈ F) (i : ι)
-    (cpos : 0 < c i) : f i ∈ F := by
-  classical
-  have := (Finset.univ (α:= ι)).add_sum_erase (a := i) (fun i : ι => c i • f i) (Finset.mem_univ _)
-  simp_rw [← this] at hs
-  convert smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr cpos)) _
-  · rw [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel]
-    · exact (MulAction.one_smul (f i)).symm
-    · exact Ne.symm (ne_of_lt cpos)
-  · refine (iff_mem_of_add_mem.mp hF).2 (C.smul_mem (le_of_lt cpos) (hsC i)) (sum_mem ?_) hs
-    exact fun i a ↦ Submodule.smul_mem C (c i) (hsC i)
+theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} {c : ι → R}
+    (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hc : ∀ i, 0 ≤ c i) (hs : ∑ i : ι, c i • f i ∈ F)
+    (i : ι) (hci : 0 < c i) : f i ∈ F := by
+  have := mem_of_sum_mem hF (fun i => C.smul_mem (hc i) (hsC i)) hs i
+  convert smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr hci)) this
+  rw [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel]
+  · exact (MulAction.one_smul (f i)).symm
+  · exact Ne.symm (ne_of_lt hci)
 
 section Map
 
 variable [AddCommGroup N] [Module R N]
 
-/-- Mapping a face using an injective linear map yields a face of the image of `C`. -/
-theorem iff_map {f : M →ₗ[R] N} (hf : Function.Injective f) :
-     F.IsFaceOf C ↔ (PointedCone.map f F).IsFaceOf (.map f C) := by
+/-- The image of a Face under an injective linear map is a face of the image of the cone. -/
+theorem map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
+     F.IsFaceOf C ↔ (F.map f).IsFaceOf (C.map f) := by
   simp only [iff_mem_of_add_mem, mem_map, forall_exists_index, and_imp]
   constructor <;> intro ⟨sub, hF⟩
   · refine ⟨Submodule.map_mono sub, fun x xc xf _ yc yf _ _ h => ⟨x, hF xc yc ?_, xf⟩⟩
@@ -151,17 +159,26 @@ theorem iff_map {f : M →ₗ[R] N} (hf : Function.Injective f) :
         hF _ hx (Eq.refl _) _ hy (Eq.refl _) _ hxy (f.map_add _ _)
       rwa [hf hx'f] at hx'
 
-/-- The preimage of a face under a surjective linear map is a face of the preimage of `C`. -/
-theorem iff_comap {f : N →ₗ[R] M} (hf : Function.Surjective f) :
-    F.IsFaceOf C ↔ (PointedCone.comap f F).IsFaceOf (.comap f C) := by
+lemma map {f : M →ₗ[R] N} (hf : Function.Injective f) (hF : F.IsFaceOf C) :
+(map f F).IsFaceOf (map f C) := (map_iff hf).mp hF
+
+lemma map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
+    (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
+
+theorem comap {f : N →ₗ[R] M} (hF : F.IsFaceOf C) :
+    (F.comap f).IsFaceOf (C.comap f) := by
   simp only [iff_mem_of_add_mem, mem_comap, map_add]
+  exact ⟨Submodule.comap_mono hF.1, hF.mem_of_add_mem⟩
+
+theorem of_comap {f : N →ₗ[R] M} (hf : Function.Surjective f)
+    (hc : (F.comap f).IsFaceOf (C.comap f)) : F.IsFaceOf C := by
+  simp only [iff_mem_of_add_mem, mem_comap, map_add] at hc ⊢
   have ec := fun x => Function.invFun_eq (hf x)
-  refine ⟨fun ⟨s, h⟩ => ⟨Submodule.comap_mono s, h⟩, fun ⟨s, h⟩ => ?_⟩
   constructor
-  · intro x xF; rw [← ec x] at xF ⊢; exact s xF
+  · intro x xF; rw [← ec x] at xF ⊢; exact hc.1 xF
   · intro x y xC yC hab
     rw [← ec x] at xC hab ⊢; rw [← ec y] at yC hab
-    exact h xC yC hab
+    exact hc.2 xC yC hab
 
 end Map
 
@@ -176,7 +193,7 @@ end PointedCone
 
 
 
-
+#exit
 
 -- ################# PR end
 
@@ -289,8 +306,8 @@ theorem sup_of_disjoint (hFC : F₁.IsFaceOf C₁) (hGD : F₂.IsFaceOf C₂)
     have := uniq_decomp_of_zero_inter -- this requires Ring
       (mem hx' hx'') (hFC.le hxf) (mem hy' hy'') (hGD.le hyg) hCD this
     refine ⟨x', ?_, y', ?_, hfx⟩
-    · exact hFC.left_mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
-    · exact hGD.left_mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
+    · exact hFC.mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
+    · exact hGD.mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
 
 theorem sup_of_disjoint_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂)
     (hCD : Disjoint (Submodule.span R C₁) (Submodule.span (M := M) R C₂))
@@ -309,33 +326,36 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 ### Equivalent definition of isFaceOf on fields
 -/
 
--- these now all follow kind of directly from mem_of_sum_mem
+-- these now all follow kind of directly from mem_of_sum_smul_mem
 
-lemma mem_of_sum_mem'' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
-    {c : ι → { c : R // 0 ≤ c }} (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, c i • f i ∈ F) (i : ι)
+lemma mem_of_sum_smul_mem'' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
+    {c : ι → R} (hcc : ∀ i, 0 ≤ c i) (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, c i • f i ∈ F) (i : ι)
     (cpos : 0 < c i) : f i ∈ F := by
-  exact mem_of_sum_mem hF hsC hs i cpos
+  exact mem_of_sum_smul_mem hcc hF hsC hs i cpos
 
 -- ## PRIORITY
-lemma mem_of_sum_mem' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
+-- might not need field
+-- prove this on semiring and follow non' version from it
+lemma mem_of_sum_smul_mem' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
     (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, f i ∈ F) (i : ι) : f i ∈ F := by
-  refine mem_of_sum_mem hF hsC (c := fun _ => 1) (by simp [hs]) i ?_
+  refine mem_of_sum_smul_mem (fun i ↦ zero_le_one' R) hF hsC (c := fun _ => 1) (by simp [hs]) i ?_
   exact Subtype.mk_lt_mk.mpr (by norm_num)
 
-lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {c : ι → { c : R // 0 ≤ c }}
+
+lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
     {f : ι → s} {i : ι} (hF : F.IsFaceOf (span R s)) (h : ∑ i, c i • (f i).val ∈ F)
     (cpos : 0 < c i) : (f i).val ∈ F := by
-  refine mem_of_sum_mem hF ?_ h i cpos
+  refine mem_of_sum_smul_mem hcc hF ?_ h i cpos
   simp [Submodule.mem_span]; exact fun i _ su => su (Subtype.coe_prop (f i))
 
-lemma mem_of_sum_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
+lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
     (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
-  refine mem_of_sum_mem (f := fun (x : s) => x.val) hF ?_ (c := fun _ => 1) ?_ ⟨x, xs⟩ ?_
+  refine mem_of_sum_smul_mem
+    (f := fun (x : s) => x.val) (fun i ↦ zero_le_one' R) hF ?_ ?_ ⟨x, xs⟩ (zero_lt_one' R)
   · exact (fun i => hsC i.property)
   · simp only [Finset.univ_eq_attach, one_smul]
     convert hs
     exact s.sum_attach id
-  · exact Subtype.mk_lt_mk.mpr (by norm_num)
 
 -- these only have one interesting direction, do we really need iff?
 
@@ -346,9 +366,8 @@ lemma iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
   · rw [iff_mem_of_smul_add_mem] at ⊢ h₁
     exact fun h => ⟨h, fun hx hy => h₁.2 (h₂.le hx) (h₂.le hy)⟩
 
-lemma iff_of_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₁) :
-    F₂.IsFaceOf C ↔ F₂.IsFaceOf F₁ :=
-  ⟨fun h => (iff_le h h₁).mpr h₂, fun h => trans h h₁⟩
+lemma iff_of_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₁) (h : F₂.IsFaceOf C) : F₂.IsFaceOf F₁ :=
+  fun h => (iff_le h h₁).mpr h₂
 
 section Map
 
@@ -357,18 +376,17 @@ variable [AddCommGroup N] [Module R N]
 -- ## MAP
 
 -- o: not sure why we need extra lemmas for these
+-- lemma map {f : M →ₗ[R] N} (hf : Function.Injective f) (hF : F.IsFaceOf C) :
+--     (map f F).IsFaceOf (map f C) := (iff_map hf).mp hF
 
-lemma map {f : M →ₗ[R] N} (hf : Function.Injective f) (hF : F.IsFaceOf C) :
-    (map f F).IsFaceOf (map f C) := (iff_map hf).mp hF
+-- lemma map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
+--     (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
 
-lemma map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
-    (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
+-- lemma comap {f : N →ₗ[R] M} (hf : Function.Surjective f) (hF : F.IsFaceOf C) :
+--     (comap f F).IsFaceOf (comap f C) := (iff_comap hf).mp hF -- no need surejctive
 
-lemma comap {f : N →ₗ[R] M} (hf : Function.Surjective f) (hF : F.IsFaceOf C) :
-    (comap f F).IsFaceOf (comap f C) := (iff_comap hf).mp hF
-
-lemma comap_equiv (e : N ≃ₗ[R] M) (hF : F.IsFaceOf C) :
-    (PointedCone.comap (e : N →ₗ[R] M) F).IsFaceOf (.comap e C) := hF.comap e.surjective
+-- lemma comap_equiv (e : N ≃ₗ[R] M) (hF : F.IsFaceOf C) :
+--     (PointedCone.comap (e : N →ₗ[R] M) F).IsFaceOf (.comap e C) := hF.comap e.surjective
 
 end Map
 
