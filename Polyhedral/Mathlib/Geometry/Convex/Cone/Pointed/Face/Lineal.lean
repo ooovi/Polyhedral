@@ -5,7 +5,7 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 
 variable {R M N : Type*}
 
@@ -24,13 +24,13 @@ lemma lineal (C : PointedCone R M) : IsFaceOf (M := M) (R := R) C.lineal C := by
   apply iff_mem_of_add_mem.mpr
   simp only [lineal_le, Submodule.restrictScalars_mem, true_and]
   intro _ _ xc yc xyf
-  simp only [lineal_mem, neg_add_rev, xc, true_and] at xyf ⊢
+  simp only [mem_lineal, neg_add_rev, xc, true_and] at xyf ⊢
   simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
 
 lemma lineal_le {C F : PointedCone R M} (hF : F.IsFaceOf C) :
     C.lineal ≤ F := by
   intro x hx
-  apply lineal_mem.mp at hx
+  apply mem_lineal.mp at hx
   exact (IsFaceOf.iff_mem_of_add_mem.mp hF).2 hx.1 hx.2 (by simp)
 
 lemma lineal_eq {C F : PointedCone R M} (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
@@ -39,5 +39,37 @@ lemma lineal_eq {C F : PointedCone R M} (hF : F.IsFaceOf C) : F.lineal = C.linea
 end Field
 
 end IsFaceOf
+
+namespace Face
+
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] {C F : PointedCone R M}
+
+/-!
+### Complete Lattice
+-/
+
+-- variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+--   [AddCommGroup N] [Module R N] {C C₁ F : PointedCone R M} {C₂ : PointedCone R N}
+
+/-- The face of a pointed cone `C` that is its lineal space. It is contained in all faces of `C`. -/
+def lineal {C : PointedCone R M} : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
+
+lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := F.isFaceOf.lineal_le
+
+/-- The bottom element of the partial order on faces of `C` is `C.lineal`. -/
+instance : OrderBot (Face C) where
+  bot := lineal
+  bot_le F := F.lineal_le
+
+instance : BoundedOrder (Face C) where
+
+instance : CompleteLattice (Face C) where
+
+end Field
+
+end Face
 
 end PointedCone
