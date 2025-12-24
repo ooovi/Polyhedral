@@ -65,7 +65,7 @@ lemma mem_relint {C : PointedCone R M} {x : M} :
 
 lemma relint_le (C : PointedCone R M) : C.relint ≤ C := fun _ h => (C.mem_relint.mp h).1
 
-lemma relint_submodule (S : Submodule R M) : (S : PointedCone R M).relint = S := sorry
+lemma relint_submodule (S : Submodule R M) : relint (S : PointedCone R M) = S := sorry
 
 -- theorem relint_def_sInf (C : PointedCone R M) :
 --     C.relint = sInf {s | dual p.flip (dual p s) = C} := sorry
@@ -83,6 +83,7 @@ lemma IsFaceOf.self_of_le_linSpan (hF : F.IsFaceOf C) (h : C.linSpan ≤ F.linSp
 -- TODO: generalize to cones with `FinSalRank`
 /-- The relative interior is non-empty. -/
 lemma relint_nonempty (C : PointedCone R M) (hC : C.FinRank) : Nonempty C.relint := by
+  haveI : Module.Finite R C.linSpan := sorry -- from FinRank
   obtain ⟨f, hf, hfC, hind⟩ := exists_fun_fin_finrank_span_eq R (C : Set M)
   use ∑ i, f i
   constructor

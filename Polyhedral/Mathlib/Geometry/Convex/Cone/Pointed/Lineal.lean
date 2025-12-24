@@ -18,13 +18,16 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 --   elements of a ring. However, the current definition makes it very easy to see that it
 --   is a submodule. The better definition is given as `lineal'` below.
 
-/-- The lineality space of a cone. -/
+/-- The lineality space of a cone. This is the set of all elements of the cone whose negative
+  is also in the cone. The lineality space is a submodule. -/
 def lineal (C : PointedCone R M) : Submodule R M := sSup {S : Submodule R M | S ≤ C }
 
 def lineal_def (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C } := by rfl
 
+/-- The lineality space is contained in the cone. -/
 @[simp] lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp [lineal]
 
+/-- Every submodule contain int he cone is also contained in the lineality space. -/
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := le_sSup hS
 
@@ -40,6 +43,85 @@ end Semiring
 
 section Ring
 
+-----------------------
+-- Better definition of lineal
+
+variable {R : Type*} [Semiring R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+
+-- Q: Is this the better definition of `lineal`?
+/-- The lineality space of a cone. -/
+def lineal'' (C : PointedCone R M) : Submodule R M where
+  carrier := {x ∈ C | ∃ y ∈ C, x + y = 0}
+  add_mem' hx hy := by
+    constructor
+    · exact C.add_mem hx.1 hy.1
+    obtain ⟨x', hx', hxx'⟩ := hx.2
+    obtain ⟨y', hy', hyy'⟩ := hy.2
+    use x' + y'
+    constructor
+    · exact C.add_mem hx' hy'
+    nth_rw 2 [add_comm]
+    rw [add_assoc]
+    nth_rw 2 [← add_assoc]
+    nth_rw 2 [add_comm]
+    rw [← add_assoc]
+    simp [hxx', hyy']
+  zero_mem' := by simp
+  smul_mem' r x hx := by
+    simp at *
+    obtain ⟨x', hx', hxx'⟩ := hx.2
+    by_cases hr : 0 ≤ r
+    · constructor
+      · exact C.smul_mem hr hx.1
+      use r • x'
+      constructor
+      · exact C.smul_mem hr hx'
+      simp [← smul_add, hxx']
+    -- have H : r • x + r • x' = 0 := by sorry
+    have H : ∃ r' ≥ 0, r + r' = 0 := sorry
+    obtain ⟨r', hr', hrr'⟩ := H
+    have H : r • x = r' • x' := sorry
+    constructor
+    · rw [H]
+      exact C.smul_mem  hr' hx'
+    have H' : r • x' = r' • x := sorry
+    use r • x'
+    constructor
+    · simpa [H'] using C.smul_mem  hr' hx.1
+    · simp [← smul_add, hxx']
+
+variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+-- Q: Is this the better definition of `lineal`?
+/-- The lineality space of a cone. -/
+def lineal' (C : PointedCone R M) : Submodule R M where
+  carrier := C ∩ -C
+  add_mem' hx hy := by simpa using ⟨C.add_mem hx.1 hy.1, C.add_mem hy.2 hx.2⟩
+  zero_mem' := by simp
+  smul_mem' r _ hx := by
+    by_cases hr : 0 ≤ r
+    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
+    · have hr := le_of_lt <| neg_pos_of_neg <| lt_of_not_ge hr
+      simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
+
+@[simp] lemma lineal_eq_inter_neg' (C : PointedCone R M) : C.lineal' = C ⊓ -C := by rfl
+
+lemma mem_lineal' {C : PointedCone R M} {x : M} : x ∈ C.lineal' ↔ x ∈ C ∧ -x ∈ C := by rfl
+
+lemma lineal_le' (C : PointedCone R M) : C.lineal' ≤ C := by simp
+
+lemma lineal_eq_sSup' (C : PointedCone R M) : C.lineal' = sSup {S : Submodule R M | S ≤ C } := by
+  rw [le_antisymm_iff]
+  constructor
+  · exact le_sSup (lineal_le' C)
+  intro x hx
+  have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
+  exact mem_lineal'.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
+
+--------------------
+
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
@@ -50,21 +132,6 @@ lemma neg_mem_of_mem_lineal {C : PointedCone R M} {x : M} (hx : x ∈ C.lineal) 
 lemma mem_of_neg_mem_lineal {C : PointedCone R M} {x : M} (hx : -x ∈ C.lineal) : x ∈ C := by
   rw [Submodule.neg_mem_iff] at hx
   exact lineal_le C hx
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
--- Q: Is this the better definition of `lineal`?
-/-- The lineality space of a cone. -/
-def lineal' (C : PointedCone R M) : Submodule R M where
-  carrier := {x : M | x ∈ C ∧ (-x) ∈ C}
-  add_mem' hx hy := by simpa [neg_add_rev] using ⟨C.add_mem hx.1 hy.1, C.add_mem hy.2 hx.2⟩
-  zero_mem' := by simp
-  smul_mem' r _ hx := by
-    by_cases hr : 0 ≤ r
-    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
-    · have hr := le_of_lt <| neg_pos_of_neg <| lt_of_not_ge hr
-      simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
 -- @[simp] -- no simp because right side has twice as many `x`?
 lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
@@ -81,7 +148,8 @@ lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ 
         exact h'; exact h
       have hx := Submodule.span_mono (R := {c : R // 0 ≤ c}) hx
       simp at hx
-      simpa only [S, ← span_pm_pair_eq_submodule_span R] using hx
+      sorry
+      -- simpa only [S, ← span_pm_pair_eq_submodule_span R] using hx
     have hSC := le_lineal hSC
     have hxS : x ∈ S := Submodule.mem_span_of_mem (by simp)
     exact hSC hxS -- maybe we could use the lemma that s ∪ -s spans a linear space (see above)

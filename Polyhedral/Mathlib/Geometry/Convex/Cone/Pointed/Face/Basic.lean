@@ -48,6 +48,7 @@ variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R 
 @[refl, simp]
 theorem refl (C : PointedCone R M) : C.IsFaceOf C := ⟨fun _ a => a, fun hx _ _ _ => hx⟩
 
+-- M: naming inconsisent or statement unnecessary?
 lemma iff_mem_of_smul_add_mem : F.IsFaceOf C ↔
     F ≤ C ∧ ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F := by
   · constructor
@@ -98,16 +99,20 @@ theorem inf_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂) : F.IsFaceOf
 
 section Nontrivial
 
-variable [NeZero (1 : R)]
-
 lemma mem_of_add_mem (hF : F.IsFaceOf C) {x y : M}
-    (hx : x ∈ C) (hy : y ∈ C) (hxy : x + y ∈ F) : x ∈ F := by
-  simpa [hxy] using hF.mem_of_smul_add_mem hx hy zero_lt_one
+    (hx : x ∈ C) (hy : y ∈ C) (hxy : x + y ∈ F) : x ∈ F := by sorry
 
 lemma mem_of_sum_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
     (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, f i ∈ F) (i : ι) : f i ∈ F := by
   refine hF.mem_of_add_mem (hsC i) (sum_mem (fun j (_ : j ∈ Finset.univ.erase i) => hsC j)) ?_
   simp [hs]
+
+variable [NeZero (1 : R)]
+
+-- TODO delete
+lemma mem_of_add_mem' (hF : F.IsFaceOf C) {x y : M}
+    (hx : x ∈ C) (hy : y ∈ C) (hxy : x + y ∈ F) : x ∈ F := by
+  simpa [hxy] using hF.mem_of_smul_add_mem hx hy zero_lt_one
 
 end Nontrivial
 
@@ -160,7 +165,7 @@ theorem map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
       rwa [hf hx'f] at hx'
 
 lemma map {f : M →ₗ[R] N} (hf : Function.Injective f) (hF : F.IsFaceOf C) :
-(map f F).IsFaceOf (map f C) := (map_iff hf).mp hF
+    (map f F).IsFaceOf (map f C) := (map_iff hf).mp hF
 
 lemma map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
     (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
@@ -169,6 +174,8 @@ theorem comap {f : N →ₗ[R] M} (hF : F.IsFaceOf C) :
     (F.comap f).IsFaceOf (C.comap f) := by
   simp only [iff_mem_of_add_mem, mem_comap, map_add]
   exact ⟨Submodule.comap_mono hF.1, hF.mem_of_add_mem⟩
+
+-- M: comap_iff ?
 
 theorem of_comap {f : N →ₗ[R] M} (hf : Function.Surjective f)
     (hc : (F.comap f).IsFaceOf (C.comap f)) : F.IsFaceOf C := by
