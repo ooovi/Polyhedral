@@ -124,7 +124,7 @@ instance : SemilatticeSup (Face C) where
 
 /-- `sSup S` of a set `S` of faces of `C` is the smallest face of `C` that has all members of `S` as
 faces. -/
-instance : SupSet (Face C) := ⟨fun (S : Set (Face C)) => sInf { F : Face C | ∀ F' ∈ S, F' ≤ F}⟩
+instance : SupSet (Face C) where sSup S := sInf { F : Face C | ∀ F' ∈ S, F' ≤ F }
 
 instance : CompleteSemilatticeSup (Face C) where
   __ := instSemilatticeSup

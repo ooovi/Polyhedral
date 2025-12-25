@@ -83,7 +83,7 @@ variable {C F : PointedCone R M}
 /-- The lineality space of a cone is a face. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   apply iff_mem_of_add_mem.mpr
-  simp only [PointedCone.lineal_le, Submodule.restrictScalars_mem, true_and]
+  simp only [PointedCone.lineal_le, true_and, mem_ofSubmodule]
   intro _ _ xc yc xyf
   simp only [mem_lineal, neg_add_rev, xc, true_and] at xyf ⊢
   simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
