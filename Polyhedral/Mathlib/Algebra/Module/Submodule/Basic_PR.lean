@@ -1,7 +1,7 @@
 
 import Mathlib.Algebra.Module.Submodule.LinearMap
 import Mathlib.Algebra.Module.Submodule.RestrictScalars
-import Mathlib.LinearAlgebra.Span.Defs
+import Mathlib.LinearAlgebra.Span.Basic
 import Mathlib.Order.OmegaCompletePartialOrder
 
 namespace Submodule
@@ -44,9 +44,9 @@ variable {R : Type*} [Ring R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 variable (R) in
-@[simp] lemma submodule_span_pm_pair (x : M) :
-    Submodule.span R {-x, x} = Submodule.span R {x} := by
-  rw [← Set.union_singleton, Submodule.span_union]; simp
+@[simp] lemma span_neg_pos (x : M) :
+    span R {-x, x} = span R {x} := by
+  simp [← Set.union_singleton, span_union, ← Set.neg_singleton, span_neg]
 
 end Ring
 
