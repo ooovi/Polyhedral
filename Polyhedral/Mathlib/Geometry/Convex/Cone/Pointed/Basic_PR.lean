@@ -6,10 +6,15 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic_PR
 
 namespace PointedCone
 
+variable {R M : Type*}
+
 section Semiring
 
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommMonoid M] [Module R M]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+
+section AddCommMonoid
+
+variable [AddCommMonoid M] [Module R M]
 variable {s : Set M}
 
 -- Useful fopr pretty printing
@@ -63,15 +68,13 @@ lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
 lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : PointedCone R M) := by
   rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
 
-end Semiring
+end AddCommMonoid
 
-
-section Semiring
+section AddCommGroup
 
 -- ### NEG
 
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [AddCommGroup M] [Module R M]
 
 instance : InvolutiveNeg (PointedCone R M) := Submodule.involutivePointwiseNeg
 
@@ -117,6 +120,8 @@ lemma comap_neg_apply (C : PointedCone R M) (f : N →ₗ[R] M) : -comap f C = c
   ext x; simp
 
 end Map
+
+end AddCommGroup
 
 end Semiring
 
