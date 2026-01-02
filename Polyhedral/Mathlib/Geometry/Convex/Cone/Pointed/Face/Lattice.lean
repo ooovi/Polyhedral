@@ -16,7 +16,7 @@ them.
 
 * `Face C`: a bundled structure for a face of the pointed cone `C`.
 * `inf` and `sup`: infimum and supremum operations on `Face C`
-* `Lattice` instance: the face lattice of a pointed cone using `inf` and `sup`.
+* `CompleteLattice` instance: the face lattice of a pointed cone using `inf` and `sup`.
 * `prod`: the product of two faces of pointed cones, together with projections `prod_left` and
   `prod_right`.
 * `prod_orderIso`: the order isomorphism defined by `prod`.
@@ -142,28 +142,6 @@ instance : Inhabited (Face C) := ⟨⊤⟩
 
 instance : Nonempty (Face C) := ⟨⊤⟩
 
-section Field
-
-variable [Field R] [LinearOrder R] [IsOrderedRing R]
-variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N] {C F : PointedCone R M}
-
-/-- The face of a pointed cone `C` that is its lineal space. It is contained in all faces of `C`. -/
-def lineal {C : PointedCone R M} : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
-
-lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := F.isFaceOf.lineal_le
-
-/-- The bottom element of the partial order on faces of `C` is `C.lineal`. -/
-instance : OrderBot (Face C) where
-  bot := lineal
-  bot_le F := F.lineal_le
-
-instance : BoundedOrder (Face C) where
-
-instance : CompleteLattice (Face C) where
-
-
-end Field
-
 /-!
 ### `OrderHom` for some operations
 -/
@@ -195,7 +173,21 @@ end Semiring
 section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
+  [AddCommGroup N] [Module R N] {C C₁ : PointedCone R M} {C₂ : PointedCone R N}
+
+/-- The face of a pointed cone `C` that is its lineal space. It is contained in all faces of `C`. -/
+def lineal : Face C := ⟨_, IsFaceOf.lineal C⟩
+
+lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := F.isFaceOf.lineal_le
+
+/-- The bottom element of the partial order on faces of `C` is `C.lineal`. -/
+instance : OrderBot (Face C) where
+  bot := lineal
+  bot_le F := F.lineal_le
+
+instance : BoundedOrder (Face C) where
+
+instance : CompleteLattice (Face C) where
 
 /-!
 ### Product

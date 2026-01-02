@@ -157,20 +157,22 @@ theorem map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
      F.IsFaceOf C ↔ (F.map f).IsFaceOf (C.map f) := by
   --simp only [iff_mem_of_smul_add_smul_mem, mem_map, forall_exists_index, and_imp]
   constructor <;> intro ⟨sub, hF⟩
-  · constructor
-    · exact Submodule.map_mono sub
-    intro x y a hx hy ha h
-    rw [mem_map] at *
-    obtain ⟨x', hxF', hx'⟩ := h
-    sorry
-  · refine ⟨fun x xf => ?_, fun hx hy hxy => ?_⟩
+  · refine ⟨Submodule.map_mono sub, ?_⟩
+    simp only [mem_map, forall_exists_index, and_imp]
+    intro _ _ a b bC fbx _ cC fcy ha _ x'F h
+    refine ⟨b, ⟨?_, fbx⟩⟩
+    apply hF bC cC ha
+    convert x'F
+    apply hf
+    simp [h, fbx, fcy]
+  · refine ⟨fun x xf => ?_, fun hx hy ha h => ?_⟩
     · obtain ⟨y, yC, hy⟩ := Submodule.mem_map.mp <| sub (Submodule.mem_map_of_mem xf)
       rw [hf hy] at yC
       assumption
-    · sorry
-      -- obtain ⟨x', hx', hx'f⟩ :=
-      --   hF _ hx (Eq.refl _) _ hy (Eq.refl _) _ hxy (f.map_add _ _)
-      -- rwa [hf hx'f] at hx'
+    · simp only [mem_map, forall_exists_index, and_imp] at hF
+      obtain ⟨_, ⟨hx', hhx'⟩⟩ := hF _ hx rfl _ hy rfl ha _ h (by simp)
+      convert hx'
+      exact hf hhx'.symm
 
 /-- The image of a face of a cone under an injective linear map is a face of the
   image of the cone. -/
@@ -189,18 +191,16 @@ theorem comap {f : N →ₗ[R] M} (hF : F.IsFaceOf C) :
   simp only [mem_comap, map_add, map_smul]
   exact hF.mem_of_smul_add_mem
 
-theorem of_comap {f : N →ₗ[R] M} (hf : Function.Surjective f)
+theorem of_comap_surjective {f : N →ₗ[R] M} (hf : Function.Surjective f)
     (hc : (F.comap f).IsFaceOf (C.comap f)) : F.IsFaceOf C := by
   constructor
-  · sorry
-  sorry
-  -- simp only [mem_comap, map_add] at hc ⊢
-  -- have ec := fun x => Function.invFun_eq (hf x)
-  -- constructor
-  -- · intro x xF; rw [← ec x] at xF ⊢; exact hc.1 xF
-  -- · intro x y xC yC hab
-  --   rw [← ec x] at xC hab ⊢; rw [← ec y] at yC hab
-  --   exact hc.2 xC yC hab
+  · intro x xF
+    rw [← (hf x).choose_spec] at xF ⊢
+    exact mem_comap.mp (hc.1 xF)
+  · intro x y a xC yC a0 h
+    rw [← (hf x).choose_spec] at h ⊢ xC
+    rw [← (hf y).choose_spec] at h yC
+    exact hc.2 xC yC a0 (by simpa)
 
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
@@ -279,12 +279,9 @@ lemma fst {C₁ : PointedCone R M} {C₂ : PointedCone R N}
   · simp only [mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right, exists_eq_right,
       forall_exists_index]
     intro x y a hx hy ha z h
-    use 0
-    refine hF.mem_of_smul_add_mem (x := (x, 0)) (y := (y, a⁻¹ • z)) ?_ ?_ ha ?_
+    refine ⟨0, hF.mem_of_smul_add_mem (x := (x, 0)) (y := (y, z)) ?_ ?_ ha (by simpa)⟩
     · exact Submodule.mem_prod.mp ⟨hx, zero_mem C₂⟩
-    · exact Submodule.mem_prod.mp ⟨hy, smul_mem C₂ (le_of_lt (inv_pos_of_pos ha)) (hF.le h).2⟩
-    · simp [← smul_assoc, mul_inv_cancel₀ (ne_of_lt ha).symm]
-      sorry
+    · exact Submodule.mem_prod.mp ⟨hy, (hF.le h).2⟩
 
 -- This should be easy given fst!! But it is not. Why??
 lemma snd {C₁ : PointedCone R M} {C₂ : PointedCone R N} {F : PointedCone R (M × N)}
