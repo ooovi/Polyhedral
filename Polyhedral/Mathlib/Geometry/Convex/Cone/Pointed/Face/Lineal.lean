@@ -5,22 +5,20 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
---import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic_PR
+-- import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic_PR
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
 variable {R M N : Type*}
 
 namespace PointedCone
 
-open Module
+open Module Pointwise
 
 section Ring
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
-/-- The lineality space of a cone. -/
+/-- The lineality space of a cone `C`, namely the submodule with carrier `C ⊓ -C`. -/
 def lineal (C : PointedCone R M) : Submodule R M where
   carrier := C ⊓ -C
   add_mem' hx hy := by simpa using ⟨C.add_mem hx.1 hy.1, C.add_mem hy.2 hx.2⟩
@@ -31,13 +29,24 @@ def lineal (C : PointedCone R M) : Submodule R M where
     · have hr := le_of_lt <| neg_pos_of_neg <| lt_of_not_ge hr
       simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
-@[simp] lemma lineal_eq_inter_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by rfl
+@[simp]
+lemma lineal_eq_inter_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by rfl
 
 lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by rfl
 
-@[simp] lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
+@[simp]
+lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
 
-lemma lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
+-- this should go to submodule.
+variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M]
+in
+@[simp]
+lemma restrictScalars_sSup {s : Set (Submodule R M)} :
+    (sSup s).restrictScalars S = sSup (Submodule.restrictScalars S '' s) :=
+  (Submodule.restrictScalarsLatticeHom S R M).map_sSup' s
+
+/- The lineality space of a cone is the subpremum of its submodules. -/
+theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
   rw [le_antisymm_iff]
   constructor
   · exact le_sSup (lineal_le C)
@@ -45,20 +54,13 @@ lemma lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M 
   have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
   exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
 
-
 end Ring
-
-
-
-
-
 
 namespace IsFaceOf
 
 section Ring
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C F : PointedCone R M}
 
 lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F :=
@@ -76,16 +78,15 @@ end Ring
 
 section Field
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C F : PointedCone R M}
 
 /-- The lineality space of a cone is a face. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   rw [iff_mem_of_add_mem]
-  simp only [PointedCone.lineal_le, true_and, mem_ofSubmodule]
+  simp only [PointedCone.lineal_le, true_and]
   intro _ _ xc yc xyf
-  simp only [mem_lineal, neg_add_rev, xc, true_and] at xyf ⊢
+  simp [neg_add_rev, xc, true_and] at xyf ⊢
   simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
 
 end Field

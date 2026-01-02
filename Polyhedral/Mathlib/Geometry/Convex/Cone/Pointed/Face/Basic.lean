@@ -271,16 +271,11 @@ theorem fst {C₁ : PointedCone R M} {C₂ : PointedCone R N}
     · exact mem_prod.mp ⟨hx, zero_mem C₂⟩
     · exact mem_prod.mp ⟨hy, (hF.le h).2⟩
 
--- This should be easy given fst!! But it is not. Why??
 theorem snd {C₁ : PointedCone R M} {C₂ : PointedCone R N} {F : PointedCone R (M × N)}
     (hF : F.IsFaceOf (C₁.prod C₂)) : (F.map (.snd R M N)).IsFaceOf C₂ := by
-  -- let e := LinearEquiv.prodComm R M N
-  -- have hF' := hF.map_equiv e
-  -- unfold map at hF'
-  -- -- simp at hF'
-  -- rw [map_prodComm_prod] at hF'
-  -- have h := hF'.fst
-  sorry
+  have := map (LinearEquiv.prodComm R M N).injective hF
+  convert fst (by simpa [PointedCone.map, Submodule.map])
+  ext; simp
 
 end Prod
 
