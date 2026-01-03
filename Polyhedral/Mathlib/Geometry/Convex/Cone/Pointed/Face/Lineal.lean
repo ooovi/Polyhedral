@@ -30,21 +30,14 @@
 -- @[simp]
 -- lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
 
--- -- -- this should go to submodule.
--- -- variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M]
--- -- in
--- -- @[simp]
--- -- lemma restrictScalars_sSup {s : Set (Submodule R M)} :
--- --     (sSup s).restrictScalars S = sSup (Submodule.restrictScalars S '' s) :=
--- --   (Submodule.restrictScalarsLatticeHom S R M).map_sSup' s
-
--- /- The lineality space of a cone is the supremum of its submodules. -/
--- theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
---   rw [le_antisymm_iff]
---   refine ⟨le_sSup (lineal_le C), ?_⟩
---   intro x hx
---   have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
---   exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
+/- The lineality space of a cone is the subpremum of its submodules. -/
+theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
+  rw [le_antisymm_iff]
+  constructor
+  · exact le_sSup (lineal_le C)
+  intro x hx
+  have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
+  exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
 
 -- end Ring
 

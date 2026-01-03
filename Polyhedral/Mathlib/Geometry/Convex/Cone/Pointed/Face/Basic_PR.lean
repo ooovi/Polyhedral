@@ -5,7 +5,10 @@ Authors: Olivia Röhrig
 -/
 
 import Mathlib.Analysis.Convex.Extreme
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic_PR
+
+open Submodule
 
 /-!
 # Faces of pointed cones
@@ -291,13 +294,8 @@ end PointedCone
 -- variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
 --   [Module R M] {S : Set M}
 
--- -- @[coe]
--- -- private abbrev ofSubmodule (S : Submodule R M) : PointedCone R M := S.restrictScalars _
-
--- private instance : Coe (Submodule R M) (PointedCone R M) := ⟨restrictScalars _⟩
-
--- /-- The linear span of the cone. -/
--- private abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
+/-- The linear span of the cone. -/
+private abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
 -- end Semiring
 
