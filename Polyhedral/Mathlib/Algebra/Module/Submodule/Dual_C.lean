@@ -39,7 +39,9 @@ assert_not_exists TopologicalSpace Real Cardinal
 
 open Function LinearMap Pointwise Set OrderDual
 
-namespace Submodule.Dual
+namespace Submodule
+
+namespace Dual
 
 variable {S R M N : Type*}
   [CommSemiring S]
@@ -145,4 +147,6 @@ end OrderedRing
 
 def IsDualClosed (T : Submodule S M) := dual C p.flip (dual C p T) = T
 
-end Submodule.Dual
+end Dual
+
+end Submodule

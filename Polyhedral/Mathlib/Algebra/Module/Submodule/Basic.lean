@@ -69,9 +69,6 @@ variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M
 
 open Function
 
-lemma subtype_restrictScalars (p : Submodule R M) :
-    p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
-
 variable (S)
 
 lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
@@ -98,6 +95,8 @@ def restrictScalars_CompleteLatticeHom : CompleteLatticeHom (Submodule R M) (Sub
   toFun := restrictScalars S
   map_sInf' _ := restrictScalars_sInf S
   map_sSup' _ := restrictScalars_sSup S
+
+-- instance {p : Submodule R M} : CoeDep (Submodule R M) p (Submodule S M) := ⟨restrictScalars S p⟩
 
 
 -- ## QUOTIENT

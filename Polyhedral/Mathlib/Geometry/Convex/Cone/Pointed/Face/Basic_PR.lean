@@ -10,10 +10,9 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic_PR
 /-!
 # Faces of pointed cones
 
-This file defines what it means for a pointed cone to be a face of another pointed cone and
-establishes basic properties of this relation.
-A subcone `F` of a cone `C` is a face if any two points in `C` that have a positive combination
-in `F` are also in `F`.
+This file defines the faces of a pointed cone and establishes some basic properties. A pointed cone
+`F` is said to be a face of a pointed cone `C` if `F` is a subset of `C` and for every two
+points in `C` a positive combination of whose is in `F`, the points are also in `F`.
 
 ## Main declarations
 
