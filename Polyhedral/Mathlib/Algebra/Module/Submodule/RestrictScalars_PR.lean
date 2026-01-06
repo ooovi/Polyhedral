@@ -12,13 +12,15 @@ variable {R : Type*} [Semiring R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {S : Type*} [Semiring S] [Module S R] [Module S M] [IsScalarTower S R M]
 
-lemma subtype_restrictScalars (p : Submodule R M) :
-    p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
+-- lemma subtype_restrictScalars (p : Submodule R M) :
+--     p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
 
 variable (S)
 
-lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
-    s.restrictScalars S ≤ t.restrictScalars S := (restrictScalarsEmbedding S R M).monotone hST
+-- TODO all to mathlib
+
+-- lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
+--     s.restrictScalars S ≤ t.restrictScalars S := (restrictScalarsEmbedding S R M).monotone hST
 
 @[simp] lemma restrictScalars_inf {s t : Submodule R M} :
     (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
@@ -38,16 +40,16 @@ lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
 
 end Semiring
 
-section Ring
+-- section Ring
 
-variable {R : Type*} [Ring R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+-- variable {R : Type*} [Ring R]
+-- variable {M : Type*} [AddCommGroup M] [Module R M]
 
-variable (R) in
-@[simp] lemma span_neg_pos (x : M) :
-    span R {-x, x} = span R {x} := by
-  simp [← Set.union_singleton, span_union, ← Set.neg_singleton, span_neg]
+-- variable (R) in
+-- @[simp] lemma span_neg_pos (x : M) :
+--     span R {-x, x} = span R {x} := by
+--   simp [← Set.union_singleton, span_union, ← Set.neg_singleton, span_neg]
 
-end Ring
+-- end Ring
 
 end Submodule
