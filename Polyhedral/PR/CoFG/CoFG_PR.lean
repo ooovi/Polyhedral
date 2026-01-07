@@ -5,8 +5,8 @@ Authors: Martin Winter
 -/
 import Mathlib.RingTheory.PrincipalIdealDomain
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic_PR
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG_PR
+import Polyhedral.PR.CoFG.Basic_PR
+import Polyhedral.PR.CoFG.FG_PR
 
 open Module Function LinearMap
 
