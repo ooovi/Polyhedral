@@ -10,7 +10,7 @@ import Mathlib.LinearAlgebra.Span.Defs
 import Mathlib.Order.OmegaCompletePartialOrder
 
 -- only needed temporarily
-import Mathlib.Geometry.Convex.Cone.Pointed
+-- import Mathlib.Geometry.Convex.Cone.Pointed
 
 /-!
 # The algebraic dual of a cone
@@ -68,6 +68,8 @@ variable {s t : Set M} {y : N}
 
 @[simp] lemma dual_empty : dual C p ∅ = ⊤ := by ext; simp
 @[simp] lemma dual_zero : dual C p 0 = ⊤ := by ext; simp
+@[simp] lemma dual_bot : dual C p {0} = ⊤ := dual_zero
+@[simp] lemma dual_ker : dual C p (ker p) = ⊤ := by ext; simp +contextual
 
 -- TODO: only true conditionally (e.g. not true for C = ⊤)
 -- @[simp] lemma dual_univ' (hp : Injective p.flip) (hC : C.salient) : dual C p univ = ⊥ := by
@@ -112,7 +114,7 @@ variable (s) in
     dual C p.flip (dual C p (dual C p.flip s)) = dual C p.flip s := dual_dual_flip_dual _
 
 @[simp]
-lemma dual_span (s : Set M) : dual C p (Submodule.span S s) = dual C p s := by
+lemma dual_span (s : Set M) : dual C p (span S s) = dual C p s := by
   refine le_antisymm (dual_le_dual Submodule.subset_span) (fun x hx y hy => ?_)
   induction hy using Submodule.span_induction with
   | mem _y h => exact hx h
@@ -122,30 +124,30 @@ lemma dual_span (s : Set M) : dual C p (Submodule.span S s) = dual C p s := by
       rw [← algebraMap_smul R, map_smul, algebraMap_smul, smul_apply]
       exact C.smul_mem t hy
 
-variable (p) in
-/-- Duality of submodules. -/
-abbrev dual' := dual (⊥ : Submodule R R) p
+-- variable (p) in
+-- /-- Duality of submodules. -/
+-- abbrev dual' := dual (⊥ : Submodule R R) p
 
-example (s : Set M) : s ≤ dual' p.flip (dual' p s) := subset_dual_dual
+-- example (s : Set M) : s ≤ dual' p.flip (dual' p s) := subset_dual_dual
 
-section OrderedRing
+-- section OrderedRing
 
-variable [PartialOrder R] [IsOrderedRing R]
+-- variable [PartialOrder R] [IsOrderedRing R]
 
-instance : Algebra {c : R // 0 ≤ c} R where
-  algebraMap := Nonneg.coeRingHom
-  commutes' r x := mul_comm ..
-  smul_def' r x := by aesop
+-- instance : Algebra {c : R // 0 ≤ c} R where
+--   algebraMap := Nonneg.coeRingHom
+--   commutes' r x := mul_comm ..
+--   smul_def' r x := by aesop
 
-variable (p) in
-/-- Duality of pointed cones. -/
-abbrev dual'' := dual (PointedCone.positive R R) p
+-- variable (p) in
+-- /-- Duality of pointed cones. -/
+-- abbrev dual'' := dual (PointedCone.positive R R) p
 
-example (s : Set M) : s ≤ dual'' p.flip (dual'' p s) := subset_dual_dual
+-- example (s : Set M) : s ≤ dual'' p.flip (dual'' p s) := subset_dual_dual
 
-end OrderedRing
+-- end OrderedRing
 
-def IsDualClosed (T : Submodule S M) := dual C p.flip (dual C p T) = T
+-- def IsDualClosed (T : Submodule S M) := dual C p.flip (dual C p T) = T
 
 end Dual
 

@@ -71,9 +71,8 @@ lemma dual_univ_ker : dual p univ = ker p.flip := by
 lemma dual_flip_univ_ker : dual p.flip univ = ker p := by
   nth_rw 2 [← flip_flip p]; exact dual_univ_ker
 
-variable [inst : Fact p.SeparatingRight] in
-@[simp] lemma dual_univ : dual p univ = ⊥ := by
-  simpa [dual_univ_ker, separatingRight_iff_flip_ker_eq_bot] using inst.elim
+variable [Fact p.SeparatingRight] in
+@[simp] lemma dual_univ : dual p univ = ⊥ := by simp [dual_univ_ker]
 
 -- variable (p) [Fact p.IsFaithfulPair] in
 -- @[simp] lemma dual_univ' : dual p univ = ⊥ := by
@@ -178,7 +177,7 @@ variable (s) in
     dual p.flip (dual p (dual p.flip s)) = dual p.flip s := dual_dual_flip_dual _
 
 @[simp]
-lemma dual_span (s : Set M) : dual p (Submodule.span R s) = dual p s := by
+lemma dual_span (s : Set M) : dual p (span R s) = dual p s := by
   refine le_antisymm (dual_le_dual Submodule.subset_span) (fun x hx y hy => ?_)
   induction hy using Submodule.span_induction with
   | mem _y h => exact hx h
