@@ -68,7 +68,7 @@ lemma range_fg_iff_ker_cofg {f : M →ₗ[R] N} : (range f).FG ↔ (ker f).CoFG 
   rw [← Finite.iff_fg]
   exact Module.Finite.equiv_iff <| f.quotKerEquivRange.symm
 
-/-- The kernel of a linear map into a noetherian module is CoFG. -/
+/-- The kernel of a linear map into a Noetherian module is CoFG. -/
 lemma ker_cofg [IsNoetherian R N] (f : M →ₗ[R] N) : (ker f).CoFG
     := range_fg_iff_ker_cofg.mp <| IsNoetherian.noetherian _
 

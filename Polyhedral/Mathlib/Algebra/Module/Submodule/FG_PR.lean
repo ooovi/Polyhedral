@@ -66,6 +66,7 @@ lemma inf_fg_right (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (S ⊓ 
 lemma inf_fg_left {S : Submodule R M} (hS : S.FG) (T : Submodule R M) : (S ⊓ T).FG := by
   rw [inf_comm]; exact inf_fg_right T hS
 
+/-- A submodule contained in an FG submodule is FG. -/
 lemma fg_of_le_fg {S T : Submodule R M} (hT : T.FG) (hST : S ≤ T) : S.FG := by
   rw [← inf_eq_left.mpr hST]; exact S.inf_fg_right hT
 
