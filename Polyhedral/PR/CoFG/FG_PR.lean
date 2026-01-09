@@ -20,7 +20,7 @@ variable [AddCommMonoid M] [Module R M] [Module S M] [IsScalarTower S R M]
 variable (S) in
 /-- If a ring `R` is finite over a subring `S` then restricting the scalars of an FG `R`-submodule
   to `S` preserves FG. -/
-lemma restrictedScalars_fg_of_fg [Module.Finite S R] {s : Submodule R M} (hs : s.FG) :
+lemma restrictedScalars_fg [Module.Finite S R] {s : Submodule R M} (hs : s.FG) :
     (s.restrictScalars S).FG := by
   rw [← Module.Finite.iff_fg] at *
   exact Module.Finite.trans R s
@@ -39,8 +39,8 @@ lemma fg_of_restrictedScalars_fg [Module.Finite S R] {s : Submodule R M}
 
 /-- If a ring `R` is finite over a subring `S` then an `R`-submodule is FG if and only if it is
   FG after restricting the scalars to `S`. -/
-lemma restrictedScalars_fg_iff_fg [Module.Finite S R] {s : Submodule R M} :
-    (s.restrictScalars S).FG ↔ s.FG := ⟨fg_of_restrictedScalars_fg, restrictedScalars_fg_of_fg S⟩
+lemma restrictedScalars_fg_iff [Module.Finite S R] {s : Submodule R M} :
+    (s.restrictScalars S).FG ↔ s.FG := ⟨fg_of_restrictedScalars_fg, restrictedScalars_fg S⟩
 
 variable (R) in
 /-- If a ring `R` is finite over a subring `S` then the `R`-span of an FG `S`-submodule is FG. -/
@@ -67,7 +67,7 @@ lemma inf_fg_left {S : Submodule R M} (hS : S.FG) (T : Submodule R M) : (S ⊓ T
   rw [inf_comm]; exact inf_fg_right T hS
 
 /-- A submodule contained in an FG submodule is FG. -/
-lemma fg_of_le_fg {S T : Submodule R M} (hT : T.FG) (hST : S ≤ T) : S.FG := by
+lemma fg_le {S T : Submodule R M} (hT : T.FG) (hST : S ≤ T) : S.FG := by
   rw [← inf_eq_left.mpr hST]; exact S.inf_fg_right hT
 
 end IsNoetherianRing
