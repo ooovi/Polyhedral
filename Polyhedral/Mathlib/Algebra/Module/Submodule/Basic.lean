@@ -71,6 +71,9 @@ open Function
 
 variable (S)
 
+lemma subtype_restrictScalars (p : Submodule R M) :
+    p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
+
 lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
     s.restrictScalars S ≤ t.restrictScalars S := (restrictScalarsEmbedding S R M).monotone hST
 

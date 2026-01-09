@@ -3,12 +3,9 @@ Copyright (c) 2025 Martin Winter, Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Yaël Dillies
 -/
-import Mathlib.Algebra.Module.Submodule.Pointwise
-import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.Projection
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.PR.Dual.Basic_PR
 import Polyhedral.PR.CoFG.CoFG_PR
 
 /-!
@@ -47,8 +44,8 @@ variable {R M N : Type*}
   {p : M →ₗ[R] N →ₗ[R] R} {s t : Set M} {y : N}
 
 variable (p s) in
-/-- The dual cone of a set `s` with respect to a bilinear pairing `p` is the cone consisting of all
-points `y` such that for all points `x ∈ s` we have `0 ≤ p x y`. -/
+/-- The dual span of a set `s` with respect to a bilinear pairing `p` is the submodule
+  consisting of the points `y` such that for all points `x ∈ s` we have `0 = p x y`. -/
 def dual : Submodule R N where
   carrier := {y | ∀ ⦃x⦄, x ∈ s → 0 = p x y}
   zero_mem' := by simp
@@ -70,13 +67,15 @@ lemma dual_flip_univ_ker : dual p.flip univ = ker p := by
 
 @[gcongr] lemma dual_le_dual (h : t ⊆ s) : dual p s ≤ dual p t := fun _y hy _x hx ↦ hy (h hx)
 
-alias dual_antitone := dual_le_dual
+alias dual_anti := dual_le_dual
+
+lemma dual_antitone : Antitone (dual p) := fun _ _ h => dual_le_dual h
 
 lemma ker_le_dual (s : Set M) : ker p.flip ≤ dual p s := by
-  simp [← dual_flip_univ_ker, dual_antitone]
+  simp [← dual_flip_univ_ker, dual_anti]
 
 lemma ker_le_dual_flip (s : Set N) : ker p ≤ dual p.flip s := by
-  simp [← dual_flip_univ_ker, dual_antitone]
+  simp [← dual_flip_univ_ker, dual_anti]
 
 /-- The inner dual cone of a singleton is given by the preimage of the positive cone under the
 linear map `p x`. -/
@@ -141,14 +140,18 @@ lemma le_dual_of_le_dual {S : Submodule R M} {T : Submodule R N}
     (hST : T ≤ dual p S) : S ≤ dual p.flip T :=
   le_trans subset_dual_dual (dual_antitone hST)
 
-lemma dual_le_iff_dual_le {S : Submodule R M} {T : Submodule R N} :
+lemma le_dual_iff_le_dual {S : Submodule R M} {T : Submodule R N} :
     S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
 
 variable (p) in
-/-- Any cone is a subcone of its double dual cone. -/
+/-- Double duality is monotone. -/
 lemma dual_dual_mono {s t : Set M} (hST : s ⊆ t) :
-    dual p.flip (dual p s) ≤ dual p.flip (dual p t) := by
-  exact dual_antitone <| dual_antitone hST
+    dual p.flip (dual p s) ≤ dual p.flip (dual p t) := dual_antitone <| dual_antitone hST
+
+variable (p) in
+/-- Double duality is monotone. -/
+lemma dual_dual_monotone : Monotone (dual p.flip ∘ SetLike.coe ∘ dual p) :=
+  fun _ _ h => dual_antitone <| dual_antitone h
 
 variable (s) in
 @[simp] lemma dual_dual_flip_dual : dual p (dual p.flip (dual p s)) = dual p s :=
@@ -170,16 +173,8 @@ lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp
 
 lemma dual_id_map (S : Submodule R M) : dual p S = dual .id (map p S) := by ext; simp
 
-lemma dual_id_surj (s : Set (Dual R N)) (h : Surjective p) :
-    dual p (surjInv h '' s) = dual .id s := by simp [dual_id, image_image,surjInv_eq]
-
 lemma dual_eval (s : Set M) :
     dual p s = comap p.flip (dual (Dual.eval R M) s) := by ext; simp
-
-variable [h : Fact (Surjective p)] in
-lemma dual_exists_set_id (s : Set (Dual R N)) : ∃ t : Set M, dual p t = dual .id s := by
-  use surjInv h.out '' s
-  ext x; simp [surjInv_eq]
 
 lemma dual_sup (S T : Submodule R M) : dual p (S ⊔ T : Submodule R M) = dual p (S ∪ T)
     := by nth_rw 2 [← dual_span]; simp
@@ -195,7 +190,7 @@ variable (p) in
 lemma dual_comap_dualAnnihilator (S : Submodule R M) :
     dual p S = comap p.flip S.dualAnnihilator := by rw [← dual_dualAnnihilator, dual_eval]
 
-/-- The dual submodule w.r.t. the standard dual map is the dual annihilator. -/
+/-- The dual submodule w.r.t. the identity map is the dual coannihilator. -/
 lemma dual_dualCoannihilator (S : Submodule R (Dual R M)) : dual .id S = S.dualCoannihilator := by
   ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
@@ -213,7 +208,7 @@ lemma subset_ker_of_mem_dual {s : Set M} {φ : Dual R M} (hφ : φ ∈ dual (Dua
     s ⊆ ker φ := by
   intro x hxS
   rw [← dual_span, dual_dualAnnihilator, mem_dualAnnihilator] at hφ
-  exact hφ x (le_span hxS)
+  exact hφ x (subset_span hxS)
 
 lemma le_ker_of_mem_dual {S : Submodule R M} {φ : Dual R M} (hφ : φ ∈ dual (Dual.eval R M) S) :
     S ≤ ker φ := by
