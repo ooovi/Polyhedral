@@ -161,7 +161,7 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
     Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
   rw [← span_submodule_span]
-  congr; simp only [Submodule.span_union']
+  simp [Submodule.span_union]
 
 lemma span_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : span R s ≤ Submodule.span R t
   := le_trans (Submodule.span_le_restrictScalars _ R s) (Submodule.span_mono hst)

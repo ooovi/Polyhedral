@@ -21,6 +21,8 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
   finitely generated (`Module.Finite`). -/
 abbrev CoFG (S : Submodule R M) : Prop := Module.Finite R (M ⧸ S)
 
+#find_home CoFG
+
 /-- In a finite module every submodule is CoFG. -/
 lemma Finite.cofg [Module.Finite R M] {S : Submodule R M} : S.CoFG := Module.Finite.quotient R S
 

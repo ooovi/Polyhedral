@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Yaël Dillies
 -/
 import Mathlib.LinearAlgebra.Dual.Defs
+import Mathlib.LinearAlgebra.Pi
 
 import Polyhedral.PR.Dual.Basic_PR
 import Polyhedral.PR.CoFG.CoFG_PR
@@ -51,6 +52,8 @@ def dual : Submodule R N where
   zero_mem' := by simp
   add_mem' {u v} hu hv x hx := by rw [map_add, ← hu hx, ← hv hx, add_zero]
   smul_mem' c y hy x hx := by rw [map_smul, ← hy hx, smul_eq_mul, mul_zero]
+
+#find_home! dual
 
 @[simp] lemma mem_dual : y ∈ dual p s ↔ ∀ ⦃x⦄, x ∈ s → 0 = p x y := .rfl
 

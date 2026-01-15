@@ -33,7 +33,7 @@ example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
   := Submodule.span_union S S'
 
 @[simp] lemma span_union' (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
-  := (Submodule.gi R M).l_sup_u S S'
+  := by simp [span_union] -- (Submodule.gi R M).l_sup_u S S'
 
 -- span_sup'
 example (S S' : Submodule R M) : span R (S ⊔ S' : Submodule R M) = S ⊔ S' := span_eq _

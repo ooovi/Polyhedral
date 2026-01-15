@@ -45,7 +45,7 @@ lemma restrictedScalars_fg_iff [Module.Finite S R] {s : Submodule R M} :
 variable (R) in
 /-- If a ring `R` is finite over a subring `S` then the `R`-span of an FG `S`-submodule is FG. -/
 lemma span_scalars_fg [Module.Finite S R] {s : Submodule S M} (hfg : s.FG) :
-    (span R (M := M) s).FG := by
+    (span R s : Submodule R M).FG := by
   obtain ⟨t, ht⟩ := hfg
   use t; rw [← ht, Submodule.span_span_of_tower]
 
