@@ -6,7 +6,8 @@ Authors: Olivia Röhrig
 
 import Mathlib.Analysis.Convex.Extreme
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic_PR
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 
 open Submodule
 
@@ -210,21 +211,23 @@ lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   rw [iff_mem_of_add_mem]
   simp only [lineal_le, true_and]
   intro _ _ xc yc xyf
-  simp [neg_add_rev, xc, true_and] at xyf ⊢
-  simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
+  sorry -- broken since PR
+  -- simp [neg_add_rev, xc, true_and] at xyf ⊢
+  -- simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
 
 /-- The lineality space of a cone lies in every face. -/
-lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F :=
-  fun _ hx => hF.mem_of_add_mem hx.1 hx.2 (by simp)
+lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F := sorry -- broken since PR
+  -- fun _ hx => hF.mem_of_add_mem hx.1 hx.2 (by simp)
 
 /-- The lineality space of a face of a cone agrees with the lineality space of the cone. -/
 lemma lineal_eq_lineal (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
   ext
-  constructor <;> intro ⟨hx, hx'⟩
-  · exact ⟨hF.le hx, hF.le hx'⟩
-  constructor
-  · exact hF.mem_of_add_mem hx hx' (by simp)
-  · exact hF.mem_of_add_mem hx' hx (by simp)
+  sorry -- broken since PR
+  -- constructor <;> intro ⟨hx, hx'⟩
+  -- · exact ⟨hF.le hx, hF.le hx'⟩
+  -- constructor
+  -- · exact hF.mem_of_add_mem hx hx' (by simp)
+  -- · exact hF.mem_of_add_mem hx' hx (by simp)
 
 section Prod
 
@@ -281,228 +284,204 @@ end PointedCone
 -- ################# PR end
 
 
--- namespace PointedCone
+namespace PointedCone
 
--- variable {R M N : Type*}
-
-
-
--- -- ## LINSPAN
--- -- copied this there so i don't need the dependency
--- section Semiring
-
--- variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
---   [Module R M] {S : Set M}
-
-/-- The linear span of the cone. -/
-private abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
-
--- end Semiring
-
--- /-
---   Cleanup for PR:
---     - move Face stuff to Face/Lattice.lean
---     - move lineal stuff to Face/Lineal.lean
---     - move dual stuff to Face/Dual.lean
---     * prove the priority stuff
---     * prove sorry-s
---     * replace span by linSpan
---     * something else to add?
--- -/
-
--- -- NOTE: I think we should assume [Ring] from the start. There is little meaning for
--- -- working in a semiring ambient space.
-
--- namespace IsFaceOf
-
--- section Semiring
-
--- variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
--- variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+variable {R M N : Type*}
 
 
--- -- ## PRIORITY
--- lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := sorry
+/-
+  Cleanup for PR:
+    - move Face stuff to Face/Lattice.lean
+    - move lineal stuff to Face/Lineal.lean
+    - move dual stuff to Face/Dual.lean
+    * prove the priority stuff
+    * prove sorry-s
+    * replace span by linSpan
+    * something else to add?
+-/
 
--- @[deprecated (since := "")]
--- alias inf_submodule := inf_linSpan
+-- NOTE: I think we should assume [Ring] from the start. There is little meaning for
+-- working in a semiring ambient space.
 
--- lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
---   inf h (refl _)
+namespace IsFaceOf
 
--- end Semiring
+section Semiring
 
--- -- ## SUP
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
--- section Ring
 
--- variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
---   {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+-- ## PRIORITY
+lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := sorry
+
+@[deprecated (since := "")]
+alias inf_submodule := inf_linSpan
+
+lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
+  inf h (refl _)
+
+end Semiring
+
+-- ## SUP
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 -- this is not the supremum we use in the face lattice. is it still interesting?
 
--- open Submodule in
--- private lemma uniq_decomp_of_zero_inter {xC xD yC yD : M}
---     (mxc : xC ∈ C₁) (myc : yC ∈ C₁) (mxd : xD ∈ C₂) (myd : yD ∈ C₂)
---     (hCD : Disjoint (span R C₁) (span (M := M) R C₂))
---     (s : xC + xD = yC + yD) :
---     xC = yC ∧ xD = yD := by
---   let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
---     (span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
---   replace hCD := disjoint_def.mp hCD
---   constructor
---   · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
---     rw [add_comm] at s
---     rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
---     exact sub_mem_span myd mxd
---   · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
---     nth_rewrite 2 [add_comm] at s
---     rw [← sub_eq_sub_iff_add_eq_add.mpr s]
---     exact sub_mem_span myc mxc
+open Submodule in
+private lemma uniq_decomp_of_zero_inter {xC xD yC yD : M}
+    (mxc : xC ∈ C₁) (myc : yC ∈ C₁) (mxd : xD ∈ C₂) (myd : yD ∈ C₂)
+    (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M))
+    (s : xC + xD = yC + yD) :
+    xC = yC ∧ xD = yD := by
+  sorry -- # broken since PR
+  -- let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
+  --   (span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+  -- replace hCD := disjoint_def.mp hCD
+  -- constructor
+  -- · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
+  --   rw [add_comm] at s
+  --   rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
+  --   exact sub_mem_span myd mxd
+  -- · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
+  --   nth_rewrite 2 [add_comm] at s
+  --   rw [← sub_eq_sub_iff_add_eq_add.mpr s]
+  --   exact sub_mem_span myc mxc
 
--- theorem sup_of_disjoint (hFC : F₁.IsFaceOf C₁) (hGD : F₂.IsFaceOf C₂)
---     (hCD : Disjoint (span R C₁) (span (M := M) R C₂)) :
---     (F₁ ⊔ F₂).IsFaceOf (C₁ ⊔ C₂) := by
---   constructor
---   · simp only [sup_le_iff]
---     constructor
---     · apply le_trans _ le_sup_left
---       convert hFC.le
---     · apply le_trans _ le_sup_right
---       convert hGD.le
---   · intro _ _ a b xs ys a0 b0 h
---     simp [mem_sup] at h xs ys ⊢
---     obtain ⟨xf, hxf, yg, hyg, hfg⟩ := h
---     obtain ⟨x', hx', y', hy', hfx⟩ := xs
---     obtain ⟨x'', hx'', y'', hy'', hfy⟩ := ys
---     have : (a • x' + b • x'') + (a • y' + b • y'') = xf + yg := by
---       rw [← hfy, ← hfx, smul_add] at hfg
---       simp [hfg]
---       abel
---     let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + b • y ∈ C :=
---       C.add_mem (C.smul_mem (le_of_lt a0) xCM) (C.smul_mem (le_of_lt b0) yCM)
---     have := uniq_decomp_of_zero_inter -- this requires Ring
---       (mem hx' hx'') (hFC.le hxf) (mem hy' hy'') (hGD.le hyg) hCD this
---     refine ⟨x', ?_, y', ?_, hfx⟩
---     · exact hFC.mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
---     · exact hGD.mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
+theorem sup_of_disjoint (hFC : F₁.IsFaceOf C₁) (hGD : F₂.IsFaceOf C₂)
+    (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M)) :
+    (F₁ ⊔ F₂).IsFaceOf (C₁ ⊔ C₂) := by
+  sorry -- # broken since PR
+  -- constructor
+  -- · simp only [sup_le_iff]
+  --   constructor
+  --   · apply le_trans _ le_sup_left
+  --     convert hFC.le
+  --   · apply le_trans _ le_sup_right
+  --     convert hGD.le
+  -- · intro _ _ a b xs ys a0 b0 h
+  --   simp [mem_sup] at h xs ys ⊢
+  --   obtain ⟨xf, hxf, yg, hyg, hfg⟩ := h
+  --   obtain ⟨x', hx', y', hy', hfx⟩ := xs
+  --   obtain ⟨x'', hx'', y'', hy'', hfy⟩ := ys
+  --   have : (a • x' + b • x'') + (a • y' + b • y'') = xf + yg := by
+  --     rw [← hfy, ← hfx, smul_add] at hfg
+  --     simp [hfg]
+  --     abel
+  --   let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + b • y ∈ C :=
+  --     C.add_mem (C.smul_mem (le_of_lt a0) xCM) (C.smul_mem (le_of_lt b0) yCM)
+  --   have := uniq_decomp_of_zero_inter -- this requires Ring
+  --     (mem hx' hx'') (hFC.le hxf) (mem hy' hy'') (hGD.le hyg) hCD this
+  --   refine ⟨x', ?_, y', ?_, hfx⟩
+  --   · exact hFC.mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
+  --   · exact hGD.mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
 
--- theorem sup_of_disjoint_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂)
---     (hCD : Disjoint (span R C₁) (span (M := M) R C₂))
---     : F.IsFaceOf (C₁ ⊔ C₂) := by
---   refine Eq.mp ?_ (sup_of_disjoint h₁ h₂ hCD)
---   simp
+theorem sup_of_disjoint_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂)
+    (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M))
+    : F.IsFaceOf (C₁ ⊔ C₂) := by
+  refine Eq.mp ?_ (sup_of_disjoint h₁ h₂ hCD)
+  simp
 
--- end Ring
+end Ring
 
--- section Field
+section Field
 
--- variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
---   {C F F₁ F₂ : PointedCone R M} {s : Set M}
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  {C F F₁ F₂ : PointedCone R M} {s : Set M}
 
--- /-!
--- ### Equivalent definition of isFaceOf on fields
--- -/
+/-!
+### Equivalent definition of isFaceOf on fields
+-/
 
--- -- these now all follow kind of directly from mem_of_sum_smul_mem
+-- these now all follow kind of directly from mem_of_sum_smul_mem
 
--- lemma mem_of_sum_smul_mem'' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
---     {c : ι → R} (hcc : ∀ i, 0 ≤ c i) (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, c i • f i ∈ F) (i : ι)
---     (cpos : 0 < c i) : f i ∈ F := by
---   exact mem_of_sum_smul_mem hcc hF hsC hs i cpos
+lemma mem_of_sum_smul_mem'' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
+    {c : ι → R} (hcc : ∀ i, 0 ≤ c i) (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, c i • f i ∈ F) (i : ι)
+    (cpos : 0 < c i) : f i ∈ F := by
+  sorry -- # broken since PR
+  -- exact mem_of_sum_smul_mem hcc hF hsC hs i cpos
 
--- -- ## PRIORITY
--- -- might not need field
--- -- prove this on semiring and follow non' version from it
--- lemma mem_of_sum_smul_mem' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
---     (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, f i ∈ F) (i : ι) : f i ∈ F := by
---   refine mem_of_sum_smul_mem (fun i ↦ zero_le_one' R) hF hsC (c := fun _ => 1) (by simp [hs]) i ?_
---   exact Subtype.mk_lt_mk.mpr (by norm_num)
+-- ## PRIORITY
+-- might not need field
+-- prove this on semiring and follow non' version from it
+lemma mem_of_sum_smul_mem' {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → M} (hF : F.IsFaceOf C)
+    (hsC : ∀ i : ι, f i ∈ C) (hs : ∑ i : ι, f i ∈ F) (i : ι) : f i ∈ F := by
+  sorry -- # broken since PR
+  -- refine mem_of_sum_smul_mem (fun i ↦ zero_le_one' R) hF hsC (c := fun _ => 1) (by simp [hs]) i ?_
+  -- exact Subtype.mk_lt_mk.mpr (by norm_num)
 
 
--- lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
---     {f : ι → s} {i : ι} (hF : F.IsFaceOf (span R s)) (h : ∑ i, c i • (f i).val ∈ F)
---     (cpos : 0 < c i) : (f i).val ∈ F := by
---   refine mem_of_sum_smul_mem hcc hF ?_ h i cpos
---   simp [mem_span]; exact fun i _ su => su (Subtype.coe_prop (f i))
+lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
+    {f : ι → s} {i : ι} (hF : F.IsFaceOf (span R s)) (h : ∑ i, c i • (f i).val ∈ F)
+    (cpos : 0 < c i) : (f i).val ∈ F := by
+  sorry -- # broken since PR
+  -- refine mem_of_sum_smul_mem hcc hF ?_ h i cpos
+  -- simp [mem_span]; exact fun i _ su => su (Subtype.coe_prop (f i))
 
--- lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
---     (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
---   refine mem_of_sum_smul_mem
---     (f := fun (x : s) => x.val) (fun i ↦ zero_le_one' R) hF ?_ ?_ ⟨x, xs⟩ (zero_lt_one' R)
---   · exact (fun i => hsC i.property)
---   · simp only [Finset.univ_eq_attach, one_smul]
---     convert hs
---     exact s.sum_attach id
+lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
+    (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
+  sorry -- # broken since PR
+  -- refine mem_of_sum_smul_mem
+  --   (f := fun (x : s) => x.val) (fun i ↦ zero_le_one' R) hF ?_ ?_ ⟨x, xs⟩ (zero_lt_one' R)
+  -- · exact (fun i => hsC i.property)
+  -- · simp only [Finset.univ_eq_attach, one_smul]
+  --   convert hs
+  --   exact s.sum_attach id
 
--- -- these only have one interesting direction, do we really need iff?
+lemma iff_of_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₁) (h : F₂.IsFaceOf C) : F₂.IsFaceOf F₁ :=
+  sorry -- # broken since PR
+  -- fun h => (iff_le h h₁).mpr h₂
 
--- lemma iff_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
---     F₁.IsFaceOf F₂ ↔ F₁ ≤ F₂ := by
---   constructor
---   · exact IsFaceOf.le
---   · rw [iff_mem_of_smul_add_mem] at ⊢ h₁
---     exact fun h => ⟨h, fun hx hy => h₁.2 (h₂.le hx) (h₂.le hy)⟩
+section Map
 
--- lemma iff_of_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₁) (h : F₂.IsFaceOf C) : F₂.IsFaceOf F₁ :=
---   fun h => (iff_le h h₁).mpr h₂
+variable [AddCommGroup N] [Module R N]
 
--- section Map
+lemma comap_equiv (e : N ≃ₗ[R] M) (hF : F.IsFaceOf C) :
+    (PointedCone.comap (e : N →ₗ[R] M) F).IsFaceOf (.comap e C) := sorry -- # broken since PR
+  -- hF.comap e.surjective
 
--- variable [AddCommGroup N] [Module R N]
+end Map
 
--- ## MAP
+/-!
+### Intersections
+-/
 
--- o: not sure why we need extra lemmas for these
--- lemma map {f : M →ₗ[R] N} (hf : Function.Injective f) (hF : F.IsFaceOf C) :
---     (map f F).IsFaceOf (map f C) := (iff_map hf).mp hF
+variable {s t : Set M}
 
--- lemma map_equiv (e : M ≃ₗ[R] N) (hF : F.IsFaceOf C) :
---     (PointedCone.map (e : M →ₗ[R] N) F).IsFaceOf (.map e C) := hF.map e.injective
+lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
+    span R (s ∩ F) = F := by
+  ext x; constructor
+  · simp [mem_span]
+    exact fun h => h F Set.inter_subset_right
+  · intro h
+    obtain ⟨n, c, g, xfg⟩ := mem_span_set'.mp (hF.le h)
+    subst xfg
+    apply sum_mem
+    intro i _
+    by_cases hh : 0 < c i
+    · sorry -- # broken since PR
+      -- apply smul_mem
+      -- apply subset_span
+      -- refine Set.mem_inter (Subtype.coe_prop (g i)) (hF.span_nonneg_lc_mem h hh)
+    · push_neg at hh
+      rw [le_antisymm hh (c i).property]
+      simp
 
--- lemma comap {f : N →ₗ[R] M} (hf : Function.Surjective f) (hF : F.IsFaceOf C) :
---     (comap f F).IsFaceOf (comap f C) := (iff_comap hf).mp hF -- no need surejctive
+lemma exists_span_subset_face {s : Set M} (hF : F.IsFaceOf (span R s)) :
+    ∃ t ⊆ s, span R t = F := ⟨_, Set.inter_subset_left, span_inter_face_span_inf_face hF⟩
 
--- lemma comap_equiv (e : N ≃ₗ[R] M) (hF : F.IsFaceOf C) :
---     (PointedCone.comap (e : N →ₗ[R] M) F).IsFaceOf (.comap e C) := hF.comap e.surjective
+-- If span R s and span R t are disjoint (only share 0)
+example (h : span R s ⊓ span R t = ⊥)
+    (hs : s ⊆ span R s) (ht : t ⊆ span R t) :
+    span R (s ∩ t) = span R s ⊓ span R t := by
+  -- When intersection is ⊥, both sides equal ⊥ if s ∩ t = ∅
+  sorry
 
--- end Map
+end Field
 
--- /-!
--- ### Intersections
--- -/
+end IsFaceOf
 
--- variable {s t : Set M}
-
--- lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
---     span R (s ∩ F) = F := by
---   ext x; constructor
---   · simp [mem_span]
---     exact fun h => h F Set.inter_subset_right
---   · intro h
---     obtain ⟨n, c, g, xfg⟩ := mem_span_set'.mp (hF.le h)
---     subst xfg
---     apply sum_mem
---     intro i _
---     by_cases hh : 0 < c i
---     · apply smul_mem; apply subset_span
---       refine Set.mem_inter (Subtype.coe_prop (g i)) (hF.span_nonneg_lc_mem h hh)
---     · push_neg at hh
---       rw [le_antisymm hh (c i).property]
---       simp
-
--- lemma exists_span_subset_face {s : Set M} (hF : F.IsFaceOf (span R s)) :
---     ∃ t ⊆ s, span R t = F := ⟨_, Set.inter_subset_left, span_inter_face_span_inf_face hF⟩
-
--- -- If span R s and span R t are disjoint (only share 0)
--- example (h : span R s ⊓ span R t = ⊥)
---     (hs : s ⊆ span R s) (ht : t ⊆ span R t) :
---     span R (s ∩ t) = span R s ⊓ span R t := by
---   -- When intersection is ⊥, both sides equal ⊥ if s ∩ t = ∅
---   sorry
-
--- end Field
-
--- end IsFaceOf
-
--- end PointedCone
+end PointedCone

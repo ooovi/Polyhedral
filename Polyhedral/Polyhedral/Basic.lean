@@ -5,7 +5,7 @@ Authors: Martin Winter
 -/
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
+--import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap

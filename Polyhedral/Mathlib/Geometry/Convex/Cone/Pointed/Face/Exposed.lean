@@ -11,6 +11,7 @@ import Mathlib.Order.Partition.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+-- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Hyperplane
 import Polyhedral.Halfspace
@@ -78,7 +79,7 @@ lemma IsExposedFaceOf.subdual_dual (hF : F.IsFaceOf C) :
   obtain ⟨φ, hφ⟩ := F.relint_nonempty sorry -- currently requires FinRank (or FinSalRank later)
   use p φ
   constructor <;> intro x hx
-  · exact hx <| hF.subset (F.relint_le hφ)
+  · exact hx <| hF.le (F.relint_le hφ)
   constructor <;> intro h
   · rw [mem_subdual]
     constructor
@@ -103,17 +104,14 @@ lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
-  rw [IsFaceOf.iff_mem_of_smul_add_mem] -- this is probably the wrong lemma to use here!
-  constructor
-  · exact hF.le
-  intro _ _ _ hx hy hc hcxy
+  rw [IsFaceOf.iff_mem_of_add_mem]
+  refine ⟨hF.le, ?_⟩
+  intro _ _ hx hy hcxy
   let ⟨φ, hφ, H⟩ := hF
   rw [← H _ hx]
   have h := (H _ <| hF.le hcxy).mpr hcxy
-  rw [map_add, map_smul, smul_eq_mul] at h
-  have H := mul_nonneg (le_of_lt hc) (hφ _ hx)
-  rw [← mul_eq_zero_iff_left (ne_of_lt hc).symm]
-  exact zero_left_of_le_add_zero H (hφ _ hy) h
+  rw [map_add] at h
+  exact zero_left_of_le_add_zero (hφ _ hx) (hφ _ hy) h
 
 lemma IsExposedFaceOf.quot_iff (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C) (hF : F₂ ≤ F₁) :
     F₁.IsExposedFaceOf C ↔ (F₁.quot F₂.linSpan).IsExposedFaceOf (C.quot F₂.linSpan) := sorry

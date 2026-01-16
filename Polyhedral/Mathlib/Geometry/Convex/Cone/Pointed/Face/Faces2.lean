@@ -167,14 +167,6 @@ alias IsFaceOf.embed' := IsFaceOf.trans
 --   rw [← restrict_embed F₂, embed_restrict]
 --   simp only [inf_le_left]
 
-/-- The isomorphism between a face's face lattice and the interval in the cone's face
- lattice below the face. -/
-def Face.orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
-  toFun G := ⟨G, bot_le, Face.embed_le G⟩
-  invFun G := F.restrict' G
-  left_inv := restrict_embed
-  right_inv G := by simp only [embed_restrict_of_le G.2.2]
-  map_rel_iff' := @fun _ _ => by simp [embed']
 
 -- can we get this for free from `Face.orderIso`?
 def Face.orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C := sorry
@@ -235,24 +227,6 @@ lemma Face.lineal_eq (F : Face C) : PointedCone.lineal F = C.lineal := sorry
 lemma isFaceOf_map_iff_of_injOn {f : M →ₗ[R] N} (hf : ker f ⊓ (Submodule.span R C) = ⊥) :
     (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
   sorry
-
-lemma isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Injective f) :
-    (PointedCone.map f F).IsFaceOf (.map f C) ↔ F.IsFaceOf C := by
-  simp only [IsFaceOf.iff_mem_of_smul_add_mem, mem_map, forall_exists_index, and_imp,
-    forall_apply_eq_imp_iff₂] at *
-  sorry
-  -- simp only [← map_add, ← map_smul, hf.eq_iff, exists_eq_right]
-  -- constructor
-  -- · intro ⟨sub, hF⟩
-  --   refine ⟨?_,  fun x hx y hy c hc hxy => hF x hx y hy c hc _ hxy rfl⟩
-  --   · intro x xf
-  --     obtain ⟨y, yC, hy⟩ := Submodule.mem_map.mp <| sub (Submodule.mem_map_of_mem xf)
-  --     rw [hf hy] at yC
-  --     exact yC
-  -- · intro ⟨sub, hF⟩
-  --   refine ⟨Submodule.map_mono sub, fun x hx y hy c hc z hz h => ?_⟩
-  --   subst h
-  --   exact hF x hx y hy c hc hz
 
 -- lemma IsFaceOf.map {f : M →ₗ[R] N} (hf : Injective f) (hF : F.IsFaceOf C) :
 --     (map f F).IsFaceOf (map f C) := (isFaceOf_map_iff hf).mpr hF
@@ -353,7 +327,7 @@ lemma IsFaceOf.def' : F.IsFaceOf C ↔
   · exact H.1
   · sorry
   · exact H.1
-  · intro x y c d hx hy hc hd h
+  · intro x y c hx hy hc h
     have H' := H.2 (span R {x}) (by simp [hx]) (span R {y}) (by simp [hy])
     -- have : span R {x} ⊔ span R {y} ≤ F := by
     --   intro z hz
@@ -364,12 +338,12 @@ lemma IsFaceOf.def' : F.IsFaceOf C ↔
     --   obtain ⟨d', hd'⟩ := hy'
     --   -- have H := H.2 (span R {x}) (by simp [hx]) (span R {y}) (by simp [hy])
     --   sorry
-    have : c • x + d • y ∈ span R {x} ⊔ span R {y} := by
+    have : c • x + y ∈ span R {x} ⊔ span R {y} := by
       simp [mem_sup]
       use c • x
       constructor
       · sorry
-      use d • y
+      use y
       constructor
       · sorry
       rfl
@@ -381,25 +355,25 @@ lemma IsFaceOf.def' : F.IsFaceOf C ↔
 
 def Face.sup_orderIso_quot (S : Submodule R M) : Face (C ⊔ S) ≃o Face (C.quot S) where
   toFun F := ⟨PointedCone.map S.mkQ F.1, by
-    rw [IsFaceOf.def]
+    --rw [IsFaceOf.def]
     constructor
     · simp [F.isFaceOf.le]
-    · intro x y c d hx hy hc hd H
+    · intro x y c hx hy hc H
       -- let f := surjInv S.mkQ_surjective
       -- let x' := f x
       -- let y' := f y
-      simp only [mem_map, -mkQ_apply] at hx hy
+      simp only [mem_map] at hx hy
       obtain ⟨x', hx, rfl⟩ := hx
       obtain ⟨y', hy, rfl⟩ := hy
       have h : C ≤ C ⊔ S := le_sup_left
       have hx : x' ∈ C ⊔ S := h hx
       have hy : y' ∈ C ⊔ S := h hy
-      have hF := F.isFaceOf.left_mem_of_smul_add_mem hx hy hc hd
+      have hF := F.isFaceOf.mem_of_smul_add_mem hx hy hc
       repeat rw [← map_smul] at H
       rw [← map_add] at H
       rw [mem_map] at H
       obtain ⟨z, hzF, hz⟩ := H
-      simp only [-mkQ_apply, mem_map]
+      simp only [mem_map]
       sorry ⟩
   invFun F := ⟨PointedCone.comap S.mkQ F.1, by
     sorry⟩
@@ -413,13 +387,15 @@ def Face.sup_orderIso_quot (S : Submodule R M) : Face (C ⊔ S) ≃o Face (C.quo
     sorry
   map_rel_iff' := by
     intro F G
-    simp only [Equiv.coe_fn_mk, toPointedCone_le_iff, toPointedCone, map_mkQ_le_iff_sup_le]
+    simp only [Equiv.coe_fn_mk, toPointedCone, map_mkQ_le_iff_sup_le]
     constructor <;> intro h
     · simp only [sup_le_iff, le_sup_right, and_true] at h
       have : G.1 ⊔ S ≤ G.1 := by
         sorry
-      exact le_trans h this
-    · exact sup_le_sup_right h S
+      sorry -- # broken by PR
+      --exact le_trans h this
+    · sorry -- # broken by PR
+      -- exact sup_le_sup_right h S
 
 def Face.sup_orderIso (F : Face C) : Face (C ⊔ linSpan F.1) ≃o Set.Icc F ⊤ where
   toFun G := ⟨⟨G ⊓ C, sorry⟩, sorry⟩
@@ -518,7 +494,8 @@ def Face.inf_face_orderHom2 : Face C₁ × Face C₂ →o Face (C₁ ⊓ C₂) w
 def Face.restrict (S : Submodule R M) (F : Face C) : Face (C.restrict S) :=
   ⟨_, F.isFaceOf.restrict S⟩
 
-@[simp] lemma Face.restrict_def (S : Submodule R M) (F : Face C) :
+-- @[simp]
+lemma Face.restrict_def (S : Submodule R M) (F : Face C) :
     F.restrict S = PointedCone.restrict S F := rfl
 
 @[coe] def Face.embed {S : Submodule R M} {C : PointedCone R S} (F : Face C) : Face (C.embed) :=
@@ -608,15 +585,17 @@ def inf_combEquiv_of_codisjoint_lineal' (hSC : Codisjoint S C.lineal) :
 def inf_combEquiv_of_isCompl_lineal (hS : IsCompl S C.lineal) :
     Face (C ⊓ S) ≃o Face C where
   toFun F := ⟨F ⊔ C.lineal, by -- TODO: this construction should exist on the level of `Face`.
-    have h := F.isFaceOf.sup (.refl C.lineal) ?_
-    · rw [← inf_sup_assoc_of_submodule_le] at h
-      · simpa [← coe_sup, hS.codisjoint.eq_top] using h
-      · exact lineal_le C
-    · rw [submodule_linSpan]
-      refine Disjoint.mono_left ?_ hS.disjoint
-      nth_rw 2 [← span_eq S]
-      exact span_monotone (by simp) ⟩
-  invFun F := ⟨F ⊓ S, F.isFaceOf.inf .rfl⟩
+    sorry -- # broken since PR
+    -- have h := F.isFaceOf.sup (.refl C.lineal) ?_
+    -- · rw [← inf_sup_assoc_of_submodule_le] at h
+    --   · simpa [← coe_sup, hS.codisjoint.eq_top] using h
+    --   · exact lineal_le C
+    -- · rw [submodule_linSpan]
+    --   refine Disjoint.mono_left ?_ hS.disjoint
+    --   nth_rw 2 [← span_eq S]
+    --   exact span_monotone (by simp)
+    ⟩
+  invFun F := ⟨F ⊓ S, F.isFaceOf.inf sorry⟩ -- # broken since PR
     -- TODO: this construction should already exist on the level of `Face`.
   left_inv F := by
     simp only [Face.toPointedCone]; congr
@@ -629,16 +608,17 @@ def inf_combEquiv_of_isCompl_lineal (hS : IsCompl S C.lineal) :
     · simp [← coe_sup, hS.codisjoint.eq_top]
     · exact F.isFaceOf.lineal_le
   map_rel_iff' := by
-    intro F G
-    simp only [Face.toPointedCone, Equiv.coe_fn_mk, Face.toPointedCone_le_iff, sup_le_iff,
-      le_sup_right, and_true]
-    constructor <;> intro h
-    · have h := inf_le_inf_right (S : PointedCone R M) h
-      rw [← sup_inf_assoc_of_le_submodule] at h
-      · have h' := le_trans F.isFaceOf.le inf_le_right
-        simpa [h', ← coe_inf, inf_comm, hS.disjoint.eq_bot] using h
-      · exact le_trans G.isFaceOf.le inf_le_right
-    · exact le_trans h le_sup_left
+    sorry -- # broken since PR
+    -- intro F G
+    -- simp only [Face.toPointedCone, Equiv.coe_fn_mk, Face.toPointedCone_le_iff, sup_le_iff,
+    --   le_sup_right, and_true]
+    -- constructor <;> intro h
+    -- · have h := inf_le_inf_right (S : PointedCone R M) h
+    --   rw [← sup_inf_assoc_of_le_submodule] at h
+    --   · have h' := le_trans F.isFaceOf.le inf_le_right
+    --     simpa [h', ← coe_inf, inf_comm, hS.disjoint.eq_bot] using h
+    --   · exact le_trans G.isFaceOf.le inf_le_right
+    -- · exact le_trans h le_sup_left
 
 lemma exists_salient_combEquiv (C : PointedCone R M) :
     ∃ D : PointedCone R M, D.Salient ∧ D ≃c C := by
@@ -690,7 +670,7 @@ lemma IsFaceOf.Submodule.eq_self {F : PointedCone R M} (hF : F.IsFaceOf S) :
     F = S := by
   rw [le_antisymm_iff]
   constructor
-  · exact hF.subset
+  · exact hF.le
   intro x hx
   have hy : -x ∈ S := by simpa using hx
   exact hF.mem_of_add_mem hx hy (by simp)

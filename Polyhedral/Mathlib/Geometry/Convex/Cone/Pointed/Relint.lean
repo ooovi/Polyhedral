@@ -11,6 +11,7 @@ import Mathlib.Order.Partition.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
 import Polyhedral.Halfspace
 
 open Function Module OrderDual LinearMap
@@ -89,7 +90,7 @@ lemma relint_nonempty (C : PointedCone R M) (hC : C.FinRank) : Nonempty C.relint
   constructor
   · exact sum_mem (fun c _ => hf c)
   intro ⟨F, hF'⟩ hF
-  replace hF := hF'.mem_of_sum_mem' hf hF
+  replace hF := hF'.mem_of_sum_mem hf hF
   refine hF'.self_of_le_linSpan ?_
   simp only [← hfC]
   intro x h

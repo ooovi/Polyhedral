@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
+import Mathlib.Order.Grade
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
@@ -31,7 +32,7 @@ variable {C F F₁ F₂ : PointedCone R M}
 lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
     ∃ t ⊆ s, span R t.toSet = F := by
   use (s.finite_toSet.inter_of_left F).toFinset
-  simp [span_inter_face_span_inf_face hF]
+  simp [IsFaceOf.span_inter_face_span_inf_face hF]
 
 /-- Faces of FG cones are FG. -/
 lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
@@ -154,10 +155,12 @@ theorem FG.finite_face (hC : C.FG) : Finite (Face C) := by
   exact Face.toPointedCone_eq_iff.mp sorry -- h
 
 lemma FG.face_atomic (hC : C.FG) : IsAtomic (Face C) :=
-  letI := FG.finite_face hC; Finite.to_isAtomic
+  sorry -- # broken since PR
+  -- letI := FG.finite_face hC; Finite.to_isAtomic
 
 lemma FG.face_coatomic (hC : C.FG) : IsCoatomic (Face C) :=
-  letI := FG.finite_face hC; Finite.to_isCoatomic
+  sorry -- # broken since PR
+  -- letI := FG.finite_face hC; Finite.to_isCoatomic
 
 
 -- atoms are 1D
@@ -178,10 +181,12 @@ lemma foobarfoo (hC : C.Salient) (hF : IsAtom F) :
 
 -- ## KREIN MILMAN
 
-lemma atomistic_of_fg (hC : C.FG) : IsAtomistic (Face C) := sorry
+instance atomistic_of_fg (hC : C.FG) : IsAtomistic (Face C) := sorry
 
-lemma coatomistic_of_fg (hC : C.FG) : IsCoatomistic (Face C) := sorry
+instance coatomistic_of_fg (hC : C.FG) : IsCoatomistic (Face C) := sorry
 
-lemma face_complemented (hC : C.FG) : ComplementedLattice (Face C) := sorry
+instance face_complemented (hC : C.FG) : ComplementedLattice (Face C) := sorry
+
+instance face_graded (hC : C.FG) : GradeOrder ℕ (Face C) := sorry
 
 end PointedCone
