@@ -22,7 +22,7 @@ variable (p) in
 /-- The operation that maps a cone to its double dual. -/
 def dualClosure : ClosureOperator (PointedCone R M) where
   toFun C := dual p.flip (dual p C)
-  monotone' _ _ hCD := dual_antimono (dual_antimono hCD)
+  monotone' _ _ hCD := dual_antitone (dual_antitone hCD)
   le_closure' _ := SetLike.coe_subset_coe.mp subset_dual_dual
   idempotent' _ := by rw [dual_flip_dual_dual_flip]
   isClosed_iff := by simp
@@ -31,7 +31,7 @@ variable (p) in
 /-- The operation that maps a cone to its double dual. -/
 def dualClosure_flip : ClosureOperator (PointedCone R N) where
   toFun C := dual p (dual p.flip C)
-  monotone' _ _ hCD := dual_antimono (dual_antimono hCD)
+  monotone' _ _ hCD := dual_antitone (dual_antitone hCD)
   le_closure' _ := SetLike.coe_subset_coe.mp subset_dual_dual
   idempotent' _ := by rw [dual_flip_dual_dual_flip]
   isClosed_iff := by simp

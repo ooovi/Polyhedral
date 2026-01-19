@@ -8,16 +8,18 @@ open Function Submodule
 
 namespace PointedCone
 
-variable {R E : Type*}
+variable {R M : Type*}
 
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable [AddCommMonoid E] [Module R E]
-variable {s : Set E}
+variable [AddCommMonoid M] [Module R M]
+variable {s : Set M}
 
 @[coe]
-abbrev ofSubmodule (S : Submodule R E) : PointedCone R E := S.restrictScalars _
+abbrev ofSubmodule (S : Submodule R M) : PointedCone R M := S.restrictScalars _
+
+instance : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
 
 -- priority high to dominate over pure restrictScalars
 instance (priority := high) : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
@@ -66,7 +68,7 @@ lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
 lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : PointedCone R M) := by
   rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
 
-end AddCommMonoid
+-- end AddCommMonoid
 
 section AddCommGroup
 
@@ -128,10 +130,10 @@ section Lineal
 
 open Pointwise
 
-variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup E] [Module R E]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
 /-- The lineality space of a cone `C` is the submodule given by `C ⊓ -C`. -/
-def lineal (C : PointedCone R E) : Submodule R E where
+def lineal (C : PointedCone R M) : Submodule R M where
   carrier := C ⊓ -C
   add_mem' hx hy := by simpa using ⟨C.add_mem hx.1 hy.1, C.add_mem hy.2 hx.2⟩
   zero_mem' := by simp
@@ -142,21 +144,21 @@ def lineal (C : PointedCone R E) : Submodule R E where
       simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
 @[simp]
-lemma lineal_eq_inf_neg (C : PointedCone R E) : C.lineal = C ⊓ -C :=
+lemma lineal_eq_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C :=
   rfl
 
-lemma mem_lineal {C : PointedCone R E} {x : E} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
+lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
   rfl
 
 @[simp]
-lemma lineal_le (C : PointedCone R E) : C.lineal ≤ C := by simp
+lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
 
 /- The lineality space of a cone is the largest submodule contained in the cone. -/
-theorem lineal_eq_sSup (C : PointedCone R E) : C.lineal = sSup {S : Submodule R E | S ≤ C} := by
+theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
   rw [le_antisymm_iff]
   refine ⟨le_sSup (lineal_le C), ?_⟩
   intro x hx
-  have hC : sSup {S : Submodule R E | S ≤ C} ≤ C := by simp
+  have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
   exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
 
 end Lineal

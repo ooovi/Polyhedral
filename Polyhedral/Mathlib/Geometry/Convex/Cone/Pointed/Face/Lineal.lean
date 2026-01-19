@@ -30,14 +30,14 @@
 -- @[simp]
 -- lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
 
-/- The lineality space of a cone is the subpremum of its submodules. -/
-theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
-  rw [le_antisymm_iff]
-  constructor
-  · exact le_sSup (lineal_le C)
-  intro x hx
-  have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
-  exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
+-- /- The lineality space of a cone is the subpremum of its submodules. -/
+-- theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C } := by
+--   rw [le_antisymm_iff]
+--   constructor
+--   · exact le_sSup (lineal_le C)
+--   intro x hx
+--   have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
+--   exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
 
 -- end Ring
 

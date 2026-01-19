@@ -41,8 +41,8 @@ instance {S : Submodule R M} : CoeOut (Submodule R S) (Submodule R M) := ⟨embe
 
 -- instance {S : Submodule R M} : CoeOut (M / S)
 
-def quot (S : Submodule R M) (T : Submodule R S) : Submodule R (M ⧸ (T : Submodule R M)) :=
-  map (T : Submodule R M).mkQ S
+-- def quot (S : Submodule R M) (T : Submodule R S) : Submodule R (M ⧸ (T : Submodule R M)) :=
+--   map (T : Submodule R M).mkQ S
 
 instance {S : Submodule R M} : HasQuotient M (Submodule R S) where
   quotient' T := quot S T

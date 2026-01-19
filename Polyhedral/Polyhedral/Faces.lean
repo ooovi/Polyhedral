@@ -118,7 +118,6 @@ lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCo
 /-- The face of a polyhedral one is itself polyhedral. -/
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
   unfold IsPolyhedral PointedCone.salientQuot
-  rw [hF.lineal_eq]
   sorry
 
 
