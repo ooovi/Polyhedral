@@ -8,6 +8,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Corank
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual_Generic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual_Test
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FGDual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.OfRank
@@ -15,6 +16,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 import Polyhedral.Mathlib.Algebra.Module.Submodule.RestrictScalars_PR
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict_RestrictScalars
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict_Test
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic_PR
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Closure
@@ -37,15 +39,6 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
-import Polyhedral.PR.BilinearMap_PR
-import Polyhedral.PR.CoFG.Basic_PR
-import Polyhedral.PR.CoFG.CoFG_PR
-import Polyhedral.PR.CoFG.FG_PR
-import Polyhedral.PR.Dual.Basic_PR
-import Polyhedral.PR.Dual.DualClosed_PR
-import Polyhedral.PR.Dual.Dual_PR
-import Polyhedral.PR.FGDual.Dual_FG_PR
-import Polyhedral.PR.FGDual.FGDual_PR
 import Polyhedral.Polyhedral.AbstractPolytope
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces
