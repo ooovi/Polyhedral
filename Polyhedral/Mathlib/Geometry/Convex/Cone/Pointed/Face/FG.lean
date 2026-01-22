@@ -177,7 +177,20 @@ lemma foobarfoo' (hF : IsAtom F) :
 lemma foobarfoo (hC : C.Salient) (hF : IsAtom F) :
     PointedCone.rank (F : PointedCone R M) = 1 := sorry
 
+/-
+The way to proving graded:
+ * assume C is pointed and FG
+ * choose a finite generating set
+ * there is a minimal subset that still generates
+ * choose any element of the minimal subset
+ * this element spans a face of C
+-/
 
+theorem span_singleton_isFaceOf_of_fg_salient (hfg : C.FG) (hpt : C.Salient) (h₀ : C ≠ ⊥) :
+    ∃ r ∈ C, (span R {r}).IsFaceOf C := by
+  sorry
+
+-- theorem isAtom_dim_add_one (F : Face C) (hF : IsAtom F) : F.rank = rank R (lineal C) + 1 := sorry
 
 -- ## KREIN MILMAN
 

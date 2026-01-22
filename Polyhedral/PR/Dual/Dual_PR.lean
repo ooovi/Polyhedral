@@ -53,8 +53,6 @@ def dual : Submodule R N where
   add_mem' {u v} hu hv x hx := by rw [map_add, ← hu hx, ← hv hx, add_zero]
   smul_mem' c y hy x hx := by rw [map_smul, ← hy hx, smul_eq_mul, mul_zero]
 
-#find_home! dual
-
 @[simp] lemma mem_dual : y ∈ dual p s ↔ ∀ ⦃x⦄, x ∈ s → 0 = p x y := .rfl
 
 @[simp] lemma dual_empty : dual p ∅ = ⊤ := by ext; simp
@@ -268,21 +266,23 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) in
-theorem dual_singleton_cofg (x : M) : (dual p {x}).CoFG := by
+theorem CoFG.of_dual_singleton (x : M) : (dual p {x}).CoFG := by
   rw [dual_singleton]; exact ker_cofg _
 
 variable (p) in
-theorem dual_finset_cofg (s : Finset M) : (dual p s).CoFG := by
+theorem CoFG.of_dual_finset (s : Finset M) : (dual p s).CoFG := by
   rw [dual_ker_pi']; exact ker_cofg _
 
 variable (p) in
-theorem dual_finite_cofg {s : Set M} (hs : s.Finite) : (dual p s).CoFG := by
-  rw [← hs.coe_toFinset]; exact dual_finset_cofg p hs.toFinset
+theorem CoFG.of_dual_finite {s : Set M} (hs : s.Finite) : (dual p s).CoFG := by
+  rw [← hs.coe_toFinset]; exact CoFG.of_dual_finset p hs.toFinset
 
 variable (p) in
-theorem dual_fg_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := by
+theorem CoFG.of_dual_fg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := by
   obtain ⟨s, rfl⟩ := hS
-  simpa using dual_finset_cofg p s
+  simpa using CoFG.of_dual_finset p s
+
+alias FG.dual_cofg := CoFG.of_dual_fg
 
 end CoFG
 

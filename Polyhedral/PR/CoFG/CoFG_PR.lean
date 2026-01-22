@@ -7,6 +7,7 @@ import Mathlib.RingTheory.PrincipalIdealDomain
 
 import Polyhedral.PR.CoFG.Basic_PR
 import Polyhedral.PR.CoFG.FG_PR
+import Polyhedral.PR.Restrict.Restrict_PR
 
 open Module Function LinearMap
 
@@ -20,8 +21,6 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 /-- A submodule `S` is co-finitely generated (CoFG) if the quotient space `M ⧸ S` is
   finitely generated (`Module.Finite`). -/
 abbrev CoFG (S : Submodule R M) : Prop := Module.Finite R (M ⧸ S)
-
-#find_home CoFG
 
 /-- In a finite module every submodule is CoFG. -/
 lemma Finite.cofg [Module.Finite R M] {S : Submodule R M} : S.CoFG := Module.Finite.quotient R S
@@ -70,7 +69,7 @@ lemma range_fg_iff_ker_cofg {f : M →ₗ[R] N} : (range f).FG ↔ (ker f).CoFG 
   rw [← Finite.iff_fg]
   exact Module.Finite.equiv_iff <| f.quotKerEquivRange.symm
 
-/-- The kernel of a linear map into a Noetherian module is CoFG. -/
+/-- The kernel of a linear map into a noetherian module is CoFG. -/
 lemma ker_cofg [IsNoetherian R N] (f : M →ₗ[R] N) : (ker f).CoFG
     := range_fg_iff_ker_cofg.mp <| IsNoetherian.noetherian _
 
@@ -98,9 +97,29 @@ theorem sInf_cofg' {s : Set (Submodule R M)} (hs : s.Finite) (hcofg : ∀ S ∈ 
     (sInf s).CoFG := by
   rw [← hs.coe_toFinset] at hcofg ⊢; exact sInf_cofg hcofg
 
+/-- The restriction of a CoFG submodule is CoFG. -/
+protected lemma CoFG.restrict (S : Submodule R M) {T : Submodule R M} (hT : T.CoFG) :
+    CoFG (restrict S T) := by
+  haveI := Module.Finite.of_injective _ (quot_restrict_linearMap_quot_injective (S ⊔ T) T)
+  exact Finite.equiv (quot_restrict_iso_sup_quot_restrict S T).symm
+
+
+-- TODO: move out of Noetherian section once clear that Noetherian is not need
+-- we keep it here because some results it depends on are not yet proven, such as
+-- `quot_restrict_linearMap_quot_range`.
+omit [IsNoetherianRing R] in
+/-- The embedding of a CoFG submodule of a CoFG submodule is CoFG. -/
+protected lemma CoFG.embed {S : Submodule R M} {T : Submodule R S} (hS : S.CoFG) (hT : T.CoFG) :
+    CoFG (embed T) := by
+  haveI := Finite.equiv (quotientQuotientEquivQuotient (Submodule.embed T) S embed_le).symm
+  haveI := Finite.equiv (quot_equiv_map_embed_mkQ S T)
+  exact Finite.of_submodule_quotient <| map (Submodule.embed T).mkQ S
+
 end IsNoetherianRing
 
 end Ring
+
+-- add later
 
 section DivisionRing
 

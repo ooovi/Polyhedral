@@ -66,7 +66,7 @@ lemma isPolyhedral_of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quo
     ← factor_comp_mk <| submodule_le_lineal hS, restrictScalars_comp, map_comp]
   exact FG.map _ hC
 
-/-- The salient quotient of a polyhedral `C` cone can als be written as the quotient of an
+/-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
    FG cone by the lineality space of `C`. -/
 lemma IsPolyhedral.exists_finset_span_quot_lineal (hC : C.IsPolyhedral) :
     ∃ s : Finset M, (span R s).quot C.lineal = C.salientQuot := by classical

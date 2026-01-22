@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
+-- PLAN: PR this together with `Submodule.dual_univ` to demonstrate usefulness
+
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 
 namespace LinearMap
@@ -18,40 +20,34 @@ variable {N : Type*} [AddCommMonoid N] [Module R N]
 
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma SeparatingLeft.of_injective (hp : Injective p) : p.SeparatingLeft := by
-  simpa [separatingLeft_iff_ker_eq_bot] using ker_eq_bot_of_injective hp
-instance [inst : Fact (Injective p)] : Fact p.SeparatingLeft :=
-    ⟨SeparatingLeft.of_injective inst.elim⟩
+instance [Module.Projective R N] : Fact (.id : (N →ₗ[R] R) →ₗ[R] _).SeparatingRight :=
+  ⟨fun _ hx => by simpa using (forall_dual_apply_eq_zero_iff R _).mp hx⟩
 
-variable [Module.Projective R N] in
-instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] (N →ₗ[R] R)).SeparatingRight :=
-    ⟨fun x hx => by simpa using (forall_dual_apply_eq_zero_iff R x).mp hx⟩
+instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] _).SeparatingLeft :=
+  ⟨fun _ hx => by ext y; exact hx y⟩
 
-variable [Module.Projective R M] in
-instance : Fact (Dual.eval R M).SeparatingLeft :=
-    ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
-
-instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] (N →ₗ[R] R)).SeparatingLeft :=
-    ⟨fun x hx => by ext y; exact hx y⟩
+instance [Module.Projective R M]  : Fact (Dual.eval R M).SeparatingLeft :=
+  ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
 
 instance : Fact (Dual.eval R M).SeparatingRight :=
-    ⟨by simp [Dual.eval, separatingLeft_iff_linear_nontrivial]⟩
+  ⟨by simp [Dual.eval, separatingLeft_iff_linear_nontrivial]⟩
 
 -- instance [inst : Fact p.flip.SeparatingLeft] : Fact p.SeparatingRight :=
 --     ⟨flip_separatingLeft.mp inst.elim⟩
+
 -- instance [inst : Fact p.flip.SeparatingRight] : Fact p.SeparatingLeft :=
 --     ⟨flip_separatingRight.mp inst.elim⟩
 
 instance [inst : Fact p.SeparatingLeft] : Fact p.flip.SeparatingRight :=
-    ⟨flip_separatingLeft.mp inst.elim⟩
+  ⟨flip_separatingLeft.mp inst.elim⟩
 instance [inst : Fact p.SeparatingRight] : Fact p.flip.SeparatingLeft :=
-    ⟨flip_separatingRight.mp inst.elim⟩
+  ⟨flip_separatingRight.mp inst.elim⟩
 
 instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingLeft := ⟨inst.elim.1⟩
 instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.2⟩
 
-variable [inst : Fact p.SeparatingLeft] in
-@[simp] lemma SeparatingLeft.ker_eq_bot : ker p = ⊥ :=
+@[simp]
+lemma SeparatingLeft.ker_eq_bot [inst : Fact p.SeparatingLeft] : ker p = ⊥ :=
   separatingLeft_iff_ker_eq_bot.mp inst.elim
 
 instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
