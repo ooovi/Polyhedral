@@ -24,18 +24,41 @@ variable (p) in
 private def auxGenSet (s : Set M) (w : N) : Set M :=
   {x ∈ s | p x w = 0} ∪ {p r w • t - p t w • r | (t ∈ s) (r ∈ s)}
 
-lemma auxGenSet_of_mem_dual (s : Set M) (w : N) (hw : w ∈ dual p s) :
-    auxGenSet p s w = span R s := by
-  sorry
+-- lemma auxGenSet_of_mem_dual (s : Set M) (w : N) (hw : w ∈ dual p s) :
+--     auxGenSet p s w = span R s := by
+--   sorry
 
-lemma auxGenSet_of_not_mem_dual (s : Set M) (w : N) (hw : w ∉ dual p s) :
-    auxGenSet p s w = {p r w • t - p t w • r | (t ∈ s) (r ∈ s)} := by
-  sorry
+-- lemma auxGenSet_of_not_mem_dual (s : Set M) (w : N) (hw : w ∉ dual p s) :
+--     auxGenSet p s w = {p r w • t - p t w • r | (t ∈ s) (r ∈ s)} := by
+--   sorry
 
 variable (p) in
 private lemma dual_auxGenSet_eq_dual_sup_span_singleton (s : Set M) (w : N) :
     dual p (auxGenSet p s w) = dual p s ⊔ span R {w} := by
-  sorry
+  ext x
+  simp [auxGenSet, mem_sup, mem_dual]
+  constructor
+  · intro h
+    simp only at h
+    by_cases H : ∀ x ∈ s, p x w = 0
+    · use x
+      simp
+      sorry
+    push_neg at H
+    obtain ⟨x₀, hx₀s, hx₀⟩ := H
+    specialize @h x₀
+    simp [hx₀] at h
+    sorry
+  · intro h v hv
+    obtain ⟨y, hy, z, hz, rfl⟩ := h
+    rw [mem_span_singleton] at hz
+    obtain ⟨a, rfl⟩ := hz
+    rw [map_add, map_smul, smul_eq_mul]
+    cases hv
+    case inl H => simp [← hy H.1, H.2]
+    case inr H =>
+      obtain ⟨t, ht, r, hr, rfl⟩ := H
+      simp [← hy ht, ← hy hr, mul_comm]
 
 private lemma span_auxGenSet_eq_span_inf_dual_singleton (s : Set M) (w : N) :
     span R (auxGenSet p s w) = span R s ⊓ dual p.flip {w} := by
@@ -53,11 +76,12 @@ private lemma dual_inf_dual_singleton_dual_sup_singleton'' (w : N) :
 
 -- --------------
 
-private lemma dual_inf_dual_singleton_dual_sup_singleton (hS : S.DualClosed p) (w : N) :
+variable (p) in
+private lemma dual_inf_dual_singleton_dual_sup_singleton (S : Submodule R M) (w : N) :
     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
   by_cases hw : w ∈ dual p S
-  · rw [← span_eq (dual p S), ← span_union, ← hS]
-    simp [← coe_inf, ← dual_union, hw]
+  · have : S ≤ dual p.flip {w} := fun _ hx => by simpa using hw hx
+    simp [← coe_inf, this, hw]
   simp only [mem_dual, SetLike.mem_coe, not_forall] at hw
   obtain ⟨s₀, hsS₀, hs₀⟩ := hw
   push_neg at hs₀
@@ -146,7 +170,7 @@ private lemma dual_inf_dual_singleton_dual_sup_singleton (hS : S.DualClosed p) (
 
 ----
 
-lemma dual_inf_dual_finite_dual_sup_finite (hS : S.DualClosed p) (s : Finset N) :
+lemma dual_inf_dual_finite_dual_sup_finite {S : Submodule R M} (s : Finset N) :
     dual p (S ∩ dual p.flip s) = dual p S ⊔ span R s := by classical
   induction s using Finset.induction with
   | empty => simp
@@ -154,18 +178,18 @@ lemma dual_inf_dual_finite_dual_sup_finite (hS : S.DualClosed p) (s : Finset N) 
     rw [Finset.coe_insert, span_insert, dual_insert, ← coe_inf]
     nth_rw 2 [sup_comm, inf_comm]
     rw [← sup_assoc, ← hs, ← inf_assoc]
-    simpa using dual_inf_dual_singleton_dual_sup_singleton
-      (hS.inf <| DualClosed.of_dual p.flip s) w
+    exact dual_inf_dual_singleton_dual_sup_singleton p _ w
 
-lemma dual_inf_dual_finite_dual_sup_finite' (hS : S.DualClosed p) {s : Set N} (hs : s.Finite) :
+lemma dual_inf_dual_finite_dual_sup_finite' {s : Set N} (hs : s.Finite) :
     dual p (S ∩ dual p.flip s) = dual p S ⊔ span R s := by
-  simpa using dual_inf_dual_finite_dual_sup_finite hS hs.toFinset
+  simpa using dual_inf_dual_finite_dual_sup_finite hs.toFinset
 
-lemma dual_inf_dual_fg_dual_sup_fg (hS : S.DualClosed p) {T : Submodule R N} (hT : T.FG) :
+lemma dual_inf_dual_fg_dual_sup_fg {T : Submodule R N} (hT : T.FG) :
     dual p (S ∩ dual p.flip T) = dual p S ⊔ T := by
   obtain ⟨s, rfl⟩ := hT
-  simpa using dual_inf_dual_finite_dual_sup_finite hS s
+  simpa using dual_inf_dual_finite_dual_sup_finite s
 
+-----
 
 -- ## DUAL CLOSED
 
@@ -178,7 +202,7 @@ lemma dual_inf_dual_fg_dual_sup_fg (hS : S.DualClosed p) {T : Submodule R N} (hT
 variable (p) in
 lemma DualClosed.sup_span_finite (hS : S.DualClosed p) (s : Finset M) :
     (S ⊔ span R s).DualClosed p := by
-  rw [← hS, ← dual_inf_dual_finite_dual_sup_finite (DualClosed.of_dual p _) s]
+  rw [← hS, ← dual_inf_dual_finite_dual_sup_finite s]
   exact DualClosed.of_dual _ _
 
 variable (p) in
@@ -246,8 +270,16 @@ lemma FGDual.dual_fg {S : Submodule R N} (hS : S.FGDual p) : FG (dual p.flip S) 
 lemma FGDual.dual_fg_sup_ker {S : Submodule R N} (hS : S.FGDual p) :
     ∃ T : Submodule R M, T.FG ∧ T ⊔ ker p = dual p.flip S := by
   obtain ⟨T, hfg, rfl⟩ := hS.exists_fg_dual
-  use T
-  simpa [hfg, Eq.comm] using hfg.dual_flip_dual_sup_ker p
+  use T; simpa [hfg, Eq.comm] using hfg.dual_flip_dual_sup_ker p
+
+private lemma sup_fgdual_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) :
+    (S ⊔ T).FGDual p := by
+  rw [← hS.dualClosed_flip, flip_flip, ← dual_inf_dual_fg_dual_sup_fg hT]
+  obtain ⟨Q, hQfg, hQ⟩ := hS.dual_fg_sup_ker
+  rw [← coe_inf, ← hQ, sup_comm, sup_inf_assoc_of_le]
+  · rw [sup_comm, dual_sup, dual_union_ker]
+    exact FGDual.of_dual_fg _ <| fg_le hQfg inf_le_left
+  exact ker_le_dual_flip _
 
 ----- vvvvvv experimental
 -- TODO: move to correct file
@@ -340,18 +372,18 @@ theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.Dua
 
 -- The proof is slightly longer but we can avoid assumptions about p, see
 -- `dual_inf_dual_sup_fgdual'` above.
-lemma dual_inf_dual_sup_fgdual (hS : S.DualClosed p) (hT : T.FGDual p.flip) :
+lemma dual_inf_dual_sup_fgdual (hT : T.FGDual p.flip) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
   obtain ⟨S', hfg, rfl⟩ := hT.exists_fg_dual
   rw [hfg.dual_dual_flip_sup_ker p]
   nth_rw 2 [sup_comm]
   rw [← sup_assoc]
   rw [sup_eq_left.mpr (DualClosed.of_dual p S).ker_le]
-  exact dual_inf_dual_fg_dual_sup_fg hS hfg
+  exact dual_inf_dual_fg_dual_sup_fg hfg
 
-lemma FGDual.dual_inf_dual_sup_dual (hS : S.FGDual p.flip) (hT : T.FGDual p.flip) :
+lemma FGDual.dual_inf_dual_sup_dual (hT : T.FGDual p.flip) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
-  exact dual_inf_dual_sup_fgdual hS.dualClosed hT
+  exact dual_inf_dual_sup_fgdual hT
 
 -- less assumptions possible?
 -- variable [Fact p.SeparatingLeft] in
@@ -359,12 +391,12 @@ lemma FGDual.dual_inf_dual_sup_dual (hS : S.FGDual p.flip) (hT : T.FGDual p.flip
 --     dual p (S ∩ T) = dual p S ⊔ dual p T := by
 --   exact dual_inf_dual_sup_fgdual (hS.dualClosed p) hT
 
-lemma dual_fg_inf_fgdual_dual_sup_dual (hS : S.FG) (hT : T.FGDual p.flip) :
+lemma dual_fg_inf_fgdual_dual_sup_dual (hT : T.FGDual p.flip) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
   rw [← dual_union_ker, ← coe_inf, ← dual_sup, inf_comm]
   rw [inf_sup_assoc_of_le]
   · rw [inf_comm, coe_inf]
-    rw [dual_inf_dual_sup_fgdual (hS.sup_ker_dualClosed p) hT]
+    rw [dual_inf_dual_sup_fgdual hT]
     rw [dual_sup, dual_union_ker]
   exact hT.ker_le
 
@@ -384,7 +416,7 @@ lemma FG.exists_fgdual_disjoint {S : Submodule R N} (hS : S.FG) :
 
 ---
 
-private lemma sup_fgdual_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) :
+private lemma sup_fgdual_fg' {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) :
     (S ⊔ T).FGDual p := by
   rw [← sup_eq_left.mpr (hS.ker_le)]
   rw [sup_assoc, sup_comm]
@@ -400,7 +432,6 @@ private lemma sup_fgdual_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) 
     · rw [dual_sup, dual_union_ker]
       exact FGDual.of_dual_fg p (inf_fg_right _ hfg)
     exact ker_le_dual_flip _
-  · exact DualClosed.of_dual _ _
   · simpa [dual_sup, dual_union_ker] using FGDual.of_dual_fg _ hT
 
 -- variable [Fact p.Nondegenerate] in
