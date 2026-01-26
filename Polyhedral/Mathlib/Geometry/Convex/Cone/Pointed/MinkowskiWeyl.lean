@@ -565,31 +565,6 @@ lemma FG.is_dual_dual_of_fgdual (hC : C.FG) :
     ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ dual p.flip D = C := by
   sorry
 
-/- The following lemmas are proven because they have equivalents for general cones that do
-  not hold without the FG assumption -/
-
--- @[simp] lemma dual_flip_dual_inter {C C' : PointedCone 𝕜 M} (hC : C.FG) (hC' : C'.FG) :
---     dual p.flip (dual p (C ∩ C')) = C ⊓ C' := by
---   rw [← dual_flip_dual (p := p) <| inf_fg hC hC']; simp
-
--- @[simp] lemma dual_dual_flip_inter {C C' : PointedCone 𝕜 N} (hC : C.FG) (hC' : C'.FG) :
---     dual p (dual p.flip (C ∩ C')) = C ⊓ C' := by
---   rw [← dual_dual_flip (p := p) <| inf_fg hC hC']; simp
-
-
-
-
--- ## FARKAS
-
-
-
-
-
-
-
-
-
-
 end LinearOrder
 
 end PointedCone

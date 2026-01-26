@@ -26,7 +26,8 @@ variable (p) in
   This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
 def FGDual (S : Submodule R N) : Prop := ∃ s : Finset M, dual p s = S
 
-/-- A FGDual cone is the dual of an FG cone. -/
+/-- A FGDual submodule is the dual of an FG cone. If the pairin `p` is at left-separating, then
+  one can choose the dual of the FGDual submodule as this FG submodule. -/
 lemma FGDual.exists_fg_dual {S : Submodule R N} (hS : S.FGDual p) :
     ∃ T : Submodule R M, T.FG ∧ dual p T = S := by
   obtain ⟨s, hs⟩ := hS;
@@ -67,8 +68,8 @@ lemma FGDual.inf {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FGDual p) :
 @[simp]
 lemma FGDual.dual_dual_flip {S : Submodule R N} (hS : S.FGDual p) :
     dual p (dual p.flip S) = S := by
-  obtain ⟨T, hfgdual, rfl⟩ := exists_fg_dual hS
-  exact dual_dual_flip_dual (p := p) T
+  obtain ⟨s, rfl⟩ := hS
+  exact dual_dual_flip_dual (p := p) s
 
 /-- The double dual of a FGDual cone is the cone itself. -/
 @[simp]
