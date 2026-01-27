@@ -22,13 +22,13 @@ variable {S T : Submodule R M}
   in case this will be necessary at some point. -/
 
 variable (p) in
-private def auxGenSet' (s : Set M) (w : N) : Set M :=
+private def auxGenSet (s : Set M) (w : N) : Set M :=
   {x ∈ s | p x w = 0} ∪ {p r w • t - p t w • r | (t ∈ s) (r ∈ s)}
 
 variable (p) in
-private lemma dual_auxGenSet_eq_dual_sup_span_singleton' (s : Set M) (w : N) :
-    dual p (auxGenSet' p s w) = dual p s ⊔ span R {w} := by
-  ext x; simp only [auxGenSet', mem_dual, Set.mem_union, Set.mem_setOf_eq, mem_sup]; constructor
+private lemma dual_auxGenSet_eq_dual_sup_span_singleton (s : Set M) (w : N) :
+    dual p (auxGenSet p s w) = dual p s ⊔ span R {w} := by
+  ext x; simp only [auxGenSet, mem_dual, Set.mem_union, Set.mem_setOf_eq, mem_sup]; constructor
   · intro h; by_cases H : ∀ x ∈ s, p x w = 0
     · exact ⟨x, fun y ys => h <| .inl ⟨ys, H y ys⟩, 0, zero_mem _, by simp⟩
     push_neg at H; obtain ⟨x₀, hx₀s, hx₀⟩ := H
@@ -45,10 +45,10 @@ private lemma dual_auxGenSet_eq_dual_sup_span_singleton' (s : Set M) (w : N) :
     · simp [← hy vs, hw]
     · simp [map_add, map_smul, smul_eq_mul, ← hy ht, ← hy hr, mul_comm]
 
-private lemma span_auxGenSet_eq_inter_dual_singleton' (w : N) :
-    auxGenSet' p S w = (S : Set M) ∩ dual p.flip {w} := by
+private lemma span_auxGenSet_eq_inter_dual_singleton (w : N) :
+    auxGenSet p S w = (S : Set M) ∩ dual p.flip {w} := by
   ext x
-  simp only [auxGenSet', SetLike.mem_coe, Set.mem_union, Set.mem_setOf_eq, Set.mem_inter_iff,
+  simp only [auxGenSet, SetLike.mem_coe, Set.mem_union, Set.mem_setOf_eq, Set.mem_inter_iff,
     mem_dual, Set.mem_singleton_iff, flip_apply, forall_eq]
   constructor
   · rintro (⟨xS, px⟩ | ⟨r, hr, t, ht, rfl⟩)
@@ -57,70 +57,80 @@ private lemma span_auxGenSet_eq_inter_dual_singleton' (w : N) :
   · rintro ⟨xS, px⟩
     exact Or.inl ⟨xS, px.symm⟩
 
-variable (p) in
-private lemma dual_inf_dual_singleton_dual_sup_singleton'' (s : Set M) (w : N) :
-    dual p (span R s ⊓ dual p.flip {w} : Submodule R M) = dual p s ⊔ span R {w} := by
-  simp [← dual_auxGenSet_eq_dual_sup_span_singleton', ← span_auxGenSet_eq_inter_dual_singleton',
-    auxGenSet', dual_union]
-  sorry
+private lemma auxGenSet_span (s : Set M) (w : N) :
+  auxGenSet p (span R s) w = span R (auxGenSet p s w) := sorry
 
-variable (p) in
-private lemma dual_inf_dual_singleton_dual_sup_singleton''' (w : N) :
-    dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
-  simpa using dual_inf_dual_singleton_dual_sup_singleton'' p S w
+private lemma span_auxGenSet_eq_inter_dual_singleton' (s : Set M) (w : N) :
+    span R (auxGenSet p s w) = span R s ⊓ dual p.flip {w} := by
+  simpa [← SetLike.coe_set_eq, ← auxGenSet_span] using span_auxGenSet_eq_inter_dual_singleton w
 
--- --------------
+-- variable (p) in
+-- private lemma dual_inf_dual_singleton_dual_sup_singleton' (s : Set M) (w : N) :
+--     dual p (span R s ⊓ dual p.flip {w} : Submodule R M) = dual p s ⊔ span R {w} := by
+--   simp [← dual_auxGenSet_eq_dual_sup_span_singleton, ← span_auxGenSet_eq_inter_dual_singleton,
+--     auxGenSet, dual_union]
+--   sorry
 
-def auxGenSet (p : M →ₗ[R] N →ₗ[R] R) (S : Submodule R M) (w : N) (s₀ : M) : Set M :=
-  {p s w • s₀ - p s₀ w • s | s ∈ S}
-
-private lemma dual_sup_singleton_eq_dual_auxGenSet {w : N} {s₀ : M} (h : s₀ ∈ S)
-    (hs₀ : (p s₀) w ≠ 0) :
-    dual p S ⊔ span R {w} = dual p (auxGenSet p S w s₀) := by
-  ext x; simp [auxGenSet, mem_sup, mem_span_singleton]
-  constructor
-  · rintro ⟨y, hy, c, rfl⟩ t s
-    simp only [map_add, ← hy h, map_smul, smul_eq_mul, zero_add, ← hy s]
-    ring
-  · intro h
-    simp_rw [mul_comm, ← smul_eq_mul, ← map_smul, ← map_sub] at h
-    refine ⟨-(p s₀ w)⁻¹ • (p s₀ x • w - p s₀ w • x), fun x hx => by simp [map_smul, ← h x hx],
-            (p s₀ w)⁻¹ * p s₀ x, by simp [smul_sub, ← smul_assoc, hs₀]⟩
-
-private lemma auxGenSet_eq_inf_dual {w : N} {s₀ : M} (h : s₀ ∈ S) (hs₀ : (p s₀) w ≠ 0) :
-    auxGenSet p S w s₀ = (S : Set M) ∩ dual p.flip {w}:= by
-  ext x
-  simp only [auxGenSet, Set.mem_setOf_eq, Set.mem_inter_iff, SetLike.mem_coe, mem_dual,
-    Set.mem_singleton_iff, flip_apply, forall_eq]
-  constructor
-  · rintro ⟨y, hy, rfl⟩
-    exact ⟨sub_mem (S.smul_mem _ h) (S.smul_mem _ hy), by simp [mul_comm]⟩
-  · intro ⟨hxS, hx⟩
-    rw [← span_eq S, ← Set.insert_eq_of_mem h, span_insert, mem_sup] at hxS
-    simp only [mem_span_singleton, span_coe_eq_restrictScalars, restrictScalars_self,
-      exists_exists_eq_and] at hxS
-    obtain ⟨c, t, ht, rfl⟩ := hxS
-    by_cases hc : c = 0
-    · use -((p s₀) w)⁻¹ • t, smul_mem S _ ht
-      simp only [hc, zero_smul, zero_add] at hx
-      simp [hc, ← hx, ← smul_assoc, mul_inv_cancel₀ hs₀]
-    · use (c * (p t w)⁻¹) • t, S.smul_mem _ ht
-      simp only [map_add, map_smul, add_apply, smul_apply, smul_eq_mul] at hx
-      have hx := neg_eq_of_add_eq_zero_left hx.symm
-      have h : p t w ≠ 0 := fun hb => (mul_ne_zero hc hs₀) (by simpa [hb] using hx)
-      simp only [map_smul, smul_apply, smul_eq_mul, ← smul_assoc, mul_left_comm, ← mul_assoc, ← hx,
-        neg_mul, mul_inv_cancel₀ h, neg_smul, one_smul, sub_neg_eq_add, add_left_inj]
-      simp [mul_assoc, inv_mul_cancel₀ h]
+-- private lemma dual_inf_dual_singleton_dual_sup_singleton'' (w : N) :
+--     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
+--   simpa using dual_inf_dual_singleton_dual_sup_singleton' p S w
 
 private lemma dual_inf_dual_singleton_dual_sup_singleton (w : N) :
     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
-  by_cases hw : w ∈ dual p S
-  · have : S ≤ dual p.flip {w} := fun _ hx => by simpa using hw hx
-    simp [← coe_inf, this, hw]
-  simp only [mem_dual, SetLike.mem_coe, not_forall] at hw
-  obtain ⟨s₀, hsS₀, hs₀⟩ := hw
-  push_neg at hs₀
-  rw [dual_sup_singleton_eq_dual_auxGenSet hsS₀ hs₀.symm, auxGenSet_eq_inf_dual hsS₀ hs₀.symm]
+  simp [← dual_auxGenSet_eq_dual_sup_span_singleton, ← span_auxGenSet_eq_inter_dual_singleton]
+
+-- --------------
+
+-- def auxGenSet (p : M →ₗ[R] N →ₗ[R] R) (S : Submodule R M) (w : N) (s₀ : M) : Set M :=
+--   {p s w • s₀ - p s₀ w • s | s ∈ S}
+
+-- private lemma dual_sup_singleton_eq_dual_auxGenSet {w : N} {s₀ : M} (h : s₀ ∈ S)
+--     (hs₀ : (p s₀) w ≠ 0) :
+--     dual p S ⊔ span R {w} = dual p (auxGenSet p S w s₀) := by
+--   ext x; simp [auxGenSet, mem_sup, mem_span_singleton]
+--   constructor
+--   · rintro ⟨y, hy, c, rfl⟩ t s
+--     simp only [map_add, ← hy h, map_smul, smul_eq_mul, zero_add, ← hy s]
+--     ring
+--   · intro h
+--     simp_rw [mul_comm, ← smul_eq_mul, ← map_smul, ← map_sub] at h
+--     refine ⟨-(p s₀ w)⁻¹ • (p s₀ x • w - p s₀ w • x), fun x hx => by simp [map_smul, ← h x hx],
+--             (p s₀ w)⁻¹ * p s₀ x, by simp [smul_sub, ← smul_assoc, hs₀]⟩
+
+-- private lemma auxGenSet_eq_inf_dual {w : N} {s₀ : M} (h : s₀ ∈ S) (hs₀ : (p s₀) w ≠ 0) :
+--     auxGenSet p S w s₀ = (S : Set M) ∩ dual p.flip {w}:= by
+--   ext x
+--   simp only [auxGenSet, Set.mem_setOf_eq, Set.mem_inter_iff, SetLike.mem_coe, mem_dual,
+--     Set.mem_singleton_iff, flip_apply, forall_eq]
+--   constructor
+--   · rintro ⟨y, hy, rfl⟩
+--     exact ⟨sub_mem (S.smul_mem _ h) (S.smul_mem _ hy), by simp [mul_comm]⟩
+--   · intro ⟨hxS, hx⟩
+--     rw [← span_eq S, ← Set.insert_eq_of_mem h, span_insert, mem_sup] at hxS
+--     simp only [mem_span_singleton, span_coe_eq_restrictScalars, restrictScalars_self,
+--       exists_exists_eq_and] at hxS
+--     obtain ⟨c, t, ht, rfl⟩ := hxS
+--     by_cases hc : c = 0
+--     · use -((p s₀) w)⁻¹ • t, smul_mem S _ ht
+--       simp only [hc, zero_smul, zero_add] at hx
+--       simp [hc, ← hx, ← smul_assoc, mul_inv_cancel₀ hs₀]
+--     · use (c * (p t w)⁻¹) • t, S.smul_mem _ ht
+--       simp only [map_add, map_smul, add_apply, smul_apply, smul_eq_mul] at hx
+--       have hx := neg_eq_of_add_eq_zero_left hx.symm
+--       have h : p t w ≠ 0 := fun hb => (mul_ne_zero hc hs₀) (by simpa [hb] using hx)
+--       simp only [map_smul, smul_apply, smul_eq_mul, ← smul_assoc, mul_left_comm, ← mul_assoc, ← hx,
+--         neg_mul, mul_inv_cancel₀ h, neg_smul, one_smul, sub_neg_eq_add, add_left_inj]
+--       simp [mul_assoc, inv_mul_cancel₀ h]
+
+-- private lemma dual_inf_dual_singleton_dual_sup_singleton (w : N) :
+--     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
+--   by_cases hw : w ∈ dual p S
+--   · have : S ≤ dual p.flip {w} := fun _ hx => by simpa using hw hx
+--     simp [← coe_inf, this, hw]
+--   simp only [mem_dual, SetLike.mem_coe, not_forall] at hw
+--   obtain ⟨s₀, hsS₀, hs₀⟩ := hw
+--   push_neg at hs₀
+--   rw [dual_sup_singleton_eq_dual_auxGenSet hsS₀ hs₀.symm, auxGenSet_eq_inf_dual hsS₀ hs₀.symm]
 
 
 ----

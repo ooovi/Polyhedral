@@ -4,19 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
--- PLAN: PR this together with `Submodule.dual_univ` to demonstrate usefulness
-/- IDEA: inlude
-  * what is necessary to derive SeparatingLeft in most natural situations, e.g. from
-    * IsPerfPair
-    * for id and eval
-  * what complements it meaningfully, e.g. SeparatingRight
--/
-
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 
 namespace LinearMap
 
-open Module Function
+open Module
 
 section CommSemiring
 
@@ -45,8 +37,6 @@ instance [Module.Projective R N] : Fact (.id : (N →ₗ[R] R) →ₗ[R] _).Sepa
 
 instance [Module.Projective R N] : Fact (.id : (N →ₗ[R] R) →ₗ[R] _).Nondegenerate := ⟨.id⟩
 
----
-
 /-- The pairing `Dual.eval` is left-separating. -/
 theorem SeparatingLeft.eval [Module.Projective R M] : (Dual.eval R M).SeparatingLeft := by
   simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]
@@ -64,17 +54,9 @@ instance : Fact (Dual.eval R M).SeparatingRight := ⟨.eval⟩
 
 instance [Module.Projective R M] : Fact (Dual.eval R M).Nondegenerate := ⟨.eval⟩
 
-----
-
 instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingLeft := ⟨inst.elim.1⟩
 
 instance [inst : Fact p.Nondegenerate] : Fact p.SeparatingRight := ⟨inst.elim.2⟩
-
--- instance [inst : Fact p.flip.SeparatingLeft] : Fact p.SeparatingRight :=
---     ⟨flip_separatingLeft.mp inst.elim⟩
-
--- instance [inst : Fact p.flip.SeparatingRight] : Fact p.SeparatingLeft :=
---     ⟨flip_separatingRight.mp inst.elim⟩
 
 instance [inst : Fact p.SeparatingLeft] : Fact p.flip.SeparatingRight :=
   ⟨flip_separatingLeft.mp inst.elim⟩
@@ -82,9 +64,20 @@ instance [inst : Fact p.SeparatingLeft] : Fact p.flip.SeparatingRight :=
 instance [inst : Fact p.SeparatingRight] : Fact p.flip.SeparatingLeft :=
   ⟨flip_separatingRight.mp inst.elim⟩
 
+/-- A bilinear map is left-separating if and only if it has a trivial kernel. -/
+@[simp]
+theorem SeparatingLeft.iff_ker_eq_bot {B : M →ₗ[R] N →ₗ[R] R} :
+    B.SeparatingLeft ↔ LinearMap.ker B = ⊥ :=
+  Iff.trans separatingLeft_iff_linear_nontrivial LinearMap.ker_eq_bot'.symm
+
 /-- If a bilinear map is left-separating then it has a trivial kernel. -/
 @[simp]
-lemma SeparatingLeft.ker_eq_bot [inst : Fact p.SeparatingLeft] : ker p = ⊥ :=
+lemma SeparatingLeft.ker_eq_bot [inst : Fact p.SeparatingLeft] : ker p = ⊥ := by
+  simpa [iff_ker_eq_bot] using inst.elim
+
+/-- If a bilinear map is left-separating then it has a trivial kernel. -/
+@[simp]
+lemma SeparatingLeft.ker_eq_bot' [inst : Fact p.SeparatingLeft] : ker p = ⊥ :=
   separatingLeft_iff_ker_eq_bot.mp inst.elim
 
 end CommSemiring
@@ -92,11 +85,16 @@ end CommSemiring
 section CommRing
 
 variable {R : Type*} [CommRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M] -- NOTE: AddCommMonoid suffices for some below
+variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-instance [inst : p.IsPerfPair] : Fact p.Nondegenerate := ⟨sorry⟩
+/-- A perfect pairing is non-degenerate. -/
+theorem IsPerfPair.nondegenerate (hp : p.IsPerfPair) : p.Nondegenerate := by
+  simpa only [Nondegenerate, ← flip_separatingLeft, separatingLeft_iff_ker_eq_bot, ker_eq_bot]
+    using ⟨hp.bijective_left.injective, hp.bijective_right.injective⟩
+
+instance [inst : p.IsPerfPair] : Fact p.Nondegenerate := ⟨inst.nondegenerate⟩
 
 end CommRing
 
