@@ -268,6 +268,31 @@ private lemma FGDual.sup_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) 
 private lemma FG.sup_fgdual {S T : Submodule R N} (hS : S.FG) (hT : T.FGDual p) :
     (S ⊔ T).FGDual p := by simpa only [sup_comm] using hT.sup_fg hS
 
+/- Proof idea:
+  * use that S ⊓ T is CoFG, and S ⊓ T ≤ S ⊔ T. Hence restrict of S ⊓ T is CoFG in S ⊔ T.
+  * Choose a complement R of S ⊓ T in S ⊔ T. Hence S ⊔ T = (S ⊓ T) ⊔ R.
+  * R is FG because complements of CoFG submodules are FG.
+  * S ⊓ T is FGDual, and R is FG, hence by `sup_fgdual_fg` their union S ⊔ T is FGDual.
+-/
+/-- The sum of an FGDual submodule with an arbitrary submodule is FGDual. -/
+lemma FGDual.sup {S : Submodule R N} (hS : S.FGDual p) (T : Submodule R N) :
+    (S ⊔ T).FGDual p := by
+  have h := CoFG.restrict (S ⊔ T) hS.cofg
+  obtain ⟨U, hUST⟩ := exists_isCompl (restrict (S ⊔ T) S)
+  have hU := CoFG.isCompl_fg hUST h
+  have H := congrArg embed <| hUST.codisjoint.eq_top
+  simp only [embed_sup, embed_restrict, embed_top] at H
+  rw [← H]
+  simpa using hS.sup_fg (embed_fg_of_fg hU)
+
+-- TODO: This is the more important lemma thanb FGDual.sup. People will complain that sup is
+-- unnecessary.
+/-- A submodule that contains an FGDual submodule is itself FGDual. -/
+lemma FGDual.of_fgdual_le {S T : Submodule R N} (hS : S.FGDual p) (hST : S ≤ T) :
+    T.FGDual p := by
+  rw [← sup_eq_right.mpr hST]
+  exact hS.sup T
+
 ----- vvvvvv experimental
 -- TODO: move to correct file
 
@@ -432,32 +457,6 @@ private lemma sup_fgdual_fg' {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG)
 --     exact fgdual_of_fg p (inf_fg_left hS.dual_fg _)
 --   · exact hS.dual_fg
 --   · exact fgdual_of_fg p.flip hT
-
-  /- Proof idea:
-    * use that S ⊓ T is CoFG, and S ⊓ T ≤ S ⊔ T. Hence restrict of S ⊓ T is CoFG in S ⊔ T.
-    * Choose a complement R of S ⊓ T in S ⊔ T. Hence S ⊔ T = (S ⊓ T) ⊔ R.
-    * R is FG because complements of CoFG submodules are FG.
-    * S ⊓ T is FGDual, and R is FG, hence by `sup_fgdual_fg` their union S ⊔ T is FGDual.
-  -/
-/-- The sum of an FGDual submodule with an arbitrary submodule is FGDual. -/
-lemma FGDual.sup {S : Submodule R N} (hS : S.FGDual p) (T : Submodule R N) :
-    (S ⊔ T).FGDual p := by
-  have h := CoFG.restrict (S ⊔ T) hS.cofg
-  obtain ⟨U, hUST⟩ := exists_isCompl (restrict (S ⊔ T) S)
-  have hU := CoFG.isCompl_fg hUST h
-  have H := congrArg embed <| hUST.codisjoint.eq_top
-  simp only [embed_sup, embed_restrict, embed_top] at H
-  rw [← H]
-  simpa using hS.sup_fg (embed_fg_of_fg hU)
-
-alias sup_fgdual := FGDual.sup
-
--- TODO: Proving this first (before sup_fgdual) might shorten total proof length.
-/-- A submodule that contains an FGDual submodule is itself FGDual. -/
-lemma FGDual.of_fgdual_le {S T : Submodule R N} (hS : S.FGDual p) (hST : S ≤ T) :
-    T.FGDual p := by
-  rw [← sup_eq_right.mpr hST]
-  exact hS.sup T
 
 -- def foob'' (S : Submodule R M) : Submodule R (M →ₗ[R] N) where
 --   carrier := { f : M →ₗ[R] N | S ≤ ker f }
