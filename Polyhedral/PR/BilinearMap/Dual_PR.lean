@@ -7,7 +7,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Pi
 
 import Polyhedral.PR.Dual.Dual_PR
-import Polyhedral.PR.BilinearMap.BilinearMap_PR
+import Polyhedral.PR.BilinearMap.BilinearMap_PR_withSurjInj
 
 assert_not_exists TopologicalSpace Real -- Cardinal (comes with BilinearMap)
 

@@ -5,6 +5,7 @@ Authors: Martin Winter
 -/
 
 import Polyhedral.PR.FGDual.FGDual_PR
+import Polyhedral.PR.FGDual.DualClosed_PR
 
 open Function Module LinearMap
 open Submodule hiding span dual
@@ -257,7 +258,7 @@ lemma FGDual.dual_fg_sup_ker {S : Submodule R N} (hS : S.FGDual p) :
 /-- The sup of an FGDual submodule with an FG submodule is FGDual. -/
 private lemma FGDual.sup_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) :
     (S ⊔ T).FGDual p := by
-  rw [← hS.dualClosed_flip, flip_flip, ← hT.dual_inf_dual_eq_dual_sup]
+  rw [← hS.dual_dual_flip, ← hT.dual_inf_dual_eq_dual_sup]
   obtain ⟨Q, hQfg, hQ⟩ := hS.dual_fg_sup_ker
   rw [← coe_inf, ← hQ, sup_comm, sup_inf_assoc_of_le]
   · rw [sup_comm, dual_sup, dual_union_ker]
@@ -433,7 +434,7 @@ private lemma sup_fgdual_fg' {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG)
   rw [← sup_eq_left.mpr (hS.ker_le)]
   rw [sup_assoc, sup_comm]
   nth_rw 2 [sup_comm]
-  rw [← hS.dualClosed_flip]
+  rw [← hS.dual_dual_flip]
   rw [← hT.sup_ker_dualClosed p.flip]
   simp only [flip_flip]
   rw [sup_comm]
