@@ -27,39 +27,41 @@ private def auxGenSet' (s : Set M) (w : N) : Set M :=
 variable (p) in
 private lemma dual_auxGenSet_eq_dual_sup_span_singleton' (s : Set M) (w : N) :
     dual p (auxGenSet' p s w) = dual p s ⊔ span R {w} := by
-  ext x
-  simp [auxGenSet', mem_sup, mem_dual]
-  constructor
-  · intro h
-    simp only at h
-    by_cases H : ∀ x ∈ s, p x w = 0
-    · use x
-      simp
-      sorry
-    push_neg at H
-    obtain ⟨x₀, hx₀s, hx₀⟩ := H
-    specialize @h x₀
-    simp [hx₀] at h
-    sorry
-  · intro h v hv
-    obtain ⟨y, hy, z, hz, rfl⟩ := h
-    rw [mem_span_singleton] at hz
-    obtain ⟨a, rfl⟩ := hz
-    rw [map_add, map_smul, smul_eq_mul]
-    cases hv
-    case inl H => simp [← hy H.1, H.2]
-    case inr H =>
-      obtain ⟨t, ht, r, hr, rfl⟩ := H
-      simp [← hy ht, ← hy hr, mul_comm]
+  ext x; simp only [auxGenSet', mem_dual, Set.mem_union, Set.mem_setOf_eq, mem_sup]; constructor
+  · intro h; by_cases H : ∀ x ∈ s, p x w = 0
+    · exact ⟨x, fun y ys => h <| .inl ⟨ys, H y ys⟩, 0, zero_mem _, by simp⟩
+    push_neg at H; obtain ⟨x₀, hx₀s, hx₀⟩ := H
+    use -(p x₀ w)⁻¹ • (p x₀ x • w - p x₀ w • x)
+    constructor
+    · intro y ys
+      simp only [neg_smul, map_neg, map_smul, map_sub, smul_eq_mul, zero_eq_neg, mul_eq_zero,
+        inv_eq_zero, hx₀, false_or]
+      simp [h <| Or.inr <| ⟨x₀, hx₀s, y, ⟨ys, rfl⟩⟩, mul_comm]
+    · use ((p x₀ w)⁻¹ * p x₀ x) • w
+      exact ⟨mem_span.mpr (fun _ h => smul_mem _ _ (h rfl)), by simp [smul_sub, ← smul_assoc, hx₀]⟩
+  · simp_rw [mem_span_singleton]
+    rintro ⟨_, hy, _, ⟨_, rfl⟩, rfl⟩ _ (⟨vs, hw⟩ | ⟨_, ht, _, hr, rfl⟩)
+    · simp [← hy vs, hw]
+    · simp [map_add, map_smul, smul_eq_mul, ← hy ht, ← hy hr, mul_comm]
 
-private lemma span_auxGenSet_eq_span_inf_dual_singleton' (s : Set M) (w : N) :
-    span R (auxGenSet' p s w) = span R s ⊓ dual p.flip {w} := by
-  sorry
+private lemma span_auxGenSet_eq_inter_dual_singleton' (w : N) :
+    auxGenSet' p S w = (S : Set M) ∩ dual p.flip {w} := by
+  ext x
+  simp only [auxGenSet', SetLike.mem_coe, Set.mem_union, Set.mem_setOf_eq, Set.mem_inter_iff,
+    mem_dual, Set.mem_singleton_iff, flip_apply, forall_eq]
+  constructor
+  · rintro (⟨xS, px⟩ | ⟨r, hr, t, ht, rfl⟩)
+    · exact ⟨xS, px.symm⟩
+    · exact ⟨S.sub_mem (S.smul_mem _ hr) (S.smul_mem _ ht), by simp [mul_comm]⟩
+  · rintro ⟨xS, px⟩
+    exact Or.inl ⟨xS, px.symm⟩
 
 variable (p) in
 private lemma dual_inf_dual_singleton_dual_sup_singleton'' (s : Set M) (w : N) :
     dual p (span R s ⊓ dual p.flip {w} : Submodule R M) = dual p s ⊔ span R {w} := by
-  simp [← dual_auxGenSet_eq_dual_sup_span_singleton', ← span_auxGenSet_eq_span_inf_dual_singleton']
+  simp [← dual_auxGenSet_eq_dual_sup_span_singleton', ← span_auxGenSet_eq_inter_dual_singleton',
+    auxGenSet', dual_union]
+  sorry
 
 variable (p) in
 private lemma dual_inf_dual_singleton_dual_sup_singleton''' (w : N) :
