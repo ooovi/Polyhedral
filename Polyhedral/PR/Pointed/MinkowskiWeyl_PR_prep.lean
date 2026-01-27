@@ -37,8 +37,6 @@ variable {C D : PointedCone 𝕜 M}
 
 namespace PointedCone
 
-theorem FGDual.dual_fg {C : PointedCone 𝕜 N} (hC : C.FGDual p) : FG (dual p.flip C) := sorry
-
 theorem FG.dual_inf (hC : C.FG) (hD : FG D) :
     dual p (C ⊓ D) = dual p C ⊔ dual p D := sorry
 
@@ -51,7 +49,12 @@ theorem FGDual.dual_inf_fg {C D : PointedCone 𝕜 N} (hC : FGDual p C) (hD : D.
 theorem FGDual.dual_inf {C D : PointedCone 𝕜 N} (hC : FGDual p C) (hD : D.FGDual p) :
     dual p.flip (C ⊓ D) = dual p.flip C ⊔ dual p.flip D := sorry
 
+@[simp]
 theorem FG.dual_dual (hC : C.FG) : dual p.flip (dual p C) = C := sorry
+
+theorem FGDual.dual_fg {C : PointedCone 𝕜 N} (hC : C.FGDual p) : FG (dual p.flip C) := by
+  obtain ⟨D, hfg, rfl⟩ := FGDual.exists_fg_dual hC
+  simp [FG.dual_dual, hfg]
 
 theorem FG.inf (hC : C.FG) (hD : D.FG) : FG (C ⊓ D) := sorry
 
@@ -69,15 +72,28 @@ theorem FG.inf_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) :
 
 theorem FGDual.inf_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) : FG (C ⊓ D) := sorry
 
+theorem FG.sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) :
+    FGDual p (C ⊔ D) := sorry
+
+theorem FGDual.sup_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) :
+    FGDual p (C ⊔ D) := sorry
+
 section Finite
 
-variable [Module.Finite 𝕜 M]
+variable {C : PointedCone 𝕜 N}
 
-theorem FG.fgdual {C : PointedCone 𝕜 N} (hC : C.FG) : FGDual p C := sorry
+variable [Module.Finite 𝕜 N] in
+theorem FGDual.fg (hC : C.FGDual p) : FG C := by simpa using hC.inf_fg fg_top
 
-theorem FGDual.fg {C : PointedCone 𝕜 N} (hC : C.FGDual p) : FG C := sorry
+variable [Module.Finite 𝕜 M] [Fact p.SeparatingLeft] in
+theorem FG.fgdual (hC : C.FG) : FGDual p C := by simpa using FG.sup_fgdual hC FGDual.bot
 
-theorem fg_iff_fgdual {C : PointedCone 𝕜 N} : FG C ↔ FGDual p C := ⟨FG.fgdual, FGDual.fg⟩
+variable [Module.Finite 𝕜 N] [Module.Finite 𝕜 M] [Fact p.SeparatingLeft] in
+  -- this is IsPerfPair, no?
+theorem fg_iff_fgdual : FG C ↔ FGDual p C := ⟨FG.fgdual, FGDual.fg⟩
+
+variable [Module.Finite 𝕜 N] in
+theorem FG.dual_fg {C : PointedCone 𝕜 M} (hC : FG C) : FG (dual p C) := (fgdual_of_fg p hC).fg
 
 end Finite
 

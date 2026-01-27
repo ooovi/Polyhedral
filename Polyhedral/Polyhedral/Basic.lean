@@ -36,12 +36,12 @@ variable {C C₁ C₂ F : PointedCone R M}
 /-- A cone is polyhedral if its salient quotient is finitely generated. -/
 abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
 
-lemma isPolyhedral_def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
+lemma IsPolyhedral.def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
 
 lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
 
 /-- Submodules are polyhedral cones. -/
-@[simp] lemma isPolyhedral_of_submdule (S : Submodule R M) :
+@[simp] lemma IsPolyhedral.of_submdule (S : Submodule R M) :
     (S : PointedCone R M).IsPolyhedral := by
   simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
 
@@ -52,19 +52,18 @@ lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuo
     FG.isPolyhedral hC.salientQuot_fg
 
 /-- The span of a finite set is polyhedral. -/
-lemma isPolyhedral_of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPolyhedral :=
+lemma IsPolyhedral.of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPolyhedral :=
   FG.isPolyhedral (fg_def.mpr ⟨s, hs, rfl⟩)
 
 /-- The span of a finite set is polyhedral. -/
 lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhedral :=
-  isPolyhedral_of_span_finite s.finite_toSet
+  .of_span_finite s.finite_toSet
 
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
-lemma isPolyhedral_of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
+lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
     C.IsPolyhedral := by
-  simp only [IsPolyhedral, salientQuot, quot, map,
-    ← factor_comp_mk <| submodule_le_lineal hS, restrictScalars_comp, map_comp]
-  exact FG.map _ hC
+  simpa only [IsPolyhedral, map, ← factor_comp_mk <| submodule_le_lineal hS,
+    restrictScalars_comp, map_comp] using FG.map _ hC
 
 /-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
    FG cone by the lineality space of `C`. -/
@@ -107,7 +106,7 @@ lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : FG C.lineal) : C.F
   exact sup_fg hD h
 
 /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
-lemma isPolyhedral_iff_fg_of_fg_lineal {h : FG C.lineal} : C.IsPolyhedral ↔ C.FG :=
+lemma IsPolyhedral.iff_fg_of_fg_lineal {h : FG C.lineal} : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_fg_lineal · h), FG.isPolyhedral⟩
 
 /-- A salient polyhedral cone is FG. -/
@@ -115,7 +114,7 @@ lemma IsPolyhedral.fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG
   hC.fg_of_fg_lineal (by simpa [salient_iff_lineal_bot.mp hsal] using fg_bot)
 
 /-- A salient cone is polyhedral if and only if it is FG. -/
-lemma isPolyhedral_iff_FG_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
+lemma IsPolyhedral.iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_salient · hC), FG.isPolyhedral⟩
 
 section CommRing
@@ -137,9 +136,9 @@ end CommRing
 -- ## SUP
 
 /-- The sum of an FG cone with a submodule is polyhedral. -/
-lemma isPolyhedral_of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
+lemma IsPolyhedral.of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
     (C ⊔ S).IsPolyhedral := by
-  refine isPolyhedral_of_quot_fg le_sup_right ?_
+  refine .of_quot_fg le_sup_right ?_
   simpa [sup_quot_eq_quot] using quot_fg hC S
 
 /-- The sum of two polyhedral cones is polyhedral -/
@@ -150,11 +149,11 @@ lemma IsPolyhedral.sup (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   rw [← hD₁', ← hD₂', sup_assoc]
   nth_rw 2 [sup_comm]
   rw [sup_assoc, ← sup_assoc, ← coe_sup]
-  exact isPolyhedral_of_fg_sup_submodule (sup_fg hD₁ hD₂) _
+  exact .of_fg_sup_submodule (sup_fg hD₁ hD₂) _
 
 /-- The sum of a polyhedral cone with a submodule is polyhedral. -/
 lemma IsPolyhedral.sup_submodule (hC : C.IsPolyhedral) (S : Submodule R M) :
-    (C ⊔ S).IsPolyhedral := hC.sup (isPolyhedral_of_submdule S)
+    (C ⊔ S).IsPolyhedral := hC.sup (.of_submdule S)
 
 /-- The sum of a polyhedral cone with an FG cone is polyhedral. -/
 lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG) :
@@ -180,7 +179,7 @@ lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f)
 lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     (C.quot S).IsPolyhedral := hC.map _
 
-@[simp] lemma isPolyhedral_neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
+@[simp] lemma IsPolyhedral.neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
   mp := by
     intro hC;
     simp [← map_id_eq_neg] at hC;
@@ -392,22 +391,22 @@ lemma IsPolyhedral.exists_fgdual_inf_span {C : PointedCone R N} (hC : C.IsPolyhe
 
 variable (p) in
 /-- Duals generated from a finite set are polyhedral. -/
-lemma isPolyhedral_dual_of_finset (s : Finset M) : (dual p s).IsPolyhedral := by
+lemma IsPolyhedral.of_dual_of_finset (s : Finset M) : (dual p s).IsPolyhedral := by
   obtain ⟨D, hfg, hD⟩ := exists_fg_sup_dual p s
   rw [← hD]
-  exact isPolyhedral_of_fg_sup_submodule hfg _
+  exact .of_fg_sup_submodule hfg _
 
 variable (p) in
 /-- Duals of FG cones are polyhedral. -/
-lemma isPolyhedral_dual_of_fg (hC : C.FG) : (dual p C).IsPolyhedral := by
+lemma IsPolyhedral.of_dual_of_fg (hC : C.FG) : (dual p C).IsPolyhedral := by
   obtain ⟨D, hfg, hD⟩ := FG.exists_fg_sup_dual p hC
   rw [← hD]
-  exact isPolyhedral_of_fg_sup_submodule hfg _
+  exact .of_fg_sup_submodule hfg _
 
 /-- FGDual cones are polyhedral. -/
-lemma isPolyhedral_of_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.IsPolyhedral := by
+lemma IsPolyhedral.of_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.IsPolyhedral := by
   obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
-  exact isPolyhedral_dual_of_fg p hfg
+  exact .of_dual_of_fg p hfg
 
 /-- The intersection of a polyhedral cone with an FG cone is FG. -/
 lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
@@ -445,7 +444,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   rw [coe_sup, inf_sup_assoc_of_submodule_le _ H]
   --
   rw [← inf_idem P, inf_assoc, inf_comm, coe_inf, ← inf_assoc, inf_assoc]
-  refine isPolyhedral_of_fg_sup_submodule (inf_fg ?_ ?_) _
+  refine .of_fg_sup_submodule (inf_fg ?_ ?_) _
   · exact h₂.fg_of_inf_fg_submodule hPfg
   · simpa [inf_comm] using h₁.fg_of_inf_fg_submodule hPfg
 
@@ -453,7 +452,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   `C ⊓ S` is FG. This is a strengthened version of `IsPolyhedral.fg_inf_of_isCompl`. -/
 lemma IsPolyhedral.fg_inf_of_disjoint_lineal (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : Disjoint C.lineal S) : FG (C ⊓ S) := by
-  refine fg_of_fg_lineal (hC.inf <| isPolyhedral_of_submdule S) ?_
+  refine fg_of_fg_lineal (hC.inf <| .of_submdule S) ?_
   simp only [lineal_inf, lineal_submodule, disjoint_iff.mp hS, fg_bot]
   -- TODO: fg_bot should be a simp lemma
 
@@ -462,7 +461,7 @@ variable (p) in
 lemma IsPolyhedral.dual (hC : C.IsPolyhedral) : (dual p C).IsPolyhedral := by
   obtain ⟨D, hDfg, hD⟩ := hC.exists_fg_sup_lineal
   rw [← hD, dual_sup_dual_inf_dual, Submodule.coe_restrictScalars, dual_eq_submodule_dual]
-  exact IsPolyhedral.inf (isPolyhedral_dual_of_fg p hDfg) (isPolyhedral_of_submdule _)
+  exact IsPolyhedral.inf (.of_dual_of_fg p hDfg) (.of_submdule _)
 
 variable (p) in
 -- I believe proving this requires a lot of other work to be done before (above).
@@ -597,7 +596,7 @@ lemma IsPolyhedral.exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
 --   obtain ⟨D, hfg, hD⟩ := hC'.exists_fg_sup_lineal
 --   rw [← hD]
 --   rw [dual_sup_dual_inf_dual]
---   obtain ⟨E, hfg, hE⟩ := (isPolyhedral_dual_of_fg .id hfg).exists_fg_sup_lineal
+--   obtain ⟨E, hfg, hE⟩ := (isPolyhedral_of_dual_of_fg .id hfg).exists_fg_sup_lineal
 --   rw [← hE]
 --   simp only [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
 --   rw [← sup_inf_assoc_of_le_submodule]
@@ -623,7 +622,7 @@ variable [IsNoetherian R M]
 lemma IsPolyhedral.FG (hC : C.IsPolyhedral) : C.FG :=
   fg_of_fg_lineal hC (IsNoetherian.noetherian _)
 
-lemma isPolyhedral_iff_FG : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.FG, FG.isPolyhedral⟩
+lemma IsPolyhedral.iff_FG : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.FG, FG.isPolyhedral⟩
 
 end IsNoetherian
 
@@ -694,8 +693,8 @@ def FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.FG
 
 -- ## ORDER
 
-def bot : PolyhedralCone R M := ⟨_, isPolyhedral_of_submdule ⊥⟩
-def top : PolyhedralCone R M := ⟨_, isPolyhedral_of_submdule ⊤⟩
+def bot : PolyhedralCone R M := ⟨_, .of_submdule ⊥⟩
+def top : PolyhedralCone R M := ⟨_, .of_submdule ⊤⟩
 
 -- alias lineal := bot
 
@@ -750,7 +749,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) in
 /-- The dual of a finite set interpreted as a polyhedral cone. -/
-def findual (s : Finset M) : PolyhedralCone R N := ⟨dual p s, isPolyhedral_dual_of_finset p s⟩
+def findual (s : Finset M) : PolyhedralCone R N := ⟨dual p s, .of_dual_of_finset p s⟩
 
 variable (p) in
 @[simp] lemma findual_eq_dual (s : Finset M) : findual p s = dual p s := rfl
@@ -770,7 +769,7 @@ end CommRing
 -- ## SUBMODULE
 
 instance : Coe (Submodule R M) (PolyhedralCone R M) where
-  coe S := ⟨_, isPolyhedral_of_submdule S⟩
+  coe S := ⟨_, .of_submdule S⟩
 
 -- instance : Coe (HalfspaceOrTop R M) (PolyhedralCone R M) := sorry
 

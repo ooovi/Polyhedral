@@ -87,6 +87,10 @@ instance [inst : Fact p.SeparatingRight] : Fact p.flip.SeparatingLeft :=
 lemma SeparatingLeft.ker_eq_bot [inst : Fact p.SeparatingLeft] : ker p = ⊥ :=
   separatingLeft_iff_ker_eq_bot.mp inst.elim
 
+instance [inst : Fact (Surjective p)] : Fact (Surjective p.flip.flip) := inst
+
+instance [inst : Fact (Injective p)] : Fact (Injective p.flip.flip) := inst
+
 end CommSemiring
 
 section CommRing
@@ -96,8 +100,43 @@ variable {M : Type*} [AddCommGroup M] [Module R M] -- NOTE: AddCommMonoid suffic
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+-- ## PRIORITY!
 instance [inst : p.IsPerfPair] : Fact p.Nondegenerate := ⟨sorry⟩
 
+instance [inst : p.IsPerfPair] : Fact (Injective p) := ⟨inst.bijective_left.injective⟩
+instance [inst : p.IsPerfPair] : Fact (Injective p.flip) := ⟨inst.bijective_right.injective⟩
+instance [inst : p.flip.IsPerfPair] : Fact (Injective p) := ⟨inst.bijective_right.injective⟩
+-- instance [inst : p.flip.IsPerfPair] : Fact (Injective p.flip) := inferInstance
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+-- ## SEPARATING
+
+variable [Fact p.SeparatingLeft] in
+@[simp] lemma SeparatingLeft.injective : Injective p := LinearMap.ker_eq_bot.mp ker_eq_bot
+
+variable [Fact p.SeparatingRight] in
+lemma SeparatingRight.injective : Injective p.flip := by simp
+
 end CommRing
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+instance instFactSurjectiveCoeIdId : Fact (Surjective (LinearMap.id (R := R) (M := M)))
+  := ⟨surjective_id⟩
+instance : Fact (Surjective (Dual.eval R M).flip)
+  := instFactSurjectiveCoeIdId
+
+instance [inst : p.IsPerfPair] : Fact (Surjective p) := ⟨inst.bijective_left.surjective⟩
+instance [inst : p.IsPerfPair] : Fact (Surjective p.flip) := ⟨inst.bijective_right.surjective⟩
+
+end Field
 
 end LinearMap

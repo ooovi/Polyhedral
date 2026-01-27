@@ -128,7 +128,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable (p)
 
 variable [Fact p.IsFaithfulPair] in -- Separating should suffice, no?
-/-- For an FG submodule `S`, there exists an FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
+/-- For an FG submodule `S`, there exists an FGDual submodule `T` that is disjoint to `S`. -/
 lemma FG.exists_fgdual_inf_bot {S : Submodule R N} (hS : S.FG) :
     ∃ T : Submodule R N, T.FGDual p ∧ S ⊓ T = ⊥ := by classical
   obtain ⟨g, hg⟩ : Fact p.IsFaithfulPair := inferInstance

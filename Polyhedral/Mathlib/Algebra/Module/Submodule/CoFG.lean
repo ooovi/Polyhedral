@@ -57,6 +57,7 @@ lemma FG.isCompl_cofg {S T : Submodule R M} (hST : IsCompl S T) (hS : S.FG) : T.
   haveI := Finite.iff_fg.mpr hS
   exact Finite.equiv (quotientEquivOfIsCompl T S hST.symm).symm
 
+/-- For a CoFG submodule exists a disjoint FG submodule. -/
 lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
     ∃ T : Submodule R M, T.FG ∧ Codisjoint S T := by classical
   obtain ⟨T, hT, hST⟩ := exists_spanRank_le_codisjoint S

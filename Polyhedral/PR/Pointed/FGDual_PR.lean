@@ -1,6 +1,6 @@
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FGDual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.PR.FGDual.FGDual_PR
+import Polyhedral.PR.Pointed.Dual_PR
 
 namespace PointedCone
 
