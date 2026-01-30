@@ -242,7 +242,7 @@ variable (p) [Fact p.SeparatingLeft] in
 @[simp] lemma FG.dual_flip_dual {C : PointedCone 𝕜 M} (hC : C.FG) : dual p.flip (dual p C) = C :=
   FG.dual_dual_flip p.flip hC
 
-variable (p) [Fact p.flip.IsFaithfulPair] in
+variable (p) [Fact p.SeparatingLeft] in
 lemma FG.isDualClosed {C : PointedCone 𝕜 M} (hC : C.FG) : C.DualClosed p
     := FG.dual_flip_dual p hC
 

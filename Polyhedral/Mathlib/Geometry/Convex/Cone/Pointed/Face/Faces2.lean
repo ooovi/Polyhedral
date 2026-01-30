@@ -625,8 +625,35 @@ lemma exists_salient_combEquiv (C : PointedCone R M) :
   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
   exact ⟨_, inf_salient hS.disjoint, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
 
+-- lemma mem_span_setminus_iff_span_isFaceOf {C : PointedCone R M} (hC : C.DualClosed p)
+--     (x : M) (hx : x ∈ C) :
+--     x ∉ span R (C \ span R {x}) ↔ (span R {x}).IsFaceOf C := by classical
+--   constructor <;> intro h
+--   · have hfar := farkas p (span R (↑C \ ↑(span R {x})))
 
-
+--     sorry
+--   · rw [mem_span_iff_exists_finset_subset]
+--     push_neg
+--     intro f s hs hfs
+--     by_contra H
+--     have hx : x ∈ span R {x} := by simp
+--     nth_rw 2 [← H] at hx
+--     have hss : ∀ x ∈ s, x ∈ C := fun _ hx => (hs hx).1
+--     have hfss : ∀ x ∈ s, 0 ≤ f x := by simp
+--     have h0 : ∃ x ∈ s, 0 < f x := by
+--       by_contra H'
+--       push_neg at H'
+--       have h0 : ∀ x ∈ s, f x = 0 := by
+--         intro x hx
+--         exact le_antisymm (H' x hx) (hfss x hx)
+--       -- show in H: 0 = x
+--       -- leads to contra in hs
+--       sorry
+--     obtain ⟨y, hy, hy0⟩ := h0
+--     have hh := h.mem_of_sum_smul_mem''' hss hfss hx y hy hy0
+--     have H := hs hy
+--     simp at H
+--     exact H.2 hh
 
 
 

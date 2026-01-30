@@ -442,16 +442,12 @@ lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed 
 -- ## FARKAS
 
 variable (p) in
-lemma farkas (C : PointedCone R M) (hC : C.DualClosed p) (x : M) :
-    x ∈ C ∨ ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
-  by_cases h : x ∈ C
-  case pos => left; exact h
-  case neg =>
-    right
-    rw [← hC.def] at h
-    simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at h
-    obtain ⟨φ, _, _⟩ := h
-    use φ
+lemma farkas {C : PointedCone R M} (hC : C.DualClosed p) {x : M} (hx : x ∉ C) :
+    ∃ φ : N, 0 > p x φ ∧ ∀ y ∈ C, 0 ≤ p y φ := by
+  rw [← hC] at hx
+  simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at hx
+  obtain ⟨φ, _, _⟩ := hx
+  use φ
 
 end LinearOrder
 

@@ -206,6 +206,10 @@ theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι →
   · exact (MulAction.one_smul (f i)).symm
   · exact Ne.symm (ne_of_lt hci)
 
+theorem mem_of_sum_smul_mem''' {s : Finset M} {c : M → R}
+    (hF : F.IsFaceOf C) (hsC : ∀ x ∈ s, x ∈ C) (hc : ∀ x ∈ s, 0 ≤ c x) (hs : ∑ x ∈ s, c x • x ∈ F)
+    (x : M) (hx : x ∈ s) (hci : 0 < c x) : x ∈ F := by sorry
+
 /-- The lineality space of a cone is a face. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   rw [iff_mem_of_add_mem]

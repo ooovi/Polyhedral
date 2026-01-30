@@ -451,6 +451,12 @@ lemma inf_salient_of_disjoint {C : PointedCone R M}
     {S : Submodule R M} (hS : C.lineal ⊓ S = ⊥) : (C ⊓ S).Salient := by
   simpa [salient_iff_lineal_bot] using hS
 
+lemma Salient.of_le_salient {C D : PointedCone R M} (hC : C.Salient) (hD : D ≤ C) : D.Salient := by
+  rw [Salient, ConvexCone.salient_iff_not_flat] at *
+  by_contra h
+  -- have h' := h.mono hD
+  sorry
+
 -- ## MAP
 
 open Function

@@ -58,7 +58,14 @@ private lemma span_auxGenSet_eq_inter_dual_singleton (w : N) :
     exact Or.inl ⟨xS, px.symm⟩
 
 private lemma auxGenSet_span (s : Set M) (w : N) :
-  auxGenSet p (span R s) w = span R (auxGenSet p s w) := sorry
+    auxGenSet p (span R s) w = span R (auxGenSet p s w) := by
+  ext x
+  simp [auxGenSet]
+  constructor <;> intro h
+  · rcases h with ⟨hx, h⟩ | ⟨y, hy, z, hz, h⟩
+    · sorry
+    · sorry
+  · sorry
 
 private lemma span_auxGenSet_eq_inter_dual_singleton' (s : Set M) (w : N) :
     span R (auxGenSet p s w) = span R s ⊓ dual p.flip {w} := by

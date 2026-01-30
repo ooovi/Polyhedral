@@ -32,22 +32,19 @@ variable {C F F₁ F₂ : PointedCone R M}
 
 def IsExposedFaceOf (F C : PointedCone R M) :=
   ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
-  -- ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
+  -- ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 ↔ x ∈ F)
 
 -- variable (p) in
 -- def IsExposedFaceOf' (F C : PointedCone R M) :=
 --   ∃ φ : N, (∀ x ∈ C, p x φ ≥ 0) ∧ (∀ x ∈ C, p x φ = 0 ↔ x ∈ F)
 
-lemma IsExposedFaceOf.def_iff :
-    F.IsExposedFaceOf C ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := by rfl
+-- lemma IsExposedFaceOf.def_iff :
+--     F.IsExposedFaceOf C ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := by rfl
 
 @[refl] lemma IsExposedFaceOf.refl (C : PointedCone R M) : C.IsExposedFaceOf C := ⟨0, by simp⟩
 lemma IsExposedFaceOf.rfl {C : PointedCone R M} : C.IsExposedFaceOf C := refl C
 
 lemma IsExposedFaceOf.le (hF : F.IsExposedFaceOf C) : F ≤ C := sorry
-
--- TODO: find mathlib lemma or add to mathlib
-lemma zero_left_of_le_add_zero {a b : R} (ha : 0 ≤ a) (hb : 0 ≤ b) (h : a + b = 0) : a = 0 := sorry
 
 lemma IsExposedFaceOf.inf {hF₁ : F₁.IsExposedFaceOf C} {hF₂ : F₂.IsExposedFaceOf C} :
     (F₁ ⊓ F₂).IsExposedFaceOf C := by
@@ -61,7 +58,7 @@ lemma IsExposedFaceOf.inf {hF₁ : F₁.IsExposedFaceOf C} {hF₂ : F₂.IsExpos
   · intro x hx
     constructor
     · intro H
-      have h := zero_left_of_le_add_zero (hφ₁ x hx) (hφ₂ x hx) H
+      have h := eq_zero_of_add_nonpos_left (hφ₁ x hx) (hφ₂ x hx) (le_of_eq H)
       simp only [h, zero_add] at H
       exact ⟨(hφ₁' x hx).mp h, (hφ₂' x hx).mp H⟩
     · intro H
@@ -102,6 +99,17 @@ lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
   apply subdual_dual
   rfl
 
+-- lemma exists_dual_pos' {C : PointedCone R M} (hC : C.Salient) :
+--     ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 → x = 0) := sorry
+
+-- States that a pointed cone minus its origin is contained in the interior of a halfspace.
+variable (p) in
+lemma exists_dual_pos {C : PointedCone R M} (hC : C.Salient) :
+    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) :=
+  -- Idea: choose φ from relint of dual cone.
+  --  (we need to show that relints of dual cones are nonempty)
+  sorry
+
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   rw [IsFaceOf.iff_mem_of_add_mem]
@@ -111,7 +119,7 @@ lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   rw [← H _ hx]
   have h := (H _ <| hF.le hcxy).mpr hcxy
   rw [map_add] at h
-  exact zero_left_of_le_add_zero (hφ _ hx) (hφ _ hy) h
+  exact eq_zero_of_add_nonpos_left (hφ _ hx) (hφ _ hy) (le_of_eq h)
 
 lemma IsExposedFaceOf.quot_iff (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C) (hF : F₂ ≤ F₁) :
     F₁.IsExposedFaceOf C ↔ (F₁.quot F₂.linSpan).IsExposedFaceOf (C.quot F₂.linSpan) := sorry
