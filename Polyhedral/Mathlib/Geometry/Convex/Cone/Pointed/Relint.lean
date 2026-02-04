@@ -83,8 +83,8 @@ lemma IsFaceOf.self_of_le_linSpan (hF : F.IsFaceOf C) (h : C.linSpan ≤ F.linSp
 -- Consider e.g. the positive orthant in the space of finitely supported vectors.
 -- TODO: generalize to cones with `FinSalRank`
 /-- The relative interior is non-empty. -/
-lemma relint_nonempty (C : PointedCone R M) (hC : C.FinRank) : Nonempty C.relint := by
-  haveI : Module.Finite R C.linSpan := sorry -- from FinRank
+lemma relint_nonempty {C : PointedCone R M} (hC : C.FinRank) : Nonempty C.relint := by
+  haveI := Module.Finite.iff_fg.mpr hC
   obtain ⟨f, hf, hfC, hind⟩ := exists_fun_fin_finrank_span_eq R (C : Set M)
   use ∑ i, f i
   constructor
@@ -98,6 +98,37 @@ lemma relint_nonempty (C : PointedCone R M) (hC : C.FinRank) : Nonempty C.relint
   obtain ⟨g, rfl⟩ := h
   exact (linSpan F).sum_mem fun i _ =>
     (linSpan F).smul_mem (g i) <| Submodule.le_span (hF i)
+
+variable (p : M →ₗ[R] N →ₗ[R] R) in
+theorem FinSalRank.dual (hC : C.FinSalRank) : FinSalRank (.dual p C) := sorry
+
+-- variable {p : M →ₗ[R] N →ₗ[R] R} in
+-- theorem foo_''' (hC : C.FinSalRank) :
+--     ∃ φ : N, ∀ x ∈ C, 0 < p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
+--   have h := hC.dual p
+--   have h := relint_nonempty (C := dual p C) sorry
+--   obtain ⟨φ, hφ⟩ := h
+--   use φ
+--   simp [relint] at hφ
+--   sorry
+
+-- -- 2. version of Farkas lemma for finite sets
+-- variable (p : M →ₗ[R] N →ₗ[R] R) in
+-- lemma farkas' (hC : C.FinRank) {x : M} (hx : x ∉ C) (hx' : -x ∉ C) :
+--     ∃ φ : N, p x φ = 0 ∧ ∀ y ∈ C, 0 ≤ p y φ ∧ (p y φ = 0 → y = 0) := by
+--   obtain ⟨f, hf, h⟩ := PointedCone.farkas hx
+--   obtain ⟨g, hg⟩ := exists_dual_pos p hs /- this lemma is not trivial. It proves that a pointed
+--     (i.e. salient) cone is contained in some halfspace. g is the normal vector of that halfspace.
+--     This lemma is not yet proven, but all the machinery is there. -/
+--   use f - (p x f / p x g) • g
+--   simp
+--   have hgx : 0 < p x g := sorry
+--   constructor
+--   · simp [ne_of_gt hgx]
+--   · intro y hy
+
+--     -- use that f x < 0 but g x and all other f y are >= 0
+--     sorry
 
 /-- The relative interior is non-empty. -/
 lemma relint_nonempty' (C : PointedCone R M) : C.relint ≠ ⊥ := sorry

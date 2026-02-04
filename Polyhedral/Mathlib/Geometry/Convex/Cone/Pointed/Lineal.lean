@@ -413,6 +413,7 @@ section Ring
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
+-- TODO: definition should probably be formulated without negation: x ∈ C → x = 0
 /-- A salient cone has trivial lineality space, see `salient_iff_lineal_bot`. -/
 abbrev Salient (C : PointedCone R M) := C.toConvexCone.Salient
 

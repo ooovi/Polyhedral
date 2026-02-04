@@ -697,4 +697,19 @@ end CommRing
 
 end Ring
 
+section DivisionRing
+
+variable {R M : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
+  [Module R M] {S : Set M}
+
+-- TODO: golf this
+theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C := by
+  constructor <;> intro h
+  · have h := C.smul_mem (le_of_lt <| inv_pos.mpr hc) h
+    rw [inv_smul_smul₀ (ne_of_lt hc).symm] at h
+    exact h
+  · exact C.smul_mem (le_of_lt hc) h
+
+end DivisionRing
+
 end PointedCone

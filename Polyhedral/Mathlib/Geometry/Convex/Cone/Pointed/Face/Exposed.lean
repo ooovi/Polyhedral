@@ -104,7 +104,15 @@ lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
 
 -- States that a pointed cone minus its origin is contained in the interior of a halfspace.
 variable (p) in
-lemma exists_dual_pos {C : PointedCone R M} (hC : C.Salient) :
+lemma exists_dual_pos (C : PointedCone R M) : -- only true when FinSalRank
+    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) :=
+  -- Idea: choose φ from relint of dual cone.
+  --  (we need to show that relints of dual cones are nonempty)
+  sorry
+
+-- States that a pointed cone minus its origin is contained in the interior of a halfspace.
+variable (p) in
+lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) :=
   -- Idea: choose φ from relint of dual cone.
   --  (we need to show that relints of dual cones are nonempty)

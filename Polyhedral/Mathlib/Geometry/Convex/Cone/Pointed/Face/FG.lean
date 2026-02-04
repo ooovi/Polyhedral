@@ -206,72 +206,192 @@ instance face_graded (hC : C.FG) : GradeOrder ℕ (Face C) := sorry
 
 -- ## ROADMAP TO GRADED
 
--- 2. version of Farkas lemma for finite sets
-variable (p) [Fact p.SeparatingLeft] in
-lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ span R s) :
-    ∃ φ : N, 0 > p x φ ∧ ∀ y ∈ s, 0 ≤ p y φ := by
-  let ⟨φ, hφ, h⟩ := PointedCone.farkas p (FG.isDualClosed p ⟨s, rfl⟩) h
-  exact ⟨φ, hφ, fun y hy => h y (subset_span hy)⟩
+lemma foo {C : PointedCone R M} (hC : C.Salient) {x : M} :
+    (C ⊔ span R {x}).Salient ↔ -x ∉ C := by
+  unfold Salient ConvexCone.Salient
+  simp [Submodule.mem_sup, Submodule.mem_span_singleton]
+  constructor <;> intro h
+  · sorry
+  · sorry
 
--- 2. version of Farkas lemma for finite sets
-variable (p) [Fact p.SeparatingLeft] in
-lemma FG.farkas' {s : Finset M} {x : M} (hs : (span R (s : Set M)).Salient) (h : x ∉ span R s) :
-    ∃ φ : N, p x φ = 0 ∧ ∀ y ∈ s, 0 ≤ p y φ ∧ (p y φ = 0 → y = 0) := by
-  obtain ⟨f, hf, h⟩ := FG.farkas p h
-  obtain ⟨g, hg⟩ := exists_dual_pos p hs /- this lemma is not trivial. It proves that a pointed
-    (i.e. salient) cone is contained in some halfspace. g is the normal vector of that halfspace.
-    This lemma is not yet proven, but all the machinery is there. -/
-  use f - (p x f / p x g) • g
-  simp
-  have hgx : 0 < p x g := sorry
+/-- If a point `x` does not lie in a cone `C` and `span R (C ∪ {x})` is salient, then `x` spans
+  a face of `C ∪ {x}`. -/
+lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x : M}
+    (hx : x ∉ C) (hC : (C ⊔ span R {x}).Salient) : (span R {x}).IsFaceOf (C ⊔ span R {x}) := by
+  rw [IsFaceOf.iff_mem_of_add_mem]
   constructor
-  · ring_nf
-    rw [mul_assoc]
-    rw [mul_inv_cancel₀ (ne_of_gt hgx)]
-    simp
-  · intro y hy
-    -- use that f x < 0 but g x and all other f y are >= 0
-    sorry
+  · exact le_sup_right
+  intro y z hy hz hyz
+  simp [Submodule.mem_sup, Submodule.mem_span_singleton] at *
+  obtain ⟨y', hy', a, _, hy⟩ := hy
+  obtain ⟨z', hz', b, _, hz⟩ := hz
+  obtain ⟨c, _, hyz⟩ := hyz
+  rw [← hy, ← hz, add_assoc, ← sub_eq_iff_eq_add] at hyz
+  nth_rw 2 [add_comm] at hyz
+  rw [← add_assoc, ← add_smul, sub_add_eq_sub_sub, sub_eq_iff_eq_add, ← sub_smul] at hyz
+  set t := c - (a + b)
+  have h := C.add_mem hy' hz'
+  rw [← hyz] at h
+  rcases le_or_gt t 0 with ht | ht
+  · set C' := C ⊔ span R {x}
+    have hxC' : x ∈ C' := by
+      simpa [C', Submodule.mem_sup, Submodule.mem_span_singleton] using ⟨0, by simp, 1, by simp⟩
+    have hxC' : -t • x ∈ C' := C'.smul_mem (neg_nonneg.mpr ht) hxC'
+    rw [neg_smul] at hxC'
+    have hCC' : C ≤ C' := by simp [C']
+    have hC : ∀ x ∈ C', -x ∈ C' → x = 0 := by
+      intro x hx hx'
+      by_contra h
+      exact hC _ hx h hx'
+    have h0 := hC _ (hCC' h) hxC'
+    rw [h0, Eq.comm, add_eq_zero_iff_eq_neg] at hyz
+    rw [hyz] at hy'
+    have h0' := hC _ (hCC' hz') (hCC' hy')
+    simp [h0'] at hyz
+    simp [hyz] at hy
+    use a
+  · rw [smul_mem_iff ht] at h
+    contradiction
 
--- If a generator is not in the span of the other generators, then it spans a face.
-lemma FG.mem_span_setminus_iff_span_isFaceOf_span {s : Finset M}
-    (hspan : (span R (s : Set M)).Salient) {x : M} (hx : x ∈ s) (h : x ∉ span R (s \ {x})) :
-      (span R {x}).IsFaceOf (span R s) := by classical
-  have hspan' : (span R (s \ {x} : Finset M)).Salient := Salient.of_le_salient hspan
-    (Submodule.span_monotone (by simp))
-  obtain ⟨g, hg, hg'⟩ := FG.farkas' (Dual.eval R M) hspan' (by simpa using h)
-  apply IsExposedFaceOf.isFaceOf -- it suffices to show that we obtain an exposed face
-  use g
-  constructor <;> intro y hy
-  · by_cases h : y = x
-    · simpa only [h] using ge_of_eq hg
-    · specialize hg' y
-      simp at hg'
-      sorry
-  · rw [Submodule.mem_span_singleton]
-    constructor <;> intro h
-    · sorry
-    · sorry
-      -- rw [Submodule.mem_span_singleton] at h
-      -- obtain ⟨c, rfl⟩ := h
-      -- simp; ring_nf
-      -- rw [mul_assoc]
-      -- rw [mul_inv_cancel₀ (ne_of_gt hgx)]
-      -- simp
+lemma exists_ray {s : Finset M} (hs : s ≠ ∅) (hsal : (span R (s : Set M)).Salient) :
+    ∃ x ∈ s, (span R {x}).IsFaceOf (span R s) := by classical
+  induction s using Finset.induction with
+  | empty => contradiction
+  | insert w s hwr hind =>
+    by_cases h : w ∈ span R s
+    · by_cases hs' : s = ∅
+      · simp [hs']
+      rw [Finset.coe_insert] at ⊢ hsal
+      unfold span at *
+      rw [Submodule.span_insert_eq_span h] at ⊢ hsal
+      obtain ⟨x, hxs, hx⟩ := hind hs' hsal
+      use x
+      simp [hxs, hx]
+    · use w
+      rw [← Finset.union_singleton, Finset.coe_union, span_union] at ⊢ hsal
+      simp at ⊢ hsal
+      exact span_singleton_isFaceOf_sup_singleton_of_not_mem h hsal
 
--- A non-bottom cone has a ray as face.
-lemma FG.exists_ray (hC : C.FG) (hC' : C.Salient) (hC'' : C ≠ ⊥) :
-    ∃ x : M, (span R {x}).IsFaceOf C := by classical
-  let s' := sInf {t : Set M | span R t = C}
-  obtain ⟨s, rfl⟩ := hC
-  let t := sInf {r : Set M | r ⊆ s ∧ span R r = span R s}
-  have ht : t.Nonempty := sorry
-  obtain ⟨x, hx⟩ := ht
-  use x
-  let t' := t \ {x}
-  have ht : t ⊆ s := sorry
-  have ht' : x ∉ t' := sorry
-  refine FG.mem_span_setminus_iff_span_isFaceOf_span hC' (ht hx) ?_
-  sorry
+/-- A non-bottom FG cone has a ray face. -/
+lemma FG.exists_ray' (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
+    ∃ x : M, (span R {x}).IsFaceOf C := by
+  obtain ⟨s, rfl⟩ := hfg
+  have h : s ≠ ∅ := by
+    by_contra h
+    simp [h] at hC
+  obtain ⟨_, hx⟩ := exists_ray h hsal
+  exact ⟨_, hx.2⟩
+
+--------------
+
+-- lemma span_singleton_isFaceOf_union_singleton_of_not_mem {C : PointedCone R M}
+--     (hC : C.DualClosed p) (hC' : C.Salient) {x : M} (hx : x ∉ C) :
+--     (span R {x}).IsFaceOf (C ⊔ span R {x}) := by
+--   replace hC : C.DualClosed (Dual.eval R M) := hC.to_eval
+--   obtain ⟨f, hf, h⟩ := farkas hC hx
+--   obtain ⟨g, hg⟩ := exists_dual_pos₀ (Dual.eval R M) hC'
+--   simp at hf hg h
+--   apply IsExposedFaceOf.isFaceOf
+--   use f - (f x / g x) • g
+--   constructor <;> intro y hy
+--     <;> simp only [Submodule.mem_sup, Submodule.mem_span_singleton] at hy
+--     <;> obtain ⟨y, hy, a, ha, rfl⟩ := hy
+--     <;> obtain ⟨b, rfl⟩ := ha
+--     -- <;> simp
+--   · sorry
+--   · simp [Submodule.mem_span_singleton]
+--     constructor <;> intro h
+--     · sorry
+--     · obtain ⟨b, hb, h⟩ := h
+--       sorry
+
+-- -- 2. version of Farkas lemma for finite sets
+-- variable (p) [Fact p.SeparatingLeft] in
+-- lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ span R s) :
+--     ∃ φ : N, 0 > p x φ ∧ ∀ y ∈ s, 0 ≤ p y φ := by
+--   let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
+--   exact ⟨φ, hφ, fun y hy => h y (subset_span hy)⟩
+
+-- -- 2. version of Farkas lemma for finite sets
+-- variable (p) [Fact p.SeparatingLeft] in
+-- lemma FG.farkas' {s : Finset M} {x : M} (hx : x ∉ span R s) (hx' : -x ∉ span R s) :
+--     ∃ φ : N, p x φ = 0 ∧ ∀ y ∈ s, 0 ≤ p y φ ∧ (p y φ = 0 → y ∈ (span R s).lineal) := by
+--   obtain ⟨f, hf, h⟩ := FG.farkas p hx
+--   obtain ⟨g, hg⟩ := exists_dual_pos p (span R s) /- This lemma is not yet proven. -/
+--   use f - (p x f / p x g) • g
+--   simp
+--   have hgx : 0 < p x g := sorry
+--   constructor
+--   · simp [ne_of_gt hgx]
+--   · intro y hy
+--     -- somehow use that f x < 0, g x > 0 and f y >= 0 for all y != x.
+--     constructor
+--     · sorry
+--     · intro h
+--       sorry
+
+-- -- 2. version of Farkas lemma for finite sets
+-- variable (p) [Fact p.SeparatingLeft] in
+-- lemma FG.farkas'' {s : Finset M} {x : M} (hs : (span R (s : Set M)).Salient) (h : x ∉ span R s) :
+--     ∃ φ : N, p x φ = 0 ∧ ∀ y ∈ s, 0 ≤ p y φ ∧ (p y φ = 0 → y = 0) := by
+--   obtain ⟨f, hf, h⟩ := FG.farkas p h
+--   obtain ⟨g, hg⟩ := exists_dual_pos p hs /- this lemma is not trivial. It proves that a pointed
+--     (i.e. salient) cone is contained in some halfspace. g is the normal vector of that halfspace.
+--     This lemma is not yet proven, but all the machinery is there. -/
+--   use f - (p x f / p x g) • g
+--   simp
+--   have hgx : 0 < p x g := sorry
+--   constructor
+--   · simp [ne_of_gt hgx]
+--   · intro y hy
+
+--     -- use that f x < 0 but g x and all other f y are >= 0
+--     sorry
+
+-- -- If a generator is not in the span of the other generators, then it spans a face.
+-- lemma FG.mem_span_setminus_iff_span_isFaceOf_span {s : Finset M}
+--     (hs : (span R (s : Set M)).Salient) {x : M} (hx : x ∈ s) (h : x ∉ span R (s \ {x})) :
+--       (span R {x}).IsFaceOf (span R s) := by classical
+--   have h' : (span R _).DualClosed (Dual.eval R M) := FG.isDualClosed _ ⟨s \ {x}, rfl⟩
+--   simp at h'
+--   have hfar := PointedCone.farkas h' h
+
+
+--   have hspan' : (span R (s \ {x} : Finset M)).Salient := Salient.of_le_salient hspan
+--     (Submodule.span_monotone (by simp))
+--   obtain ⟨g, hg, hg'⟩ := FG.farkas'' (Dual.eval R M) hspan' (by simpa using h)
+--   apply IsExposedFaceOf.isFaceOf -- it suffices to show that we obtain an exposed face
+--   use g
+--   constructor <;> intro y hy
+--   · by_cases h : y = x
+--     · simpa only [h] using ge_of_eq hg
+--     · specialize hg' y
+--       simp at hg'
+--       sorry
+--   · rw [Submodule.mem_span_singleton]
+--     constructor <;> intro h
+--     · sorry
+--     · sorry
+--       -- rw [Submodule.mem_span_singleton] at h
+--       -- obtain ⟨c, rfl⟩ := h
+--       -- simp; ring_nf
+--       -- rw [mul_assoc]
+--       -- rw [mul_inv_cancel₀ (ne_of_gt hgx)]
+--       -- simp
+
+-- -- A non-bottom cone has a ray as face.
+-- lemma FG.exists_ray (hC : C.FG) (hC' : C.Salient) (hC'' : C ≠ ⊥) :
+--     ∃ x : M, (span R {x}).IsFaceOf C := by classical
+--   let s' := sInf {t : Set M | span R t = C}
+--   obtain ⟨s, rfl⟩ := hC
+--   let t := sInf {r : Set M | r ⊆ s ∧ span R r = span R s}
+--   have ht : t.Nonempty := sorry
+--   obtain ⟨x, hx⟩ := ht
+--   use x
+--   let t' := t \ {x}
+--   have ht : t ⊆ s := sorry
+--   have ht' : x ∉ t' := sorry
+--   refine FG.mem_span_setminus_iff_span_isFaceOf_span hC' (ht hx) ?_
+--   sorry
 
 end PointedCone
