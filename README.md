@@ -20,3 +20,15 @@ Currently the project implements:
 * face theorey of polyhedral cones (all faces are exposed, the face lattice is graded, etc.)
 
 <!--blueprint:  https://ooovi.github.io/Polyhedral/-->
+## On it's way
+- https://github.com/leanprover-community/mathlib4/pull/34006
+- https://github.com/leanprover-community/mathlib4/pull/33664
+- https://github.com/leanprover-community/mathlib4/pull/34703
+- https://github.com/leanprover-community/mathlib4/pull/33980
+- https://github.com/leanprover-community/mathlib4/pull/33761
+- https://github.com/leanprover-community/mathlib4/pull/34487
+- https://github.com/leanprover-community/mathlib4/pull/34007
+- https://github.com/leanprover-community/mathlib4/pull/34006
+- https://github.com/leanprover-community/mathlib4/pull/33993
+- https://github.com/leanprover-community/mathlib4/pull/33986
+- https://github.com/leanprover-community/mathlib4/pull/33924
