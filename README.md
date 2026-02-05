@@ -28,7 +28,6 @@ Currently the project implements:
 - https://github.com/leanprover-community/mathlib4/pull/33761
 - https://github.com/leanprover-community/mathlib4/pull/34487
 - https://github.com/leanprover-community/mathlib4/pull/34007
-- https://github.com/leanprover-community/mathlib4/pull/34006
 - https://github.com/leanprover-community/mathlib4/pull/33993
 - https://github.com/leanprover-community/mathlib4/pull/33986
 - https://github.com/leanprover-community/mathlib4/pull/33924
