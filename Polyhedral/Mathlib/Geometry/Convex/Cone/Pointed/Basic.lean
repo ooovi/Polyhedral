@@ -195,7 +195,6 @@ lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = 
 lemma span_union (s t : Set M) : span R (s ∪ t) = span R s ⊔ span R t :=
     Submodule.span_union s t
 
-
 section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
@@ -709,6 +708,20 @@ theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • 
     rw [inv_smul_smul₀ (ne_of_lt hc).symm] at h
     exact h
   · exact C.smul_mem (le_of_lt hc) h
+
+-- analogue of `Submodule.span_singleton_smul_eq`
+theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} = span R {x} := by
+  ext y
+  simp [Submodule.mem_span_singleton]
+  constructor <;> intro h <;> obtain ⟨a, ha, h⟩ := h
+  · use a * r
+    constructor
+    · exact mul_nonneg ha (le_of_lt hr)
+    · simpa [smul_smul] using h
+  · use a * r⁻¹
+    constructor
+    · exact mul_nonneg ha (le_of_lt (inv_pos.mpr hr))
+    · simpa [smul_smul, inv_mul_cancel_right₀ (ne_of_lt hr).symm] using h
 
 end DivisionRing
 
