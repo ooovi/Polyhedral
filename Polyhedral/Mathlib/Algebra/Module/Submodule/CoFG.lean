@@ -250,7 +250,7 @@ lemma CoFG.disjoint_fg {S T : Submodule R M}
 
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
   obtain ⟨U, hSU, hUT⟩ := exists_isCompl_of_codisjoint hST
-  exact (fg_of_le_fg hS hSU).isCompl_cofg hUT
+  exact (FG.of_le hS hSU).isCompl_cofg hUT
 
 end DivisionRing
 

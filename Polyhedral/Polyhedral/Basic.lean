@@ -273,7 +273,7 @@ private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.
   use .embed S ⊔ (P₁ ⊓ P₂)
   constructor
   · refine FG.sup (Submodule.embed_fg_iff_fg.mpr (ker_compl_fg f range_le (FG.sup h₁ h₂) hs)) ?_
-    exact inf_fg_right P₁ h₂
+    exact FG.of_le h₂ inf_le_right
   · rw [left_eq_inf.mpr hM₁, left_eq_inf.mpr hM₂, sup_assoc]
     have Xeq := congrArg (Submodule.map X.subtype) hs.symm.sup_eq_top.symm
     simp_rw [Submodule.map_top, range_subtype, Submodule.map_sup, f, X] at Xeq
@@ -305,8 +305,8 @@ private lemma aux'' {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG
     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
   obtain ⟨M₁, hle₁, hM₁⟩ := exists_isCompl_of_disjoint hd₁
   obtain ⟨M₂, hle₂, hM₂⟩ := exists_isCompl_of_disjoint hd₂
-  have h₁ : (P₁ ⊓ M₁).FG := fg_of_le_fg h₁ inf_le_left
-  have h₂ : (P₂ ⊓ M₂).FG := fg_of_le_fg h₂ inf_le_left
+  have h₁ : (P₁ ⊓ M₁).FG := FG.of_le h₁ inf_le_left
+  have h₂ : (P₂ ⊓ M₂).FG := FG.of_le h₂ inf_le_left
   obtain ⟨P, Pfg, Pdist⟩ := aux' h₁ h₂ inf_le_right inf_le_right hM₁.symm hM₂.symm
   use P
   simp [← Pdist, Pfg]
@@ -317,7 +317,7 @@ private lemma aux {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) 
     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
   obtain ⟨P₁', hle₁, hdis₁, hP₁⟩ := exists_le_disjoint_sup_self P₁ L₁
   obtain ⟨P₂', hle₂, hdis₂, hP₂⟩ := exists_le_disjoint_sup_self P₂ L₂
-  simpa [hP₁, hP₂] using aux'' (fg_of_le_fg h₁ hle₁) (fg_of_le_fg h₂ hle₂) L₁ L₂ hdis₁ hdis₂
+  simpa [hP₁, hP₂] using aux'' (FG.of_le h₁ hle₁) (FG.of_le h₂ hle₂) L₁ L₂ hdis₁ hdis₂
 
 omit [LinearOrder R] [IsOrderedRing R] in
 private lemma auxi {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M) :
@@ -338,8 +338,8 @@ private lemma auxi {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG)
   obtain ⟨M₂, hM₂⟩ := Submodule.exists_isCompl L₂
   let P₁ := P₁ ⊓ M₁
   let P₂ := P₂ ⊓ M₂
-  have h₁ : P₁.FG := fg_of_le_fg h₁ inf_le_left
-  have h₂ : P₂.FG := fg_of_le_fg h₂ inf_le_left
+  have h₁ : P₁.FG := FG.of_le h₁ inf_le_left
+  have h₂ : P₂.FG := FG.of_le h₂ inf_le_left
   have hPL₁ : Disjoint P₁ L₁ := hM₁.symm.disjoint.inf_left' _
   have hPL₂ : Disjoint P₂ L₂ := hM₂.symm.disjoint.inf_left' _
   let f₁ := hM₁.projection --
@@ -413,7 +413,7 @@ lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : FG S) : FG (C ⊓ S) := by
   obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span .id
   rw [← hD, inf_assoc, ← coe_inf]
-  exact inf_fgdual_fg hcofg <| coe_fg <| Submodule.inf_fg_right _ hS
+  exact inf_fgdual_fg hcofg <| coe_fg <| FG.of_le hS inf_le_right
 
 /-- The intersection of two polyhedral cones is polyhdral. -/
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :

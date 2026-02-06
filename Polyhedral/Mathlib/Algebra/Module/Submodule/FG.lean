@@ -96,21 +96,9 @@ variable [Ring R] [IsNoetherianRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 
-/-- The intersection of a submodule with an FG submodule is FG. -/
-lemma inf_fg_right (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (S ⊓ T).FG := by
-  have := isNoetherian_of_fg_of_noetherian _ hT
-  exact fg_of_restrict_le inf_le_right <| IsNoetherian.noetherian <| restrict T (S ⊓ T)
-
-/-- The intersection of a submodule with an FG submodule is FG. -/
-lemma inf_fg_left {S : Submodule R M} (hS : S.FG) (T : Submodule R M) : (S ⊓ T).FG := by
-  rw [inf_comm]; exact inf_fg_right T hS
-
 /-- The restriction of an FG submodule to an arbitrary submodule is FG. -/
 lemma restrict_fg (S : Submodule R M) {T : Submodule R M} (hT : T.FG) : (restrict S T).FG := by
-  rw [restrict_fg_iff_inf_fg]; exact inf_fg_right S hT
-
-lemma fg_of_le_fg {S T : Submodule R M} (hT : T.FG) (hST : S ≤ T) : S.FG := by
-  rw [← inf_eq_left.mpr hST]; exact S.inf_fg_right hT
+  rw [restrict_fg_iff_inf_fg]; exact FG.of_le hT inf_le_right
 
 end IsNoetherianRing
 

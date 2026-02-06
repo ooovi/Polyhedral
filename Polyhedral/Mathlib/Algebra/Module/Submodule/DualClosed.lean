@@ -419,7 +419,7 @@ variable (p) [Fact p.SeparatingRight] in
 lemma CoFG.dual_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := by
   apply fg_of_fg_map_injective p.flip SeparatingRight.injective
   rw [S.dual_dualAnnihilator', map_comap_eq]
-  exact inf_fg_right _ hS.dualAnnihilator_fg
+  exact FG.of_le hS.dualAnnihilator_fg inf_le_right
 
 /- Not true!! Consider M = N the space finitely supported sequences. Let S be the subspace of
     sequences with sum x_i = 0. Then S^* = bot and S^** = top. -/
@@ -516,7 +516,7 @@ private lemma sup_fgdual_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) 
     obtain ⟨S', hfg, hS'⟩ := hS.dual_fg_sup_ker
     rw [← hS', inf_comm, ← inf_sup_assoc_of_le]
     · rw [dual_sup, dual_union_ker]
-      exact fgdual_of_fg p (inf_fg_right _ hfg)
+      exact fgdual_of_fg p (FG.of_le hfg inf_le_right)
     exact ker_le_dual_flip _
   · exact dual_dualClosed _ _
   · simpa [dual_sup, dual_union_ker] using fgdual_of_fg _ hT
