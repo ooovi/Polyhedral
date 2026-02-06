@@ -620,9 +620,9 @@ variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid
   [Module R M]
 
 lemma ofSubmodule_fg_of_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R M).FG
-    := Submodule.restrictedScalars_fg_of_fg _ hS
+    := Submodule.FG.restrictScalars hS
 
-/- We current struggle to implement the converse, see `fg_of_restrictedScalars_fg`. -/
+/- We current struggle to implement the converse, see `FG.of_restrictScalars`. -/
 alias coe_fg := ofSubmodule_fg_of_fg
 
 -- Q: is this problematic?
@@ -630,7 +630,7 @@ instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
 
 @[simp]
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
-  ⟨Submodule.fg_of_restrictedScalars_fg, coe_fg⟩
+  ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
 
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (M := M) C).FG :=

@@ -131,10 +131,10 @@ variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
-    := Submodule.restrictScalars_inf _
+    := Submodule.restrictScalars_inf _ _ _
 
 lemma sInf_coe (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
-  Submodule.restrictScalars_sInf _
+  Submodule.restrictScalars_sInf _ _
 
 lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf, iInf_image]
@@ -143,10 +143,10 @@ lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : Po
 --   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf]
 
 lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
-    := Submodule.restrictScalars_sup _
+    := Submodule.restrictScalars_sup _ _ _
 
 lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
-  Submodule.restrictScalars_sSup _
+  Submodule.restrictScalars_sSup _ _
 
 lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : PointedCone R M) := by
   rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
@@ -621,9 +621,9 @@ variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid
   [Module R M]
 
 lemma ofSubmodule_fg_of_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R M).FG
-    := Submodule.restrictedScalars_fg_of_fg _ hS
+    := Submodule.FG.restrictScalars hS
 
-/- We current struggle to implement the converse, see `fg_of_restrictedScalars_fg`. -/
+/- We current struggle to implement the converse, see `FG.of_restrictScalars`. -/
 alias coe_fg := ofSubmodule_fg_of_fg
 
 -- Q: is this problematic?
@@ -631,7 +631,7 @@ instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
 
 @[simp]
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
-  ⟨Submodule.fg_of_restrictedScalars_fg, coe_fg⟩
+  ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
 
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (M := M) C).FG :=
