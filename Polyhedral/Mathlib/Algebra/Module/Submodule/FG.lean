@@ -25,7 +25,7 @@ alias sup_fg := Submodule.FG.sup
 -- is probably better called `Module.fg_of_linearEquiv` or so.
 lemma FG.linearEquiv {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T) (hS : S.FG) :
     T.FG := by -- T.fg_top.mp <| fg_of_linearEquiv e.symm (S.fg_top.mpr hS)
-  rw [← fg_top] at *
+  rw [← Submodule.fg_top] at *
   exact fg_of_linearEquiv e.symm hS
 
 -- ## RESTRICT / EMBED

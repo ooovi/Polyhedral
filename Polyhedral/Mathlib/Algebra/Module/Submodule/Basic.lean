@@ -74,31 +74,6 @@ variable (S)
 lemma subtype_restrictScalars (p : Submodule R M) :
     p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
 
-lemma restrictScalars_mono {s t : Submodule R M} (hST : s ≤ t) :
-    s.restrictScalars S ≤ t.restrictScalars S := (restrictScalarsEmbedding S R M).monotone hST
-
-@[simp] lemma restrictScalars_inf {s t : Submodule R M} :
-    (s ⊓ t).restrictScalars S = (s.restrictScalars S) ⊓ (t.restrictScalars S) := by
-  ext x; simp
-
-@[simp] lemma restrictScalars_sup {s t : Submodule R M} :
-    (s ⊔ t).restrictScalars S = (s.restrictScalars S) ⊔ (t.restrictScalars S):= by
-  ext x; simp [mem_sup]
-
-@[simp] lemma restrictScalars_sSup {s : Set (Submodule R M)} :
-    (sSup s).restrictScalars S = sSup (restrictScalars S '' s) :=
-  (restrictScalarsLatticeHom S R M).map_sSup' s
-
-@[simp] lemma restrictScalars_sInf {s : Set (Submodule R M)} :
-    (sInf s).restrictScalars S = sInf (restrictScalars S '' s) :=
-  (restrictScalarsLatticeHom S R M).map_sInf' s
-
-@[simps]
-def restrictScalars_CompleteLatticeHom : CompleteLatticeHom (Submodule R M) (Submodule S M) where
-  toFun := restrictScalars S
-  map_sInf' _ := restrictScalars_sInf S
-  map_sSup' _ := restrictScalars_sSup S
-
 -- instance {p : Submodule R M} : CoeDep (Submodule R M) p (Submodule S M) := ⟨restrictScalars S p⟩
 
 
@@ -523,7 +498,7 @@ lemma exists_le_disjoint_sup_self (S T : Submodule R M) :
     ∃ S' : Submodule R M, S' ≤ S ∧ Disjoint S' T ∧ S' ⊔ T = S ⊔ T := by
   obtain ⟨S', hSS', hST'⟩ := exists_isCompl_of_codisjoint (codisjoint_restrict_sup S T)
   exact ⟨embed S',
-    by simpa [embed_restrict_of_le le_sup_left] using embed_mono hSS',
+    by simpa [embed_restrict_of_le (toAddSubmonoid_le.mp hSS')] using embed_mono hSS',
     by simpa using embed_disjoint hST'.disjoint,
     by simpa using embed_codisjoint hST'.codisjoint⟩
 

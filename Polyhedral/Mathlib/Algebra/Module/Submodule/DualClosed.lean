@@ -411,7 +411,7 @@ def dual_linearMap_dual_quot (S : Submodule R M) :
 --   simpa [← finite_def, Module.finite_dual_iff] using hS
 
 lemma CoFG.dualAnnihilator_fg {S : Submodule R M} (hS : S.CoFG) : FG S.dualAnnihilator := by
-  rw [← fg_top]
+  rw [← Submodule.fg_top]
   refine fg_of_linearEquiv S.dualAnnihilator_linearEquiv_dual_quot ?_
   simpa [← finite_def, Module.finite_dual_iff] using hS
 

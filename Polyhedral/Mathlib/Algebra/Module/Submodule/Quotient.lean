@@ -45,10 +45,10 @@ instance {S : Submodule R M} : CoeOut (Submodule R S) (Submodule R M) := ⟨embe
 --   map (T : Submodule R M).mkQ S
 
 instance {S : Submodule R M} : HasQuotient M (Submodule R S) where
-  quotient' T := quot S T
+  Quotient T := quot S T
 
 instance {S : Submodule R M} : HasQuotient S (Submodule R S) where
-  quotient' T := quot S T
+  Quotient T := quot S T
 
 example (S : Submodule R M) (T : Submodule R S) : S ⧸ T := sorry
 

@@ -426,15 +426,14 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   replace hD₂ := congrArg (Submodule.span R ∘ SetLike.coe) hD₂
   simp only [Function.comp_apply] at hD₁ hD₂
   rw [← PointedCone.coe_sup_submodule_span, Submodule.span_union] at hD₁ hD₂
-  simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars,
-    restrictScalars_self] at hD₁ hD₂
+  simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars] at hD₁ hD₂
   --
   have h := Submodule.le_span (R := R) (M := M) (s := (C₁ ⊓ C₂ : PointedCone R M))
   replace h := le_trans h (span_inter_le _ _)
   rw [← hD₁, ← hD₂] at h
   --
   obtain ⟨P, hPfg, hP⟩ := aux (submodule_span_fg hfg₁) (submodule_span_fg hfg₂) C₁.lineal C₂.lineal
-  rw [hP] at h
+  simp_rw [Submodule.restrictScalars_self, hP] at h
   nth_rw 2 [← ofSubmodule_coe] at h
   rw [Set.le_iff_subset] at h
   rw [SetLike.coe_subset_coe] at h
@@ -663,6 +662,8 @@ lemma toPointedCone_injective :
 instance : SetLike (PolyhedralCone R M) M where
   coe C := C.toPointedCone
   coe_injective' := SetLike.coe_injective.comp toPointedCone_injective
+
+instance : PartialOrder (PolyhedralCone R M) := .ofSetLike (PolyhedralCone R M) M
 
 @[simp] lemma coe_toPointedCone (C : PolyhedralCone R M) :
     (C.toPointedCone : Set M) = C := rfl
