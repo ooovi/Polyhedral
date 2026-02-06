@@ -74,7 +74,7 @@ variable (p) [p.IsPerfPair] in
   rw [← dual_span_lineal_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
   nth_rw 3 [← PointedCone.ofSubmodule_coe]
-  rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (isPolyhedral_of_submdule _)]
+  rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]
   rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
   rw [dual_flip_dual p hC]
   nth_rw 2 [← Submodule.dual_span]

@@ -41,7 +41,7 @@ lemma IsPolyhedral.def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
 lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
 
 /-- Submodules are polyhedral cones. -/
-@[simp] lemma IsPolyhedral.of_submdule (S : Submodule R M) :
+@[simp] lemma IsPolyhedral.of_submodule (S : Submodule R M) :
     (S : PointedCone R M).IsPolyhedral := by
   simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
 
@@ -153,7 +153,7 @@ lemma IsPolyhedral.sup (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
 
 /-- The sum of a polyhedral cone with a submodule is polyhedral. -/
 lemma IsPolyhedral.sup_submodule (hC : C.IsPolyhedral) (S : Submodule R M) :
-    (C ⊔ S).IsPolyhedral := hC.sup (.of_submdule S)
+    (C ⊔ S).IsPolyhedral := hC.sup (.of_submodule S)
 
 /-- The sum of a polyhedral cone with an FG cone is polyhedral. -/
 lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG) :
@@ -452,7 +452,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   `C ⊓ S` is FG. This is a strengthened version of `IsPolyhedral.fg_inf_of_isCompl`. -/
 lemma IsPolyhedral.fg_inf_of_disjoint_lineal (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : Disjoint C.lineal S) : FG (C ⊓ S) := by
-  refine fg_of_fg_lineal (hC.inf <| .of_submdule S) ?_
+  refine fg_of_fg_lineal (hC.inf <| .of_submodule S) ?_
   simp only [lineal_inf, lineal_submodule, disjoint_iff.mp hS, fg_bot]
   -- TODO: fg_bot should be a simp lemma
 
@@ -461,7 +461,7 @@ variable (p) in
 lemma IsPolyhedral.dual (hC : C.IsPolyhedral) : (dual p C).IsPolyhedral := by
   obtain ⟨D, hDfg, hD⟩ := hC.exists_fg_sup_lineal
   rw [← hD, dual_sup_dual_inf_dual, Submodule.coe_restrictScalars, dual_eq_submodule_dual]
-  exact IsPolyhedral.inf (.of_dual_of_fg p hDfg) (.of_submdule _)
+  exact IsPolyhedral.inf (.of_dual_of_fg p hDfg) (.of_submodule _)
 
 variable (p) in
 -- I believe proving this requires a lot of other work to be done before (above).
@@ -693,8 +693,8 @@ def FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.FG
 
 -- ## ORDER
 
-def bot : PolyhedralCone R M := ⟨_, .of_submdule ⊥⟩
-def top : PolyhedralCone R M := ⟨_, .of_submdule ⊤⟩
+def bot : PolyhedralCone R M := ⟨_, .of_submodule ⊥⟩
+def top : PolyhedralCone R M := ⟨_, .of_submodule ⊤⟩
 
 -- alias lineal := bot
 
@@ -769,7 +769,7 @@ end CommRing
 -- ## SUBMODULE
 
 instance : Coe (Submodule R M) (PolyhedralCone R M) where
-  coe S := ⟨_, .of_submdule S⟩
+  coe S := ⟨_, .of_submodule S⟩
 
 -- instance : Coe (HalfspaceOrTop R M) (PolyhedralCone R M) := sorry
 

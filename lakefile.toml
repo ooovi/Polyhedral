@@ -26,3 +26,6 @@ rev = "main"
 
 [[lean_lib]]
 name = "Polyhedral"
+
+[[lean_lib]]
+name = "Experimental"

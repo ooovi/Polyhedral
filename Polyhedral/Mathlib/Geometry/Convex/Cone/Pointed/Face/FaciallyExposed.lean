@@ -49,10 +49,10 @@ variable (p) [Fact (Function.Surjective p.flip)] in
     have H : (C ⊔ Submodule.span R (F : Set M)).lineal = Submodule.span R F := by
       sorry
     rw [H]
-    exact IsFaceOf.inf_submodule hF
-  · simpa using FG.dual_fgdual _ hC
+    exact IsFaceOf.inf_linSpan hF
+  · simpa using FG.dual_fgdual _ sorry -- hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg hC)
+    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg sorry) -- hC)
 
 end PointedCone
 

@@ -2,7 +2,7 @@
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.Algebra.Order.Nonneg.Module
 import Mathlib.Geometry.Convex.Cone.Pointed
-import Polyhedral.Mathlib.Algebra.Module.Submodule.RestrictScalars_PR
+import Polyhedral.PR.RestrictScalars_PR
 
 open Function Submodule
 
