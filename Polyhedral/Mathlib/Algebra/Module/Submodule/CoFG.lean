@@ -245,11 +245,11 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 
 lemma CoFG.disjoint_fg {S T : Submodule R M}
     (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
-  obtain ⟨U, hSU, hUT⟩ := exists_isCompl_of_disjoint hST
+  obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
   exact (cofg_of_le hSU hS).isCompl_fg hUT
 
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
-  obtain ⟨U, hSU, hUT⟩ := exists_isCompl_of_codisjoint hST
+  obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
   exact (FG.of_le hS hSU).isCompl_cofg hUT
 
 end DivisionRing

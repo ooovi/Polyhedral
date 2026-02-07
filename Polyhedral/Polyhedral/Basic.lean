@@ -303,8 +303,8 @@ omit [LinearOrder R] [IsOrderedRing R] in
 private lemma aux'' {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M)
     (hd₁ : Disjoint P₁ L₁) (hd₂ : Disjoint P₂ L₂) :
     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
-  obtain ⟨M₁, hle₁, hM₁⟩ := exists_isCompl_of_disjoint hd₁
-  obtain ⟨M₂, hle₂, hM₂⟩ := exists_isCompl_of_disjoint hd₂
+  obtain ⟨M₁, hle₁, hM₁⟩ := hd₁.exists_isCompl
+  obtain ⟨M₂, hle₂, hM₂⟩ := hd₂.exists_isCompl
   have h₁ : (P₁ ⊓ M₁).FG := FG.of_le h₁ inf_le_left
   have h₂ : (P₂ ⊓ M₂).FG := FG.of_le h₂ inf_le_left
   obtain ⟨P, Pfg, Pdist⟩ := aux' h₁ h₂ inf_le_right inf_le_right hM₁.symm hM₂.symm
