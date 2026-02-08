@@ -157,8 +157,7 @@ variable (p 𝕜) in
 private lemma span_sup_dual_eq_dual_dual_inf_span {C : PointedCone 𝕜 M} (hC : C.FG) (w : N) :
     span 𝕜 {w} ⊔ dual p C = dual p (dual p.flip {w} ∩ C) := by
   have ⟨s, hs⟩ := hC
-  rw [← auxGenSet_eq_dual_inf _ _ hC, ← hs, dual_span,
-    ← span_auxGenSet, dual_span, dual_auxGenSet s.finite_toSet]
+  simp [← hs, ← span_auxGenSet_eq_dual_inf_span, dual_auxGenSet]
 
 variable (p 𝕜) in
 private lemma span_sup_dual_eq_dual_dual_inf_span' (s : Finset N) (t : Finset M) :
