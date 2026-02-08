@@ -122,19 +122,20 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   rw [mul_inv_cancel_left₀ hy.2.ne]
   exact hv2 ⟨hzS, hzw⟩ hy
 
+variable (p 𝕜) in
+lemma auxGenSet_eq_dual_inf (hs : s.Finite) (w : N) :
+    auxGenSet p s w = (dual p.flip {w} : Set M) ∩ s := by
+  -- Olivia help !
+  sorry
+
+
 ------- vvvvvvvv Experiments below
 
 -- There is something that should follow immediately from the above, but does not because
 -- the proof looses information about these details. Can we reconstruct it?
 
 variable (p 𝕜) in
-lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
-    auxGenSet p s w = (dual p.flip {w} : Set M) ∩ s := by
-  -- Olivia help !
-  sorry
-
-variable (p 𝕜) in
-lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
+lemma span_auxGenSet_eq_dual_inf_span' (hs : s.Finite) (w : N) :
     span 𝕜 (auxGenSet p s w) = dual p.flip {w} ⊓ span 𝕜 s := by
   ext x
   simp
@@ -144,13 +145,9 @@ lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
   sorry
 
 variable (p 𝕜) in
-private lemma span_sup_dual_eq_dual_dual_inf_span
-    (hs : s.Finite) (w : N) :
-    span 𝕜 {w} ⊔ dual p s = dual p (dual p.flip {w} ∩ span 𝕜 s) := by
-  rw [← Submodule.coe_inf]
-  rw [← span_auxGenSet_eq_dual_inf_span 𝕜 p hs w]
-  rw [dual_span, Eq.comm]
-  exact dual_auxGenSet hs
+private lemma span_sup_dual_eq_dual_dual_inf_span (hs : s.Finite) (w : N) :
+    span 𝕜 {w} ⊔ dual p s = dual p (dual p.flip {w} ∩ s) := by
+  simpa [← auxGenSet_eq_dual_inf _ _ hs, Eq.comm] using dual_auxGenSet hs
 
 variable (p 𝕜) in
 private lemma span_sup_dual_eq_dual_dual_inf_span' (s : Finset N) (t : Finset M) :
@@ -200,7 +197,7 @@ lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
   · specialize h p fg_bot hS bot_le rfl
     obtain ⟨D, hfgdual, hD⟩ := h
     exact ⟨_, sup_fg_fgdual hC hfgdual, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
-  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p
+  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p  -- <-- submodule duality theory
     exact ⟨_, coe_fgdual_iff.mpr hfgdual, by simp [← restrictScalars_inf, inf_comm, hC', hD.eq_bot]⟩
 
 variable (p) [Fact p.SeparatingRight] in
@@ -226,7 +223,7 @@ lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
   constructor
   · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hS)
   · rw [dual_sup_dual_inf_dual]
-    simp [Submodule.FG.dual_dual_flip _ hS]
+    simp [Submodule.FG.dual_dual_flip _ hS] -- <-- submodule duality theory
 
 @[deprecated FG.exists_fgdual_dual (since := "")]
 alias FG.exists_fgdual_flip_dual := FG.exists_fgdual_dual
@@ -428,7 +425,7 @@ lemma sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FGDual p) 
   rw [sup_assoc, ← sup_assoc]
   refine sup_fg_fgdual (sup_fg hCfg hDfg) ?_
   rw [← coe_sup, coe_fgdual_iff]
-  exact Submodule.sup_fgdual hD.lineal_fgdual _
+  exact Submodule.sup_fgdual hD.lineal_fgdual _  -- <-- submodule duality theory
 
 -- NOTE: Assumption `p.SeparatingLeft` cannot be avoided, see analogous proof for submodules. -/
 variable (p) [Fact p.SeparatingLeft] in
