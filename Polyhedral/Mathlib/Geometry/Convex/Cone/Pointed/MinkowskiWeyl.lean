@@ -123,11 +123,20 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   exact hv2 ⟨hzS, hzw⟩ hy
 
 variable (p 𝕜) in
-lemma auxGenSet_eq_dual_inf (hs : s.Finite) (w : N) :
-    auxGenSet p s w = (dual p.flip {w} : Set M) ∩ s := by
+lemma auxGenSet_eq_dual_inf {C : PointedCone 𝕜 M} (hC : C.FG) (w : N) :
+    auxGenSet p C w = (dual p.flip {w} : Set M) ∩ C := by
   -- Olivia help !
   sorry
 
+variable (p 𝕜) in
+lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
+    span 𝕜 (auxGenSet p s w) = (dual p.flip {w} : Set M) ∩ span 𝕜 s := by
+  -- Olivia help !
+  sorry
+
+lemma span_auxGenSet (s : Set M) :
+    span 𝕜 (auxGenSet p s w) = auxGenSet p (span 𝕜 s) w := by
+  sorry
 
 ------- vvvvvvvv Experiments below
 
@@ -145,9 +154,11 @@ lemma span_auxGenSet_eq_dual_inf_span' (hs : s.Finite) (w : N) :
   sorry
 
 variable (p 𝕜) in
-private lemma span_sup_dual_eq_dual_dual_inf_span (hs : s.Finite) (w : N) :
-    span 𝕜 {w} ⊔ dual p s = dual p (dual p.flip {w} ∩ s) := by
-  simpa [← auxGenSet_eq_dual_inf _ _ hs, Eq.comm] using dual_auxGenSet hs
+private lemma span_sup_dual_eq_dual_dual_inf_span {C : PointedCone 𝕜 M} (hC : C.FG) (w : N) :
+    span 𝕜 {w} ⊔ dual p C = dual p (dual p.flip {w} ∩ C) := by
+  have ⟨s, hs⟩ := hC
+  rw [← auxGenSet_eq_dual_inf _ _ hC, ← hs, dual_span,
+    ← span_auxGenSet, dual_span, dual_auxGenSet s.finite_toSet]
 
 variable (p 𝕜) in
 private lemma span_sup_dual_eq_dual_dual_inf_span' (s : Finset N) (t : Finset M) :
