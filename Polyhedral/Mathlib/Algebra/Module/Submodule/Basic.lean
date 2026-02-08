@@ -438,6 +438,7 @@ lemma exists_isProj (S : Submodule R M) : ∃ p : M →ₗ[R] M, IsProj S p := b
   have ⟨_, hS'⟩ := exists_isCompl S
   exact ⟨_, IsCompl.projection_isProj hS'⟩
 
+-- TODO: this should likely exist on modular lattices
 lemma exists_le_disjoint_sup_self (S T : Submodule R M) :
     ∃ S' : Submodule R M, S' ≤ S ∧ Disjoint S' T ∧ S' ⊔ T = S ⊔ T := by
   obtain ⟨S', hSS', hST'⟩ := (codisjoint_restrict_sup S T).exists_isCompl

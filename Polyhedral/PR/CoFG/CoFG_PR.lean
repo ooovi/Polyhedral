@@ -5,8 +5,6 @@ Authors: Martin Winter
 -/
 import Mathlib.RingTheory.PrincipalIdealDomain
 
-import Polyhedral.PR.CoFG.Basic_PR
-import Polyhedral.PR.CoFG.FG_PR
 import Polyhedral.PR.Restrict.Restrict_PR
 
 open Module Function LinearMap
@@ -135,7 +133,7 @@ lemma CoFG.disjoint_fg {S T : Submodule R M}
 /-- A submodule codisjoint to an FG submodule is CoFG. -/
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
   obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
-  exact (fg_le hS hSU).isCompl_cofg hUT
+  exact (FG.of_le hS hSU).isCompl_cofg hUT
 
 end DivisionRing
 

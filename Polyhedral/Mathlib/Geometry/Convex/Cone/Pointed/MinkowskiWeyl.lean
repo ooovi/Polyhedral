@@ -129,6 +129,12 @@ private lemma dual_auxGenSet (hs : s.Finite) :
 
 variable (p 𝕜) in
 lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
+    auxGenSet p s w = (dual p.flip {w} : Set M) ∩ s := by
+  -- Olivia help !
+  sorry
+
+variable (p 𝕜) in
+lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
     span 𝕜 (auxGenSet p s w) = dual p.flip {w} ⊓ span 𝕜 s := by
   ext x
   simp

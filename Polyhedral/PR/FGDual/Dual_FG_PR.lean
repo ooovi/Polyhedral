@@ -279,7 +279,7 @@ private lemma FGDual.sup_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) 
   obtain ⟨Q, hQfg, hQ⟩ := hS.dual_fg_sup_ker
   rw [← coe_inf, ← hQ, sup_comm, sup_inf_assoc_of_le]
   · rw [sup_comm, dual_sup, dual_union_ker]
-    exact FGDual.of_dual_fg _ <| fg_le hQfg inf_le_left
+    exact FGDual.of_dual_fg _ <| hQfg.of_le inf_le_left
   exact ker_le_dual_flip _
 
 /-- The sup of an FG submodule with an FGDual submodule is FGDual. -/
@@ -355,7 +355,7 @@ def dual_linearMap_dual_quot (S : Submodule R M) :
 --   simpa [← finite_def, Module.finite_dual_iff] using hS
 
 lemma CoFG.dualAnnihilator_fg {S : Submodule R M} (hS : S.CoFG) : FG S.dualAnnihilator := by
-  rw [← fg_top]
+  rw [← Submodule.fg_top]
   refine fg_of_linearEquiv S.dualAnnihilator_linearEquiv_dual_quot ?_
   simpa [← finite_def, Module.finite_dual_iff] using hS
 
@@ -363,7 +363,7 @@ variable (p) [Fact p.SeparatingRight] in
 lemma CoFG.dual_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := by
   apply fg_of_fg_map_injective p.flip SeparatingRight.injective
   rw [S.dual_comap_dualAnnihilator, map_comap_eq]
-  exact inf_fg_right _ hS.dualAnnihilator_fg
+  exact hS.dualAnnihilator_fg.of_le inf_le_right
 
 /- Not true!! Consider M = N the space finitely supported sequences. Let S be the subspace of
     sequences with sum x_i = 0. Then S^* = bot and S^** = top. -/
@@ -460,7 +460,7 @@ private lemma sup_fgdual_fg' {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG)
     obtain ⟨S', hfg, hS'⟩ := hS.dual_fg_sup_ker
     rw [← hS', inf_comm, ← inf_sup_assoc_of_le]
     · rw [dual_sup, dual_union_ker]
-      exact FGDual.of_dual_fg p (inf_fg_right _ hfg)
+      exact FGDual.of_dual_fg p (hfg.of_le inf_le_right)
     exact ker_le_dual_flip _
   · simpa [dual_sup, dual_union_ker] using FGDual.of_dual_fg _ hT
 
