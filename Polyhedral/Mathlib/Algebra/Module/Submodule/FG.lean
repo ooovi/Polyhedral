@@ -56,22 +56,6 @@ lemma restrict_fg_iff_inf_fg {S T : Submodule R M} :
     (restrict S T).FG ↔ (S ⊓ T : Submodule R M).FG := by
   rw [← embed_restrict, embed_fg_iff_fg]
 
-section RestrictScalars
-
-variable {S : Type*}
-variable [Semiring S] [Module S R]
-variable [Module S M] [IsScalarTower S R M]
-
--- this is a corrected version of `FG.span hfg`. Replace once fixed.
-variable (R) in
--- @[deprecated]
-lemma span_scalars_FG [Module.Finite S R] {s : Submodule S M} (hfg : s.FG) :
-    (span R (s : Set M)).FG := by -- FG.span hfg
-  obtain ⟨t, ht⟩ := hfg
-  use t; rw [← ht, Submodule.span_span_of_tower]
-
-end RestrictScalars
-
 section IsNoetherianRing
 
 variable {R M N : Type*}
