@@ -439,7 +439,7 @@ lemma exists_fg_sup_dual (s : Finset M) :
   use (dual p s) ⊓ S
   constructor
   · rw [dual_span_lineal_dual] at hS
-    have h := CoFG.isCompl_fg hS (dual_finset_cofg p s)
+    have h := CoFG.fg_of_isCompl hS (dual_finset_cofg p s)
     exact inf_fgdual_fg (fgdual_of_finset p s) (coe_fg h) -- h instead if coe_fg h would work
   · rw [← dual_span_lineal_dual]
     exact inf_sup_lineal hS.codisjoint

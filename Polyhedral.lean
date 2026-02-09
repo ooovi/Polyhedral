@@ -3,8 +3,6 @@ import Polyhedral.Hyperplane
 import Polyhedral.Line
 import Polyhedral.Mathlib.Algebra.Module.Exposed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Corank
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
@@ -29,6 +27,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
+import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 import Polyhedral.Polyhedral.AbstractPolytope
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces

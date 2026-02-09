@@ -10,7 +10,7 @@ import Mathlib.LinearAlgebra.Projection
 
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap -- imports Cardinal ... somehow
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.CoFG
+import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 
 /-!
 # The algebraic dual of a cone
@@ -882,11 +882,11 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) in
 theorem dual_singleton_cofg (x : M) : (dual p {x}).CoFG := by
-  rw [dual_singleton]; exact ker_cofg _
+  rw [dual_singleton]; exact CoFG.ker _
 
 variable (p) in
 theorem dual_finset_cofg (s : Finset M) : (dual p s).CoFG := by
-  rw [dual_ker_pi']; exact ker_cofg _
+  rw [dual_ker_pi']; exact CoFG.ker _
 
 variable (p) in
 theorem dual_finite_cofg {s : Set M} (hs : s.Finite) : (dual p s).CoFG := by

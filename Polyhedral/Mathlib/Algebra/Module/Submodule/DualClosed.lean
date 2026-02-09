@@ -544,7 +544,7 @@ lemma FGDual.sup {S : Submodule R N} (hS : S.FGDual p) (T : Submodule R N) :
     (S ⊔ T).FGDual p := by
   have h := CoFG.restrict (S ⊔ T) hS.cofg
   obtain ⟨U, hUST⟩ := exists_isCompl (restrict (S ⊔ T) S)
-  have hU := CoFG.isCompl_fg hUST h
+  have hU := h.fg_of_isCompl hUST
   have H := congrArg embed <| hUST.codisjoint.eq_top
   simp only [embed_sup, embed_restrict, embed_top] at H
   rw [← H]
