@@ -29,7 +29,9 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Polyhedral.AbstractPolytope
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces
+import Polyhedral.Polyhedral.Polytope
 import Polyhedral.Ray
