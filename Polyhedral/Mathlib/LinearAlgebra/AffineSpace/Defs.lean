@@ -2,6 +2,8 @@ module
 
 public import Mathlib.LinearAlgebra.ConvexSpace
 public import Mathlib.Order.Closure
+public import Mathlib.Algebra.AddTorsor.Defs
+import Mathlib.LinearAlgebra.AffineSpace.Combination
 
 /-!
 # Affine space
@@ -10,14 +12,12 @@ public import Mathlib.Order.Closure
 
 public section
 
-universe u v w
-
 noncomputable section
 
 /--
 A finitely supported weighting over elements of `M` with coefficients in `R`. The weights sum to 1.
 -/
-structure AffineWeights (R : Type u) [AddCommMonoid R] [One R] (M : Type v)
+structure AffineWeights (R : Type*) [AddCommMonoid R] [One R] (M : Type*)
     extends weights : M →₀ R where
   /-- The weights sum to 1. -/
   total : weights.sum (fun _ r => r) = 1
@@ -27,7 +27,7 @@ grind_pattern AffineWeights.total => self.weights
 
 namespace AffineWeights
 
-variable {R : Type u} [AddCommMonoid R] [One R] {M : Type v}
+variable {R : Type*} [AddCommMonoid R] [One R] {M : Type*}
 
 @[ext]
 theorem ext {f g : AffineWeights R M} (h : f.weights = g.weights) : f = g := by
@@ -53,7 +53,7 @@ def duple (x y : M) {s t : R} (h : s + t = 1) : AffineWeights R M where
 Map a function over the support of an affine weighting.
 For each n : N, the weight is the sum of weights of all m : M with g m = n.
 -/
-def map {M : Type v} {N : Type w} (g : M → N) (f : AffineWeights R M) : AffineWeights R N where
+def map {M : Type*} {N : Type*} (g : M → N) (f : AffineWeights R M) : AffineWeights R N where
   weights := f.weights.mapDomain g
   total := by simp [Finsupp.sum_mapDomain_index]
 
@@ -61,7 +61,7 @@ def map {M : Type v} {N : Type w} (g : M → N) (f : AffineWeights R M) : Affine
 Join operation for affine weightings (monadic join).
 Given a weighting of a weighting, flattens it to a single weighting.
 -/
-def join {R : Type u} [Semiring R] {M : Type v} (f : AffineWeights R (AffineWeights R M)) :
+def join {R : Type*} [Semiring R] {M : Type*} (f : AffineWeights R (AffineWeights R M)) :
     AffineWeights R M where
   weights := f.weights.sum (fun d r => r • d.weights)
   total := by
@@ -74,7 +74,7 @@ end AffineWeights
 /--
 A set equipped with an operation of finite affine combinations, where the coefficients sum to 1.
 -/
-class AffineSpace (R : Type u) (M : Type v) [Semiring R] where
+class AffineSpace (R : Type*) (M : Type*) [Semiring R] where
   /-- Take a affine combination with the given weighting. -/
   affineCombination (f : AffineWeights R M) : M
   /-- Associativity of affine combination (monadic join law). -/
@@ -87,16 +87,17 @@ namespace AffineSpace
 
 section ConvexSpace
 
-variable {R : Type u} {M : Type v} [LE R] [Semiring R] in
+variable {R : Type*} {M : Type*} [LE R] [Semiring R] in
 -- its probably nicer to redefine StdSimplex to extend AffineWeights?
 instance : Coe (StdSimplex R M) (AffineWeights R M) where
   coe f := ⟨f.weights, f.total⟩
 
-variable {R : Type u} {M : Type v} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
+variable {R : Type*} {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
 
 instance : Coe (StdSimplex R (StdSimplex R M)) (AffineWeights R (AffineWeights R M)) where
   coe f := f.map (Coe.coe (β := (AffineWeights R M)))
 
+/-- An affine space is a convex space too. -/
 instance [af : AffineSpace R M] : ConvexSpace R M where
   convexCombination (f : StdSimplex R M) := af.affineCombination f
   assoc (f : StdSimplex R (StdSimplex R M)) := by
@@ -110,7 +111,7 @@ end ConvexSpace
 
 section Convex
 
-variable (R : Type u) {M : Type v}
+variable (R : Type*) {M : Type*}
 variable [PartialOrder R] [Semiring R] [IsStrictOrderedRing R] [AffineSpace R M]
 
 /-- Convexity of sets in affine spaces. -/
@@ -126,5 +127,72 @@ theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R
 def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter R
 
 end Convex
+
+section IsExtreme
+
+section OpenSegment
+
+open AffineWeights
+
+variable {𝕜 E : Type*}
+variable [Semiring 𝕜] [PartialOrder 𝕜] [AffineSpace 𝕜 E]
+variable (𝕜)
+
+/-- Open segment in an affine space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
+the base semiring has some element between `0` and `1`. -/
+def openSegment (x y : E) : Set E :=
+  { z : E | ∃ s t : 𝕜, 0 < s ∧ 0 < t ∧ ∃ h : s + t = 1, z = affineCombination (duple x y h)}
+
+theorem openSegment_symm (x y : E) : openSegment 𝕜 x y = openSegment 𝕜 y x :=
+  Set.ext fun _ =>
+    ⟨fun ⟨a, b, ha, hb, hab, H⟩ =>
+      ⟨b, a, hb, ha, (add_comm _ _).trans hab, by simp [H, duple, add_comm]⟩,
+      fun ⟨a, b, ha, hb, hab, H⟩ =>
+      ⟨b, a, hb, ha, (add_comm _ _).trans hab,  by simp [H, duple, add_comm]⟩⟩
+
+end OpenSegment
+
+variable (R : Type*) {M : Type*} [Semiring R] [AffineSpace R M] [PartialOrder R]
+
+/-- A set `B` is an extreme subset of `A` if `B ⊆ A` and all points of `B` only belong to open
+segments whose ends are in `B`.
+
+Our definition only requires that the left endpoint of the segment lies in `B`,
+but by symmetry of open segments, the right endpoint must also lie in `B`. -/
+@[mk_iff]
+structure IsExtreme (A B : Set M) : Prop where
+  subset : B ⊆ A
+  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ A → ∀ ⦃y⦄, y ∈ A →
+    ∀ ⦃z⦄, z ∈ B → z ∈ openSegment R x y → x ∈ B
+
+-- some sanity checks
+
+@[refl]
+protected theorem IsExtreme.refl (A : Set M) : IsExtreme R A A :=
+  ⟨Set.Subset.refl A, fun _ hx₁A _ _ _ _ _ ↦ hx₁A⟩
+
+variable {R} {A B C : Set M} {x : M}
+
+theorem IsExtreme.right_mem_of_mem_openSegment (h : IsExtreme R A B) {y z : M} (hx : x ∈ A)
+    (hy : y ∈ A) (hz : z ∈ B) (hzxy : z ∈ openSegment R x y) : y ∈ B :=
+  h.left_mem_of_mem_openSegment hy hx hz <| by rwa [openSegment_symm]
+
+@[trans]
+protected theorem IsExtreme.trans (hAB : IsExtreme R A B) (hBC : IsExtreme R B C) :
+    IsExtreme R A C := by
+  refine ⟨hBC.subset.trans hAB.subset, fun x₁ hx₁A x₂ hx₂A x hxC hx ↦ ?_⟩
+  exact hBC.left_mem_of_mem_openSegment
+    (hAB.left_mem_of_mem_openSegment hx₁A hx₂A (hBC.subset hxC) hx)
+    (hAB.right_mem_of_mem_openSegment hx₁A hx₂A (hBC.subset hxC) hx) hxC hx
+
+protected theorem IsExtreme.antisymm : AntiSymmetric (IsExtreme R : Set M → Set M → Prop) :=
+  fun _ _ hAB hBA ↦ Set.Subset.antisymm hBA.1 hAB.1
+
+instance : IsPartialOrder (Set M) (IsExtreme R) where
+  refl := IsExtreme.refl R
+  trans _ _ _ := IsExtreme.trans
+  antisymm := IsExtreme.antisymm
+
+end IsExtreme
 
 end AffineSpace
