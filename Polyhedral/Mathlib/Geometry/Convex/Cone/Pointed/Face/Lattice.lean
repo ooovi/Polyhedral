@@ -54,6 +54,9 @@ instance {C : PointedCone R M} : CoeDep (PointedCone R M) C (Face C) := ⟨self 
 @[coe, simp]
 def toPointedCone {C : PointedCone R M} (F : Face C) : PointedCone R M := F.toSubmodule
 
+/-toPointedCone and self are inverse. -/
+lemma toPointedCone_self_eq_self (C : PointedCone R M) : (self C).toPointedCone = C := Submodule.toSubMulAction_inj.mp rfl
+
 instance : CoeOut (Face (C : PointedCone R M)) (PointedCone R M) := ⟨toPointedCone⟩
 
 instance : SetLike (Face C) M where
