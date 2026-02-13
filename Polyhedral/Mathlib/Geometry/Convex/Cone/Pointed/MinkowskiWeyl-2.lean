@@ -122,6 +122,391 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   rw [mul_inv_cancel_left₀ hy.2.ne]
   exact hv2 ⟨hzS, hzw⟩ hy
 
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+-- lemma xxx {g : M →ₗ[𝕜] 𝕜} (hg : ∀ x ∈ C, 0 ≤ g x) : ∀ x ∈ C.lineal, g x = 0 := sorry
+
+def max {C : PointedCone 𝕜 M} (f : M →ₗ[𝕜] 𝕜) {g : M →ₗ[𝕜] 𝕜}
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : PointedCone 𝕜 M where
+  carrier := {x ∈ C | x ≠ 0 → ∀ y ∈ C, y ≠ 0 → f y / g y ≤ f x / g x}
+  add_mem' := by
+    simp only [ne_eq, mem_setOf_eq, map_add, and_imp]
+    intro x y hxC hx hyC hy
+    constructor
+    · exact C.add_mem hxC hyC
+    intro hxy z hzC hz0
+    --specialize hx
+    sorry
+  zero_mem' := by simp
+  smul_mem' := by
+    simp only [ne_eq, mem_setOf_eq, smul_eq_zero, not_or, map_smul_of_tower, and_imp,
+      Subtype.forall, Nonneg.mk_smul, Nonneg.mk_eq_zero, smul_eq_mul]
+    intro _ ha _ hxC h
+    constructor
+    · exact C.smul_mem ha hxC
+    intro ha'
+    simp only [div_eq_mul_inv, mul_inv_rev] at ⊢ h
+    rw [mul_comm, mul_assoc]
+    nth_rw 2 [← mul_assoc]
+    rw [inv_mul_cancel₀ ha', one_mul, mul_comm]
+    exact h
+
+def max_isFaceOf {C : PointedCone 𝕜 M} (f : M →ₗ[𝕜] 𝕜) {g : M →ₗ[𝕜] 𝕜} (hg : ∀ x ∈ C, 0 ≤ g x) :
+    (C.max f hg).IsFaceOf C := sorry
+
+def max_nonempty {C : PointedCone 𝕜 M} (hfg : C.FG) (f : M →ₗ[𝕜] 𝕜) {g : M →ₗ[𝕜] 𝕜}
+    (hg : ∀ x ∈ C, 0 ≤ g x) : Nonempty (C.max f hg) := by
+  obtain ⟨s, rfl⟩ := hfg
+  by_cases hs : s.Nonempty
+  · let s' := s.image fun x => f x / g x
+    have hs' : s'.Nonempty := by simp [s', hs]
+    have hcx := Finset.max'_mem s' hs'
+    obtain ⟨x, hxs, hfx⟩ := Finset.mem_image.mp hcx
+    use x
+    simp only [max, ne_eq, mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, mem_setOf_eq]
+    constructor
+    · exact subset_span hxs
+    intro hx0 y hy hy0
+    have := Finset.le_max' s' (f y / g y) (by simp [s']; use y)
+    sorry
+  · simp at hs
+    simp [max, hs]
+
+lemma FG.max_of_hom_nonempty {C : PointedCone 𝕜 M} (hfg : C.FG) (f : M →ₗ[𝕜] 𝕜) (hf : PosHom f) :
+    Nonempty (C.max_of_hom hf) := by
+  obtain ⟨s, rfl⟩ := hfg
+  by_cases hs' : s.Nonempty
+  · let s' := s.image fun x => f x
+    have hs' : s'.Nonempty := Finset.image_nonempty.mpr hs'
+    let cx := s'.max' hs'
+    have hcx := Finset.max'_mem (s.image fun x => f x) hs'
+    obtain ⟨x, hxs, hfx⟩ := Finset.mem_image.mp hcx
+    use x
+    constructor
+    · exact subset_span hxs
+    rw [hfx]
+    -- obtain ⟨z, hzs, hfz⟩ := Finset.mem_image.mp hcx
+    -- rw [← hfz]; clear hfz
+    -- have := Finset.le_max' s' (f z) (by sorry)
+    -- simp [s'] at this
+    intro y hy
+    have := Finset.le_max' s' (f y)
+    have : f y ∈ s' := by
+      simp [s']
+      use y
+    sorry
+  · simp at hs'
+    use 0
+    simp [hs']
+
+
+lemma span_le_of_le {s : Set M} {C : PointedCone 𝕜 M} (hs : s ⊆ C) : span 𝕜 s ≤ C := by
+  simpa using (Submodule.span_mono hs : span 𝕜 s ≤ span 𝕜 C)
+
+lemma aux {s : Set M} {x : M} (hx : x ∈ span 𝕜 s) {w : N} (hw : p x w < 0) :
+    ∃ y ∈ s, p y w < 0 := by
+  by_contra h
+  push_neg at h
+  absurd hw
+  push_neg
+  have : s ⊆ dual p.flip {w} := fun x hx => by simp [h x hx]
+  simpa using (span_mono this) hx
+
+private lemma dual_auxGenSet'' {C : PointedCone 𝕜 M} (hC : C.FG) :
+    dual p (auxGenSet p C w) = .span 𝕜 {w} ⊔ dual p C := by classical
+
+  apply ge_antisymm
+  · -- easy direction: RHS ≤ LHS
+    rw [← dual_span]
+    exact sup_le span_singleton_le_dual_auxGenSet <|
+      dual_le_dual auxGenSet_subset_span
+
+  -- hard direction: LHS ≤ RHS
+  -- We'll reuse your proof, but we’ll take max over a finite generator finset S.
+  obtain hSw | hSw := {y ∈ (C : Set M) | p y w < 0}.eq_empty_or_nonempty
+  · -- If nothing in C has p _ w < 0, then every x∈C satisfies 0≤p x w, hence C ⊆ first part of auxGenSet
+    simp only [Set.sep_eq_empty_iff_mem_false, not_lt] at hSw
+    exact le_sup_of_le_right <|
+      dual_le_dual (fun x hxC => .inl ⟨hxC, hSw _ hxC⟩)
+
+  -- Now {y∈C | p y w < 0} is nonempty.
+  -- Expand auxGenSet = A ∪ B and unpack membership in the dual.
+  rw [dual_union]
+  intro v ⟨hv1, hv2⟩
+  rw [Submodule.mem_sup]
+
+  -- The same key inequality extracted from hv2 as in your finite proof:
+  replace hv2 {x y : M}
+      (hx : x ∈ (C : Set M) ∧ 0 ≤ p x w)
+      (hy : y ∈ (C : Set M) ∧ p y w < 0) :
+      p y w * p x v ≤ p y v * p x w := by
+    simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_setOf_eq,
+      forall_exists_index, and_imp] at hv2
+    specialize hv2 x hx.1 hx.2 y hy.1 hy.2 rfl
+    simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply,
+      smul_eq_mul, sub_nonneg] at hv2
+    nth_rw 2 [mul_comm] at hv2
+    exact hv2
+
+  -- Next split exactly as before, but over C (not generators):
+  obtain hSv | ⟨y, hy⟩ :=
+      {y ∈ (C : Set M) | p y w < 0 ∧ p y v < 0}.eq_empty_or_nonempty
+  · -- If no y in C is simultaneously w-negative and v-negative, then v ∈ dual p C directly (same argument)
+    simp +contextual only [Set.sep_and, Set.eq_empty_iff_forall_notMem, Set.mem_inter_iff,
+      Set.mem_setOf_eq, not_and, true_and, not_lt, and_imp] at hSv
+    refine ⟨0, zero_mem _, v, ?_, zero_add _⟩
+    -- show v ∈ dual p C
+    intro x hxC
+    by_cases hxw : 0 ≤ p x w
+    · exact hv1 ⟨hxC, hxw⟩
+    · exact hSv x hxC (lt_of_not_ge hxw)
+
+  ----------------------------------------------------------------
+  -- Hardest branch: there exists y∈C with p y w <0 and p y v <0.
+  -- Here we use FG to extract a finite generator finset S and run the max argument on S.
+  ----------------------------------------------------------------
+
+  -- Extract generators: C = span S
+  obtain ⟨s, hCS⟩ := hC
+  -- We will rewrite dual p C to dual p (S : Set M) using dual_span.
+  have hdualC : dual p C = dual p s := by
+    -- C = span S, then dual p C = dual p (span S) = dual p S
+    -- adjust lemma names if needed
+    simpa [hCS] using (dual_span (p := p) (s := s))
+
+  -- A convenient lemma: any generator z ∈ S is in C
+  have hS_sub : (s : Set M) ⊆ (C : Set M) := by
+    intro z hzS
+    -- z ∈ span S = C
+    -- adjust lemma name: typically `PointedCone.subset_span` or `Submodule.subset_span`
+    simpa [hCS] using (PointedCone.subset_span (R := 𝕜) (s := (s : Set M)) hzS)
+
+  have hysw : {y ∈ s | (p y) w < 0}.Nonempty := by -- TODO: improve this code
+    obtain ⟨y, hy⟩ := hSw
+    simp at hy
+    rw [← hCS] at hy
+    obtain ⟨y, hy⟩ := aux hy.1 hy.2
+    use y
+    simpa using hy
+      -- nonempty: we need at least one generator with p _ w < 0.
+      -- This follows from hSw plus the fact C is generated by S:
+      -- if all generators had 0 ≤ p _ w, then every x∈C would satisfy 0 ≤ p x w, contradicting hSw.
+      -- You may already have a lemma for this; otherwise prove it with a small conic-combination argument.
+
+  -- Define u as max of ratios over the NEGATIVE-on-w generators.
+  let u : 𝕜 := ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max' (by simp [hysw])
+
+  -- Show u ≥ 0. In the finite proof this came from picking y with p y w <0 and p y v <0.
+  -- We do the same, but we need a generator y0 with BOTH negatives.
+  have hu : 0 ≤ u := by
+    -- From ⟨y, hy⟩ with y∈C and both negatives, and v∈dual(auxGenSet),
+    -- one shows there exists y0∈S with p y0 w <0 and p y0 v <0.
+    -- Then ratio(y0) ≥ 0 and u, being the max, is ≥ ratio(y0).
+    -- This is the only additional “generator extraction” sub-lemma you need.
+    have : ∃ y0 ∈ s, p y0 w < 0 ∧ p y0 v < 0 := by
+
+      -- Sketch:
+      -- 1) write y as conic combination of generators (using hCS and hy.1 : y∈C)
+      -- 2) use hv1 to show any generator with 0≤p _ w must have 0≤p _ v (since it lies in A)
+      -- 3) since p y v < 0, some generator must have p _ v < 0, hence also p _ w < 0
+      -- Implement using the representation lemma for `PointedCone.mem_span`.
+      sorry
+    rcases this with ⟨y0, hy0S, hy0w, hy0v⟩
+    refine le_trans ?_ (Finset.le_max' _ (p y0 v * (p y0 w)⁻¹) ?_)
+    · -- ratio(y0) ≥ 0 since both numerator and denominator are < 0
+      exact mul_nonneg_of_nonpos_of_nonpos hy0v.le (inv_nonpos.mpr hy0w.le)
+    · -- show ratio(y0) is in the finset image
+      simp only [Finset.mem_image, Finset.mem_filter]
+      exact ⟨y0, ⟨hy0S, hy0w⟩, rfl⟩
+
+  -- Now decompose v = (u•w) + (v - u•w)
+  refine ⟨u • w, ?_, v - u • w, ?_, add_sub_cancel _ _⟩
+  · -- u•w ∈ span{w} with u≥0 (pointed span)
+    rw [← Nonneg.mk_smul _ hu]
+    exact Submodule.smul_mem _ _ (Submodule.subset_span rfl)
+
+  -- show v - u•w ∈ dual p C; rewrite to generators via hdualC
+  -- (this is where FG really matters)
+  -- Goal becomes: ∀ z ∈ S, 0 ≤ p z (v - u•w)
+  -- after simp it’s the same split-by-sign proof as your finite-set version.
+  -- Use `hdualC` to replace `dual p C` by `dual p (S:Set M)`:
+  have : v - u • w ∈ dual p s := by
+    intro z hzS
+    -- We need: 0 ≤ p z (v - u•w)
+    simp only [map_sub, map_smul, smul_eq_mul, sub_nonneg]
+    -- split on sign of p z w
+    obtain hzw | hzw := lt_or_ge (p z w) 0
+    · -- z has p z w < 0: u is a max over those ratios, identical to your finite proof
+      rw [← _root_.mul_le_mul_right_of_neg (inv_neg''.mpr hzw),
+        mul_inv_cancel_right₀ hzw.ne]
+      exact Finset.le_max' _ (p z v * (p z w)⁻¹) <|
+        Finset.mem_image.mpr ⟨z, Finset.mem_filter.mpr ⟨hzS, hzw⟩, rfl⟩
+    · -- z has 0 ≤ p z w: use the key inequality hv2 with y that attains the max
+      obtain ⟨y0, hy0, H⟩ := Finset.mem_image.mp <|
+        ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max'_mem (by simp [hysw])
+      -- unpack hy0 : y0 ∈ S ∧ p y0 w < 0
+      have hy0S : y0 ∈ (s : Set M) := by
+        simpa [Finset.mem_filter] using (Finset.mem_filter.mp hy0).1
+      have hy0w : p y0 w < 0 := by
+        simpa [Finset.mem_filter] using (Finset.mem_filter.mp hy0).2
+      -- Now apply hv2 with x=z (needs z∈C and 0≤p z w) and y=y0 (needs y0∈C and p y0 w <0)
+      have hzC : z ∈ (C : Set M) := hS_sub hzS
+      have hy0C : y0 ∈ (C : Set M) := hS_sub hy0S
+      -- Rearrangement is exactly your last 6 lines:
+      rw [← _root_.mul_le_mul_left_of_neg hy0w, ← mul_assoc]
+      nth_rw 4 [mul_comm]
+      rw [mul_inv_cancel_left₀ hy0w.ne]
+      exact hv2 ⟨hzC, hzw⟩ ⟨hy0C, hy0w⟩
+
+  -- Convert back to dual p C using hdualC
+  simpa [hdualC] using this
+
+private lemma dual_auxGenSet' {C : PointedCone 𝕜 M} (hC : C.FG) :
+    dual p (auxGenSet p C w) = span 𝕜 {w} ⊔ dual p C := by
+  classical
+  apply ge_antisymm
+  · rw [← dual_span]
+    exact sup_le span_singleton_le_dual_auxGenSet <| dual_le_dual auxGenSet_subset_span
+  obtain hSw | hSw := {y ∈ C | p y w < 0}.eq_empty_or_nonempty
+  · -- simp only [Set.sep_eq_empty_iff_mem_false, not_lt] at hSw
+    -- exact le_sup_of_le_right <| dual_le_dual fun x hx => .inl ⟨hx, hSw _ hx⟩
+    sorry
+  rw [dual_union]
+  intro v ⟨hv1, hv2⟩
+  rw [Submodule.mem_sup]
+  replace hv2 {x y : M} (hx : x ∈ C ∧ 0 ≤ p x w) (hy : y ∈ C ∧ p y w < 0) :
+      p y w * p x v ≤ p y v * p x w := by
+    simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_setOf_eq,
+      forall_exists_index, and_imp] at hv2
+    specialize hv2 x hx.1 hx.2 y hy.1 hy.2 rfl
+    simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply, smul_eq_mul,
+      sub_nonneg] at hv2
+    nth_rw 2 [mul_comm] at hv2
+    exact hv2
+  obtain hSv | ⟨y, hy⟩ := {y ∈ C | p y w < 0 ∧ p y v < 0}.eq_empty_or_nonempty
+  · simp +contextual only [Set.eq_empty_iff_forall_notMem, Set.mem_setOf_eq, not_and, not_lt] at hSv
+    refine ⟨0, zero_mem _, v, fun x hx => ?_, zero_add _⟩
+    by_cases hxw : 0 ≤ p x w
+    · exact hv1 ⟨hx, hxw⟩
+    · exact hSv x hx (lt_of_not_ge hxw)
+  obtain ⟨s, rfl⟩ := hC
+  rw [dual_span]
+  let u : 𝕜 := ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max' <| by
+    simp
+    -- use hSw
+    sorry -- simpa [Finset.Nonempty, Set.Nonempty] using hSw
+  have hu : 0 ≤ u := by
+    refine le_trans (mul_nonneg_of_nonpos_of_nonpos hy.2.2.le (inv_nonpos.mpr hy.2.1.le))
+      (Finset.le_max' _ (p y v * (p y w)⁻¹) ?_)
+    simp only [Finset.mem_image, Finset.mem_filter]
+    exact ⟨y, ⟨hy.1, hy.2.1⟩, rfl⟩
+  refine ⟨u • w, ?_, v - u • w, fun z hzS ↦ ?_, add_sub_cancel _ _⟩
+  · rw [← Nonneg.mk_smul _ hu]
+    exact Submodule.smul_mem _ _ (Submodule.subset_span rfl)
+  simp only [map_sub, map_smul, smul_eq_mul, sub_nonneg]
+  obtain hzw | hzw := lt_or_ge (p z w) 0
+  · rw [← _root_.mul_le_mul_right_of_neg (inv_neg''.mpr hzw), mul_inv_cancel_right₀ hzw.ne]
+    exact Finset.le_max' _ (p z v * (p z w)⁻¹) <|
+      Finset.mem_image.mpr ⟨z, Finset.mem_filter.mpr ⟨hzS, hzw⟩, rfl⟩
+  obtain ⟨y, hy, t_eq : _ = u⟩ := Finset.mem_image.mp <|
+    ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max'_mem <| by
+      simpa [Finset.Nonempty, Set.Nonempty] using hSw
+  rw [Finset.mem_filter] at hy
+  rw [← t_eq, ← _root_.mul_le_mul_left_of_neg hy.2, ← mul_assoc]
+  nth_rw 4 [mul_comm]
+  rw [mul_inv_cancel_left₀ hy.2.ne]
+  exact hv2 ⟨hzS, hzw⟩ hy
+
+variable (p 𝕜) in
+lemma auxGenSet_eq_dual_inf {C : PointedCone 𝕜 M} (w : N) :
+    auxGenSet p C w = (dual p.flip {w} : Set M) ∩ C := by
+  ext x
+  simp only [auxGenSet, SetLike.mem_coe, Set.mem_union, Set.mem_setOf_eq, Set.mem_inter_iff,
+    mem_dual, Set.mem_singleton_iff, flip_apply, forall_eq]
+  constructor
+  · rintro (⟨xS, px⟩ | ⟨r, hr, t, ht, rfl⟩)
+    · exact ⟨px, xS⟩
+    · simp_rw [map_sub, map_smul, sub_apply, smul_apply, smul_eq_mul, mul_comm, sub_self,
+      le_refl, true_and, sub_eq_add_neg, ← neg_smul]
+      exact C.add_mem (C.smul_mem hr.2 ht.1) <| C.smul_mem (neg_nonneg.mpr (le_of_lt ht.2)) hr.1
+  · rintro ⟨xS, px⟩
+    exact Or.inl ⟨px, xS⟩
+
+lemma auxGenSet_mono (s t : Set M) (hst : s ⊆ t) : auxGenSet p s w ⊆ auxGenSet p t w := by
+  -- intro x
+  -- simp
+  -- rintro (⟨hx, h⟩ | h)
+  -- · left; exact ⟨hst hx, h⟩
+  -- right
+  -- obtain ⟨y, ⟨hy, hyw⟩, z, ⟨hz, hzw⟩, h⟩ := h
+  -- use y
+  -- constructor
+  -- · exact ⟨hst hy, hyw⟩
+  -- use z
+  -- · exact ⟨hst hz, hzw⟩
+  sorry
+
+lemma span_auxGenSet (s : Set M) :
+    span 𝕜 (auxGenSet p s w) = auxGenSet p (span 𝕜 s) w := by
+  -- unfold auxGenSet
+  -- rw [span_union]
+  -- simp
+  -- #check mem_span_set
+  -- rw [span_image]
+  sorry
+
+variable (p 𝕜) in
+lemma span_auxGenSet_eq_dual_inf_span (hs : s.Finite) (w : N) :
+    span 𝕜 (auxGenSet p s w) = (dual p.flip {w} : Set M) ∩ span 𝕜 s := by
+  simpa [← SetLike.coe_set_eq, span_auxGenSet] using auxGenSet_eq_dual_inf _ _ w
+
+------- vvvvvvvv Experiments below
+
+-- There is something that should follow immediately from the above, but does not because
+-- the proof looses information about these details. Can we reconstruct it?
+
+variable (p 𝕜) in
+lemma span_auxGenSet_eq_dual_inf_span' (hs : s.Finite) (w : N) :
+    span 𝕜 (auxGenSet p s w) = dual p.flip {w} ⊓ span 𝕜 s := by
+  ext x
+  simp
+  unfold auxGenSet
+  rw [span_union]
+  rw [mem_sup]
+  sorry
+
+variable (p 𝕜) in
+private lemma span_sup_dual_eq_dual_dual_inf_span {C : PointedCone 𝕜 M} (hC : C.FG) (w : N) :
+    span 𝕜 {w} ⊔ dual p C = dual p (dual p.flip {w} ∩ C) := by
+  have ⟨s, hs⟩ := hC
+  simp [← hs, ← span_auxGenSet_eq_dual_inf_span, dual_auxGenSet]
+
+variable (p 𝕜) in
+private lemma span_sup_dual_eq_dual_dual_inf_span' {C : PointedCone 𝕜 M} (hC : C.FG) (w : N) :
+    span 𝕜 {w} ⊔ dual p C = dual p (dual p.flip {w} ∩ C) := by
+  simp [← auxGenSet_eq_dual_inf, ← dual_auxGenSet' hC]
+
+variable (p 𝕜) in
+private lemma span_sup_dual_eq_dual_dual_inf_span'' (s : Finset N) (t : Finset M) :
+    span 𝕜 s ⊔ dual p t = dual p (dual p.flip s ∩ span 𝕜 (t : Set M)) := by classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert w s hwr hs =>
+    simp only [Finset.coe_insert, span]
+    rw [span_insert, sup_assoc, sup_comm, hs, dual_insert]
+    repeat rw [← Submodule.coe_inf]
+    rw [inf_assoc]
+    nth_rw 2 [inf_comm]
+    -- now use that span R {w} is dual closed.
+    sorry
+
+variable (p) in
+lemma dual_fg_inf_fgdual_dual_sup_dual' {C D : PointedCone 𝕜 M} (hC : C.FG)
+    (hD : D.FGDual p.flip) : dual p (C ∩ D) = (dual p C) ⊔ (dual p D) := by
+  sorry
+
+------- ^^^^^^ Experiments above
+
 /-- The union of an FG cone and a FGDual cone is FGDual. -/
 lemma sup_fg_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) : (C ⊔ D).FGDual p
     := by classical
