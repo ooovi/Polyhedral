@@ -134,6 +134,8 @@ lemma mem_of_neg_mem_lineal {C : PointedCone R M} {x : M} (hx : -x ∈ C.lineal)
   exact lineal_le C hx
 
 -- @[simp] -- no simp because right side has twice as many `x`?
+-- i believe we need a linear order on R otherwise consider ℝ with the trivial order (i.e. the only
+-- comparable elements are in ℤ), then ℤ ⊆ ℝ is a cone with x ∈ ℤ ↔ -x ∈ ℤ, but ℤ.lineal is trivial
 lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
   constructor
   · intro h
@@ -148,7 +150,21 @@ lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ 
         exact h'; exact h
       have hx := Submodule.span_mono (R := {c : R // 0 ≤ c}) hx
       simp at hx
-      sorry
+      refine le_trans ?_ hx
+      intro y hy
+      apply Submodule.mem_span_pair.mp at hy
+      rcases hy with ⟨a, b, hab⟩
+      apply Submodule.mem_span_pair.mpr
+      by_cases hab_pos : b≥a
+      · use 0, ⟨b-a, sub_nonneg_of_le hab_pos⟩
+        simp
+        rw [← hab, sub_smul, sub_eq_add_neg, smul_neg, add_comm]
+      have : a-b ≥ 0 := by
+        sorry
+      use ⟨a-b, this⟩, 0
+      simp
+      rw [← hab, ← smul_neg, sub_smul]
+      simp
       -- simpa only [S, ← span_pm_pair_eq_submodule_span R] using hx
     have hSC := le_lineal hSC
     have hxS : x ∈ S := Submodule.mem_span_of_mem (by simp)
@@ -231,6 +247,7 @@ lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D
   exact ⟨⟨y, hy, by use z⟩, -y, hy', -z, hz', by simp [add_comm]⟩
 
 -- ## PRIORITY
+--isnt this false when C and D are two rays pointing in opposite directions?
 lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : C.linSpan ⊓ D.lineal ≤ C.lineal) :
     (C ⊔ D).lineal = C.lineal ⊔ D.lineal := by
   rw [le_antisymm_iff, and_comm]
@@ -455,8 +472,10 @@ lemma inf_salient_of_disjoint {C : PointedCone R M}
 lemma Salient.of_le_salient {C D : PointedCone R M} (hC : C.Salient) (hD : D ≤ C) : D.Salient := by
   rw [Salient, ConvexCone.salient_iff_not_flat] at *
   by_contra h
+  apply hC
+  rcases h with ⟨x, xD, x_ne_0, neg_xD⟩
+  exact ⟨x, hD xD, x_ne_0, hD neg_xD⟩
   -- have h' := h.mono hD
-  sorry
 
 -- ## MAP
 
@@ -531,7 +550,30 @@ abbrev salientQuot (C : PointedCone R M) := C.quot C.lineal
 
 lemma salientQuot_def (C : PointedCone R M) : C.salientQuot = C.quot C.lineal := rfl
 
-lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := sorry
+lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
+  rw [Salient, ConvexCone.salient_iff_not_flat]
+  intro h
+  rcases h with ⟨x, hx, x_ne_0, hx'⟩
+  rcases (Set.mem_image (⇑C.lineal.mkQ) (↑C) x).mp hx with ⟨y,yC, hy⟩
+  rcases (Set.mem_image (⇑C.lineal.mkQ) (↑C) (-x)).mp hx' with ⟨y',yC', hy'⟩
+  have : y ∉ C.lineal := by
+    intro h
+    apply x_ne_0
+    rw [← hy]
+    simp [h]
+  apply this
+  have : (C.lineal).mkQ (y+y') = 0 := by
+    rw [map_add, hy, hy', add_neg_cancel]
+  have sum_lineal : y+y' ∈ C.lineal := by
+    rw [← Submodule.ker_mkQ C.lineal]
+    exact LinearMap.mem_ker.mpr this
+  apply mem_lineal.mp at sum_lineal
+  have : -y ∈ C := by
+    have : y' + -(y + y') = -y := by
+      simp
+    rw [← this]
+    exact Submodule.add_mem C yC' (sum_lineal.2)
+  exact mem_lineal.mpr ⟨yC, this⟩
 
 @[simp] lemma salientQuot_of_submodule (S : Submodule R M) :
     (S : PointedCone R M).salientQuot = ⊥ := by
