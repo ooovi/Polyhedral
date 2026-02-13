@@ -36,14 +36,14 @@ example (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
   := by simp
 
 example (s t : Set M) : span R (s ∩ t) ≤ span R s :=
-  span_mono Set.inter_subset_left
+  span_mono inf_le_left
 
 example (s t : Set M) : span R (s ∩ t) ≤ span R t :=
-  span_mono Set.inter_subset_right
+  span_mono inf_le_right
 
-@[deprecated "this simplifies" (since := "...")]
+@[deprecated "this simplifies to the above examples" (since := "...")]
 lemma span_inter_le (s t : Set M) : span R (s ∩ t) ≤ span R s ⊓ span R t :=
-    le_inf (span_mono Set.inter_subset_left) (span_mono Set.inter_subset_right)
+    le_inf (span_mono inf_le_left) (span_mono inf_le_right)
 
 
 -- ## RESTRICT SCALARS
