@@ -517,7 +517,7 @@ def embed_combEquiv (C : PointedCone R S) : Face (embed C) ≃o Face C where
   toFun F := ⟨PointedCone.restrict S F, sorry⟩ -- F.isFaceOf.restrict S⟩
   invFun := .embed
   left_inv F := by simp [Face.embed, embed_restrict, le_trans F.isFaceOf.le embed_le]
-  right_inv F := by simp [Face.embed]
+  right_inv F := by simp [Face.embed]; sorry
   map_rel_iff' := by
     intro F G
     simp
@@ -543,13 +543,14 @@ def restrict_combEquiv_of_codisjoint_lineal (hCS : Codisjoint S C.lineal) :
     simp [Face.restrict, ← Face.toPointedCone_eq_iff]
     apply embed_injective
     simp
-    rw [inf_comm]
-    rw [← sup_inf_assoc_of_le_restrictScalars]
-    · simp only [sup_eq_left]
-      refine le_trans inf_le_left ?_
+    sorry
+    -- rw [inf_comm]
+    -- rw [← sup_inf_assoc_of_le_restrictScalars]
+    -- · simp only [sup_eq_left]
+      -- refine le_trans inf_le_left ?_
       --unfold Face.embed'
-      sorry
-    · simp
+      -- sorry
+    -- · simp
   right_inv F := by
     simp only [Face.restrict, Face.toPointedCone, embed_restrict, inf_comm,
       ← Face.toPointedCone_eq_iff]
@@ -706,7 +707,7 @@ lemma Face.eq_top (F : Face (S : PointedCone R M)) : F = ⊤ := by
   rw [← Face.toPointedCone_eq_iff]
   simp
   have h := IsFaceOf.Submodule.eq_self F.isFaceOf
-  rw [h]
+  -- rw [h]
   sorry
 
 lemma Face.eq_bot (F : Face (S : PointedCone R M)) : F = ⊥ := by sorry
