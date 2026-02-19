@@ -317,7 +317,7 @@ def opt (C : PointedCone R M) (f g : M →ₗ[R] R) (hg : ∀ x ∈ C, 0 ≤ g x
   carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
   add_mem' := by
     intro a b ha hb
-    simp at *
+    simp only [Set.mem_setOf_eq, map_add] at *
     constructor
     · exact C.add_mem ha.1 hb.1
     intro y hy
