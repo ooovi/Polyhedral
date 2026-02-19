@@ -7,7 +7,6 @@
 -- open SimpleGraph Preorder
 
 -- def DiamondLattice : Set Nat := {0, 1}
-
 -- def Preorder.flagFlipGraph (α : Type*) [Preorder α] : SimpleGraph (Flag α) := sorry
 
 -- class AbstractPolytope (P : Type*) [PartialOrder P] [BoundedOrder P] [GradeBoundedOrder ℕ P] where
