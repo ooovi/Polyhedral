@@ -35,4 +35,6 @@ Currently the project implements:
 - https://github.com/leanprover-community/mathlib4/pull/33993
 - https://github.com/leanprover-community/mathlib4/pull/33986
 - https://github.com/leanprover-community/mathlib4/pull/33924
+- coercion submodule => cone: https://github.com/leanprover-community/mathlib4/pull/35308
+- duality lemmas: https://github.com/leanprover-community/mathlib4/pull/35323
 -->
