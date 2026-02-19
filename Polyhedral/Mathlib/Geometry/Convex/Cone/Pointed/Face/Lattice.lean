@@ -49,7 +49,14 @@ variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 @[coe]
 abbrev toPointedCone {C : PointedCone R M} (F : Face C) : PointedCone R M := F.toSubmodule
 
-instance : CoeOut (Face C) (PointedCone R M) := ⟨toPointedCone⟩
+/- Converts a face of a pointed cone into a pointed cone. -/
+@[coe, simp]
+def toPointedCone {C : PointedCone R M} (F : Face C) : PointedCone R M := F.toSubmodule
+
+/-toPointedCone and self are inverse. -/
+lemma toPointedCone_self_eq_self (C : PointedCone R M) : (self C).toPointedCone = C := Submodule.toSubMulAction_inj.mp rfl
+
+instance : CoeOut (Face (C : PointedCone R M)) (PointedCone R M) := ⟨toPointedCone⟩
 
 instance : SetLike (Face C) M where
   coe C := C.toPointedCone

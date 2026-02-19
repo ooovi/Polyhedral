@@ -316,7 +316,18 @@ variable [AddCommGroup N] [Module R N] {C C₁ C₂ F F₁ F₂ : PointedCone R 
 
 
 -- ## PRIORITY
-lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := sorry
+-- this is false without a linear order: consider ℝ with the trivial ordering
+-- (i.e., only elements in ℤ are comparable) then C:= ℕ + √2 ℕ is and ℕ ⊆ ℂ a face,
+-- but ℤ.linSpan ∩ C = C
+lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+  apply le_antisymm
+  · intro x ⟨xC, xF⟩
+    have : ∃ p ∈ F, ∃ n ∈ F, p = x + n := by sorry -- (mem_linSpan F).1 this
+    rcases this with ⟨p, pf, n, nf, rfl⟩
+    exact hF.mem_of_add_mem xC (hF.le nf) pf
+  · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
+
+
 
 @[deprecated (since := "")]
 alias inf_submodule := inf_linSpan
