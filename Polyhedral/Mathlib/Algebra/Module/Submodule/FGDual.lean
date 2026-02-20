@@ -266,7 +266,7 @@ variable (p) in
 theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := (hS.dual_fgdual p).cofg
 
 theorem fg_of_isCompl_fgdual {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FGDual p) :
-    T.FG := CoFG.isCompl_fg hST (FGDual.cofg hS)
+    T.FG := CoFG.fg_of_isCompl hST (FGDual.cofg hS)
 
 end IsNoetherianRing
 
