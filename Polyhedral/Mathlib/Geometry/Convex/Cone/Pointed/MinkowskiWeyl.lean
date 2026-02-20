@@ -91,16 +91,17 @@ private lemma dual_auxGenSet' {C : PointedCone 𝕜 M} (hC : C.FG) :
     nth_rw 2 [mul_comm] at hv2
     exact hv2
   obtain ⟨s, hs⟩ := hC
+  have hsC : ∀ x ∈ s, x ∈ C := by
+    intro _ hx
+    rw [← hs]
+    exact Submodule.mem_span_of_mem hx
   obtain hSv | ⟨y, hy⟩ := {y ∈ s | p y w < 0 ∧ p y v < 0}.eq_empty_or_nonempty
   · simp +contextual only [Finset.filter_eq_empty_iff, not_and, not_lt] at hSv
     refine ⟨0, zero_mem _, v, ?_, zero_add _⟩
     simp only [← hs, dual_span, mem_dual, SetLike.mem_coe]
     intro x hx
-    have : x ∈ C := by
-      rw [← hs]
-      exact Submodule.mem_span_of_mem hx
     by_cases hxw : 0 ≤ p x w
-    · exact hv1 ⟨this, hxw⟩
+    · exact hv1 ⟨hsC x hx, hxw⟩
     · exact hSv hx (lt_of_not_ge hxw)
   simp only [Finset.mem_filter] at hy
   let u : 𝕜 := ({y ∈ s | p y w < 0}.image (fun y => p y v * (p y w)⁻¹)).max' <| by
@@ -128,13 +129,7 @@ private lemma dual_auxGenSet' {C : PointedCone 𝕜 M} (hC : C.FG) :
   rw [← t_eq, ← _root_.mul_le_mul_left_of_neg hy.2, ← mul_assoc]
   nth_rw 4 [mul_comm]
   rw [mul_inv_cancel_left₀ hy.2.ne]
-  replace hzS : z ∈ C := by
-    rw [← hs]
-    exact mem_span_of_mem hzS
-  have : y ∈ C := by
-    rw [← hs]
-    exact mem_span_of_mem hy.1
-  exact hv2 ⟨hzS, hzw⟩ ⟨this, hy.2⟩
+  exact hv2 ⟨hsC z hzS, hzw⟩ ⟨hsC y hy.1, hy.2⟩
 
 private lemma dual_auxGenSet (hs : s.Finite) :
     dual p (auxGenSet p s w) = span 𝕜 {w} ⊔ dual p s := by
