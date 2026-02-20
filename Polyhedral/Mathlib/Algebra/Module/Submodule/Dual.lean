@@ -74,6 +74,9 @@ lemma dual_flip_univ_ker : dual p.flip univ = ker p := by
 variable [Fact p.SeparatingRight] in
 @[simp] lemma dual_univ : dual p univ = ⊥ := by simp [dual_univ_ker]
 
+@[deprecated "unproven" (since := "")]
+lemma top_of_dual_bot {S : Submodule R M} (h : dual p S = ⊥) : S = ⊤ := sorry
+
 -- variable (p) [Fact p.IsFaithfulPair] in
 -- @[simp] lemma dual_univ' : dual p univ = ⊥ := by
 --   rw [le_antisymm_iff, and_comm]
@@ -907,6 +910,8 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+-- TODO: which of these lemmas is an iff?
+
 variable (p) [Fact p.SeparatingRight] in
 theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
     Disjoint (dual p S) (dual p T) := by
@@ -914,6 +919,17 @@ theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T)
   rw [← dual_sup_dual_inf_dual]
   rw [codisjoint_iff.mp hST]
   exact dual_univ
+
+-- can we simplify the proof?
+variable (p) [Fact p.SeparatingLeft] in
+theorem disjoint_dual_of_codisjoint_dual {S : Submodule R M} {T : Submodule R N}
+    (hST : Codisjoint (dual p S) T) : Disjoint S (dual p.flip T) := by
+  rw [disjoint_iff]
+  rw [codisjoint_iff] at hST
+  have hST := congrArg (dual p.flip ∘ SetLike.coe) hST
+  simp only [Function.comp_apply, top_coe, dual_univ, dual_sup, dual_union] at hST
+  rw [← le_bot_iff] at ⊢ hST
+  exact le_trans (inf_le_inf_right _ subset_dual_dual) hST
 
 variable (p) [p.IsPerfPair] in -- can we do with less assumptions?
 theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :

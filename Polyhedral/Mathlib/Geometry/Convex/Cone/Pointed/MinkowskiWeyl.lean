@@ -212,13 +212,13 @@ lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
   · specialize h p fg_bot hS bot_le rfl
     obtain ⟨D, hfgdual, hD⟩ := h
     exact ⟨_, sup_fg_fgdual hC hfgdual, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
-  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p  -- <-- submodule duality theory
+  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p  -- <-~ only FGDual theory
     exact ⟨_, coe_fgdual_iff.mpr hfgdual, by simp [← restrictScalars_inf, inf_comm, hC', hD.eq_bot]⟩
 
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of its linear span with a FGDual cone. -/
 lemma FG.exists_fgdual_inf_span {C : PointedCone 𝕜 N} (hC : C.FG) :
-      ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ Submodule.span 𝕜 (M := N) C = C :=
+      ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ C.linSpan = C :=
   exists_fgdual_inf_submodule p hC (submodule_span_fg hC) Submodule.subset_span
 
 variable (p) [Fact p.SeparatingRight] in

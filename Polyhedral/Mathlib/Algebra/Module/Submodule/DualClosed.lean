@@ -487,18 +487,18 @@ lemma dual_fg_inf_fgdual_dual_sup_dual (hS : S.FG) (hT : T.FGDual p.flip) :
   exact hT.ker_le
 
 
-
-variable (p) [Fact p.SeparatingRight] in
-/-- For an FG submodule `S`, there exists an FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
-lemma FG.exists_fgdual_disjoint {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.FGDual p ∧ Disjoint S T := by
-  obtain ⟨V, hfg, hV⟩ := (hS.dual_cofg p.flip).exists_fg_codisjoint
-  use dual p V
-  constructor
-  · exact hfg.dual_fgdual _
-  · rw [← hS.dual_dual_flip p]
-    exact disjoint_dual_of_codisjoint p hV
-
+-- NOTE: has now been proven without duality theory in FGDual
+--
+-- variable (p) [Fact p.SeparatingRight] in
+-- /-- For an FG submodule `S`, there exists an FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
+-- lemma FG.exists_fgdual_disjoint {S : Submodule R N} (hS : S.FG) :
+--     ∃ T : Submodule R N, T.FGDual p ∧ Disjoint S T := by
+--   obtain ⟨V, hfg, hV⟩ := (hS.dual_cofg p.flip).exists_fg_codisjoint
+--   use dual p V
+--   constructor
+--   · exact hfg.dual_fgdual _
+--   · rw [← hS.dual_dual_flip p]
+--     exact disjoint_dual_of_codisjoint p hV
 
 ---
 

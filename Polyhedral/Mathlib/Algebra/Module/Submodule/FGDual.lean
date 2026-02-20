@@ -278,6 +278,16 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+variable (p) [Fact p.SeparatingRight] in
+/-- For an FG submodule `S`, there exists an FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
+lemma FG.exists_fgdual_disjoint {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.FGDual p ∧ Disjoint S T := by
+  obtain ⟨V, hfg, hV⟩ := (hS.dual_cofg p.flip).exists_fg_codisjoint
+  use dual p V
+  constructor
+  · exact hfg.dual_fgdual _
+  · exact disjoint_dual_of_codisjoint_dual p.flip hV
+
 -- WARNING: CoFG.disjoint_fg is not yet proven
 -- Does this need Field?
 theorem fg_of_disjoint_fgdual {S T : Submodule R N} (hST : Disjoint S T) (hS : S.FGDual p) :
