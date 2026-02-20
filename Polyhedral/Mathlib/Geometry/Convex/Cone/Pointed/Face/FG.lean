@@ -13,9 +13,9 @@ import Mathlib.Order.Grade
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
-import Polyhedral.Hyperplane
-import Polyhedral.Halfspace
+-- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
+-- import Polyhedral.Hyperplane
+-- import Polyhedral.Halfspace
 
 open Module
 
@@ -94,7 +94,7 @@ lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   wlog _ : Module.Finite R M with exposed -- reduction to finite dimensional case
   · let S : Submodule R M := .span R C
-    have H := exposed (FG.restrict_fg S hC) (restrict S hF)
+    have H := exposed (FG.restrict_fg S hC) (IsFaceOf.restrict S hF)
       (Finite.iff_fg.mpr <| submodule_span_fg hC)
     have hC : C ≤ Submodule.span R (C : Set M) := Submodule.le_span
     simpa [S, hC, le_trans hF.le hC] using H.embed

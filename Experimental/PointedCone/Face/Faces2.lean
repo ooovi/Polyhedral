@@ -76,9 +76,9 @@ Next goal: **Polyhedral Cone decomposition**
    of the face lattice of C
  * duality flips the face lattice
  * intervals in a face lattice are a face lattice
- * exposed faces
+ * exposed
    * bot and top are exposed
-   * if there are finitely many faces, then all faces are exposed
+   * if there are finitely many, then all faces are exposed
  * projections with FG ker preserve dual closedness
    * how do projections behave under duality
 -/

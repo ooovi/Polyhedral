@@ -8,7 +8,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Pointed
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Hyperplane
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 
 /-!
 # Halfspace
