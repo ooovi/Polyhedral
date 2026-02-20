@@ -4,6 +4,7 @@ import Experimental.DualTopology
 import Experimental.Dual_Generic
 import Experimental.Dual_WeakBilin
 import Experimental.Duality
+import Experimental.FG_experiments
 import Experimental.Line
 import Experimental.OfRank
 import Experimental.PointedCone.Face.Faces2
