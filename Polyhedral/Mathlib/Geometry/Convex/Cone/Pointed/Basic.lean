@@ -640,6 +640,10 @@ lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
 lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (C : Set M)).FG :=
   hC.span
 
+/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
+lemma FG.linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG :=
+  hC.span
+
 @[deprecated submodule_span_fg (since := "...")]
 alias span_fg := submodule_span_fg
 

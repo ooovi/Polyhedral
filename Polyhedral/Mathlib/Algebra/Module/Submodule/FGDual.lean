@@ -286,7 +286,7 @@ lemma FG.exists_fgdual_disjoint {S : Submodule R N} (hS : S.FG) :
   use dual p V
   constructor
   · exact hfg.dual_fgdual _
-  · exact disjoint_dual_of_codisjoint_dual p.flip hV
+  · exact disjoint_dual_of_codisjoint_dual _ hV
 
 -- WARNING: CoFG.disjoint_fg is not yet proven
 -- Does this need Field?

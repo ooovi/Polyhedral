@@ -11,20 +11,6 @@ import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FGDual
 
-/-!
-# Polyhedral cones
-
-Given a bilinear pairing `p` between two `R`-modules `M` and `N`, we define
-polyhedral cones to be pointed cones in `N` that are the dual of a finite set
-in `M` (this means they are the intersection of finitely many halfspaces).
-
-The main statement is that if both `M` and `N` are finite and the pairing is injective
-in both arguments, then polyhedral cones are precisely the finitely generated cones, see
-`isPolyhedral_iff_fg`. Moreover, we obtain that the dual of a polyhedral cone is again polyhedral
-(`IsPolyhedral.dual`) and that the double dual of a polyhedral cone is the cone itself
-(`IsPolyhedral.dual_dual_flip`, `IsPolyhedral.dual_flip_dual`).
--/
-
 open Function Module LinearMap
 open Submodule hiding span dual
 open Set
@@ -32,8 +18,6 @@ open Set
 variable {𝕜 M N : Type*}
 
 namespace PointedCone
-
-alias sup_fg := Submodule.FG.sup
 
 section LinearOrder
 
@@ -204,7 +188,7 @@ lemma sup_fgdual_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) : (
     := by rw [sup_comm]; exact sup_fg_fgdual hD hC
 
 variable (p) [Fact p.SeparatingRight] in
-/-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
+/-- An FG cone can be written as the intersection of an FGDual cone and an FG submodule. -/
 lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
     {S : Submodule 𝕜 N} (hS : S.FG) (hCS : C ≤ S) :
       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ S = C := by
@@ -212,36 +196,46 @@ lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
   · specialize h p fg_bot hS bot_le rfl
     obtain ⟨D, hfgdual, hD⟩ := h
     exact ⟨_, sup_fg_fgdual hC hfgdual, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
-  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p  -- <-~ only FGDual theory
+  · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p  -- <~~ only FGDual theory
     exact ⟨_, coe_fgdual_iff.mpr hfgdual, by simp [← restrictScalars_inf, inf_comm, hC', hD.eq_bot]⟩
 
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of its linear span with a FGDual cone. -/
-lemma FG.exists_fgdual_inf_span {C : PointedCone 𝕜 N} (hC : C.FG) :
+lemma FG.exists_fgdual_inf_linSpan {C : PointedCone 𝕜 N} (hC : C.FG) :
       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ C.linSpan = C :=
   exists_fgdual_inf_submodule p hC (submodule_span_fg hC) Submodule.subset_span
 
-variable (p) [Fact p.SeparatingRight] in
-/-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
-lemma FG.exists_fgdual_inf_fg_submodule {C : PointedCone 𝕜 N} (hC : C.FG) :
-      ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ ∃ S : Subspace 𝕜 N, S.FG ∧ D ⊓ S = C := by
-  obtain ⟨D, hfgdual, hD⟩ := exists_fgdual_inf_span p hC
-  exact ⟨D, hfgdual, Submodule.span 𝕜 C, submodule_span_fg hC, hD⟩
+-- variable (p) [Fact p.SeparatingRight] in
+-- /-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
+-- lemma FG.exists_fgdual_inf_fg_submodule {C : PointedCone 𝕜 N} (hC : C.FG) :
+--       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ ∃ S : Submodule 𝕜 N, S.FG ∧ D ⊓ S = C := by
+--   obtain ⟨D, hfgdual, hD⟩ := exists_fgdual_inf_linSpan p hC
+--   exact ⟨D, hfgdual, Submodule.span 𝕜 C, submodule_span_fg hC, hD⟩
+
+-- variable (p) [Fact p.SeparatingRight] in
+-- /-- An FG cone is the dual of a FGDual cone. -/
+-- lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
+--     ∃ D : PointedCone 𝕜 M, D.FGDual p.flip ∧ dual p D = C := by
+--   obtain ⟨D, hD, S, hS, rfl⟩ := exists_fgdual_inf_fg_submodule p hC
+--   obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
+--   use C' ⊔ dual p.flip S
+--   constructor
+--   · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hS)
+--   · rw [dual_sup_dual_inf_dual]
+--     simp [Submodule.FG.dual_dual_flip _ hS] -- <-- submodule duality theory
 
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone is the dual of a FGDual cone. -/
 lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
     ∃ D : PointedCone 𝕜 M, D.FGDual p.flip ∧ dual p D = C := by
-  obtain ⟨D, hD, S, hS, rfl⟩ := exists_fgdual_inf_fg_submodule p hC
+  obtain ⟨D, hD, h⟩ := exists_fgdual_inf_linSpan p hC; rw [← h]
   obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
-  use C' ⊔ dual p.flip S
+  use C' ⊔ dual p.flip C.linSpan
+  have hC := FG.linSpan_fg hC
   constructor
-  · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hS)
-  · rw [dual_sup_dual_inf_dual]
-    simp [Submodule.FG.dual_dual_flip _ hS] -- <-- submodule duality theory
-
-@[deprecated FG.exists_fgdual_dual (since := "")]
-alias FG.exists_fgdual_flip_dual := FG.exists_fgdual_dual
+  · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hC)
+  · rw [dual_sup_dual_inf_dual, dual_eq_submodule_dual, ofSubmodule_coe, dual_eq_submodule_dual,
+      Submodule.FG.dual_dual_flip p hC] -- <-- submodule duality theory
 
 -- variable (p) [Fact p.flip.IsFaithfulPair] in
 -- /-- An FG cone is the dual of a FGDual cone. -/
