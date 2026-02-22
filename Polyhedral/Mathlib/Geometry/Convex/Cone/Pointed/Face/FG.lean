@@ -198,13 +198,22 @@ low dimensional examples
 
 noncomputable def Face.rank (F : Face C) := Module.rank R F.span
 
-lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := sorry
+lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
 
-lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := sorry
+lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
+  have hlin : C.linSpan = (⊥ : Submodule R M) :=
+    (Submodule.rank_eq_zero).1 (by simpa [PointedCone.rank] using h)
+  exact le_bot_iff.mp (by simpa [hlin] using (PointedCone.le_submodule_span C))
 
-lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ := sorry
+lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ :=
+  ⟨bot_of_rank_zero, by rintro rfl; simp [PointedCone.rank]⟩
 
-lemma Face.bot_iff_rank_zero {F : Face C} : F.rank = 0 ↔ F = ⊥ := sorry
+lemma Face.bot_iff_rank_zero {F : Face C} (hC : C.Salient) : F.rank = 0 ↔ F = ⊥ := by
+  have hEq : ((F : PointedCone R M) = (⊥ : PointedCone R M)) ↔ F = ⊥ := by
+    simpa only [Face.lineal_bot, PointedCone.salient_iff_lineal_bot.mp hC] using
+      (Face.toPointedCone_eq_iff (F₁ := F) (F₂ := (⊥ : Face C)))
+  simpa [Face.rank, PointedCone.rank] using
+    (PointedCone.bot_iff_rank_zero (C := (F : PointedCone R M))).trans hEq
 
 lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R {x} := by
   have : C ≠ ⊥ := fun h' ↦ by simp [bot_iff_rank_zero.mpr h'] at h
@@ -243,7 +252,7 @@ theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFace
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
   by_cases! h : F.rank < 1
-  · absurd Face.bot_iff_rank_zero.mp <| Cardinal.lt_one_iff_zero.mp h
+  · absurd (Face.bot_iff_rank_zero hsal).mp <| Cardinal.lt_one_iff_zero.mp h
     exact hF.ne_bot
   have h1 : (F : PointedCone R M).FG := IsFaceOf.fg_of_fg hfg F.isFaceOf
   have h2 : (F : PointedCone R M).Salient := IsFaceOf.salient hsal F.isFaceOf
@@ -255,7 +264,7 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
   have t_rank : test.rank = 1 := rank_one_of_ray hx0
   have : test ≤ F := hxF.le
   rcases (IsAtom.le_iff hF).1 this with h | h
-  · rw [bot_iff_rank_zero.2 h] at t_rank
+  · rw [(bot_iff_rank_zero hsal).2 h] at t_rank
     simp at t_rank
   rw [← h, t_rank]
 
