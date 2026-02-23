@@ -285,7 +285,29 @@ lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ := sorry
 
 lemma Face.bot_iff_rank_zero {F : Face C} : F.rank = 0 ↔ F = ⊥ := sorry
 
-lemma ray_of_rank_one (h : C.rank = 1) : ∃ x : M, C = span R {x} := sorry
+lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R {x} := by
+  have : C ≠ ⊥ := fun h' ↦ by simp [bot_iff_rank_zero.mpr h'] at h
+  obtain ⟨x, hxC, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot this
+  refine ⟨x, le_antisymm ?_ (by simp [hxC]) ⟩
+  intro y hy
+  by_cases! ha : ∃ a : R, y = a • x
+  · obtain ⟨a, rfl⟩ := ha
+    by_cases! ha : a ≥ 0
+    · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha <| Submodule.mem_span_singleton_self x
+    exfalso
+    apply hS x hxC hx0
+    have : -x = (-a⁻¹) • (a • x) := by
+      rw [smul_smul]
+      field_simp [ne_of_lt ha]
+      rw [neg_smul, one_smul]
+    rw [this]
+    exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy
+  let f := ![(⟨x, Submodule.mem_span_of_mem hxC⟩ : C.linSpan), ⟨y, Submodule.mem_span_of_mem hy⟩]
+  have : LinearIndependent R f := by
+    apply (LinearIndependent.pair_iff' (Subtype.coe_ne_coe.mp hx0)).2
+    exact fun a ↦ Subtype.coe_ne_coe.mp fun a_1 ↦ ha a  (Eq.symm a_1)
+  have : C.rank ≥ 2 := le_rank_iff.2 ⟨f, this⟩
+  simp [h] at this
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
