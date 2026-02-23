@@ -49,13 +49,6 @@ variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 @[coe]
 abbrev toPointedCone {C : PointedCone R M} (F : Face C) : PointedCone R M := F.toSubmodule
 
-/- Converts a face of a pointed cone into a pointed cone. -/
-@[coe, simp]
-def toPointedCone {C : PointedCone R M} (F : Face C) : PointedCone R M := F.toSubmodule
-
-/-toPointedCone and self are inverse. -/
-lemma toPointedCone_self_eq_self (C : PointedCone R M) : (self C).toPointedCone = C := Submodule.toSubMulAction_inj.mp rfl
-
 instance : CoeOut (Face (C : PointedCone R M)) (PointedCone R M) := ⟨toPointedCone⟩
 
 instance : SetLike (Face C) M where
@@ -240,83 +233,54 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 
 end Semiring
 
-
-/-!
-### Complete Lattice
-needs lineal
--/
--- commented out because there are problems with imports
--- section Field
-
--- variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
---   [AddCommGroup N] [Module R N] {C C₁ F : PointedCone R M} {C₂ : PointedCone R N}
-
--- /-- The face of a pointed cone `C` that is its lineal space. It is contained in all
---   faces of `C`. -/
--- def lineal {C : PointedCone R M} : Face C := ⟨C.lineal, IsFaceOf.lineal C⟩
-
--- lemma lineal_le {C : PointedCone R M} (F : Face C) : lineal ≤ F := F.isFaceOf.lineal_le
-
--- /-- The bottom element of the partial order on faces of `C` is `C.lineal`. -/
--- instance : OrderBot (Face C) where
---   bot := lineal
---   bot_le F := F.lineal_le
-
--- instance : BoundedOrder (Face C) where
-
--- instance : CompleteLattice (Face C) where
-
--- end Field
-
 section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
 variable {C F : PointedCone R M} {s t : Set M}
 
--- can't define the order embeddin until we have the complete lattice
 /-!
 ### Embed and restrict
 -/
 
--- /-- The face of `C` obtained by embedding a face of a face of `C`. -/
--- def embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
---     ⟨F₂, F₂.isFaceOf.trans F₁.isFaceOf⟩
+/-- The face of `C` obtained by embedding a face of a face of `C`. -/
+def embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
+    ⟨F₂, F₂.isFaceOf.trans F₁.isFaceOf⟩
 
--- /-- A face of a face of `C` coerces to a face of `C`. -/
--- instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
+/-- A face of a face of `C` coerces to a face of `C`. -/
+instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
 
--- /-- The face of `F₁` obtained by intersecting `F₁` with another of `C`'s faces. -/
--- def restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) := sorry -- # broken by PR
---   -- ⟨F₁ ⊓ F₂, (F₁.isFaceOf.inf_left F₂.isFaceOf).iff_le F₁.isFaceOf inf_le_left⟩
+/-- The face of `F₁` obtained by intersecting `F₁` with another of `C`'s faces. -/
+def restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) := sorry -- # broken by PR
+  -- ⟨F₁ ⊓ F₂, (F₁.isFaceOf.inf_left F₂.isFaceOf).iff_le F₁.isFaceOf inf_le_left⟩
 
--- lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := sorry -- # broken by PR
---   -- rfl
+lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := sorry -- # broken by PR
+  -- rfl
 
--- lemma embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
---     embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
+lemma embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
+    embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
 
--- lemma restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
---     F₁.restrict (embed F₂) = F₂ := by sorry -- # broken by PR
---   -- unfold restrict embed; congr
---   -- simpa using F₂.isFaceOf.le
+lemma restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
+    F₁.restrict (embed F₂) = F₂ := by sorry -- # broken by PR
+  -- unfold restrict embed; congr
+  -- simpa using F₂.isFaceOf.le
 
--- lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
---   rw [← restrict_embed F₂, embed_restrict]
---   simp only [inf_le_left]
+lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
+  rw [← restrict_embed F₂, embed_restrict]
+  simp only [inf_le_left]
 
--- /-- The isomorphism between a face's face lattice and the interval in the cone's face
---  lattice below the face. -/
--- def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
---   toFun G := ⟨G, bot_le, Face.embed_le G⟩
---   invFun G := F.restrict G
---   left_inv := restrict_embed
---   right_inv G := by simp only [embed_restrict_of_le G.2.2]
---   map_rel_iff' := @fun _ _ => by simp [embed]
+/-- The isomorphism between a face's face lattice and the interval in the cone's face
+ lattice below the face. -/
+def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
+  toFun G := ⟨G, bot_le, Face.embed_le G⟩
+  invFun G := F.restrict G
+  left_inv := restrict_embed
+  right_inv G := by simp only [embed_restrict_of_le G.2.2]
+  map_rel_iff' := @fun _ _ => by simp [embed]; sorry
 
--- /-- The embedding of a face's face lattice into the cone's face lattice. -/
--- def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=
---   (embed_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
+/-- The embedding of a face's face lattice into the cone's face lattice. -/
+def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=
+  (embed_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
 
 
 -- needs dual

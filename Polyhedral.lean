@@ -1,12 +1,9 @@
-import Polyhedral.Halfspace
-import Polyhedral.Hyperplane
-import Polyhedral.Line
-import Polyhedral.Mathlib.Algebra.Module.Exposed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FGDual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
@@ -16,12 +13,10 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FaciallyExposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Grade
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.KreinMilman
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.SemiExposed
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
@@ -29,7 +24,5 @@ import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
-import Polyhedral.Polyhedral.AbstractPolytope
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces
-import Polyhedral.Ray

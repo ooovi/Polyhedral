@@ -66,6 +66,15 @@ def dual : Submodule R N where
 @[simp] lemma dual_bot : dual p {0} = ⊤ := dual_zero
 @[simp] lemma dual_ker : dual p (ker p) = ⊤ := by ext; simp +contextual
 
+variable [inst : Fact p.SeparatingLeft] in
+lemma dual_top_iff_le_ker {S : Submodule R M} : dual p S = ⊤ ↔ S ≤ ker p := by
+  constructor <;> intro h
+  · intro x hx
+    simp only [Submodule.ext_iff, mem_dual, SetLike.mem_coe, mem_top, iff_true] at h
+    simpa using inst.elim x (fun y => (h y hx).symm)
+  · simp only [SeparatingLeft.ker_eq_bot, le_bot_iff] at h
+    simp [h]
+
 lemma dual_univ_ker : dual p univ = ker p.flip := by
   ext x; simpa [Eq.comm] using (funext_iff (f := (0 : M →ₗ[R] R)) (g := p.flip x)).symm
 lemma dual_flip_univ_ker : dual p.flip univ = ker p := by
@@ -907,6 +916,9 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+-- TODO: proof converses and duals in finite dim.
+
+-- converse is not true
 variable (p) [Fact p.SeparatingRight] in
 theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T) :
     Disjoint (dual p S) (dual p T) := by
@@ -915,7 +927,18 @@ theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T)
   rw [codisjoint_iff.mp hST]
   exact dual_univ
 
-variable (p) [p.IsPerfPair] in -- can we do with less assumptions?
+-- can we simplify the proof?
+-- the dual statement (from Disjoint to Codisjoint) seems to be wrong.
+variable (p) [Fact p.SeparatingLeft] in
+theorem disjoint_dual_of_codisjoint_dual {S : Submodule R M} {T : Submodule R N}
+    (hST : Codisjoint (dual p S) T) : Disjoint S (dual p.flip T) := by
+  rw [disjoint_iff]
+  have hST := congrArg (dual p.flip ∘ SetLike.coe) hST.eq_top
+  simp only [Function.comp_apply, top_coe, dual_univ, dual_sup, dual_union] at hST
+  rw [← le_bot_iff] at ⊢ hST
+  exact le_trans (inf_le_inf_right _ subset_dual_dual) hST
+
+variable (p) [p.IsPerfPair] in -- likely `Surjective p.flip` suffices
 theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
     Codisjoint (dual p S) (dual p T) := by
   rw [codisjoint_iff]
@@ -923,11 +946,14 @@ theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :
   rw [disjoint_iff.mp hST]
   simp only [bot_coe, dual_bot]
 
+theorem codisjoint_of_disjoint_dual {S T : Submodule R M}
+    (hST : Codisjoint (dual p S) (dual p T)) : Disjoint S T := by
+  sorry
+
 variable (p) [p.IsPerfPair] in -- can we do with less assumptions?
 theorem IsCompl.dual {S T : Submodule R M} (hST : IsCompl S T) :
     IsCompl (dual p S) (dual p T) :=
   ⟨disjoint_dual_of_codisjoint p hST.codisjoint, codisjoint_dual_of_disjoint p hST.disjoint⟩
-
 
 end Field
 

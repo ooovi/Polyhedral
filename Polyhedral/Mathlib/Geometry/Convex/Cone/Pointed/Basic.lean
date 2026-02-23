@@ -158,6 +158,9 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 -- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
+theorem span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R s :=
+  Submodule.span_insert x s
+
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
     Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
   rw [← span_submodule_span]
@@ -635,6 +638,10 @@ lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
 
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (C : Set M)).FG :=
+  hC.span
+
+/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
+lemma FG.linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG :=
   hC.span
 
 @[deprecated submodule_span_fg (since := "...")]

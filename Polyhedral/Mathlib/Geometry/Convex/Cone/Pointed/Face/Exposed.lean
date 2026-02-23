@@ -13,8 +13,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 -- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
-import Polyhedral.Hyperplane
-import Polyhedral.Halfspace
+-- import Polyhedral.Hyperplane
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 
 open Module
 open Submodule

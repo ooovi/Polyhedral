@@ -59,7 +59,7 @@ lemma le_dual_of_le_dual {S : PointedCone R M} {T : PointedCone R N}
   le_trans subset_dual_dual (dual_antitone hSC)
 
 -- NOTE: This is the characterizing property of an antitone GaloisConnection.
-lemma dual_le_iff_dual_le {S : PointedCone R M} {T : PointedCone R N} :
+lemma le_dual_iff_le_dual {S : PointedCone R M} {T : PointedCone R N} :
     S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
 
 -- lemma span_sSup_sInf_span (S : Set (PointedCone R M)) :

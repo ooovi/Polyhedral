@@ -12,7 +12,7 @@ import Mathlib.Order.Partition.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
--- import Polyhedral.Halfspace
+import Polyhedral.Halfspace
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual DualClosed
@@ -75,13 +75,13 @@ lemma face_of_submodule_eq_top {S : Submodule R M} (F : Face (S : PointedCone R 
 lemma relint_submodule (S : Submodule R M) : relint (S : PointedCone R M) = S := by
   ext x
   unfold relint
-  simp only [restrictScalars_mem, ConvexCone.mem_mk,
+  simp only [restrictScalars_mem, Face.mem_coe, ConvexCone.mem_mk,
     Set.mem_setOf_eq, mem_toConvexCone, and_iff_left_iff_imp]
   intro _ F _
   rw [face_of_submodule_eq_top F]
-  have: (⊤ : Face (S : PointedCone R M)) = ⟨(S : PointedCone R M), IsFaceOf.refl _⟩ := by
+  have:(⊤ : Face (S : PointedCone R M)) = ((S : PointedCone R M) : Face (S : PointedCone R M)) := by
     apply face_of_submodule_eq_top
-  rw [this]
+  rw [this, Face.toPointedCone_self_eq_self (S : PointedCone R M)]
 
 -- theorem relint_def_sInf (C : PointedCone R M) :
 --     C.relint = sInf {s | dual p.flip (dual p s) = C} := sorry

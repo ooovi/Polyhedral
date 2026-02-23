@@ -495,7 +495,30 @@ example (h : span R s ⊓ span R t = ⊥)
   -- When intersection is ⊥, both sides equal ⊥ if s ∩ t = ∅
   sorry
 
+
+-- ## RESTRICT / EMBED
+
+-- TODO: move to Faces lean file
+
+lemma IsFaceOf.restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
+    (restrict S F).IsFaceOf (restrict S C) := ⟨restrict_mono S hF.1, hF.2⟩ -- hF.comap S.subtype
+
+lemma IsFaceOf.embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
+    (embed F).IsFaceOf (embed C) := hF.map S.subtype_injective
+
+
+
+-- ## QUOT / FIBER
+
+-- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
+
+lemma quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
+    (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
+  sorry
+
 end Field
+
+
 
 end IsFaceOf
 
