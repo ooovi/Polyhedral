@@ -361,7 +361,10 @@ lemma IsFaceOf.span_ray {s : Set M} {x : M} (hx : x ≠ 0)
 
 theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
     F.Salient := by
-  sorry
+  intro x xF x_ne_0 x_negF
+  have xC : x ∈ C := hF.le (mem_toConvexCone.mp xF)
+  have x_negC : -x ∈ C := hF.le (mem_toConvexCone.mp x_negF)
+  exact hC x xC x_ne_0 x_negC
 
 -- TODO: this proof uses FG only at one point: to show that opt is non-empty. This should
 --  generalize to dual-closed.
