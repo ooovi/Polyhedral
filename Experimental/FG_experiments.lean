@@ -41,7 +41,6 @@ lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   use t, tt
 
 
-
 -- TODO: can we reduce assumptions?
 variable (p) [Fact (Function.Surjective p.flip)] in
 lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
@@ -309,18 +308,46 @@ lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R 
   have : C.rank ≥ 2 := le_rank_iff.2 ⟨f, this⟩
   simp [h] at this
 
-lemma Face.rank_one_of_atom (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient)
-    (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
-  rcases lt_trichotomy F.rank 1 with h | h | h
-  · have h : F.rank = 0 := sorry
-    absurd Face.bot_iff_rank_zero.mp h
-    exact hF.ne_bot
-  · exact h
-  · have h1 : (F : PointedCone R M).FG := sorry
-    have h2 : (F : PointedCone R M).Salient := sorry
+lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (span R {x}).rank = 1 := by
+  apply (rank_submodule_eq_one_iff (span R {x}).linSpan).mpr
+  use x, (by simp only [Submodule.span_span_of_tower, Submodule.mem_span_singleton_self])
+  refine ⟨hx, ?_⟩
+  simp only [Submodule.span_span_of_tower, le_refl]
 
-    have h := FG.exists_ray h1 sorry h2
-    sorry
+theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
+    F.Salient := by
+  intro x xF x_ne_0 x_negF
+  have xC : x ∈ C := hF.le (mem_toConvexCone.mp xF)
+  have x_negC : -x ∈ C := hF.le (mem_toConvexCone.mp x_negF)
+  exact hC x xC x_ne_0 x_negC
+
+lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
+    (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
+  by_cases! h : F.rank < 1
+  · absurd Face.bot_iff_rank_zero.mp <| Cardinal.lt_one_iff_zero.mp h
+    exact hF.ne_bot
+  have h1 : (F : PointedCone R M).FG := IsFaceOf.fg_of_fg hfg F.isFaceOf
+  have h2 : (F : PointedCone R M).Salient := IsFaceOf.salient hsal F.isFaceOf
+  obtain ⟨x, hx0, hxF⟩ := by
+    refine FG.exists_ray h1 (fun h3 ↦ ?_) h2
+    replace h : (F : PointedCone R M).rank ≥ 1 := h
+    simp [(F : PointedCone R M).bot_iff_rank_zero.mpr h3] at h
+  let test : Face C := ⟨PointedCone.span R {x}, hxF.trans F.isFaceOf⟩
+  have t_rank : test.rank = 1 := rank_one_of_ray hx0
+  have : test ≤ F := hxF.le
+  rcases (IsAtom.le_iff hF).1 this with h | h
+  · rw [bot_iff_rank_zero.2 h] at t_rank
+    simp at t_rank
+  rw [← h, t_rank]
+
+lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
+  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
+
+lemma rank_mono_face {C : PointedCone R M} {F₁ F₂ : Face C} (h : F₁ ≤ F₂) : F₁.rank ≤ F₂.rank :=
+  rank_mono h
+
+
+
 
 -- def Face.atoms (C : PointedCone R M) : Set (Face C) := {F : Face C | IsAtom F}
 
@@ -422,13 +449,6 @@ lemma IsFaceOf.span_ray {s : Set M} {x : M} (hx : x ≠ 0)
   constructor
   · exact ha'
   exact ha.2.symm
-
-theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient := by
-  intro x xF x_ne_0 x_negF
-  have xC : x ∈ C := hF.le (mem_toConvexCone.mp xF)
-  have x_negC : -x ∈ C := hF.le (mem_toConvexCone.mp x_negF)
-  exact hC x xC x_ne_0 x_negC
 
 -- TODO: this proof uses FG only at one point: to show that opt is non-empty. This should
 --  generalize to dual-closed.
