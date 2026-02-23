@@ -312,23 +312,65 @@ lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ span R s) :
   let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
   exact ⟨φ, hφ, fun y hy => h y (subset_span hy)⟩
 
-def opt (C : PointedCone R M) (f g : M →ₗ[R] R) (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) :
+def opt (C : PointedCone R M) (f g : M →ₗ[R] R) (_ : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) :
     PointedCone R M where
   carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
   add_mem' := by
     intro a b ha hb
     simp only [Set.mem_setOf_eq, map_add] at *
-    constructor
-    · exact C.add_mem ha.1 hb.1
+    refine ⟨C.add_mem ha.1 hb.1, ?_⟩
     intro y hy
-    have ha := ha.2 y hy
-    have hb := hb.2 y hy
-    sorry
-  zero_mem' := sorry
-  smul_mem' := sorry
+    rw [add_mul, mul_add]
+    exact add_le_add (ha.2 y hy) (hb.2 y hy)
+  zero_mem' := by simp only [Set.mem_setOf_eq, zero_mem, map_zero, zero_mul, mul_zero, le_refl,
+     implies_true, and_self]
+  smul_mem' := by
+    intro a x hx
+    refine ⟨C.smul_mem a.2 hx.1, ?_⟩
+    intro y hy
+    by_cases! h : a ≤ 0
+    · simp [nonpos_iff_eq_zero.mp h]
+    simp only [LinearMap.map_smul_of_tower, Algebra.smul_mul_assoc, Algebra.mul_smul_comm]
+    exact (smul_le_smul_iff_of_pos_left h).mpr <| hx.2 y hy
+
+lemma IsSalient.of_opt (C : PointedCone R M) (_ g : M →ₗ[R] R)
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.Salient := by
+  intro x hx x_ne_0 hxn
+  have h1 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
+  have h2 := lt_of_le_of_ne
+    (hg _ hxn).1 (fun h ↦ x_ne_0 (neg_eq_zero.mp <| (hg _ hxn).2 <| Eq.symm h))
+  simp only [_root_.map_neg, Left.neg_pos_iff] at h2
+  linarith
 
 lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : (C.opt f g hg).IsFaceOf C := sorry
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : (C.opt f g hg).IsFaceOf C := by
+  refine { le := fun _ hx ↦ hx.1, mem_of_smul_add_mem := ?_ }
+  intro x y a hx hy ha ⟨h2, h⟩
+  by_cases! x_ne_0 : x = 0
+  · rw [x_ne_0]; exact zero_mem (C.opt f g hg)
+  by_cases! t_ne_0 : a • x + y = 0
+  · exfalso
+    apply (IsSalient.of_opt C f g hg) (a • x)
+    · exact C.smul_mem (le_of_lt ha) hx
+    · exact smul_ne_zero (ne_of_gt ha) x_ne_0
+    rw [neg_eq_of_add_eq_zero_right t_ne_0]
+    exact hy
+  refine ⟨hx, fun z hz ↦ ?_⟩
+  have : g x > 0 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
+  have t1 := h x hx
+  have t2 := h y hy
+  have t4 := (mul_le_mul_iff_of_pos_left this).mpr <| (h z hz)
+  simp only [map_add, map_smul, smul_eq_mul] at t1 t2 t4
+  have local_lemma : ∀ {a b c d e : R}, e > 0 → a ≤ b → c ≤ d → e * a + c = e * b + d → a = b :=
+    fun _ _ _ _ ↦ by nlinarith
+  have t3 : (a * f x + f y) * g x = f x * (a * g x + g y) := local_lemma ha t1 t2 (by ring)
+  have : a * g x + g y > 0 := by
+    simpa only [gt_iff_lt, map_add, map_smul, smul_eq_mul] using
+      lt_of_le_of_ne (hg _ h2).1 (fun h ↦ t_ne_0 <| (hg _ h2).2 (Eq.symm h))
+  apply (mul_le_mul_iff_of_pos_left this).mp
+  nth_rw 3 [mul_comm] at t3
+  rw [← mul_assoc, ← t3]
+  linarith
 
 lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (f g : M →ₗ[R] R)
     (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.opt f g hg ≠ ⊥ := sorry
