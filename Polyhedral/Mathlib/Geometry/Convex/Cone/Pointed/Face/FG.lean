@@ -3,6 +3,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 
@@ -217,49 +218,6 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
 low dimensional examples
 -/
 
-noncomputable def Face.rank (F : Face C) := Module.rank R F.span
-
-lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := sorry
-
-lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := sorry
-
-lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ := sorry
-
-lemma Face.bot_iff_rank_zero {F : Face C} : F.rank = 0 ↔ F = ⊥ := sorry
-
-lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R {x} := by
-  have : C ≠ ⊥ := fun h' ↦ by simp [bot_iff_rank_zero.mpr h'] at h
-  obtain ⟨x, hxC, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot this
-  refine ⟨x, le_antisymm ?_ (by simp [hxC]) ⟩
-  intro y hy
-  by_cases! ha : ∃ a : R, y = a • x
-  · obtain ⟨a, rfl⟩ := ha
-    by_cases! ha : a ≥ 0
-    · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha <| Submodule.mem_span_singleton_self x
-    exfalso
-    apply hS x hxC hx0
-    have : -x = (-a⁻¹) • (a • x) := by
-      rw [smul_smul]
-      field_simp [ne_of_lt ha]
-      rw [neg_smul, one_smul]
-    rw [this]
-    exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy
-  let f := ![(⟨x, Submodule.mem_span_of_mem hxC⟩ : C.linSpan), ⟨y, Submodule.mem_span_of_mem hy⟩]
-  have : LinearIndependent R f := by
-    apply (LinearIndependent.pair_iff' (Subtype.coe_ne_coe.mp hx0)).2
-    exact fun a ↦ Subtype.coe_ne_coe.mp fun a_1 ↦ ha a  (Eq.symm a_1)
-  have : C.rank ≥ 2 := Module.le_rank_iff.2 ⟨f, this⟩
-  simp [h] at this
-
-lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (span R {x}).rank = 1 := by
-  apply (rank_submodule_eq_one_iff (span R {x}).linSpan).mpr
-  use x, (by simp only [Submodule.span_span_of_tower, Submodule.mem_span_singleton_self])
-  refine ⟨hx, ?_⟩
-  simp only [Submodule.span_span_of_tower, le_refl]
-
-theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient :=
-  hC.anti hF.le
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
@@ -276,14 +234,9 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
   have t_rank : test.rank = 1 := rank_one_of_ray hx0
   have : test ≤ F := hxF.le
   rcases (IsAtom.le_iff hF).1 this with h | h
-  · rw [bot_iff_rank_zero.2 h] at t_rank
+  · rw [Face.bot_iff_rank_zero.2 h] at t_rank
     simp at t_rank
   rw [← h, t_rank]
 
-lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
-  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
-
-lemma rank_mono_face {C : PointedCone R M} {F₁ F₂ : Face C} (h : F₁ ≤ F₂) : F₁.rank ≤ F₂.rank :=
-  rank_mono h
 
 end PointedCone
