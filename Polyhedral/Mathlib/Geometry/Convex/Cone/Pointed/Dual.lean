@@ -104,10 +104,16 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp only [ofSubmodule_coe]
 
+
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+{M : Type*} [AddCommGroup M] [Module R M]
+{N : Type*} [AddCommGroup N] [Module R N]
+{p : M →ₗ[R] N →ₗ[R] R} in
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
 lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .dual p C.lineal := by
-  simp only [lineal, Submodule.dual_sSup_sInf_dual]
+  simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
   refine sInf_le_sInf ?_
   intro T
   simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
@@ -457,7 +463,7 @@ section Field
 
 open Function
 
-variable {R : Type*} [Field R] [PartialOrder R] [IsOrderedRing R]
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}

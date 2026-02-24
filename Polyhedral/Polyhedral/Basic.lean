@@ -59,7 +59,7 @@ lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhed
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
 lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
     C.IsPolyhedral := by
-  simpa only [IsPolyhedral, map, ← factor_comp_mk <| submodule_le_lineal hS,
+  simpa only [IsPolyhedral, map, ← factor_comp_mk <| le_lineal hS,
     restrictScalars_comp, map_comp] using FG.map _ hC
 
 /-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
@@ -165,7 +165,8 @@ lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsP
   simp only [PointedCone.map, Submodule.map_sup] -- `map` should be an abbrev
   refine sup ?_ ?_
   · exact FG.isPolyhedral (FG.map _ hfg)
-  · simp [← restrictScalars_map]
+  · rw [← restrictScalars_map]
+    simp
 
 lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f).IsPolyhedral := by
   unfold IsPolyhedral PointedCone.salientQuot quot at *
