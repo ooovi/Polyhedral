@@ -321,12 +321,24 @@ variable {R M N : Type*}
 
 namespace IsFaceOf
 
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+
+
+end Semiring
+
 section Ring
 
 variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
--- ## PRIORITY
+theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
+    F.Salient :=
+  hC.anti hF.le
+
 -- this is false without a linear order: consider ℝ with the trivial ordering
 -- (i.e., only elements in ℤ are comparable) then C:= ℕ + √2 ℕ is and ℕ ⊆ ℂ a face,
 -- but ℤ.linSpan ∩ C = C
@@ -338,22 +350,11 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
     exact hF.mem_of_add_mem xC (hF.le nf) pf
   · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
 
-
-
-@[deprecated (since := "")]
-alias inf_submodule := inf_linSpan
-
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)
 
-end Ring
 
 -- ## SUP
-
-section Ring
-
-variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 -- this is not the supremum we use in the face lattice. is it still interesting?
 
@@ -438,11 +439,11 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 --   exact zero_lt_one' R
 
 
--- lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
---     {f : ι → s} {i : ι} (hF : F.IsFaceOf (span R s)) (h : ∑ i, c i • (f i).val ∈ F)
---     (cpos : 0 < c i) : (f i).val ∈ F := by
---   refine mem_of_sum_smul_mem hF ?_ hcc h i cpos
---   simpa [mem_span] using fun i _ su => su (Subtype.coe_prop (f i))
+lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
+    {f : ι → s} {i : ι} (hF : F.IsFaceOf (span R s)) (h : ∑ i, c i • (f i).val ∈ F)
+    (cpos : 0 < c i) : (f i).val ∈ F := by
+  refine mem_of_sum_smul_mem hF ?_ hcc h i cpos
+  simpa [mem_span] using fun i _ su => su (Subtype.coe_prop (f i))
 
 -- lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
 --     (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
@@ -475,18 +476,17 @@ variable {s t : Set M}
 lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
     span R (s ∩ F) = F := by
   ext x; constructor
-  · simp [mem_span]
-    exact fun h => h F Set.inter_subset_right
+  · simpa only [mem_span] using fun h => h F Set.inter_subset_right
   · intro h
     obtain ⟨n, c, g, xfg⟩ := mem_span_set'.mp (hF.le h)
     subst xfg
     apply sum_mem
     intro i _
     by_cases hh : 0 < c i
-    · sorry -- # broken since PR
-      -- apply smul_mem
-      -- apply subset_span
-      -- refine Set.mem_inter (Subtype.coe_prop (g i)) (hF.span_nonneg_lc_mem h hh)
+    · --sorry -- # broken since PR
+      refine smul_mem _ (le_of_lt hh) ?_
+      apply subset_span (E := M)
+      exact Set.mem_inter (Subtype.coe_prop (g i)) (hF.span_nonneg_lc_mem (fun i => (c i).2) h hh)
     · push_neg at hh
       rw [le_antisymm hh (c i).property]
       simp
@@ -516,11 +516,11 @@ lemma IsFaceOf.restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
 
 -- ## QUOT / FIBER
 
--- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
+abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
 
--- lemma quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
---     (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
---   sorry
+lemma quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
+    (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
+  sorry
 
 end Field
 

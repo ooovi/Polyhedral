@@ -228,32 +228,25 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 
--- instance {S : Submodule R M} : CoeDep (Submodule R M) S (Face (S : PointedCone R M)) :=
---   ⟨(S : PointedCone R M)⟩
-
 @[simp, norm_cast]
 theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
--- needs dual
-
 abbrev span (F : Face C) : Submodule R M := Submodule.span R F
 
-section QuotFiber
--- ## QUOT / FIBER
+end Semiring
 
-open Function Module OrderDual LinearMap
+
+section Ring
+
 open Submodule hiding span dual IsDualClosed
-open PointedCone
 
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {S : Submodule R M}
-variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
-variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C : PointedCone R M}
+
+-- ## QUOT / FIBER
 
 abbrev quotMap (F : Face C) := mkQ F.span
 -- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
@@ -297,16 +290,29 @@ def quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ where
 
 def quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := sorry
 
-end QuotFiber
+end Ring
 
-
-end Semiring
 
 section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
 variable {C F : PointedCone R M} {s t : Set M}
+
+
+/-!
+### Rank
+-/
+
+noncomputable def rank (F : Face C) := Module.rank R F.span
+
+lemma bot_iff_rank_zero {F : Face C} (hC : C.Salient) : F.rank = 0 ↔ F = ⊥ := by
+  have hEq : ((F : PointedCone R M) = (⊥ : PointedCone R M)) ↔ F = ⊥ := by
+    simpa only [Face.lineal_bot, PointedCone.salient_iff_lineal_bot.mp hC] using
+      (Face.toPointedCone_eq_iff (F₁ := F) (F₂ := (⊥ : Face C)))
+  simpa [Face.rank, PointedCone.rank] using
+    (PointedCone.bot_iff_rank_zero (C := (F : PointedCone R M))).trans hEq
+
 
 /-!
 ### Embed and restrict
