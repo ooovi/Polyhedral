@@ -17,7 +17,6 @@ import Experimental.PointedCone._CoFG
 import Experimental.PointedCone._FG
 import Experimental.PointedCone._Field
 import Experimental.PointedCone.«MinkowskiWeyl-2»
-import Experimental.PointedCone.«MinkowskiWeyl-3»
 import Experimental.Ray
 import Experimental.Submodule'
 import Experimental.Submodule.Exposed

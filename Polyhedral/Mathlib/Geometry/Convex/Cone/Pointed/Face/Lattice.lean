@@ -236,17 +236,10 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
+-- needs dual
 
 abbrev span (F : Face C) : Submodule R M := Submodule.span R F
 
-noncomputable def rank (F : Face C) := Module.rank R F.span
-
-lemma rank_mono_face {C : PointedCone R M} {F₁ F₂ : Face C} (h : F₁ ≤ F₂) : F₁.rank ≤ F₂.rank :=
-  rank_mono h
-
-lemma Face.bot_iff_rank_zero {F : Face C} : F.rank = 0 ↔ F = ⊥ := sorry
-
--- needs dual
 section QuotFiber
 -- ## QUOT / FIBER
 

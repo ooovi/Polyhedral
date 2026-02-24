@@ -112,9 +112,6 @@ open Cardinal
 noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
 -- ⨆ ι : { s : Set M // LinearIndepOn R id s }, (#ι.1)
 
-lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
-  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
-
 noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 
 -- NOTE: this is not the same as Module.Finite or FG!
