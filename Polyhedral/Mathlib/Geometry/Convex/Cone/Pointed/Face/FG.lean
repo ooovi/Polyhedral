@@ -44,6 +44,27 @@ stuff we need:
 
 namespace PointedCone
 
+section DivisionRingLemmas
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C F : PointedCone R M}
+
+lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
+    ∃ t ⊆ s, span R t = F := by
+  use (s.finite_toSet.inter_of_left F).toFinset
+  simp [IsFaceOf.span_inter_face_span_inf_face hF]
+
+/-- Faces of FG cones are FG. -/
+lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
+  obtain ⟨_, rfl⟩ := hC
+  let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
+  use t, tt
+
+end DivisionRingLemmas
+
+section Field
+
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
@@ -57,19 +78,7 @@ lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ span R s) :
   let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
   exact ⟨φ, hφ, fun y hy => h y (subset_span hy)⟩
 
-
 variable {C F F₁ F₂ : PointedCone R M}
-
-lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
-    ∃ t ⊆ s, span R t = F := by
-  use (s.finite_toSet.inter_of_left F).toFinset
-  simp [IsFaceOf.span_inter_face_span_inf_face hF]
-
-/-- Faces of FG cones are FG. -/
-lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
-  obtain ⟨_, rfl⟩ := hC
-  let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
-  use t, tt
 
 section exposed
 
@@ -93,7 +102,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     exact hF.inf_linSpan
   · simpa using FG.dual_fgdual _ hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg hC)
+    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| IsFaceOf.fg_of_fg hC hF)
 
 open Module in
 /-- Every face of an FG cone is exposed. -/
@@ -110,6 +119,26 @@ lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
   exact .subdual_dual _ <| .subdual_dual _ hF
 
 end exposed
+end Field
+
+section SemiringLemmasFaceOf
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C F F₁ : PointedCone R M}
+
+lemma face_faces (h : F.IsFaceOf C) :
+    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+  ⟨fun h' => ⟨h'.le, h'.trans h⟩,
+   fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
+end SemiringLemmasFaceOf
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
 
 
 open Submodule in
@@ -188,11 +217,19 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   exact ⟨_, hx.2⟩
 
 
-lemma bot_face (F : Face C) : F = ⊥ ↔ F.toPointedCone = ⊥ := sorry
-
-lemma face_faces (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
-  ⟨fun h' => ⟨h'.le, h'.trans h⟩,
-   fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
+  have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
+    have hlineal : (⊥ : Face C) = (⟨_, IsFaceOf.lineal C⟩ : Face C) :=
+      le_antisymm bot_le (IsFaceOf.lineal_le (⊥ : Face C).isFaceOf)
+    simpa [Face.toPointedCone, salient_iff_lineal_bot.mp hC] using
+      congrArg (fun G : Face C => (G : PointedCone R M))
+        hlineal
+  constructor
+  · rintro rfl
+    exact hbotcone
+  · intro h
+    exact (Face.toPointedCone_eq_iff (F₁ := F) (F₂ := (⊥ : Face C))).mp (by
+      simpa [hbotcone] using h)
 
 theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
     ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
@@ -200,13 +237,21 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
   · sorry
   · by_cases! h : G = ⊥
     · sorry
-    ·
-      have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
+    · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
       have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
-      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg (fun n => h ((bot_face G).mpr n)) hgsal
+      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
+        (fun n => h ((bot_face (C := C) (F := G) hsal).mpr n)) hgsal
       have := (face_faces G.isFaceOf).mp hvray
       obtain ⟨s, hs⟩ := hfg
       sorry
+
+end DivisionRing
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
@@ -227,5 +272,5 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     simp at t_rank
   rw [← h, t_rank]
 
-
+end Field
 end PointedCone
