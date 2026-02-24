@@ -122,7 +122,7 @@ open Submodule in
   `x` spans a face of `span R (C ∪ {x})`. -/
 lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x : M}
     (hx : x ∉ C) (hC : (C ⊔ span R {x}).Salient) : (span R {x}).IsFaceOf (C ⊔ span R {x}) := by
-  rw [IsFaceOf.iff_mem_of_add_mem]
+  rw [isFaceOf_iff_mem_of_add_mem]
   constructor
   · exact le_sup_right
   intro y z hy hz hyz
@@ -191,6 +191,27 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
     simp [h] at hC
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
+
+
+lemma bot_face (F : Face C) : F = ⊥ ↔ F.toPointedCone = ⊥ := sorry
+
+lemma face_faces (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+  ⟨fun h' => ⟨h'.le, h'.trans h⟩,
+   fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
+theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
+    ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
+  wlog h : F = C
+  · sorry
+  · by_cases! h : G = ⊥
+    · sorry
+    ·
+      have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
+      have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
+      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg (fun n => h ((bot_face G).mpr n)) hgsal
+      have := (face_faces G.isFaceOf).mp hvray
+      obtain ⟨s, hs⟩ := hfg
+      sorry
 
 /-
 low dimensional examples

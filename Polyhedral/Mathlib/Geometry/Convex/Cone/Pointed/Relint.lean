@@ -105,7 +105,7 @@ lemma relint_nonempty {C : PointedCone R M} (hC : C.FinRank) : Nonempty C.relint
   constructor
   · exact sum_mem (fun c _ => hf c)
   intro ⟨F, hF'⟩ hF
-  replace hF := hF'.mem_of_sum_mem hf hF
+  replace hF := (hF'.sum_mem_iff_mem hf).mp hF
   refine hF'.self_of_le_linSpan ?_
   simp only [← hfC]
   intro x h

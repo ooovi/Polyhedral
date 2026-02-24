@@ -116,11 +116,11 @@ lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) :=
   -- Idea: choose φ from relint of dual cone.
   --  (we need to show that relints of dual cones are nonempty)
-  sorry
+    sorry
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
-  rw [IsFaceOf.iff_mem_of_add_mem]
+  rw [isFaceOf_iff_mem_of_add_mem]
   refine ⟨hF.le, ?_⟩
   intro _ _ hx hy hcxy
   let ⟨φ, hφ, H⟩ := hF

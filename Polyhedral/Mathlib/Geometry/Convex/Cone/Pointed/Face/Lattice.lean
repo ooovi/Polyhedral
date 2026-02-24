@@ -7,6 +7,9 @@ Authors: Olivia Röhrig
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
 
+import Mathlib.LinearAlgebra.Quotient.Defs
+
+
 /-!
 ## Face
 
@@ -115,6 +118,7 @@ instance : Nonempty (Face C) := ⟨⊤⟩
 
 instance : CompleteLattice (Face C) where
 
+
 end Semiring
 
 section Field
@@ -195,6 +199,8 @@ end Prod
 
 end Field
 
+
+
 end Face
 
 end PointedCone
@@ -230,6 +236,69 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
+-- needs dual
+
+abbrev span (F : Face C) : Submodule R M := Submodule.span R F
+
+section QuotFiber
+-- ## QUOT / FIBER
+
+open Function Module OrderDual LinearMap
+open Submodule hiding span dual IsDualClosed
+open PointedCone
+
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {S : Submodule R M}
+variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+abbrev quotMap (F : Face C) := mkQ F.span
+-- abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
+
+-- lemma IsFaceOf.quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
+--     (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
+--   sorry
+
+-- def quotBy (C : PointedCone R M) (F : Face C) : PointedCone R (M ⧸ F.span) := map F.quotMap C
+
+/-- The cone obtained by quotienting by the face's linear span. -/
+abbrev quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
+
+def quotFace (F G : Face C) : Face (F.quot) :=
+    ⟨F.quot ⊓ PointedCone.map F.quotMap G,
+     ⟨by simp, fun x' y' h0 ha => by sorry⟩⟩
+
+def fiberFace {F : Face C} (G : Face (F.quot)) : Face C :=
+    ⟨C ⊓ PointedCone.comap F.quotMap G, by sorry⟩
+
+/-- Faces of a quotient cone can naturally be considered as faces of the cone. -/
+instance {F : Face C} : CoeOut (Face F.quot) (Face C) := ⟨fiberFace⟩
+
+lemma fiber_quot (F G : Face C) : fiberFace (F.quotFace G) = F ⊔ G := sorry
+
+lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G :=
+     by simp [fiber_quot, h]
+
+lemma quot_fiber {F : Face C} (G : Face (F.quot)) : F.quotFace (fiberFace G) = G := sorry
+
+lemma le_fiber {F : Face C} (G : Face (F.quot)) : F ≤ fiberFace G := sorry
+
+/-- The isomorphism between a quotient's face lattice and the interval in the cone's face
+ lattice above the face. -/
+def quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ where
+  toFun G := ⟨G, le_fiber G, le_top⟩
+  invFun G := F.quotFace G
+  left_inv := quot_fiber
+  right_inv G := by simp only [fiber_quot_of_le G.2.1]
+  map_rel_iff' := by intro G G'; simp; sorry
+
+def quot_orderEmbed (F : Face C) : Face F.quot ↪o Face C := sorry
+
+end QuotFiber
+
 
 end Semiring
 
@@ -251,19 +320,18 @@ def embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : Face C :=
 instance {F : Face C} : CoeOut (Face (F : PointedCone R M)) (Face C) := ⟨Face.embed⟩
 
 /-- The face of `F₁` obtained by intersecting `F₁` with another of `C`'s faces. -/
-def restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) := sorry -- # broken by PR
-  -- ⟨F₁ ⊓ F₂, (F₁.isFaceOf.inf_left F₂.isFaceOf).iff_le F₁.isFaceOf inf_le_left⟩
+def restrict (F₁ F₂ : Face C) : Face (F₁ : PointedCone R M) :=
+  ⟨F₁ ⊓ F₂, ((F₁.isFaceOf.inf_left F₂.isFaceOf).iff_le_of_isFaceOf F₁.isFaceOf).mpr inf_le_left⟩
 
-lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := sorry -- # broken by PR
-  -- rfl
+lemma embed_restrict (F₁ F₂ : Face C) : embed (F₁.restrict F₂) = F₁ ⊓ F₂ := rfl
 
 lemma embed_restrict_of_le {F₁ F₂ : Face C} (hF : F₂ ≤ F₁) :
     embed (F₁.restrict F₂) = F₂ := by simp [embed_restrict, hF]
 
 lemma restrict_embed {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) :
-    F₁.restrict (embed F₂) = F₂ := by sorry -- # broken by PR
-  -- unfold restrict embed; congr
-  -- simpa using F₂.isFaceOf.le
+    F₁.restrict (embed F₂) = F₂ := by
+  unfold restrict embed; congr
+  simpa using F₂.isFaceOf.le
 
 lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤ F₁ := by
   rw [← restrict_embed F₂, embed_restrict]
@@ -283,23 +351,22 @@ def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=
   (embed_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
 
 
--- needs dual
-
-abbrev span (F : Face C) : Submodule R M := Submodule.span R F
-
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
 /-- The face of the dual cone that corresponds to this face. -/
 def dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
 
-def Face.dual_flip (F : Face (.dual p C)) : Face C := ⟨subdual p.flip (.dual p C) F, by
-  sorry -- # broken by PR
-  -- nth_rw 2 [← LinearMap.flip_flip p]
-  -- exact F.isFaceOf.subdual_dual
+def dual_flip (hC : DualClosed p C) (F : Face (.dual p C)) : Face C :=
+  ⟨subdual p.flip (.dual p C) F, by
+    nth_rw 2 [← LinearMap.flip_flip p]
+    rw [← dual_flip_dual_dual_flip]
+    simp only [LinearMap.flip_flip, dual_dual_flip_dual]
+    convert F.isFaceOf.subdual_dual (p.flip)
+    exact (DualClosed.def p hC).symm
   ⟩
 
-lemma dual_antitone : Antitone (dual p : Face C → Face _) := sorry -- # broken by PR
-  -- fun _ _ hF _ xd => subdual_antitone p (toPointedCone_le_iff.mpr hF) xd
+lemma dual_antitone : Antitone (dual p : Face C → Face _) :=
+  fun _ _ hF _ xd => subdual_antitone p hF xd
 
 -- not sure if these are necessary
 /-!
@@ -307,12 +374,12 @@ lemma dual_antitone : Antitone (dual p : Face C → Face _) := sorry -- # broken
 -/
 /-- The face `map f F` of `map f C`. -/
 def map {f : M →ₗ[R] N} (hf : Function.Injective f) (F : Face C) : Face (map f C)
-    := ⟨_, F.isFaceOf.map hf⟩
+    := ⟨_, F.isFaceOf.map _ hf⟩
 
 lemma map_inj (f : M →ₗ[R] N) (hf : Function.Injective f) :
     Function.Injective (map hf : Face C → Face _) := by
   intro F₁ F₂ h
-  simp [map] at h
+  simp only [map, mk.injEq] at h
   ext x; constructor <;> intro hx
   · have : f x ∈ PointedCone.map f F₁.toSubmodule := mem_map.mpr ⟨x, ⟨hx, rfl⟩⟩
     rw [h] at this
@@ -328,7 +395,7 @@ def map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M �
     := F.map e.injective
 
 /-- The face `comap f F` of `comap f C`. -/
-def comap {f : N →ₗ[R] M} (F : Face C) : Face (comap f C) := ⟨_, F.isFaceOf.comap⟩
+def comap {f : N →ₗ[R] M} (F : Face C) : Face (comap f C) := ⟨_, F.isFaceOf.comap _⟩
 
 -- /-- The face `comap e F` of `comap e C`. -/
 -- def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
