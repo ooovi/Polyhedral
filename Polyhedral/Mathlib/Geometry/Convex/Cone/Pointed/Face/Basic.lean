@@ -210,28 +210,28 @@ theorem mem_of_sum_smul_mem''' {s : Finset M} {c : M → R}
     (hF : F.IsFaceOf C) (hsC : ∀ x ∈ s, x ∈ C) (hc : ∀ x ∈ s, 0 ≤ c x) (hs : ∑ x ∈ s, c x • x ∈ F)
     (x : M) (hx : x ∈ s) (hci : 0 < c x) : x ∈ F := by sorry
 
+
 /-- The lineality space of a cone is a face. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   rw [iff_mem_of_add_mem]
   simp only [lineal_le, true_and]
   intro _ _ xc yc xyf
-  sorry -- broken since PR
-  -- simp [neg_add_rev, xc, true_and] at xyf ⊢
-  -- simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
+  simp [neg_add_rev, xc, true_and, mem_lineal] at xyf ⊢
+  simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
 
 /-- The lineality space of a cone lies in every face. -/
-lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F := sorry -- broken since PR
-  -- fun _ hx => hF.mem_of_add_mem hx.1 hx.2 (by simp)
+lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F :=
+  fun _ hx => hF.mem_of_add_mem (mem_lineal.mp hx).1 (mem_lineal.mp hx).2 (by simp)
 
 /-- The lineality space of a face of a cone agrees with the lineality space of the cone. -/
 lemma lineal_eq_lineal (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
   ext
-  sorry -- broken since PR
-  -- constructor <;> intro ⟨hx, hx'⟩
-  -- · exact ⟨hF.le hx, hF.le hx'⟩
-  -- constructor
-  -- · exact hF.mem_of_add_mem hx hx' (by simp)
-  -- · exact hF.mem_of_add_mem hx' hx (by simp)
+  simp only [mem_lineal]
+  constructor <;> intro ⟨hx, hx'⟩
+  · exact ⟨hF.le hx, hF.le hx'⟩
+  constructor
+  · exact hF.mem_of_add_mem hx hx' (by simp)
+  · exact hF.mem_of_add_mem hx' hx (by simp)
 
 section Prod
 
@@ -346,59 +346,58 @@ variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 
 -- this is not the supremum we use in the face lattice. is it still interesting?
 
-open Submodule in
-private lemma uniq_decomp_of_zero_inter {xC xD yC yD : M}
-    (mxc : xC ∈ C₁) (myc : yC ∈ C₁) (mxd : xD ∈ C₂) (myd : yD ∈ C₂)
-    (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M))
-    (s : xC + xD = yC + yD) :
-    xC = yC ∧ xD = yD := by
-  sorry -- # broken since PR
-  -- let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
-  --   (span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
-  -- replace hCD := disjoint_def.mp hCD
-  -- constructor
-  -- · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
-  --   rw [add_comm] at s
-  --   rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
-  --   exact sub_mem_span myd mxd
-  -- · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
-  --   nth_rewrite 2 [add_comm] at s
-  --   rw [← sub_eq_sub_iff_add_eq_add.mpr s]
-  --   exact sub_mem_span myc mxc
+-- open Submodule in
+-- private lemma uniq_decomp_of_zero_inter {xC xD yC yD : M}
+--     (mxc : xC ∈ C₁) (myc : yC ∈ C₁) (mxd : xD ∈ C₂) (myd : yD ∈ C₂)
+--     (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M))
+--     (s : xC + xD = yC + yD) :
+--     xC = yC ∧ xD = yD := by
+--   -- sorry -- # broken since PR
+--   let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) : yC - xC ∈ span R C₁ :=
+--     (PointedCone.span R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+--   replace hCD := disjoint_def.mp hCD
+--   constructor
+--   · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
+--     rw [add_comm] at s
+--     rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
+--     exact sub_mem_span myd mxd
+--   · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
+--     nth_rewrite 2 [add_comm] at s
+--     rw [← sub_eq_sub_iff_add_eq_add.mpr s]
+--     exact sub_mem_span myc mxc
 
-theorem sup_of_disjoint (hFC : F₁.IsFaceOf C₁) (hGD : F₂.IsFaceOf C₂)
-    (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M)) :
-    (F₁ ⊔ F₂).IsFaceOf (C₁ ⊔ C₂) := by
-  sorry -- # broken since PR
-  -- constructor
-  -- · simp only [sup_le_iff]
-  --   constructor
-  --   · apply le_trans _ le_sup_left
-  --     convert hFC.le
-  --   · apply le_trans _ le_sup_right
-  --     convert hGD.le
-  -- · intro _ _ a b xs ys a0 b0 h
-  --   simp [mem_sup] at h xs ys ⊢
-  --   obtain ⟨xf, hxf, yg, hyg, hfg⟩ := h
-  --   obtain ⟨x', hx', y', hy', hfx⟩ := xs
-  --   obtain ⟨x'', hx'', y'', hy'', hfy⟩ := ys
-  --   have : (a • x' + b • x'') + (a • y' + b • y'') = xf + yg := by
-  --     rw [← hfy, ← hfx, smul_add] at hfg
-  --     simp [hfg]
-  --     abel
-  --   let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + b • y ∈ C :=
-  --     C.add_mem (C.smul_mem (le_of_lt a0) xCM) (C.smul_mem (le_of_lt b0) yCM)
-  --   have := uniq_decomp_of_zero_inter -- this requires Ring
-  --     (mem hx' hx'') (hFC.le hxf) (mem hy' hy'') (hGD.le hyg) hCD this
-  --   refine ⟨x', ?_, y', ?_, hfx⟩
-  --   · exact hFC.mem_of_smul_add_mem hx' hx'' a0 b0 (by rwa [this.1])
-  --   · exact hGD.mem_of_smul_add_mem hy' hy'' a0 b0 (by rwa [this.2])
+-- theorem sup_of_disjoint (hFC : F₁.IsFaceOf C₁) (hGD : F₂.IsFaceOf C₂)
+--     (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M)) :
+--     (F₁ ⊔ F₂).IsFaceOf (C₁ ⊔ C₂) := by
+--   constructor
+--   · simp only [sup_le_iff]
+--     constructor
+--     · apply le_trans _ le_sup_left
+--       convert hFC.le
+--     · apply le_trans _ le_sup_right
+--       convert hGD.le
+--   · intro x y a xs ys a0 h
+--     simp only [mem_sup] at h xs ys ⊢
+--     obtain ⟨xf, hxf, yg, hyg, hfg⟩ := h
+--     obtain ⟨x', hx', y', hy', hfx⟩ := xs
+--     obtain ⟨x'', hx'', y'', hy'', hfy⟩ := ys
+--     have : (a • x' + x'') + (a • y' + y'') = xf + yg := by
+--       rw [← hfy, ← hfx, smul_add] at hfg
+--       simp [hfg]
+--       abel
+--     let mem {C : PointedCone R  M} {x y} (xCM yCM) : a • x + y ∈ C :=
+--       C.add_mem (C.smul_mem (le_of_lt a0) xCM) yCM
+--     have := uniq_decomp_of_zero_inter -- this requires Ring
+--       (mem hx' hx'') (hFC.le hxf) (mem hy' hy'') (hGD.le hyg) hCD this
+--     refine ⟨x', ?_, y', ?_, hfx⟩
+--     · exact hFC.mem_of_smul_add_mem hx' hx'' a0 (by rwa [this.1])
+--     · exact hGD.mem_of_smul_add_mem hy' hy'' a0 (by rwa [this.2])
 
-theorem sup_of_disjoint_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂)
-    (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M))
-    : F.IsFaceOf (C₁ ⊔ C₂) := by
-  refine Eq.mp ?_ (sup_of_disjoint h₁ h₂ hCD)
-  simp
+-- theorem sup_of_disjoint_right (h₁ : F.IsFaceOf C₁) (h₂ : F.IsFaceOf C₂)
+--     (hCD : Disjoint (span R C₁) (span R C₂ : PointedCone R M))
+--     : F.IsFaceOf (C₁ ⊔ C₂) := by
+--   refine Eq.mp ?_ (sup_of_disjoint h₁ h₂ hCD)
+--   simp
 
 end Ring
 
