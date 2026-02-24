@@ -315,11 +315,8 @@ lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (span R {x}).rank = 1 := by
   simp only [Submodule.span_span_of_tower, le_refl]
 
 theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient := by
-  intro x xF x_ne_0 x_negF
-  have xC : x ∈ C := hF.le (mem_toConvexCone.mp xF)
-  have x_negC : -x ∈ C := hF.le (mem_toConvexCone.mp x_negF)
-  exact hC x xC x_ne_0 x_negC
+    F.Salient :=
+  hC.anti hF.le
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
