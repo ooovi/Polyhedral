@@ -1,46 +1,7 @@
+import Mathlib.Order.Grade
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
-
-/-
-theorem 2.7 from ziegler page 57:
-(i) For every polytope P the face poset L(P) is a graded lattice of length
-dim(P) + 1, with rank function r(F) = dim(F) + 1.
-(ii) Every interval [G, F] of L(P) is the face lattice of a convex polytope
-of dimension r(F) − r(G) − 1.
-
-proof:
-part (ii).
-- assume F = P, by Prop 2.3(iii) (faces of F are exactly the faces of P that are contained in F)
-- if G = ∅, then everything is clear
-- If G ̸= ∅, it has a vertex v ∈ G by Prop 2.2(i) (krein milman, Every polytope is the convex
- hull of its vertices: P = conv(vert(P)).)
-- it is a vertex of P by Prop 2.3(iii)
-- Prop 2.4: There is a bijection between the k-dimensional faces of P that contain v, and the
- (k−1)-dimensional faces of P/v, given by
- π : F ↦ F ∩ {x : cx = c₁}
- σ : F' ↦ P ∩ aff ({v} ∪ F')
-- face lattice of P/v is isomorphic to interval [{v}, P] of the face lattice L(P), by Prop 2.4
-- done by induction on dim(G).
-
-part (i).
-- G ⊂ F faces of P
-- monotonicity:
-  - then G = P ∩ aff(G) ⊆ P ∩ aff(F) = F by Prop 2.3(iv) (every face has a supportin hyperplane)
-  - so aff(G) ⊂ aff(F), and thus dim(G) < dim(F)
-- covering:
-  - let dim(F)−dim(G) ≥ 2, show there is a face H ∈ L(P) with G ⊂ H ⊂ F
-  - by part (ii) the interval [G, F] is the face lattice of a polytope of dimension at least 1
-  - so it has a vertex, which yields the desired H.
-
-
-stuff we need:
-- faces of F are exactly the faces of P that are contained in F (`IsFaceOf.trans`)
-- every non-⊥ cone has a vertex (`FG.exists_ray` below)
-- bijection between the k-dimensional faces of P that contain v, and the
- (k−1)-dimensional faces of P/v
-- every face has a supporting hyperplane (`IsFaceOf.FG.exposed` below)
--/
-
 
 namespace PointedCone
 
@@ -194,6 +155,48 @@ lemma face_faces (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.Is
   ⟨fun h' => ⟨h'.le, h'.trans h⟩,
    fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
 
+
+/-
+theorem 2.7 from ziegler page 57:
+(i) For every polytope P the face poset L(P) is a graded lattice of length
+dim(P) + 1, with rank function r(F) = dim(F) + 1.
+(ii) Every interval [G, F] of L(P) is the face lattice of a convex polytope
+of dimension r(F) − r(G) − 1.
+
+proof:
+part (ii).
+- assume F = P, by Prop 2.3(iii) (faces of F are exactly the faces of P that are contained in F)
+- if G = ∅, then everything is clear
+- If G ̸= ∅, it has a vertex v ∈ G by Prop 2.2(i) (krein milman, Every polytope is the convex
+ hull of its vertices: P = conv(vert(P)).)
+- it is a vertex of P by Prop 2.3(iii)
+- Prop 2.4: There is a bijection between the k-dimensional faces of P that contain v, and the
+ (k−1)-dimensional faces of P/v, given by
+ π : F ↦ F ∩ {x : cx = c₁}
+ σ : F' ↦ P ∩ aff ({v} ∪ F')
+- face lattice of P/v is isomorphic to interval [{v}, P] of the face lattice L(P), by Prop 2.4
+- done by induction on dim(G).
+
+part (i).
+- G ⊂ F faces of P
+- monotonicity:
+  - then G = P ∩ aff(G) ⊆ P ∩ aff(F) = F by Prop 2.3(iv) (every face has a supportin hyperplane)
+  - so aff(G) ⊂ aff(F), and thus dim(G) < dim(F)
+- covering:
+  - let dim(F)−dim(G) ≥ 2, show there is a face H ∈ L(P) with G ⊂ H ⊂ F
+  - by part (ii) the interval [G, F] is the face lattice of a polytope of dimension at least 1
+  - so it has a vertex, which yields the desired H.
+
+
+stuff we need:
+- faces of F are exactly the faces of P that are contained in F (`IsFaceOf.trans`)
+- every non-⊥ cone has a vertex (`FG.exists_ray` below)
+- bijection between the k-dimensional faces of P that contain v, and the
+ (k−1)-dimensional faces of P/v
+- every face has a supporting hyperplane (`IsFaceOf.FG.exposed` below)
+-/
+
+
 theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
     ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
   wlog h : F = C
@@ -207,6 +210,64 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
       have := (face_faces G.isFaceOf).mp hvray
       obtain ⟨s, hs⟩ := hfg
       sorry
+
+/-- A face of a pointed cone `C` that is supported by a hyperplane consists of all points in the
+intersection of its linear span and `C`. -/
+lemma cone_eq_inter_span (C : PointedCone R M) (G : Face C) {ρ : M →ₗ[R] R}
+    (hρG : ∀ x ∈ C, ρ x = 0 ↔ x ∈ G) :
+    (G : Set M) = (Submodule.span R (G : Set M) : Set M) ∩ (C : Set M) := by
+  ext x
+  simp only [SetLike.mem_coe, Set.mem_inter_iff]
+  constructor
+  · intro hx
+    simpa [Submodule.mem_span] using ⟨fun p hp => p.mem_toAddSubgroup.mp (hp hx), G.isFaceOf.le hx⟩
+  · intro ⟨hspan, hC⟩
+    apply (hρG _ hC).mp
+    have : ρ.domRestrict (Submodule.span R ↑G) ⟨x, hspan⟩ = 0 := by
+      have := (Submodule.linearMap_eq_zero_iff_of_eq_span (S := (G : Set M)) (ρ.domRestrict _) rfl)
+      rw [this.mpr (fun s => (hρG _ (G.isFaceOf.le s.prop)).mpr s.prop)]
+      exact LinearMap.zero_apply _
+    exact LinearMap.mem_ker.mp this
+
+lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
+    StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
+  intro F G hFG
+  obtain ⟨_, _, hφF⟩ := IsFaceOf.FG.exposed hCfg F.isFaceOf
+  obtain ⟨_, _, hρG⟩ := IsFaceOf.FG.exposed hCfg G.isFaceOf
+  letI : FiniteDimensional R G.toPointedCone.linSpan := by
+    refine (Submodule.fg_iff_finiteDimensional _).mp ?_
+    obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
+    simpa [← hgfg] using Submodule.FG.of_finite
+  apply Submodule.finrank_lt_finrank_of_lt
+  have sb : (F : Set M) < (G : Set M) := HasSSubset.SSubset.lt hFG
+  rw [cone_eq_inter_span C F hφF, cone_eq_inter_span C G hρG] at sb
+  change (Submodule.span R (F : Set M) : Set M) ⊂ Submodule.span R (G : Set M)
+  apply ssubset_of_subset_of_ne <| Submodule.span_mono (R := R) hFG.le
+  intro h
+  rw [h] at sb
+  exact irrefl _ sb
+
+lemma finrank_quot_add_finrank_of_fg {C : PointedCone R M} {F G : Face C}
+    (hFG : F ≤ G) (hGfg : (G : PointedCone R M).FG) :
+    (PointedCone.quot (G : PointedCone R M) ((F : PointedCone R M).linSpan)).finrank
+      + (F : PointedCone R M).finrank
+      = (G : PointedCone R M).finrank := by sorry
+
+lemma finrank_covBy_of_fg {C : PointedCone R M} (hCfg : C.FG)
+    {F G : Face C} (hFG : F ⋖ G) :
+    (F : PointedCone R M).finrank ⋖ (G : PointedCone R M).finrank := by sorry
+
+/-- The face lattice of a finitely generated cone is graded by face dimension. -/
+noncomputable instance gradeOrder_finrank_of_fg {C : PointedCone R M}
+    (hCfg : C.FG) : GradeOrder ℕ (Face C) where
+  grade F := (F : PointedCone R M).finrank
+  grade_strictMono := finrank_strictMono_of_fg hCfg
+  covBy_grade := fun {_ _} hFG => finrank_covBy_of_fg hCfg hFG
+
+
+
+
+
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
