@@ -172,6 +172,11 @@ end Map
 
 end IsFaceOf
 
+lemma face_faces (h : F.IsFaceOf C) :
+    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+  ⟨fun h' => ⟨h'.le, h'.trans h⟩,
+    fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
 variable [AddCommGroup N] [Module R N] in
 /-- The image of a cone `F` under an injective linear map is a face of the
   image of another cone `C` if and only if `F` is a face of `C`. -/
@@ -196,9 +201,9 @@ theorem isFaceOf_comap_iff {f : N →ₗ[R] M} (hf : Function.Surjective f) :
 
 end Semiring
 
-section Field
+section DivisionRing
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable {C F F₁ F₂ : PointedCone R M}
 
@@ -206,10 +211,14 @@ theorem isFaceOf_iff_mem_of_add_mem : F.IsFaceOf C ↔
     (F ≤ C ∧ ∀ {x y : M}, x ∈ C → y ∈ C → x + y ∈ F → x ∈ F) := by
   constructor <;> intro h
   · exact ⟨h.le, IsFaceOf.mem_of_add_mem h⟩
-  · refine ⟨h.1, fun xC yC c0 hcxy => ?_⟩
-    have cxF := h.2 (smul_mem _ (le_of_lt c0) xC) yC hcxy
-    convert smul_mem _ (inv_nonneg.mpr (le_of_lt c0)) cxF
-    simp [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel _ (ne_of_lt c0).symm]
+  · refine ⟨h.1, ?_⟩
+    intro x y a xC yC a0 haxy
+    have haxF := h.2 (smul_mem _ (le_of_lt a0) xC) yC haxy
+    have hxF : (a⁻¹ : R) • (a • x) ∈ F := smul_mem _ (inv_nonneg.mpr (le_of_lt a0)) haxF
+    have hxF' := hxF
+    rw [← smul_assoc] at hxF'
+    have hxF'' : ((1 : R) • x) ∈ F := by simpa [inv_mul_cancel₀ (ne_of_gt a0)] using hxF'
+    simpa using hxF''
 
 namespace IsFaceOf
 
@@ -219,19 +228,32 @@ theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι →
     (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hc : ∀ i, 0 ≤ c i) (hs : ∑ i : ι, c i • f i ∈ F)
     (i : ι) (hci : 0 < c i) : f i ∈ F := by
   classical
-  have := (sum_mem_iff_mem hF (fun i => C.smul_mem (hc i) (hsC i))).mp hs i
-  convert smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr hci)) this
-  rw [← smul_assoc, smul_eq_mul, mul_comm, Field.mul_inv_cancel]
-  · exact (MulAction.one_smul (f i)).symm
-  · exact Ne.symm (ne_of_lt hci)
+  have hciF := (sum_mem_iff_mem hF (fun i => C.smul_mem (hc i) (hsC i))).mp hs i
+  have hiF : ((c i)⁻¹ : R) • (c i • f i) ∈ F :=
+    smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr hci)) hciF
+  have hiF' := hiF
+  rw [← smul_assoc] at hiF'
+  have hiF'' : ((1 : R) • f i) ∈ F := by simpa [inv_mul_cancel₀ (ne_of_gt hci)] using hiF'
+  simpa using hiF''
+
+end IsFaceOf
+
+end DivisionRing
+
+section Ring
+
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable {C F F₁ F₂ : PointedCone R M}
+
+namespace IsFaceOf
 
 /-- The lineality space of a cone is a face. -/
 lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
-  rw [isFaceOf_iff_mem_of_add_mem]
-  simp only [lineal_le, true_and]
-  intro _ _ xc yc xyf
-  simp [neg_add_rev, xc, true_and] at xyf ⊢
-  simpa [neg_add_cancel_comm] using add_mem xyf.2 yc
+  refine ⟨lineal_le C, ?_⟩
+  intro x y a xC yC a0 hxy
+  exact mem_lineal_of_smul_mem_lineal xC
+    (lineal_isExtreme_left (C.smul_mem (le_of_lt a0) xC) yC hxy)
 
 /-- The lineality space of a cone lies in every face. -/
 lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F :=
@@ -290,7 +312,7 @@ end Prod
 
 end IsFaceOf
 
-end Field
+end Ring
 
 end PointedCone
 
@@ -413,9 +435,9 @@ lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁
 
 end Ring
 
-section Field
+section DivisionRing
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   {C F F₁ F₂ : PointedCone R M} {s : Set M}
 
 /-!
@@ -522,7 +544,7 @@ lemma quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F�
     (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
   sorry
 
-end Field
+end DivisionRing
 
 
 

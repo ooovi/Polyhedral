@@ -121,9 +121,9 @@ instance : CompleteLattice (Face C) where
 
 end Semiring
 
-section Field
+section Ring
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N] {C C₁ : PointedCone R M} {C₂ : PointedCone R N}
 
 lemma lineal_bot : (⊥ : Face C) = ⟨_, IsFaceOf.lineal C⟩ :=
@@ -197,7 +197,7 @@ def prodOrderIso (C : PointedCone R M) (D : PointedCone R N) :
 
 end Prod
 
-end Field
+end Ring
 
 
 
@@ -222,6 +222,20 @@ namespace PointedCone
 variable {R M N : Type*}
 
 namespace Face
+section Ring
+variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
+
+lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
+  have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
+    simp [Face.lineal_bot, Face.toPointedCone, salient_iff_lineal_bot.mp hC]
+  refine ⟨fun h => by simpa [h, hbotcone], fun h => ?_⟩
+  apply Face.ext
+  intro x
+  change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
+  simpa [h, hbotcone]
+
+end Ring
 
 section Semiring
 
