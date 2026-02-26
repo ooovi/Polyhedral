@@ -211,41 +211,19 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
       obtain ⟨s, hs⟩ := hfg
       sorry
 
-/-- A face of a pointed cone `C` that is supported by a hyperplane consists of all points in the
-intersection of its linear span and `C`. -/
-lemma cone_eq_inter_span (C : PointedCone R M) (G : Face C) {ρ : M →ₗ[R] R}
-    (hρG : ∀ x ∈ C, ρ x = 0 ↔ x ∈ G) :
-    (G : Set M) = (Submodule.span R (G : Set M) : Set M) ∩ (C : Set M) := by
-  ext x
-  simp only [SetLike.mem_coe, Set.mem_inter_iff]
-  constructor
-  · intro hx
-    simpa [Submodule.mem_span] using ⟨fun p hp => p.mem_toAddSubgroup.mp (hp hx), G.isFaceOf.le hx⟩
-  · intro ⟨hspan, hC⟩
-    apply (hρG _ hC).mp
-    have : ρ.domRestrict (Submodule.span R ↑G) ⟨x, hspan⟩ = 0 := by
-      have := (Submodule.linearMap_eq_zero_iff_of_eq_span (S := (G : Set M)) (ρ.domRestrict _) rfl)
-      rw [this.mpr (fun s => (hρG _ (G.isFaceOf.le s.prop)).mpr s.prop)]
-      exact LinearMap.zero_apply _
-    exact LinearMap.mem_ker.mp this
-
 lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
     StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
   intro F G hFG
-  obtain ⟨_, _, hφF⟩ := IsFaceOf.FG.exposed hCfg F.isFaceOf
-  obtain ⟨_, _, hρG⟩ := IsFaceOf.FG.exposed hCfg G.isFaceOf
   letI : FiniteDimensional R G.toPointedCone.linSpan := by
     refine (Submodule.fg_iff_finiteDimensional _).mp ?_
     obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
     simpa [← hgfg] using Submodule.FG.of_finite
-  apply Submodule.finrank_lt_finrank_of_lt
-  have sb : (F : Set M) < (G : Set M) := HasSSubset.SSubset.lt hFG
-  rw [cone_eq_inter_span C F hφF, cone_eq_inter_span C G hρG] at sb
-  change (Submodule.span R (F : Set M) : Set M) ⊂ Submodule.span R (G : Set M)
-  apply ssubset_of_subset_of_ne <| Submodule.span_mono (R := R) hFG.le
-  intro h
-  rw [h] at sb
-  exact irrefl _ sb
+  apply Submodule.finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
+  · exact Submodule.span_mono (R := R) hFG.le
+  · intro h
+    have : F.toSubmodule < G.toSubmodule := gt_iff_lt.mp hFG
+    rw [← IsFaceOf.inf_linSpan F.isFaceOf, ← IsFaceOf.inf_linSpan G.isFaceOf] at this
+    simp [linSpan, h] at this
 
 lemma finrank_quot_add_finrank_of_fg {C : PointedCone R M} {F G : Face C}
     (hFG : F ≤ G) (hGfg : (G : PointedCone R M).FG) :
