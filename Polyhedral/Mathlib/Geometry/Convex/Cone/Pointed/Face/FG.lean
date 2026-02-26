@@ -121,19 +121,6 @@ lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
 end exposed
 end Field
 
-section SemiringLemmasFaceOf
-
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {C F F₁ : PointedCone R M}
-
-lemma face_faces (h : F.IsFaceOf C) :
-    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
-  ⟨fun h' => ⟨h'.le, h'.trans h⟩,
-   fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
-
-end SemiringLemmasFaceOf
-
 section DivisionRing
 
 variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -216,21 +203,6 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-
-lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
-  have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
-    have hlineal : (⊥ : Face C) = (⟨_, IsFaceOf.lineal C⟩ : Face C) :=
-      le_antisymm bot_le (IsFaceOf.lineal_le (⊥ : Face C).isFaceOf)
-    simpa [Face.toPointedCone, salient_iff_lineal_bot.mp hC] using
-      congrArg (fun G : Face C => (G : PointedCone R M))
-        hlineal
-  constructor
-  · rintro rfl
-    exact hbotcone
-  · intro h
-    exact (Face.toPointedCone_eq_iff (F₁ := F) (F₂ := (⊥ : Face C))).mp (by
-      simpa [hbotcone] using h)
-
 theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
     ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
   wlog h : F = C
@@ -240,7 +212,7 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
     · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
       have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
       obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
-        (fun n => h ((bot_face (C := C) (F := G) hsal).mpr n)) hgsal
+        (fun n => h ((Face.bot_face (C := C) (F := G) hsal).mpr n)) hgsal
       have := (face_faces G.isFaceOf).mp hvray
       obtain ⟨s, hs⟩ := hfg
       sorry
