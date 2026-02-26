@@ -211,15 +211,19 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
       obtain ⟨s, hs⟩ := hfg
       sorry
 
+lemma face_linSpan_FiniteDimensional_of_FG (hCfg : C.FG) (G : Face C) :
+    FiniteDimensional R G.toPointedCone.linSpan := by
+  refine (Submodule.fg_iff_finiteDimensional _).mp ?_
+  obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
+  simpa [← hgfg] using Submodule.FG.of_finite
+
+open Submodule in
 lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
     StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
   intro F G hFG
-  letI : FiniteDimensional R G.toPointedCone.linSpan := by
-    refine (Submodule.fg_iff_finiteDimensional _).mp ?_
-    obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
-    simpa [← hgfg] using Submodule.FG.of_finite
-  apply Submodule.finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
-  · exact Submodule.span_mono (R := R) hFG.le
+  haveI := face_linSpan_FiniteDimensional_of_FG hCfg G
+  apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
+  · exact span_mono (R := R) hFG.le
   · intro h
     have : F.toSubmodule < G.toSubmodule := gt_iff_lt.mp hFG
     rw [← IsFaceOf.inf_linSpan F.isFaceOf, ← IsFaceOf.inf_linSpan G.isFaceOf] at this
