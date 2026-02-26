@@ -82,19 +82,6 @@ lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
 end exposed
 end Field
 
-section SemiringLemmasFaceOf
-
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {C F F₁ : PointedCone R M}
-
-lemma face_faces (h : F.IsFaceOf C) :
-    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
-  ⟨fun h' => ⟨h'.le, h'.trans h⟩,
-   fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
-
-end SemiringLemmasFaceOf
-
 section DivisionRing
 
 variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -177,7 +164,6 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-
 lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
   have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
     have hlineal : (⊥ : Face C) = (⟨_, IsFaceOf.lineal C⟩ : Face C) :=
@@ -233,7 +219,6 @@ stuff we need:
 - every face has a supporting hyperplane (`IsFaceOf.FG.exposed` below)
 -/
 
-
 theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
     ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
   wlog h : F = C
@@ -244,7 +229,7 @@ theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) 
       have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
       obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
         (fun n => h ((bot_face (C := C) (F := G) hsal).mpr n)) hgsal
-      have := (face_faces G.isFaceOf).mp hvray
+      -- have := (face_faces G.isFaceOf).mp hvray
       obtain ⟨s, hs⟩ := hfg
       sorry
 
