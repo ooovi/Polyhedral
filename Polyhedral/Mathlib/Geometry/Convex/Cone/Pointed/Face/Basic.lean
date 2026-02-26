@@ -201,6 +201,32 @@ theorem isFaceOf_comap_iff {f : N →ₗ[R] M} (hf : Function.Surjective f) :
 
 end Semiring
 
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable {G : PointedCone R M} {S : Submodule R M}
+variable {H : PointedCone R (M ⧸ S)}
+
+namespace IsFaceOf
+
+/-- Pulling back a face of `G.quot S` gives a face of `G`. -/
+lemma inf_comap_mkQ (hH : H.IsFaceOf (G.quot S)) :
+    (G ⊓ PointedCone.comap S.mkQ H).IsFaceOf G := by
+  refine ⟨inf_le_left, ?_⟩
+  intro x y a hxG hyG ha hxy
+  refine ⟨hxG, ?_⟩
+  change S.mkQ x ∈ H
+  exact hH.mem_of_smul_add_mem
+    ((PointedCone.mem_map).2 ⟨x, hxG, rfl⟩)
+    ((PointedCone.mem_map).2 ⟨y, hyG, rfl⟩)
+    ha
+    (by simpa [PointedCone.comap, LinearMap.map_smul, LinearMap.map_add] using hxy.2)
+
+
+end IsFaceOf
+end Ring
+
 section DivisionRing
 
 variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -371,6 +397,24 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
     rcases this with ⟨p, pf, n, nf, rfl⟩
     exact hF.mem_of_add_mem xC (hF.le nf) pf
   · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
+
+/-- Quotient by the linear span of a face is salient. -/
+lemma salient_quot_linSpan_of_face (hF : F.IsFaceOf C) : (C.quot F.linSpan).Salient := by
+  intro z hzC hz0 hzNeg
+  rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
+  rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
+  have hxySpan : x + y ∈ F.linSpan := by
+    rw [← Submodule.ker_mkQ F.linSpan]
+    exact LinearMap.mem_ker.mpr (by simp [map_add, hy])
+  have hxyF : x + y ∈ F := by
+    rw [← hF.inf_linSpan]
+    exact ⟨C.add_mem hxC hyC, hxySpan⟩
+  have hxF : x ∈ F := hF.mem_of_add_mem hxC hyC hxyF
+  have hx0 : (F.linSpan).mkQ x = 0 := by
+    simpa [Submodule.mkQ_apply] using
+      (Submodule.Quotient.mk_eq_zero (p := F.linSpan) (x := x)).2
+        (PointedCone.le_submodule_span F hxF)
+  exact hz0 (by simpa using hx0)
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)
