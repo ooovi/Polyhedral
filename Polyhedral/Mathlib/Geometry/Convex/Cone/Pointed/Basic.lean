@@ -120,6 +120,8 @@ abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
 lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := by
   sorry
 
+lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
+
 end Semiring
 
 
@@ -732,5 +734,25 @@ theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} =
     · simpa [smul_smul, inv_mul_cancel_right₀ (ne_of_lt hr).symm] using h
 
 end DivisionRing
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
+
+
+lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
+  have hlin : C.linSpan = (⊥ : Submodule R M) :=
+    (Submodule.rank_eq_zero).1 (by simpa [PointedCone.rank] using h)
+  exact le_bot_iff.mp (by simpa [hlin] using (PointedCone.le_submodule_span C))
+
+lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ :=
+  ⟨bot_of_rank_zero, by rintro rfl; simp [PointedCone.rank]⟩
+
+lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
+  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
+
+end Field
 
 end PointedCone

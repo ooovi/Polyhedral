@@ -1,10 +1,5 @@
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.RingTheory.Finiteness.Basic
-
-
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
 /-
 theorem 2.7 from ziegler page 57:
@@ -49,6 +44,27 @@ stuff we need:
 
 namespace PointedCone
 
+section DivisionRingLemmas
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C F : PointedCone R M}
+
+lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
+    ∃ t ⊆ s, span R t = F := by
+  use (s.finite_toSet.inter_of_left F).toFinset
+  simp [IsFaceOf.span_inter_face_span_inf_face hF]
+
+/-- Faces of FG cones are FG. -/
+lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
+  obtain ⟨_, rfl⟩ := hC
+  let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
+  use t, tt
+
+end DivisionRingLemmas
+
+section Field
+
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
@@ -62,19 +78,7 @@ lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ span R s) :
   let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
   exact ⟨φ, hφ, fun y hy => h y (subset_span hy)⟩
 
-
 variable {C F F₁ F₂ : PointedCone R M}
-
-lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
-    ∃ t ⊆ s, span R t = F := by
-  use (s.finite_toSet.inter_of_left F).toFinset
-  simp [IsFaceOf.span_inter_face_span_inf_face hF]
-
-/-- Faces of FG cones are FG. -/
-lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
-  obtain ⟨_, rfl⟩ := hC
-  let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
-  use t, tt
 
 section exposed
 
@@ -98,7 +102,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     exact hF.inf_linSpan
   · simpa using FG.dual_fgdual _ hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg hC)
+    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| IsFaceOf.fg_of_fg hC hF)
 
 open Module in
 /-- Every face of an FG cone is exposed. -/
@@ -115,6 +119,13 @@ lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
   exact .subdual_dual _ <| .subdual_dual _ hF
 
 end exposed
+end Field
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
 
 
 open Submodule in
@@ -122,7 +133,7 @@ open Submodule in
   `x` spans a face of `span R (C ∪ {x})`. -/
 lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x : M}
     (hx : x ∉ C) (hC : (C ⊔ span R {x}).Salient) : (span R {x}).IsFaceOf (C ⊔ span R {x}) := by
-  rw [IsFaceOf.iff_mem_of_add_mem]
+  rw [isFaceOf_iff_mem_of_add_mem]
   constructor
   · exact le_sup_right
   intro y z hy hz hyz
@@ -192,58 +203,32 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-/-
-low dimensional examples
--/
+theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
+    ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
+  wlog h : F = C
+  · sorry
+  · by_cases! h : G = ⊥
+    · sorry
+    · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
+      have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
+      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
+        (fun n => h ((Face.bot_face (C := C) (F := G) hsal).mpr n)) hgsal
+      have := (face_faces G.isFaceOf).mp hvray
+      obtain ⟨s, hs⟩ := hfg
+      sorry
 
-noncomputable def Face.rank (F : Face C) := Module.rank R F.span
+end DivisionRing
 
-lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := sorry
+section Field
 
-lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := sorry
-
-lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ := sorry
-
-lemma Face.bot_iff_rank_zero {F : Face C} : F.rank = 0 ↔ F = ⊥ := sorry
-
-lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R {x} := by
-  have : C ≠ ⊥ := fun h' ↦ by simp [bot_iff_rank_zero.mpr h'] at h
-  obtain ⟨x, hxC, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot this
-  refine ⟨x, le_antisymm ?_ (by simp [hxC]) ⟩
-  intro y hy
-  by_cases! ha : ∃ a : R, y = a • x
-  · obtain ⟨a, rfl⟩ := ha
-    by_cases! ha : a ≥ 0
-    · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha <| Submodule.mem_span_singleton_self x
-    exfalso
-    apply hS x hxC hx0
-    have : -x = (-a⁻¹) • (a • x) := by
-      rw [smul_smul]
-      field_simp [ne_of_lt ha]
-      rw [neg_smul, one_smul]
-    rw [this]
-    exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy
-  let f := ![(⟨x, Submodule.mem_span_of_mem hxC⟩ : C.linSpan), ⟨y, Submodule.mem_span_of_mem hy⟩]
-  have : LinearIndependent R f := by
-    apply (LinearIndependent.pair_iff' (Subtype.coe_ne_coe.mp hx0)).2
-    exact fun a ↦ Subtype.coe_ne_coe.mp fun a_1 ↦ ha a  (Eq.symm a_1)
-  have : C.rank ≥ 2 := Module.le_rank_iff.2 ⟨f, this⟩
-  simp [h] at this
-
-lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (span R {x}).rank = 1 := by
-  apply (rank_submodule_eq_one_iff (span R {x}).linSpan).mpr
-  use x, (by simp only [Submodule.span_span_of_tower, Submodule.mem_span_singleton_self])
-  refine ⟨hx, ?_⟩
-  simp only [Submodule.span_span_of_tower, le_refl]
-
-theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient :=
-  hC.anti hF.le
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
   by_cases! h : F.rank < 1
-  · absurd Face.bot_iff_rank_zero.mp <| Cardinal.lt_one_iff_zero.mp h
+  · absurd (Face.bot_iff_rank_zero hsal).mp <| Cardinal.lt_one_iff_zero.mp h
     exact hF.ne_bot
   have h1 : (F : PointedCone R M).FG := IsFaceOf.fg_of_fg hfg F.isFaceOf
   have h2 : (F : PointedCone R M).Salient := IsFaceOf.salient hsal F.isFaceOf
@@ -255,14 +240,9 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
   have t_rank : test.rank = 1 := rank_one_of_ray hx0
   have : test ≤ F := hxF.le
   rcases (IsAtom.le_iff hF).1 this with h | h
-  · rw [bot_iff_rank_zero.2 h] at t_rank
+  · rw [(bot_iff_rank_zero hsal).2 h] at t_rank
     simp at t_rank
   rw [← h, t_rank]
 
-lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
-  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
-
-lemma rank_mono_face {C : PointedCone R M} {F₁ F₂ : Face C} (h : F₁ ≤ F₂) : F₁.rank ≤ F₂.rank :=
-  rank_mono h
-
+end Field
 end PointedCone

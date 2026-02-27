@@ -55,7 +55,7 @@ variable (p : M →ₗ[R] N →ₗ[R] R) {C F F₁ F₂ : PointedCone R M}
 lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
-  apply iff_mem_of_add_mem.mpr ⟨by simp, ?_⟩
+  apply isFaceOf_iff_mem_of_add_mem.mpr ⟨by simp, ?_⟩
   intro x y xd
   simp only [mem_dual, SetLike.mem_coe, Submodule.mem_inf, map_add, Submodule.restrictScalars_mem,
     Submodule.mem_dual, xd, true_and, and_imp]

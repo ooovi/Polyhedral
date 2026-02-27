@@ -182,7 +182,7 @@ lemma lineal_is_hyperplaneOrTop (P : HalfspaceOrTop R M) :
     (PointedCone.lineal (P : PointedCone R M)).IsHyperplaneOrTop := by
   obtain ⟨S, x, rfl⟩ := P
   use x; ext y
-  simp [lineal_mem, antisymm_iff]
+  simp [mem_lineal, antisymm_iff]
 
 /-- The boundary of a hyperplane `H` is equivalently given by `H ⊓ -H` or `H.lineal`. -/
 def boundary (P : HalfspaceOrTop R M) : Submodule.HyperplaneOrTop R M
