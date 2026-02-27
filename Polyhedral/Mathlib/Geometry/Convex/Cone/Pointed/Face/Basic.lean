@@ -511,14 +511,25 @@ lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 
   refine mem_of_sum_smul_mem hF ?_ hcc h i cpos
   simpa [mem_span] using fun i _ su => su (Subtype.coe_prop (f i))
 
--- lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
---     (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
---   refine mem_of_sum_smul_mem
---     (f := fun (x : s) => x.val) hF ?_ (fun i ↦ zero_le_one' R) ?_ ⟨x, xs⟩ (zero_lt_one' R)
---   · exact (fun i => hsC i.property)
---   · simp only [Finset.univ_eq_attach, one_smul]
---     convert hs
---     exact s.sum_attach id
+lemma span_nonneg_lc_mem' {s : Finset M} {c : M → R} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
+ (c_pos : ∀ x ∈ s, c x > 0) (h : ∑ x ∈ s, c x • x ∈ F) :
+    (s : Set M) ⊆ F := by
+  classical
+  intro x hx
+  rw [← Finset.add_sum_erase s (fun x ↦ c x • x) hx] at h
+  refine hF.mem_of_smul_add_mem (hsC hx) (sum_mem (fun y hy ↦ ?_)) (c_pos x hx) h
+  rw [Finset.mem_erase] at hy
+  exact smul_mem _ (le_of_lt <| c_pos y hy.2) <| hsC hy.2
+
+lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
+    (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
+  sorry -- # broken since PR
+  -- refine mem_of_sum_smul_mem
+  --   (f := fun (x : s) => x.val) (fun i ↦ zero_le_one' R) hF ?_ ?_ ⟨x, xs⟩ (zero_lt_one' R)
+  -- · exact (fun i => hsC i.property)
+  -- · simp only [Finset.univ_eq_attach, one_smul]
+  --   convert hs
+  --   exact s.sum_attach id
 
 -- lemma iff_of_le (h₁ : F₁.IsFaceOf C) (h₂ : F₂ ≤ F₁) (h : F₂.IsFaceOf C) : F₂.IsFaceOf F₁ :=
 --   ⟨_, fun h => (iff_le h h₁).mpr h₂⟩
