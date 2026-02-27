@@ -223,7 +223,8 @@ variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone is the dual of a FGDual cone. -/
 lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
     ∃ D : PointedCone 𝕜 M, D.FGDual p.flip ∧ dual p D = C := by
-  obtain ⟨D, hD, h⟩ := exists_fgdual_inf_linSpan p hC; rw [← h]
+  obtain ⟨D, hD, h⟩ := exists_fgdual_inf_linSpan p hC
+  rw [← h]
   obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
   use C' ⊔ dual p.flip C.linSpan
   have hC := FG.linSpan_fg hC
