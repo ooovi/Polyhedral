@@ -436,6 +436,16 @@ lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] [DecidableEq ι] {c : ι → 
   -- refine mem_of_sum_smul_mem hcc hF ?_ h i cpos
   -- simp [mem_span]; exact fun i _ su => su (Subtype.coe_prop (f i))
 
+lemma span_nonneg_lc_mem' {s : Finset M} {c : M → R} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
+ (c_pos : ∀ x ∈ s, c x > 0) (h : ∑ x ∈ s, c x • x ∈ F) :
+    (s : Set M) ⊆ F := by
+  classical
+  intro x hx
+  rw [← Finset.add_sum_erase s (fun x ↦ c x • x) hx] at h
+  refine hF.mem_of_smul_add_mem (hsC hx) (sum_mem (fun y hy ↦ ?_)) (c_pos x hx) h
+  rw [Finset.mem_erase] at hy
+  exact smul_mem _ (le_of_lt <| c_pos y hy.2) <| hsC hy.2
+
 lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
     (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
   sorry -- # broken since PR
