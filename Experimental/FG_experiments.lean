@@ -837,7 +837,9 @@ theorem Face_of_simplicial_iff {F : PointedCone R M} {s : Set M} (hs : s.Finite)
     exact hx
   intro ⟨t, ht, hF⟩
   subst hF
-  refine {le := Submodule.span_le.2 fun _ hx ↦ Submodule.mem_span_of_mem (ht hx), mem_of_smul_add_mem := ?_ }
+  refine {
+    le := Submodule.span_le.2 fun _ hx ↦ Submodule.mem_span_of_mem (ht hx),
+    mem_of_smul_add_mem := ?_ }
   intro x y a hx hy ha hxy
   lift t to Finset M using Set.Finite.subset hs ht
   lift s to Finset M using hs
