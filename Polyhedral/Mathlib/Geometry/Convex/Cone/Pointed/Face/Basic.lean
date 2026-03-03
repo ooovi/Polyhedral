@@ -201,6 +201,32 @@ theorem isFaceOf_comap_iff {f : N →ₗ[R] M} (hf : Function.Surjective f) :
 
 end Semiring
 
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable {G : PointedCone R M} {S : Submodule R M}
+variable {H : PointedCone R (M ⧸ S)}
+
+namespace IsFaceOf
+
+/-- Pulling back a face of `G.quot S` gives a face of `G`. -/
+lemma inf_comap_mkQ (hH : H.IsFaceOf (G.quot S)) :
+    (G ⊓ PointedCone.comap S.mkQ H).IsFaceOf G := by
+  refine ⟨inf_le_left, ?_⟩
+  intro x y a hxG hyG ha hxy
+  refine ⟨hxG, ?_⟩
+  change S.mkQ x ∈ H
+  exact hH.mem_of_smul_add_mem
+    ((PointedCone.mem_map).2 ⟨x, hxG, rfl⟩)
+    ((PointedCone.mem_map).2 ⟨y, hyG, rfl⟩)
+    ha
+    (by simpa [PointedCone.comap, LinearMap.map_smul, LinearMap.map_add] using hxy.2)
+
+
+end IsFaceOf
+end Ring
+
 section DivisionRing
 
 variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -374,6 +400,7 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
   · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
 
 open Submodule in
+/-- Quotient by the linear span of a face is salient. -/
 lemma quot_salient (F : PointedCone R M) (hF : F.IsFaceOf C) :
     (C.quot F.linSpan).Salient := by
   simp only [Salient, ConvexCone.Salient, toConvexCone_map, ConvexCone.mem_map,

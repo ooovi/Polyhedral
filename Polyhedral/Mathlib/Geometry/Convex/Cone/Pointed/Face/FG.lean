@@ -316,6 +316,14 @@ variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
+end DivisionRing
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
+
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
   by_cases! h : F.rank < 1
