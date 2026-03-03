@@ -735,10 +735,10 @@ theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} =
 
 end DivisionRing
 
-section Field
+section Domain
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
+variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
 variable {C : PointedCone R M}
 
 
@@ -750,9 +750,16 @@ lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
 lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ :=
   ⟨bot_of_rank_zero, by rintro rfl; simp [PointedCone.rank]⟩
 
+end Domain
+
+section Semiring
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+
 lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
   Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
 
-end Field
+end Semiring
 
 end PointedCone
