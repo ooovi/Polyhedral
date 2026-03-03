@@ -350,6 +350,7 @@ variable [AddCommGroup M] [Module R M]
 variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 
+
 end Semiring
 
 section Ring
@@ -371,6 +372,20 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
     rcases this with ⟨p, pf, n, nf, rfl⟩
     exact hF.mem_of_add_mem xC (hF.le nf) pf
   · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
+
+open Submodule in
+lemma quot_salient (F : PointedCone R M) (hF : F.IsFaceOf C) :
+    (C.quot F.linSpan).Salient := by
+  simp only [Salient, ConvexCone.Salient, toConvexCone_map, ConvexCone.mem_map,
+    mkQ_apply, ne_eq, not_exists, not_and, forall_exists_index, and_imp,
+    forall_apply_eq_imp_iff₂, Quotient.mk_eq_zero]
+  intro a aC anS x xC hh
+  have hxy_ker : a + x ∈ (mkQ F.linSpan).ker :=
+    LinearMap.mem_ker.mpr <| add_eq_zero_iff_eq_neg'.mpr hh
+  rw [ker_mkQ] at hxy_ker
+  refine anS <| mem_span_of_mem <| hF.mem_of_add_mem aC xC <| ?_
+  rw [← inf_linSpan hF]
+  exact mem_inf.mpr ⟨Submodule.add_mem C aC xC, hxy_ker⟩
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)

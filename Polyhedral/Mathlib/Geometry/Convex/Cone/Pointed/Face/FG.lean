@@ -1,4 +1,5 @@
 import Mathlib.Order.Grade
+import Mathlib.LinearAlgebra.Quotient.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
@@ -164,20 +165,6 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
-  have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
-    have hlineal : (⊥ : Face C) = (⟨_, IsFaceOf.lineal C⟩ : Face C) :=
-      le_antisymm bot_le (IsFaceOf.lineal_le (⊥ : Face C).isFaceOf)
-    simpa [Face.toPointedCone, salient_iff_lineal_bot.mp hC] using
-      congrArg (fun G : Face C => (G : PointedCone R M))
-        hlineal
-  constructor
-  · rintro rfl
-    exact hbotcone
-  · intro h
-    exact (Face.toPointedCone_eq_iff (F₁ := F) (F₂ := (⊥ : Face C))).mp (by
-      simpa [hbotcone] using h)
-
 
 /-
 theorem 2.7 from ziegler page 57:
@@ -219,43 +206,92 @@ stuff we need:
 - every face has a supporting hyperplane (`IsFaceOf.FG.exposed` below)
 -/
 
-theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
-    ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
-  wlog h : F = C
-  · sorry
-  · by_cases! h : G = ⊥
-    · sorry
-    · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
-      have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
-      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
-        (fun n => h ((bot_face (C := C) (F := G) hsal).mpr n)) hgsal
-      -- have := (face_faces G.isFaceOf).mp hvray
-      obtain ⟨s, hs⟩ := hfg
-      sorry
-
 lemma face_linSpan_FiniteDimensional_of_FG (hCfg : C.FG) (G : Face C) :
     FiniteDimensional R G.toPointedCone.linSpan := by
   refine (Submodule.fg_iff_finiteDimensional _).mp ?_
   obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
   simpa [← hgfg] using Submodule.FG.of_finite
 
-open Submodule in
-lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
-    StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
-  intro F G hFG
-  haveI := face_linSpan_FiniteDimensional_of_FG hCfg G
-  apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
-  · exact span_mono (R := R) hFG.le
-  · intro h
-    have : F.toSubmodule < G.toSubmodule := gt_iff_lt.mp hFG
-    rw [← IsFaceOf.inf_linSpan F.isFaceOf, ← IsFaceOf.inf_linSpan G.isFaceOf] at this
-    simp [linSpan, h] at this
-
 lemma finrank_quot_add_finrank_of_fg {C : PointedCone R M} {F G : Face C}
     (hFG : F ≤ G) (hGfg : (G : PointedCone R M).FG) :
     (PointedCone.quot (G : PointedCone R M) ((F : PointedCone R M).linSpan)).finrank
       + (F : PointedCone R M).finrank
       = (G : PointedCone R M).finrank := by sorry
+
+-- comap_face : F is a face of C → comap q F is a face of comap q C
+-- map_face   : Surjective q → F is a face of comap q C → map q F is a face of C
+
+
+theorem intervals' {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+    {M : Type*} [AddCommGroup M] [Module R M]
+    {C : PointedCone R M} (hfg : C.FG) (hsal : C.Salient) (G : Face C) :
+    ∃ C' : PointedCone R M, Nonempty (Set.Icc G ⊤ ≃o Face C') := by
+  by_cases! h : G = ⊥
+  · sorry
+  · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
+    have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
+    -- G has a vertex
+    obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
+      (fun n => h ((Face.bot_face (C := C) (F := G) hsal).mpr n)) hgsal
+    -- its also a vertex of C
+    have ⟨rayLE, rayF⟩ := (face_faces G.isFaceOf).mp hvray
+    let ⟨s, hs⟩ := hfg
+    -- face lattice of P/v is isomorphic to interval [{v}, P]
+    have := Face.quot_orderIso ⟨_, rayF⟩
+    -- dimension of G/v is dim G - 1
+    have := finrank_quot_add_finrank_of_fg (OrderTop.le_top G) ?_
+
+    -- "induction on dim G": recurse with projected face
+    let G' : Face (C.quot (span R {v}).linSpan) :=
+      ⟨G.toPointedCone.quot (span R {v}).linSpan, IsFaceOf.quot G.isFaceOf rayF rayLE⟩
+    obtain ⟨C', ⟨oC'⟩⟩ := intervals' (C.quot_fg hfg _) (IsFaceOf.quot_salient _ rayF) G'
+    use Submodule.comap ((span R {v}).linSpan.mkQ.restrictScalars {c : R // 0 ≤ c}) C'
+    constructor
+    unfold G' at oC'
+    sorry
+    sorry
+
+    -- refine {
+    --   toFun F := ⟨_, IsFaceOf.inf_comap_mkQ⟩
+    --   invFun F := ⟨comap ((span R {v}).linSpan.mkQ.restrictScalars {c : R // 0 ≤ c}) F.toPointedCone, ?_⟩
+    --   left_inv F := by
+    --     ext
+    --     simp [Submodule.map_comap_eq_of_surjective hq]
+    --   right_inv F := by
+    --     ext
+    --     simp [Submodule.comap_map_eq_of_surjective hq]
+    --   map_rel_iff' := by
+    --     simp [Submodule.comap_le_comap_iff_of_surjective hq]
+    -- }
+
+
+
+-- theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
+--     ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
+--   wlog h : F = ⊤
+--   · sorry
+--   · by_cases! h : G = ⊥
+--     · sorry
+--     · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
+--       have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
+--       obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
+--         (fun n => h ((Face.bot_face (C := C) (F := G) hsal).mpr n)) hgsal
+--       obtain ⟨G', hG⟩ := (face_faces G.isFaceOf).mp hvray
+--       obtain ⟨s, hs⟩ := hfg
+
+--       sorry
+
+open Submodule in
+lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
+    StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
+  intro G F hFG
+  haveI := face_linSpan_FiniteDimensional_of_FG hCfg F
+  apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
+  · exact span_mono (R := R) hFG.le
+  · intro h
+    have : G.toSubmodule < F.toSubmodule := gt_iff_lt.mp hFG
+    rw [← IsFaceOf.inf_linSpan F.isFaceOf, ← IsFaceOf.inf_linSpan G.isFaceOf] at this
+    simp [linSpan, h] at this
 
 lemma finrank_covBy_of_fg {C : PointedCone R M} (hCfg : C.FG)
     {F G : Face C} (hFG : F ⋖ G) :
@@ -267,6 +303,7 @@ noncomputable instance gradeOrder_finrank_of_fg {C : PointedCone R M}
   grade F := (F : PointedCone R M).finrank
   grade_strictMono := finrank_strictMono_of_fg hCfg
   covBy_grade := fun {_ _} hFG => finrank_covBy_of_fg hCfg hFG
+
 
 
 
