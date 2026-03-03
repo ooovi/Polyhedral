@@ -121,9 +121,9 @@ instance : CompleteLattice (Face C) where
 
 end Semiring
 
-section Field
+section DivisionRing
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
   [AddCommGroup N] [Module R N] {C C₁ : PointedCone R M} {C₂ : PointedCone R N}
 
 lemma lineal_bot : (⊥ : Face C) = ⟨_, IsFaceOf.lineal C⟩ :=
@@ -197,7 +197,7 @@ def prodOrderIso (C : PointedCone R M) (D : PointedCone R N) :
 
 end Prod
 
-end Field
+end DivisionRing
 
 
 
