@@ -75,8 +75,54 @@ lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
   rw [← mul_assoc, ← t3]
   linarith
 
-lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.opt f g hg ≠ ⊥ := sorry
+lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g hg := by
+  classical
+  obtain ⟨s, hs⟩ := hC
+  have hs0 : ∃ z ∈ s, z ≠ 0 := by
+    by_contra hs0
+    push_neg at hs0
+    exact hC0 <| by rw [← hs]; exact Submodule.span_eq_bot.mpr hs0
+  have hg_pos : ∀ {z : M}, z ∈ C → z ≠ 0 → 0 < g z := by
+    intro z hz hz0
+    exact lt_of_le_of_ne (hg _ hz).1 (fun h ↦ hz0 <| (hg _ hz).2 (Eq.symm h))
+  let s0 : Finset M := s.filter fun z => z ≠ 0
+  have hs0_ne : s0.Nonempty := by
+    rcases hs0 with ⟨z, hzs, hz0⟩
+    exact ⟨z, by simp [s0, hzs, hz0]⟩
+  obtain ⟨x, hx0, hxmin⟩ := Finset.exists_min_image s0 (fun z => f z / g z) hs0_ne
+  have hxs : x ∈ s := (Finset.mem_filter.mp hx0).1
+  have hx_ne_0 : x ≠ 0 := (Finset.mem_filter.mp hx0).2
+  have hxC : x ∈ C := by rw [← hs]; exact subset_span hxs
+  have hgx : 0 < g x := hg_pos hxC hx_ne_0
+  have hgen : ∀ z ∈ s, f x * g z ≤ f z * g x := by
+    intro z hzs
+    by_cases hz0 : z = 0
+    · simp [hz0]
+    have hzC : z ∈ C := by rw [← hs]; exact subset_span hzs
+    have hgz : 0 < g z := hg_pos hzC hz0
+    have hz0' : z ∈ s0 := by simp [s0, hzs, hz0]
+    exact (div_le_div_iff₀ hgx hgz).1 (hxmin _ hz0')
+  refine ⟨x, hx_ne_0, ?_⟩
+  refine ⟨hxC, ?_⟩
+  intro y hy
+  rw [← hs] at hy
+  induction hy using Submodule.span_induction with
+  | mem z hz => exact hgen z hz
+  | zero =>
+      simp
+  | add y z _ _ hy hz =>
+      simpa [map_add, add_mul, mul_add] using add_le_add hy hz
+  | smul a y _ hy =>
+      have hy' := mul_le_mul_of_nonneg_left hy a.2
+      simpa [LinearMap.map_smul_of_tower, smul_eq_mul, mul_assoc, mul_left_comm, mul_comm]
+        using hy'
+
+lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.opt f g hg ≠ ⊥ := by
+  rcases FG.exists_ne_zero_mem_opt C hC hC0 f g hg with ⟨x, hx0, hxopt⟩
+  intro hbot
+  exact hx0 <| by simpa [hbot] using hxopt
 
 end opt
 
@@ -135,7 +181,11 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   rw [hs] at hg
   let F := C.opt f g hg
   have hF : F.IsFaceOf C := IsFaceOf.of_opt C f g hg
-  have hF' := opt_neq_bot C hfg f g hg
+  have hC0 : C ≠ ⊥ := by
+    intro hC0
+    have : x = 0 := by simpa [hC0] using hx
+    exact hxt (by simp [this])
+  have hF' := opt_neq_bot C hfg hC0 f g hg
   have hFsal := Salient.of_le_salient hsal hF.le
   obtain ⟨r, hr0, hrF⟩ := exists_ray (hF.fg_of_fg hfg) hF' hFsal
   have hr := IsFaceOf.trans hrF hF
