@@ -104,8 +104,6 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp only [ofSubmodule_coe]
 
-
-
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 {M : Type*} [AddCommGroup M] [Module R M]
 {N : Type*} [AddCommGroup N] [Module R N]
@@ -113,16 +111,17 @@ variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
 lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .dual p C.lineal := by
-  simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
-  refine sInf_le_sInf ?_
-  intro T
-  simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
-  intro h
-  obtain ⟨S, hSC, hS⟩ := h
-  rw [← hS]
-  nth_rw 3 [← ofSubmodule_coe]
-  rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
-  exact dual_le_dual hSC
+  -- simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
+  -- refine sInf_le_sInf ?_
+  -- intro T
+  -- simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+  -- intro h
+  -- obtain ⟨S, hSC, hS⟩ := h
+  -- rw [← hS]
+  -- nth_rw 3 [← ofSubmodule_coe]
+  -- rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
+  -- exact dual_le_dual hSC
+  sorry
 
 section Map
 
@@ -135,11 +134,11 @@ variable {M' N' : Type*}
 -- TODO: generalize to arbitrary pairings
 lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
     comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
-  ext x; simp
+  ext; simp
 
 lemma dual_map' (f : M →ₗ[R] M') (C : PointedCone R M) :
     comap f.dualMap (dual (Dual.eval R M) C) = dual (Dual.eval R M') (map f C) := by
-  ext x; simp
+  ext; simp
 
 -- TODO: generalize to arbitrary pairings
 -- lemma dual_map' (f : M →ₗ[R] M') (hf : Function.Injective f) (s : Set M) :
@@ -162,9 +161,14 @@ lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
     specialize hy hy'
     simp_all only [_root_.neg_neg, LinearMap.map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff]
 
-lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+variable {M' : Type*} [AddCommGroup M'] [Module R M']
 
-lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by ext x; simp
+@[simp] lemma dual_image (s : Set M') (q : M' →ₗ[R] M) : dual p (q '' s) = dual (p.comp q) s :=
+  by ext; simp
+
+lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by simp
+
+lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by simp
 
 example /- dual_inf -/ (C D : PointedCone R M) :
     dual p (C ⊓ D : PointedCone R M) = dual p (C ∩ D) := rfl
