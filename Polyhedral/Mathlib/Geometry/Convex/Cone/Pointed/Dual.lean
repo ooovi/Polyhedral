@@ -111,17 +111,16 @@ variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
 lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .dual p C.lineal := by
-  -- simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
-  -- refine sInf_le_sInf ?_
-  -- intro T
-  -- simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
-  -- intro h
-  -- obtain ⟨S, hSC, hS⟩ := h
-  -- rw [← hS]
-  -- nth_rw 3 [← ofSubmodule_coe]
-  -- rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
-  -- exact dual_le_dual hSC
-  sorry
+  simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
+  refine sInf_le_sInf ?_
+  intro T
+  simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+  intro h
+  obtain ⟨S, hSC, hS⟩ := h
+  rw [← hS]
+  nth_rw 3 [← ofSubmodule_coe]
+  rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
+  exact dual_le_dual hSC
 
 section Map
 
