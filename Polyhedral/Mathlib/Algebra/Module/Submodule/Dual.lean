@@ -196,6 +196,8 @@ lemma dual_span (s : Set M) : dual p (span R s) = dual p s := by
 
 -- ----------------
 
+-- TODO: add `dual_image`, see cone thoery.
+
 /-- Conversion to the standard algebraic duality operator. -/
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp
 
