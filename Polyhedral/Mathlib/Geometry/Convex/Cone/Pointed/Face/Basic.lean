@@ -170,12 +170,11 @@ theorem of_comap_surjective {f : N →ₗ[R] M} (hf : Function.Surjective f)
 
 end Map
 
-end IsFaceOf
-
-lemma face_faces (h : F.IsFaceOf C) :
-    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+lemma isFaceOf_iff (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
   ⟨fun h' => ⟨h'.le, h'.trans h⟩,
     fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
+end IsFaceOf
 
 variable [AddCommGroup N] [Module R N] in
 /-- The image of a cone `F` under an injective linear map is a face of the
