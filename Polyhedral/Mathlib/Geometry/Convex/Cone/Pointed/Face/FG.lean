@@ -1,4 +1,5 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
 /-

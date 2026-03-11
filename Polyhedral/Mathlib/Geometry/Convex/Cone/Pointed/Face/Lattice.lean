@@ -313,21 +313,6 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
   [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
 variable {C F : PointedCone R M} {s t : Set M}
 
-
-/-!
-### Rank
--/
-
-noncomputable def rank (F : Face C) := Module.rank R F.span
-
-lemma bot_iff_rank_zero {F : Face C} (hC : C.Salient) : F.rank = 0 ↔ F = ⊥ := by
-  have hEq : ((F : PointedCone R M) = (⊥ : PointedCone R M)) ↔ F = ⊥ := by
-    simpa only [Face.lineal_bot, PointedCone.salient_iff_lineal_bot.mp hC] using
-      (Face.toPointedCone_eq_iff (F₁ := F) (F₂ := (⊥ : Face C)))
-  simpa [Face.rank, PointedCone.rank] using
-    (PointedCone.bot_iff_rank_zero (C := (F : PointedCone R M))).trans hEq
-
-
 /-!
 ### Embed and restrict
 -/

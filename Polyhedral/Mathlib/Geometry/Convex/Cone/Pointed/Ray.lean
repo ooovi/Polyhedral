@@ -1,4 +1,4 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 namespace PointedCone
 

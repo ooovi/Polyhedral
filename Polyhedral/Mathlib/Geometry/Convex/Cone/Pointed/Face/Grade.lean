@@ -11,6 +11,7 @@ import Mathlib.Order.Partition.Basic
 import Mathlib.Order.Grade
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Polyhedral.Basic
 -- import Polyhedral.Hyperplane
