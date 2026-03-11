@@ -194,6 +194,15 @@ lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint
 --     codisjoint_iff.mp hCS.codisjoint]
 
 
+/-- The linear span of `C ⊓ -C` is the lineality space of `C`. -/
+lemma linSpan_inf_neg_eq_lineal (C : PointedCone R M) : (C ⊓ -C).linSpan = C.lineal := by
+  simpa [coe_lineal] using (submodule_linSpan (R := R) (M := M) C.lineal)
+
+/-- The cone built from the lineality submodule has linear span equal to that submodule. -/
+@[simp] lemma linSpan_lineal (C : PointedCone R M) :
+    (((C.lineal : Submodule R M) : PointedCone R M)).linSpan = C.lineal :=
+  submodule_linSpan (R := R) (M := M) C.lineal
+
 
 -- ## MAP
 
@@ -467,18 +476,5 @@ lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 
 -- def salientQuot_neg (C : PointedCone R M) : C.salientQuot ≃ₗ[R] (-C).salientQuot := sorry
 
---variable (R M) in
-/-- Salient rank of a cone. -/
-noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
-    -- Module.rank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
-
---variable (R M) in
-/-- Salient rank of a cone. -/
-noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
-    -- Module.finrank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
-
-abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
-
 end Ring
-
 end PointedCone

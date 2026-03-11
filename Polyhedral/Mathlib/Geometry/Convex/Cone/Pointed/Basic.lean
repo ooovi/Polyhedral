@@ -105,23 +105,6 @@ alias linSpan_eq := submodule_linSpan
 -- end Ring
 
 
--- ## RANK
-
-open Cardinal
-
-noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
--- ⨆ ι : { s : Set M // LinearIndepOn R id s }, (#ι.1)
-
-noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
-
--- NOTE: this is not the same as Module.Finite or FG!
-abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
-
-lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := by
-  sorry
-
-lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
-
 end Semiring
 
 
@@ -677,6 +660,12 @@ lemma quot_span : C.quot (.span R C) = ⊥ := quot_bot_of_le Submodule.le_span
 
 lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 
+/-- The linear span of a quotient cone is the image of the linear span under the quotient map. -/
+@[simp] lemma linSpan_quot (C : PointedCone R M) (S : Submodule R M) :
+    (C.quot S).linSpan = Submodule.map S.mkQ C.linSpan := by
+  simpa [PointedCone.quot, PointedCone.linSpan] using
+    (Submodule.span_image (f := S.mkQ) (s := (C : Set M)))
+
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
     (C ⊔ S).quot S = C.quot S := sorry
 
@@ -734,32 +723,4 @@ theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} =
     · simpa [smul_smul, inv_mul_cancel_right₀ (ne_of_lt hr).symm] using h
 
 end DivisionRing
-
-section Domain
-
-variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
-variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
-variable {C : PointedCone R M}
-
-
-lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
-  have hlin : C.linSpan = (⊥ : Submodule R M) :=
-    (Submodule.rank_eq_zero).1 (by simpa [PointedCone.rank] using h)
-  exact le_bot_iff.mp (by simpa [hlin] using (PointedCone.le_submodule_span C))
-
-lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ :=
-  ⟨bot_of_rank_zero, by rintro rfl; simp [PointedCone.rank]⟩
-
-end Domain
-
-section Semiring
-
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommMonoid M] [Module R M]
-
-lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
-  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
-
-end Semiring
-
 end PointedCone
