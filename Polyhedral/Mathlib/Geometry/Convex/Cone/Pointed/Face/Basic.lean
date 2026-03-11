@@ -170,12 +170,11 @@ theorem of_comap_surjective {f : N →ₗ[R] M} (hf : Function.Surjective f)
 
 end Map
 
-end IsFaceOf
-
-lemma face_faces (h : F.IsFaceOf C) :
-    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+lemma isFaceOf_iff (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
   ⟨fun h' => ⟨h'.le, h'.trans h⟩,
     fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
+end IsFaceOf
 
 variable [AddCommGroup N] [Module R N] in
 /-- The image of a cone `F` under an injective linear map is a face of the
@@ -399,22 +398,18 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
   · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
 
 /-- Quotient by the linear span of a face is salient. -/
-lemma salient_quot_linSpan_of_face (hF : F.IsFaceOf C) : (C.quot F.linSpan).Salient := by
-  intro z hzC hz0 hzNeg
-  rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
-  rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
-  have hxySpan : x + y ∈ F.linSpan := by
-    rw [← Submodule.ker_mkQ F.linSpan]
-    exact LinearMap.mem_ker.mpr (by simp [map_add, hy])
-  have hxyF : x + y ∈ F := by
-    rw [← hF.inf_linSpan]
-    exact ⟨C.add_mem hxC hyC, hxySpan⟩
-  have hxF : x ∈ F := hF.mem_of_add_mem hxC hyC hxyF
-  have hx0 : (F.linSpan).mkQ x = 0 := by
-    simpa [Submodule.mkQ_apply] using
-      (Submodule.Quotient.mk_eq_zero (p := F.linSpan) (x := x)).2
-        (PointedCone.le_submodule_span F hxF)
-  exact hz0 (by simpa using hx0)
+lemma quot_salient (F : PointedCone R M) (hF : F.IsFaceOf C) :
+    (C.quot F.linSpan).Salient := by
+  simp only [Salient, ConvexCone.Salient, toConvexCone_map, ConvexCone.mem_map,
+    mkQ_apply, ne_eq, not_exists, not_and, forall_exists_index, and_imp,
+    forall_apply_eq_imp_iff₂, Quotient.mk_eq_zero]
+  intro a aC anS x xC hh
+  have hxy_ker : a + x ∈ (mkQ F.linSpan).ker :=
+    LinearMap.mem_ker.mpr <| add_eq_zero_iff_eq_neg'.mpr hh
+  rw [ker_mkQ] at hxy_ker
+  refine anS <| mem_span_of_mem <| hF.mem_of_add_mem aC xC <| ?_
+  rw [← inf_linSpan hF]
+  exact mem_inf.mpr ⟨Submodule.add_mem C aC xC, hxy_ker⟩
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)
