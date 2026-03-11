@@ -24,8 +24,7 @@ noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 -- NOTE: this is not the same as Module.Finite or FG!
 abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
 
-lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := by
-  sorry
+lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
 
 lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
 
@@ -57,11 +56,11 @@ lemma rank_eq_rank_add_rank_quot_linSpan {F G : PointedCone R M} (hFG : F ≤ G)
   let f : G.linSpan →ₗ[R] (M ⧸ F.linSpan) := (F.linSpan.mkQ).domRestrict G.linSpan
   have hker : Module.rank R f.ker = Module.rank R F.linSpan := by
     rw [show f.ker = Submodule.comap G.linSpan.subtype F.linSpan by
-      simpa [f] using ker_domRestrict_mkQ_linSpan (F := F) (G := G)]
+      simpa [f] using ker_domRestrict_mkQ_linSpan F G]
     exact (Submodule.comapSubtypeEquivOfLe (Submodule.span_mono hFG)).rank_eq
   have hrange : (G.quot F.linSpan).linSpan = f.range := by
     change (G.quot F.linSpan).linSpan = ((F.linSpan.mkQ).domRestrict G.linSpan).range
-    exact linSpan_quot_eq_range_domRestrict_mkQ (F := F) (G := G)
+    exact linSpan_quot_eq_range_domRestrict_mkQ F G
   have hmain : Module.rank R f.range + Module.rank R f.ker = Module.rank R G.linSpan :=
     LinearMap.rank_range_add_rank_ker f
   calc
@@ -98,17 +97,17 @@ lemma finrank_eq_finrank_add_finrank_quot_linSpan {F G : PointedCone R M}
     G.finrank = F.finrank + (G.quot F.linSpan).finrank := by
   letI : Module.Finite R G.linSpan := Module.Finite.iff_fg.mpr hG
   letI : Module.Finite R F.linSpan := Module.Finite.iff_fg.mpr <|
-    PointedCone.finRank_of_le (R := R) (M := M) (F := F) (G := G) hG hFG
+    PointedCone.finRank_of_le hG hFG
   letI : Module.Finite R (G.quot F.linSpan).linSpan := Module.Finite.iff_fg.mpr <|
-    PointedCone.finRank_quot_linSpan (R := R) (M := M) (F := F) (G := G) hG
+    PointedCone.finRank_quot_linSpan hG
   let f : G.linSpan →ₗ[R] (M ⧸ F.linSpan) := (F.linSpan.mkQ).domRestrict G.linSpan
   have hker : Module.finrank R f.ker = Module.finrank R F.linSpan := by
     rw [show f.ker = Submodule.comap G.linSpan.subtype F.linSpan by
-      simpa [f] using ker_domRestrict_mkQ_linSpan (F := F) (G := G)]
+      simpa [f] using ker_domRestrict_mkQ_linSpan F G]
     exact (Submodule.comapSubtypeEquivOfLe (Submodule.span_mono hFG)).finrank_eq
   have hrange : (G.quot F.linSpan).linSpan = f.range := by
     change (G.quot F.linSpan).linSpan = ((F.linSpan.mkQ).domRestrict G.linSpan).range
-    exact linSpan_quot_eq_range_domRestrict_mkQ (F := F) (G := G)
+    exact linSpan_quot_eq_range_domRestrict_mkQ F G
   have hmain : Module.finrank R f.range + Module.finrank R f.ker = Module.finrank R G.linSpan :=
     LinearMap.finrank_range_add_finrank_ker f
   calc
@@ -152,7 +151,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 lemma rank_eq_rank_lineal_add_salRank (C : PointedCone R M) :
     C.rank = Module.rank R C.lineal + C.salRank := by
   have h := PointedCone.rank_eq_rank_add_rank_quot_linSpan
-    (R := R) (M := M) (F := ((C.lineal : Submodule R M) : PointedCone R M)) (G := C) C.lineal_le
+    (F := ((C.lineal : Submodule R M) : PointedCone R M)) C.lineal_le
   have hlineal :
       (((C.lineal : Submodule R M) : PointedCone R M)).rank = Module.rank R C.lineal := by
     rw [PointedCone.rank, linSpan_lineal]
@@ -165,7 +164,7 @@ lemma finrank_eq_finrank_lineal_add_salFinrank (C : PointedCone R M)
     C.finrank = Module.finrank R C.lineal + C.salFinrank := by
   letI : Module.Finite R C.linSpan := Module.Finite.iff_fg.mpr hC
   have h := PointedCone.finrank_eq_finrank_add_finrank_quot_linSpan
-    (R := R) (M := M) (F := ((C.lineal : Submodule R M) : PointedCone R M)) (G := C) hC C.lineal_le
+    (F := ((C.lineal : Submodule R M) : PointedCone R M)) hC C.lineal_le
   have hlineal :
       (((C.lineal : Submodule R M) : PointedCone R M)).finrank = Module.finrank R C.lineal := by
     rw [PointedCone.finrank, linSpan_lineal]
@@ -175,7 +174,7 @@ lemma finrank_eq_finrank_lineal_add_salFinrank (C : PointedCone R M)
 /-- A cone with trivial lineality has salient rank equal to rank. -/
 lemma salRank_eq_rank_of_lineal_eq_bot (C : PointedCone R M) (hlineal : C.lineal = ⊥) :
     C.salRank = C.rank := by
-  have h := PointedCone.rank_eq_rank_lineal_add_salRank (R := R) (M := M) C
+  have h := PointedCone.rank_eq_rank_lineal_add_salRank C
   rw [hlineal] at h
   simpa [add_comm] using h.symm
 
@@ -183,7 +182,7 @@ lemma salRank_eq_rank_of_lineal_eq_bot (C : PointedCone R M) (hlineal : C.lineal
 lemma salFinrank_eq_finrank_of_lineal_eq_bot (C : PointedCone R M)
     (hC : C.FinRank) (hlineal : C.lineal = ⊥) :
     C.salFinrank = C.finrank := by
-  have h := PointedCone.finrank_eq_finrank_lineal_add_salFinrank (R := R) (M := M) C hC
+  have h := PointedCone.finrank_eq_finrank_lineal_add_salFinrank C hC
   rw [hlineal] at h
   simpa [add_comm] using h.symm
 
@@ -191,8 +190,8 @@ lemma salFinrank_eq_finrank_of_lineal_eq_bot (C : PointedCone R M)
 lemma salRank_eq_natCast_salFinrank (C : PointedCone R M) (hC : C.FinSalRank) :
     C.salRank = (C.salFinrank : Cardinal) := by
   letI : Module.Finite R (C.salientQuot).linSpan := Module.Finite.iff_fg.mpr hC
-  simpa [PointedCone.salRank, PointedCone.salFinrank, PointedCone.rank, PointedCone.finrank] using
-    (Module.finrank_eq_rank (R := R) (M := (C.salientQuot).linSpan)).symm
+  rw [PointedCone.salRank, PointedCone.salFinrank, PointedCone.rank, PointedCone.finrank]
+  exact (Module.finrank_eq_rank (R := R) (M := (C.salientQuot).linSpan)).symm
 
 end Decomposition
 

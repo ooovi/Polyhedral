@@ -16,9 +16,11 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.KreinMilman
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap

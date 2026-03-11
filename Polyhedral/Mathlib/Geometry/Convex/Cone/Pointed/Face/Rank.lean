@@ -53,11 +53,11 @@ lemma salFinrank_eq_salFinrank_add_finrank_quot_linSpan {F G : PointedCone R M}
     (hF : F.IsFaceOf G) (hG : G.FinRank) :
     G.salFinrank = F.salFinrank + (G.quot F.linSpan).finrank := by
   have hFfin : F.FinRank :=
-    PointedCone.finRank_of_le (R := R) (M := M) (F := F) (G := G) hG hF.le
+    PointedCone.finRank_of_le hG hF.le
   have hFG := PointedCone.finrank_eq_finrank_add_finrank_quot_linSpan
-      (R := R) (M := M) (F := F) (G := G) hG hF.le
-  rw [PointedCone.finrank_eq_finrank_lineal_add_salFinrank (R := R) (M := M) G hG,
-    PointedCone.finrank_eq_finrank_lineal_add_salFinrank (R := R) (M := M) F hFfin,
+      hG hF.le
+  rw [PointedCone.finrank_eq_finrank_lineal_add_salFinrank G hG,
+    PointedCone.finrank_eq_finrank_lineal_add_salFinrank F hFfin,
     hF.lineal_eq_lineal, Nat.add_assoc] at hFG
   exact Nat.add_left_cancel hFG
 
@@ -68,12 +68,12 @@ lemma salFinrank_eq_salFinrank_add_salFinrank_quot_linSpan {F G : PointedCone R 
   have hqlineal : (G.quot F.linSpan).lineal = ⊥ :=
     PointedCone.salient_iff_lineal_bot.mp (hF.salient_quot_linSpan_of_face)
   have hqfin : (G.quot F.linSpan).FinRank :=
-    PointedCone.finRank_quot_linSpan (R := R) (M := M) (F := F) (G := G) hG
+    PointedCone.finRank_quot_linSpan hG
   have hq : (G.quot F.linSpan).salFinrank = (G.quot F.linSpan).finrank :=
     PointedCone.salFinrank_eq_finrank_of_lineal_eq_bot
-      (R := R) (M := M ⧸ F.linSpan) (C := G.quot F.linSpan) hqfin hqlineal
+      (C := G.quot F.linSpan) hqfin hqlineal
   simpa [hq] using
-    salFinrank_eq_salFinrank_add_finrank_quot_linSpan (R := R) (M := M) hF hG
+    salFinrank_eq_salFinrank_add_finrank_quot_linSpan hF hG
 
 /-- Dimension-addition for salient rank along a face inclusion (finite lineality case). -/
 lemma salRank_eq_salRank_add_rank_quot_linSpan {F G : PointedCone R M}
@@ -81,11 +81,11 @@ lemma salRank_eq_salRank_add_rank_quot_linSpan {F G : PointedCone R M}
     G.salRank = F.salRank + (G.quot F.linSpan).rank := by
   letI : Module.Finite R G.lineal := Module.Finite.iff_fg.mpr hlinealG
   have hFG := PointedCone.rank_eq_rank_add_rank_quot_linSpan
-      (R := R) (M := M) (F := F) (G := G) hF.le
-  have hG := PointedCone.rank_eq_rank_lineal_add_salRank (R := R) (M := M) G
+      hF.le
+  have hG := PointedCone.rank_eq_rank_lineal_add_salRank G
   have hlineal : F.lineal = G.lineal := hF.lineal_eq_lineal
   letI : Module.Finite R F.lineal := hlineal.symm ▸ (inferInstance : Module.Finite R G.lineal)
-  have hF' := PointedCone.rank_eq_rank_lineal_add_salRank (R := R) (M := M) F
+  have hF' := PointedCone.rank_eq_rank_lineal_add_salRank F
   rw [hG, hF', hlineal] at hFG
   exact Cardinal.eq_of_add_eq_add_left (by simpa [add_assoc] using hFG)
     (Module.rank_lt_aleph0 R G.lineal)
@@ -97,9 +97,8 @@ lemma salRank_eq_salRank_add_salRank_quot_linSpan {F G : PointedCone R M}
   have hqlineal : (G.quot F.linSpan).lineal = ⊥ :=
     PointedCone.salient_iff_lineal_bot.mp (hF.salient_quot_linSpan_of_face)
   have hq : (G.quot F.linSpan).salRank = (G.quot F.linSpan).rank :=
-    PointedCone.salRank_eq_rank_of_lineal_eq_bot
-      (R := R) (M := M ⧸ F.linSpan) (C := G.quot F.linSpan) hqlineal
-  simpa [hq] using salRank_eq_salRank_add_rank_quot_linSpan (R := R) (M := M) hF hlinealG
+    PointedCone.salRank_eq_rank_of_lineal_eq_bot (C := G.quot F.linSpan) hqlineal
+  simpa [hq] using salRank_eq_salRank_add_rank_quot_linSpan hF hlinealG
 
 end Salient
 
