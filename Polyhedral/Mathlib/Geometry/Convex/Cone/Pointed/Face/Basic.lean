@@ -393,8 +393,7 @@ theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
 lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
   apply le_antisymm
   · intro x ⟨xC, xF⟩
-    have := (mem_linSpan F).1 xF
-    rcases this with ⟨p, pf, n, nf, rfl⟩
+    rcases (mem_linSpan F).1 xF with ⟨p, pf, n, nf, rfl⟩
     exact hF.mem_of_add_mem xC (hF.le nf) pf
   · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
 
