@@ -395,7 +395,7 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
   · intro x ⟨xC, xF⟩
     rcases (mem_linSpan F).1 xF with ⟨p, pf, n, nf, rfl⟩
     exact hF.mem_of_add_mem xC (hF.le nf) pf
-  · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
+  · simpa using ⟨hF.le, Submodule.subset_span⟩
 
 /-- Quotient by the linear span of a face is salient. -/
 lemma salient_quot_linSpan_of_face (hF : F.IsFaceOf C) : (C.quot F.linSpan).Salient := by
