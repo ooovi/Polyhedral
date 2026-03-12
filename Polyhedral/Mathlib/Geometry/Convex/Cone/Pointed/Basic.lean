@@ -152,13 +152,11 @@ lemma span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R 
   Submodule.span_insert x s
 
 lemma coe_sup_submodule_span' {s t : Set M} :
-    Submodule.span R (s ∪ t) = (span R s ⊔ span R t).linSpan := by
-  rw [← span_submodule_span]
-  simp [Submodule.span_union]
+    Submodule.span R (s ∪ t) = Submodule.span R (span R s ⊔ span R t) := by simp
 
--- Has this anything to do with cones?
+-- Has this anything to do with cones? See version above
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
-    Submodule.span R ((C : Set M) ∪ (D : Set M)) = (C ⊔ D).linSpan := by
+    Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
   rw [← span_submodule_span]
   simp [Submodule.span_union]
 

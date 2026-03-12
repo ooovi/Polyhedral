@@ -211,7 +211,7 @@ lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
   obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
   simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
-    Submodule.span_union, span_coe_eq_restrictScalars, restrictScalars_self] at hh
+    Submodule.span_union, span_coe_eq_restrictScalars] at hh
   refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
 
 -- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
