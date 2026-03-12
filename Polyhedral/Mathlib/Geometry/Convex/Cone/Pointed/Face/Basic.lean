@@ -378,14 +378,11 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 end Semiring
 
-section Ring
+section DirectedOrderRing
 
-variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+  [AddCommGroup M] [Module R M]
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
-
-theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient :=
-  hC.anti hF.le
 
 lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
     x ∈ F.linSpan ↔ x ∈ F := by
@@ -413,8 +410,19 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
 --     exact hF.mem_of_add_mem hxC (hF.le hzF) hyF
 --   · simpa using ⟨hF.le, Submodule.subset_span⟩
 
+end DirectedOrderRing
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+{C C₁ C₂ F F₁ F₂ : PointedCone R M}
+
+theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
+    F.Salient :=
+  hC.anti hF.le
+
 /-- Quotient by the linear span of a face is salient. -/
-lemma salient_quot_linSpan_of_face (hF : F.IsFaceOf C) : (C.quot F.linSpan).Salient := by
+lemma salient_quot_linSpan_of_face [IsDirectedOrder R] (hF : F.IsFaceOf C) :
+    (C.quot F.linSpan).Salient := by
   intro z hzC hz0 hzNeg
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
   rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
