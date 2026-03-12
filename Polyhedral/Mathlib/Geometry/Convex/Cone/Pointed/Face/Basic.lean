@@ -397,9 +397,10 @@ lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
 -- this is false without a linear order: consider ℝ with the trivial ordering
 -- (i.e., only elements in ℤ are comparable) then C:= ℕ + √2 ℕ is and ℕ ⊆ ℂ a face,
 -- but ℤ.linSpan ∩ C = C
-lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := le_antisymm
-  (fun _ hx => (hF.mem_linSpan_iff_mem hx.1).mp hx.2)
-  (fun _ hx => ⟨hF.le hx, Submodule.subset_span hx⟩)
+lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+  apply le_antisymm <;> intro _ hx
+  · exact (hF.mem_linSpan_iff_mem hx.1).mp hx.2
+  · exact ⟨hF.le hx, Submodule.subset_span hx⟩
 
 -- old proof
 -- lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
