@@ -89,10 +89,14 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 /-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
-@[simp] lemma submodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+@[simp] lemma coe_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
     by simp [linSpan]
 
-alias linSpan_eq := submodule_linSpan
+@[deprecated (since := "today")]
+alias submodule_linSpan := coe_linSpan
+
+@[deprecated (since := "today")]
+alias linSpan_eq := coe_linSpan
 
 -- section Ring
 
@@ -143,42 +147,53 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 -- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
-theorem span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R s :=
+@[deprecated "Really needed?" (since := "today")]
+lemma span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R s :=
   Submodule.span_insert x s
 
-lemma coe_sup_submodule_span {C D : PointedCone R M} :
-    Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
+lemma coe_sup_submodule_span' {s t : Set M} :
+    Submodule.span R (s ∪ t) = (span R s ⊔ span R t).linSpan := by
   rw [← span_submodule_span]
   simp [Submodule.span_union]
 
+-- Has this anything to do with cones?
+lemma coe_sup_submodule_span {C D : PointedCone R M} :
+    Submodule.span R ((C : Set M) ∪ (D : Set M)) = (C ⊔ D).linSpan := by
+  rw [← span_submodule_span]
+  simp [Submodule.span_union]
+
+lemma span_le_submodule_span (s : Set M) : span R s ≤ Submodule.span R s :=
+    Submodule.span_le_restrictScalars _ _ s
+
+@[deprecated "We don't need this, the proof is short" (since := "today")]
 lemma span_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : span R s ≤ Submodule.span R t
-  := le_trans (Submodule.span_le_restrictScalars _ R s) (Submodule.span_mono hst)
+  := le_trans (span_le_submodule_span s) (Submodule.span_mono hst)
 
-lemma span_le_submodule_span (s : Set M) : span R s ≤ Submodule.span R s
-  := span_le_submodule_span_of_le (subset_refl s)
+lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := Submodule.subset_span
 
-lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) :
-    C ≤ Submodule.span R (D : Set M) := by
-  nth_rw 1 [← Submodule.span_eq C]
-  exact span_le_submodule_span_of_le hCD
+@[deprecated (since := "today")]
+alias le_submodule_span_self := le_linSpan
 
-lemma le_submodule_span (C : PointedCone R M) : C ≤ Submodule.span R (C : Set M)
-  := le_submodule_span_of_le (le_refl C)
+@[deprecated (since := "today")]
+alias le_submodule_span := le_linSpan
 
-@[deprecated le_submodule_span (since := "")]
-alias le_submodule_span_self := le_submodule_span
+@[deprecated "We don't need this, the proof is short" (since := "today")]
+lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) : C ≤ D.linSpan :=
+  le_trans hCD (le_linSpan D)
 
+@[deprecated (since := "today")]
 alias le_span := subset_span
 
 -- should be in `Submodule.Basic`
+@[deprecated "Really needed?" (since := "today")]
 lemma submodule_span_of_span {s : Set M} {S : Submodule R M} (hsS : span R s = S) :
     Submodule.span R s = S := by
   simpa using congrArg (Submodule.span R ∘ SetLike.coe) hsS
 
-lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = S) :
-    span R s = Submodule.span R s := by
-  obtain ⟨S, hS⟩ := h; rw [hS]
-  simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
+-- lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = S) :
+--     span R s = Submodule.span R s := by
+--   obtain ⟨S, hS⟩ := h; rw [hS]
+--   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
 lemma span_union (s t : Set M) : span R (s ∪ t) = span R s ⊔ span R t :=
     Submodule.span_union s t
@@ -196,12 +211,12 @@ lemma inf_sup_assoc_of_submodule_le {C : PointedCone R M} (D : PointedCone R M)
     {S : Submodule R M} (hSC : S ≤ C) : C ⊓ (D ⊔ S) = (C ⊓ D) ⊔ S :=
   Submodule.inf_sup_assoc_of_restrictScalars_le D hSC
 
--- TODO: write version with `restrictScalars` instead.
+-- TODO: write version with `restrictScalars` instead. (Or have I already??)
 lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R M}
-  (hS : Disjoint (Submodule.span R C) S) : (C ⊔ S) ⊓ Submodule.span R (C : Set M) = C := by
+  (hS : Disjoint C.linSpan S) : (C ⊔ S) ⊓ C.linSpan = C := by
   rw [← sup_inf_assoc_of_le_submodule]
   · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
-  · exact le_submodule_span C
+  · exact le_linSpan C
 
 end Ring
 
@@ -399,11 +414,11 @@ variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup
 open Submodule in
 lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
     (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
-    (hCD : Disjoint (Submodule.span R C) (Submodule.span (M := M) R D))
+    (hCD : Disjoint C.linSpan D.linSpan)
     (s : xC + xD = yC + yD) :
     xC = yC ∧ xD = yD := by
-  let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
-    (Submodule.span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+  let sub_mem_span {C : PointedCone R M} {x y} (mx : x ∈ C) (my : y ∈ C) :=
+    C.linSpan.sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
   replace hCD := disjoint_def.mp hCD
   constructor
   · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
