@@ -387,7 +387,7 @@ variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
 lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
     x ∈ F.linSpan ↔ x ∈ F := by
   constructor <;> intro hxF
-  · obtain ⟨_, hyF, _, hzF, rfl⟩ := (mem_linSpan F).1 hxF
+  · obtain ⟨_, hyF, _, hzF, rfl⟩ := mem_linSpan.1 hxF
     exact hF.mem_of_add_mem hx (hF.le hzF) hyF
   · exact Submodule.subset_span hxF
 

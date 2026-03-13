@@ -3,7 +3,7 @@ import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.Algebra.Order.Nonneg.Module
 import Mathlib.Geometry.Convex.Cone.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Pointwise
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 
 namespace PointedCone
 

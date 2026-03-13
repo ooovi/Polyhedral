@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Module.Submodule.Pointwise
+
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Dual
@@ -221,7 +221,7 @@ lemma dual_span_lineal_dual (s : Set M) :
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
   rw [← PointedCone.ofSubmodule_coe]
-  rw [← span_union_neg_eq_span_submodule]
+  rw [← span_union_neg_eq_submodule_span]
   rw [dual_span]
   rw [dual_union]
   rw [← dual_neg, lineal_inf_neg]
