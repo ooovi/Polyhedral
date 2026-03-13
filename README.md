@@ -22,6 +22,7 @@ Currently the project implements:
 ## On it's way
 - Face-lattices of cones: [#33664](https://github.com/leanprover-community/mathlib4/pull/33664)
 - Duality operator for submodules: [#34007](https://github.com/leanprover-community/mathlib4/pull/34007)
+- Interaction of cone span, linear span and negation [#36605](https://github.com/leanprover-community/mathlib4/pull/36605)
 - Instances for SeparatingLeft, SeparatingRight and Nondegenerate: [#34487](https://github.com/leanprover-community/mathlib4/pull/34487)
 <!-- not a serious PR (!) - https://github.com/leanprover-community/mathlib4/pull/34703 -->
 

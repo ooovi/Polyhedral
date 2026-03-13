@@ -464,15 +464,15 @@ variable (R) in
 
 @[simp] lemma span_sup_span_neg_eq_submodule_span (s : Set M) :
     span R s ⊔ span R (-s) = Submodule.span R s := by
-  ext x; constructor <;> intro h
-  · simp only [Submodule.mem_sup] at h
-    obtain ⟨_, hy, _, hz, rfl⟩ := h
+  ext x
+  constructor <;> intro h
+  · obtain ⟨_, hy, _, hz, rfl⟩ := Submodule.mem_sup.mp h
     exact add_mem
       (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hy p hp)
       (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hz p <| by
         intro y hy
         simpa using p.neg_mem (hp (Set.mem_neg.mp hy)))
-  · simp only [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
+  · rw [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
     obtain ⟨n, f, g, rfl⟩ := h
     have hx : ∑ i, f i • (g i : M) ∈ span R (-s ∪ s) := by
       refine sum_mem ?_
@@ -497,7 +497,7 @@ variable (R) in
   simp only [Submodule.mem_span, Set.union_subset_iff, and_imp,
     Submodule.restrictScalars_mem]
   constructor <;> intros h B sB
-  · refine h (Submodule.restrictScalars {c : R // 0 ≤ c} B) ?_ sB
+  · refine h (B.restrictScalars _) ?_ sB
     rw [Submodule.coe_restrictScalars]
     exact fun _ tm => neg_mem_iff.mp (sB tm)
   · intro nsB
