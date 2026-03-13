@@ -66,9 +66,9 @@ lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   use t, tt
 
 lemma Face.linSpan_FG_of_FG (hCfg : C.FG) (G : Face C) :
-    G.toPointedCone.linSpan.FG := by
+    G.linSpan.FG := by
   obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
-  simpa [← hgfg] using Submodule.FG.of_finite
+  simpa [linSpan, ← hgfg] using Submodule.FG.of_finite
 
 end DivisionRingLemmas
 
@@ -212,20 +212,6 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
-    ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
-  wlog h : F = C
-  · sorry
-  · by_cases! h : G = ⊥
-    · sorry
-    · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
-      have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
-      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
-        (fun n => h ((Face.bot_face (C := C) (F := G) hsal).mpr n)) hgsal
-      have := G.isFaceOf.isFaceOf_iff.mp hvray
-      obtain ⟨s, hs⟩ := hfg
-      sorry
-
 open Submodule in
 lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
     StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
@@ -243,15 +229,16 @@ lemma finrank_add_one_of_fg {C : PointedCone R M} (hCfg : C.FG)
     G.toPointedCone.finrank = F.toPointedCone.finrank + 1 := by
   obtain ⟨hfg, hc⟩ := hFG
   -- suffices to show quotient has rank 1
-  have hgfg := quot_fg (G.isFaceOf.fg_of_fg hCfg) F.toPointedCone.linSpan
+  have hgfg := quot_fg (G.isFaceOf.fg_of_fg hCfg) F.linSpan
   convert
     finrank_eq_finrank_add_finrank_quot_linSpan (FG.linSpan_fg (G.isFaceOf.fg_of_fg hCfg)) hfg.le
     -- G/F has a ray
   have FfG : F.toPointedCone.IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
+  have : ¬G.toPointedCone ≤ F.linSpan := by
+    simpa [Face.le_linSpan_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
-    FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr (Face.not_le_linspan hfg))
-      FfG.quot_salient
-  set ray : Face ((quot G.toSubmodule F.toPointedCone.linSpan)) := ⟨span R {v}, hvray⟩
+    FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr this) FfG.quot_salient
+  set ray : Face ((quot G.toSubmodule F.linSpan)) := ⟨span R {v}, hvray⟩
   -- pull ray back to get face of G with F < H
   let H := ray.fiberFace (F := ⟨_, FfG⟩)
   have : F < H := by
@@ -278,6 +265,15 @@ lemma finrank_covBy_of_fg {C : PointedCone R M} (hCfg : C.FG)
   refine ⟨finrank_strictMono_of_fg hCfg hfg, ?_⟩
   suffices G.toPointedCone.finrank = F.toPointedCone.finrank + 1 by omega
   exact (finrank_add_one_of_fg hCfg ⟨hfg, hc⟩)
+
+lemma covBy_iff_finrank_covBy_of_fg_of_le {C : PointedCone R M} (hCfg : C.FG)
+    {F G : Face C} (hfg : F ≤ G) : F ⋖ G ↔
+    (F : PointedCone R M).finrank ⋖ (G : PointedCone R M).finrank := by
+  refine ⟨finrank_covBy_of_fg hCfg, ?_⟩
+  intro h
+  constructor
+  · exact lt_of_le_of_ne hfg <| fun a => ne_of_lt h.1 (congrArg finrank (by simpa))
+  · exact fun H hH hah => h.2 (finrank_strictMono_of_fg hCfg hH) (finrank_strictMono_of_fg hCfg hah)
 
 /-- The face lattice of a finitely generated cone is graded by face dimension. -/
 noncomputable instance gradeOrder_finrank_of_fg {C : PointedCone R M}

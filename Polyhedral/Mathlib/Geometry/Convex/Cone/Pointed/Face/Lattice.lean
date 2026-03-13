@@ -330,22 +330,19 @@ lemma fiberFace_eq_iff {F : Face C} (G : Face (C / F)) :
     suffices C ⊓ restrictScalars { c // 0 ≤ c } F.span = F by symm; simp [this]
     convert F.isFaceOf.inf_linSpan
 
+abbrev linSpan (F : Face C) : Submodule R M := F.toPointedCone.linSpan
+
+lemma le_linSpan_iff_le {F G : Face C} :
+    (F : PointedCone R M) ≤ G.linSpan ↔ F ≤ G := by
+  simp [IsFaceOf.le_linSpan_iff_le F.isFaceOf.le G.isFaceOf]
+
 end RingLinearOrder
 
 section DivisionRing
 
 variable {R M N : Type*}
 variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
-variable {C F : PointedCone R M} {s t : Set M}
-
-lemma le_linSpan_iff_le {F G : Face C} :
-    (F : PointedCone R M) ≤ (G : PointedCone R M).linSpan ↔ F ≤ G := by
-  simp [IsFaceOf.le_linSpan_iff_le F.isFaceOf.le G.isFaceOf]
-
-lemma not_le_linspan {F G : Face C} (hFG : F < G) :
-    ¬G.toPointedCone ≤ F.toPointedCone.linSpan := by
-  simpa [Face.le_linSpan_iff_le] using not_le_of_gt hFG
+  [AddCommGroup N] [Module R N] {C : PointedCone R M}
 
 /-!
 ### Embed and restrict
