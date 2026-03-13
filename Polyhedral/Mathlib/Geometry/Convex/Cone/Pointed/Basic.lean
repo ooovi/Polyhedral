@@ -434,15 +434,15 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 --     sorry
 --   · sorry
 
-
--- NOTE: I changed the statement of the lemma and added the trivial transformation as the first
---  line `suffices`. Maybe there is a shorter proof now?
+-- NOTE: I changed the statement of the lemma and added the `rw` to the first line that
+--  transforms it into the previous statement. Maybe there is a shorter proof now?
+-- TODO: simplify proof?
 --
 -- Mathematically, this lemma is equivalent to directedness of the order on `R`: for `M = R`
 -- and `x = 1`, it says every element of `R` is a difference of two nonnegative elements.
 variable (R) in
 @[simp] lemma span_neg_pair_eq_span_singleton (x : M) : span R {-x, x} = R ∙ x := by
-  suffices h : span R {-x, x} = Submodule.span R {-x, x} by simp [h]
+  rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
   ext y
   simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
     smul_neg, Subtype.exists, Nonneg.mk_smul, exists_prop]
