@@ -404,15 +404,17 @@ section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 
+lemma span_insert_eq_span_of_mem {s : Set M} {x : M} (hx : x ∈ s) :
+    Submodule.span R (insert (-x) s) = Submodule.span R s := by sorry
+
+@[simp] lemma span_neg_pair_eq_span_singleton {x : M} :
+    Submodule.span R {-x, x} = Submodule.span R {x} :=
+  span_insert_eq_span_of_mem (Set.mem_singleton x)
+
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
     IsProj S (IsCompl.projection hST) where
   map_mem := projection_apply_mem hST
   map_id x hx := projection_apply_left hST ⟨x, hx⟩
-
-variable (R) in
-@[simp] lemma span_neg_pair_eq_span_singleton (x : M) :
-    Submodule.span R {-x, x} = Submodule.span R {x} := by
-  rw [← Set.union_singleton, Submodule.span_union]; simp
 
 end Ring
 
