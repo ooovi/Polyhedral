@@ -409,6 +409,11 @@ lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
   map_mem := projection_apply_mem hST
   map_id x hx := projection_apply_left hST ⟨x, hx⟩
 
+variable (R) in
+@[simp] lemma span_neg_pair_eq_span_singleton (x : M) :
+    Submodule.span R {-x, x} = Submodule.span R {x} := by
+  rw [← Set.union_singleton, Submodule.span_union]; simp
+
 end Ring
 
 

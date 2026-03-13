@@ -488,17 +488,10 @@ omit [IsDirectedOrder R] in
 @[simp]
 lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
 
--- TODO: move to Submodule/Basic
-omit [IsOrderedRing R] [PartialOrder R] [IsDirectedOrder R] in
 variable (R) in
-@[simp] lemma submodule_span_pm_pair (x : M) :
-    Submodule.span R {-x, x} = Submodule.span R {x} := by
-  rw [← Set.union_singleton, Submodule.span_union]; simp
-
-variable (R) in
-lemma span_sign_pair_eq_submodule_span_singleton (x : M) :
+@[simp] lemma span_sign_pair_eq_submodule_span_singleton (x : M) :
     span R {-x, x} = Submodule.span R {x} := by
-  simpa [← submodule_span_pm_pair] using span_pm_pair_eq_submodule_span R x
+  simpa [← Submodule.span_neg_pair_eq_span_singleton] using span_pm_pair_eq_submodule_span R x
 
 lemma submodule_span_eq_add_span_neg (s : Set M) : Submodule.span R s = span R s ⊔ span R (-s) := by
   ext x; constructor <;> intro h
