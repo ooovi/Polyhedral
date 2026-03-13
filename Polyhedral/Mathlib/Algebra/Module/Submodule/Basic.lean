@@ -407,8 +407,7 @@ variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
 @[simp] lemma span_insert_eq_span_of_mem {s : Set M} {x : M} (hx : x ∈ s) :
     Submodule.span R (insert (-x) s) = Submodule.span R s := by sorry
 
-lemma span_neg_pair_eq_span_singleton {x : M} :
-    Submodule.span R {-x, x} = Submodule.span R {x} := by simp
+example {x : M} : Submodule.span R {-x, x} = R ∙ x := by simp
   -- span_insert_eq_span_of_mem (Set.mem_singleton x)
 
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
