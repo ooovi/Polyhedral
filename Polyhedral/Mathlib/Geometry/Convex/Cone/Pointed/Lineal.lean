@@ -1,10 +1,9 @@
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
-
-
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.Algebra.Order.Nonneg.Module
 import Mathlib.Geometry.Convex.Cone.Basic
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Pointwise
 
 namespace PointedCone
 
@@ -398,6 +397,7 @@ lemma salient_comap {C : PointedCone R M} {f : N →ₗ[R] M} (hC : C.Salient) (
   rw [salient_iff_lineal_bot] at *
   simpa [comap_lineal, hC] using LinearMap.ker_eq_bot_of_injective hf
 
+open Pointwise in
 lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
   simpa [← map_id_eq_neg] using salient_map hC (injective_neg.mpr injective_id)
 

@@ -177,6 +177,7 @@ lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f)
 lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     (C.quot S).IsPolyhedral := hC.map _
 
+open Pointwise in
 @[simp] lemma IsPolyhedral.neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
   mp := by
     intro hC;
@@ -184,6 +185,7 @@ lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     simpa [map_map] using hC.map (-.id)
   mpr := fun hC => by simpa only [← map_id_eq_neg] using hC.map _
 
+open Pointwise in
 lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
 
 
@@ -799,10 +801,12 @@ def quot (S : Submodule R M) : PolyhedralCone R (M ⧸ S) := ⟨_, C.isPolyhedra
 
 -- ## NEG
 
+open Pointwise in
 instance : InvolutiveNeg (PolyhedralCone R M) where
   neg C := ⟨_, C.isPolyhedral.neg⟩
   neg_neg := by simp
 
+open Pointwise in
 @[simp] lemma neg_coe (C : PolyhedralCone R M) :
     (-C : PolyhedralCone R M) = -(C : PointedCone R M) := rfl
 
