@@ -540,8 +540,7 @@ lemma span_union_neg_eq_span_submodule (s : Set M) :
     · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr nsB) h₁
     · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr sB) h₂
 
-lemma sup_neg_eq_submodule_span (C : PointedCone R M) :
-    -C ⊔ C = Submodule.span R (C : Set M) := by
+lemma sup_neg_eq_submodule_span (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
   nth_rw 1 2 [← Submodule.span_eq C]
   rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
   exact span_union_neg_eq_span_submodule (C : Set M)
