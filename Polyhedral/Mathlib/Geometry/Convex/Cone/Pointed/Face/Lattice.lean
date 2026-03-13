@@ -339,14 +339,13 @@ variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Mo
   [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
 variable {C F : PointedCone R M} {s t : Set M}
 
-lemma not_le_linspan {C : PointedCone R M} {F G : Face C} (hFG : F < G) :
+lemma le_linSpan_iff_le {F G : Face C} :
+    (F : PointedCone R M) ≤ (G : PointedCone R M).linSpan ↔ F ≤ G := by
+  simp [IsFaceOf.le_linSpan_iff_le F.isFaceOf.le G.isFaceOf]
+
+lemma not_le_linspan {F G : Face C} (hFG : F < G) :
     ¬G.toPointedCone ≤ F.toPointedCone.linSpan := by
-  apply SetLike.not_le_iff_exists.mpr
-  obtain ⟨x, hxG, hxnF⟩ := SetLike.exists_of_lt hFG
-  use x, hxG
-  intro ha
-  obtain ⟨_, hy, _, hnf, hs⟩ := (mem_linSpan F.toPointedCone).mp ha
-  exact hxnF ((F.isFaceOf.mem_add_iff (G.isFaceOf.le hxG) (F.isFaceOf.le hnf)).mp (hs ▸ hy)).1
+  simpa [Face.le_linSpan_iff_le] using not_le_of_gt hFG
 
 /-!
 ### Embed and restrict

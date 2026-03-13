@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Module.Submodule.Pointwise
+
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Dual
@@ -146,6 +146,7 @@ lemma dual_map' (f : M →ₗ[R] M') (C : PointedCone R M) :
 
 end Map
 
+open Pointwise in
 @[simp]
 lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
   ext x -- TODO: make this proof an application of `map_dual`
@@ -199,8 +200,10 @@ lemma submodule_dual_le_dual {s : Set M} : Submodule.dual p s ≤ dual p s := by
 
 -- ## Neg
 
+open Pointwise in
 lemma dual_neg (s : Set M) : -dual p s = dual p (-s) := by ext x; simp
 
+open Pointwise in
 @[simp] lemma dual_neg_neg (s : Set M) : -dual p (-s) = dual p s := by ext x; simp
 
 -----------
@@ -218,8 +221,8 @@ lemma dual_span_lineal_dual (s : Set M) :
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
   rw [← PointedCone.ofSubmodule_coe]
-  rw [← span_union_neg_eq_span_submodule]
-  rw [Set.involutiveNeg, dual_span]
+  rw [← span_union_neg_eq_submodule_span]
+  rw [dual_span]
   rw [dual_union]
   rw [← dual_neg, lineal_inf_neg]
   try rw [inf_comm]

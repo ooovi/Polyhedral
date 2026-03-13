@@ -65,9 +65,8 @@ lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
   use t, tt
 
-lemma Face.linSpan_FiniteDimensional_of_FG (hCfg : C.FG) (G : Face C) :
-    FiniteDimensional R G.toPointedCone.linSpan := by
-  refine (Submodule.fg_iff_finiteDimensional _).mp ?_
+lemma Face.linSpan_FG_of_FG (hCfg : C.FG) (G : Face C) :
+    G.toPointedCone.linSpan.FG := by
   obtain ⟨_, hgfg⟩ : G.FG := G.isFaceOf.fg_of_fg hCfg
   simpa [← hgfg] using Submodule.FG.of_finite
 
@@ -231,7 +230,7 @@ open Submodule in
 lemma finrank_strictMono_of_fg {C : PointedCone R M} (hCfg : C.FG) :
     StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
   intro G F hFG
-  haveI := F.linSpan_FiniteDimensional_of_FG hCfg
+  haveI := (Submodule.fg_iff_finiteDimensional _).mp (Face.linSpan_FG_of_FG hCfg F)
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
   · exact span_mono (R := R) hFG.le
   · intro h
@@ -251,7 +250,7 @@ lemma finrank_add_one_of_fg {C : PointedCone R M} (hCfg : C.FG)
   have FfG : F.toPointedCone.IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
   obtain ⟨v, hv0, hvray⟩ :=
     FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr (Face.not_le_linspan hfg))
-      (FfG.quot_salient _)
+      FfG.quot_salient
   set ray : Face ((quot G.toSubmodule F.toPointedCone.linSpan)) := ⟨span R {v}, hvray⟩
   -- pull ray back to get face of G with F < H
   let H := ray.fiberFace (F := ⟨_, FfG⟩)

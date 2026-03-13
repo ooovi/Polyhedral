@@ -377,39 +377,74 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 end Semiring
 
+section DirectedOrderRing
+
+variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+  [AddCommGroup M] [Module R M]
+{C C₁ C₂ F F₁ F₂ : PointedCone R M}
+
+lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
+    x ∈ F.linSpan ↔ x ∈ F := by
+  constructor <;> intro hxF
+  · obtain ⟨_, hyF, _, hzF, rfl⟩ := F.mem_linSpan.1 hxF
+    exact hF.mem_of_add_mem hx (hF.le hzF) hyF
+  · exact Submodule.subset_span hxF
+
+-- This fails for a merely partial order.
+-- Let R = ℝ[X] with the coefficientwise order, M = R.
+-- Let C be the cone of polynomials with all coefficients ≥ 0,
+-- and F the face of nonnegative constant polynomials.
+-- Then F is a face of C, but 1 ∈ F, so F.linSpan = ⊤.
+-- Hence C ⊓ F.linSpan = C ≠ F.
+lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+  apply le_antisymm <;> intro _ hx
+  · exact (hF.mem_linSpan_iff_mem hx.1).mp hx.2
+  · exact ⟨hF.le hx, Submodule.subset_span hx⟩
+
+-- old proof
+-- lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+--   apply le_antisymm
+--   · intro x ⟨hxC, hxF⟩
+--     obtain ⟨_, hyF, _, hzF, rfl⟩ := (mem_linSpan F).1 hxF
+--     exact hF.mem_of_add_mem hxC (hF.le hzF) hyF
+--   · simpa using ⟨hF.le, Submodule.subset_span⟩
+
+lemma le_linSpan_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) :
+    C₁ ≤ F.linSpan ↔ C₁ ≤ F := by
+  constructor <;> intro h
+  · intro x hx
+    obtain ⟨_, hy, _, hnf, hs⟩ := (mem_linSpan).mp (h hx)
+    exact ((hG.mem_add_iff (hD hx) (hG.le hnf)).mp (hs ▸ hy)).1
+  · exact le_trans h Submodule.subset_span
+
+end DirectedOrderRing
 section Ring
 
-variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
     F.Salient :=
   hC.anti hF.le
 
--- this is false without a linear order: consider ℝ with the trivial ordering
--- (i.e., only elements in ℤ are comparable) then C:= ℕ + √2 ℕ is and ℕ ⊆ ℂ a face,
--- but ℤ.linSpan ∩ C = C
-lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
-  apply le_antisymm
-  · intro x ⟨xC, xF⟩
-    have := (mem_linSpan F).1 xF
-    rcases this with ⟨p, pf, n, nf, rfl⟩
-    exact hF.mem_of_add_mem xC (hF.le nf) pf
-  · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
-
 /-- Quotient by the linear span of a face is salient. -/
-lemma quot_salient (F : PointedCone R M) (hF : F.IsFaceOf C) :
+lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
     (C.quot F.linSpan).Salient := by
-  simp only [Salient, ConvexCone.Salient, toConvexCone_map, ConvexCone.mem_map,
-    mkQ_apply, ne_eq, not_exists, not_and, forall_exists_index, and_imp,
-    forall_apply_eq_imp_iff₂, Quotient.mk_eq_zero]
-  intro a aC anS x xC hh
-  have hxy_ker : a + x ∈ (mkQ F.linSpan).ker :=
-    LinearMap.mem_ker.mpr <| add_eq_zero_iff_eq_neg'.mpr hh
-  rw [ker_mkQ] at hxy_ker
-  refine anS <| mem_span_of_mem <| hF.mem_of_add_mem aC xC <| ?_
-  rw [← inf_linSpan hF]
-  exact mem_inf.mpr ⟨Submodule.add_mem C aC xC, hxy_ker⟩
+  intro z hzC hz0 hzNeg
+  rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
+  rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
+  have hxySpan : x + y ∈ F.linSpan := by
+    rw [← Submodule.ker_mkQ F.linSpan]
+    exact LinearMap.mem_ker.mpr (by simp [map_add, hy])
+  have hxyF : x + y ∈ F := by
+    rw [← hF.inf_linSpan]
+    exact ⟨C.add_mem hxC hyC, hxySpan⟩
+  have hxF : x ∈ F := hF.mem_of_add_mem hxC hyC hxyF
+  have hx0 : (F.linSpan).mkQ x = 0 := by
+    simpa [Submodule.mkQ_apply] using
+      (Submodule.Quotient.mk_eq_zero (p := F.linSpan) (x := x)).2
+        (PointedCone.le_submodule_span F hxF)
+  exact hz0 (by simpa using hx0)
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)

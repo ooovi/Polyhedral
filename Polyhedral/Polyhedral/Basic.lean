@@ -177,6 +177,7 @@ lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f)
 lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     (C.quot S).IsPolyhedral := hC.map _
 
+open Pointwise in
 @[simp] lemma IsPolyhedral.neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
   mp := by
     intro hC;
@@ -184,6 +185,7 @@ lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     simpa [map_map] using hC.map (-.id)
   mpr := fun hC => by simpa only [← map_id_eq_neg] using hC.map _
 
+open Pointwise in
 lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
 
 
@@ -211,7 +213,7 @@ lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
   obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
   simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
-    Submodule.span_union, span_coe_eq_restrictScalars, restrictScalars_self] at hh
+    Submodule.span_union, span_coe_eq_restrictScalars] at hh
   refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
 
 -- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
@@ -799,10 +801,12 @@ def quot (S : Submodule R M) : PolyhedralCone R (M ⧸ S) := ⟨_, C.isPolyhedra
 
 -- ## NEG
 
+open Pointwise in
 instance : InvolutiveNeg (PolyhedralCone R M) where
   neg C := ⟨_, C.isPolyhedral.neg⟩
   neg_neg := by simp
 
+open Pointwise in
 @[simp] lemma neg_coe (C : PolyhedralCone R M) :
     (-C : PolyhedralCone R M) = -(C : PointedCone R M) := rfl
 
