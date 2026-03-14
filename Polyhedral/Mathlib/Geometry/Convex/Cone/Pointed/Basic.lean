@@ -659,7 +659,24 @@ abbrev quot (C : PointedCone R M) (S : Submodule R M) : PointedCone R (M ⧸ S) 
 
 lemma quot_def (C : PointedCone R M) (S : Submodule R M) : C.quot S = C.map S.mkQ := rfl
 
-lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := sorry
+lemma quot_eq_bot_iff (C : PointedCone R M) (S : Submodule R M) :
+    C.quot S = ⊥ ↔ C ≤ S := by
+  simp only [quot, PointedCone.ext_iff, PointedCone.map]
+  constructor
+  · intro h x hx
+    have := h (S.mkQ x)
+    simp [Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at this
+    exact this.mp ⟨x, hx, rfl⟩
+  · intro h y
+    simp only [Submodule.mem_map, LinearMap.coe_restrictScalars, Submodule.mkQ_apply,
+      Submodule.mem_bot]
+    constructor
+    · rintro ⟨y₁, hy₁, rfl⟩
+      exact (Submodule.Quotient.mk_eq_zero S).mpr (h hy₁)
+    · rintro rfl
+      exact ⟨0, C.zero_mem, Submodule.Quotient.mk_zero S⟩
+
+lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := (quot_eq_bot_iff C S).mpr h
 
 lemma quot_span : C.quot (.span R C) = ⊥ := quot_bot_of_le Submodule.le_span
 

@@ -66,7 +66,7 @@ lemma salFinrank_eq_salFinrank_add_salFinrank_quot_linSpan {F G : PointedCone R 
     (hF : F.IsFaceOf G) (hG : G.FinRank) :
     G.salFinrank = F.salFinrank + (G.quot F.linSpan).salFinrank := by
   have hqlineal : (G.quot F.linSpan).lineal = ⊥ :=
-    PointedCone.salient_iff_lineal_bot.mp (hF.salient_quot_linSpan_of_face)
+    PointedCone.salient_iff_lineal_bot.mp (hF.quot_salient)
   have hqfin : (G.quot F.linSpan).FinRank :=
     PointedCone.finRank_quot_linSpan hG
   have hq : (G.quot F.linSpan).salFinrank = (G.quot F.linSpan).finrank :=
@@ -95,7 +95,7 @@ lemma salRank_eq_salRank_add_salRank_quot_linSpan {F G : PointedCone R M}
     (hF : F.IsFaceOf G) (hlinealG : G.lineal.FG) :
     G.salRank = F.salRank + (G.quot F.linSpan).salRank := by
   have hqlineal : (G.quot F.linSpan).lineal = ⊥ :=
-    PointedCone.salient_iff_lineal_bot.mp (hF.salient_quot_linSpan_of_face)
+    PointedCone.salient_iff_lineal_bot.mp (hF.quot_salient)
   have hq : (G.quot F.linSpan).salRank = (G.quot F.linSpan).rank :=
     PointedCone.salRank_eq_rank_of_lineal_eq_bot (C := G.quot F.linSpan) hqlineal
   simpa [hq] using salRank_eq_salRank_add_rank_quot_linSpan hF hlinealG
