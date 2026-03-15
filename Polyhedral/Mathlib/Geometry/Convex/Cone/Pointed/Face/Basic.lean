@@ -601,19 +601,37 @@ lemma IsFaceOf.restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
 -- lemma IsFaceOf.embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
 --     (embed F).IsFaceOf (embed C) := hF.map S.subtype_injective
 
+end DivisionRing
+
+section DirectedOrderRing
+
+variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable {C F : PointedCone R M}
 
 
 -- ## QUOT / FIBER
 
-abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
+lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ F.linSpan) :
+    (F.quot S).IsFaceOf (C.quot S) := by
+  refine ⟨map_mono hF.le, ?_⟩
+  intro x y a hx hy ha hxy
+  rcases PointedCone.mem_map.mp hx with ⟨x', hx'C, rfl⟩
+  rcases PointedCone.mem_map.mp hy with ⟨y', hy'C, rfl⟩
+  rcases PointedCone.mem_map.mp hxy with ⟨z, hzF₁, hzq⟩
+  have hzsub : z - (a • x' + y') ∈ S := by
+    rw [← Submodule.ker_mkQ S]
+    change S.mkQ (z - (a • x' + y')) = 0
+    simp [map_sub, hzq]
+  have hxy_lin : a • x' + y' ∈ F.linSpan := by
+    have hz_lin : z ∈ F.linSpan := Submodule.subset_span hzF₁
+    exact (F.linSpan.sub_mem_iff_right hz_lin).mp (hS hzsub)
+  have hxy_F : a • x' + y' ∈ F := by
+    have hxy_C : a • x' + y' ∈ C := C.add_mem (C.smul_mem (le_of_lt ha) hx'C) hy'C
+    simpa [hF.inf_linSpan] using show a • x' + y' ∈ C ⊓ F.linSpan from ⟨hxy_C, hxy_lin⟩
+  exact PointedCone.mem_map.mpr ⟨x', hF.mem_of_smul_add_mem hx'C hy'C ha hxy_F, rfl⟩
 
-lemma quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
-    (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
-  sorry
-
-end DivisionRing
-
-
+end DirectedOrderRing
 
 end IsFaceOf
 
