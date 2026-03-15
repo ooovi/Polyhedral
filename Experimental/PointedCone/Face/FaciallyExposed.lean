@@ -52,7 +52,7 @@ variable (p) [Fact (Function.Surjective p.flip)] in
     exact IsFaceOf.inf_linSpan hF
   · simpa using FG.dual_fgdual _ sorry -- hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (submodule_span_fg <| hF.fg_of_fg sorry) -- hC)
+    exact Submodule.FG.dual_fgdual _ (FG.linSpan_fg <| hF.fg_of_fg sorry) -- hC)
 
 end PointedCone
 

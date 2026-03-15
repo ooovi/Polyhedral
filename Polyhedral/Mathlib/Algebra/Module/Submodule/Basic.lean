@@ -251,13 +251,11 @@ lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M
     s ⊔ (t ⊓ p.restrictScalars S) = (s ⊔ t) ⊓ p.restrictScalars S := by
   ext x
   simp only [mem_sup, mem_inf, restrictScalars_mem]
-  constructor
-  · intro h
-    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
+  constructor <;> intro h
+  · obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
     refine ⟨⟨y, hy, z, hz, hyzx⟩, ?_⟩
     simpa [← hyzx] using p.add_mem (hsp hy) hz'
-  · intro h
-    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
+  · obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
     refine ⟨y, hy, z, ⟨hz, ?_⟩, hyzx⟩
     rw [← add_right_inj (-y), neg_add_cancel_left] at hyzx
     rw [hyzx]
@@ -273,17 +271,15 @@ lemma inf_sup_assoc_of_restrictScalars_le {s : Submodule S M} (t : Submodule S M
     s ⊓ (t ⊔ p.restrictScalars S) = (s ⊓ t) ⊔ p.restrictScalars S := by
   ext x
   simp only [mem_inf, mem_sup, restrictScalars_mem]
-  constructor
-  · intro h
-    obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
+  constructor <;> intro h
+  · obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
     use y
     constructor
     · refine ⟨?_, hyt⟩
       rw [← add_left_inj (-z), add_neg_cancel_right] at hyzx
       simpa [hyzx] using add_mem hxs <| hsp <| neg_mem (S := Submodule R M) hzp
     · use z
-  · intro h
-    obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
+  · obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
     exact ⟨by simpa [← hyzx] using add_mem hys (hsp hzp), ⟨y, hyt, z, hzp, hyzx⟩⟩
 
 /-- A version of `IsCompl.IicOrderIsoIci` for submodules with restricted scalars. -/
