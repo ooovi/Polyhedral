@@ -6,7 +6,6 @@ Authors: Martin Winter, Yaël Dillies
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Pi
 
-import Polyhedral.PR.Dual.Basic_PR
 import Polyhedral.PR.CoFG.CoFG_PR
 
 /-!

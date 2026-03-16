@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 import Mathlib.RingTheory.PrincipalIdealDomain
+-- import Mathlib.RingTheory.Finiteness.Cofinite
 
 import Polyhedral.PR.Restrict.Restrict_PR
 

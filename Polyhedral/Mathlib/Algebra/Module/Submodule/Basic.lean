@@ -32,33 +32,18 @@ alias le_span := subset_span
 example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
   := Submodule.span_union S S'
 
-@[simp] lemma span_union' (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
-  := by simp [span_union] -- (Submodule.gi R M).l_sup_u S S'
+example (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
+  := by simp
 
--- span_sup'
-example (S S' : Submodule R M) : span R (S ⊔ S' : Submodule R M) = S ⊔ S' := span_eq _
+example (s t : Set M) : span R (s ∩ t) ≤ span R s :=
+  span_mono inf_le_left
 
-@[simp] lemma span_inter_le (s t : Set M) : span R (s ∩ t) ≤ span R s ⊓ span R t :=
-    le_inf (span_mono Set.inter_subset_left) (span_mono Set.inter_subset_right)
+example (s t : Set M) : span R (s ∩ t) ≤ span R t :=
+  span_mono inf_le_right
 
-@[simp] lemma span_inter (S S' : Submodule R M) : span R (S ∩ S') = S ⊓ S'
-    := (Submodule.gi R M).l_inf_u S S'
-
-alias span_inf := span_inter
-
-lemma span_sSup (s : Set (Submodule R M)) :
-    span R (sSup (SetLike.coe '' s)) = sSup s := (Submodule.gi R M).l_sSup_u_image s
-
-lemma span_sInf (s : Set (Submodule R M)) :
-    span R (sInf (SetLike.coe '' s)) = sInf s := (Submodule.gi R M).l_sInf_u_image s
-
-lemma span_biUnion (s : Set (Submodule R M)) :
-    span R (⋃ S ∈ s, S) = sSup s := by simpa using span_sSup s
-
-lemma span_biInter (s : Set (Submodule R M)) :
-    span R (⋂ S ∈ s, S) = sInf s := by simpa using span_sInf s
-
-alias span_iInter := span_biInter
+@[deprecated "this simplifies to the above examples" (since := "...")]
+lemma span_inter_le (s t : Set M) : span R (s ∩ t) ≤ span R s ⊓ span R t :=
+    le_inf (span_mono inf_le_left) (span_mono inf_le_right)
 
 
 -- ## RESTRICT SCALARS
@@ -266,13 +251,11 @@ lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M
     s ⊔ (t ⊓ p.restrictScalars S) = (s ⊔ t) ⊓ p.restrictScalars S := by
   ext x
   simp only [mem_sup, mem_inf, restrictScalars_mem]
-  constructor
-  · intro h
-    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
+  constructor <;> intro h
+  · obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
     refine ⟨⟨y, hy, z, hz, hyzx⟩, ?_⟩
     simpa [← hyzx] using p.add_mem (hsp hy) hz'
-  · intro h
-    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
+  · obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
     refine ⟨y, hy, z, ⟨hz, ?_⟩, hyzx⟩
     rw [← add_right_inj (-y), neg_add_cancel_left] at hyzx
     rw [hyzx]
@@ -288,17 +271,15 @@ lemma inf_sup_assoc_of_restrictScalars_le {s : Submodule S M} (t : Submodule S M
     s ⊓ (t ⊔ p.restrictScalars S) = (s ⊓ t) ⊔ p.restrictScalars S := by
   ext x
   simp only [mem_inf, mem_sup, restrictScalars_mem]
-  constructor
-  · intro h
-    obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
+  constructor <;> intro h
+  · obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
     use y
     constructor
     · refine ⟨?_, hyt⟩
       rw [← add_left_inj (-z), add_neg_cancel_right] at hyzx
       simpa [hyzx] using add_mem hxs <| hsp <| neg_mem (S := Submodule R M) hzp
     · use z
-  · intro h
-    obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
+  · obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
     exact ⟨by simpa [← hyzx] using add_mem hys (hsp hzp), ⟨y, hyt, z, hzp, hyzx⟩⟩
 
 /-- A version of `IsCompl.IicOrderIsoIci` for submodules with restricted scalars. -/
@@ -411,13 +392,37 @@ end RestrictedScalar
 
 -- example (S : Submodule R M) (T : Submodule R N) : S ≃ₗ[R] T := sorry
 
-
 end Semiring
+
+
+section AddCommGroup
+
+variable {M S R : Type*} [Semiring R] [AddCommGroup M] [Module R M]
+
+open Pointwise in
+lemma neg_le_iff_neg_eq {S : Submodule R M} : -S ≤ S ↔ -S = S  where
+  mp := by
+    intro h
+    ext x
+    rw [Submodule.mem_neg]
+    suffices h : ∀ x, -x ∈ S → x ∈ S from by
+      exact ⟨h x, by nth_rw 1 [← neg_neg x]; exact h (-x)⟩
+    exact SetLike.le_def.mp @h
+  mpr := le_of_eq
+
+end AddCommGroup
 
 
 section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
+
+@[simp] lemma span_insert_eq_span_of_mem {s : Set M} {x : M} (hx : x ∈ s) :
+    span R (insert (-x) s) = span R s :=
+  Submodule.span_insert_eq_span <| neg_mem_iff.mpr <| subset_span hx
+
+example {x : M} : span R {-x, x} = R ∙ x := by simp
+  -- span_insert_eq_span_of_mem (Set.mem_singleton x)
 
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
     IsProj S (IsCompl.projection hST) where

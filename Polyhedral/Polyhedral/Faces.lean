@@ -3,7 +3,7 @@ import Polyhedral.Polyhedral.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
+-- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
 
@@ -86,10 +86,9 @@ variable (p) [p.IsPerfPair] in
 lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   wlog h : C.FG with exposed -- reduction to salient case
-  · have h' := hF.quot (.lineal C) hF.lineal_le
-    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le]
-    rw [submodule_linSpan] at ⊢ h'
-    exact exposed hC.salientQuot h' hC.salientQuot_fg
+  · have h' := hF.quot (Eq.trans_le hF.lineal_eq_lineal.symm (lineal_le_linSpan F))
+    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, PointedCone.coe_linSpan]
+    simpa using exposed hC.salientQuot h' hC.salientQuot_fg
   exact IsFaceOf.FG.exposed h hF
 
 -- -- TODO: remove the finiteness assumption by reducing to the finite dim case
@@ -151,11 +150,11 @@ variable {S : Submodule R M}
 variable {C C₁ C₂ F : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma IsPolyhedral.exists_fg_combEquiv (hC : C.IsPolyhedral) : ∃ D, D.FG ∧ D ≃c C := by
-  obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
-  exact ⟨_, hC.fg_inf_of_isCompl hS, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
+-- lemma IsPolyhedral.exists_fg_combEquiv (hC : C.IsPolyhedral) : ∃ D, D.FG ∧ D ≃c C := by
+--   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
+--   exact ⟨_, hC.fg_inf_of_isCompl hS, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
 
--- ## TODO: remove `isPerfPair` from everything below.
+-- -- ## TODO: remove `isPerfPair` from everything below.
 
 variable [p.IsPerfPair] in
 def IsPolyhedral.Face.dual_flip (hC : C.IsPolyhedral) (F : Face (.dual p C)) : Face C :=
@@ -207,11 +206,11 @@ instance {C : PolyhedralCone R M} :
     CoeOut (Face (C : PointedCone R M)) (PolyhedralCone R M) where
   coe F := ⟨F, C.isPolyhedral.face F.isFaceOf⟩
 
-instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) := by
-  obtain ⟨_, hfg, ⟨e⟩⟩ := C.isPolyhedral.exists_fg_combEquiv
-  rw [Function.Bijective.finite_iff]
-  · exact FG.finite_face hfg
-  · exact e.symm.bijective
+-- instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) := by
+--   obtain ⟨_, hfg, ⟨e⟩⟩ := C.isPolyhedral.exists_fg_combEquiv
+--   rw [Function.Bijective.finite_iff]
+--   · exact FG.finite_face hfg
+--   · exact e.symm.bijective
 
 /-- Ideas:
   * `atoms` gives the lowest dimensional non-trivial faces

@@ -7,7 +7,7 @@ import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.RingTheory.Finiteness.Defs
 import Mathlib.LinearAlgebra.Dimension.Finite
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Corank
+import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 
 /-!
 # Submodules of bounded rank

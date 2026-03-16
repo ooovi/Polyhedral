@@ -3,9 +3,6 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
---import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
@@ -62,7 +59,7 @@ lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhed
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
 lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
     C.IsPolyhedral := by
-  simpa only [IsPolyhedral, map, ← factor_comp_mk <| submodule_le_lineal hS,
+  simpa only [IsPolyhedral, map, ← factor_comp_mk <| le_lineal hS,
     restrictScalars_comp, map_comp] using FG.map _ hC
 
 /-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
@@ -168,7 +165,8 @@ lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsP
   simp only [PointedCone.map, Submodule.map_sup] -- `map` should be an abbrev
   refine sup ?_ ?_
   · exact FG.isPolyhedral (FG.map _ hfg)
-  · simp [← restrictScalars_map]
+  · rw [← restrictScalars_map]
+    simp
 
 lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f).IsPolyhedral := by
   unfold IsPolyhedral PointedCone.salientQuot quot at *
@@ -179,6 +177,7 @@ lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f)
 lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     (C.quot S).IsPolyhedral := hC.map _
 
+open Pointwise in
 @[simp] lemma IsPolyhedral.neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
   mp := by
     intro hC;
@@ -186,6 +185,7 @@ lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     simpa [map_map] using hC.map (-.id)
   mpr := fun hC => by simpa only [← map_id_eq_neg] using hC.map _
 
+open Pointwise in
 lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
 
 
@@ -213,8 +213,8 @@ lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
   obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
   simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
-    Submodule.span_union, span_coe_eq_restrictScalars, restrictScalars_self] at hh
-  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
+    Submodule.span_union, span_coe_eq_restrictScalars] at hh
+  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (FG.linSpan_fg <| hC.fg_inf_of_isCompl hS)
 
 -- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
 --     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
@@ -429,10 +429,11 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars] at hD₁ hD₂
   --
   have h := Submodule.le_span (R := R) (M := M) (s := (C₁ ⊓ C₂ : PointedCone R M))
-  replace h := le_trans h (span_inter_le _ _)
-  rw [← hD₁, ← hD₂] at h
+  replace h := le_trans h <| Set.subset_inter (span_mono inf_le_left) (span_mono inf_le_right)
+  --replace h := le_trans h (span_inter_le _ _)
+  rw [← Submodule.coe_inf, ← hD₁, ← hD₂] at h
   --
-  obtain ⟨P, hPfg, hP⟩ := aux (submodule_span_fg hfg₁) (submodule_span_fg hfg₂) C₁.lineal C₂.lineal
+  obtain ⟨P, hPfg, hP⟩ := aux (FG.linSpan_fg hfg₁) (FG.linSpan_fg hfg₂) C₁.lineal C₂.lineal
   simp_rw [Submodule.restrictScalars_self, hP] at h
   nth_rw 2 [← ofSubmodule_coe] at h
   rw [Set.le_iff_subset] at h
@@ -800,10 +801,12 @@ def quot (S : Submodule R M) : PolyhedralCone R (M ⧸ S) := ⟨_, C.isPolyhedra
 
 -- ## NEG
 
+open Pointwise in
 instance : InvolutiveNeg (PolyhedralCone R M) where
   neg C := ⟨_, C.isPolyhedral.neg⟩
   neg_neg := by simp
 
+open Pointwise in
 @[simp] lemma neg_coe (C : PolyhedralCone R M) :
     (-C : PolyhedralCone R M) = -(C : PointedCone R M) := rfl
 

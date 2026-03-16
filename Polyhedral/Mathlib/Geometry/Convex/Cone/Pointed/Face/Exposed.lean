@@ -13,8 +13,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 -- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
-import Polyhedral.Hyperplane
-import Polyhedral.Halfspace
+-- import Polyhedral.Hyperplane
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 
 open Module
 open Submodule
@@ -116,11 +116,11 @@ lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) :=
   -- Idea: choose φ from relint of dual cone.
   --  (we need to show that relints of dual cones are nonempty)
-  sorry
+    sorry
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
-  rw [IsFaceOf.iff_mem_of_add_mem]
+  rw [isFaceOf_iff_mem_of_add_mem]
   refine ⟨hF.le, ?_⟩
   intro _ _ hx hy hcxy
   let ⟨φ, hφ, H⟩ := hF
@@ -128,6 +128,10 @@ lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   have h := (H _ <| hF.le hcxy).mpr hcxy
   rw [map_add] at h
   exact eq_zero_of_add_nonpos_left (hφ _ hx) (hφ _ hy) (le_of_eq h)
+
+-- probably the better formulation of the below
+lemma IsExposedFaceOf.quot_iff' {S : Submodule R M} (hF : F.IsFaceOf C) (hF : S ≤ F.linSpan) :
+    F.IsExposedFaceOf C ↔ (F.quot S).IsExposedFaceOf (C.quot S) := sorry
 
 lemma IsExposedFaceOf.quot_iff (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C) (hF : F₂ ≤ F₁) :
     F₁.IsExposedFaceOf C ↔ (F₁.quot F₂.linSpan).IsExposedFaceOf (C.quot F₂.linSpan) := sorry

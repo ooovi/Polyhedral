@@ -527,9 +527,10 @@ lemma submodule_span_eq_add_span_neg (s : Set M) : Submodule.span R s = span R s
 lemma span_union_neg_eq_span_submodule (s : Set M) :
     span R (-s ∪ s) = Submodule.span R s := by
   ext x
-  simp [Submodule.mem_span]
+  simp only [Set.involutiveNeg, Submodule.mem_span, Set.union_subset_iff, and_imp,
+    Submodule.restrictScalars_mem]
   constructor <;> intros h B sB
-  · refine h (Submodule.restrictScalars {c // 0 ≤ c} B) ?_ sB
+  · refine h (Submodule.restrictScalars {c : R // 0 ≤ c} B) ?_ sB
     rw [Submodule.coe_restrictScalars]
     exact fun _ tm => neg_mem_iff.mp (sB tm)
   · intro nsB

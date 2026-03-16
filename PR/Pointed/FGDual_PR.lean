@@ -1,6 +1,19 @@
 
-import Polyhedral.PR.FGDual.FGDual_PR
-import Polyhedral.PR.Pointed.Dual_PR
+import Mathlib.Algebra.Module.Submodule.Pointwise
+import Mathlib.LinearAlgebra.BilinearMap
+import Mathlib.LinearAlgebra.Dual.Defs
+import Mathlib.Geometry.Convex.Cone.Dual
+
+import Mathlib.Geometry.Convex.Cone.Pointed
+import Mathlib.Geometry.Convex.Cone.Dual
+import Mathlib.RingTheory.Finiteness.Basic
+import Mathlib.LinearAlgebra.PerfectPairing.Basic
+import Mathlib.Algebra.Module.Submodule.Pointwise
+import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.SetTheory.Cardinal.Defs
+
+-- import Polyhedral.PR.FGDual.FGDual_PR
+-- import Polyhedral.PR.Pointed.Dual_PR
 
 namespace PointedCone
 
