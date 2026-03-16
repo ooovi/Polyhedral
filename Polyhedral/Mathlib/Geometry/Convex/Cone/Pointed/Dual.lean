@@ -20,6 +20,32 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 @[deprecated dual_zero (since := "")]
 alias dual_bot := dual_zero
 
+variable [inst : Fact p.SeparatingLeft] in
+lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
+  -- constructor <;> intro h
+  -- · intro x hx
+  --   simp [Submodule.ext_iff] at h
+  --   simp only [Submodule.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_top, iff_true] at h
+  --   simpa using inst.elim x (fun y => (h y hx).symm)
+  -- · simp only [SeparatingLeft.ker_eq_bot, le_bot_iff] at h
+  --   simp [h]
+
+lemma dual_univ_ker : dual p .univ = ker p.flip := by
+  ext x
+  simp only [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem, mem_ker]
+  rw [LinearMap.ext_iff]
+  simp only [flip_apply, zero_apply]
+  constructor <;> intro h y
+  · exact le_antisymm (by simpa using @h (-y)) (@h y)
+  · rw [h y]
+
+lemma dual_flip_univ_ker : dual p.flip .univ = ker p := by
+  nth_rw 2 [← flip_flip p]; exact dual_univ_ker
+
+-- Better version of dual.univ
+variable [Fact p.SeparatingRight] in
+@[simp] lemma dual_univ' : dual p .univ = ⊥ := by simp [dual_univ_ker]
+
 -- TODO: are there instances missing that should make the proof automatic?
 -- TODO: 0 in `dual_univ` simplifies to ⊥, so maybe it is not the best statement?
 @[simp] lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
