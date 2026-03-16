@@ -58,5 +58,10 @@ lemma rank_one_of_ray {x : M} (hx : x ≠ 0) :
   rw [PointedCone.rank]
   simpa using hr
 
+lemma finrank_one_of_ray {x : M} (hx : x ≠ 0) :
+    (span R {x}).finrank = 1 := by
+  simpa [Module.finrank, Cardinal.toNat_eq_one] using rank_one_of_ray hx
+
 end Ring
+
 end PointedCone

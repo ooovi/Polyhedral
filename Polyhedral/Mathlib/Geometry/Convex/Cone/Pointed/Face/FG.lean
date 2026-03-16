@@ -238,7 +238,7 @@ lemma finrank_add_one_of_fg {C : PointedCone R M} (hCfg : C.FG)
     simpa [Face.le_linSpan_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
     FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr this) FfG.quot_salient
-  set ray : Face ((quot G.toSubmodule F.linSpan)) := ⟨span R {v}, hvray⟩
+  set ray : Face (quot G.toSubmodule F.linSpan) := ⟨span R {v}, hvray⟩
   -- pull ray back to get face of G with F < H
   let H := ray.fiberFace (F := ⟨_, FfG⟩)
   have : F < H := by
@@ -250,13 +250,13 @@ lemma finrank_add_one_of_fg {C : PointedCone R M} (hCfg : C.FG)
     exact hv0 <| (AddOpposite.op_eq_zero_iff v).mp (congrArg AddOpposite.op this)
   -- must be G = H because of covering
   simp only [← eq_of_le_of_not_lt H.isFaceOf.le <| hc this]
-  have := ray.quot_fiber (F := ⟨_, FfG⟩)
-  rw [Face.quotFace, Face.mk.injEq, inf_eq_right.mpr] at this
-  · convert (congrArg PointedCone.finrank this).symm
-    symm
-    apply Module.finrank_eq_of_rank_eq
-    exact rank_one_of_ray hv0
-  · simpa using le_trans (Face.isFaceOf _).le le_sup_left
+  rw [← PointedCone.finrank_one_of_ray (R := R) hv0]
+  congr; ext x; constructor
+  · intro hx
+    obtain ⟨x', hx', rfl⟩ := hvray.le hx
+    exact ⟨x', ⟨hx', hx⟩, rfl⟩
+  · rintro ⟨_, ⟨_, hhx'⟩, rfl⟩
+    exact mem_toConvexCone.mp hhx'
 
 lemma finrank_covBy_of_fg {C : PointedCone R M} (hCfg : C.FG)
     {F G : Face C} (hFG : F ⋖ G) :

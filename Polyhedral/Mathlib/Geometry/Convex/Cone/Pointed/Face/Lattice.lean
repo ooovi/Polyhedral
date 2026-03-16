@@ -356,7 +356,7 @@ lemma quot_fiber {F : Face C} (G : Face (C ⧸ F)) : F.quotFace (fiberFace G) = 
 
 /-- The isomorphism between a quotient's face lattice and the interval in the cone's face
  lattice above the face. -/
-def quot_orderIso (F : Face C) : Face (C / F) ≃o Set.Icc F ⊤ where
+def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Icc F ⊤ where
   toFun G := ⟨fiberFace G, le_fiber G, le_top⟩
   invFun G := F.quotFace G
   left_inv := quot_fiber
@@ -387,7 +387,7 @@ lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥
   change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
   simp [h, hbotcone]
 
-lemma fiberFace_eq_iff {F : Face C} (G : Face (C / F)) :
+lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
     F = fiberFace G ↔ G.toPointedCone = ⊥ := by
   constructor <;> intro h
   · ext x
