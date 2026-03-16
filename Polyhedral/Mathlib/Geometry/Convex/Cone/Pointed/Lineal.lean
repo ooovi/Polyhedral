@@ -1,10 +1,9 @@
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
-
-
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.Algebra.Order.Nonneg.Module
 import Mathlib.Geometry.Convex.Cone.Basic
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 
 namespace PointedCone
 
@@ -193,6 +192,13 @@ lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint
 --   simp [← inf_sup_assoc_of_submodule_le S (lineal_le C), ← coe_sup,
 --     codisjoint_iff.mp hCS.codisjoint]
 
+
+lemma lineal_le_linSpan (C : PointedCone R M) : C.lineal ≤ C.linSpan :=
+  ofSubmodule_mono.mpr <| le_trans (lineal_le C) (le_linSpan C)
+
+/-- The linear span of `C ⊓ -C` is the lineality space of `C`. -/
+lemma linSpan_inf_neg_eq_lineal (C : PointedCone R M) : (C ⊓ -C).linSpan = C.lineal := by
+  simpa [coe_lineal] using (coe_linSpan (R := R) (M := M) C.lineal)
 
 
 -- ## MAP
@@ -389,6 +395,7 @@ lemma salient_comap {C : PointedCone R M} {f : N →ₗ[R] M} (hC : C.Salient) (
   rw [salient_iff_lineal_bot] at *
   simpa [comap_lineal, hC] using LinearMap.ker_eq_bot_of_injective hf
 
+open Pointwise in
 lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
   simpa [← map_id_eq_neg] using salient_map hC (injective_neg.mpr injective_id)
 
@@ -467,18 +474,5 @@ lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 
 -- def salientQuot_neg (C : PointedCone R M) : C.salientQuot ≃ₗ[R] (-C).salientQuot := sorry
 
---variable (R M) in
-/-- Salient rank of a cone. -/
-noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
-    -- Module.rank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
-
---variable (R M) in
-/-- Salient rank of a cone. -/
-noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
-    -- Module.finrank R (Submodule.span R (C.salientQuot : Set (M ⧸ C.lineal)))
-
-abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
-
 end Ring
-
 end PointedCone

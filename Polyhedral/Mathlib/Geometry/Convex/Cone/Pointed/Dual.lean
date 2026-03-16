@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Module.Submodule.Pointwise
+
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Dual
@@ -19,6 +19,32 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 @[deprecated dual_zero (since := "")]
 alias dual_bot := dual_zero
+
+variable [inst : Fact p.SeparatingLeft] in
+lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
+  -- constructor <;> intro h
+  -- · intro x hx
+  --   simp [Submodule.ext_iff] at h
+  --   simp only [Submodule.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_top, iff_true] at h
+  --   simpa using inst.elim x (fun y => (h y hx).symm)
+  -- · simp only [SeparatingLeft.ker_eq_bot, le_bot_iff] at h
+  --   simp [h]
+
+lemma dual_univ_ker : dual p .univ = ker p.flip := by
+  ext x
+  simp only [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem, mem_ker]
+  rw [LinearMap.ext_iff]
+  simp only [flip_apply, zero_apply]
+  constructor <;> intro h y
+  · exact le_antisymm (by simpa using @h (-y)) (@h y)
+  · rw [h y]
+
+lemma dual_flip_univ_ker : dual p.flip .univ = ker p := by
+  nth_rw 2 [← flip_flip p]; exact dual_univ_ker
+
+-- Better version of dual.univ
+variable [Fact p.SeparatingRight] in
+@[simp] lemma dual_univ' : dual p .univ = ⊥ := by simp [dual_univ_ker]
 
 -- TODO: are there instances missing that should make the proof automatic?
 -- TODO: 0 in `dual_univ` simplifies to ⊥, so maybe it is not the best statement?
@@ -104,8 +130,6 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp only [ofSubmodule_coe]
 
-
-
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 {M : Type*} [AddCommGroup M] [Module R M]
 {N : Type*} [AddCommGroup N] [Module R N]
@@ -135,11 +159,11 @@ variable {M' N' : Type*}
 -- TODO: generalize to arbitrary pairings
 lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
     comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
-  ext x; simp
+  ext; simp
 
 lemma dual_map' (f : M →ₗ[R] M') (C : PointedCone R M) :
     comap f.dualMap (dual (Dual.eval R M) C) = dual (Dual.eval R M') (map f C) := by
-  ext x; simp
+  ext; simp
 
 -- TODO: generalize to arbitrary pairings
 -- lemma dual_map' (f : M →ₗ[R] M') (hf : Function.Injective f) (s : Set M) :
@@ -148,6 +172,7 @@ lemma dual_map' (f : M →ₗ[R] M') (C : PointedCone R M) :
 
 end Map
 
+open Pointwise in
 @[simp]
 lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
   ext x -- TODO: make this proof an application of `map_dual`
@@ -162,9 +187,14 @@ lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
     specialize hy hy'
     simp_all only [_root_.neg_neg, LinearMap.map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff]
 
-lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
+variable {M' : Type*} [AddCommGroup M'] [Module R M']
 
-lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by ext x; simp
+@[simp] lemma dual_image (s : Set M') (q : M' →ₗ[R] M) : dual p (q '' s) = dual (p.comp q) s :=
+  by ext; simp
+
+lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by simp
+
+lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by simp
 
 example /- dual_inf -/ (C D : PointedCone R M) :
     dual p (C ⊓ D : PointedCone R M) = dual p (C ∩ D) := rfl
@@ -196,8 +226,10 @@ lemma submodule_dual_le_dual {s : Set M} : Submodule.dual p s ≤ dual p s := by
 
 -- ## Neg
 
+open Pointwise in
 lemma dual_neg (s : Set M) : -dual p s = dual p (-s) := by ext x; simp
 
+open Pointwise in
 @[simp] lemma dual_neg_neg (s : Set M) : -dual p (-s) = dual p s := by ext x; simp
 
 -----------
@@ -215,8 +247,8 @@ lemma dual_span_lineal_dual (s : Set M) :
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
   rw [← PointedCone.ofSubmodule_coe]
-  rw [← span_union_neg_eq_span_submodule]
-  rw [Set.involutiveNeg, dual_span]
+  rw [← span_union_neg_eq_submodule_span]
+  rw [dual_span]
   rw [dual_union]
   rw [← dual_neg, lineal_inf_neg]
   try rw [inf_comm]

@@ -76,7 +76,7 @@ lemma dual_top_iff_le_ker {S : Submodule R M} : dual p S = ⊤ ↔ S ≤ ker p :
     simp [h]
 
 lemma dual_univ_ker : dual p univ = ker p.flip := by
-  ext x; simpa [Eq.comm] using (funext_iff (f := (0 : M →ₗ[R] R)) (g := p.flip x)).symm
+  ext x; simpa [Eq.comm] using (LinearMap.ext_iff (f := 0) (g := p.flip x)).symm
 lemma dual_flip_univ_ker : dual p.flip univ = ker p := by
   nth_rw 2 [← flip_flip p]; exact dual_univ_ker
 
@@ -195,6 +195,8 @@ lemma dual_span (s : Set M) : dual p (span R s) = dual p s := by
   | smul t y _hy hy => simp only [map_smul, smul_apply, smul_eq_mul, ← hy, mul_zero]
 
 -- ----------------
+
+-- TODO: add `dual_image`, see cone thoery.
 
 /-- Conversion to the standard algebraic duality operator. -/
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp

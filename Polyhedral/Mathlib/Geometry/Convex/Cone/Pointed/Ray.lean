@@ -1,8 +1,10 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 namespace PointedCone
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C F F₁ F₂ : PointedCone R M}
 
@@ -11,29 +13,50 @@ lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R 
   obtain ⟨x, hxC, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot this
   refine ⟨x, le_antisymm ?_ (by simp [hxC]) ⟩
   intro y hy
-  by_cases! ha : ∃ a : R, y = a • x
-  · obtain ⟨a, rfl⟩ := ha
-    by_cases! ha : a ≥ 0
-    · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha <| Submodule.mem_span_singleton_self x
+  by_cases hyx : ∃ a : R, y = a • x
+  · obtain ⟨a, rfl⟩ := hyx
+    by_cases ha0 : 0 ≤ a
+    · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha0 <| Submodule.mem_span_singleton_self x
     exfalso
+    have ha : a < 0 := lt_of_not_ge ha0
     apply hS x hxC hx0
-    have : -x = (-a⁻¹) • (a • x) := by
-      rw [smul_smul]
-      field_simp [ne_of_lt ha]
-      rw [neg_smul, one_smul]
-    rw [this]
+    have hnegx : -x = (-a⁻¹) • (a • x) := by
+      have ha' : a ≠ 0 := ne_of_lt ha
+      simp [smul_smul, ha']
+    rw [hnegx]
     exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy
-  let f := ![(⟨x, Submodule.mem_span_of_mem hxC⟩ : C.linSpan), ⟨y, Submodule.mem_span_of_mem hy⟩]
-  have : LinearIndependent R f := by
-    apply (LinearIndependent.pair_iff' (Subtype.coe_ne_coe.mp hx0)).2
-    exact fun a ↦ Subtype.coe_ne_coe.mp fun a_1 ↦ ha a  (Eq.symm a_1)
-  have : C.rank ≥ 2 := Module.le_rank_iff.2 ⟨f, this⟩
+  let f : Fin 2 → C.linSpan :=
+    ![(⟨x, Submodule.mem_span_of_mem hxC⟩ : C.linSpan), ⟨y, Submodule.mem_span_of_mem hy⟩]
+  have hf0 : f 0 ≠ 0 := by
+    intro hf0
+    apply hx0
+    simpa [f] using congrArg Subtype.val hf0
+  have hlin : LinearIndependent R f := by
+    refine (LinearIndependent.pair_iff' hf0).2 ?_
+    intro a hax
+    apply hyx
+    refine ⟨a, ?_⟩
+    exact (Subtype.ext_iff.mp hax).symm
+  have : C.rank ≥ 2 := Module.le_rank_iff.2 ⟨f, hlin⟩
   simp [h] at this
 
-lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (span R {x}).rank = 1 := by
-  apply (rank_submodule_eq_one_iff (span R {x}).linSpan).mpr
-  use x, (by simp only [Submodule.span_span_of_tower, Submodule.mem_span_singleton_self])
-  refine ⟨hx, ?_⟩
-  simp only [Submodule.span_span_of_tower, le_refl]
+end DivisionRing
 
+section Ring
+
+variable {R : Type*} [Ring R] [StrongRankCondition R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
+variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
+
+lemma rank_one_of_ray {x : M} (hx : x ≠ 0) :
+    (span R {x}).rank = 1 := by
+  have hlin : LinearIndependent R (fun _ : Unit => x) :=
+    LinearIndependent.of_subsingleton () hx
+  have hr := rank_span (R := R) (M := M) hlin
+  have hspan : Submodule.span R (Set.range (fun _ : Unit => x)) = (span R {x}).linSpan := by
+    simp [PointedCone.linSpan, Set.range_const]
+  rw [hspan] at hr
+  rw [PointedCone.rank]
+  simpa using hr
+
+end Ring
 end PointedCone
