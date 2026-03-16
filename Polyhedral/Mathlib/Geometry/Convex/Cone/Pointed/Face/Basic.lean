@@ -281,7 +281,8 @@ lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   exact mem_lineal_of_smul_mem_lineal xC
     (lineal_isExtreme_left (C.smul_mem (le_of_lt a0) xC) yC hxy)
 
-/-- The lineality space of a cone lies in every face. -/
+/-- The lineality space of a cone lies in every face. When the lineality space is a face, it
+  therefore is the minimal face. -/
 lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F :=
   fun _ hx => hF.mem_of_add_mem hx.1 hx.2 (by simp)
 
@@ -378,28 +379,51 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 end Semiring
 
+section DirectedOrderRing
+
+variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+  [AddCommGroup M] [Module R M]
+{C C₁ C₂ F F₁ F₂ : PointedCone R M}
+
+lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
+    x ∈ F.linSpan ↔ x ∈ F := by
+  constructor <;> intro hxF
+  · obtain ⟨_, hyF, _, hzF, rfl⟩ := mem_linSpan.1 hxF
+    exact hF.mem_of_add_mem hx (hF.le hzF) hyF
+  · exact Submodule.subset_span hxF
+
+-- This fails for a merely partial order.
+-- Let R = ℝ[X] with the coefficientwise order, M = R.
+-- Let C be the cone of polynomials with all coefficients ≥ 0,
+-- and F the face of nonnegative constant polynomials.
+-- Then F is a face of C, but 1 ∈ F, so F.linSpan = ⊤.
+-- Hence C ⊓ F.linSpan = C ≠ F.
+lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+  apply le_antisymm <;> intro _ hx
+  · exact (hF.mem_linSpan_iff_mem hx.1).mp hx.2
+  · exact ⟨hF.le hx, Submodule.subset_span hx⟩
+
+-- old proof
+-- lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+--   apply le_antisymm
+--   · intro x ⟨hxC, hxF⟩
+--     obtain ⟨_, hyF, _, hzF, rfl⟩ := (mem_linSpan F).1 hxF
+--     exact hF.mem_of_add_mem hxC (hF.le hzF) hyF
+--   · simpa using ⟨hF.le, Submodule.subset_span⟩
+
+end DirectedOrderRing
 section Ring
 
-variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
     F.Salient :=
   hC.anti hF.le
 
--- this is false without a linear order: consider ℝ with the trivial ordering
--- (i.e., only elements in ℤ are comparable) then C:= ℕ + √2 ℕ is and ℕ ⊆ ℂ a face,
--- but ℤ.linSpan ∩ C = C
-lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
-  apply le_antisymm
-  · intro x ⟨xC, xF⟩
-    have := (mem_linSpan F).1 xF
-    rcases this with ⟨p, pf, n, nf, rfl⟩
-    exact hF.mem_of_add_mem xC (hF.le nf) pf
-  · exact le_inf_iff.mpr ⟨hF.le, le_submodule_span_of_le fun ⦃x⦄ a ↦ a⟩
-
 /-- Quotient by the linear span of a face is salient. -/
-lemma salient_quot_linSpan_of_face (hF : F.IsFaceOf C) : (C.quot F.linSpan).Salient := by
+lemma salient_quot_linSpan_of_face [IsDirectedOrder R] (hF : F.IsFaceOf C) :
+    (C.quot F.linSpan).Salient := by
   intro z hzC hz0 hzNeg
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
   rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
@@ -589,19 +613,37 @@ lemma IsFaceOf.restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
 -- lemma IsFaceOf.embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
 --     (embed F).IsFaceOf (embed C) := hF.map S.subtype_injective
 
+end DivisionRing
+
+section DirectedOrderRing
+
+variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable {C F : PointedCone R M}
 
 
 -- ## QUOT / FIBER
 
-abbrev IsFaceOf.quot {C F : PointedCone R M} (hF : F.IsFaceOf C) := C.quot (Submodule.span R F)
+lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ F.linSpan) :
+    (F.quot S).IsFaceOf (C.quot S) := by
+  refine ⟨map_mono hF.le, ?_⟩
+  intro x y a hx hy ha hxy
+  rcases PointedCone.mem_map.mp hx with ⟨x', hx'C, rfl⟩
+  rcases PointedCone.mem_map.mp hy with ⟨y', hy'C, rfl⟩
+  rcases PointedCone.mem_map.mp hxy with ⟨z, hzF₁, hzq⟩
+  have hzsub : z - (a • x' + y') ∈ S := by
+    rw [← Submodule.ker_mkQ S]
+    change S.mkQ (z - (a • x' + y')) = 0
+    simp [map_sub, hzq]
+  have hxy_lin : a • x' + y' ∈ F.linSpan := by
+    have hz_lin : z ∈ F.linSpan := Submodule.subset_span hzF₁
+    exact (F.linSpan.sub_mem_iff_right hz_lin).mp (hS hzsub)
+  have hxy_F : a • x' + y' ∈ F := by
+    have hxy_C : a • x' + y' ∈ C := C.add_mem (C.smul_mem (le_of_lt ha) hx'C) hy'C
+    simpa [hF.inf_linSpan] using show a • x' + y' ∈ C ⊓ F.linSpan from ⟨hxy_C, hxy_lin⟩
+  exact PointedCone.mem_map.mpr ⟨x', hF.mem_of_smul_add_mem hx'C hy'C ha hxy_F, rfl⟩
 
-lemma quot {C F₁ F₂ : PointedCone R M} (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
-    (hF : F₂ ≤ F₁) : (F₁.quot F₂.linSpan).IsFaceOf (C.quot F₂.linSpan) := by
-  sorry
-
-end DivisionRing
-
-
+end DirectedOrderRing
 
 end IsFaceOf
 

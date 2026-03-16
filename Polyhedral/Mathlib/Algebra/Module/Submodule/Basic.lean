@@ -251,13 +251,11 @@ lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M
     s ⊔ (t ⊓ p.restrictScalars S) = (s ⊔ t) ⊓ p.restrictScalars S := by
   ext x
   simp only [mem_sup, mem_inf, restrictScalars_mem]
-  constructor
-  · intro h
-    obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
+  constructor <;> intro h
+  · obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
     refine ⟨⟨y, hy, z, hz, hyzx⟩, ?_⟩
     simpa [← hyzx] using p.add_mem (hsp hy) hz'
-  · intro h
-    obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
+  · obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
     refine ⟨y, hy, z, ⟨hz, ?_⟩, hyzx⟩
     rw [← add_right_inj (-y), neg_add_cancel_left] at hyzx
     rw [hyzx]
@@ -273,17 +271,15 @@ lemma inf_sup_assoc_of_restrictScalars_le {s : Submodule S M} (t : Submodule S M
     s ⊓ (t ⊔ p.restrictScalars S) = (s ⊓ t) ⊔ p.restrictScalars S := by
   ext x
   simp only [mem_inf, mem_sup, restrictScalars_mem]
-  constructor
-  · intro h
-    obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
+  constructor <;> intro h
+  · obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
     use y
     constructor
     · refine ⟨?_, hyt⟩
       rw [← add_left_inj (-z), add_neg_cancel_right] at hyzx
       simpa [hyzx] using add_mem hxs <| hsp <| neg_mem (S := Submodule R M) hzp
     · use z
-  · intro h
-    obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
+  · obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
     exact ⟨by simpa [← hyzx] using add_mem hys (hsp hzp), ⟨y, hyt, z, hzp, hyzx⟩⟩
 
 /-- A version of `IsCompl.IicOrderIsoIci` for submodules with restricted scalars. -/
@@ -396,13 +392,37 @@ end RestrictedScalar
 
 -- example (S : Submodule R M) (T : Submodule R N) : S ≃ₗ[R] T := sorry
 
-
 end Semiring
+
+
+section AddCommGroup
+
+variable {M S R : Type*} [Semiring R] [AddCommGroup M] [Module R M]
+
+open Pointwise in
+lemma neg_le_iff_neg_eq {S : Submodule R M} : -S ≤ S ↔ -S = S  where
+  mp := by
+    intro h
+    ext x
+    rw [Submodule.mem_neg]
+    suffices h : ∀ x, -x ∈ S → x ∈ S from by
+      exact ⟨h x, by nth_rw 1 [← neg_neg x]; exact h (-x)⟩
+    exact SetLike.le_def.mp @h
+  mpr := le_of_eq
+
+end AddCommGroup
 
 
 section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
+
+@[simp] lemma span_insert_eq_span_of_mem {s : Set M} {x : M} (hx : x ∈ s) :
+    span R (insert (-x) s) = span R s :=
+  Submodule.span_insert_eq_span <| neg_mem_iff.mpr <| subset_span hx
+
+example {x : M} : span R {-x, x} = R ∙ x := by simp
+  -- span_insert_eq_span_of_mem (Set.mem_singleton x)
 
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
     IsProj S (IsCompl.projection hST) where

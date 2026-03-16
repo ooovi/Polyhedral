@@ -86,10 +86,9 @@ variable (p) [p.IsPerfPair] in
 lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   wlog h : C.FG with exposed -- reduction to salient case
-  · have h' := hF.quot (.lineal C) hF.lineal_le
-    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le]
-    rw [submodule_linSpan] at ⊢ h'
-    exact exposed hC.salientQuot h' hC.salientQuot_fg
+  · have h' := hF.quot (Eq.trans_le hF.lineal_eq_lineal.symm (lineal_le_linSpan F))
+    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, PointedCone.coe_linSpan]
+    simpa using exposed hC.salientQuot h' hC.salientQuot_fg
   exact IsFaceOf.FG.exposed h hF
 
 -- -- TODO: remove the finiteness assumption by reducing to the finite dim case
