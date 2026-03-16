@@ -176,7 +176,7 @@ lemma sup_fg_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) : (
     obtain ⟨t, ht⟩ := hs
     use (auxGenSet p t w).toFinset
     simp only [toFinset_union, SetLike.mem_coe, toFinset_image2, Finset.coe_union, coe_toFinset,
-      Finset.coe_image₂, Finset.coe_insert, span_insert, sup_assoc, ← ht]
+      Finset.coe_image₂, Finset.coe_insert, Submodule.span_insert, sup_assoc, ← ht]
     exact dual_auxGenSet t.finite_toSet
 
 lemma sup_fgdual_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) : (C ⊔ D).FGDual p
@@ -198,14 +198,14 @@ variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of its linear span with a FGDual cone. -/
 lemma FG.exists_fgdual_inf_linSpan {C : PointedCone 𝕜 N} (hC : C.FG) :
       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ C.linSpan = C :=
-  exists_fgdual_inf_submodule p hC (submodule_span_fg hC) Submodule.subset_span
+  exists_fgdual_inf_submodule p hC (FG.linSpan_fg hC) Submodule.subset_span
 
 -- variable (p) [Fact p.SeparatingRight] in
 -- /-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
 -- lemma FG.exists_fgdual_inf_fg_submodule {C : PointedCone 𝕜 N} (hC : C.FG) :
 --       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ ∃ S : Submodule 𝕜 N, S.FG ∧ D ⊓ S = C := by
 --   obtain ⟨D, hfgdual, hD⟩ := exists_fgdual_inf_linSpan p hC
---   exact ⟨D, hfgdual, Submodule.span 𝕜 C, submodule_span_fg hC, hD⟩
+--   exact ⟨D, hfgdual, Submodule.span 𝕜 C, FG.linSpan_fg hC, hD⟩
 
 -- variable (p) [Fact p.SeparatingRight] in
 -- /-- An FG cone is the dual of a FGDual cone. -/
@@ -360,12 +360,12 @@ end Module.Finite
 lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
   wlog _ : Module.Finite 𝕜 M with h
   · let CD : Submodule 𝕜 M := .span 𝕜 (C ⊔ D : PointedCone 𝕜 M)
-    have hCle : C ≤ CD := le_submodule_span_of_le le_sup_left
-    have hDle : D ≤ CD := le_submodule_span_of_le le_sup_right
+    have hCle : C ≤ CD := le_trans le_sup_left (le_linSpan _)
+    have hDle : D ≤ CD := le_trans le_sup_right (le_linSpan _)
     specialize h (restrict_fg_of_fg_le hCle hC) (restrict_fg_of_fg_le hDle hD)
-      (Finite.iff_fg.mpr <| submodule_span_fg <| sup_fg hC hD)
+      (Finite.iff_fg.mpr <| FG.linSpan_fg <| sup_fg hC hD)
     rw [← restrict_inf] at h
-    exact fg_of_restrict_le (le_submodule_span_of_le inf_le_sup) h
+    exact fg_of_restrict_le (le_trans inf_le_sup <| le_linSpan _) h
   · exact FGDual.fg <| inf_fgdual (FG.fgdual .id hC) (FG.fgdual .id hD) -- inf_fg' hC hD
 
 /- TODO: the equivalent of the below statement with FGDual instead of FG can likely be proven
@@ -373,8 +373,8 @@ lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG :
 
 /-- The intersection of an FG cone with an arbitrary submodule is FG. -/
 lemma inf_fg_submodule {C : PointedCone 𝕜 M} (hC : C.FG) (S : Submodule 𝕜 M) : (C ⊓ S).FG := by
-  rw [left_eq_inf.mpr (le_submodule_span C), inf_assoc, ← coe_inf]
-  exact inf_fg hC <| coe_fg <| FG.of_le (submodule_span_fg hC) inf_le_left
+  rw [left_eq_inf.mpr C.le_linSpan, inf_assoc, ← coe_inf]
+  exact inf_fg hC <| coe_fg <| FG.of_le (FG.linSpan_fg hC) inf_le_left
 
 lemma inf_submodule_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG)
     : (S ⊓ C : PointedCone 𝕜 M).FG := by rw [inf_comm]; exact inf_fg_submodule hC S
@@ -428,7 +428,7 @@ lemma sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FGDual p) 
   rw [← hC', ← hD', sup_assoc]
   nth_rw 2 [sup_comm]
   rw [sup_assoc, ← sup_assoc]
-  refine sup_fg_fgdual (sup_fg hCfg hDfg) ?_
+  refine sup_fg_fgdual (FG.sup hCfg hDfg) ?_
   rw [← coe_sup, coe_fgdual_iff]
   exact Submodule.sup_fgdual hD.lineal_fgdual _  -- <-- submodule duality theory
 
@@ -437,7 +437,7 @@ variable (p) [Fact p.SeparatingLeft] in
 lemma FG.dual_inf_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) :
     dual p (C ∩ D) = (dual p C) ⊔ (dual p D) := by
   nth_rw 1 [← FG.dual_flip_dual p hC, ← FG.dual_flip_dual p hD,
-    ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
+    ← Submodule.coe_inf, ← dual_union, ← dual_sup]
   exact FGDual.dual_dual_flip <| sup_fgdual (FG.dual_fgdual p hC) (FG.dual_fgdual p hD)
 
 -- variable [Fact p.flip.IsFaithfulPair] in

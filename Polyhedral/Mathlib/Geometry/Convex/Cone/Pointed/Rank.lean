@@ -154,8 +154,8 @@ lemma rank_eq_rank_lineal_add_salRank (C : PointedCone R M) :
     (F := ((C.lineal : Submodule R M) : PointedCone R M)) C.lineal_le
   have hlineal :
       (((C.lineal : Submodule R M) : PointedCone R M)).rank = Module.rank R C.lineal := by
-    rw [PointedCone.rank, linSpan_lineal]
-  rw [hlineal, linSpan_lineal (R := R) (M := M) C] at h
+    rw [PointedCone.rank, coe_linSpan]
+  rw [hlineal, coe_linSpan] at h
   simpa [PointedCone.rank, PointedCone.salRank, PointedCone.salientQuot, add_comm] using h
 
 /-- Dimension-addition for finrank, split into lineality and salient quotient. -/
@@ -167,8 +167,8 @@ lemma finrank_eq_finrank_lineal_add_salFinrank (C : PointedCone R M)
     (F := ((C.lineal : Submodule R M) : PointedCone R M)) hC C.lineal_le
   have hlineal :
       (((C.lineal : Submodule R M) : PointedCone R M)).finrank = Module.finrank R C.lineal := by
-    rw [PointedCone.finrank, linSpan_lineal]
-  rw [hlineal, linSpan_lineal (R := R) (M := M) C] at h
+    rw [PointedCone.finrank, coe_linSpan]
+  rw [hlineal, coe_linSpan] at h
   simpa [PointedCone.finrank, PointedCone.salFinrank, PointedCone.salientQuot, add_comm] using h
 
 /-- A cone with trivial lineality has salient rank equal to rank. -/

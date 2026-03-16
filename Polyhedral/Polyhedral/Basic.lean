@@ -214,7 +214,7 @@ lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
   simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
     Submodule.span_union, span_coe_eq_restrictScalars] at hh
-  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (submodule_span_fg <| hC.fg_inf_of_isCompl hS)
+  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (FG.linSpan_fg <| hC.fg_inf_of_isCompl hS)
 
 -- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
 --     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
@@ -433,7 +433,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   --replace h := le_trans h (span_inter_le _ _)
   rw [← Submodule.coe_inf, ← hD₁, ← hD₂] at h
   --
-  obtain ⟨P, hPfg, hP⟩ := aux (submodule_span_fg hfg₁) (submodule_span_fg hfg₂) C₁.lineal C₂.lineal
+  obtain ⟨P, hPfg, hP⟩ := aux (FG.linSpan_fg hfg₁) (FG.linSpan_fg hfg₂) C₁.lineal C₂.lineal
   simp_rw [Submodule.restrictScalars_self, hP] at h
   nth_rw 2 [← ofSubmodule_coe] at h
   rw [Set.le_iff_subset] at h

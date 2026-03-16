@@ -246,43 +246,113 @@ abbrev quotMap (F : Face C) := mkQ F.span
 /-- The cone obtained by quotienting by the face's linear span. -/
 abbrev quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
 
-scoped notation:50 C " / " F => Face.quot (C := C) F
+scoped notation:50 C " ⧸ " F => Face.quot (C := C) F
 
-def quotFace (F G : Face C) : Face (C / F) :=
-  ⟨(C / F) ⊓ PointedCone.map F.quotMap G,
-    ⟨by simp, by sorry⟩⟩
-
-def fiberFace {F : Face C} (G : Face (C / F)) : Face C :=
-  ⟨C ⊓ PointedCone.comap F.quotMap G, by
-    refine ⟨inf_le_left, ?_⟩
-    intro x y a xC yC a0 h
-    simp only [mem_inf, mem_comap, mkQ_apply, Quotient.mk_add, Quotient.mk_smul, mem_coe, xC,
-      true_and] at h ⊢
-    refine G.isFaceOf.mem_of_smul_add_mem ?_ ?_ a0 h.2
-    · simpa [mem_map, mkQ_apply] using ⟨x, ⟨xC, rfl⟩⟩
-    · simpa [mem_map, mkQ_apply] using ⟨y, ⟨yC, rfl⟩⟩
-  ⟩
+def fiberFace {F : Face C} (G : Face (C ⧸ F)) : Face C := by
+  refine ⟨C ⊓ PointedCone.comap F.quotMap G, ?_⟩
+  simpa [Face.quot, Face.quotMap] using
+    (PointedCone.IsFaceOf.inf_comap_mkQ (G := C) (S := F.span) (H := G) G.isFaceOf)
 
 @[simp]
-lemma mem_fiberFace {F : Face C} (G : Face (C / F)) (x : M) :
+lemma mem_fiberFace {F : Face C} (G : Face (C ⧸ F)) (x : M) :
     x ∈ fiberFace G ↔ x ∈ C ∧ F.quotMap x ∈ G := by
   change x ∈ C ⊓ comap F.quotMap ↑G ↔ _; simp_all
 
 /-- Faces of a quotient cone can naturally be considered as faces of the cone. -/
 instance {F : Face C} : CoeOut (Face F.quot) (Face C) := ⟨fiberFace⟩
 
-lemma le_fiber {F : Face C} (G : Face (C / F)) : F ≤ fiberFace G := by
+lemma le_fiber {F : Face C} (G : Face (C ⧸ F)) : F ≤ fiberFace G := by
   intro x xF
   simp only [mem_fiberFace, F.isFaceOf.le xF, mkQ_apply,
     (Quotient.mk_eq_zero F.span).mpr (mem_span_of_mem xF), true_and]
   simp [← Face.mem_coe]
 
-lemma fiber_quot (F G : Face C) : fiberFace (F.quotFace G) = F ⊔ G := sorry
+@[simp]
+lemma map_fiberFace {F : Face C} (G : Face (C ⧸ F)) :
+    PointedCone.map F.quotMap (fiberFace G) = G := by
+  ext x
+  constructor
+  · rintro ⟨y, hy, rfl⟩
+    exact (mem_fiberFace G y).mp hy |>.2
+  · intro hx
+    obtain ⟨y, yC, rfl⟩ := PointedCone.mem_map.mp (G.isFaceOf.le hx)
+    exact PointedCone.mem_map.mpr ⟨y, (mem_fiberFace G y).mpr ⟨yC, hx⟩, rfl⟩
 
-lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G :=
-     by simp [fiber_quot, h]
+lemma fiberFace_le_fiberFace_iff {F : Face C} {G G' : Face (C ⧸ F)} :
+    fiberFace G ≤ fiberFace G' ↔ G ≤ G' := by
+  constructor
+  · intro h x hx
+    have hx' : x ∈ PointedCone.map F.quotMap (fiberFace G) := by
+      simpa [map_fiberFace] using hx
+    have hx'' : x ∈ PointedCone.map F.quotMap (fiberFace G') := by
+      rcases PointedCone.mem_map.mp hx' with ⟨y, hy, rfl⟩
+      exact PointedCone.mem_map.mpr ⟨y, h hy, rfl⟩
+    simpa [map_fiberFace] using hx''
+  · intro h x hx
+    rcases (mem_fiberFace G x).mp hx with ⟨hxC, hxG⟩
+    exact (mem_fiberFace G' x).mpr ⟨hxC, h hxG⟩
 
-lemma quot_fiber {F : Face C} (G : Face (C / F)) : F.quotFace (fiberFace G) = G := sorry
+lemma fiberFace_mono {F : Face C} : Monotone (fiberFace (C := C) (F := F)) := fun _ _ h =>
+  fiberFace_le_fiberFace_iff.mpr h
+
+end Ring
+
+section DirectedOrderRing
+
+open Submodule hiding span dual IsDualClosed
+
+variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
+
+-- ## QUOT / FIBER
+
+def quotFace (F G : Face C) : Face (C ⧸ F) := by
+  refine ⟨PointedCone.map F.quotMap ((F ⊔ G : Face C) : PointedCone R M), ?_⟩
+  have hle : ((F : Face C) : PointedCone R M) ≤ ((F ⊔ G : Face C) : PointedCone R M) :=
+    show F ≤ F ⊔ G from le_sup_left
+  simpa [Face.quot, Face.quotMap] using
+    (PointedCone.IsFaceOf.quot (C := C) (F := ((F ⊔ G : Face C) : PointedCone R M))
+      (S := F.span) (F ⊔ G).isFaceOf (Submodule.span_mono hle))
+
+@[simp]
+lemma quotFace_eq_map_of_le {F G : Face C} (h : F ≤ G) :
+    (F.quotFace G : PointedCone R (M ⧸ F.span)) = PointedCone.map F.quotMap G := by
+  simp [quotFace, sup_eq_right.mpr h]
+
+@[simp]
+lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G := by
+  ext x
+  constructor
+  · intro hx
+    rcases (mem_fiberFace (F.quotFace G) x).mp hx with ⟨hxC, hxq⟩
+    have hxq' : F.quotMap x ∈ PointedCone.map F.quotMap G := by
+      change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.span)) at hxq
+      simpa [quotFace_eq_map_of_le h] using hxq
+    obtain ⟨y, hyG, hyq⟩ := PointedCone.mem_map.mp hxq'
+    have hxy : x - y ∈ F.span := by
+      rw [← Submodule.ker_mkQ F.span]
+      change F.quotMap (x - y) = 0
+      simp [map_sub, hyq]
+    have hx_lin : x ∈ (G : PointedCone R M).linSpan :=
+      ((G : PointedCone R M).linSpan.sub_mem_iff_left (Submodule.subset_span hyG)).mp
+        (Submodule.span_mono h hxy)
+    simpa [G.isFaceOf.inf_linSpan] using show x ∈ C ⊓ (G : PointedCone R M).linSpan from
+      ⟨hxC, hx_lin⟩
+  · intro hx
+    refine (mem_fiberFace (F.quotFace G) x).mpr ⟨G.isFaceOf.le hx, ?_⟩
+    change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.span))
+    simpa [quotFace_eq_map_of_le h] using
+      (PointedCone.mem_map.mpr ⟨x, hx, rfl⟩ : F.quotMap x ∈ PointedCone.map F.quotMap G)
+
+lemma fiber_quot (F G : Face C) : fiberFace (F.quotFace G) = F ⊔ G := by
+  simpa [quotFace, sup_assoc, sup_left_comm, sup_comm] using
+    (fiber_quot_of_le (F := F) (G := F ⊔ G) le_sup_left)
+
+@[simp]
+lemma quot_fiber {F : Face C} (G : Face (C ⧸ F)) : F.quotFace (fiberFace G) = G := by
+  exact (Face.toPointedCone_eq_iff).mp <| by
+    rw [quotFace_eq_map_of_le (le_fiber G), map_fiberFace]
 
 /-- The isomorphism between a quotient's face lattice and the interval in the cone's face
  lattice above the face. -/
@@ -291,11 +361,14 @@ def quot_orderIso (F : Face C) : Face (C / F) ≃o Set.Icc F ⊤ where
   invFun G := F.quotFace G
   left_inv := quot_fiber
   right_inv G := by simp only [fiber_quot_of_le G.2.1]
-  map_rel_iff' := by intro G G'; simp; sorry
+  map_rel_iff' := by
+    intro G G'
+    exact fiberFace_le_fiberFace_iff
 
-def quot_orderEmbed (F : Face C) : Face (C / F) ↪o Face C := sorry
+def quot_orderEmbed (F : Face C) : Face (C ⧸ F) ↪o Face C :=
+  (quot_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
 
-end Ring
+end DirectedOrderRing
 
 section RingLinearOrder
 
@@ -380,7 +453,9 @@ def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F 
   invFun G := F.restrict G
   left_inv := restrict_embed
   right_inv G := by simp only [embed_restrict_of_le G.2.2]
-  map_rel_iff' := @fun _ _ => by simp [embed]; sorry
+  map_rel_iff' := by
+    intro G G'
+    rfl
 
 /-- The embedding of a face's face lattice into the cone's face lattice. -/
 def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=

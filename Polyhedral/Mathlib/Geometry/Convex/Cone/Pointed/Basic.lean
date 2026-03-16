@@ -49,8 +49,14 @@ lemma mem_coe {S : Submodule R M} {x : M} : x ∈ (S : PointedCone R M) ↔ x �
 
 alias ofSubmodule_toSet_coe := ofSubmodule_coe
 
-@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T
-  := Submodule.restrictScalars_inj ..
+@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T :=
+  Submodule.restrictScalars_inj ..
+
+@[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
+  Submodule.restrictScalars_monotone ..
+
+@[simp] lemma ofSubmodule_mono {S T : Submodule R M} : ofSubmodule S ≤ ofSubmodule T ↔ S ≤ T := by
+  rfl
 
 def ofSubmodule_embedding : Submodule R M ↪o PointedCone R M :=
   Submodule.restrictScalarsEmbedding ..
@@ -434,15 +440,15 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 --     sorry
 --   · sorry
 
-
--- NOTE: I changed the statement of the lemma and added the trivial transformation as the first
---  line `suffices`. Maybe there is a shorter proof now?
+-- NOTE: I changed the statement of the lemma and added the `rw` to the first line that
+--  transforms it into the previous statement. Maybe there is a shorter proof now?
+-- TODO: simplify proof?
 --
 -- Mathematically, this lemma is equivalent to directedness of the order on `R`: for `M = R`
 -- and `x = 1`, it says every element of `R` is a difference of two nonnegative elements.
 variable (R) in
 @[simp] lemma span_neg_pair_eq_span_singleton (x : M) : span R {-x, x} = R ∙ x := by
-  suffices h : span R {-x, x} = Submodule.span R {-x, x} by simp [h]
+  rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
   ext y
   simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
     smul_neg, Subtype.exists, Nonneg.mk_smul, exists_prop]
@@ -464,15 +470,15 @@ variable (R) in
 
 @[simp] lemma span_sup_span_neg_eq_submodule_span (s : Set M) :
     span R s ⊔ span R (-s) = Submodule.span R s := by
-  ext x; constructor <;> intro h
-  · simp only [Submodule.mem_sup] at h
-    obtain ⟨_, hy, _, hz, rfl⟩ := h
+  ext x
+  constructor <;> intro h
+  · obtain ⟨_, hy, _, hz, rfl⟩ := Submodule.mem_sup.mp h
     exact add_mem
       (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hy p hp)
       (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hz p <| by
         intro y hy
         simpa using p.neg_mem (hp (Set.mem_neg.mp hy)))
-  · simp only [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
+  · rw [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
     obtain ⟨n, f, g, rfl⟩ := h
     have hx : ∑ i, f i • (g i : M) ∈ span R (-s ∪ s) := by
       refine sum_mem ?_
@@ -497,7 +503,7 @@ variable (R) in
   simp only [Submodule.mem_span, Set.union_subset_iff, and_imp,
     Submodule.restrictScalars_mem]
   constructor <;> intros h B sB
-  · refine h (Submodule.restrictScalars {c : R // 0 ≤ c} B) ?_ sB
+  · refine h (B.restrictScalars _) ?_ sB
     rw [Submodule.coe_restrictScalars]
     exact fun _ tm => neg_mem_iff.mp (sB tm)
   · intro nsB
@@ -625,15 +631,8 @@ lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
   ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
 
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
-lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (C : Set M)).FG :=
-  hC.span
-
-/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma FG.linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG :=
   hC.span
-
-@[deprecated submodule_span_fg (since := "...")]
-alias span_fg := submodule_span_fg
 
 lemma fg_top [Module.Finite R M] : (⊤ : PointedCone R M).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
