@@ -281,7 +281,8 @@ lemma lineal (C : PointedCone R M) : IsFaceOf C.lineal C := by
   exact mem_lineal_of_smul_mem_lineal xC
     (lineal_isExtreme_left (C.smul_mem (le_of_lt a0) xC) yC hxy)
 
-/-- The lineality space of a cone lies in every face. -/
+/-- The lineality space of a cone lies in every face. When the lineality space is a face, it
+  therefore is the minimal face. -/
 lemma lineal_le (hF : F.IsFaceOf C) : C.lineal ≤ F :=
   fun _ hx => hF.mem_of_add_mem hx.1 hx.2 (by simp)
 

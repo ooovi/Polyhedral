@@ -49,8 +49,14 @@ lemma mem_coe {S : Submodule R M} {x : M} : x ∈ (S : PointedCone R M) ↔ x �
 
 alias ofSubmodule_toSet_coe := ofSubmodule_coe
 
-@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T
-  := Submodule.restrictScalars_inj ..
+@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T :=
+  Submodule.restrictScalars_inj ..
+
+@[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
+  Submodule.restrictScalars_monotone ..
+
+@[simp] lemma ofSubmodule_mono {S T : Submodule R M} : ofSubmodule S ≤ ofSubmodule T ↔ S ≤ T := by
+  rfl
 
 def ofSubmodule_embedding : Submodule R M ↪o PointedCone R M :=
   Submodule.restrictScalarsEmbedding ..

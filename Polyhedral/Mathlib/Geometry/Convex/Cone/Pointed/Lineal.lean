@@ -193,14 +193,12 @@ lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint
 --     codisjoint_iff.mp hCS.codisjoint]
 
 
+lemma lineal_le_linSpan (C : PointedCone R M) : C.lineal ≤ C.linSpan :=
+  ofSubmodule_mono.mpr <| le_trans (lineal_le C) (le_linSpan C)
+
 /-- The linear span of `C ⊓ -C` is the lineality space of `C`. -/
 lemma linSpan_inf_neg_eq_lineal (C : PointedCone R M) : (C ⊓ -C).linSpan = C.lineal := by
-  simpa [coe_lineal] using (submodule_linSpan (R := R) (M := M) C.lineal)
-
-/-- The cone built from the lineality submodule has linear span equal to that submodule. -/
-@[simp] lemma linSpan_lineal (C : PointedCone R M) :
-    (((C.lineal : Submodule R M) : PointedCone R M)).linSpan = C.lineal :=
-  submodule_linSpan (R := R) (M := M) C.lineal
+  simpa [coe_lineal] using (coe_linSpan (R := R) (M := M) C.lineal)
 
 
 -- ## MAP
