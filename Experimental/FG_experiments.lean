@@ -823,7 +823,7 @@ theorem IsSimplicial_of_rank_le_two (hC : C.rank ≤ 2) (hFG : C.FG) (hSal : C.S
   refine ⟨linearIndep_pair_of_incomparable_rays ?_ hxy, Eq.symm this⟩
   rwa [← this]
 
-theorem Face_of_simplicial {s t : Set M} (hs : s.Finite)
+theorem IsFaceOf.of_subset_LinearIndepOn {s t : Set M} (hs : s.Finite)
   (hli : LinearIndepOn R id s) (ht : t ⊆ s) :
     (span R t).IsFaceOf (span R s) := by
   refine ⟨Submodule.span_le.2 fun _ hx ↦ Submodule.mem_span_of_mem (ht hx), ?_⟩
@@ -837,7 +837,7 @@ theorem Face_of_simplicial {s t : Set M} (hs : s.Finite)
   use c, ?_, c_pos, hyc
   refine le_trans ?_ d_supp
   rw [Finsupp.sum_of_support_subset c c_supp _ (fun i _ ↦ zero_smul R i)] at hyc
-  rw [Finsupp.sum_of_support_subset d (trans d_supp ht) _ (fun i _ ↦ zero_smul R i)] at hyd
+  rw [Finsupp.sum_of_support_subset d (_root_.trans d_supp ht) _ (fun i _ ↦ zero_smul R i)] at hyd
   rw [Finsupp.sum_of_support_subset e e_supp _ (fun i _ ↦ zero_smul R i)] at hye
   rw [ ← hyc, ← hye, Finset.smul_sum, ← Finset.sum_add_distrib] at hyd
   have : ∑ x ∈ s, (a • c x • x + e x • x) = ∑ x ∈ s, (a * c x + e x) • x :=
