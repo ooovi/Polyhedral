@@ -412,11 +412,8 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
 
 lemma le_linSpan_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) :
     C₁ ≤ F.linSpan ↔ C₁ ≤ F := by
-  constructor <;> intro h
-  · intro x hx
-    obtain ⟨_, hy, _, hnf, hs⟩ := (mem_linSpan).mp (h hx)
-    exact ((hG.mem_add_iff (hD hx) (hG.le hnf)).mp (hs ▸ hy)).1
-  · exact le_trans h Submodule.subset_span
+  nth_rw 2 [← hG.inf_linSpan]
+  simpa using fun _ => hD
 
 end DirectedOrderRing
 section Ring
