@@ -43,6 +43,7 @@ variable {C F F₁ F₂ : PointedCone R M}
 -- lemma face_iff_dif_cone (C F : PointedCone R M) :
 --     F.IsFaceOf C ↔ ∃ D : ConvexCone R M, (C \ F : Set M) = D := sorry
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The algeraic relative interior of a pointed cone `C` consists of all the points of `C`
   that do not lie in any proper face of `C`. This definition agrees with the topological
   relative interior in many cases. -/

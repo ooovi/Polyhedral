@@ -56,6 +56,7 @@ lemma IsPolyhedral.of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPol
 lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhedral :=
   .of_span_finite s.finite_toSet
 
+set_option backward.isDefEq.respectTransparency false in
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
 lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
     C.IsPolyhedral := by
@@ -159,6 +160,7 @@ lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG
 
 -- ## MAP / COMAP
 
+set_option backward.isDefEq.respectTransparency false in
 lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsPolyhedral := by
   obtain ⟨D, hfg, hD'⟩ := hC.exists_fg_sup_lineal
   rw [← hD']
@@ -435,7 +437,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   --
   obtain ⟨P, hPfg, hP⟩ := aux (FG.linSpan_fg hfg₁) (FG.linSpan_fg hfg₂) C₁.lineal C₂.lineal
   simp_rw [Submodule.restrictScalars_self, hP] at h
-  nth_rw 2 [← ofSubmodule_coe] at h
+  nth_rw 2 [← coe_ofSubmodule] at h
   rw [Set.le_iff_subset] at h
   rw [SetLike.coe_subset_coe] at h
   --

@@ -24,6 +24,7 @@ noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 -- NOTE: this is not the same as Module.Finite or FG!
 abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
 
+set_option backward.isDefEq.respectTransparency false in
 lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
 
 lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le

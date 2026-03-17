@@ -32,9 +32,8 @@ lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p
 
 lemma dual_univ_ker : dual p .univ = ker p.flip := by
   ext x
-  simp only [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem, mem_ker]
-  rw [LinearMap.ext_iff]
-  simp only [flip_apply, zero_apply]
+  simp_rw [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem,
+    mem_ker, LinearMap.ext_iff, flip_apply, zero_apply]
   constructor <;> intro h y
   · exact le_antisymm (by simpa using @h (-y)) (@h y)
   · rw [h y]
@@ -128,7 +127,7 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
   sorry
 
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
-    := by simp only [ofSubmodule_coe]
+    := by simp
 
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 {M : Type*} [AddCommGroup M] [Module R M]
@@ -144,7 +143,7 @@ lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .d
   intro h
   obtain ⟨S, hSC, hS⟩ := h
   rw [← hS]
-  nth_rw 3 [← ofSubmodule_coe]
+  nth_rw 3 [← coe_ofSubmodule]
   rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
   exact dual_le_dual hSC
 
@@ -246,7 +245,7 @@ lemma dual_span_lineal_dual (s : Set M) :
   rw [Eq.comm]
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
-  rw [← PointedCone.ofSubmodule_coe]
+  rw [← PointedCone.coe_ofSubmodule]
   rw [← span_union_neg_eq_submodule_span]
   rw [dual_span]
   rw [dual_union]
@@ -296,10 +295,11 @@ lemma dual_embed_quot_dual (S : Submodule R M) (C : PointedCone R S) :
       simpa only [rp_apply] using h
     · rw [surjInv_eq (Submodule.dual p S).mkQ_surjective]
 
+set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma dual_quot_dual (S : Submodule R M) (C : PointedCone R M) :
     (dual p (S ∩ C)).quot (.dual p S) = dual (p.rp S) (restrict S C) := by
-  simp only [← ofSubmodule_coe S, ← Submodule.coe_inf, ← embed_restrict S C, dual_embed_quot_dual]
+  simp only [← coe_ofSubmodule S, ← Submodule.coe_inf, ← embed_restrict S C, ← dual_embed_quot_dual]
 
 alias dual_restrict := dual_quot_dual
 
@@ -313,6 +313,7 @@ alias dual_restrict_of_le := dual_quot_dual_of_le
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
+set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma comap_dual_mkQ_dual (S : Submodule R M) (C : PointedCone R S) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) C) = dual p (embed C) := by
@@ -324,7 +325,7 @@ alias dual_embed := comap_dual_mkQ_dual
 
 lemma comap_dual_mkQ_dual_restrict (S : Submodule R M) (C : PointedCone R M) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) (restrict S C)) = dual p (S ∩ C) := by
-  simp only [← ofSubmodule_coe S, ← Submodule.coe_inf, ← embed_restrict S C, dual_embed]
+  simp [dual_embed]
 
 -- This is a crucial lemma. It helps restricting duality statement. We can use it to show that
 -- properties that are preserved under duality in finite dim, and that are closed under adding

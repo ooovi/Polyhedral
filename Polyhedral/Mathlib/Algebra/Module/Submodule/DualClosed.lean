@@ -442,7 +442,7 @@ theorem CoFG._fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.Du
 variable [Fact p.SeparatingLeft] in -- TODO: remove assumption, see above
 theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
     S.FGDual p := by
-  rw [← hS', flip_flip]
+  rw [← hS', LinearMap.flip_flip]
   exact FG.dual_fgdual _ (hS.dual_fg _)
 
 ----------- ^^^^^^ experimental
@@ -504,14 +504,10 @@ lemma dual_fg_inf_fgdual_dual_sup_dual (hS : S.FG) (hT : T.FGDual p.flip) :
 
 private lemma sup_fgdual_fg {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FG) :
     (S ⊔ T).FGDual p := by
-  rw [← sup_eq_left.mpr (hS.ker_le)]
-  rw [sup_assoc, sup_comm]
+  rw [← sup_eq_left.mpr (hS.ker_le),sup_assoc, sup_comm]
   nth_rw 2 [sup_comm]
-  rw [← hS.dualClosed_flip]
-  rw [← hT.sup_ker_dualClosed p.flip]
-  simp only [flip_flip]
-  rw [sup_comm]
-  rw [← dual_inf_dual_sup_fgdual]
+  rw [← hS.dualClosed_flip, ← hT.sup_ker_dualClosed p.flip, LinearMap.flip_flip, sup_comm,
+    ← dual_inf_dual_sup_fgdual]
   · rw [← coe_inf]
     obtain ⟨S', hfg, hS'⟩ := hS.dual_fg_sup_ker
     rw [← hS', inf_comm, ← inf_sup_assoc_of_le]
