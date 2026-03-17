@@ -321,6 +321,9 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 /-- A salient cone has trivial lineality space, see `salient_iff_lineal_bot`. -/
 abbrev Salient (C : PointedCone R M) := C.toConvexCone.Salient
 
+@[simp] lemma bot_salient : (⊥ : PointedCone R M).Salient := by
+  simp [Salient, ConvexCone.Salient]
+
 lemma salient_iff_mem_neg {C : PointedCone R M} : C.Salient ↔ ∀ x ∈ C, x ≠ 0 → -x ∉ C := by rfl
 
 lemma Salient.mem_neg_mem_zero {C : PointedCone R M} (hC : C.Salient)
