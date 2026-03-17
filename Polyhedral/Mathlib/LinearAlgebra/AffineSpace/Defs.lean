@@ -1,9 +1,7 @@
 module
 
+public import Mathlib.LinearAlgebra.AffineSpace.Combination
 public import Mathlib.LinearAlgebra.ConvexSpace
-public import Mathlib.Order.Closure
-public import Mathlib.Algebra.AddTorsor.Defs
-import Mathlib.LinearAlgebra.AffineSpace.Combination
 
 /-!
 # Affine space
@@ -185,14 +183,91 @@ protected theorem IsExtreme.trans (hAB : IsExtreme R A B) (hBC : IsExtreme R B C
     (hAB.left_mem_of_mem_openSegment hx₁A hx₂A (hBC.subset hxC) hx)
     (hAB.right_mem_of_mem_openSegment hx₁A hx₂A (hBC.subset hxC) hx) hxC hx
 
-protected theorem IsExtreme.antisymm : AntiSymmetric (IsExtreme R : Set M → Set M → Prop) :=
-  fun _ _ hAB hBA ↦ Set.Subset.antisymm hBA.1 hAB.1
+protected theorem IsExtreme.antisymm : Std.Antisymm (IsExtreme R : Set M → Set M → Prop) :=
+  ⟨fun _ _ hAB hBA ↦ Set.Subset.antisymm hBA.1 hAB.1⟩
 
 instance : IsPartialOrder (Set M) (IsExtreme R) where
   refl := IsExtreme.refl R
   trans _ _ _ := IsExtreme.trans
-  antisymm := IsExtreme.antisymm
+  antisymm := IsExtreme.antisymm.antisymm
 
 end IsExtreme
 
 end AffineSpace
+
+noncomputable section AddTorsor
+
+variable {R : Type*} {V : Type*} {P : Type*}
+variable [Ring R] [AddCommGroup V] [Module R V] [AddTorsor V P]
+
+/-- The affine combination of points in an affine space, given a probability distribution. -/
+public def affineCombination (s : AffineWeights R P) : P :=
+  s.weights.support.affineCombination R id s.weights
+
+variable [PartialOrder R] [IsStrictOrderedRing R] in
+public theorem affineCombination_single (x : P) :
+    affineCombination (AffineWeights.single (R := R) x) = x := by
+  simp only [affineCombination, AffineWeights.single]
+  rw [Finsupp.support_single_ne_zero _ one_ne_zero]
+  refine ({x} : Finset P).affineCombination_of_eq_one_of_eq_zero _ _
+    (Finset.mem_singleton_self x) (by simp) fun j _ hne => Finsupp.single_eq_of_ne hne
+
+variable [IsCancelMulZero R] in
+public theorem affineCombination_assoc (f : AffineWeights R (AffineWeights R P)) :
+    affineCombination (f.map affineCombination) = affineCombination f.join := by
+  classical
+  -- Choose a base point
+  obtain ⟨b⟩ : Nonempty P := inferInstance
+  -- Express both sides using weightedVSubOfPoint with base point b
+  have hL := Finset.affineCombination_eq_weightedVSubOfPoint_vadd_of_sum_eq_one
+    (f.map affineCombination).weights.support (f.map affineCombination).weights id
+    (f.map affineCombination).total b
+  have hR := Finset.affineCombination_eq_weightedVSubOfPoint_vadd_of_sum_eq_one
+    f.join.weights.support f.join.weights id f.join.total b
+  simp only [affineCombination, hL, hR]
+  congr 1
+  -- Now show the weighted vector sums are equal
+  simp only [Finset.weightedVSubOfPoint_apply, AffineWeights.map, AffineWeights.join, id]
+  -- Rewrite LHS using sum_mapDomain_index
+  change (Finsupp.mapDomain affineCombination f.weights).sum (fun x w => w • (x -ᵥ b)) = _
+  rw [Finsupp.sum_mapDomain_index (fun _ => by simp) (fun _ _ _ => by simp [add_smul])]
+  simp only [Finsupp.sum, affineCombination]
+  -- Expand affineCombination d using base point b
+  conv_lhs =>
+    congr; · skip
+    ext d
+    rw [d.weights.support.affineCombination_eq_weightedVSubOfPoint_vadd_of_sum_eq_one
+        _ _ d.total b, vadd_vsub, Finset.weightedVSubOfPoint_apply]
+    simp only [id]
+  simp_rw [Finset.smul_sum, smul_smul]
+  -- Expand RHS using sum_finset_sum_index
+  let h : P → R → V := fun x w => w • (x -ᵥ b)
+  have h_rhs : (∑ d ∈ f.weights.support, f.weights d • d.weights).sum h
+      = ∑ d ∈ f.weights.support, (f.weights d • d.weights).sum h :=
+    (Finsupp.sum_finset_sum_index (h := h) (fun _ => zero_smul _ _)
+      (fun _ _ _ => add_smul _ _ _)).symm
+  simp only [Finsupp.sum] at h_rhs ⊢
+  rw [h_rhs]
+  -- Both sides are now double sums; show the inner sums match
+  congr 1
+  ext d
+  simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
+  -- Show that d.support = (f.weights d • d.weights).support
+  by_cases hd : f.weights d = 0
+  · simp [hd]
+  · refine Finset.sum_congr ?_ (fun _ _ => rfl)
+    ext p
+    simp only [Finsupp.mem_support_iff, ne_eq]
+    constructor
+    · exact fun hp => smul_ne_zero hd hp
+    · intro hp hp'
+      simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, hp', mul_zero,
+        not_true_eq_false] at hp
+
+variable [PartialOrder R] [IsStrictOrderedRing R] [IsCancelMulZero R]
+public instance instAffineSpace : AffineSpace R P where
+  affineCombination f := affineCombination f
+  single := affineCombination_single
+  assoc := affineCombination_assoc
+
+end AddTorsor
