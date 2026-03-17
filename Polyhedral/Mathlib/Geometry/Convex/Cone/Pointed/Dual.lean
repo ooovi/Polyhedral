@@ -32,9 +32,8 @@ lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p
 
 lemma dual_univ_ker : dual p .univ = ker p.flip := by
   ext x
-  simp only [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem, mem_ker]
-  rw [LinearMap.ext_iff]
-  simp only [flip_apply, zero_apply]
+  simp_rw [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem,
+    mem_ker, LinearMap.ext_iff, flip_apply, zero_apply]
   constructor <;> intro h y
   · exact le_antisymm (by simpa using @h (-y)) (@h y)
   · rw [h y]
