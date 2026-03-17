@@ -241,7 +241,8 @@ lemma comap_lineal (C : PointedCone R M) {f : N →ₗ[R] M} :
 
 lemma lineal_restrict (S : Submodule R M) (C : PointedCone R M) :
     (restrict S C).lineal = .restrict S C.lineal := by
-  simp only [Submodule.submoduleOf, ← comap_lineal, ← Submodule.subtype_restrictScalars, comap]
+  simp only [Submodule.submoduleOf, ← comap_lineal, comap]
+  congr
 
 lemma lineal_embed (S : Submodule R M) (C : PointedCone R S) :
     (embed C).lineal = .embed C.lineal := by simp [map_lineal]
@@ -451,10 +452,10 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
     intro h
     apply x_ne_0
     rw [← hy]
-    simp [h]
+    exact (Submodule.Quotient.mk_eq_zero C.lineal).mpr h
   apply this
   have : (C.lineal).mkQ (y+y') = 0 := by
-    rw [map_add, hy, hy', add_neg_cancel]
+    rw [map_add, hy, hy', add_neg_cancel]; rfl
   have sum_lineal : y+y' ∈ C.lineal := by
     rw [← Submodule.ker_mkQ C.lineal]
     exact LinearMap.mem_ker.mpr this
@@ -471,7 +472,7 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
   unfold salientQuot
   rw [lineal_submodule, ← Submodule.span_eq S]
   simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
-  rw [← ofSubmodule_coe, quot_span]
+  rw [← coe_ofSubmodule, quot_span]
 
 lemma salientQuot_fg (hC : C.FG) : C.salientQuot.FG := quot_fg hC _
 

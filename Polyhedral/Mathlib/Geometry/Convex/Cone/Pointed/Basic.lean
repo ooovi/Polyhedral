@@ -34,41 +34,12 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
-@[coe]
-abbrev ofSubmodule (S : Submodule R M) : PointedCone R M := S.restrictScalars _
-
-instance : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
-
-@[simp]
-lemma ofSubmodule_coe (S : Submodule R M) : (ofSubmodule S : Set M) = S := by rfl
-  -- also provable from `Submodule.coe_restrictScalars R S`
-
-@[simp]
-lemma mem_coe {S : Submodule R M} {x : M} : x ∈ (S : PointedCone R M) ↔ x ∈ S := by rfl
-  -- also provable from `Submodule.coe_restrictScalars R S`
-
-alias ofSubmodule_toSet_coe := ofSubmodule_coe
-
-@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T :=
-  Submodule.restrictScalars_inj ..
-
+set_option backward.isDefEq.respectTransparency false in
 @[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
   Submodule.restrictScalars_monotone ..
 
 @[simp] lemma ofSubmodule_mono {S T : Submodule R M} : ofSubmodule S ≤ ofSubmodule T ↔ S ≤ T := by
   rfl
-
-def ofSubmodule_embedding : Submodule R M ↪o PointedCone R M :=
-  Submodule.restrictScalarsEmbedding ..
-
-def ofSubmodule_latticeHom : CompleteLatticeHom (Submodule R M) (PointedCone R M) :=
-  Submodule.restrictScalarsLatticeHom ..
-
-lemma ofSubmodule_sInf (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
-  ofSubmodule_latticeHom.map_sInf' s
-
-lemma ofSubmodule_sSup (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
-  ofSubmodule_latticeHom.map_sSup' s
 
 -- ## SPAN
 
@@ -76,6 +47,7 @@ lemma ofSubmodule_sSup (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule ''
   with `Submodule.span`. -/
 alias hull := span
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma span_submodule_span (s : Set M) :
     Submodule.span R (span R s) = Submodule.span R s := Submodule.span_span_of_tower ..
 
@@ -125,9 +97,11 @@ section Semiring_AddCommGroup
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
     := Submodule.restrictScalars_inf _ _ _
 
+set_option backward.isDefEq.respectTransparency false in
 lemma sInf_coe (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
   Submodule.restrictScalars_sInf _ _
 
@@ -137,9 +111,11 @@ lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : Po
 -- lemma iInf_coe' (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
 --   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
     := Submodule.restrictScalars_sup _ _ _
 
+set_option backward.isDefEq.respectTransparency false in
 lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
   Submodule.restrictScalars_sSup _ _
 
@@ -166,6 +142,7 @@ lemma coe_sup_submodule_span {C D : PointedCone R M} :
   rw [← span_submodule_span]
   simp [Submodule.span_union]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma span_le_submodule_span (s : Set M) : span R s ≤ Submodule.span R s :=
     Submodule.span_le_restrictScalars _ _ s
 
@@ -207,10 +184,12 @@ section Ring
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
     {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S :=
   Submodule.sup_inf_assoc_of_le_restrictScalars D hCS
 
+set_option backward.isDefEq.respectTransparency false in
 lemma inf_sup_assoc_of_submodule_le {C : PointedCone R M} (D : PointedCone R M)
     {S : Submodule R M} (hSC : S ≤ C) : C ⊓ (D ⊔ S) = (C ⊓ D) ⊔ S :=
   Submodule.inf_sup_assoc_of_restrictScalars_le D hSC
@@ -333,10 +312,12 @@ lemma restrict_fg_iff_inf_fg (S : Submodule R M) (C : PointedCone R M) :
 lemma restrict_mono (S : Submodule R M) {C D : PointedCone R M} (hCD : C ≤ D) :
     C.restrict S ≤ D.restrict S := fun _ => (hCD ·)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma restrict_inf (S : Submodule R M) {C D : PointedCone R M} :
     (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S
   := by ext x; simp [restrict, Submodule.submoduleOf]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
     (C ⊓ S).restrict S = C.restrict S := by
@@ -497,6 +478,7 @@ variable (R) in
 -- NOTE: if this is implemented, it is more general than what mathlib already provides
 -- for converting submodules into pointed cones. Especially the proof that R≥0 is an FG
 -- submodule of R should be easier with this.
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma span_union_neg_eq_submodule_span (s : Set M) :
     span R (-s ∪ s) = Submodule.span R s := by
   ext x
@@ -544,7 +526,7 @@ end Pointwise
 
 lemma mem_linSpan {C : PointedCone R M} {x : M} :
     x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
-  rw [← mem_coe, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
+  rw [← mem_ofSubmodule_iff, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
   simp only [Submodule.mem_neg]
   constructor <;> intro h
   · obtain ⟨y, hy', z, hz, rfl⟩ := h
@@ -617,6 +599,7 @@ end Map
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma ofSubmodule_fg_of_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R M).FG
     := Submodule.FG.restrictScalars hS
 
@@ -626,10 +609,12 @@ alias coe_fg := ofSubmodule_fg_of_fg
 -- Q: is this problematic?
 instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
   ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma FG.linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG :=
   hC.span
@@ -674,13 +659,16 @@ lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
     (C ⊔ S).quot S = C.quot S := sorry
 
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma quot_eq_iff_sup_eq {S : Submodule R M} {C D : PointedCone R M} :
     C.quot S = D.quot S ↔ C ⊔ S = D ⊔ S := Submodule.map_mkQ_eq_iff_sup_eq
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma map_mkQ_le_iff_sup_le {p : Submodule R M} {s t : PointedCone R M} :
     map p.mkQ s ≤ map p.mkQ t ↔ s ⊔ p ≤ t ⊔ p := Submodule.map_mkQ_le_iff_sup_le
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma map_mkQ_eq_iff_sup_eq {p : Submodule R M} {s t : PointedCone R M} :
     map p.mkQ s = map p.mkQ t ↔ s ⊔ p = t ⊔ p := Submodule.map_mkQ_eq_iff_sup_eq
 
@@ -691,6 +679,7 @@ variable {R M : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommG
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
     {C : PointedCone R M} (hSC : S ≤ C) : C.quot S ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
   Submodule.IsCompl.map_mkQ_equiv_inf hST hSC
@@ -713,6 +702,7 @@ theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • 
   · exact C.smul_mem (le_of_lt hc) h
 
 -- analogue of `Submodule.span_singleton_smul_eq`
+set_option backward.isDefEq.respectTransparency false in
 theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} = span R {x} := by
   ext y
   simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop]
