@@ -45,11 +45,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 /- Intended new name for `PointedCone.span` to better avoid name clashes and confusion
   with `Submodule.span`. -/
-alias hull := span
-
-set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma span_submodule_span (s : Set M) :
-    Submodule.span R (span R s) = Submodule.span R s := Submodule.span_span_of_tower ..
+-- alias hull := span
 
 def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
   choice s _ := span R s
@@ -75,6 +71,13 @@ alias submodule_linSpan := coe_linSpan
 
 @[deprecated (since := "today")]
 alias linSpan_eq := coe_linSpan
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp] lemma linSpan_span_eq_submodule_span (s : Set M) :
+    (span R s).linSpan = Submodule.span R s := Submodule.span_span_of_tower ..
+
+@[deprecated (since := "today")]
+alias span_submodule_span := linSpan_span_eq_submodule_span
 
 -- section Ring
 
