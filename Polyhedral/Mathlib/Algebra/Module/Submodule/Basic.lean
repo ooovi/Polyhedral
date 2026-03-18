@@ -46,6 +46,12 @@ lemma span_inter_le (s t : Set M) : span R (s ∩ t) ≤ span R s ⊓ span R t :
     le_inf (span_mono inf_le_left) (span_mono inf_le_right)
 
 
+
+@[simp] lemma span_insert_span (s : Set M) (x : M) :
+    span R (insert x (span R s)) = span R (insert x s) := by simp [← Set.union_singleton]
+
+
+
 -- ## RESTRICT SCALARS
 
 section RestrictedScalar
