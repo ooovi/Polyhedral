@@ -336,18 +336,37 @@ lemma Salient.mem_neg_mem_zero {C : PointedCone R M} (hC : C.Salient)
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
+lemma Salient.of_le_salient {C D : PointedCone R M} (hC : C.Salient) (hD : D ≤ C) : D.Salient := by
+  rw [Salient, ConvexCone.salient_iff_not_flat] at *
+  by_contra h
+  apply hC
+  rcases h with ⟨x, xD, x_ne_0, neg_xD⟩
+  exact ⟨x, hD xD, x_ne_0, hD neg_xD⟩
+  -- have h' := h.mono hD
+
 lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = ⊥ := by
-  constructor
-  · intro h
-    ext x
+  constructor <;> intro h
+  · ext x
     simp only [mem_lineal, Submodule.mem_bot]
     exact ⟨fun H => h.mem_neg_mem_zero H.1 H.2, by simp +contextual⟩
-  · intro h x hx
+  · intro x hx
     rw [not_imp_not]
     intro hnx
     have hlin := mem_lineal.mpr ⟨hx, hnx⟩
     rw [h] at hlin
     exact hlin
+
+@[simp] lemma ofSubmodule_salient_iff_eq_bot {S : Submodule R M} :
+    (S : PointedCone R M).Salient ↔ S = ⊥ := by
+  nth_rw 2 [← lineal_submodule S]
+  exact salient_iff_lineal_bot
+  -- constructor <;> intro h
+  -- · ext x
+  --   simp only [Submodule.mem_bot]
+  --   constructor <;> intro hx
+  --   · exact (h x hx).mtr (by simpa using hx)
+  --   · simp [hx]
+  -- · simp [h]
 
 /-- If `S` is a submodule disjoint to the lineality space of a cone `C`, then `C ⊓ S`
   is salient. -/
@@ -359,14 +378,6 @@ lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.li
 -- lemma inf_salient_of_disjoint {C : PointedCone R M}
 --     {S : Submodule R M} (hS : C.lineal ⊓ S = ⊥) : (C ⊓ S).Salient := by
 --   simpa [salient_iff_lineal_bot] using hS
-
-lemma Salient.of_le_salient {C D : PointedCone R M} (hC : C.Salient) (hD : D ≤ C) : D.Salient := by
-  rw [Salient, ConvexCone.salient_iff_not_flat] at *
-  by_contra h
-  apply hC
-  rcases h with ⟨x, xD, x_ne_0, neg_xD⟩
-  exact ⟨x, hD xD, x_ne_0, hD neg_xD⟩
-  -- have h' := h.mono hD
 
 -- ## MAP
 
