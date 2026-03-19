@@ -20,7 +20,10 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 @[deprecated dual_zero (since := "")]
 alias dual_bot := dual_zero
 
-variable [inst : Fact p.SeparatingLeft] in
+@[simp] lemma dual_ker : dual p (ker p) = ⊤ := by ext; simp +contextual
+
+-- For the proof, see the analogous statement for submodules
+#check Submodule.dual_top_iff_le_ker
 lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
   -- constructor <;> intro h
   -- · intro x hx
@@ -487,6 +490,29 @@ lemma farkas {C : PointedCone R M} (hC : C.DualClosed p) {x : M} (hx : x ∉ C) 
   obtain ⟨φ, _, _⟩ := hx
   use φ
 
+/-- The double dual of a cone being ⊤ is equivalent to every non-zero linear
+  form attaining a negative value on the cone. In infinite dimensional vector spaces
+  there exists such cones other than ⊤ itself (e.g. the lexicographic cone). -/
+lemma dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg {C : PointedCone R M} :
+    dual p.flip (dual p C) ≠ ⊤ ↔ ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
+  constructor <;> intro h
+  · obtain ⟨x, hx⟩ := SetLike.exists_not_mem_of_ne_top _ h
+    obtain ⟨φ, hxφ, hφ⟩ := farkas (dual_dualClosed _ _) hx
+    use φ
+    constructor
+    · by_contra hφ
+      rw [flip_apply] at hxφ
+      simp [hφ] at hxφ
+    exact fun y hy => hφ y (subset_dual_dual hy)
+  · obtain ⟨φ, h0φ, hφ⟩ := h
+    by_contra h
+    rw [dual_top_iff_le_ker] at h
+    have := h hφ
+    contradiction
+
+lemma exists_ne_zero_forall_nonneg_of_dualClosed_ne_top {C : PointedCone R M}
+    (hC : C.DualClosed p) (h : C ≠ ⊤) : ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
+  simp [← dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg, hC, h]
 
 
 

@@ -132,7 +132,8 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 -- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
-@[deprecated "Really needed?" (since := "today")]
+-- TODO: this is only needed because `Submodule.span_insert` is restricted to rings
+--@[deprecated "Really needed?" (since := "today")]
 lemma span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R s :=
   Submodule.span_insert x s
 
