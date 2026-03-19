@@ -12,7 +12,7 @@ open Module Cardinal
 
 /-! ### Basic rank notions -/
 
-section Basic
+section Semiring
 
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M]
@@ -32,7 +32,25 @@ lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
 lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
   Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
 
-end Basic
+end Semiring
+
+section Ring
+
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
+variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
+variable {C : PointedCone R M}
+
+lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
+  have hlin : C.linSpan = (⊥ : Submodule R M) :=
+    (Submodule.rank_eq_zero).1 (by simpa [PointedCone.rank] using h)
+  exact le_bot_iff.mp (by simpa [hlin] using C.le_linSpan)
+
+lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ :=
+  ⟨bot_of_rank_zero, by rintro rfl; simp [PointedCone.rank]⟩
+
+@[simp] lemma rank_bot_eq_zero : (⊥ : PointedCone R M).rank = 0 := by rw [bot_iff_rank_zero]
+
+end Ring
 
 /-! ### Rank formulas for quotients -/
 
@@ -197,23 +215,5 @@ lemma salRank_eq_natCast_salFinrank (C : PointedCone R M) (hC : C.FinSalRank) :
 end Decomposition
 
 end Salient
-
-/-! ### Rank-zero cones -/
-
-section RankZero
-
-variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
-variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
-variable {C : PointedCone R M}
-
-lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
-  have hlin : C.linSpan = (⊥ : Submodule R M) :=
-    (Submodule.rank_eq_zero).1 (by simpa [PointedCone.rank] using h)
-  exact le_bot_iff.mp (by simpa [hlin] using (PointedCone.le_submodule_span C))
-
-lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ :=
-  ⟨bot_of_rank_zero, by rintro rfl; simp [PointedCone.rank]⟩
-
-end RankZero
 
 end PointedCone
