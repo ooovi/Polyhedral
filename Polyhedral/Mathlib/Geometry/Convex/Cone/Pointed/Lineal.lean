@@ -366,8 +366,7 @@ lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
     have hsum2 : ∑ x ∈ t, fn x • x = ∑ x ∈ tn, fn x • x := by
       refine Finset.sum_union_eq_right fun _ _ h ↦ ?_
       simp [fn.notMem_support.mp fun h2 ↦ h <| hftn h2]
-    rw [hsum1, hsum2, hsum]
-    exact add_neg_cancel _
+    rw [hsum1, hsum2, hsum, add_neg_cancel]
   rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
   simp only [hlin, zero_smul]
 
