@@ -370,12 +370,20 @@ lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
   rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
   simp only [hlin, zero_smul]
 
-variable [IsDomain R] [IsTorsionFree R M] in
+section IsDomain
+
+variable [IsDomain R] [IsTorsionFree R M]
+
 lemma salient_span_singleton (x : M) : (span R {x}).Salient := by
   by_cases h : x = 0
   · simp [h]
   refine salient_span_of_linearIndepOn (s := {x}) ?_
   simp [h]
+
+lemma top_not_salient (h : Module.rank R M ≠ 0) : ¬(⊤ : PointedCone R M).Salient := by
+  simpa [Salient, ConvexCone.Salient, rank_zero_iff_forall_zero] using h
+
+end IsDomain
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
