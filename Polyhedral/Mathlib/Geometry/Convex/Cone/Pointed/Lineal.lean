@@ -333,6 +333,43 @@ lemma Salient.mem_neg_mem_zero {C : PointedCone R M} (hC : C.Salient)
   rw [not_imp_not] at hC
   exact hC hx'
 
+
+-- TODO: move to right place
+section Nonneg
+
+omit [IsOrderedRing R]
+
+@[simp] lemma _root_.Nonneg.coe_eq_zero (a : {c : R // 0 ≤ c}) : (a : R) = 0 ↔ a = 0 := by
+  rw [Nonneg.mk_eq_zero]
+
+end Nonneg
+
+set_option backward.isDefEq.respectTransparency false in
+lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
+    (span R s).Salient := by classical
+  rw [salient_iff_mem_neg]
+  intro x hxp hx0 hxn
+  absurd hx0
+  rw [Submodule.mem_span_iff_exists_finset_subset] at hxp hxn
+  obtain ⟨fp, tp, htsp, hftp, rfl⟩ := hxp
+  obtain ⟨fn, tn, htsn, hftn, hsum⟩ := hxn
+  let t := tp ∪ tn
+  let f := fun x => fp x + fn x
+  refine Finset.sum_eq_zero (fun x hx => ?_)
+  have hlin := linearIndepOn_iff'.mp h t (f ·) (by simp [t, htsp, htsn])
+  simp only [id_eq, Nonneg.coe_smul] at hlin
+  specialize hlin ?_ x (Finset.subset_union_left hx)
+  · simp only [f, add_smul, Finset.sum_add_distrib]
+    /- Plan:
+      * Somehow replace the sums in the goal that are over t by sums of tp and tn repectively.
+        This is fine, because they are supported on these subset.
+      * Prove the resulting identity from hsum.
+      * Alternatively, extend the sums in hsum from tp/tn to t, and proceed as before.
+    -/
+    sorry
+  rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
+  simp only [hlin, zero_smul]
+
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
@@ -379,41 +416,6 @@ lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.li
 --     {S : Submodule R M} (hS : C.lineal ⊓ S = ⊥) : (C ⊓ S).Salient := by
 --   simpa [salient_iff_lineal_bot] using hS
 
--- TODO: move
-section Nonneg
-
-omit [IsOrderedRing R]
-
-@[simp] lemma _root_.Nonneg.coe_eq_zero (a : {c : R // 0 ≤ c}) : (a : R) = 0 ↔ a = 0 := by
-  rw [Nonneg.mk_eq_zero]
-
-end Nonneg
-
-set_option backward.isDefEq.respectTransparency false in
-lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
-    (span R s).Salient := by classical
-  rw [salient_iff_mem_neg]
-  intro x hxp hx0 hxn
-  absurd hx0
-  rw [Submodule.mem_span_iff_exists_finset_subset] at hxp hxn
-  obtain ⟨fp, tp, htsp, hftp, rfl⟩ := hxp
-  obtain ⟨fn, tn, htsn, hftn, hsum⟩ := hxn
-  let t := tp ∪ tn
-  let f := fun x => fp x + fn x
-  refine Finset.sum_eq_zero (fun x hx => ?_)
-  have hlin := linearIndepOn_iff'.mp h t (f ·) (by simp [t, htsp, htsn])
-  simp only [id_eq, Nonneg.coe_smul] at hlin
-  specialize hlin ?_ x (Finset.subset_union_left hx)
-  · simp only [f, add_smul, Finset.sum_add_distrib]
-    /- Plan:
-      * Somehow replace the sums in the goal that are over t by sums of tp and tn repectively.
-        This is fine, because they are supported on these subset.
-      * Prove the resulting identity from hsum.
-      * Alternatively, extend the sums in hsum from tp/tn to t, and proceed as before.
-    -/
-    sorry
-  rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
-  simp only [hlin, zero_smul]
 
 -- ## MAP
 
