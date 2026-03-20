@@ -24,6 +24,9 @@ noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 -- NOTE: this is not the same as Module.Finite or FG!
 abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
 
+@[simp] lemma finRank_of_isNoetherian [IsNoetherian R M] (C : PointedCone R M) : C.FinRank :=
+  IsNoetherian.noetherian C.linSpan
+
 set_option backward.isDefEq.respectTransparency false in
 lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
 
