@@ -437,8 +437,8 @@ lemma salient_quot_linSpan_of_face [IsDirectedOrder R] (hF : F.IsFaceOf C) :
   have hx0 : (F.linSpan).mkQ x = 0 := by
     simpa [Submodule.mkQ_apply] using
       (Submodule.Quotient.mk_eq_zero (p := F.linSpan) (x := x)).2
-        (PointedCone.le_submodule_span F hxF)
-  exact hz0 (by simpa using hx0)
+        (PointedCone.le_linSpan F hxF)
+  exact hz0 (by simp only [mkQ_apply]; exact hx0)
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)
@@ -574,6 +574,7 @@ lemma mem_of_sum_smul_mem' {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M)
 
 variable {s t : Set M}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
     span R (s ∩ F) = F := by
   ext x; constructor
@@ -624,6 +625,7 @@ variable {C F : PointedCone R M}
 
 -- ## QUOT / FIBER
 
+set_option backward.isDefEq.respectTransparency false in
 lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ F.linSpan) :
     (F.quot S).IsFaceOf (C.quot S) := by
   refine ⟨map_mono hF.le, ?_⟩

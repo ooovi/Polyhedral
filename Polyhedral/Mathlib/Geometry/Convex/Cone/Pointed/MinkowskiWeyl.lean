@@ -230,7 +230,7 @@ lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
   have hC := FG.linSpan_fg hC
   constructor
   · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hC)
-  · rw [dual_sup_dual_inf_dual, dual_eq_submodule_dual, ofSubmodule_coe, dual_eq_submodule_dual,
+  · rw [dual_sup_dual_inf_dual, dual_eq_submodule_dual, coe_ofSubmodule, dual_eq_submodule_dual,
       Submodule.FG.dual_dual_flip p hC] -- <-- submodule duality theory
 
 -- variable (p) [Fact p.flip.IsFaithfulPair] in
@@ -330,6 +330,7 @@ lemma fg_iff_fgdual {C : PointedCone 𝕜 N} : C.FG ↔ C.FGDual p := ⟨FG.fgdu
 -- /-- A finite dimensional cone is FG if and only if it is FGDual. -/
 -- lemma fg_iff_fgdual {C : PointedCone 𝕜 N} : C.FGDual p ↔ C.FG := ⟨FGDual.fg, FG.fgdual p⟩
 
+set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 /-- In finite dimensional space, the dual of and FG cone is itself FG. -/
 lemma FG.dual_fg {C : PointedCone 𝕜 M} (hC : C.FG) : (dual p C).FG := by
@@ -462,7 +463,7 @@ lemma dual_fg_inf_fgdual_dual_sup_dual {C D : PointedCone 𝕜 M} (hC : C.FG)
   obtain ⟨D', hD', rfl⟩ := FGDual.exists_fg_dual hD
   rw [← Submodule.coe_inf]
   rw [← dual_sup_dual_inf_dual]
-  rw [flip_flip] at hC'
+  rw [LinearMap.flip_flip] at hC'
   rw [FGDual.dual_dual_flip <| sup_fgdual_fg hC' hD']
   rw [FGDual.dual_dual_flip hC']
   rw [FG.dual_dual_flip p hD']

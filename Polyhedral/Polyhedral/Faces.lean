@@ -54,7 +54,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) : (C ⊔ F.linSpan).lineal = F.linSpan := by
   rw [sup_comm]
   rw [_lineal_sup_eq] <;> simp -- WARNING: is `_lineal_sup_eq` even true?
-  simpa using le_trans hF.lineal_le (le_submodule_span F)
+  simpa using le_trans hF.lineal_le (le_linSpan F)
   -- ext x
   -- simp [mem_lineal, mem_linSpan, Submodule.mem_sup]
   -- constructor
@@ -73,7 +73,7 @@ variable (p) [p.IsPerfPair] in
   rw [dual_flip_dual p hC]
   rw [← dual_span_lineal_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
-  nth_rw 3 [← PointedCone.ofSubmodule_coe]
+  nth_rw 3 [← PointedCone.coe_ofSubmodule]
   rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]
   rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
   rw [dual_flip_dual p hC]

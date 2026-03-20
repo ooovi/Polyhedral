@@ -686,7 +686,7 @@ variable [Fact (Surjective p.flip)] in
 /-- A submodule of a vector space is dual closed. -/
 lemma dualClosed (S : Submodule R M) : S.DualClosed p := by
   apply DualClosed.to_bilin
-  nth_rw 1 [DualClosed, Dual.eval, flip_flip]
+  nth_rw 1 [DualClosed, Dual.eval, LinearMap.flip_flip]
   rw [dual_dualCoannihilator, dual_dualAnnihilator]
   exact Subspace.dualAnnihilator_dualCoannihilator_eq
 
