@@ -360,13 +360,14 @@ lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
   simp only [id_eq, Nonneg.coe_smul] at hlin
   specialize hlin ?_ x (Finset.subset_union_left hx)
   · simp only [f, add_smul, Finset.sum_add_distrib]
-    /- Plan:
-      * Somehow replace the sums in the goal that are over t by sums of tp and tn repectively.
-        This is fine, because they are supported on these subset.
-      * Prove the resulting identity from hsum.
-      * Alternatively, extend the sums in hsum from tp/tn to t, and proceed as before.
-    -/
-    sorry
+    have hsum1 : ∑ x ∈ t, fp x • x = ∑ x ∈ tp, fp x • x := by
+      refine Finset.sum_union_eq_left fun _ _ h ↦ ?_
+      simp [fp.notMem_support.mp fun h2 ↦ h <| hftp h2]
+    have hsum2 : ∑ x ∈ t, fn x • x = ∑ x ∈ tn, fn x • x := by
+      refine Finset.sum_union_eq_right fun _ _ h ↦ ?_
+      simp [fn.notMem_support.mp fun h2 ↦ h <| hftn h2]
+    rw [hsum1, hsum2, hsum]
+    exact add_neg_cancel _
   rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
   simp only [hlin, zero_smul]
 
