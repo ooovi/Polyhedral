@@ -65,8 +65,11 @@ def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [mem_lineal]; aesop
 
-@[simp] lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
+@[simp] lemma ofSubmodule_lineal (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
   ext x; simp [mem_lineal]
+
+@[deprecated (since := "today")]
+alias lineal_submodule := ofSubmodule_lineal
 
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
@@ -360,13 +363,13 @@ lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
   simp only [id_eq, Nonneg.coe_smul] at hlin
   specialize hlin ?_ x (Finset.subset_union_left hx)
   · simp only [f, add_smul, Finset.sum_add_distrib]
-    /- Plan:
-      * Somehow replace the sums in the goal that are over t by sums of tp and tn repectively.
-        This is fine, because they are supported on these subset.
-      * Prove the resulting identity from hsum.
-      * Alternatively, extend the sums in hsum from tp/tn to t, and proceed as before.
-    -/
-    sorry
+    have hsum1 : ∑ x ∈ t, fp x • x = ∑ x ∈ tp, fp x • x := by -- restrict t to tp
+      refine Finset.sum_union_eq_left fun _ _ h ↦ ?_
+      simp [fp.notMem_support.mp fun h2 ↦ h <| hftp h2]
+    have hsum2 : ∑ x ∈ t, fn x • x = ∑ x ∈ tn, fn x • x := by -- restrict t to tn
+      refine Finset.sum_union_eq_right fun _ _ h ↦ ?_
+      simp [fn.notMem_support.mp fun h2 ↦ h <| hftn h2]
+    rw [hsum1, hsum2, hsum, add_neg_cancel]
   rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
   simp only [hlin, zero_smul]
 
@@ -377,9 +380,10 @@ variable [IsDomain R] [IsTorsionFree R M]
 lemma salient_span_singleton (x : M) : (span R {x}).Salient := by
   by_cases h : x = 0
   · simp [h]
-  refine salient_span_of_linearIndepOn (s := {x}) ?_
-  simp [h]
+  · exact salient_span_of_linearIndepOn (by simp [h])
 
+-- NOTE: there is alos `ofSubmodule_salient_iff_eq_bot` below, which proven something stronger
+--  for general rings, BUT assumes linear order. Is one setting better than the other?
 lemma top_not_salient (h : Module.rank R M ≠ 0) : ¬(⊤ : PointedCone R M).Salient := by
   simpa [Salient, ConvexCone.Salient, rank_zero_iff_forall_zero] using h
 

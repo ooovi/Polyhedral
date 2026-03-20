@@ -63,14 +63,17 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 /-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
-@[simp] lemma coe_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+@[simp high] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
     by simp [linSpan]
 
 @[deprecated (since := "today")]
-alias submodule_linSpan := coe_linSpan
+alias coe_linSpan := ofSubmodule_linSpan
 
 @[deprecated (since := "today")]
-alias linSpan_eq := coe_linSpan
+alias submodule_linSpan := ofSubmodule_linSpan
+
+@[deprecated (since := "today")]
+alias linSpan_eq := ofSubmodule_linSpan
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma linSpan_span_eq_submodule_span (s : Set M) :
