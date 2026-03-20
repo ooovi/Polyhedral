@@ -483,12 +483,55 @@ lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed 
 
 -- ## FARKAS
 
-lemma farkas {C : PointedCone R M} (hC : C.DualClosed p) {x : M} (hx : x ∉ C) :
-    ∃ φ : N, 0 > p x φ ∧ ∀ y ∈ C, 0 ≤ p y φ := by
+/- Separation lemma for dual closed cones. -/
+lemma exists_pos_forall_nonneg_of_not_mem {C : PointedCone R M}
+    (hC : C.DualClosed p) {x : M} (hx : x ∉ C) : ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
   rw [← hC] at hx
   simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at hx
   obtain ⟨φ, _, _⟩ := hx
   use φ
+
+alias farkas := exists_pos_forall_nonneg_of_not_mem
+
+/-- The dual of a cone being ⊥ is equivalent to all non-zero linear forms
+  attaining negative values on the cone. -/
+lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg {C : PointedCone R M} :
+    dual p C = ⊥ ↔ ∀ φ : N, φ = 0 ∨ ∃ x ∈ C, p x φ < 0 := by
+  simp only [SetLike.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_bot]
+  constructor <;> intro h φ
+  · by_cases hφ : φ = 0
+    · left; exact hφ
+    · replace h := (h φ).mp.mt hφ
+      push_neg at h
+      right; exact h
+  · constructor
+    · intro h'
+      rcases h φ
+      · assumption
+      · absurd h'
+        push_neg
+        assumption
+    · simp +contextual
+
+-- /-- The dual of a cone being ⊥ is equivalent to all non-zero linear forms
+--   attaining negative values on the cone. -/
+-- lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg' {C : PointedCone R M} :
+--     dual p C ≠ ⊥ ↔ ∃ φ : N, φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
+--   simp only [SetLike.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_bot]
+--   constructor <;> intro h φ
+--   · by_cases hφ : φ = 0
+--     · left; exact hφ
+--     · replace h := (h φ).mp.mt hφ
+--       push_neg at h
+--       right; exact h
+--   · constructor
+--     · intro h'
+--       rcases h φ
+--       · assumption
+--       · absurd h'
+--         push_neg
+--         assumption
+--     · simp +contextual
 
 /-- The double dual of a cone being ⊤ is equivalent to every non-zero linear
   form attaining a negative value on the cone. In infinite dimensional vector spaces
