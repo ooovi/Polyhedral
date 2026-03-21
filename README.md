@@ -47,5 +47,7 @@ A more detailled overview of all open and merged PRs is given [on Zulip](https:/
 - Submodules over a ring are modular elements in the lattice of submodules over a semiring: [#36689](https://github.com/leanprover-community/mathlib4/pull/36689)
 - Instances for SeparatingLeft, SeparatingRight and Nondegenerate: [#34487](https://github.com/leanprover-community/mathlib4/pull/34487)
 - Co-finitely generated submodules: [#34006](https://github.com/leanprover-community/mathlib4/pull/34006)
+- Renaming PointedCone.span to PointedCone.hull: #36953
+
 
 -->
