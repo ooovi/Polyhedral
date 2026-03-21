@@ -20,13 +20,16 @@ Currently the project implements:
 * the face lattice of a cone
 * face theory of polyhedral cones (all faces are exposed, the face lattice is graded, etc.)
 
+<!--blueprint:  https://ooovi.github.io/Polyhedral/-->
+## Pull requests
+
 Below is a short list of the most important PRs from this project.
 A more detailled overview of all open and merged PRs is given [on Zulip](https://leanprover.zulipchat.com/#narrow/channel/144837-PR-reviews/topic/PRs.20for.20polyhedral.20geometry.2Fcombinatorics/with/579565921).
 
-<!--blueprint:  https://ooovi.github.io/Polyhedral/-->
-## On it's way
+- Lineality space of a cone: [#33780](https://github.com/leanprover-community/mathlib4/pull/33780) (merged)
 - Face-lattices of cones: [#33664](https://github.com/leanprover-community/mathlib4/pull/33664)
 - Duality operator for submodules: [#34007](https://github.com/leanprover-community/mathlib4/pull/34007)
+- Duals of finitely generated cones: [#36946](https://github.com/leanprover-community/mathlib4/pull/36946)
 
 <!-- not a serious PR (!) - https://github.com/leanprover-community/mathlib4/pull/34703 -->
 
