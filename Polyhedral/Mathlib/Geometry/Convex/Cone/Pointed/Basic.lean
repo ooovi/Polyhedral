@@ -34,6 +34,10 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
+abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
+
+----
+
 set_option backward.isDefEq.respectTransparency false in
 @[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
   Submodule.restrictScalars_monotone ..
