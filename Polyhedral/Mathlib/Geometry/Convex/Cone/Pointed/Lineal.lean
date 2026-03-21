@@ -27,6 +27,7 @@ def lineal (C : PointedCone R M) : Submodule R M where
     · rw [← neg_nonneg] at hr
       simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
+-- TODO: maybe do not make this a simp lemma. Seems more annoying than helpful.
 @[simp]
 lemma coe_lineal (C : PointedCone R M) : C.lineal = C ⊓ -C :=
   rfl
@@ -34,6 +35,7 @@ lemma coe_lineal (C : PointedCone R M) : C.lineal = C ⊓ -C :=
 lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
   rfl
 
+-- TODO: make cone argument implicit?
 /-- The lineality space is contained in the cone. -/
 lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
 
@@ -170,24 +172,18 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
       replace h' := smul_mem C h1c hx
       exact lineal_isExtreme_right h' hx hcx
 
-
--- Q: Can we shorten the proof, see `inf_sup_lineal_eq_of_isCompl` below.
+-- TODO: maybe this result is not really necessary. See `inf_sup_eq_self_of_le_of_codisjoint` below.
 /-- If `C` is a cone and `S` is complementary to the cone's linealiry space, then `C` can
   be written as `(C ⊓ S) ⊔ C.lineal`. -/
 lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
-  rw [le_antisymm_iff]
-  constructor
-  · exact sup_le_iff.mpr ⟨inf_le_left, lineal_le C⟩
-  · intro x hx
-    rw [Submodule.codisjoint_iff_exists_add_eq] at hCS
-    obtain ⟨y, z, hy, hz, hyz⟩ := hCS x
-    rw [Submodule.mem_sup]
-    have hzC : z ∈ C := by
-      have h := Submodule.add_mem C hx (neg_mem_of_mem_lineal hy)
-      rw [← hyz, add_neg_cancel_comm] at h
-      exact h
-    exact ⟨z, by simp; exact ⟨hzC, hz⟩, y, hy, by rw [add_comm]; exact hyz⟩
+  simp [-coe_lineal, ← inf_sup_assoc_of_submodule_le _ (lineal_le _), ← coe_sup, hCS.symm.eq_top]
+
+-- set_option backward.isDefEq.respectTransparency false in
+lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone R M}
+    {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint S T) : (C ⊓ S) ⊔ T = C := by
+  simp [← inf_sup_assoc_of_submodule_le _ hT, hST.eq_top]
+  -- simp [← Submodule.inf_sup_assoc_of_restrictScalars_le _ hT, hST.eq_top]
 
 -- @[deprecated inf_sup_lineal (since := "2025-11-07")]
 -- lemma inf_sup_lineal_eq_of_isCompl {C : PointedCone R M} {S : Submodule R M}

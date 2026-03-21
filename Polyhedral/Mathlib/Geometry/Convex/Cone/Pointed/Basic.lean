@@ -438,8 +438,7 @@ variable (R) in
 @[simp] lemma span_neg_pair_eq_span_singleton (x : M) : span R {-x, x} = R ∙ x := by
   rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
   ext y
-  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
-    smul_neg, Subtype.exists, Nonneg.mk_smul, exists_prop]
+  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair, smul_neg, Subtype.exists]
   constructor
   · rintro ⟨a, _, b, _, rfl⟩
     exact ⟨a, b, rfl⟩
