@@ -50,6 +50,8 @@ Here we chose the core for defining the algebraic relint. Among its many equival
 we chose the most elementary one: `hull R (C ∪ (-x)) = span R C`, because it does not depend on
 duality or the notions of faces.
 
+See also: https://en.wikipedia.org/wiki/Algebraic_interior
+
 -/
 
 /- TODO:
@@ -107,7 +109,7 @@ lemma finset_sum_mem_relint_span {s : Finset M} : ∑ x ∈ s, x ∈ relint (spa
 
 lemma relint_nonempty (h : C.FinSalRank) : Nonempty C.relint := sorry
 
--- Easier to prove than `relint_nonempty`, for now.
+-- Easier to prove than `relint_nonempty`, perhaps prove this first.
 lemma relint_nonempty' (h : C.FinRank) : Nonempty C.relint := by
   /-
     * choose a basis of C.linSpan in C
@@ -122,7 +124,7 @@ example {C : PointedCone R M} (hC : C.FinSalRank) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
   obtain ⟨φ, hφ⟩ := relint_nonempty (hC.dual_finSalRank p)
   rw [mem_relint_dual] at hφ
-  exact ⟨φ, fun x hx => ⟨by simpa using hφ.1 hx, hφ.2 x hx⟩⟩
+  exact ⟨φ, fun _ h => ⟨by simpa using hφ.1 h, hφ.2 _ h⟩⟩
 
 lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := sorry
 
