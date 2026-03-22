@@ -34,6 +34,7 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
+-- allows us to use dot notation for lemmas in Submodule.FG or PointedCone.FG
 abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
 
 ----

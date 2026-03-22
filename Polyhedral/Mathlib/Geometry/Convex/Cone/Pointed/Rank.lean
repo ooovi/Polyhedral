@@ -28,7 +28,9 @@ abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
   IsNoetherian.noetherian C.linSpan
 
 set_option backward.isDefEq.respectTransparency false in
-lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
+lemma FG.finRank {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
+
+alias finRank_of_fg := FG.finRank
 
 lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
 
