@@ -31,7 +31,7 @@ Without a topology one can consider algebraic notions of relative interior.
 
 The `core` is one possible notion with the following equivalent definitions: a point x ∈ C lies in
 the core iff one of the following equivalent conditions holds:
-  * x lies in no proper face
+  * x lies in no proper face of C
   * hull R (C ∪ (-x)) = span R C
   * ∀ t : M, ∃ c > 0, x + c • t ∈ C
   * ∀ φ : Dual R M, φ x = 0 → φ ∈ lineal (dual (Dual.eval R M) C)
@@ -54,6 +54,7 @@ duality or the notions of faces.
 
 /- TODO:
   * the relints of the faces of a cone partition the cone.
+  * the relint is preserved under taking the double dual closure.
 -/
 
 namespace PointedCone
@@ -62,19 +63,22 @@ variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
-variable {C D F F₁ F₂ : PointedCone R M}
-variable {x : M}
+variable {C D : PointedCone R M} {x : M}
 
 /-- Algebraic relative interior, also known as core. -/
 def relint (C : PointedCone R M) : ConvexCone R M where
-  carrier := {x ∈ C | span R (insert (-x) C) = C.linSpan}
+  carrier := {x ∈ C | ∀ t, ∃ c > 0, x + c • t ∈ C}
   smul_mem' c hc x hx := sorry
   add_mem' x hx y hy := sorry
 
-lemma mem_relint_iff_mem_span_neg_eq_top :
-    x ∈ C.relint ↔ x ∈ C ∧ span R (insert (-x) C) = C.linSpan := by simp [relint]
-
 lemma relint_le : C.relint ≤ C := fun _ hx => hx.1
+
+lemma mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem :
+    x ∈ C.relint ↔ x ∈ C ∧ ∀ t, ∃ c > 0, x + c • t ∈ C := by simp [relint]
+
+lemma mem_relint_iff_mem_span_neg_eq_top :
+    x ∈ C.relint ↔ x ∈ C ∧ span R (insert (-x) C) = C.linSpan := by
+    sorry
 
 lemma mem_relint_iff_mem_forall_isFaceOf_eq_top_of_mem :
     x ∈ C.relint ↔ x ∈ C ∧ ∀ F : PointedCone R M, F.IsFaceOf C → x ∈ F → F = C := by
@@ -92,10 +96,6 @@ lemma mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero :
 variable [Fact p.SeparatingLeft] in
 lemma mem_relint_dual {y : N} :
     y ∈ (dual p C).relint ↔ y ∈ dual p C ∧ ∀ x ∈ C, p x y = 0 → x ∈ C.lineal := by
-  sorry
-
-lemma mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem :
-    x ∈ C.relint ↔ x ∈ C ∧ ∀ t : M, ∃ ε > 0, x + ε • t ∈ C := by
   sorry
 
 lemma finset_sum_mem_relint_of_subset_of_le_span {s : Finset M} (hs : (s : Set M) ⊆ C)
@@ -116,14 +116,14 @@ lemma relint_nonempty' (h : C.FinRank) : Nonempty C.relint := by
   -/
   sorry
 
-lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := sorry
-
- -- short proof of `IsExposedFace.exists_dual_pos`
+ -- potential short proof of `IsExposedFace.exists_dual_pos`
 variable (p) [Fact p.SeparatingLeft] in
-example (C : PointedCone R M) (hC : C.FinSalRank) :
+example {C : PointedCone R M} (hC : C.FinSalRank) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
   obtain ⟨φ, hφ⟩ := relint_nonempty (hC.dual_finSalRank p)
   rw [mem_relint_dual] at hφ
   exact ⟨φ, fun x hx => ⟨by simpa using hφ.1 hx, hφ.2 x hx⟩⟩
+
+lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := sorry
 
 end PointedCone

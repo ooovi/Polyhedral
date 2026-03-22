@@ -163,11 +163,15 @@ noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
 /-- Salient finrank of a cone. -/
 noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
 
+/-- A cone is of finite salient rank if its salient quotient is of finite rank. It means that
+  the non-trivial structure of the cone only spans finitely many dimensions. -/
 abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
 
 lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank := sorry
 
 lemma FG.finSalRank (h : C.FG) : C.FinSalRank := h.finRank.finSalRank
+
+lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) : C.FinRank := sorry
 
 end Definitions
 
@@ -179,11 +183,15 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+/- The dual of a cone with finite salient rank also has finite salient rank.-/
 variable (p) in
-lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := sorry
+lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := by
+  sorry
 
-variable (p) in
-lemma FinSalRank.dual_finSalRank_iff : (dual p C).FinSalRank ↔ C.FinSalRank := sorry
+variable (p) [Fact p.SeparatingLeft] in
+@[simp] -- enable simp, once proven (this is for safety in case it is false)
+lemma dual_finSalRank_iff_finSalRank : (dual p C).FinSalRank ↔ C.FinSalRank := by
+  sorry
 
 end CommRing
 
