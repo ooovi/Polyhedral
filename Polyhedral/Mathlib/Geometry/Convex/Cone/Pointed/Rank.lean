@@ -179,7 +179,11 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma FinSalRank.iff_dual_finSalRank : (dual p C).FinSalRank ↔ C.FinSalRank := sorry
+variable (p) in
+lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := sorry
+
+variable (p) in
+lemma FinSalRank.dual_finSalRank_iff : (dual p C).FinSalRank ↔ C.FinSalRank := sorry
 
 end CommRing
 
