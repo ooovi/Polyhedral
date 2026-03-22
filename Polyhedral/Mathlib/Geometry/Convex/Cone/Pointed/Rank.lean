@@ -155,6 +155,7 @@ section Definitions
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
 
 /-- Salient rank of a cone. -/
 noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
@@ -164,7 +165,23 @@ noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
 
 abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
 
+lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank := sorry
+
+lemma FG.finSalRank (h : C.FG) : C.FinSalRank := h.finRank.finSalRank
+
 end Definitions
+
+section CommRing
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {C : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+lemma FinSalRank.iff_dual_finSalRank : (dual p C).FinSalRank ↔ C.FinSalRank := sorry
+
+end CommRing
 
 section Decomposition
 
