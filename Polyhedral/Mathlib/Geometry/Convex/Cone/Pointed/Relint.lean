@@ -26,7 +26,7 @@ namespace PointedCone
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
--- variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
 variable {x : M}
 
@@ -45,12 +45,20 @@ lemma mem_relint_iff_mem_span_neg_eq_top :
 lemma relint_le : C.relint ≤ C := fun _ hx => (mem_relint_iff_mem_span_neg_eq_top.mp hx).1
 
 lemma mem_relint_iff_mem_forall_isFaceOf_eq_top_of_mem :
-    x ∈ C.relint ↔ x ∈ C ∧ ∀ F : PointedCone R M, F.IsFaceOf C → (x ∈ F → F = ⊤) := sorry
+    x ∈ C.relint ↔ x ∈ C ∧ ∀ F : PointedCone R M, F.IsFaceOf C → (x ∈ F → F = ⊤) := by
+  sorry
 
 lemma mem_relint_iff_mem_forall_face_eq_top_of_mem :
-    x ∈ C.relint ↔ x ∈ C ∧ ∀ F : Face C, x ∈ F → F = ⊤ := sorry
+    x ∈ C.relint ↔ x ∈ C ∧ ∀ F : Face C, x ∈ F → F = ⊤ := by
+  sorry
 
-lemma finset_sum_mem_relint_span (s : Finset M) : ∑ x ∈ s, x ∈ relint (span R (s : Set M)) := sorry
+lemma mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero :
+    x ∈ C.relint ↔ x ∈ C ∧ ∀ y ∈ dual p C, 0 ≤ p x y ∧ (p x y = 0 → y ∈ (dual p C).lineal) := by
+  sorry
+
+lemma finset_sum_mem_relint_span {s : Finset M} (hs : (s : Set M) ⊆ C)
+    (hC : C ≤ Submodule.span (M := M) R s) : ∑ x ∈ s, x ∈ relint (span R (s : Set M)) := by
+  sorry
 
 lemma relint_nonempty (h : C.FinSalRank) : Nonempty C.relint := sorry
 
