@@ -200,16 +200,12 @@ end Prod
 
 end Ring
 
-
-
 end Face
 
 end PointedCone
 
 
 -----------------------end of PR
-
-
 
 
 namespace PointedCone
@@ -227,13 +223,15 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
--- abbrev span (F : Face C) : Submodule R M := Submodule.span R F
 abbrev linSpan (F : Face C) : Submodule R M := F.toPointedCone.linSpan
+
+noncomputable abbrev rank (F : Face C) : Cardinal := F.toPointedCone.rank
 
 noncomputable abbrev finrank (F : Face C) : ℕ := F.toPointedCone.finrank
 
 end Semiring
 
+-- ## Quot and Fiber
 
 section Ring
 
@@ -242,8 +240,6 @@ open Submodule hiding span dual IsDualClosed
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
-
--- ## QUOT / FIBER
 
 abbrev quotMap (F : Face C) := mkQ F.linSpan
 
@@ -308,8 +304,6 @@ open Submodule hiding span dual IsDualClosed
 variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
-
--- ## QUOT / FIBER
 
 def quotFace (F G : Face C) : Face (C ⧸ F) := by
   refine ⟨PointedCone.map F.quotMap ((F ⊔ G : Face C) : PointedCone R M), ?_⟩
@@ -489,7 +483,6 @@ def dual_flip (hC : DualClosed p C) (F : Face (.dual p C)) : Face C :=
 lemma dual_antitone : Antitone (dual p : Face C → Face _) :=
   fun _ _ hF _ xd => subdual_antitone p hF xd
 
--- not sure if these are necessary
 /-!
 #### Map and comap
 -/
@@ -519,8 +512,8 @@ def map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M �
 def comap {f : N →ₗ[R] M} (F : Face C) : Face (comap f C) := ⟨_, F.isFaceOf.comap _⟩
 
 -- /-- The face `comap e F` of `comap e C`. -/
--- def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
---     := F.comap
+def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
+    := F.comap
 
 end Field
 

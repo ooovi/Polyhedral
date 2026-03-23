@@ -5,47 +5,6 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
-/-
-theorem 2.7 from ziegler page 57:
-(i) For every polytope P the face poset L(P) is a graded lattice of length
-dim(P) + 1, with rank function r(F) = dim(F) + 1.
-(ii) Every interval [G, F] of L(P) is the face lattice of a convex polytope
-of dimension r(F) − r(G) − 1.
-
-proof:
-part (ii).
-- assume F = P, by Prop 2.3(iii) (faces of F are exactly the faces of P that are contained in F)
-- if G = ∅, then everything is clear
-- If G ̸= ∅, it has a vertex v ∈ G by Prop 2.2(i) (krein milman, Every polytope is the convex
- hull of its vertices: P = conv(vert(P)).)
-- it is a vertex of P by Prop 2.3(iii)
-- Prop 2.4: There is a bijection between the k-dimensional faces of P that contain v, and the
- (k−1)-dimensional faces of P/v, given by
- π : F ↦ F ∩ {x : cx = c₁}
- σ : F' ↦ P ∩ aff ({v} ∪ F')
-- face lattice of P/v is isomorphic to interval [{v}, P] of the face lattice L(P), by Prop 2.4
-- done by induction on dim(G).
-
-part (i).
-- G ⊂ F faces of P
-- monotonicity:
-  - then G = P ∩ aff(G) ⊆ P ∩ aff(F) = F by Prop 2.3(iv) (every face has a supportin hyperplane)
-  - so aff(G) ⊂ aff(F), and thus dim(G) < dim(F)
-- covering:
-  - let dim(F)−dim(G) ≥ 2, show there is a face H ∈ L(P) with G ⊂ H ⊂ F
-  - by part (ii) the interval [G, F] is the face lattice of a polytope of dimension at least 1
-  - so it has a vertex, which yields the desired H.
-
-
-stuff we need:
-- faces of F are exactly the faces of P that are contained in F (`IsFaceOf.trans`)
-- every non-⊥ cone has a vertex (`FG.exists_ray` below)
-- bijection between the k-dimensional faces of P that contain v, and the
- (k−1)-dimensional faces of P/v
-- every face has a supporting hyperplane (`IsFaceOf.FG.exposed` below)
--/
-
-
 namespace PointedCone
 
 section DivisionRingLemmas
