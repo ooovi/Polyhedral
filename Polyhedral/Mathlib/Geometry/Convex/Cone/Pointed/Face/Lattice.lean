@@ -398,7 +398,7 @@ lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
       rw [Submodule.mem_bot, ← hcx, hczero]
   · simp only [fiberFace, quotMap, comap, h, comap_bot, LinearMap.ker_restrictScalars, ker_mkQ,
     ← toPointedCone_eq_iff]
-    suffices C ⊓ restrictScalars { c // 0 ≤ c } F.linSpan = F by symm; simp [this]
+    suffices C ⊓ restrictScalars { c // 0 ≤ c } F.linSpan = F by symm; exact this
     convert F.isFaceOf.inf_linSpan
 
 lemma le_linSpan_iff_le {F G : Face C} :
