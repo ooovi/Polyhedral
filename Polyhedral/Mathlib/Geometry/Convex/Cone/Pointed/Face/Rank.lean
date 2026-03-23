@@ -17,8 +17,6 @@ variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
-noncomputable def rank (F : Face C) := Module.rank R F.linSpan
-
 end Basic
 
 section RankZero
