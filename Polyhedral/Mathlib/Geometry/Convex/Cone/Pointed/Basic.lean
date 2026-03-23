@@ -664,7 +664,8 @@ lemma quot_eq_bot_iff (C : PointedCone R M) (S : Submodule R M) :
   constructor
   · intro h x hx
     have := h (S.mkQ x)
-    simp [Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at this
+    simp only [Submodule.mkQ_apply, Submodule.mem_map, LinearMap.coe_restrictScalars,
+      Submodule.mem_bot, Submodule.Quotient.mk_eq_zero] at this
     exact this.mp ⟨x, hx, rfl⟩
   · intro h y
     simp only [Submodule.mem_map, LinearMap.coe_restrictScalars, Submodule.mkQ_apply,
