@@ -322,7 +322,6 @@ lemma quotFace_eq_map_of_le {F G : Face C} (h : F ≤ G) :
     (F.quotFace G : PointedCone R (M ⧸ F.linSpan)) = PointedCone.map F.quotMap G := by
   simp [quotFace, sup_eq_right.mpr h]
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G := by
   ext x
@@ -336,7 +335,8 @@ lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) =
     have hxy : x - y ∈ F.linSpan := by
       rw [← Submodule.ker_mkQ F.linSpan]
       change F.quotMap (x - y) = 0
-      simp [map_sub, hyq]
+      simp only [map_sub, mkQ_apply, hyq, sub_self]
+      rfl
     have hx_lin : x ∈ (G : PointedCone R M).linSpan :=
       ((G : PointedCone R M).linSpan.sub_mem_iff_left (Submodule.subset_span hyG)).mp
         (Submodule.span_mono h hxy)
@@ -390,6 +390,7 @@ lemma bot_face {F : Face C} (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥
   change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
   simp [h, hbotcone]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
     F = fiberFace G ↔ G.toPointedCone = ⊥ := by
   constructor <;> intro h
