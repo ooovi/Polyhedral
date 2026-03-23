@@ -6,6 +6,7 @@ Authors: Olivia Röhrig
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 import Mathlib.LinearAlgebra.Quotient.Defs
 
@@ -203,8 +204,6 @@ end Prod
 
 end Ring
 
-
-
 end Face
 
 end PointedCone
@@ -213,36 +212,13 @@ end PointedCone
 -----------------------end of PR
 
 
-
-
-
-
-
-
-
-
 namespace PointedCone
 
-variable {R M N : Type*}
-
 namespace Face
-section Ring
-variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-variable {C : PointedCone R M}
-
-lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
-  have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
-    simp [Face.lineal_bot, Face.toPointedCone, salient_iff_lineal_bot.mp hC]
-  refine ⟨fun h => by simpa [h, hbotcone], fun h => ?_⟩
-  apply Face.ext
-  intro x
-  change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
-  simpa [h, hbotcone]
-
-end Ring
 
 section Semiring
 
+variable {R M N : Type*}
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 
@@ -251,10 +227,15 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
-abbrev span (F : Face C) : Submodule R M := Submodule.span R F
+abbrev linSpan (F : Face C) : Submodule R M := F.toPointedCone.linSpan
+
+noncomputable abbrev rank (F : Face C) : Cardinal := F.toPointedCone.rank
+
+noncomputable abbrev finrank (F : Face C) : ℕ := F.toPointedCone.finrank
 
 end Semiring
 
+-- ## Quot and Fiber
 
 section Ring
 
@@ -264,19 +245,17 @@ variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
--- ## QUOT / FIBER
-
-abbrev quotMap (F : Face C) := mkQ F.span
+abbrev quotMap (F : Face C) := mkQ F.linSpan
 
 /-- The cone obtained by quotienting by the face's linear span. -/
-abbrev quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
+abbrev quot (F : Face C) : PointedCone R (M ⧸ F.linSpan) := .map F.quotMap C
 
 scoped notation:50 C " ⧸ " F => Face.quot (C := C) F
 
 def fiberFace {F : Face C} (G : Face (C ⧸ F)) : Face C := by
   refine ⟨C ⊓ PointedCone.comap F.quotMap G, ?_⟩
   simpa [Face.quot, Face.quotMap] using
-    (PointedCone.IsFaceOf.inf_comap_mkQ (G := C) (S := F.span) (H := G) G.isFaceOf)
+    (PointedCone.IsFaceOf.inf_comap_mkQ (G := C) (S := F.linSpan) (H := G) G.isFaceOf)
 
 @[simp]
 lemma mem_fiberFace {F : Face C} (G : Face (C ⧸ F)) (x : M) :
@@ -289,7 +268,7 @@ instance {F : Face C} : CoeOut (Face F.quot) (Face C) := ⟨fiberFace⟩
 lemma le_fiber {F : Face C} (G : Face (C ⧸ F)) : F ≤ fiberFace G := by
   intro x xF
   simp only [mem_fiberFace, F.isFaceOf.le xF, mkQ_apply,
-    (Quotient.mk_eq_zero F.span).mpr (mem_span_of_mem xF), true_and]
+    (Quotient.mk_eq_zero F.linSpan).mpr (mem_span_of_mem xF), true_and]
   simp [← Face.mem_coe]
 
 @[simp]
@@ -330,22 +309,19 @@ variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRin
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
--- ## QUOT / FIBER
-
 def quotFace (F G : Face C) : Face (C ⧸ F) := by
   refine ⟨PointedCone.map F.quotMap ((F ⊔ G : Face C) : PointedCone R M), ?_⟩
   have hle : ((F : Face C) : PointedCone R M) ≤ ((F ⊔ G : Face C) : PointedCone R M) :=
     show F ≤ F ⊔ G from le_sup_left
   simpa [Face.quot, Face.quotMap] using
     (PointedCone.IsFaceOf.quot (C := C) (F := ((F ⊔ G : Face C) : PointedCone R M))
-      (S := F.span) (F ⊔ G).isFaceOf (Submodule.span_mono hle))
+      (S := F.linSpan) (F ⊔ G).isFaceOf (Submodule.span_mono hle))
 
 @[simp]
 lemma quotFace_eq_map_of_le {F G : Face C} (h : F ≤ G) :
-    (F.quotFace G : PointedCone R (M ⧸ F.span)) = PointedCone.map F.quotMap G := by
+    (F.quotFace G : PointedCone R (M ⧸ F.linSpan)) = PointedCone.map F.quotMap G := by
   simp [quotFace, sup_eq_right.mpr h]
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G := by
   ext x
@@ -353,13 +329,14 @@ lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) =
   · intro hx
     rcases (mem_fiberFace (F.quotFace G) x).mp hx with ⟨hxC, hxq⟩
     have hxq' : F.quotMap x ∈ PointedCone.map F.quotMap G := by
-      change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.span)) at hxq
+      change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.linSpan)) at hxq
       simpa [quotFace_eq_map_of_le h] using hxq
     obtain ⟨y, hyG, hyq⟩ := PointedCone.mem_map.mp hxq'
-    have hxy : x - y ∈ F.span := by
-      rw [← Submodule.ker_mkQ F.span]
+    have hxy : x - y ∈ F.linSpan := by
+      rw [← Submodule.ker_mkQ F.linSpan]
       change F.quotMap (x - y) = 0
-      simp [map_sub, hyq]
+      simp only [map_sub, mkQ_apply, hyq, sub_self]
+      rfl
     have hx_lin : x ∈ (G : PointedCone R M).linSpan :=
       ((G : PointedCone R M).linSpan.sub_mem_iff_left (Submodule.subset_span hyG)).mp
         (Submodule.span_mono h hxy)
@@ -367,7 +344,7 @@ lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) =
       ⟨hxC, hx_lin⟩
   · intro hx
     refine (mem_fiberFace (F.quotFace G) x).mpr ⟨G.isFaceOf.le hx, ?_⟩
-    change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.span))
+    change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.linSpan))
     simpa [quotFace_eq_map_of_le h] using
       (PointedCone.mem_map.mpr ⟨x, hx, rfl⟩ : F.quotMap x ∈ PointedCone.map F.quotMap G)
 
@@ -382,8 +359,8 @@ lemma quot_fiber {F : Face C} (G : Face (C ⧸ F)) : F.quotFace (fiberFace G) = 
 
 /-- The isomorphism between a quotient's face lattice and the interval in the cone's face
  lattice above the face. -/
-def quot_orderIso (F : Face C) : Face F.quot ≃o Set.Icc F ⊤ where
-  toFun G := ⟨G, le_fiber G, le_top⟩
+def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Icc F ⊤ where
+  toFun G := ⟨fiberFace G, le_fiber G, le_top⟩
   invFun G := F.quotFace G
   left_inv := quot_fiber
   right_inv G := by simp only [fiber_quot_of_le G.2.1]
@@ -396,12 +373,51 @@ def quot_orderEmbed (F : Face C) : Face (C ⧸ F) ↪o Face C :=
 
 end DirectedOrderRing
 
+section RingLinearOrder
 
-section Field
+open Submodule
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
-variable {C F : PointedCone R M} {s t : Set M}
+variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
+
+lemma bot_face {F : Face C} (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥ := by
+  have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
+    simp [Face.lineal_bot, Face.toPointedCone, salient_iff_lineal_bot.mp hC]
+  refine ⟨fun h => ?_, fun h => by simp [h, hbotcone]⟩
+  apply Face.ext
+  intro x
+  change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
+  simp [h, hbotcone]
+
+set_option backward.isDefEq.respectTransparency false in
+lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
+    F = fiberFace G ↔ G.toPointedCone = ⊥ := by
+  constructor <;> intro h
+  · ext x
+    refine ⟨?_, fun hx => hx ▸ G.zero_mem⟩
+    · intro hxG
+      obtain ⟨c, hcC, hcx⟩ := PointedCone.mem_map.mp (G.isFaceOf.le hxG)
+      have hcF : c ∈ F := h ▸ ⟨hcC, Submodule.mem_comap.mpr (hcx ▸ hxG)⟩
+      have hczero : F.quotMap c = 0 :=
+        (Submodule.Quotient.mk_eq_zero _).mpr (Submodule.subset_span hcF)
+      rw [Submodule.mem_bot, ← hcx, hczero]
+  · simp only [fiberFace, quotMap, comap, h, comap_bot, LinearMap.ker_restrictScalars, ker_mkQ,
+    ← toPointedCone_eq_iff]
+    suffices C ⊓ restrictScalars { c // 0 ≤ c } F.linSpan = F by symm; exact this
+    convert F.isFaceOf.inf_linSpan
+
+lemma le_linSpan_iff_le {F G : Face C} :
+    (F : PointedCone R M) ≤ G.linSpan ↔ F ≤ G := by
+  simp [IsFaceOf.le_linSpan_iff_le F.isFaceOf.le G.isFaceOf]
+
+end RingLinearOrder
+
+section DivisionRing
+
+variable {R M N : Type*}
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  [AddCommGroup N] [Module R N] {C : PointedCone R M}
 
 /-!
 ### Embed and restrict
@@ -447,6 +463,14 @@ def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F 
 def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=
   (embed_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
 
+end DivisionRing
+
+section Field
+
+variable {R M N : Type*}
+variable [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+  [AddCommGroup N] [Module R N] {C₁ : PointedCone R M} {C₂ : PointedCone R N}
+variable {C F : PointedCone R M} {s t : Set M}
 
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
@@ -465,7 +489,6 @@ def dual_flip (hC : DualClosed p C) (F : Face (.dual p C)) : Face C :=
 lemma dual_antitone : Antitone (dual p : Face C → Face _) :=
   fun _ _ hF _ xd => subdual_antitone p hF xd
 
--- not sure if these are necessary
 /-!
 #### Map and comap
 -/
@@ -495,8 +518,8 @@ def map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M �
 def comap {f : N →ₗ[R] M} (F : Face C) : Face (comap f C) := ⟨_, F.isFaceOf.comap _⟩
 
 -- /-- The face `comap e F` of `comap e C`. -/
--- def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
---     := F.comap
+def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
+    := F.comap
 
 end Field
 

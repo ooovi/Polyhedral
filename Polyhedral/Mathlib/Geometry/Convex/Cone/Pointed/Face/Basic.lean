@@ -168,12 +168,11 @@ theorem of_comap_surjective {f : N →ₗ[R] M} (hf : Function.Surjective f)
 
 end Map
 
-end IsFaceOf
-
-lemma face_faces (h : F.IsFaceOf C) :
-    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+lemma isFaceOf_iff (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
   ⟨fun h' => ⟨h'.le, h'.trans h⟩,
     fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
+end IsFaceOf
 
 variable [AddCommGroup N] [Module R N] in
 /-- The image of a cone `F` under an injective linear map is a face of the
@@ -386,7 +385,7 @@ variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
 lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
     x ∈ F.linSpan ↔ x ∈ F := by
   constructor <;> intro hxF
-  · obtain ⟨_, hyF, _, hzF, rfl⟩ := mem_linSpan.1 hxF
+  · obtain ⟨_, hyF, _, hzF, rfl⟩ := F.mem_linSpan.1 hxF
     exact hF.mem_of_add_mem hx (hF.le hzF) hyF
   · exact Submodule.subset_span hxF
 
@@ -409,6 +408,11 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
 --     exact hF.mem_of_add_mem hxC (hF.le hzF) hyF
 --   · simpa using ⟨hF.le, Submodule.subset_span⟩
 
+lemma le_linSpan_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) :
+    C₁ ≤ F.linSpan ↔ C₁ ≤ F := by
+  nth_rw 2 [← hG.inf_linSpan]
+  simpa using fun _ => hD
+
 end DirectedOrderRing
 section Ring
 
@@ -420,7 +424,7 @@ theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
   hC.anti hF.le
 
 /-- Quotient by the linear span of a face is salient. -/
-lemma salient_quot_linSpan_of_face [IsDirectedOrder R] (hF : F.IsFaceOf C) :
+lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
     (C.quot F.linSpan).Salient := by
   intro z hzC hz0 hzNeg
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
