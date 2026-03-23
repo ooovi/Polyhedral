@@ -211,7 +211,7 @@ lemma exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
 
 open Submodule in
 lemma finrank_strictMono (hCfg : C.FG) :
-    StrictMono (fun F : Face C => (F : PointedCone R M).finrank) := by
+    StrictMono (fun F : Face C => F.finrank) := by
   intro G F hFG
   haveI := (Submodule.fg_iff_finiteDimensional _).mp (FG.linSpan_fg <| F.isFaceOf.fg hCfg)
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
@@ -223,15 +223,15 @@ lemma finrank_strictMono (hCfg : C.FG) :
 
 lemma finrank_add_one (hCfg : C.FG)
     {F G : Face C} (hFG : F ⋖ G) :
-    G.toPointedCone.finrank = F.toPointedCone.finrank + 1 := by
+    G.finrank = F.finrank + 1 := by
   obtain ⟨hfg, hc⟩ := hFG
   -- suffices to show quotient has rank 1
   have hgfg := quot_fg (G.isFaceOf.fg hCfg) F.linSpan
   convert
     finrank_eq_finrank_add_finrank_quot_linSpan (FG.linSpan_fg (G.isFaceOf.fg hCfg)) hfg.le
     -- G/F has a ray
-  have FfG : F.toPointedCone.IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
-  have : ¬G.toPointedCone ≤ F.linSpan := by
+  have FfG : (F : PointedCone R M).IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
+  have : ¬(G : PointedCone R M) ≤ F.linSpan := by
     simpa [Face.le_linSpan_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
     FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr this) FfG.quot_salient
@@ -257,15 +257,15 @@ lemma finrank_add_one (hCfg : C.FG)
 
 lemma finrank_covBy (hCfg : C.FG)
     {F G : Face C} (hFG : F ⋖ G) :
-    (F : PointedCone R M).finrank ⋖ (G : PointedCone R M).finrank := by
+    F.finrank ⋖ G.finrank := by
   obtain ⟨hfg, hc⟩ := hFG
   refine ⟨finrank_strictMono hCfg hfg, ?_⟩
-  suffices G.toPointedCone.finrank = F.toPointedCone.finrank + 1 by omega
+  suffices G.finrank = F.finrank + 1 by omega
   exact (FG.finrank_add_one hCfg ⟨hfg, hc⟩)
 
 lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
     {F G : Face C} (hfg : F ≤ G) : F ⋖ G ↔
-    (F : PointedCone R M).finrank ⋖ (G : PointedCone R M).finrank := by
+    F.finrank ⋖ G.finrank := by
   refine ⟨finrank_covBy hCfg, ?_⟩
   intro h
   constructor
@@ -275,7 +275,7 @@ lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
 /-- The face lattice of a finitely generated cone is graded by face dimension. -/
 noncomputable instance gradeOrder_finrank {C : PointedCone R M}
     (hCfg : C.FG) : GradeOrder ℕ (Face C) where
-  grade F := (F : PointedCone R M).finrank
+  grade F := F.finrank
   grade_strictMono := finrank_strictMono hCfg
   covBy_grade := fun {_ _} hFG => finrank_covBy hCfg hFG
 

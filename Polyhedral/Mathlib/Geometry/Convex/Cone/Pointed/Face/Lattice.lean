@@ -6,6 +6,7 @@ Authors: Olivia Röhrig
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 import Mathlib.LinearAlgebra.Quotient.Defs
 
@@ -229,6 +230,8 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
 -- abbrev span (F : Face C) : Submodule R M := Submodule.span R F
 abbrev linSpan (F : Face C) : Submodule R M := F.toPointedCone.linSpan
 
+noncomputable abbrev finrank (F : Face C) : ℕ := F.toPointedCone.finrank
+
 end Semiring
 
 
@@ -379,10 +382,10 @@ variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
-lemma bot_face {F : Face C} (hC : C.Salient) : F = ⊥ ↔ F.toPointedCone = ⊥ := by
+lemma bot_face {F : Face C} (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥ := by
   have hbotcone : (((⊥ : Face C).toPointedCone : PointedCone R M) = ⊥) := by
     simp [Face.lineal_bot, Face.toPointedCone, salient_iff_lineal_bot.mp hC]
-  refine ⟨fun h => by simp [h, hbotcone], fun h => ?_⟩
+  refine ⟨fun h => ?_, fun h => by simp [h, hbotcone]⟩
   apply Face.ext
   intro x
   change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
