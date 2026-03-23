@@ -99,6 +99,7 @@ lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
   apply subdual_dual
   rfl
 
+
 -- lemma exists_dual_pos' {C : PointedCone R M} (hC : C.Salient) :
 --     ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 → x = 0) := sorry
 

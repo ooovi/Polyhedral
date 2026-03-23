@@ -27,6 +27,7 @@ def lineal (C : PointedCone R M) : Submodule R M where
     · rw [← neg_nonneg] at hr
       simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
 
+-- TODO: maybe do not make this a simp lemma. Seems more annoying than helpful.
 @[simp]
 lemma coe_lineal (C : PointedCone R M) : C.lineal = C ⊓ -C :=
   rfl
@@ -34,6 +35,7 @@ lemma coe_lineal (C : PointedCone R M) : C.lineal = C ⊓ -C :=
 lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
   rfl
 
+-- TODO: make cone argument implicit?
 /-- The lineality space is contained in the cone. -/
 lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
 
@@ -65,8 +67,11 @@ def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [mem_lineal]; aesop
 
-@[simp] lemma lineal_submodule (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
+@[simp] lemma ofSubmodule_lineal (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
   ext x; simp [mem_lineal]
+
+@[deprecated (since := "today")]
+alias lineal_submodule := ofSubmodule_lineal
 
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := lineal_submodule ⊤
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := lineal_submodule ⊥
@@ -167,24 +172,18 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
       replace h' := smul_mem C h1c hx
       exact lineal_isExtreme_right h' hx hcx
 
-
--- Q: Can we shorten the proof, see `inf_sup_lineal_eq_of_isCompl` below.
+-- TODO: maybe this result is not really necessary. See `inf_sup_eq_self_of_le_of_codisjoint` below.
 /-- If `C` is a cone and `S` is complementary to the cone's linealiry space, then `C` can
   be written as `(C ⊓ S) ⊔ C.lineal`. -/
 lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
-  rw [le_antisymm_iff]
-  constructor
-  · exact sup_le_iff.mpr ⟨inf_le_left, lineal_le C⟩
-  · intro x hx
-    rw [Submodule.codisjoint_iff_exists_add_eq] at hCS
-    obtain ⟨y, z, hy, hz, hyz⟩ := hCS x
-    rw [Submodule.mem_sup]
-    have hzC : z ∈ C := by
-      have h := Submodule.add_mem C hx (neg_mem_of_mem_lineal hy)
-      rw [← hyz, add_neg_cancel_comm] at h
-      exact h
-    exact ⟨z, by simp; exact ⟨hzC, hz⟩, y, hy, by rw [add_comm]; exact hyz⟩
+  simp [-coe_lineal, ← inf_sup_assoc_of_submodule_le _ (lineal_le _), ← coe_sup, hCS.symm.eq_top]
+
+-- set_option backward.isDefEq.respectTransparency false in
+lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone R M}
+    {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint S T) : (C ⊓ S) ⊔ T = C := by
+  simp [← inf_sup_assoc_of_submodule_le _ hT, hST.eq_top]
+  -- simp [← Submodule.inf_sup_assoc_of_restrictScalars_le _ hT, hST.eq_top]
 
 -- @[deprecated inf_sup_lineal (since := "2025-11-07")]
 -- lemma inf_sup_lineal_eq_of_isCompl {C : PointedCone R M} {S : Submodule R M}
@@ -360,22 +359,31 @@ lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
   simp only [id_eq, Nonneg.coe_smul] at hlin
   specialize hlin ?_ x (Finset.subset_union_left hx)
   · simp only [f, add_smul, Finset.sum_add_distrib]
-    have hsum1 : ∑ x ∈ t, fp x • x = ∑ x ∈ tp, fp x • x := by
+    have hsum1 : ∑ x ∈ t, fp x • x = ∑ x ∈ tp, fp x • x := by -- restrict t to tp
       refine Finset.sum_union_eq_left fun _ _ h ↦ ?_
       simp [fp.notMem_support.mp fun h2 ↦ h <| hftp h2]
-    have hsum2 : ∑ x ∈ t, fn x • x = ∑ x ∈ tn, fn x • x := by
+    have hsum2 : ∑ x ∈ t, fn x • x = ∑ x ∈ tn, fn x • x := by -- restrict t to tn
       refine Finset.sum_union_eq_right fun _ _ h ↦ ?_
       simp [fn.notMem_support.mp fun h2 ↦ h <| hftn h2]
     rw [hsum1, hsum2, hsum, add_neg_cancel]
   rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
   simp only [hlin, zero_smul]
 
-variable [IsDomain R] [IsTorsionFree R M] in
+section IsDomain
+
+variable [IsDomain R] [IsTorsionFree R M]
+
 lemma salient_span_singleton (x : M) : (span R {x}).Salient := by
   by_cases h : x = 0
   · simp [h]
-  refine salient_span_of_linearIndepOn (s := {x}) ?_
-  simp [h]
+  · exact salient_span_of_linearIndepOn (by simp [h])
+
+-- NOTE: there is alos `ofSubmodule_salient_iff_eq_bot` below, which proven something stronger
+--  for general rings, BUT assumes linear order. Is one setting better than the other?
+lemma top_not_salient (h : Module.rank R M ≠ 0) : ¬(⊤ : PointedCone R M).Salient := by
+  simpa [Salient, ConvexCone.Salient, rank_zero_iff_forall_zero] using h
+
+end IsDomain
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]

@@ -34,6 +34,11 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
+-- allows us to use dot notation for lemmas in Submodule.FG or PointedCone.FG
+abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
+
+----
+
 set_option backward.isDefEq.respectTransparency false in
 @[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
   Submodule.restrictScalars_monotone ..
@@ -63,14 +68,17 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 /-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
-@[simp] lemma coe_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+@[simp high] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
     by simp [linSpan]
 
 @[deprecated (since := "today")]
-alias submodule_linSpan := coe_linSpan
+alias coe_linSpan := ofSubmodule_linSpan
 
 @[deprecated (since := "today")]
-alias linSpan_eq := coe_linSpan
+alias submodule_linSpan := ofSubmodule_linSpan
+
+@[deprecated (since := "today")]
+alias linSpan_eq := ofSubmodule_linSpan
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma linSpan_span_eq_submodule_span (s : Set M) :
@@ -435,8 +443,7 @@ variable (R) in
 @[simp] lemma span_neg_pair_eq_span_singleton (x : M) : span R {-x, x} = R ∙ x := by
   rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
   ext y
-  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
-    smul_neg, Subtype.exists, Nonneg.mk_smul, exists_prop]
+  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair, smul_neg, Subtype.exists]
   constructor
   · rintro ⟨a, _, b, _, rfl⟩
     exact ⟨a, b, rfl⟩

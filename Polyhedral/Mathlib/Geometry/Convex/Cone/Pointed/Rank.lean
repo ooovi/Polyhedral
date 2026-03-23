@@ -24,8 +24,13 @@ noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
 -- NOTE: this is not the same as Module.Finite or FG!
 abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
 
+@[simp] lemma finRank_of_isNoetherian [IsNoetherian R M] (C : PointedCone R M) : C.FinRank :=
+  IsNoetherian.noetherian C.linSpan
+
 set_option backward.isDefEq.respectTransparency false in
-lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
+lemma FG.finRank {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
+
+alias finRank_of_fg := FG.finRank
 
 lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
 
@@ -150,6 +155,7 @@ section Definitions
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {C : PointedCone R M}
 
 /-- Salient rank of a cone. -/
 noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
@@ -157,9 +163,37 @@ noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
 /-- Salient finrank of a cone. -/
 noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
 
+/-- A cone is of finite salient rank if its salient quotient is of finite rank. It means that
+  the non-trivial structure of the cone only spans finitely many dimensions. -/
 abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
 
+lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank := sorry
+
+lemma FG.finSalRank (h : C.FG) : C.FinSalRank := h.finRank.finSalRank
+
+lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) : C.FinRank := sorry
+
 end Definitions
+
+section CommRing
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {C : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+/- The dual of a cone with finite salient rank also has finite salient rank.-/
+variable (p) in
+lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := by
+  sorry
+
+variable (p) [Fact p.SeparatingLeft] in
+@[simp] -- enable simp, once proven (this is for safety in case it is false)
+lemma dual_finSalRank_iff_finSalRank : (dual p C).FinSalRank ↔ C.FinSalRank := by
+  sorry
+
+end CommRing
 
 section Decomposition
 
