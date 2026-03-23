@@ -3,7 +3,8 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual DualClosed
@@ -43,7 +44,7 @@ lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
   simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
 
 /-- FG cones are polyhedral. -/
-lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := salientQuot_fg hC
+lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := hC.salientQuot_fg
 
 lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
     FG.isPolyhedral hC.salientQuot_fg
@@ -455,7 +456,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
 lemma IsPolyhedral.fg_inf_of_disjoint_lineal (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : Disjoint C.lineal S) : FG (C ⊓ S) := by
   refine fg_of_fg_lineal (hC.inf <| .of_submodule S) ?_
-  simp only [lineal_inf, lineal_submodule, disjoint_iff.mp hS, fg_bot]
+  simp only [lineal_inf, ofSubmodule_lineal, disjoint_iff.mp hS, fg_bot]
   -- TODO: fg_bot should be a simp lemma
 
 variable (p) in
@@ -814,3 +815,5 @@ open Pointwise in
 
 
 end PolyhedralCone
+
+end PointedCone

@@ -1,6 +1,4 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
-
-
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 namespace PointedCone
 
