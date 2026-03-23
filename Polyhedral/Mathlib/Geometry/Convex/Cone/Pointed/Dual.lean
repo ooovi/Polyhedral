@@ -20,7 +20,10 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 @[deprecated dual_zero (since := "")]
 alias dual_bot := dual_zero
 
-variable [inst : Fact p.SeparatingLeft] in
+@[simp] lemma dual_ker : dual p (ker p) = ⊤ := by ext; simp +contextual
+
+-- For the proof, see the analogous statement for submodules
+#check Submodule.dual_top_iff_le_ker
 lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
   -- constructor <;> intro h
   -- · intro x hx
@@ -32,9 +35,8 @@ lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p
 
 lemma dual_univ_ker : dual p .univ = ker p.flip := by
   ext x
-  simp only [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem, mem_ker]
-  rw [LinearMap.ext_iff]
-  simp only [flip_apply, zero_apply]
+  simp_rw [mem_dual, Set.mem_univ, forall_const, Submodule.restrictScalars_mem,
+    mem_ker, LinearMap.ext_iff, flip_apply, zero_apply]
   constructor <;> intro h y
   · exact le_antisymm (by simpa using @h (-y)) (@h y)
   · rw [h y]
@@ -128,7 +130,7 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
   sorry
 
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
-    := by simp only [ofSubmodule_coe]
+    := by simp
 
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 {M : Type*} [AddCommGroup M] [Module R M]
@@ -144,7 +146,7 @@ lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .d
   intro h
   obtain ⟨S, hSC, hS⟩ := h
   rw [← hS]
-  nth_rw 3 [← ofSubmodule_coe]
+  nth_rw 3 [← coe_ofSubmodule]
   rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
   exact dual_le_dual hSC
 
@@ -246,7 +248,7 @@ lemma dual_span_lineal_dual (s : Set M) :
   rw [Eq.comm]
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
-  rw [← PointedCone.ofSubmodule_coe]
+  rw [← PointedCone.coe_ofSubmodule]
   rw [← span_union_neg_eq_submodule_span]
   rw [dual_span]
   rw [dual_union]
@@ -296,10 +298,11 @@ lemma dual_embed_quot_dual (S : Submodule R M) (C : PointedCone R S) :
       simpa only [rp_apply] using h
     · rw [surjInv_eq (Submodule.dual p S).mkQ_surjective]
 
+set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma dual_quot_dual (S : Submodule R M) (C : PointedCone R M) :
     (dual p (S ∩ C)).quot (.dual p S) = dual (p.rp S) (restrict S C) := by
-  simp only [← ofSubmodule_coe S, ← Submodule.coe_inf, ← embed_restrict S C, dual_embed_quot_dual]
+  simp only [← coe_ofSubmodule S, ← Submodule.coe_inf, ← embed_restrict S C, ← dual_embed_quot_dual]
 
 alias dual_restrict := dual_quot_dual
 
@@ -313,6 +316,7 @@ alias dual_restrict_of_le := dual_quot_dual_of_le
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
+set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma comap_dual_mkQ_dual (S : Submodule R M) (C : PointedCone R S) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) C) = dual p (embed C) := by
@@ -324,7 +328,7 @@ alias dual_embed := comap_dual_mkQ_dual
 
 lemma comap_dual_mkQ_dual_restrict (S : Submodule R M) (C : PointedCone R M) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) (restrict S C)) = dual p (S ∩ C) := by
-  simp only [← ofSubmodule_coe S, ← Submodule.coe_inf, ← embed_restrict S C, dual_embed]
+  simp [dual_embed]
 
 -- This is a crucial lemma. It helps restricting duality statement. We can use it to show that
 -- properties that are preserved under duality in finite dim, and that are closed under adding
@@ -479,13 +483,79 @@ lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed 
 
 -- ## FARKAS
 
-lemma farkas {C : PointedCone R M} (hC : C.DualClosed p) {x : M} (hx : x ∉ C) :
-    ∃ φ : N, 0 > p x φ ∧ ∀ y ∈ C, 0 ≤ p y φ := by
+/- Separation lemma for dual closed cones. -/
+lemma exists_pos_forall_nonneg_of_not_mem {C : PointedCone R M}
+    (hC : C.DualClosed p) {x : M} (hx : x ∉ C) : ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
   rw [← hC] at hx
   simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at hx
   obtain ⟨φ, _, _⟩ := hx
   use φ
 
+alias farkas := exists_pos_forall_nonneg_of_not_mem
+
+/-- The dual of a cone being ⊥ is equivalent to all non-zero linear forms
+  attaining negative values on the cone. -/
+lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg {C : PointedCone R M} :
+    dual p C = ⊥ ↔ ∀ φ : N, φ = 0 ∨ ∃ x ∈ C, p x φ < 0 := by
+  simp only [SetLike.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_bot]
+  constructor <;> intro h φ
+  · by_cases hφ : φ = 0
+    · left; exact hφ
+    · replace h := (h φ).mp.mt hφ
+      push_neg at h
+      right; exact h
+  · constructor
+    · intro h'
+      rcases h φ
+      · assumption
+      · absurd h'
+        push_neg
+        assumption
+    · simp +contextual
+
+-- /-- The dual of a cone being ⊥ is equivalent to all non-zero linear forms
+--   attaining negative values on the cone. -/
+-- lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg' {C : PointedCone R M} :
+--     dual p C ≠ ⊥ ↔ ∃ φ : N, φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
+--   simp only [SetLike.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_bot]
+--   constructor <;> intro h φ
+--   · by_cases hφ : φ = 0
+--     · left; exact hφ
+--     · replace h := (h φ).mp.mt hφ
+--       push_neg at h
+--       right; exact h
+--   · constructor
+--     · intro h'
+--       rcases h φ
+--       · assumption
+--       · absurd h'
+--         push_neg
+--         assumption
+--     · simp +contextual
+
+/-- The double dual of a cone being ⊤ is equivalent to every non-zero linear
+  form attaining a negative value on the cone. In infinite dimensional vector spaces
+  there exists such cones other than ⊤ itself (e.g. the lexicographic cone). -/
+lemma dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg {C : PointedCone R M} :
+    dual p.flip (dual p C) ≠ ⊤ ↔ ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
+  constructor <;> intro h
+  · obtain ⟨x, hx⟩ := SetLike.exists_not_mem_of_ne_top _ h
+    obtain ⟨φ, hxφ, hφ⟩ := farkas (dual_dualClosed _ _) hx
+    use φ
+    constructor
+    · by_contra hφ
+      rw [flip_apply] at hxφ
+      simp [hφ] at hxφ
+    exact fun y hy => hφ y (subset_dual_dual hy)
+  · obtain ⟨φ, h0φ, hφ⟩ := h
+    by_contra h
+    rw [dual_top_iff_le_ker] at h
+    have := h hφ
+    contradiction
+
+lemma exists_ne_zero_forall_nonneg_of_dualClosed_ne_top {C : PointedCone R M}
+    (hC : C.DualClosed p) (h : C ≠ ⊤) : ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
+  simp [← dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg, hC, h]
 
 
 

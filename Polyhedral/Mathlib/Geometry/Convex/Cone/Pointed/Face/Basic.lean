@@ -56,14 +56,12 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 theorem isFaceOf_iff_mem_of_smul_add_smul_mem : F.IsFaceOf C ↔
     (F ≤ C ∧ ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F)
-    := by
-  constructor <;> intro h
-  · refine ⟨h.1, fun xC yC a0 b0 hab => ?_⟩
-    exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
-  · refine ⟨h.1, ?_⟩
+    where
+  mp h := ⟨h.1, fun xC yC a0 b0 hab => h.2 xC (Submodule.smul_mem C ⟨_, b0.le⟩ yC) a0 hab⟩
+  mpr h := by
+    refine ⟨h.1, ?_⟩
     by_cases hc : 0 < (1 : R)
-    · intros xc yc a0 haxy
-      exact h.2 xc yc a0 hc (by simpa)
+    · exact fun xc yc a0 _ => h.2 xc yc a0 hc (by simpa)
     · simp [(subsingleton_of_zero_eq_one (zero_le_one.eq_or_lt.resolve_right hc)).eq_zero]
 
 namespace IsFaceOf
@@ -441,8 +439,8 @@ lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
   have hx0 : (F.linSpan).mkQ x = 0 := by
     simpa [Submodule.mkQ_apply] using
       (Submodule.Quotient.mk_eq_zero (p := F.linSpan) (x := x)).2
-        (PointedCone.le_submodule_span F hxF)
-  exact hz0 (by simpa using hx0)
+        (PointedCone.le_linSpan F hxF)
+  exact hz0 (by simp only [mkQ_apply]; exact hx0)
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)
@@ -567,6 +565,7 @@ lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 
 
 variable {s t : Set M}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
     span R (s ∩ F) = F := by
   ext x; constructor
@@ -617,6 +616,7 @@ variable {C F : PointedCone R M}
 
 -- ## QUOT / FIBER
 
+set_option backward.isDefEq.respectTransparency false in
 lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ F.linSpan) :
     (F.quot S).IsFaceOf (C.quot S) := by
   refine ⟨map_mono hF.le, ?_⟩

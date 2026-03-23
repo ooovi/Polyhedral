@@ -34,23 +34,44 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
--- allows us to use dot notation for lemmas in Submodule.FG or PointedCone.FG
-abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
+@[coe]
+abbrev ofSubmodule (S : Submodule R M) : PointedCone R M := S.restrictScalars _
 
-----
+instance : Coe (Submodule R M) (PointedCone R M) := ⟨ofSubmodule⟩
 
-set_option backward.isDefEq.respectTransparency false in
-@[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
-  Submodule.restrictScalars_monotone ..
+@[simp]
+lemma ofSubmodule_coe (S : Submodule R M) : (ofSubmodule S : Set M) = S := by rfl
+  -- also provable from `Submodule.coe_restrictScalars R S`
 
-@[simp] lemma ofSubmodule_mono {S T : Submodule R M} : ofSubmodule S ≤ ofSubmodule T ↔ S ≤ T := by
-  rfl
+@[simp]
+lemma mem_coe {S : Submodule R M} {x : M} : x ∈ (S : PointedCone R M) ↔ x ∈ S := by rfl
+  -- also provable from `Submodule.coe_restrictScalars R S`
+
+alias ofSubmodule_toSet_coe := ofSubmodule_coe
+
+@[simp] lemma ofSubmodule_inj {S T : Submodule R M} : ofSubmodule S = ofSubmodule T ↔ S = T
+  := Submodule.restrictScalars_inj ..
+
+def ofSubmodule_embedding : Submodule R M ↪o PointedCone R M :=
+  Submodule.restrictScalarsEmbedding ..
+
+def ofSubmodule_latticeHom : CompleteLatticeHom (Submodule R M) (PointedCone R M) :=
+  Submodule.restrictScalarsLatticeHom ..
+
+lemma ofSubmodule_sInf (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
+  ofSubmodule_latticeHom.map_sInf' s
+
+lemma ofSubmodule_sSup (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
+  ofSubmodule_latticeHom.map_sSup' s
 
 -- ## SPAN
 
 /- Intended new name for `PointedCone.span` to better avoid name clashes and confusion
   with `Submodule.span`. -/
--- alias hull := span
+alias hull := span
+
+@[simp] lemma span_submodule_span (s : Set M) :
+    Submodule.span R (span R s) = Submodule.span R s := Submodule.span_span_of_tower ..
 
 def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
   choice s _ := span R s
@@ -68,24 +89,10 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 /-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
-@[simp high] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+@[simp] lemma submodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
     by simp [linSpan]
 
-@[deprecated (since := "today")]
-alias coe_linSpan := ofSubmodule_linSpan
-
-@[deprecated (since := "today")]
-alias submodule_linSpan := ofSubmodule_linSpan
-
-@[deprecated (since := "today")]
-alias linSpan_eq := ofSubmodule_linSpan
-
-set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma linSpan_span_eq_submodule_span (s : Set M) :
-    (span R s).linSpan = Submodule.span R s := Submodule.span_span_of_tower ..
-
-@[deprecated (since := "today")]
-alias span_submodule_span := linSpan_span_eq_submodule_span
+alias linSpan_eq := submodule_linSpan
 
 -- section Ring
 
@@ -98,6 +105,21 @@ alias span_submodule_span := linSpan_span_eq_submodule_span
 -- end Ring
 
 
+-- ## RANK
+
+open Cardinal
+
+noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
+-- ⨆ ι : { s : Set M // LinearIndepOn R id s }, (#ι.1)
+
+noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
+
+-- NOTE: this is not the same as Module.Finite or FG!
+abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
+
+lemma finRank_of_fg {C : PointedCone R M} (hC : C.FG) : C.FinRank := by
+  sorry
+
 end Semiring
 
 
@@ -108,11 +130,9 @@ section Semiring_AddCommGroup
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
     := Submodule.restrictScalars_inf _ _ _
 
-set_option backward.isDefEq.respectTransparency false in
 lemma sInf_coe (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
   Submodule.restrictScalars_sInf _ _
 
@@ -122,11 +142,9 @@ lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : Po
 -- lemma iInf_coe' (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
 --   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
     := Submodule.restrictScalars_sup _ _ _
 
-set_option backward.isDefEq.respectTransparency false in
 lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
   Submodule.restrictScalars_sSup _ _
 
@@ -140,78 +158,63 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 -- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
--- TODO: this is only needed because `Submodule.span_insert` is restricted to rings
---@[deprecated "Really needed?" (since := "today")]
-lemma span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R s :=
-  Submodule.span_insert x s
-
-lemma coe_sup_submodule_span' {s t : Set M} :
-    Submodule.span R (s ∪ t) = Submodule.span R (span R s ⊔ span R t) := by simp
-
--- Has this anything to do with cones? See version above
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
     Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
   rw [← span_submodule_span]
   simp [Submodule.span_union]
 
-set_option backward.isDefEq.respectTransparency false in
-lemma span_le_submodule_span (s : Set M) : span R s ≤ Submodule.span R s :=
-    Submodule.span_le_restrictScalars _ _ s
-
-@[deprecated "We don't need this, the proof is short" (since := "today")]
 lemma span_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : span R s ≤ Submodule.span R t
-  := le_trans (span_le_submodule_span s) (Submodule.span_mono hst)
+  := le_trans (Submodule.span_le_restrictScalars _ R s) (Submodule.span_mono hst)
 
-lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := Submodule.subset_span
+lemma span_le_submodule_span (s : Set M) : span R s ≤ Submodule.span R s
+  := span_le_submodule_span_of_le (subset_refl s)
 
-@[deprecated (since := "today")]
-alias le_submodule_span_self := le_linSpan
+lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) :
+    C ≤ Submodule.span R (D : Set M) := by
+  nth_rw 1 [← Submodule.span_eq C]
+  exact span_le_submodule_span_of_le hCD
 
-@[deprecated (since := "today")]
-alias le_submodule_span := le_linSpan
+lemma le_submodule_span (C : PointedCone R M) : C ≤ Submodule.span R (C : Set M)
+  := le_submodule_span_of_le (le_refl C)
 
-@[deprecated "We don't need this, the proof is short" (since := "today")]
-lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) : C ≤ D.linSpan :=
-  le_trans hCD (le_linSpan D)
+@[deprecated le_submodule_span (since := "")]
+alias le_submodule_span_self := le_submodule_span
 
-@[deprecated (since := "today")]
 alias le_span := subset_span
 
 -- should be in `Submodule.Basic`
-@[deprecated "Really needed?" (since := "today")]
 lemma submodule_span_of_span {s : Set M} {S : Submodule R M} (hsS : span R s = S) :
     Submodule.span R s = S := by
   simpa using congrArg (Submodule.span R ∘ SetLike.coe) hsS
 
--- lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = S) :
---     span R s = Submodule.span R s := by
---   obtain ⟨S, hS⟩ := h; rw [hS]
---   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
+lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = S) :
+    span R s = Submodule.span R s := by
+  obtain ⟨S, hS⟩ := h; rw [hS]
+  simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
 lemma span_union (s t : Set M) : span R (s ∪ t) = span R s ⊔ span R t :=
     Submodule.span_union s t
+
 
 section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
     {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S :=
   Submodule.sup_inf_assoc_of_le_restrictScalars D hCS
 
-set_option backward.isDefEq.respectTransparency false in
 lemma inf_sup_assoc_of_submodule_le {C : PointedCone R M} (D : PointedCone R M)
     {S : Submodule R M} (hSC : S ≤ C) : C ⊓ (D ⊔ S) = (C ⊓ D) ⊔ S :=
   Submodule.inf_sup_assoc_of_restrictScalars_le D hSC
 
--- TODO: write version with `restrictScalars` instead. (Or have I already??)
+-- TODO: write version with `restrictScalars` instead.
 lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R M}
-  (hS : Disjoint C.linSpan S) : (C ⊔ S) ⊓ C.linSpan = C := by
+  (hS : Disjoint (Submodule.span R C) S) : (C ⊔ S) ⊓ Submodule.span R (C : Set M) = C := by
   rw [← sup_inf_assoc_of_le_submodule]
   · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
-  · exact le_linSpan C
+  · exact le_submodule_span C
 
 end Ring
 
@@ -324,12 +327,10 @@ lemma restrict_fg_iff_inf_fg (S : Submodule R M) (C : PointedCone R M) :
 lemma restrict_mono (S : Submodule R M) {C D : PointedCone R M} (hCD : C ≤ D) :
     C.restrict S ≤ D.restrict S := fun _ => (hCD ·)
 
-set_option backward.isDefEq.respectTransparency false in
 lemma restrict_inf (S : Submodule R M) {C D : PointedCone R M} :
     (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S
   := by ext x; simp [restrict, Submodule.submoduleOf]
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
     (C ⊓ S).restrict S = C.restrict S := by
@@ -344,22 +345,23 @@ lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
 
 -- Submodule.submoduleOf_sup_of_le
 
-end Semiring_AddCommGroup
 
 
+-- ### NEG
 
-section Ring
+instance : InvolutiveNeg (PointedCone R M) := Submodule.involutivePointwiseNeg -- ⟨map (f := -.id)⟩
 
-section PartialOrder
-
-variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
-section Pointwise
-
-open Pointwise
-
-@[simp] lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
+/- The following lemmas are now automatic. -/
+-- lemma neg_neg (P : PointedCone R M) : - -P = P := by simp
+-- lemma neg_coe {P : PointedCone R M} : (-P : PointedCone R M) = -(P : Set M) := by simp
+-- lemma mem_neg {x : M} {P : PointedCone R M} : x ∈ -P ↔ -x ∈ P := by simp
+-- lemma neg_mem_neg {x : M} {P : PointedCone R M} : -x ∈ -P ↔ x ∈ P := by simp
+-- lemma neg_inj {P Q : PointedCone R M} : -P = -Q ↔ P = Q := by simp
+-- lemma span_neg_eq_neg {s : Set M} : span R (-s) = -(span R s) := Submodule.span_neg_eq_neg s
+-- lemma neg_inf {P Q : PointedCone R M} : -(P ⊓ Q) = -P ⊓ -Q := by simp
+-- lemma neg_sup {P Q : PointedCone R M} : -(P ⊔ Q) = -P ⊔ -Q := by simp
+-- lemma neg_top : -⊤ = (⊤ : PointedCone R M) := by simp
+-- lemma neg_bot : -⊥ = (⊥ : PointedCone R M) := by simp
 
 -- TODO: Does this not already exist?
 lemma map_id_eq_neg (C : PointedCone R M) : C.map (-.id) = -C := by
@@ -387,7 +389,7 @@ lemma map_neg (C : PointedCone R M) (f : M →ₗ[R] N) : map (-f) C = map f (-C
 
 lemma map_neg_apply (C : PointedCone R M) (f : M →ₗ[R] N) : - map f C = map f (-C) := by
   ext x
-  simp only [Submodule.mem_neg, mem_map]
+  simp
   constructor <;> {
     intro h
     obtain ⟨x, hx⟩ := h
@@ -400,14 +402,42 @@ lemma comap_neg (C : PointedCone R M) (f : N →ₗ[R] M) : comap (-f) C = comap
 lemma comap_neg_apply (C : PointedCone R M) (f : N →ₗ[R] M) : -comap f C = comap f (-C) := by
   ext x; simp
 
-end Pointwise
+end Semiring_AddCommGroup
 
-end PartialOrder
+section RingPartialOrder
 
-section DirectedOrder
+variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
-variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
+-- This lemma is used in Faces/Basic.lean. It should probably be moved there.
+open Submodule in
+lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
+    (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
+    (hCD : Disjoint (Submodule.span R C) (Submodule.span (M := M) R D))
+    (s : xC + xD = yC + yD) :
+    xC = yC ∧ xD = yD := by
+  let sub_mem_span {C x y} (mx : x ∈ C) (my : y ∈ C) :=
+    (Submodule.span (M := M) R C).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+  replace hCD := disjoint_def.mp hCD
+  constructor
+  · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
+    rw [add_comm] at s
+    rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
+    exact sub_mem_span myd mxd
+  · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
+    nth_rewrite 2 [add_comm] at s
+    rw [← sub_eq_sub_iff_add_eq_add.mpr s]
+    exact sub_mem_span myc mxc
+
+end RingPartialOrder
+
+section Ring
+
+-- variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+
+@[simp]
+lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
 
 -- lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} (hC : -C = C) :
 --     Submodule.span R (C : Set M) = C := by
@@ -433,150 +463,119 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 --     sorry
 --   · sorry
 
--- NOTE: I changed the statement of the lemma and added the `rw` to the first line that
---  transforms it into the previous statement. Maybe there is a shorter proof now?
--- TODO: simplify proof?
---
--- Mathematically, this lemma is equivalent to directedness of the order on `R`: for `M = R`
--- and `x = 1`, it says every element of `R` is a difference of two nonnegative elements.
+-- Does this theorem need linear order (as opposed to a partial order)?
+-- If not, then neither a lot of things downstream.
 variable (R) in
-@[simp] lemma span_neg_pair_eq_span_singleton (x : M) : span R {-x, x} = R ∙ x := by
-  rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
+lemma span_pm_pair_eq_submodule_span (x : M) :
+    span R {-x, x} = Submodule.span R {-x, x} := by
   ext y
-  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair, smul_neg, Subtype.exists]
+  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
+    smul_neg, Subtype.exists, Nonneg.mk_smul, exists_prop, ← neg_smul, ← add_smul]
   constructor
-  · rintro ⟨a, _, b, _, rfl⟩
-    exact ⟨a, b, rfl⟩
-  · rintro ⟨a, b, rfl⟩
-    obtain ⟨c, hac, hbc⟩ := exists_ge_ge a b
-    refine ⟨c - b, sub_nonneg.mpr hbc, c - a, sub_nonneg.mpr hac, ?_⟩
-    calc
-      -((c - b) • x) + (c - a) • x = (-(c - b) + (c - a)) • x := by
-        rw [← neg_smul, ← add_smul]
-      _ = (b - a) • x := by
-        congr 1
-        abel
-      _ = -(a • x) + b • x := by
-        rw [sub_smul]
-        abel
+  · intro h
+    obtain ⟨a, _, b, _, h⟩ := h
+    exact ⟨a, b, h⟩
+  · intro h
+    obtain ⟨a, b, h⟩ := h
+    by_cases H : -a + b ≥ 0
+    · exact ⟨0, le_refl 0, _, H, by simp [h]⟩
+    · exact ⟨-b + a, by
+        simp_all only [ge_iff_le, le_neg_add_iff_add_le, add_zero, not_le]
+        exact le_of_lt H, 0, le_refl 0, by simp [h]⟩
 
-@[simp] lemma span_sup_span_neg_eq_submodule_span (s : Set M) :
-    span R s ⊔ span R (-s) = Submodule.span R s := by
-  ext x
-  constructor <;> intro h
-  · obtain ⟨_, hy, _, hz, rfl⟩ := Submodule.mem_sup.mp h
-    exact add_mem
-      (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hy p hp)
-      (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hz p <| by
-        intro y hy
-        simpa using p.neg_mem (hp (Set.mem_neg.mp hy)))
-  · rw [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
-    obtain ⟨n, f, g, rfl⟩ := h
-    have hx : ∑ i, f i • (g i : M) ∈ span R (-s ∪ s) := by
-      refine sum_mem ?_
-      intro i _
-      have hpair : f i • (g i : M) ∈ span R ({-(g i : M), (g i : M)} : Set M) := by
-        rw [span_neg_pair_eq_span_singleton (R := R) (x := (g i : M))]
-        exact Submodule.mem_span_singleton.mpr ⟨f i, by simp⟩
-      exact Set.mem_of_subset_of_mem (Submodule.span_mono <| by
-        intro z hz
-        rcases Set.mem_insert_iff.mp hz with rfl | hz
-        · exact Set.mem_union_left _ (by simp [(g i).property])
-        · rcases Set.mem_singleton_iff.mp hz with rfl
-          exact Set.mem_union_right _ (g i).property) hpair
-    simpa [span_union, sup_comm, Set.union_comm] using hx
+-- TODO: move to Submodule/Basic
+omit [IsOrderedRing R] [LinearOrder R] in
+variable (R) in
+@[simp] lemma submodule_span_pm_pair (x : M) :
+    Submodule.span R {-x, x} = Submodule.span R {x} := by
+  rw [← Set.union_singleton, Submodule.span_union]; simp
+
+variable (R) in
+lemma span_sign_pair_eq_submodule_span_singleton (x : M) :
+    span R {-x, x} = Submodule.span R {x} := by
+  simpa [← submodule_span_pm_pair] using span_pm_pair_eq_submodule_span R x
+
+lemma submodule_span_eq_add_span_neg (s : Set M) : Submodule.span R s = span R s ⊔ span R (-s) := by
+  ext x; constructor <;> intros h
+  · simp only [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
+    obtain ⟨_, f, g, h⟩ := h
+    simp only [Set.involutiveNeg, Submodule.mem_sup]
+    rw[← h, ← Finset.sum_filter_add_sum_filter_not _ (fun i => 0 ≤ f i)]
+    use ∑ x with 0 ≤ f x, f x • g x
+    simp only [not_le, add_right_inj, exists_eq_right]
+    constructor <;> apply sum_mem
+    · exact fun x xm => smul_mem _ ((Finset.mem_filter.mp xm).2) (subset_span (g x).property)
+    · intros x xm
+      rw [← neg_smul_neg]
+      apply smul_mem
+      · exact Left.nonneg_neg_iff.mpr (le_of_lt (Finset.mem_filter.mp xm).2)
+      · apply subset_span
+        simp
+  · simp_all [Submodule.mem_sup]
+    obtain ⟨_, hy, _, hz, h⟩ := h
+    rw [← h]
+    apply add_mem
+    · exact Submodule.mem_span.mpr (fun p hp => Submodule.mem_span.mp hy p hp)
+    · refine Submodule.mem_span.mpr (fun p hp => Submodule.mem_span.mp hz p ?_)
+      intro x xs
+      convert p.neg_mem <| hp <| Set.mem_neg.mp xs
+      exact (InvolutiveNeg.neg_neg x).symm
 
 -- NOTE: if this is implemented, it is more general than what mathlib already provides
 -- for converting submodules into pointed cones. Especially the proof that R≥0 is an FG
 -- submodule of R should be easier with this.
-set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma span_union_neg_eq_submodule_span (s : Set M) :
+lemma span_union_neg_eq_span_submodule (s : Set M) :
     span R (-s ∪ s) = Submodule.span R s := by
   ext x
-  simp only [Submodule.mem_span, Set.union_subset_iff, and_imp,
+  simp only [Set.involutiveNeg, Submodule.mem_span, Set.union_subset_iff, and_imp,
     Submodule.restrictScalars_mem]
   constructor <;> intros h B sB
-  · refine h (B.restrictScalars _) ?_ sB
+  · refine h (Submodule.restrictScalars {c : R // 0 ≤ c} B) ?_ sB
     rw [Submodule.coe_restrictScalars]
     exact fun _ tm => neg_mem_iff.mp (sB tm)
   · intro nsB
     have : x ∈ (Submodule.span R s : PointedCone R M) :=
       h (Submodule.span R s) Submodule.subset_span
-    rw [← span_sup_span_neg_eq_submodule_span] at this
+    rw [submodule_span_eq_add_span_neg s] at this
     obtain ⟨_, h₁, _, h₂, h⟩ := Submodule.mem_sup.mp this
     rw [← h]
     apply add_mem
     · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr nsB) h₁
     · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr sB) h₂
 
-lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
-    span R s = Submodule.span R s := by
-  nth_rw 1 [← Set.union_self s, hs]
-  exact span_union_neg_eq_submodule_span s
-
-section Pointwise
-
-open Pointwise
-
-lemma sup_neg_eq_submodule_span (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
+lemma sup_neg_eq_submodule_span (C : PointedCone R M) :
+    -C ⊔ C = Submodule.span R (C : Set M) := by
   nth_rw 1 2 [← Submodule.span_eq C]
   rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
-  exact span_union_neg_eq_submodule_span (C : Set M)
+  exact span_union_neg_eq_span_submodule (C : Set M)
 
--- NOTE: I think only one of `neg_eq_iff_eq_linSpan` and `neg_eq_iff_eq_linSpan` is needed.
---  I don't know which.
+lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
+    span R s = Submodule.span R s := by
+  nth_rw 1 [← Set.union_self s]
+  nth_rw 1 [hs]
+  exact span_union_neg_eq_span_submodule s
 
-lemma neg_eq_iff_eq_linSpan {C : PointedCone R M} : -C = C ↔ C.linSpan = C := by
+lemma neg_eq_self_iff_neg_le {C : PointedCone R M} : -C = C ↔ -C ≤ C :=
+  Submodule.neg_eq_self_iff_neg_le
+
+lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} :
+    -C = C ↔ Submodule.span R (C : Set M) = C := by
   rw [← sup_neg_eq_submodule_span, sup_eq_right]
-  exact Submodule.neg_eq_self_iff_neg_le
+  exact neg_eq_self_iff_neg_le
 
-lemma neg_le_iff_eq_linSpan {C : PointedCone R M} : -C ≤ C ↔ C.linSpan = C :=
-  Iff.trans Submodule.neg_eq_self_iff_neg_le.symm neg_eq_iff_eq_linSpan
+lemma neg_self_iff_eq_span_submodule' {C : PointedCone R M} :
+    -C ≤ C ↔ Submodule.span R (C : Set M) = C
+  := Iff.trans neg_eq_self_iff_neg_le.symm neg_self_iff_eq_span_submodule
 
-end Pointwise
-
-lemma mem_linSpan {C : PointedCone R M} {x : M} :
+lemma mem_linSpan (C : PointedCone R M) {x : M} :
     x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
-  rw [← mem_ofSubmodule_iff, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
+  rw [← mem_coe, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
   simp only [Submodule.mem_neg]
   constructor <;> intro h
   · obtain ⟨y, hy', z, hz, rfl⟩ := h
     exact ⟨z, hz, -y, hy', by simp⟩
   · obtain ⟨p, hp, n, hn, rfl⟩ := h
     exact ⟨-n, by simp [hn], x + n, hp, by simp⟩
-
-end DirectedOrder
-
-section PartialOrder
-
-variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-
--- This lemma is used in Faces/Basic.lean. It should probably be moved there.
-open Submodule in
-lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
-    (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
-    (hCD : Disjoint C.linSpan D.linSpan)
-    (s : xC + xD = yC + yD) :
-    xC = yC ∧ xD = yD := by
-  let sub_mem_span {C : PointedCone R M} {x y} (mx : x ∈ C) (my : y ∈ C) :=
-    C.linSpan.sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
-  replace hCD := disjoint_def.mp hCD
-  constructor
-  · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
-    rw [add_comm] at s
-    rw [sub_eq_sub_iff_add_eq_add.mpr s.symm]
-    exact sub_mem_span myd mxd
-  · refine (sub_eq_zero.mp <| hCD _ ?_ (sub_mem_span mxd myd)).symm
-    nth_rewrite 2 [add_comm] at s
-    rw [← sub_eq_sub_iff_add_eq_add.mpr s]
-    exact sub_mem_span myc mxc
-
-end PartialOrder
-
-section LinearOrder
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
 
 section Map
 
@@ -586,6 +585,10 @@ lemma map_span (f : M →ₗ[R] M') (s : Set M) : map f (span R s) = span R (f '
   Submodule.map_span _ _
 
 end Map
+
+end Ring
+
+
 
 -- -- ## LINEAR EQUIV
 
@@ -606,11 +609,12 @@ end Map
 --   fun_inv : ∀ x ∈ t, toFun (toInv x) = x
 -- example (S : PointedCone R M) (T : PointedCone R N) : S ≃ₗ[R≥0] T := sorry
 
+section Ring_LinearOrder
+
 -- we have LinearOrder because then Module.Finite { c // 0 ≤ c } R
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma ofSubmodule_fg_of_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R M).FG
     := Submodule.FG.restrictScalars hS
 
@@ -620,29 +624,28 @@ alias coe_fg := ofSubmodule_fg_of_fg
 -- Q: is this problematic?
 instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
   ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
-lemma FG.linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG :=
+lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span R (M := M) C).FG :=
   hC.span
+
+@[deprecated submodule_span_fg (since := "...")]
+alias span_fg := submodule_span_fg
 
 lemma fg_top [Module.Finite R M] : (⊤ : PointedCone R M).FG :=
   ofSubmodule_fg_of_fg Module.Finite.fg_top
 
-end LinearOrder
-
-end Ring
+end Ring_LinearOrder
 
 
 -- # QUOTIENTS
 
 /- Most, if not everything, from this section should be proven for general restricted scalars. -/
 
-section Quotient
+section Ring
 
 variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
@@ -654,47 +657,23 @@ abbrev quot (C : PointedCone R M) (S : Submodule R M) : PointedCone R (M ⧸ S) 
 
 lemma quot_def (C : PointedCone R M) (S : Submodule R M) : C.quot S = C.map S.mkQ := rfl
 
-lemma quot_eq_bot_iff (C : PointedCone R M) (S : Submodule R M) :
-    C.quot S = ⊥ ↔ C ≤ S := by
-  simp only [quot, PointedCone.ext_iff, PointedCone.map]
-  constructor
-  · intro h x hx
-    exact (Submodule.Quotient.mk_eq_zero _).mp <| (h (S.mkQ x)).mp ⟨x, hx, rfl⟩
-  · intro h y
-    simp only [Submodule.mem_map, LinearMap.coe_restrictScalars, Submodule.mkQ_apply,
-      Submodule.mem_bot]
-    constructor
-    · rintro ⟨y₁, hy₁, rfl⟩
-      exact (Submodule.Quotient.mk_eq_zero S).mpr (h hy₁)
-    · rintro rfl
-      exact ⟨0, C.zero_mem, Submodule.Quotient.mk_zero S⟩
-
-lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := (quot_eq_bot_iff C S).mpr h
+lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := sorry
 
 lemma quot_span : C.quot (.span R C) = ⊥ := quot_bot_of_le Submodule.le_span
 
 lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 
-/-- The linear span of a quotient cone is the image of the linear span under the quotient map. -/
-@[simp] lemma linSpan_quot (C : PointedCone R M) (S : Submodule R M) :
-    (C.quot S).linSpan = Submodule.map S.mkQ C.linSpan := by
-  simpa [PointedCone.quot, PointedCone.linSpan] using
-    (Submodule.span_image (f := S.mkQ) (s := (C : Set M)))
-
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
     (C ⊔ S).quot S = C.quot S := sorry
 
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma quot_eq_iff_sup_eq {S : Submodule R M} {C D : PointedCone R M} :
     C.quot S = D.quot S ↔ C ⊔ S = D ⊔ S := Submodule.map_mkQ_eq_iff_sup_eq
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma map_mkQ_le_iff_sup_le {p : Submodule R M} {s t : PointedCone R M} :
     map p.mkQ s ≤ map p.mkQ t ↔ s ⊔ p ≤ t ⊔ p := Submodule.map_mkQ_le_iff_sup_le
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma map_mkQ_eq_iff_sup_eq {p : Submodule R M} {s t : PointedCone R M} :
     map p.mkQ s = map p.mkQ t ↔ s ⊔ p = t ⊔ p := Submodule.map_mkQ_eq_iff_sup_eq
 
@@ -705,43 +684,12 @@ variable {R M : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommG
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
-set_option backward.isDefEq.respectTransparency false in
 noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
     {C : PointedCone R M} (hSC : S ≤ C) : C.quot S ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
   Submodule.IsCompl.map_mkQ_equiv_inf hST hSC
 
 end CommRing
 
-end Quotient
-
-section DivisionRing
-
-variable {R M : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M] {S : Set M}
-
--- TODO: golf this
-theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C := by
-  constructor <;> intro h
-  · have h := C.smul_mem (le_of_lt <| inv_pos.mpr hc) h
-    rw [inv_smul_smul₀ (ne_of_lt hc).symm] at h
-    exact h
-  · exact C.smul_mem (le_of_lt hc) h
-
--- analogue of `Submodule.span_singleton_smul_eq`
-set_option backward.isDefEq.respectTransparency false in
-theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} = span R {x} := by
-  ext y
-  simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop]
-  constructor <;> intro h <;> obtain ⟨a, ha, h⟩ := h
-  · use a * r
-    constructor
-    · exact mul_nonneg ha (le_of_lt hr)
-    · simpa [smul_smul] using h
-  · use a * r⁻¹
-    constructor
-    · exact mul_nonneg ha (le_of_lt (inv_pos.mpr hr))
-    · simpa [smul_smul, inv_mul_cancel_right₀ (ne_of_lt hr).symm] using h
-
-end DivisionRing
+end Ring
 
 end PointedCone

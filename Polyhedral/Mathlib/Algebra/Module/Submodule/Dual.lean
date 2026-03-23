@@ -66,13 +66,17 @@ def dual : Submodule R N where
 @[simp] lemma dual_bot : dual p {0} = ⊤ := dual_zero
 @[simp] lemma dual_ker : dual p (ker p) = ⊤ := by ext; simp +contextual
 
-variable [inst : Fact p.SeparatingLeft] in
-lemma dual_top_iff_le_ker {S : Submodule R M} : dual p S = ⊤ ↔ S ≤ ker p := by
+@[simp] lemma dual_top_iff_le_ker {S : Submodule R M} : dual p S = ⊤ ↔ S ≤ ker p := by
+  rw [SetLike.ext_iff]
+  simp only [mem_dual, SetLike.mem_coe, mem_top, iff_true]
   constructor <;> intro h
   · intro x hx
-    simp only [Submodule.ext_iff, mem_dual, SetLike.mem_coe, mem_top, iff_true] at h
-    simpa using inst.elim x (fun y => (h y hx).symm)
-  · simp only [SeparatingLeft.ker_eq_bot, le_bot_iff] at h
+    simp only [mem_ker, LinearMap.ext_iff]
+    intro y
+    simp [← h y hx]
+  · intro x y hy
+    specialize h hy
+    simp at h
     simp [h]
 
 lemma dual_univ_ker : dual p univ = ker p.flip := by
@@ -686,7 +690,7 @@ variable [Fact (Surjective p.flip)] in
 /-- A submodule of a vector space is dual closed. -/
 lemma dualClosed (S : Submodule R M) : S.DualClosed p := by
   apply DualClosed.to_bilin
-  nth_rw 1 [DualClosed, Dual.eval, flip_flip]
+  nth_rw 1 [DualClosed, Dual.eval, LinearMap.flip_flip]
   rw [dual_dualCoannihilator, dual_dualAnnihilator]
   exact Subspace.dualAnnihilator_dualCoannihilator_eq
 

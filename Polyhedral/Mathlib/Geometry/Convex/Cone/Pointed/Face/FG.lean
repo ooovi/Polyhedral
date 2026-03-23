@@ -53,7 +53,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
   rw [FG.dual_flip_dual p hC]
   rw [← dual_span_lineal_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
-  nth_rw 3 [← PointedCone.ofSubmodule_coe]
+  nth_rw 3 [← PointedCone.coe_ofSubmodule]
   rw [FGDual.dual_inf_dual_sup_dual ?_ ?_]
   · rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
     rw [FG.dual_flip_dual p hC]
@@ -91,6 +91,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
 
+set_option backward.isDefEq.respectTransparency false in
 open Submodule in
 /-- If a point `x` does not lie in a cone `C` but together with `C` spans a salient cone, then
   `x` spans a face of `span R (C ∪ {x})`. -/

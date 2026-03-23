@@ -98,15 +98,19 @@ instance : SemilatticeInf (Face C) where
 
 instance : CompleteSemilatticeInf (Face C) where
   __ := instSemilatticeInf
-  sInf_le S f fS := by
-    rw [← coe_le_iff]
-    refine inf_le_of_right_le ?_
-    simpa [LE.le] using fun _ xs => xs f fS
-  le_sInf S f fS := by
-    simp only [sInf, Set.mem_setOf_eq, Set.iInter_exists, Set.biInter_and',
+  isGLB_sInf S := by
+    constructor <;> intro f fS
+    · rw [← coe_le_iff]
+      refine inf_le_of_right_le ?_
+      simpa [LE.le] using fun _ xs => xs f fS
+    · simp only [sInf, Set.mem_setOf_eq, Set.iInter_exists, Set.biInter_and',
       Set.iInter_iInter_eq_right, ← coe_le_iff, toPointedCone, le_inf_iff]
-    refine ⟨f.isFaceOf.le, ?_⟩
-    simpa [LE.le] using fun _ xf s sm => fS s sm xf
+      refine ⟨f.isFaceOf.le, ?_⟩
+      simpa [LE.le] using fun ⦃x⦄ a _ i ↦ (mem_coe x).mp (fS i a)
+
+
+
+  -- sInf_le S f fS := by
 
 instance : CompleteLattice (Face C) where
   top := ⟨C, IsFaceOf.refl _⟩
@@ -318,6 +322,7 @@ lemma quotFace_eq_map_of_le {F G : Face C} (h : F ≤ G) :
     (F.quotFace G : PointedCone R (M ⧸ F.linSpan)) = PointedCone.map F.quotMap G := by
   simp [quotFace, sup_eq_right.mpr h]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) = G := by
   ext x

@@ -14,6 +14,7 @@ variable {C F F₁ F₂ : PointedCone R M}
 
 section opt
 
+set_option backward.isDefEq.respectTransparency false in
 /- The minimum of `f/g` on a salient cone. -/
 def opt (C : PointedCone R M) (f g : M →ₗ[R] R) (_ : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) :
     PointedCone R M where
@@ -75,6 +76,7 @@ lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
   rw [← mul_assoc, ← t3]
   linarith
 
+set_option backward.isDefEq.respectTransparency false in
 lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
     (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g hg := by
   classical
