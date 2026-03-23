@@ -688,14 +688,100 @@ def IsSimplicial : Prop :=
 protected theorem IsSimplicial.span {s : Set M} (hs : s.Finite) (hli : LinearIndepOn R id s) :
     (PointedCone.span R s).IsSimplicial := ⟨s, hs, hli, rfl⟩
 
-lemma helper {C : PointedCone R M} {x : M} {a : R}
+lemma zero_le_of_smul_mem_salient {C : PointedCone R M} {x : M} {a : R}
   (hSal : C.Salient) (hx0 : x ≠ 0) (hx : x ∈ C) (ha : a • x ∈ C) :
-    a ≥ 0 := by
+    0 ≤ a := by
   by_contra!
   apply hSal (a • x) ha
-  · simp [ne_of_lt this, hx0]
+  · simp only [ne_eq, isUnit_iff_ne_zero, ne_of_lt this, not_false_eq_true, IsUnit.smul_eq_zero,
+    hx0]
   rw [← neg_smul]
   exact C.smul_mem (neg_nonneg.mpr <| le_of_lt this) hx
+
+lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
+    (span R s).Salient := by
+  refine salient_iff_mem_neg.mpr fun x ↦ ?_
+  apply Submodule.span_induction
+  · intro x hx hx0 hx_neg
+    apply mem_span_set.1 at hx_neg
+    sorry
+  · intro h
+    contradiction
+  · intro x y hxs _ hx hy hxy0
+    by_cases hx0 : x = 0
+    · simp [hx0] at *
+      exact hy hxy0
+    by_cases hy0 : y = 0
+    · simp [hy0] at *
+      exact hx hxy0
+    specialize hx hx0
+    intro hxy
+    apply hy hy0
+    rw [(by module : -y = -(x+y) + x)]
+    exact add_mem hxy hxs
+
+  simp
+  intro a ha x hx hx₂ ha0 hx0
+  rw [← neg_smul]
+  intro hax
+  sorry
+
+
+lemma salient_span_singleton (x : M) : (span R {x}).Salient := by
+  by_cases h : x = 0
+  · simp [h]
+    sorry
+  apply salient_span_of_linearIndepOn (s := {x})
+  simp [h]
+
+---
+
+lemma salient_iff_eq_linSpan_of_rank_eq_one (hC : C.rank = 1) :
+    ¬C.Salient ↔ C = C.linSpan := sorry
+
+lemma exists_span_pair_of_rank_le_one (hC : C.rank ≤ 1) :
+    ∃ x y : M, C = span R {x, y} := sorry
+
+lemma exists_span_pair_of_rank_eq_one (hC : C.rank = 1) :
+    ∃ x y : M, x ≠ 0 ∧ y ≠ 0 ∧ C = span R {x, y} := sorry
+
+lemma exists_span_singleton_of_rank_le_one_salient (hC : C.rank ≤ 1) (hsal : C.Salient) :
+    ∃ x : M, C = span R {x} := sorry
+
+lemma exists_span_singleton_of_rank_eq_one_salient (hC : C.rank = 1) (hsal : C.Salient) :
+    ∃ x : M, x ≠ 0 ∧ C = span R {x} := sorry
+
+---
+
+lemma FG.exists_span_pair_of_rank_le_two (hfg : C.FG) (hC : C.rank ≤ 2) :
+    ∃ x y z : M, C = span R {x, y, z} := sorry
+
+lemma FG.exists_span_pair_of_rank_le_two_salient (hfg : C.FG) (hC : C.rank ≤ 2) (hsal : C.Salient) :
+    ∃ x y : M, C = span R {x, y} := sorry
+
+lemma FG.exists_span_pair_of_rank_eq_two_salient (hfg : C.FG) (hC : C.rank = 2) (hsal : C.Salient) :
+    ∃ x y : M, LinearIndepOn R id {x, y} ∧ C = span R {x, y} := sorry
+
+---
+
+lemma IsSimplicial.bot : (⊥ : PointedCone R M).IsSimplicial := by use ∅; simp
+
+-- why, actually, does simplicial assume that `s` is finite?
+lemma IsSimplicial.salient (hC : C.IsSimplicial) : C.Salient := by
+  obtain ⟨s, _, hli, rfl⟩ := hC
+  exact salient_span_of_linearIndepOn hli
+
+-- it is very annoying to deal with C.rank vs C.finrank. We need to think of a solution.
+lemma IsSimplicial.of_fg_rank_le_two_salient (hfg : C.FG) (hC : C.rank ≤ 2) (hsal : C.Salient) :
+    C.IsSimplicial := by
+  by_cases h0 : C.finrank = 0
+  · sorry
+  by_cases h1 : C.finrank = 1
+  · sorry
+  by_cases h2 : C.finrank = 2
+  · sorry
+  absurd Nat.two_lt_of_ne h0 h1 h2
+  exact not_lt_of_ge <| Module.finrank_le_of_rank_le hC
 
 lemma linearIndep_pair_of_incomparable_rays {x y : M} (hSal : (span R {x, y}).Salient)
   (hxy : ¬ (span R {x} ≤ span R {y} ∨ span R {y} ≤ span R {x})) :
@@ -704,7 +790,7 @@ lemma linearIndep_pair_of_incomparable_rays {x y : M} (hSal : (span R {x, y}).Sa
   apply linearIndepOn_id_pair hx0
   intro b h
   have hb : b ≥ 0 := by
-    apply helper hSal hx0 (Submodule.mem_span_of_mem <| Set.mem_insert x {y})
+    apply zero_le_of_smul_mem_salient hSal hx0 (Submodule.mem_span_of_mem <| Set.mem_insert x {y})
     rw [h]
     exact Submodule.mem_span_of_mem <| Set.mem_insert_of_mem x rfl
   have : span R {y} ≤ span R {x} := by
@@ -763,7 +849,7 @@ lemma two_faces_span_of_rank_two (hC : C.rank = 2) (hFG : C.FG) (hSal : C.Salien
     simp only [neg_smul, neg_add_cancel_left] at hsC
     have hsy : - a • x + (a • x + b • y) ∈ span R {y} := by
       apply Submodule.mem_span_singleton.2
-      use ⟨b, helper hSal hy0 hyC hsC⟩
+      use ⟨b, zero_le_of_smul_mem_salient hSal hy0 hyC hsC⟩
       simp only [Nonneg.mk_smul, neg_smul, neg_add_cancel_left]
     have := hy.mem_of_smul_add_mem hxC hz (Left.neg_pos_iff.mpr this) hsy
     apply hxy

@@ -54,20 +54,16 @@ lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
   · rw [x_ne_0]; exact zero_mem (C.opt f g hg)
   by_cases! t_ne_0 : a • x + y = 0
   · exfalso
-    apply (IsSalient.of_opt C f g hg) (a • x)
-    · exact C.smul_mem (le_of_lt ha) hx
+    apply (IsSalient.of_opt C f g hg) (a • x) <| C.smul_mem (le_of_lt ha) hx
     · exact smul_ne_zero (ne_of_gt ha) x_ne_0
-    rw [neg_eq_of_add_eq_zero_right t_ne_0]
-    exact hy
+    rwa [neg_eq_of_add_eq_zero_right t_ne_0]
   refine ⟨hx, fun z hz ↦ ?_⟩
   have : g x > 0 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
   have t1 := h x hx
   have t2 := h y hy
   have t4 := (mul_le_mul_iff_of_pos_left this).mpr <| (h z hz)
   simp only [map_add, map_smul, smul_eq_mul] at t1 t2 t4
-  have local_lemma : ∀ {a b c d e : R}, e > 0 → a ≤ b → c ≤ d → e * a + c = e * b + d → a = b :=
-    fun _ _ _ _ ↦ by nlinarith
-  have t3 : (a * f x + f y) * g x = f x * (a * g x + g y) := local_lemma ha t1 t2 (by ring)
+  have t3 : (a * f x + f y) * g x = f x * (a * g x + g y) := by nlinarith [ha, t1, t2]
   have : a * g x + g y > 0 := by
     simpa only [gt_iff_lt, map_add, map_smul, smul_eq_mul] using
       lt_of_le_of_ne (hg _ h2).1 (fun h ↦ t_ne_0 <| (hg _ h2).2 (Eq.symm h))
