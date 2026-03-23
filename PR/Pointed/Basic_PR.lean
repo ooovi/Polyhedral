@@ -555,23 +555,17 @@ lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
   nth_rw 1 [hs]
   exact span_union_neg_eq_span_submodule s
 
-lemma neg_le_iff_neg_eq {C : PointedCone R M} : -C ≤ C ↔ -C = C  where
-  mp := by
-    intro h
-    ext x; rw [Submodule.mem_neg]
-    suffices h : ∀ x, -x ∈ C → x ∈ C from by
-      exact ⟨h x, by nth_rw 1 [← neg_neg x]; exact h (-x)⟩
-    exact SetLike.le_def.mp @h
-  mpr := le_of_eq
+lemma neg_eq_self_iff_neg_le {C : PointedCone R M} : -C = C ↔ -C ≤ C :=
+  Submodule.neg_eq_self_iff_neg_le
 
 lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} :
     -C = C ↔ Submodule.span R (C : Set M) = C := by
   rw [← sup_neg_eq_submodule_span, sup_eq_right]
-  exact neg_le_iff_neg_eq.symm
+  exact neg_eq_self_iff_neg_le
 
 lemma neg_self_iff_eq_span_submodule' {C : PointedCone R M} :
     -C ≤ C ↔ Submodule.span R (C : Set M) = C
-  := Iff.trans neg_le_iff_neg_eq neg_self_iff_eq_span_submodule
+  := Iff.trans neg_eq_self_iff_neg_le.symm neg_self_iff_eq_span_submodule
 
 lemma mem_linSpan (C : PointedCone R M) {x : M} :
     x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by

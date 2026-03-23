@@ -3,11 +3,6 @@ Copyright (c) 2025 Justus Springer, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Justus Springer, Martin Winter
 -/
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm.Basic
-
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FGDual
 

@@ -3,18 +3,8 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.Quotient.Basic
-import Mathlib.Order.Partition.Basic
-
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
--- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice2
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
--- import Polyhedral.Hyperplane
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 
 open Module
 open Submodule
