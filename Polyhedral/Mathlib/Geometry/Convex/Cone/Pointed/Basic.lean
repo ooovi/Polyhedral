@@ -66,6 +66,7 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 -- ## LINSPAN
 
 /-- The linear span of the cone. -/
+-- @[deprecated Submodule.span (since := "today")]
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
 @[simp high] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
