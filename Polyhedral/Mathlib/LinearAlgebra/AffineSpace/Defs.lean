@@ -82,7 +82,7 @@ end AffineWeights
 /--
 A set equipped with an operation of finite affine combinations, where the coefficients sum to 1.
 -/
-class AffineSpace (R : Type*) (M : Type*) [Semiring R] where
+class AffineSpace' (R : Type*) (M : Type*) [Semiring R] where
   /-- Take a affine combination with the given weighting. -/
   affineCombination (f : AffineWeights R M) : M
   /-- Associativity of affine combination (monadic join law). -/
@@ -91,7 +91,7 @@ class AffineSpace (R : Type*) (M : Type*) [Semiring R] where
   /-- A affine combination of a single point is that point. -/
   single (x : M) : affineCombination (.single x) = x
 
-namespace AffineSpace
+namespace AffineSpace'
 
 section ConvexSpace
 
@@ -106,7 +106,7 @@ instance : Coe (StdSimplex R (StdSimplex R M)) (AffineWeights R (AffineWeights R
   coe f := f.map (Coe.coe (β := (AffineWeights R M)))
 
 /-- An affine space is a convex space too. -/
-instance [af : AffineSpace R M] : ConvexSpace R M where
+instance [af : AffineSpace' R M] : ConvexSpace R M where
   convexCombination (f : StdSimplex R M) := af.affineCombination f
   assoc (f : StdSimplex R (StdSimplex R M)) := by
     convert af.assoc f
@@ -120,7 +120,7 @@ end ConvexSpace
 section Convex
 
 variable (R : Type*) {M : Type*}
-variable [PartialOrder R] [Semiring R] [IsStrictOrderedRing R] [AffineSpace R M]
+variable [PartialOrder R] [Semiring R] [IsStrictOrderedRing R] [AffineSpace' R M]
 
 /-- Convexity of sets in affine spaces. -/
 def Convex (s : Set M) : Prop :=
@@ -143,7 +143,7 @@ section OpenSegment
 open AffineWeights
 
 variable {𝕜 E : Type*}
-variable [Semiring 𝕜] [PartialOrder 𝕜] [AffineSpace 𝕜 E]
+variable [Semiring 𝕜] [PartialOrder 𝕜] [AffineSpace' 𝕜 E]
 variable (𝕜)
 
 /-- Open segment in an affine space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
@@ -160,7 +160,7 @@ theorem openSegment_symm (x y : E) : openSegment 𝕜 x y = openSegment 𝕜 y x
 
 end OpenSegment
 
-variable (R : Type*) {M : Type*} [Semiring R] [AffineSpace R M] [PartialOrder R]
+variable (R : Type*) {M : Type*} [Semiring R] [AffineSpace' R M] [PartialOrder R]
 
 /-- A set `B` is an extreme subset of `A` if `B ⊆ A` and all points of `B` only belong to open
 segments whose ends are in `B`.
@@ -203,7 +203,7 @@ instance : IsPartialOrder (Set M) (IsExtreme R) where
 
 end IsExtreme
 
-end AffineSpace
+end AffineSpace'
 
 noncomputable section AddTorsor
 
@@ -277,8 +277,8 @@ public theorem affineCombination_assoc (f : AffineWeights R (AffineWeights R P))
         not_true_eq_false] at hp
 
 variable [PartialOrder R] [IsStrictOrderedRing R] [IsCancelMulZero R]
-/-- An AddTorsor is also an AffineSpace. -/
-public instance instAffineSpace : AffineSpace R P where
+/-- An AddTorsor is also an AffineSpace'. -/
+public instance instAffineSpace' : AffineSpace' R P where
   affineCombination f := affineCombination f
   single := affineCombination_single
   assoc := affineCombination_assoc

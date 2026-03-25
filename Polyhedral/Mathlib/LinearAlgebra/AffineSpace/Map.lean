@@ -1,19 +1,19 @@
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
-namespace AffineSpace
+namespace AffineSpace'
 
 section AffineMap
 
-open AffineWeights AffineSpace
+open AffineWeights AffineSpace'
 
-structure AffineMap (R M N : Type*) [Semiring R] [AffineSpace R M] [AffineSpace R N] where
+structure AffineMap (R M N : Type*) [Semiring R] [AffineSpace' R M] [AffineSpace' R N] where
   toFun : M → N
   comm  : ∀ w : AffineWeights R M,
     toFun (affineCombination w) = affineCombination (w.map toFun)
 
 namespace AffineMap
 
-variable {R M N : Type*} [Semiring R] [AffineSpace R M] [AffineSpace R N]
+variable {R M N : Type*} [Semiring R] [AffineSpace' R M] [AffineSpace' R N]
 
 instance : FunLike (AffineMap R M N) M N where
   coe := fun t => t.toFun
@@ -28,14 +28,14 @@ abbrev id : AffineMap R M M := ⟨_root_.id, by simp [map]⟩
 @[simp]
 lemma id_toFun (x : M) : (AffineMap.id (R := R)).toFun x = x := rfl
 
-variable {P : Type*} [AffineSpace R P]
+variable {P : Type*} [AffineSpace' R P]
 def comp (g : AffineMap R N P) (f : AffineMap R M N) : AffineMap R M P where
   toFun := g.toFun ∘ f.toFun
   comm  := fun w => by simp only [Function.comp, f.comm, g.comm, AffineWeights.map_map]
 
 end AffineMap
 
-structure AffineEquiv (R M N : Type*) [Semiring R] [AffineSpace R M] [AffineSpace R N]
+structure AffineEquiv (R M N : Type*) [Semiring R] [AffineSpace' R M] [AffineSpace' R N]
     extends AffineMap R M N where
   invFun : AffineMap R N M
   left_inv : invFun.toFun.LeftInverse toFun
@@ -43,7 +43,7 @@ structure AffineEquiv (R M N : Type*) [Semiring R] [AffineSpace R M] [AffineSpac
 
 namespace AffineEquiv
 
-variable {R M N : Type*} [Semiring R] [AffineSpace R M] [AffineSpace R N]
+variable {R M N : Type*} [Semiring R] [AffineSpace' R M] [AffineSpace' R N]
 
 instance : FunLike (AffineEquiv R M N) M N where
   coe e := e.toFun
@@ -79,7 +79,7 @@ abbrev id : AffineEquiv R M M :=
   ⟨AffineMap.id, AffineMap.id,
     Function.leftInverse_iff_comp.mpr rfl, Function.rightInverse_iff_comp.mpr rfl⟩
 
-variable {P : Type*} [AffineSpace R P]
+variable {P : Type*} [AffineSpace' R P]
 def trans (e₁ : AffineEquiv R M N) (e₂ : AffineEquiv R N P) : AffineEquiv R M P where
   toAffineMap := e₂.toAffineMap.comp e₁.toAffineMap
   invFun := e₁.invFun.comp e₂.invFun
@@ -91,13 +91,13 @@ def symm (e : AffineEquiv R M N) : AffineEquiv R N M :=
 
 end AffineEquiv
 
-structure AffineEmbedding (R M N : Type*) [Semiring R] [AffineSpace R M] [AffineSpace R N]
+structure AffineEmbedding (R M N : Type*) [Semiring R] [AffineSpace' R M] [AffineSpace' R N]
     extends AffineMap R M N where
   inj' : Function.Injective toFun
 
 namespace AffineEmbedding
 
-variable {R M N : Type*} [Semiring R] [AffineSpace R M] [AffineSpace R N]
+variable {R M N : Type*} [Semiring R] [AffineSpace' R M] [AffineSpace' R N]
 
 instance : FunLike (AffineEmbedding R M N) M N where
   coe e := e.toFun
@@ -111,7 +111,7 @@ end AffineEmbedding
 
 section Translation
 
-variable {R M N : Type*} [Ring R] [AffineSpace R M] [AffineSpace R N]
+variable {R M N : Type*} [Ring R] [AffineSpace' R M] [AffineSpace' R N]
 
 open Finsupp in
 /-- A weighting with weight `1` on `x` and `z` and weight `-1` on `y`. -/
@@ -132,7 +132,7 @@ lemma sub_add_comm (x y z : M) (f : AffineMap R M M) :
 @[simp]
 lemma sub_add_same (b : M) (f : AffineMap R M M) :
     affineCombination (sub_add (R := R) (f.toFun b) b b) = f.toFun b := by
-  simp [sub_add, AffineSpace.single]
+  simp [sub_add, AffineSpace'.single]
 
 abbrev isTranslative (f : M → M) :=
   ∀ (a b : M), f a = affineCombination (R := R) (sub_add (f b) b a)
@@ -190,8 +190,8 @@ instance [Nonempty M] : AddGroup (AffineTranslation R M) where
     rfl
   zsmul := zsmulRec
 
-variable {R : Type*} [Ring R] {M : Type*} [af : AffineSpace R M] in
-/-- An AffineSpace defines an AddTorsor on its affine translations. -/
+variable {R : Type*} [Ring R] {M : Type*} [af : AffineSpace' R M] in
+/-- An AffineSpace' defines an AddTorsor on its affine translations. -/
 @[reducible]
 public def instAddTorsor [Nonempty M] : AddTorsor (AffineTranslation R M) M where
   vadd v p := v.toFun p
