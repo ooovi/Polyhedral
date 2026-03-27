@@ -188,11 +188,12 @@ lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
     {S : Submodule 𝕜 N} (hS : S.FG) (hCS : C ≤ S) :
       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ S = C := by
   wlog hC' : C = ⊥ with h
-  · specialize h p fg_bot hS bot_le rfl
-    obtain ⟨D, hfgdual, hD⟩ := h
-    exact ⟨_, sup_fg_fgdual hC hfgdual, by simp [← sup_inf_assoc_of_le_submodule D hCS, hD]⟩
+  · obtain ⟨D, hfgdual, hD⟩ := h p fg_bot hS bot_le rfl
+    refine ⟨_, sup_fg_fgdual hC hfgdual, ?_⟩
+    simp [← sup_inf_assoc_of_le_submodule D hCS, hD]
   · obtain ⟨D, hfgdual, hD⟩ := hS.exists_fgdual_disjoint p  -- <~~ only FGDual theory
-    exact ⟨_, coe_fgdual_iff.mpr hfgdual, by simp [← restrictScalars_inf, inf_comm, hC', hD.eq_bot]⟩
+    refine ⟨D, coe_fgdual_iff.mpr hfgdual, ?_⟩
+    simp [← restrictScalars_inf, inf_comm, hC', hD.eq_bot]
 
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of its linear span with a FGDual cone. -/
@@ -219,6 +220,7 @@ lemma FG.exists_fgdual_inf_linSpan {C : PointedCone 𝕜 N} (hC : C.FG) :
 --   · rw [dual_sup_dual_inf_dual]
 --     simp [Submodule.FG.dual_dual_flip _ hS] -- <-- submodule duality theory
 
+set_option backward.isDefEq.respectTransparency false in
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone is the dual of a FGDual cone. -/
 lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
@@ -227,7 +229,7 @@ lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
   rw [← h]
   obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
   use C' ⊔ dual p.flip C.linSpan
-  have hC := FG.linSpan_fg hC
+  have hC := hC.span (A := 𝕜)
   constructor
   · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hC)
   · rw [dual_sup_dual_inf_dual, dual_eq_submodule_dual, coe_ofSubmodule, dual_eq_submodule_dual,
@@ -241,7 +243,7 @@ lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
 variable (p) [Fact p.SeparatingRight] in
 /-- The double dual of an FG cone is the cone itself. -/
 @[simp] lemma FG.dual_dual_flip {C : PointedCone 𝕜 N} (hC : C.FG) : dual p (dual p.flip C) = C := by
-  obtain ⟨D, hfgdual, rfl⟩ := exists_fgdual_dual p hC
+  obtain ⟨D, _, rfl⟩ := exists_fgdual_dual p hC
   exact dual_dual_flip_dual (p := p) D
 
 -- NOTE: we keep this flipped version because it is a simp lemma.
