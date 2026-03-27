@@ -128,6 +128,16 @@ theorem sum_mem_iff_mem {ι : Type*} [Fintype ι] {f : ι → M} (hF : F.IsFaceO
   refine hF.mem_of_add_mem (hsC i) (sum_mem (fun j (_ : j ∈ Finset.univ.erase i) => hsC j)) ?_
   simp [hs]
 
+/-- If the positive combination of points of a cone is in a face, then all the points are
+  in the face. -/
+theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι → R}
+    (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hc : ∀ i, 0 ≤ c i) (hs : ∑ i : ι, c i • f i ∈ F)
+    (i : ι) (hci : 0 < c i) : f i ∈ F := by classical
+  rw [Finset.sum_eq_add_sum_diff_singleton i] at hs
+  · refine hF.mem_of_smul_add_mem (hsC i) ?_ hci hs
+    exact C.sum_mem fun i _ => C.smul_mem (hc i) (hsC i)
+  · simp
+
 section Map
 
 variable [AddCommGroup N] [Module R N]
@@ -222,6 +232,7 @@ lemma inf_comap_mkQ (hH : H.IsFaceOf (G.quot S)) :
 
 
 end IsFaceOf
+
 end Ring
 
 section DivisionRing
@@ -242,24 +253,6 @@ theorem isFaceOf_iff_mem_of_add_mem : F.IsFaceOf C ↔
     rw [← smul_assoc] at hxF'
     have hxF'' : ((1 : R) • x) ∈ F := by simpa [inv_mul_cancel₀ (ne_of_gt a0)] using hxF'
     simpa using hxF''
-
-namespace IsFaceOf
-
-/-- If the positive combination of points of a cone is in a face, then all the points are
-  in the face. -/
-theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι → R}
-    (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hc : ∀ i, 0 ≤ c i) (hs : ∑ i : ι, c i • f i ∈ F)
-    (i : ι) (hci : 0 < c i) : f i ∈ F := by
-  classical
-  have hciF := (sum_mem_iff_mem hF (fun i => C.smul_mem (hc i) (hsC i))).mp hs i
-  have hiF : ((c i)⁻¹ : R) • (c i • f i) ∈ F :=
-    smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr hci)) hciF
-  have hiF' := hiF
-  rw [← smul_assoc] at hiF'
-  have hiF'' : ((1 : R) • f i) ∈ F := by simpa [inv_mul_cancel₀ (ne_of_gt hci)] using hiF'
-  simpa using hiF''
-
-end IsFaceOf
 
 end DivisionRing
 
