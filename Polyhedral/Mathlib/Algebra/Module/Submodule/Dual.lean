@@ -226,7 +226,7 @@ lemma dual_sup_dual_inf_dual (S T : Submodule R M) :
 
 /-- The dual submodule w.r.t. the standard dual map is the dual annihilator. -/
 lemma dual_dualAnnihilator (S : Submodule R M) : dual (Dual.eval R M) S = S.dualAnnihilator := by
-  ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
+  ext x; simpa using ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
 variable (p) in
 lemma dual_dualAnnihilator' (S : Submodule R M) :
@@ -234,11 +234,11 @@ lemma dual_dualAnnihilator' (S : Submodule R M) :
 
 /-- The dual submodule w.r.t. the standard dual map is the dual annihilator. -/
 lemma dual_dualCoannihilator (S : Submodule R (Dual R M)) : dual .id S = S.dualCoannihilator := by
-  ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
+  ext x; simpa using ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
 variable (p) in
 lemma dual_dualCoannihilator' (S : Submodule R M) : dual p S = (map p S).dualCoannihilator := by
-  ext x; simp; exact ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
+  ext x; simpa using ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
 -- theorem mem_dualAnnihilator' {S : Submodule R M} (φ : Module.Dual R M) :
 --     φ ∈ S.dualAnnihilator ↔ S ≤ ker φ := by
@@ -446,7 +446,7 @@ lemma DualClosed.def_iff {S : Submodule R M} :
 
 variable (p) in
 @[simp] lemma dual_dualClosed (s : Set M) : (dual p s).DualClosed p.flip := by
-  simp [DualClosed, flip_flip, dual_dual_flip_dual]
+  simp [DualClosed, dual_dual_flip_dual]
 
 variable (p) in
 @[simp] lemma dual_flip_IsDualClosed (s : Set N) : (dual p.flip s).DualClosed p
@@ -746,7 +746,7 @@ lemma exists_smul_of_ker_le_ker {p q : M →ₗ[R] R} (h : ker p ≤ ker q) :
   by_cases H : p = 0
   · exact ⟨0, by simpa [H] using h⟩
   rw [LinearMap.ext_iff] at H
-  simp at H
+  simp only [zero_apply, not_forall] at H
   obtain ⟨x, hx⟩ := H
   use q x / p x
   ext y
@@ -763,8 +763,8 @@ lemma exists_smul_of_ker_le_ker {p q : M →ₗ[R] R} (h : ker p ≤ ker q) :
 variable [inst : Fact p.SeparatingLeft] in -- ! satisfied by both Dual.eval and .id
 lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} := by
   ext y
-  simp
-  rw [mem_span_singleton]
+  simp only [mem_dual, SetLike.mem_coe, mem_singleton_iff, forall_eq, flip_apply,
+    mem_span_singleton]
   constructor
   · intro h
     obtain ⟨a, ha⟩ := exists_smul_of_ker_le_ker (fun _ hx => (h hx.symm).symm)
@@ -772,8 +772,7 @@ lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} :
     rw [← LinearMap.map_smul] at ha
     have inj := inst.elim
     rw [separatingLeft_iff_ker_eq_bot, ker_eq_bot] at inj
-    replace ha := inj ha
-    exact ha.symm
+    exact (inj ha).symm
   · intro h _ hz
     obtain ⟨_, rfl⟩ := h
     simp [← hz]
@@ -819,28 +818,27 @@ lemma exists_fun_dual_ker {ι : Type*} (f : M →ₗ[R] ((ι → R) →ₗ[R] R)
   simp only [dual_dualCoannihilator, dualCoannihilator_range_eq_ker_flip]
   use f.flip; simp
 
-lemma exists_fun_dual_ker' {ι : Type*} [Fintype ι] (f : M →ₗ[R] (ι → R)) :
+lemma exists_fun_dual_ker' {ι : Type*} [Finite ι] (f : M →ₗ[R] (ι → R)) :
     ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id (LinearMap.range g) = ker f := by
   let h := (Pi.basisFun R ι).constr (M' := R) R
   obtain ⟨g, hg⟩ := exists_fun_dual_ker (h.comp f)
   rw [LinearEquiv.ker_comp] at hg
   use g
 
-lemma exists_fun_dual_ker'' {ι : Type*} [Fintype ι] (f : M →ₗ[R] (ι → R)) :
+lemma exists_fun_dual_ker'' {ι : Type*} [Finite ι] (f : M →ₗ[R] (ι → R)) :
     ∃ g : ι → (Dual R M), dual .id (range g) = ker f := by
   obtain ⟨g, hg⟩ := exists_fun_dual_ker' f
   let h := (Pi.basisFun R ι).constr (M' := (Dual R M)) R
   use h.symm g
   rw [← hg]
   rw [← dual_span]
-  unfold h
+  -- unfold h
   -- rw [Basis.constr_apply]
   congr
   ext x
-  simp [mem_span]
+  rw [mem_span, LinearMap.mem_range]
   constructor
   · intro h
-
     sorry
   · sorry
 
@@ -869,7 +867,7 @@ lemma exists_fun_dual_ker'''' {ι : Type*} [Fintype ι] (f : M →ₗ[R] (ι →
     simp
 
 variable [h : Fact (Surjective p)] in
-lemma exists_fun_dual_ker''' {ι : Type*} [Fintype ι] (f : N →ₗ[R] (ι → R)) :
+lemma exists_fun_dual_ker''' {ι : Type*} [Finite ι] (f : N →ₗ[R] (ι → R)) :
     ∃ g : ι → M, dual p (range g) = ker f := by
   obtain ⟨g, hg⟩ := exists_fun_dual_ker'' f
   use (surjInv h.out).comp g
@@ -877,7 +875,7 @@ lemma exists_fun_dual_ker''' {ι : Type*} [Fintype ι] (f : N →ₗ[R] (ι → 
   exact dual_id_surj _ _
 
 variable [Fact (Surjective p)] in
-lemma exists_finset_dual_ker' {ι : Type*} [Fintype ι] (f : N →ₗ[R] (ι → R)) :
+lemma exists_finset_dual_ker' {ι : Type*} [Finite ι] (f : N →ₗ[R] (ι → R)) :
     ∃ s : Finset M, dual p s = ker f := by
   obtain ⟨g, hg⟩ := exists_fun_dual_ker''' p f
   use (finite_range g).toFinset
