@@ -9,6 +9,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 import Mathlib.Order.Grade
+import Mathlib.Data.Finset.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
@@ -129,8 +130,6 @@ variable (hC : C.FG)
 
 
 -- ## RANK
-
-noncomputable def Face.rank (F : Face C) := Module.rank R F.span
 
 -- def Face.IsRay (F : Face C) := F.rank = 1
 
@@ -276,14 +275,6 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := sorry
-
-lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := sorry
-
-lemma bot_iff_rank_zero : C.rank = 0 ↔ C = ⊥ := sorry
-
-lemma Face.bot_iff_rank_zero {F : Face C} : F.rank = 0 ↔ F = ⊥ := sorry
-
 lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = span R {x} := by
   have : C ≠ ⊥ := fun h' ↦ by simp [bot_iff_rank_zero.mpr h'] at h
   obtain ⟨x, hxC, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot this
@@ -314,9 +305,6 @@ lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (span R {x}).rank = 1 := by
   refine ⟨hx, ?_⟩
   simp only [Submodule.span_span_of_tower, le_refl]
 
-theorem IsFaceOf.salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient :=
-  hC.anti hF.le
 
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
@@ -336,9 +324,6 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
   · rw [bot_iff_rank_zero.2 h] at t_rank
     simp at t_rank
   rw [← h, t_rank]
-
-lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
-  Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
 
 lemma rank_mono_face {C : PointedCone R M} {F₁ F₂ : Face C} (h : F₁ ≤ F₂) : F₁.rank ≤ F₂.rank :=
   rank_mono h
@@ -695,6 +680,269 @@ end
 -------
 
 -- theorem isAtom_dim_add_one (F : Face C) (hF : IsAtom F) : F.rank = rank R (lineal C) + 1 := sorry
+
+def IsSimplicial : Prop :=
+  ∃ s : Set M, s.Finite ∧ LinearIndepOn R id s ∧ span R s = C
+
+/-- The conic span of a finite linearly independent set is simplicial. -/
+protected theorem IsSimplicial.span {s : Set M} (hs : s.Finite) (hli : LinearIndepOn R id s) :
+    (PointedCone.span R s).IsSimplicial := ⟨s, hs, hli, rfl⟩
+
+lemma zero_le_of_smul_mem_salient {C : PointedCone R M} {x : M} {a : R}
+  (hSal : C.Salient) (hx0 : x ≠ 0) (hx : x ∈ C) (ha : a • x ∈ C) :
+    0 ≤ a := by
+  by_contra!
+  apply hSal (a • x) ha
+  · simp only [ne_eq, isUnit_iff_ne_zero, ne_of_lt this, not_false_eq_true, IsUnit.smul_eq_zero,
+    hx0]
+  rw [← neg_smul]
+  exact C.smul_mem (neg_nonneg.mpr <| le_of_lt this) hx
+
+lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
+    (span R s).Salient := by
+  refine salient_iff_mem_neg.mpr fun x ↦ ?_
+  apply Submodule.span_induction
+  · intro x hx hx0 hx_neg
+    apply mem_span_set.1 at hx_neg
+    sorry
+  · intro h
+    contradiction
+  · intro x y hxs _ hx hy hxy0
+    by_cases hx0 : x = 0
+    · simp [hx0] at *
+      exact hy hxy0
+    by_cases hy0 : y = 0
+    · simp [hy0] at *
+      exact hx hxy0
+    specialize hx hx0
+    intro hxy
+    apply hy hy0
+    rw [(by module : -y = -(x+y) + x)]
+    exact add_mem hxy hxs
+
+  simp
+  intro a ha x hx hx₂ ha0 hx0
+  rw [← neg_smul]
+  intro hax
+  sorry
+
+
+lemma salient_span_singleton (x : M) : (span R {x}).Salient := by
+  by_cases h : x = 0
+  · simp [h]
+    sorry
+  apply salient_span_of_linearIndepOn (s := {x})
+  simp [h]
+
+---
+
+lemma salient_iff_eq_linSpan_of_rank_eq_one (hC : C.rank = 1) :
+    ¬C.Salient ↔ C = C.linSpan := sorry
+
+lemma exists_span_pair_of_rank_le_one (hC : C.rank ≤ 1) :
+    ∃ x y : M, C = span R {x, y} := sorry
+
+lemma exists_span_pair_of_rank_eq_one (hC : C.rank = 1) :
+    ∃ x y : M, x ≠ 0 ∧ y ≠ 0 ∧ C = span R {x, y} := sorry
+
+lemma exists_span_singleton_of_rank_le_one_salient (hC : C.rank ≤ 1) (hsal : C.Salient) :
+    ∃ x : M, C = span R {x} := sorry
+
+lemma exists_span_singleton_of_rank_eq_one_salient (hC : C.rank = 1) (hsal : C.Salient) :
+    ∃ x : M, x ≠ 0 ∧ C = span R {x} := sorry
+
+---
+
+lemma FG.exists_span_pair_of_rank_le_two (hfg : C.FG) (hC : C.rank ≤ 2) :
+    ∃ x y z : M, C = span R {x, y, z} := sorry
+
+lemma FG.exists_span_pair_of_rank_le_two_salient (hfg : C.FG) (hC : C.rank ≤ 2) (hsal : C.Salient) :
+    ∃ x y : M, C = span R {x, y} := sorry
+
+lemma FG.exists_span_pair_of_rank_eq_two_salient (hfg : C.FG) (hC : C.rank = 2) (hsal : C.Salient) :
+    ∃ x y : M, LinearIndepOn R id {x, y} ∧ C = span R {x, y} := sorry
+
+---
+
+lemma IsSimplicial.bot : (⊥ : PointedCone R M).IsSimplicial := by use ∅; simp
+
+-- why, actually, does simplicial assume that `s` is finite?
+lemma IsSimplicial.salient (hC : C.IsSimplicial) : C.Salient := by
+  obtain ⟨s, _, hli, rfl⟩ := hC
+  exact salient_span_of_linearIndepOn hli
+
+-- it is very annoying to deal with C.rank vs C.finrank. We need to think of a solution.
+lemma IsSimplicial.of_fg_rank_le_two_salient (hfg : C.FG) (hC : C.rank ≤ 2) (hsal : C.Salient) :
+    C.IsSimplicial := by
+  by_cases h0 : C.finrank = 0
+  · sorry
+  by_cases h1 : C.finrank = 1
+  · sorry
+  by_cases h2 : C.finrank = 2
+  · sorry
+  absurd Nat.two_lt_of_ne h0 h1 h2
+  exact not_lt_of_ge <| Module.finrank_le_of_rank_le hC
+
+lemma linearIndep_pair_of_incomparable_rays {x y : M} (hSal : (span R {x, y}).Salient)
+  (hxy : ¬ (span R {x} ≤ span R {y} ∨ span R {y} ≤ span R {x})) :
+    LinearIndepOn R id {x, y} := by
+  have hx0 : x ≠ 0 := fun h ↦ by simp [h] at hxy
+  apply linearIndepOn_id_pair hx0
+  intro b h
+  have hb : b ≥ 0 := by
+    apply zero_le_of_smul_mem_salient hSal hx0 (Submodule.mem_span_of_mem <| Set.mem_insert x {y})
+    rw [h]
+    exact Submodule.mem_span_of_mem <| Set.mem_insert_of_mem x rfl
+  have : span R {y} ≤ span R {x} := by
+    apply Submodule.span_le.2
+    simp only [Set.singleton_subset_iff, SetLike.mem_coe, Submodule.mem_span_singleton,
+      Subtype.exists, Nonneg.mk_smul, exists_prop]
+    exact ⟨b, hb, h⟩
+  simp [this] at hxy
+
+lemma two_faces_span_of_rank_two (hC : C.rank = 2) (hFG : C.FG) (hSal : C.Salient) {x y : M}
+  (hx : IsFaceOf (span R {x}) C) (hy : IsFaceOf (span R {y}) C)
+  (hxy : ¬ (span R {x} ≤ span R {y} ∨ span R {y} ≤ span R {x})) :
+    C = span R {x,y} := by
+  have hxC : x ∈ C := Set.singleton_subset_iff.1 (Submodule.span_le.1 hx.le)
+  have hyC : y ∈ C := Set.singleton_subset_iff.1 (Submodule.span_le.1 hy.le)
+  have hx0 : x ≠ 0 := fun h ↦ by simp [h] at hxy
+  have hy0 : y ≠ 0 := fun h ↦ by simp [h] at hxy
+  have xy_li : LinearIndepOn R id {x, y} := by
+    refine linearIndep_pair_of_incomparable_rays ?_ hxy
+    exact Salient.of_le_salient hSal <| Submodule.span_le.mpr <| Set.pair_subset hxC hyC
+  have : FiniteDimensional R C.linSpan := Finite.iff_fg.mpr <| finRank_of_fg hFG
+  have C_span : Submodule.span R {x,y} = C.linSpan  := by
+    have : Submodule.span R {x,y} ≤ C.linSpan := by
+      apply Submodule.span_le.2
+      intro z hz
+      apply Submodule.mem_span_of_mem
+      obtain rfl | rfl := hz
+      all_goals simp [hxC, hyC]
+    apply Submodule.eq_of_le_of_finrank_le this
+    apply finrank_le_finrank_of_rank_le_rank
+    · simp only [hC, Cardinal.lift_id]
+      apply le_rank_iff.2
+      use ![⟨x, Submodule.mem_span_of_mem <| Set.mem_insert x {y}⟩,
+       ⟨y, Submodule.mem_span_of_mem <| Set.mem_insert_of_mem x rfl⟩]
+      refine LinearIndependent.pair_iff.mpr ?_
+      simp only [SetLike.mk_smul_mk, AddMemClass.mk_add_mk, Submodule.mk_eq_zero]
+      have : x≠y := fun h ↦ by simp [h] at hxy
+      exact (LinearIndepOn.pair_iff id this).1 xy_li
+    apply Submodule.rank_mono at this
+    simp only [hC] at this
+    apply lt_of_le_of_lt this Cardinal.ofNat_lt_aleph0
+  refine le_antisymm ?_ <| Submodule.span_le.2 <| Set.pair_subset hxC hyC
+  intro z hz
+  have hz' : z ∈ C.linSpan := Submodule.mem_span_of_mem hz
+  rw [← C_span] at hz'
+  obtain ⟨a, b, rfl⟩ := Submodule.mem_span_pair.1 hz'
+  wlog! hab : a ≤ b generalizing a b x y
+  · rw [Set.pair_comm, Or.comm, add_comm] at *
+    exact this hy hx hxy hyC hxC hy0 hx0 xy_li C_span b a hz hz' (le_of_lt hab)
+  have ha : a ≥ 0 := by
+    by_contra!
+    have haC : -a • x ∈ C := smul_mem C (by linarith) hxC
+    have hsY : - a • x + (a • x + b • y) ∈ Submodule.span R {y} :=
+      Submodule.mem_span_singleton.2 ⟨b, by simp⟩
+    have hsC : - a • x + (a • x + b • y) ∈ C := C.add_mem haC hz
+    simp only [neg_smul, neg_add_cancel_left] at hsC
+    have hsy : - a • x + (a • x + b • y) ∈ span R {y} := by
+      apply Submodule.mem_span_singleton.2
+      use ⟨b, zero_le_of_smul_mem_salient hSal hy0 hyC hsC⟩
+      simp only [Nonneg.mk_smul, neg_smul, neg_add_cancel_left]
+    have := hy.mem_of_smul_add_mem hxC hz (Left.neg_pos_iff.mpr this) hsy
+    apply hxy
+    left
+    apply Submodule.span_le.2
+    simp only [Set.singleton_subset_iff, SetLike.mem_coe, this]
+  apply Submodule.mem_span_pair.2
+  use ⟨a, ha⟩, ⟨b, le_trans ha hab⟩
+  simp only [Nonneg.mk_smul]
+
+theorem IsSimplicial_of_rank_le_two (hC : C.rank ≤ 2) (hFG : C.FG) (hSal : C.Salient) :
+    C.IsSimplicial := by
+  obtain ⟨s, hs⟩ := FG.krein_milman hFG hSal
+  by_cases! hC : C.rank ≠ 2
+  · expose_names
+    have h_finrank : C.finrank = C.rank :=
+     Cardinal.cast_toNat_of_lt_aleph0 <| lt_of_le_of_lt hC_1 Cardinal.ofNat_lt_aleph0
+    have : C.finrank ≤ 1 := Nat.le_of_lt_succ <| finrank_lt_of_rank_lt <| Std.lt_of_le_of_ne hC_1 hC
+    obtain h|h := Nat.le_one_iff_eq_zero_or_eq_one.mp this
+    · use ∅, Set.finite_empty, linearIndepOn_empty R id
+      replace h : C.rank = 0 := by simp [← h_finrank, h]
+      simp only [Submodule.span_empty]
+      exact Eq.symm <| bot_iff_rank_zero.mp h
+    replace h : C.rank = 1 := by simp [← h_finrank, h]
+    obtain ⟨v, hv⟩ := ray_of_rank_one hSal h
+    use {v}, Set.finite_singleton v, LinearIndepOn.singleton ?_, hv.symm
+    simp only [id_eq, ne_eq]
+    intro hv0
+    simp only [hv0, Submodule.span_zero_singleton] at hv
+    simp only [bot_iff_rank_zero.mpr hv, zero_ne_one] at h
+  have : ∃ x ∈ s, ∃ y ∈ s, ¬ (span R {x} ≤ span R {y} ∨ span R {y} ≤ span R {x}):= by
+    by_contra!
+    by_cases! s_empty : ∀ x ∈ s, x = 0
+    · have : C = ⊥ := by
+        rw [← hs.1]
+        exact Submodule.span_eq_bot.mpr s_empty
+      simp [bot_iff_rank_zero.2 this] at hC
+    obtain ⟨x, hx⟩ := s_empty
+    have : C ≤ span R {x} := by
+      rw [← hs.1]
+      apply Submodule.span_le.2
+      intro y hy
+      obtain h | h := this x hx.1 y hy
+      · obtain ⟨a, ha⟩ := Submodule.mem_span_singleton.1 <| h <| Submodule.mem_span_singleton_self x
+        by_cases ha0 : a = 0
+        · simp [ha0] at ha
+          simp [ha] at hx
+        apply Submodule.mem_span_singleton.2
+        use a⁻¹
+        simp [← ha, ha0]
+      exact h <| Submodule.mem_span_singleton_self y
+    apply rank_mono at this
+    simp only [hC, rank_one_of_ray hx.2, Nat.not_ofNat_le_one] at this
+  obtain ⟨x, hx, y, hy, hxy⟩ := this
+  refine ⟨{x, y}, Set.toFinite {x, y}, ?_⟩
+  have := two_faces_span_of_rank_two hC hFG hSal (hs.2 x hx) (hs.2 y hy) hxy
+  refine ⟨linearIndep_pair_of_incomparable_rays ?_ hxy, Eq.symm this⟩
+  rwa [← this]
+
+theorem IsFaceOf.of_subset_LinearIndepOn {s t : Set M} (hs : s.Finite)
+  (hli : LinearIndepOn R id s) (ht : t ⊆ s) :
+    (span R t).IsFaceOf (span R s) := by
+  refine ⟨Submodule.span_le.2 fun _ hx ↦ Submodule.mem_span_of_mem (ht hx), ?_⟩
+  intro x y a hx hy ha hxy
+  lift t to Finset M using Set.Finite.subset hs ht
+  lift s to Finset M using hs
+  obtain ⟨c, c_supp, c_pos, hyc⟩ := mem_span_set.1 hx
+  obtain ⟨d, d_supp, d_pos, hyd⟩ := mem_span_set.1 hxy
+  obtain ⟨e, e_supp, e_pos, hye⟩ := mem_span_set.1 hy
+  apply mem_span_set.2
+  use c, ?_, c_pos, hyc
+  refine le_trans ?_ d_supp
+  rw [Finsupp.sum_of_support_subset c c_supp _ (fun i _ ↦ zero_smul R i)] at hyc
+  rw [Finsupp.sum_of_support_subset d (_root_.trans d_supp ht) _ (fun i _ ↦ zero_smul R i)] at hyd
+  rw [Finsupp.sum_of_support_subset e e_supp _ (fun i _ ↦ zero_smul R i)] at hye
+  rw [ ← hyc, ← hye, Finset.smul_sum, ← Finset.sum_add_distrib] at hyd
+  have : ∑ x ∈ s, (a • c x • x + e x • x) = ∑ x ∈ s, (a * c x + e x) • x :=
+    Finset.sum_congr rfl (fun x h ↦ by rw [add_smul, smul_smul])
+  rw [this, ← Finset.sum_attach s (fun x ↦ d x • x),
+   ← Finset.sum_attach s (fun x ↦ (a * c x + e x) • x)] at hyd
+  apply linearIndependent_iff'ₛ.1 at hli
+  specialize hli ⊤ (fun x ↦ d x) (fun x ↦ a * c x + e x) hyd
+  simp only [SetLike.coe_sort_coe, Finset.top_eq_univ,
+    Finset.univ_eq_attach, Finset.mem_attach, forall_const, Subtype.forall] at hli
+  intro x hx
+  have c_p : c x > 0 := by
+    apply lt_of_le_of_ne (c_pos x)
+    symm
+    exact Finsupp.mem_support_iff.mp hx
+  have : d x > 0 := by
+    rw [hli x (c_supp hx)]
+    nlinarith [e_pos x, ha, c_p]
+  simp [ne_of_gt this]
 
 -- ## KREIN MILMAN
 

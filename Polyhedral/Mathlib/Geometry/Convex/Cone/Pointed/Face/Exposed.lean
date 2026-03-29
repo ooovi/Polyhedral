@@ -104,20 +104,52 @@ lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
 --     ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 → x = 0) := sorry
 
 -- States that a pointed cone minus its origin is contained in the interior of a halfspace.
-variable (p) in
-lemma exists_dual_pos (C : PointedCone R M) : -- only true with FinSalRank
-    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) :=
-  -- Idea: choose φ from relint of dual cone.
-  --  (we need to show that relints of dual cones are nonempty)
-  sorry
 
 -- States that a pointed cone minus its origin is contained in the interior of a halfspace.
-variable (p) in
-lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) : -- only true with FinSalRank
-    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) :=
-  -- Idea: choose φ from relint of dual cone.
-  --  (we need to show that relints of dual cones are nonempty)
-    sorry
+
+variable (p) [Fact p.SeparatingLeft] in
+lemma exists_dual_pos' [Module.Finite R M] (C : PointedCone R M) (hFG : C.FG) :
+    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
+  obtain ⟨s, rfl⟩ : C.FGDual p.flip := fg_iff_fgdual.mp hFG
+  use (∑ y ∈ s, y)
+  intro x hxC
+  constructor
+  · simpa [map_sum] using Finset.sum_nonneg hxC
+  intro hx
+  have : ∀ y ∈ s, 0 = p x y := by
+    intro _ hy
+    apply le_antisymm (hxC hy)
+    simpa [← hx, map_sum] using Finset.single_le_sum hxC hy
+  exact mem_lineal.mpr ⟨hxC, fun y hy ↦ by simp [this y hy]⟩
+
+variable (p) [Fact p.SeparatingLeft] in
+lemma exists_dual_pos (C : PointedCone R M) (hFG : C.FG) :
+    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
+  let D := C.restrict C.linSpan
+  let p' : C.linSpan →ₗ[R] N →ₗ[R] R := p.domRestrict C.linSpan
+  have : Fact p'.SeparatingLeft := by
+    refine ⟨p'.separatingLeft_iff_linear_nontrivial.mpr fun x hx ↦ ?_⟩
+    have : p x = 0 := LinearMap.mem_ker.mp hx
+    refine coe_eq_zero.mp ?_
+    expose_names
+    exact p.separatingLeft_iff_linear_nontrivial.mp inst_7.out x this
+  have hDFG : D.FG := by exact FG.restrict_fg C.linSpan hFG
+  have hFin : Module.Finite R C.linSpan := by exact Finite.iff_fg.mpr <| FG.linSpan_fg hFG
+  obtain ⟨φ, hφ⟩ := exists_dual_pos' p' D hDFG
+  use φ, fun x hx ↦ ?_
+  have : p' ⟨x, mem_span_of_mem hx⟩ = p x := p.congr_arg rfl
+  specialize hφ ⟨x, mem_span_of_mem hx⟩ (mem_restrict_iff.mpr hx)
+  rw [this] at hφ
+  exact ⟨hφ.1, fun h ↦ hφ.2 h⟩
+
+variable (p) [Fact p.SeparatingLeft] in
+lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) (hFG : C.FG) :
+    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) := by
+  obtain ⟨φ, hφ⟩ := exists_dual_pos p C hFG
+  use φ, fun x hx ↦ ?_
+  refine ⟨(hφ x hx).1, fun hx2 ↦ ?_⟩
+  have : x ∈ C.lineal := (hφ x hx).2 hx2
+  simpa only [salient_iff_lineal_bot.mp hC, mem_bot]
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
