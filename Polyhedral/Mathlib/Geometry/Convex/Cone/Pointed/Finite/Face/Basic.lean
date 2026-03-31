@@ -25,6 +25,8 @@ lemma IsFaceOf.fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
   use t, tt
 
+lemma lineal_fg (hC : C.FG) : C.lineal.FG := coe_fg_iff.mp ((IsFaceOf.lineal C).fg hC)
+
 end DivisionRingLemmas
 
 section Field
