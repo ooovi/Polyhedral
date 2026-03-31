@@ -230,4 +230,3 @@ def coatoms : Set (Face (C : PointedCone R M)) := sorry
 end Field
 
 end PointedCone
-#min_imports
