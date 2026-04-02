@@ -1,47 +1,9 @@
+import Mathlib.Order.Grade
+import Mathlib.LinearAlgebra.Quotient.Basic
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
-
-/-
-theorem 2.7 from ziegler page 57:
-(i) For every polytope P the face poset L(P) is a graded lattice of length
-dim(P) + 1, with rank function r(F) = dim(F) + 1.
-(ii) Every interval [G, F] of L(P) is the face lattice of a convex polytope
-of dimension r(F) − r(G) − 1.
-
-proof:
-part (ii).
-- assume F = P, by Prop 2.3(iii) (faces of F are exactly the faces of P that are contained in F)
-- if G = ∅, then everything is clear
-- If G ̸= ∅, it has a vertex v ∈ G by Prop 2.2(i) (krein milman, Every polytope is the convex
- hull of its vertices: P = conv(vert(P)).)
-- it is a vertex of P by Prop 2.3(iii)
-- Prop 2.4: There is a bijection between the k-dimensional faces of P that contain v, and the
- (k−1)-dimensional faces of P/v, given by
- π : F ↦ F ∩ {x : cx = c₁}
- σ : F' ↦ P ∩ aff ({v} ∪ F')
-- face lattice of P/v is isomorphic to interval [{v}, P] of the face lattice L(P), by Prop 2.4
-- done by induction on dim(G).
-
-part (i).
-- G ⊂ F faces of P
-- monotonicity:
-  - then G = P ∩ aff(G) ⊆ P ∩ aff(F) = F by Prop 2.3(iv) (every face has a supportin hyperplane)
-  - so aff(G) ⊂ aff(F), and thus dim(G) < dim(F)
-- covering:
-  - let dim(F)−dim(G) ≥ 2, show there is a face H ∈ L(P) with G ⊂ H ⊂ F
-  - by part (ii) the interval [G, F] is the face lattice of a polytope of dimension at least 1
-  - so it has a vertex, which yields the desired H.
-
-
-stuff we need:
-- faces of F are exactly the faces of P that are contained in F (`IsFaceOf.trans`)
-- every non-⊥ cone has a vertex (`FG.exists_ray` below)
-- bijection between the k-dimensional faces of P that contain v, and the
- (k−1)-dimensional faces of P/v
-- every face has a supporting hyperplane (`IsFaceOf.FG.exposed` below)
--/
-
 
 namespace PointedCone
 
@@ -57,7 +19,7 @@ lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
   simp [IsFaceOf.span_inter_face_span_inf_face hF]
 
 /-- Faces of FG cones are FG. -/
-lemma IsFaceOf.fg_of_fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
+lemma IsFaceOf.fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   obtain ⟨_, rfl⟩ := hC
   let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
   use t, tt
@@ -103,7 +65,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     exact hF.inf_linSpan
   · simpa using FG.dual_fgdual _ hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (FG.linSpan_fg <| IsFaceOf.fg_of_fg hC hF)
+    exact Submodule.FG.dual_fgdual _ (FG.linSpan_fg <| IsFaceOf.fg hC hF)
 
 open Module in
 /-- Every face of an FG cone is exposed. -/
@@ -195,8 +157,10 @@ lemma exists_ray' {s : Finset M} (hs : ∃ x ∈ s, x ≠ 0) (hsal : (span R (s 
       exact ⟨by by_contra H; absurd h; simp [H],
         span_singleton_isFaceOf_sup_singleton_of_not_mem h hsal⟩
 
+namespace FG
+
 /-- A non-bottom salient FG cone has a ray face. -/
-lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
+lemma exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
     ∃ x : M, x ≠ 0 ∧ (span R {x}).IsFaceOf C := by
   obtain ⟨s, rfl⟩ := hfg
   have h : ∃ x ∈ s, x ≠ 0 := by
@@ -205,19 +169,77 @@ lemma FG.exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
   obtain ⟨_, hx⟩ := exists_ray' h hsal
   exact ⟨_, hx.2⟩
 
-theorem intervals (hfg : C.FG) (hsal : C.Salient) (G F : Face C) (hf : G ≤ F) :
-    ∃ C' : PointedCone R M, Nonempty (Set.Icc G F ≃o Face C') := by
-  wlog h : F = C
-  · sorry
-  · by_cases! h : G = ⊥
-    · sorry
-    · have hgfg : G.FG := IsFaceOf.fg_of_fg hfg G.isFaceOf
-      have hgsal : G.toPointedCone.Salient := hsal.anti G.isFaceOf.le
-      obtain ⟨v, hv0, hvray⟩ := FG.exists_ray hgfg
-        (fun n => h ((Face.bot_face (C := C) (F := G) hsal).mpr n)) hgsal
-      have := (face_faces G.isFaceOf).mp hvray
-      obtain ⟨s, hs⟩ := hfg
-      sorry
+open Submodule in
+lemma finrank_strictMono (hCfg : C.FG) :
+    StrictMono (fun F : Face C => F.finrank) := by
+  intro G F hFG
+  haveI := (Submodule.fg_iff_finiteDimensional _).mp (FG.linSpan_fg <| F.isFaceOf.fg hCfg)
+  apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
+  · exact span_mono (R := R) hFG.le
+  · intro h
+    have : G.toSubmodule < F.toSubmodule := gt_iff_lt.mp hFG
+    rw [← IsFaceOf.inf_linSpan F.isFaceOf, ← IsFaceOf.inf_linSpan G.isFaceOf] at this
+    simp [linSpan, h] at this
+
+lemma finrank_add_one (hCfg : C.FG)
+    {F G : Face C} (hFG : F ⋖ G) :
+    G.finrank = F.finrank + 1 := by
+  obtain ⟨hfg, hc⟩ := hFG
+  -- suffices to show quotient has rank 1
+  have hgfg := quot_fg (G.isFaceOf.fg hCfg) F.linSpan
+  convert
+    finrank_eq_finrank_add_finrank_quot_linSpan (FG.linSpan_fg (G.isFaceOf.fg hCfg)) hfg.le
+    -- G/F has a ray
+  have FfG : (F : PointedCone R M).IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
+  have : ¬(G : PointedCone R M) ≤ F.linSpan := by
+    simpa [Face.le_linSpan_iff_le] using not_le_of_gt hfg
+  obtain ⟨v, hv0, hvray⟩ :=
+    FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr this) FfG.quot_salient
+  set ray : Face (quot G.toSubmodule F.linSpan) := ⟨span R {v}, hvray⟩
+  -- pull ray back to get face of G with F < H
+  let H := ray.fiberFace (F := ⟨_, FfG⟩)
+  have : F < H := by
+    apply lt_of_le_of_ne (ray.le_fiber (F := ⟨_, FfG⟩))
+    intro ha
+    have ugh : span R {v} = ⊥ := (Face.fiberFace_eq_iff _).mp ha
+    have : v ∈ span R {v} := Submodule.mem_span_singleton_self v
+    rw [ugh] at this
+    exact hv0 <| (AddOpposite.op_eq_zero_iff v).mp (congrArg AddOpposite.op this)
+  -- must be G = H because of covering
+  simp only [← eq_of_le_of_not_lt H.isFaceOf.le <| hc this]
+  rw [← PointedCone.finrank_one_of_ray (R := R) hv0]
+  congr; ext x; constructor
+  · intro hx
+    obtain ⟨x', hx', rfl⟩ := hvray.le hx
+    exact ⟨x', ⟨hx', hx⟩, rfl⟩
+  · rintro ⟨_, ⟨_, hhx'⟩, rfl⟩
+    exact mem_toConvexCone.mp hhx'
+
+lemma finrank_covBy (hCfg : C.FG)
+    {F G : Face C} (hFG : F ⋖ G) :
+    F.finrank ⋖ G.finrank := by
+  obtain ⟨hfg, hc⟩ := hFG
+  refine ⟨finrank_strictMono hCfg hfg, ?_⟩
+  suffices G.finrank = F.finrank + 1 by omega
+  exact (FG.finrank_add_one hCfg ⟨hfg, hc⟩)
+
+lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
+    {F G : Face C} (hfg : F ≤ G) : F ⋖ G ↔
+    F.finrank ⋖ G.finrank := by
+  refine ⟨finrank_covBy hCfg, ?_⟩
+  intro h
+  constructor
+  · exact lt_of_le_of_ne hfg <| fun a => ne_of_lt h.1 (congrArg finrank (by simpa))
+  · exact fun H hH hah => h.2 (finrank_strictMono hCfg hH) (finrank_strictMono hCfg hah)
+
+/-- The face lattice of a finitely generated cone is graded by face dimension. -/
+noncomputable instance gradeOrder_finrank {C : PointedCone R M}
+    (hCfg : C.FG) : GradeOrder ℕ (Face C) where
+  grade F := F.finrank
+  grade_strictMono := finrank_strictMono hCfg
+  covBy_grade := fun {_ _} hFG => finrank_covBy hCfg hFG
+
+end FG
 
 end DivisionRing
 
@@ -232,7 +254,7 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
   by_cases! h : F.rank < 1
   · absurd (Face.bot_iff_rank_zero hsal).mp <| Cardinal.lt_one_iff_zero.mp h
     exact hF.ne_bot
-  have h1 : (F : PointedCone R M).FG := IsFaceOf.fg_of_fg hfg F.isFaceOf
+  have h1 : (F : PointedCone R M).FG := IsFaceOf.fg hfg F.isFaceOf
   have h2 : (F : PointedCone R M).Salient := IsFaceOf.salient hsal F.isFaceOf
   obtain ⟨x, hx0, hxF⟩ := by
     refine FG.exists_ray h1 (fun h3 ↦ ?_) h2

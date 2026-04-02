@@ -185,7 +185,7 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     exact hxt (by simp [this])
   have hF' := opt_neq_bot C hfg hC0 f g hg
   have hFsal := Salient.of_le_salient hsal hF.le
-  obtain ⟨r, hr0, hrF⟩ := exists_ray (hF.fg_of_fg hfg) hF' hFsal
+  obtain ⟨r, hr0, hrF⟩ := exists_ray (hF.fg hfg) hF' hFsal
   have hr := IsFaceOf.trans hrF hF
   rw [← hs] at hr
   obtain ⟨w, hws, c, hc', h⟩ := hr.span_ray hr0
