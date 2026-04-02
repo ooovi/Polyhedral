@@ -93,14 +93,14 @@ instance [inst : Fact p.flip.IsFaithfulPair] : Fact p.SeparatingLeft :=
 
 
 variable [Module.Projective R N] in
-instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] (N →ₗ[R] R)).SeparatingRight :=
+instance : Fact (SeparatingRight (M₁ := N →ₗ[R] R) .id) :=
     ⟨fun x hx => by simpa using (forall_dual_apply_eq_zero_iff R x).mp hx⟩
 
 variable [Module.Projective R M] in
 instance : Fact (Dual.eval R M).SeparatingLeft :=
     ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
 
-instance : Fact (.id : (N →ₗ[R] R) →ₗ[R] (N →ₗ[R] R)).SeparatingLeft :=
+instance : Fact (SeparatingLeft (M₁ := N →ₗ[R] R) .id) :=
     ⟨fun x hx => by ext y; exact hx y⟩
 
 instance : Fact (Dual.eval R M).SeparatingRight :=
