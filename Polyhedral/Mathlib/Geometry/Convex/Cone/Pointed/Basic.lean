@@ -34,6 +34,11 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
 
+-- allows us to use dot notation for lemmas in Submodule.FG or PointedCone.FG
+abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
+
+----
+
 set_option backward.isDefEq.respectTransparency false in
 @[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
   Submodule.restrictScalars_monotone ..
@@ -42,10 +47,6 @@ set_option backward.isDefEq.respectTransparency false in
   rfl
 
 -- ## SPAN
-
-set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma hull_submodule_span (s : Set M) :
-    Submodule.span R (hull R s) = Submodule.span R s := Submodule.span_span_of_tower ..
 
 def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   choice s _ := hull R s
@@ -62,14 +63,24 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
 /-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
-@[simp] lemma coe_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+@[simp high] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
     by simp [linSpan]
 
 @[deprecated (since := "today")]
-alias submodule_linSpan := coe_linSpan
+alias coe_linSpan := ofSubmodule_linSpan
 
 @[deprecated (since := "today")]
-alias linSpan_eq := coe_linSpan
+alias submodule_linSpan := ofSubmodule_linSpan
+
+@[deprecated (since := "today")]
+alias linSpan_eq := ofSubmodule_linSpan
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp] lemma linSpan_hull_eq_submodule_span (s : Set M) :
+    (hull R s).linSpan = Submodule.span R s := Submodule.span_span_of_tower ..
+
+@[deprecated (since := "today")]
+alias span_submodule_span := linSpan_hull_eq_submodule_span
 
 -- section Ring
 
@@ -124,7 +135,8 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 -- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
-@[deprecated "Really needed?" (since := "today")]
+-- TODO: this is only needed because `Submodule.span_insert` is restricted to rings
+--@[deprecated "Really needed?" (since := "today")]
 lemma hull_insert (x) (s : Set M) : hull R (insert x s) = hull R {x} ⊔ hull R s :=
   Submodule.span_insert x s
 
@@ -134,7 +146,7 @@ lemma coe_sup_submodule_span' {s t : Set M} :
 -- Has this anything to do with cones? See version above
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
     Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
-  rw [← hull_submodule_span]
+  rw [← linSpan_hull_eq_submodule_span]
   simp [Submodule.span_union]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -179,20 +191,10 @@ section Ring
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
-set_option backward.isDefEq.respectTransparency false in
-lemma sup_inf_assoc_of_le_submodule {C : PointedCone R M} (D : PointedCone R M)
-    {S : Submodule R M} (hCS : C ≤ S) : C ⊔ (D ⊓ S) = (C ⊔ D) ⊓ S :=
-  Submodule.sup_inf_assoc_of_le_restrictScalars D hCS
-
-set_option backward.isDefEq.respectTransparency false in
-lemma inf_sup_assoc_of_submodule_le {C : PointedCone R M} (D : PointedCone R M)
-    {S : Submodule R M} (hSC : S ≤ C) : C ⊓ (D ⊔ S) = (C ⊓ D) ⊔ S :=
-  Submodule.inf_sup_assoc_of_restrictScalars_le D hSC
-
 -- TODO: write version with `restrictScalars` instead. (Or have I already??)
 lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R M}
   (hS : Disjoint C.linSpan S) : (C ⊔ S) ⊓ C.linSpan = C := by
-  rw [← sup_inf_assoc_of_le_submodule]
+  rw [sup_inf_assoc_of_le_submodule]
   · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
   · exact le_linSpan C
 
@@ -426,8 +428,7 @@ variable (R) in
 @[simp] lemma hull_neg_pair_eq_span_singleton (x : M) : hull R {-x, x} = R ∙ x := by
   rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
   ext y
-  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
-    smul_neg, Subtype.exists, Nonneg.mk_smul, exists_prop]
+  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair, smul_neg, Subtype.exists]
   constructor
   · rintro ⟨a, _, b, _, rfl⟩
     exact ⟨a, b, rfl⟩
@@ -502,7 +503,7 @@ section Pointwise
 
 open Pointwise
 
-lemma sup_neg_eq_submodule_span (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
+lemma sup_neg_eq_linSpan (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
   nth_rw 1 2 [← Submodule.span_eq C]
   rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
   exact hull_union_neg_eq_submodule_span (C : Set M)
@@ -511,17 +512,17 @@ lemma sup_neg_eq_submodule_span (C : PointedCone R M) : -C ⊔ C = C.linSpan := 
 --  I don't know which.
 
 lemma neg_eq_iff_eq_linSpan {C : PointedCone R M} : -C = C ↔ C.linSpan = C := by
-  rw [← sup_neg_eq_submodule_span, sup_eq_right]
-  exact Submodule.neg_le_iff_neg_eq.symm
+  rw [← sup_neg_eq_linSpan, sup_eq_right]
+  exact Submodule.neg_eq_self_iff_neg_le
 
 lemma neg_le_iff_eq_linSpan {C : PointedCone R M} : -C ≤ C ↔ C.linSpan = C :=
-  Iff.trans Submodule.neg_le_iff_neg_eq neg_eq_iff_eq_linSpan
+  Iff.trans Submodule.neg_eq_self_iff_neg_le.symm neg_eq_iff_eq_linSpan
 
 end Pointwise
 
 lemma mem_linSpan {C : PointedCone R M} {x : M} :
     x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
-  rw [← mem_ofSubmodule_iff, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
+  rw [← mem_ofSubmodule_iff, ← sup_neg_eq_linSpan, Submodule.mem_sup]
   simp only [Submodule.mem_neg]
   constructor <;> intro h
   · obtain ⟨y, hy', z, hz, rfl⟩ := h
@@ -590,33 +591,6 @@ end Map
 --   fun_inv : ∀ x ∈ t, toFun (toInv x) = x
 -- example (S : PointedCone R M) (T : PointedCone R N) : S ≃ₗ[R≥0] T := sorry
 
--- we have LinearOrder because then Module.Finite { c // 0 ≤ c } R
-variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid M]
-  [Module R M]
-
-set_option backward.isDefEq.respectTransparency false in
-lemma ofSubmodule_fg_of_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R M).FG
-    := Submodule.FG.restrictScalars hS
-
-/- We current struggle to implement the converse, see `FG.of_restrictScalars`. -/
-alias coe_fg := ofSubmodule_fg_of_fg
-
--- Q: is this problematic?
-instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
-
-set_option backward.isDefEq.respectTransparency false in
-@[simp]
-lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
-  ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
-
-set_option backward.isDefEq.respectTransparency false in
-/-- The submodule span of a finitely generated pointed cone is finitely generated. -/
-lemma FG.linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG :=
-  hC.span
-
-lemma fg_top [Module.Finite R M] : (⊤ : PointedCone R M).FG :=
-  ofSubmodule_fg_of_fg Module.Finite.fg_top
-
 end LinearOrder
 
 end Ring
@@ -638,7 +612,22 @@ abbrev quot (C : PointedCone R M) (S : Submodule R M) : PointedCone R (M ⧸ S) 
 
 lemma quot_def (C : PointedCone R M) (S : Submodule R M) : C.quot S = C.map S.mkQ := rfl
 
-lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := sorry
+lemma quot_eq_bot_iff (C : PointedCone R M) (S : Submodule R M) :
+    C.quot S = ⊥ ↔ C ≤ S := by
+  simp only [quot, PointedCone.ext_iff, PointedCone.map]
+  constructor
+  · intro h x hx
+    exact (Submodule.Quotient.mk_eq_zero _).mp <| (h (S.mkQ x)).mp ⟨x, hx, rfl⟩
+  · intro h y
+    simp only [Submodule.mem_map, LinearMap.coe_restrictScalars, Submodule.mkQ_apply,
+      Submodule.mem_bot]
+    constructor
+    · rintro ⟨y₁, hy₁, rfl⟩
+      exact (Submodule.Quotient.mk_eq_zero S).mpr (h hy₁)
+    · rintro rfl
+      exact ⟨0, C.zero_mem, Submodule.Quotient.mk_zero S⟩
+
+lemma quot_bot_of_le {S : Submodule R M} (h : C ≤ S) : C.quot S = ⊥ := (quot_eq_bot_iff C S).mpr h
 
 lemma quot_span : C.quot (.span R C) = ⊥ := quot_bot_of_le Submodule.le_span
 

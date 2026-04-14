@@ -3,7 +3,9 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual DualClosed
@@ -43,18 +45,18 @@ lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
   simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
 
 /-- FG cones are polyhedral. -/
-lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := salientQuot_fg hC
+lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := hC.salientQuot_fg
 
 lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
     FG.isPolyhedral hC.salientQuot_fg
 
-/-- The span of a finite set is polyhedral. -/
-lemma IsPolyhedral.of_span_finite {s : Set M} (hs : s.Finite) : (span R s).IsPolyhedral :=
+/-- The hull of a finite set is polyhedral. -/
+lemma IsPolyhedral.of_hull_finite {s : Set M} (hs : s.Finite) : (hull R s).IsPolyhedral :=
   FG.isPolyhedral (fg_def.mpr ⟨s, hs, rfl⟩)
 
-/-- The span of a finite set is polyhedral. -/
-lemma isPolyhedral_of_span_finset (s : Finset M) : (span (E := M) R s).IsPolyhedral :=
-  .of_span_finite s.finite_toSet
+/-- The hull of a finite set is polyhedral. -/
+lemma isPolyhedral_of_hull_finset (s : Finset M) : (hull (E := M) R s).IsPolyhedral :=
+  .of_hull_finite s.finite_toSet
 
 set_option backward.isDefEq.respectTransparency false in
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
@@ -65,16 +67,16 @@ lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quo
 
 /-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
    FG cone by the lineality space of `C`. -/
-lemma IsPolyhedral.exists_finset_span_quot_lineal (hC : C.IsPolyhedral) :
-    ∃ s : Finset M, (span R s).quot C.lineal = C.salientQuot := by classical
+lemma IsPolyhedral.exists_finset_hull_quot_lineal (hC : C.IsPolyhedral) :
+    ∃ s : Finset M, (hull R s).quot C.lineal = C.salientQuot := by classical
   obtain ⟨s, hs⟩ := hC
   use Finset.image (surjInv <| mkQ_surjective _) s
-  simp only [map_span, Finset.coe_image, Set.image_image, surjInv_eq, Set.image_id', hs]
+  simp only [map_hull, Finset.coe_image, Set.image_image, surjInv_eq, Set.image_id', hs]
 
--- lemma IsPolyhedral.exists_finset_inter_span_quot_lineal (hC : C.IsPolyhedral) :
---     ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (span R s).quot C.lineal = C.salientQuot := by
+-- lemma IsPolyhedral.exists_finset_inter_hull_quot_lineal (hC : C.IsPolyhedral) :
+--     ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (hull R s).quot C.lineal = C.salientQuot := by
 --   classical
---   obtain ⟨s, hs⟩ := exists_finset_span_quot_lineal hC
+--   obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
 --   use {x ∈ s | x ∉ C.lineal}
 --   constructor
 --   · ext; simp
@@ -86,25 +88,25 @@ lemma IsPolyhedral.exists_finset_span_quot_lineal (hC : C.IsPolyhedral) :
 
 /-- A polyhedral cone can be written as the sum of its lineality space with an FG cone. -/
 lemma IsPolyhedral.exists_finset_sup_lineal (hC : C.IsPolyhedral) :
-    ∃ s : Finset M, span R s ⊔ C.lineal = C := by classical
-  obtain ⟨s, hs⟩ := exists_finset_span_quot_lineal hC
+    ∃ s : Finset M, hull R s ⊔ C.lineal = C := by classical
+  obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
   exact ⟨s, by simpa [quot_eq_iff_sup_eq] using hs⟩
 
 /-- A polyhedral cone can be written as the sum of its lineality space with an FG cone. -/
 lemma IsPolyhedral.exists_fg_sup_lineal (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R M, D.FG ∧ D ⊔ C.lineal = C := by
   obtain ⟨s, hs⟩ := hC.exists_finset_sup_lineal
-  exact ⟨span R s, fg_span s.finite_toSet, hs⟩
+  exact ⟨hull R s, fg_span s.finite_toSet, hs⟩
 
 
 /-- A polyhedral cone with FG lineality space is FG. -/
-lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : FG C.lineal) : C.FG := by
+lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : C.lineal.FG) : C.FG := by
   obtain ⟨D, hD, hD'⟩ := hC.exists_fg_sup_lineal
   rw [← hD']
-  exact sup_fg hD h
+  exact sup_fg hD (FG.coe_fg_iff.mpr h)
 
 /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
-lemma IsPolyhedral.iff_fg_of_fg_lineal {h : FG C.lineal} : C.IsPolyhedral ↔ C.FG :=
+lemma IsPolyhedral.iff_fg_of_fg_lineal {h : C.lineal.FG} : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_fg_lineal · h), FG.isPolyhedral⟩
 
 /-- A salient polyhedral cone is FG. -/
@@ -202,7 +204,7 @@ variable {C C₁ C₂ F : PointedCone R M}
 
 /-- A polyhedral cone is FG if and only if its lineality space is FG. -/
 lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
-  ⟨FG.lineal_fg, hC.fg_of_fg_lineal⟩
+  ⟨lineal_fg, hC.fg_of_fg_lineal⟩
 
 
 -- ## DUAL
@@ -352,7 +354,7 @@ private lemma auxi {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG)
   let g := g₂ - g₁
   have hfg : f = g := sorry
   have hker : ker f = (P₁ ⊓ P₂) ⊔ (L₁ ⊓ L₂) := sorry
-  have him : FG (range g) := sorry
+  have him : Submodule.FG (range g) := sorry
   have iso := LinearMap.quotKerEquivRange f
 
   obtain ⟨M, hM⟩ := Submodule.exists_isCompl (L₁ ⊔ L₂)
@@ -412,10 +414,10 @@ lemma IsPolyhedral.of_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.IsPolyh
 
 /-- The intersection of a polyhedral cone with an FG cone is FG. -/
 lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
-    {S : Submodule R M} (hS : FG S) : FG (C ⊓ S) := by
+    {S : Submodule R M} (hS : S.FG) : FG (C ⊓ S) := by
   obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span .id
   rw [← hD, inf_assoc, ← coe_inf]
-  exact inf_fgdual_fg hcofg <| coe_fg <| FG.of_le hS inf_le_right
+  exact inf_fgdual_fg hcofg <| FG.coe_fg <| FG.of_le hS inf_le_right
 
 /-- The intersection of two polyhedral cones is polyhdral. -/
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
@@ -443,7 +445,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   --
   rw [← inf_eq_left.mpr h]
   have H := inf_le_inf (lineal_le C₁) (lineal_le C₂)
-  rw [coe_sup, inf_sup_assoc_of_submodule_le _ H]
+  rw [coe_sup, ← inf_sup_assoc_of_le_of_submodule_le _ H]
   --
   rw [← inf_idem P, inf_assoc, inf_comm, coe_inf, ← inf_assoc, inf_assoc]
   refine .of_fg_sup_submodule (inf_fg ?_ ?_) _
@@ -455,7 +457,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
 lemma IsPolyhedral.fg_inf_of_disjoint_lineal (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : Disjoint C.lineal S) : FG (C ⊓ S) := by
   refine fg_of_fg_lineal (hC.inf <| .of_submodule S) ?_
-  simp only [lineal_inf, lineal_submodule, disjoint_iff.mp hS, fg_bot]
+  simp only [lineal_inf, submodule_lineal, disjoint_iff.mp hS, fg_bot]
   -- TODO: fg_bot should be a simp lemma
 
 variable (p) in
@@ -681,13 +683,13 @@ def of_FG {C : PointedCone R M} (hC : C.FG) : PolyhedralCone R M
     := ⟨C, FG.isPolyhedral hC⟩
 
 variable (R) in
-/-- The span of finitely many elements as a polyhedral cone. -/
-def finspan (s : Finset M) : PolyhedralCone R M := ⟨_, isPolyhedral_of_span_finset s⟩
+/-- The hull of finitely many elements as a polyhedral cone. -/
+def finhull (s : Finset M) : PolyhedralCone R M := ⟨_, isPolyhedral_of_hull_finset s⟩
 
-@[simp] lemma finspan_eq_span (s : Finset M) : finspan R s = span (E := M) R s := rfl
+@[simp] lemma finhull_eq_hull (s : Finset M) : finhull R s = hull (E := M) R s := rfl
 
-def finspan_lineal (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
-  ⟨span R s ⊔ S, IsPolyhedral.sup (isPolyhedral_of_span_finset s) (by simp)⟩
+def finhull_lineal (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
+  ⟨hull R s ⊔ S, IsPolyhedral.sup (isPolyhedral_of_hull_finset s) (by simp)⟩
 
 variable [IsNoetherian R M] in
 /-- A polyhedral cone is finitely generated. -/
@@ -814,3 +816,5 @@ open Pointwise in
 
 
 end PolyhedralCone
+
+end PointedCone

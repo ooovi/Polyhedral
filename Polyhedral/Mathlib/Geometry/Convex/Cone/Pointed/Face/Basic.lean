@@ -56,14 +56,12 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 theorem isFaceOf_iff_mem_of_smul_add_smul_mem : F.IsFaceOf C ↔
     (F ≤ C ∧ ∀ {x y : M} {a b : R}, x ∈ C → y ∈ C → 0 < a → 0 < b → a • x + b • y ∈ F → x ∈ F)
-    := by
-  constructor <;> intro h
-  · refine ⟨h.1, fun xC yC a0 b0 hab => ?_⟩
-    exact h.2 xC (Submodule.smul_mem C ⟨_, le_of_lt b0⟩ yC) a0 hab
-  · refine ⟨h.1, ?_⟩
+    where
+  mp h := ⟨h.1, fun xC yC a0 b0 hab => h.2 xC (Submodule.smul_mem C ⟨_, b0.le⟩ yC) a0 hab⟩
+  mpr h := by
+    refine ⟨h.1, ?_⟩
     by_cases hc : 0 < (1 : R)
-    · intros xc yc a0 haxy
-      exact h.2 xc yc a0 hc (by simpa)
+    · exact fun xc yc a0 _ => h.2 xc yc a0 hc (by simpa)
     · simp [(subsingleton_of_zero_eq_one (zero_le_one.eq_or_lt.resolve_right hc)).eq_zero]
 
 namespace IsFaceOf
@@ -130,6 +128,16 @@ theorem sum_mem_iff_mem {ι : Type*} [Fintype ι] {f : ι → M} (hF : F.IsFaceO
   refine hF.mem_of_add_mem (hsC i) (sum_mem (fun j (_ : j ∈ Finset.univ.erase i) => hsC j)) ?_
   simp [hs]
 
+/-- If the positive combination of points of a cone is in a face, then all the points are
+  in the face. -/
+theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι → R}
+    (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hc : ∀ i, 0 ≤ c i) (hs : ∑ i : ι, c i • f i ∈ F)
+    (i : ι) (hci : 0 < c i) : f i ∈ F := by classical
+  rw [Finset.sum_eq_add_sum_diff_singleton i] at hs
+  · refine hF.mem_of_smul_add_mem (hsC i) ?_ hci hs
+    exact C.sum_mem fun i _ => C.smul_mem (hc i) (hsC i)
+  · simp
+
 section Map
 
 variable [AddCommGroup N] [Module R N]
@@ -170,12 +178,11 @@ theorem of_comap_surjective {f : N →ₗ[R] M} (hf : Function.Surjective f)
 
 end Map
 
-end IsFaceOf
-
-lemma face_faces (h : F.IsFaceOf C) :
-    F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
+lemma isFaceOf_iff (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.IsFaceOf C :=
   ⟨fun h' => ⟨h'.le, h'.trans h⟩,
     fun h' => ⟨h'.1, fun x y ha hs => h'.2.mem_of_smul_add_mem (h.le x) (h.le y) ha hs⟩⟩
+
+end IsFaceOf
 
 variable [AddCommGroup N] [Module R N] in
 /-- The image of a cone `F` under an injective linear map is a face of the
@@ -225,6 +232,7 @@ lemma inf_comap_mkQ (hH : H.IsFaceOf (G.quot S)) :
 
 
 end IsFaceOf
+
 end Ring
 
 section DivisionRing
@@ -245,24 +253,6 @@ theorem isFaceOf_iff_mem_of_add_mem : F.IsFaceOf C ↔
     rw [← smul_assoc] at hxF'
     have hxF'' : ((1 : R) • x) ∈ F := by simpa [inv_mul_cancel₀ (ne_of_gt a0)] using hxF'
     simpa using hxF''
-
-namespace IsFaceOf
-
-/-- If the positive combination of points of a cone is in a face, then all the points are
-  in the face. -/
-theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι → R}
-    (hF : F.IsFaceOf C) (hsC : ∀ i : ι, f i ∈ C) (hc : ∀ i, 0 ≤ c i) (hs : ∑ i : ι, c i • f i ∈ F)
-    (i : ι) (hci : 0 < c i) : f i ∈ F := by
-  classical
-  have hciF := (sum_mem_iff_mem hF (fun i => C.smul_mem (hc i) (hsC i))).mp hs i
-  have hiF : ((c i)⁻¹ : R) • (c i • f i) ∈ F :=
-    smul_mem (C := F) (x := (c i : R) • f i) (le_of_lt (Right.inv_pos.mpr hci)) hciF
-  have hiF' := hiF
-  rw [← smul_assoc] at hiF'
-  have hiF'' : ((1 : R) • f i) ∈ F := by simpa [inv_mul_cancel₀ (ne_of_gt hci)] using hiF'
-  simpa using hiF''
-
-end IsFaceOf
 
 end DivisionRing
 
@@ -388,7 +378,7 @@ variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
 lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
     x ∈ F.linSpan ↔ x ∈ F := by
   constructor <;> intro hxF
-  · obtain ⟨_, hyF, _, hzF, rfl⟩ := mem_linSpan.1 hxF
+  · obtain ⟨_, hyF, _, hzF, rfl⟩ := F.mem_linSpan.1 hxF
     exact hF.mem_of_add_mem hx (hF.le hzF) hyF
   · exact Submodule.subset_span hxF
 
@@ -411,6 +401,11 @@ lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
 --     exact hF.mem_of_add_mem hxC (hF.le hzF) hyF
 --   · simpa using ⟨hF.le, Submodule.subset_span⟩
 
+lemma le_linSpan_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) :
+    C₁ ≤ F.linSpan ↔ C₁ ≤ F := by
+  nth_rw 2 [← hG.inf_linSpan]
+  simpa using fun _ => hD
+
 end DirectedOrderRing
 section Ring
 
@@ -422,7 +417,7 @@ theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
   hC.anti hF.le
 
 /-- Quotient by the linear span of a face is salient. -/
-lemma salient_quot_linSpan_of_face [IsDirectedOrder R] (hF : F.IsFaceOf C) :
+lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
     (C.quot F.linSpan).Salient := by
   intro z hzC hz0 hzNeg
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
@@ -564,7 +559,7 @@ lemma hull_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 
 variable {s t : Set M}
 
 set_option backward.isDefEq.respectTransparency false in
-lemma hull_inter_face_span_inf_face (hF : F.IsFaceOf (hull R s)) :
+lemma hull_inter_face_hull_inf_face (hF : F.IsFaceOf (hull R s)) :
     hull R (s ∩ F) = F := by
   ext x; constructor
   · simpa only [mem_span] using fun h => h F Set.inter_subset_right
@@ -574,15 +569,16 @@ lemma hull_inter_face_span_inf_face (hF : F.IsFaceOf (hull R s)) :
     apply sum_mem
     intro i _
     by_cases hh : 0 < c i
-    · refine smul_mem _ (le_of_lt hh) ?_
+    · --sorry -- # broken since PR
+      refine smul_mem _ (le_of_lt hh) ?_
       apply subset_hull (E := M)
       exact Set.mem_inter (Subtype.coe_prop (g i)) (hF.hull_nonneg_lc_mem (fun i => (c i).2) h hh)
     · push_neg at hh
       rw [le_antisymm hh (c i).property]
       simp
 
-lemma exists_span_subset_face {s : Set M} (hF : F.IsFaceOf (hull R s)) :
-    ∃ t ⊆ s, hull R t = F := ⟨_, Set.inter_subset_left, hull_inter_face_span_inf_face hF⟩
+lemma exists_hull_subset_face {s : Set M} (hF : F.IsFaceOf (hull R s)) :
+    ∃ t ⊆ s, hull R t = F := ⟨_, Set.inter_subset_left, hull_inter_face_hull_inf_face hF⟩
 
 -- If span R s and span R t are disjoint (only share 0)
 example (h : span R s ⊓ span R t = ⊥)
