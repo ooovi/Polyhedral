@@ -3,11 +3,6 @@ Copyright (c) 2025 Justus Springer, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Justus Springer, Martin Winter
 -/
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm.Basic
-
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FGDual
 
@@ -377,7 +372,7 @@ lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG :
 /-- The intersection of an FG cone with an arbitrary submodule is FG. -/
 lemma inf_fg_submodule {C : PointedCone 𝕜 M} (hC : C.FG) (S : Submodule 𝕜 M) : (C ⊓ S).FG := by
   rw [left_eq_inf.mpr C.le_linSpan, inf_assoc, ← coe_inf]
-  exact inf_fg hC <| coe_fg <| FG.of_le (FG.linSpan_fg hC) inf_le_left
+  exact inf_fg hC <| FG.coe_fg <| FG.of_le (FG.linSpan_fg hC) inf_le_left
 
 lemma inf_submodule_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG)
     : (S ⊓ C : PointedCone 𝕜 M).FG := by rw [inf_comm]; exact inf_fg_submodule hC S
@@ -407,7 +402,7 @@ lemma exists_fg_sup_dual (s : Finset M) :
   constructor
   · rw [dual_span_lineal_dual] at hS
     have h := CoFG.fg_of_isCompl hS (dual_finset_cofg p s)
-    exact inf_fgdual_fg (fgdual_of_finset p s) (coe_fg h) -- h instead if coe_fg h would work
+    exact inf_fgdual_fg (fgdual_of_finset p s) (FG.coe_fg h) -- h instead if coe_fg h would work
   · rw [← dual_span_lineal_dual]
     exact inf_sup_lineal hS.codisjoint
 

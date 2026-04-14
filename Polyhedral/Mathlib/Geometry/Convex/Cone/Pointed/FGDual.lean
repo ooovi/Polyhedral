@@ -1,6 +1,7 @@
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FGDual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 
 namespace PointedCone
 
@@ -31,7 +32,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
 variable [Module.Finite R M] [Fact p.SeparatingRight] in
 lemma FGDual.bot : FGDual p ⊥ := by
-  obtain ⟨s, hs⟩ := coe_fg <| Module.Finite.fg_top (R := R) (M := M)
+  obtain ⟨s, hs⟩ := FG.coe_fg <| Module.Finite.fg_top (R := R) (M := M)
   use s
   rw [← dual_span]
   simp [hs]
@@ -114,7 +115,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 lemma FGDual.coe {S : Submodule R N} (hS : S.FGDual p) : (S : PointedCone R N).FGDual p := by
   obtain ⟨T, hfg, rfl⟩ := hS.exists_fg_dual
   rw [← coe_dual]
-  exact fgdual_of_fg p (coe_fg hfg)
+  exact fgdual_of_fg p (FG.coe_fg hfg)
 
 alias coe_fgdual := FGDual.coe
 

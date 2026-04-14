@@ -3,9 +3,10 @@ import Polyhedral.Polyhedral.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
--- import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
+
 
 namespace PointedCone
 

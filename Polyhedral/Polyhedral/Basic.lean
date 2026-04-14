@@ -3,7 +3,9 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual DualClosed
@@ -43,7 +45,7 @@ lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
   simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
 
 /-- FG cones are polyhedral. -/
-lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := salientQuot_fg hC
+lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := hC.salientQuot_fg
 
 lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
     FG.isPolyhedral hC.salientQuot_fg
@@ -101,7 +103,7 @@ lemma IsPolyhedral.exists_fg_sup_lineal (hC : C.IsPolyhedral) :
 lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : C.lineal.FG) : C.FG := by
   obtain ⟨D, hD, hD'⟩ := hC.exists_fg_sup_lineal
   rw [← hD']
-  exact sup_fg hD h
+  exact sup_fg hD (FG.coe_fg_iff.mpr h)
 
 /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
 lemma IsPolyhedral.iff_fg_of_fg_lineal {h : C.lineal.FG} : C.IsPolyhedral ↔ C.FG :=
@@ -202,7 +204,7 @@ variable {C C₁ C₂ F : PointedCone R M}
 
 /-- A polyhedral cone is FG if and only if its lineality space is FG. -/
 lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
-  ⟨FG.lineal_fg, hC.fg_of_fg_lineal⟩
+  ⟨lineal_fg, hC.fg_of_fg_lineal⟩
 
 
 -- ## DUAL
@@ -415,7 +417,7 @@ lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : S.FG) : FG (C ⊓ S) := by
   obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span .id
   rw [← hD, inf_assoc, ← coe_inf]
-  exact inf_fgdual_fg hcofg <| coe_fg <| FG.of_le hS inf_le_right
+  exact inf_fgdual_fg hcofg <| FG.coe_fg <| FG.of_le hS inf_le_right
 
 /-- The intersection of two polyhedral cones is polyhdral. -/
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
@@ -455,7 +457,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
 lemma IsPolyhedral.fg_inf_of_disjoint_lineal (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : Disjoint C.lineal S) : FG (C ⊓ S) := by
   refine fg_of_fg_lineal (hC.inf <| .of_submodule S) ?_
-  simp only [lineal_inf, lineal_submodule, disjoint_iff.mp hS, fg_bot]
+  simp only [lineal_inf, ofSubmodule_lineal, disjoint_iff.mp hS, fg_bot]
   -- TODO: fg_bot should be a simp lemma
 
 variable (p) in
@@ -814,3 +816,5 @@ open Pointwise in
 
 
 end PolyhedralCone
+
+end PointedCone
