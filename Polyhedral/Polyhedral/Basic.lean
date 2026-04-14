@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
@@ -102,7 +103,7 @@ lemma IsPolyhedral.exists_fg_sup_lineal (hC : C.IsPolyhedral) :
 lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : C.lineal.FG) : C.FG := by
   obtain ⟨D, hD, hD'⟩ := hC.exists_fg_sup_lineal
   rw [← hD']
-  exact sup_fg hD h
+  exact sup_fg hD (FG.coe_fg_iff.mpr h)
 
 /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
 lemma IsPolyhedral.iff_fg_of_fg_lineal {h : C.lineal.FG} : C.IsPolyhedral ↔ C.FG :=
@@ -203,7 +204,7 @@ variable {C C₁ C₂ F : PointedCone R M}
 
 /-- A polyhedral cone is FG if and only if its lineality space is FG. -/
 lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
-  ⟨FG.lineal_fg, hC.fg_of_fg_lineal⟩
+  ⟨lineal_fg, hC.fg_of_fg_lineal⟩
 
 
 -- ## DUAL
@@ -416,7 +417,7 @@ lemma IsPolyhedral.fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
     {S : Submodule R M} (hS : S.FG) : FG (C ⊓ S) := by
   obtain ⟨D, hcofg, hD⟩ := hC.exists_fgdual_inf_span .id
   rw [← hD, inf_assoc, ← coe_inf]
-  exact inf_fgdual_fg hcofg <| coe_fg <| FG.of_le hS inf_le_right
+  exact inf_fgdual_fg hcofg <| FG.coe_fg <| FG.of_le hS inf_le_right
 
 /-- The intersection of two polyhedral cones is polyhdral. -/
 lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
