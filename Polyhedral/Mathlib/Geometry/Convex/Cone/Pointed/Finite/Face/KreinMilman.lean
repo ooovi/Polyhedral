@@ -93,13 +93,13 @@ lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ �
   obtain ⟨x, hx0, hxmin⟩ := Finset.exists_min_image s0 (fun z => f z / g z) hs0_ne
   have hxs : x ∈ s := (Finset.mem_filter.mp hx0).1
   have hx_ne_0 : x ≠ 0 := (Finset.mem_filter.mp hx0).2
-  have hxC : x ∈ C := by rw [← hs]; exact subset_span hxs
+  have hxC : x ∈ C := by rw [← hs]; exact subset_hull hxs
   have hgx : 0 < g x := hg_pos hxC hx_ne_0
   have hgen : ∀ z ∈ s, f x * g z ≤ f z * g x := by
     intro z hzs
     by_cases hz0 : z = 0
     · simp [hz0]
-    have hzC : z ∈ C := by rw [← hs]; exact subset_span hzs
+    have hzC : z ∈ C := by rw [← hs]; exact subset_hull hzs
     have hgz : 0 < g z := hg_pos hzC hz0
     have hz0' : z ∈ s0 := by simp [s0, hzs, hz0]
     exact (div_le_div_iff₀ hgx hgz).1 (hxmin _ hz0')
@@ -127,17 +127,16 @@ lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : 
 end opt
 
 /- For every ray `x` of the span of a set `s`, there is a member of `s` that also spans the ray. -/
-lemma IsFaceOf.span_ray {s : Set M} {x : M} (hx : x ≠ 0)
-    (hspan : (span R {x}).IsFaceOf (span R s)) : ∃ y ∈ s, ∃ c : R, 0 < c ∧ y = c • x := by
-  have h := hspan.span_inter_face_span_inf_face
-  have ⟨y, hy, hy0⟩ : ∃ w ∈ s ∩ (span R {x}), w ≠ 0 := by
+lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
+    (hspan : (hull R {x}).IsFaceOf (hull R s)) : ∃ y ∈ s, ∃ c : R, 0 < c ∧ y = c • x := by
+  have h := hspan.hull_inter_face_hull_inf_face
+  have ⟨y, hy, hy0⟩ : ∃ w ∈ s ∩ (hull R {x}), w ≠ 0 := by
     by_contra H
     absurd hx
-    push_neg at H
+    push Not at H
     simp only [← Set.mem_singleton_iff] at H
     simpa [h] using Submodule.span_mono (R := {c : R // 0 ≤ c}) H
-  simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton, Subtype.exists,
-    Nonneg.mk_smul, exists_prop] at hy
+  simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton, Subtype.exists] at hy
   obtain ⟨hys, a, ha, rfl⟩ := hy
   exact ⟨_, hys, a, lt_of_le_of_ne ha (fun h => hy0 (by simp [← h])), rfl⟩
 
@@ -147,16 +146,16 @@ open Module in
 --  generalize to dual-closed.
 /- Krein-Milman theorem: Every finitely generated cone is spanned by a finite set of its rays. -/
 lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
-    ∃ s : Finset M, span R s = C ∧ ∀ x ∈ s, (span R {x}).IsFaceOf C := by
+    ∃ s : Finset M, hull R s = C ∧ ∀ x ∈ s, (hull R {x}).IsFaceOf C := by
   classical
   let ⟨s, hs⟩ := hfg
   by_cases hs' : s = ∅
   · exact ⟨∅, by simp [← hs, hs']⟩
   by_contra! h
-  let t := s.filter fun x => (span R {x}).IsFaceOf C
+  let t := s.filter fun x => (hull R {x}).IsFaceOf C
   specialize h t
   have hts : t ⊆ s := by simp [t]
-  have hst : ¬(s : Set M) ⊆ span R (t : Set M) := by
+  have hst : ¬(s : Set M) ⊆ hull R (t : Set M) := by
     by_contra h'
     have h' := Submodule.span_mono (R := {c : R // 0 ≤ c}) h'
     have h'' := Submodule.span_mono (R := {c : R // 0 ≤ c}) hts
@@ -166,7 +165,7 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   obtain ⟨x, hxs, hxt⟩ := Set.not_subset.mp hst
   have hx : x ∈ C := by
     rw [← hs]
-    exact subset_span hxs
+    exact subset_hull hxs
   obtain ⟨f, hf, hf'⟩ := FG.farkas (Dual.eval R M) hxt
   rw [← hs] at hsal
   -- TODO exists_dual_pos₀ is a hole
@@ -190,18 +189,18 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   obtain ⟨r, hr0, hrF⟩ := exists_ray (hF.fg hfg) hF' hFsal
   have hr := IsFaceOf.trans hrF hF
   rw [← hs] at hr
-  obtain ⟨w, hws, c, hc', h⟩ := hr.span_ray hr0
+  obtain ⟨w, hws, c, hc', h⟩ := hr.hull_ray hr0
   simp only [SetLike.mem_coe] at hws
   have hc0 := (ne_of_lt hc').symm
   have hrw : r = c⁻¹ • w := by
     subst h hs
     simp [smul_smul, hc0]
   rw [hrw] at hr
-  rw [span_singleton_smul_eq (inv_pos.mpr hc')] at hr
+  rw [hull_singleton_smul_eq (inv_pos.mpr hc')] at hr
   have hwt : w ∈ t := by
     simpa [Finset.mem_filter, t] using ⟨hws, hs ▸ hr⟩
   have hwF : r ∈ F := by
-    have : r ∈ span R {r} := by simp
+    have : r ∈ hull R {r} := by simp
     exact hrF.le this
   have hwF : w ∈ F := by
     rw [h]

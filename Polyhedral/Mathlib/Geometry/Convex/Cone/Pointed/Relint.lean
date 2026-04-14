@@ -68,8 +68,8 @@ lemma relint_le : C.relint ≤ C := fun _ hx => hx.1
 lemma mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem :
     x ∈ C.relint ↔ x ∈ C ∧ ∀ t, ∃ c > 0, x + c • t ∈ C := by simp [relint]
 
-lemma mem_relint_iff_mem_span_neg_eq_top :
-    x ∈ C.relint ↔ x ∈ C ∧ span R (insert (-x) C) = C.linSpan := by
+lemma mem_relint_iff_mem_hull_neg_eq_top :
+    x ∈ C.relint ↔ x ∈ C ∧ hull R (insert (-x) C) = C.linSpan := by
     sorry
 
 lemma mem_relint_iff_mem_forall_isFaceOf_eq_top_of_mem :
@@ -94,7 +94,7 @@ lemma finset_sum_mem_relint_of_subset_of_le_span {s : Finset M} (hs : (s : Set M
     (hC : C ≤ Submodule.span R (s : Set M)) : ∑ x ∈ s, x ∈ relint C := by
   sorry
 
-lemma finset_sum_mem_relint_span {s : Finset M} : ∑ x ∈ s, x ∈ relint (span R (s : Set M)) := by
+lemma finset_sum_mem_relint_hull {s : Finset M} : ∑ x ∈ s, x ∈ relint (hull R (s : Set M)) := by
   sorry
 
 lemma relint_nonempty (h : C.FinSalRank) : Nonempty C.relint := sorry

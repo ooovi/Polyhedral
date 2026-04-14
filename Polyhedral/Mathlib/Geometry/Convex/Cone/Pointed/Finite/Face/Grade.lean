@@ -35,14 +35,14 @@ lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank =
     simpa [Face.le_linSpan_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
     FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr this) FfG.quot_salient
-  set ray : Face (quot G.toSubmodule F.linSpan) := ⟨span R {v}, hvray⟩
+  set ray : Face (quot G.toSubmodule F.linSpan) := ⟨hull R {v}, hvray⟩
   -- pull ray back to get face of G with F < H
   let H := ray.fiberFace (F := ⟨_, FfG⟩)
   have : F < H := by
     apply lt_of_le_of_ne (ray.le_fiber (F := ⟨_, FfG⟩))
     intro ha
-    have ugh : span R {v} = ⊥ := (Face.fiberFace_eq_iff _).mp ha
-    have : v ∈ span R {v} := Submodule.mem_span_singleton_self v
+    have ugh : hull R {v} = ⊥ := (Face.fiberFace_eq_iff _).mp ha
+    have : v ∈ hull R {v} := Submodule.mem_span_singleton_self v
     rw [ugh] at this
     exact hv0 <| (AddOpposite.op_eq_zero_iff v).mp (congrArg AddOpposite.op this)
   -- must be G = H because of covering

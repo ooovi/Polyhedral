@@ -524,8 +524,8 @@ variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Mo
 --   exact zero_lt_one' R
 
 
-lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
-    {f : ι → s} {i : ι} (hF : F.IsFaceOf (span R s)) (h : ∑ i, c i • (f i).val ∈ F)
+lemma hull_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 0 ≤ c i)
+    {f : ι → s} {i : ι} (hF : F.IsFaceOf (hull R s)) (h : ∑ i, c i • (f i).val ∈ F)
     (cpos : 0 < c i) : (f i).val ∈ F := by
   refine mem_of_sum_smul_mem hF ?_ hcc h i cpos
   simpa [mem_span] using fun i _ su => su (Subtype.coe_prop (f i))
@@ -559,8 +559,8 @@ lemma span_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 
 variable {s t : Set M}
 
 set_option backward.isDefEq.respectTransparency false in
-lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
-    span R (s ∩ F) = F := by
+lemma hull_inter_face_hull_inf_face (hF : F.IsFaceOf (hull R s)) :
+    hull R (s ∩ F) = F := by
   ext x; constructor
   · simpa only [mem_span] using fun h => h F Set.inter_subset_right
   · intro h
@@ -571,14 +571,14 @@ lemma span_inter_face_span_inf_face (hF : F.IsFaceOf (span R s)) :
     by_cases hh : 0 < c i
     · --sorry -- # broken since PR
       refine smul_mem _ (le_of_lt hh) ?_
-      apply subset_span (E := M)
-      exact Set.mem_inter (Subtype.coe_prop (g i)) (hF.span_nonneg_lc_mem (fun i => (c i).2) h hh)
+      apply subset_hull (E := M)
+      exact Set.mem_inter (Subtype.coe_prop (g i)) (hF.hull_nonneg_lc_mem (fun i => (c i).2) h hh)
     · push_neg at hh
       rw [le_antisymm hh (c i).property]
       simp
 
-lemma exists_span_subset_face {s : Set M} (hF : F.IsFaceOf (span R s)) :
-    ∃ t ⊆ s, span R t = F := ⟨_, Set.inter_subset_left, span_inter_face_span_inf_face hF⟩
+lemma exists_hull_subset_face {s : Set M} (hF : F.IsFaceOf (hull R s)) :
+    ∃ t ⊆ s, hull R t = F := ⟨_, Set.inter_subset_left, hull_inter_face_hull_inf_face hF⟩
 
 -- If span R s and span R t are disjoint (only share 0)
 example (h : span R s ⊓ span R t = ⊥)

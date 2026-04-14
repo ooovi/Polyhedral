@@ -338,7 +338,6 @@ lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) =
       rw [← Submodule.ker_mkQ F.linSpan]
       change F.quotMap (x - y) = 0
       simp only [map_sub, mkQ_apply, hyq, sub_self]
-      rfl
     have hx_lin : x ∈ (G : PointedCone R M).linSpan :=
       ((G : PointedCone R M).linSpan.sub_mem_iff_left (Submodule.subset_span hyG)).mp
         (Submodule.span_mono h hxy)

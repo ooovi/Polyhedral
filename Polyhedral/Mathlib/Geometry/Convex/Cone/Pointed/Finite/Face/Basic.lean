@@ -14,15 +14,15 @@ variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C F : PointedCone R M}
 
-lemma exists_fg_span_subset_face {s : Finset M} (hF : F.IsFaceOf (span R s)) :
-    ∃ t ⊆ s, span R t = F := by
+lemma exists_fg_hull_subset_face {s : Finset M} (hF : F.IsFaceOf (hull R s)) :
+    ∃ t ⊆ s, hull R t = F := by
   use (s.finite_toSet.inter_of_left F).toFinset
-  simp [IsFaceOf.span_inter_face_span_inf_face hF]
+  simp [IsFaceOf.hull_inter_face_hull_inf_face hF]
 
 /-- Faces of FG cones are FG. -/
 lemma IsFaceOf.fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   obtain ⟨_, rfl⟩ := hC
-  let ⟨t, _, tt⟩ := exists_fg_span_subset_face hF
+  let ⟨t, _, tt⟩ := exists_fg_hull_subset_face hF
   use t, tt
 
 lemma lineal_fg (hC : C.FG) : C.lineal.FG := FG.coe_fg_iff.mp ((IsFaceOf.lineal C).fg hC)
@@ -36,13 +36,13 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-/- Farkas lemma for finitely generated cones: for any point `x` not in the span of a finite set `s`,
-  there exists a hyperplane `φ` separating `x` from `span R s`. -/
+/- Farkas lemma for finitely generated cones: for any point `x` not in the hull of a finite set `s`,
+  there exists a hyperplane `φ` separating `x` from `hull R s`. -/
 variable (p) [Fact p.SeparatingLeft] in
-lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ span R s) :
+lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ hull R s) :
     ∃ φ : N, 0 > p x φ ∧ ∀ y ∈ s, 0 ≤ p y φ := by
   let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
-  exact ⟨φ, hφ, fun y hy => h y (subset_span hy)⟩
+  exact ⟨φ, hφ, fun y hy => h y (subset_hull hy)⟩
 
 variable {C F F₁ F₂ : PointedCone R M}
 
@@ -97,9 +97,9 @@ variable {C : PointedCone R M}
 set_option backward.isDefEq.respectTransparency false in
 open Submodule in
 /-- If a point `x` does not lie in a cone `C` but together with `C` spans a salient cone, then
-  `x` spans a face of `span R (C ∪ {x})`. -/
+  `x` spans a face of `hull R (C ∪ {x})`. -/
 lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x : M}
-    (hx : x ∉ C) (hC : (C ⊔ span R {x}).Salient) : (span R {x}).IsFaceOf (C ⊔ span R {x}) := by
+    (hx : x ∉ C) (hC : (C ⊔ hull R {x}).Salient) : (hull R {x}).IsFaceOf (C ⊔ hull R {x}) := by
   rw [isFaceOf_iff_mem_of_add_mem]
   constructor
   · exact le_sup_right
@@ -116,7 +116,7 @@ lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x 
   have h := C.add_mem hy' hz'
   rw [← hyz] at h
   rcases le_or_gt t 0 with ht | ht
-  · set C' := C ⊔ span R {x}
+  · set C' := C ⊔ hull R {x}
     have hxC' : x ∈ C' := by
       simpa [C', mem_sup, mem_span_singleton] using ⟨0, by simp, 1, by simp⟩
     have hxC' : -t • x ∈ C' := C'.smul_mem (neg_nonneg.mpr ht) hxC'
@@ -137,17 +137,17 @@ lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x 
     contradiction
 
 open Finset Submodule in
-lemma exists_ray' {s : Finset M} (hs : ∃ x ∈ s, x ≠ 0) (hsal : (span R (s : Set M)).Salient) :
-    ∃ x ∈ s, x ≠ 0 ∧ (span R {x}).IsFaceOf (span R s) := by classical
+lemma exists_ray' {s : Finset M} (hs : ∃ x ∈ s, x ≠ 0) (hsal : (hull R (s : Set M)).Salient) :
+    ∃ x ∈ s, x ≠ 0 ∧ (hull R {x}).IsFaceOf (hull R s) := by classical
   induction s using Finset.induction with
   | empty => absurd hs; simp
   | insert w s hwr hind =>
-    by_cases h : w ∈ span R s
+    by_cases h : w ∈ hull R s
     · by_cases hs' : ∃ x ∈ s, x ≠ 0
-      · simp only [coe_insert, span, span_insert_eq_span h] at ⊢ hsal
+      · simp only [coe_insert, hull, span_insert_eq_span h] at ⊢ hsal
         obtain ⟨x, hxs, hx⟩ := hind hs' hsal
         exact ⟨x, by simp [hxs, hx]⟩
-      push_neg at hs'
+      push Not at hs'
       have hs' : ∀ x ∈ (s : Set M), x = 0 := fun x hx => hs' x hx
       simp only [Submodule.span_eq_bot.mpr hs', mem_bot] at h
       obtain ⟨x, hx, h⟩ := hs
@@ -164,7 +164,7 @@ namespace FG
 
 /-- A non-bottom salient FG cone has a ray face. -/
 lemma exists_ray (hfg : C.FG) (hC : C ≠ ⊥) (hsal : C.Salient) :
-    ∃ x : M, x ≠ 0 ∧ (span R {x}).IsFaceOf C := by
+    ∃ x : M, x ≠ 0 ∧ (hull R {x}).IsFaceOf C := by
   obtain ⟨s, rfl⟩ := hfg
   have h : ∃ x ∈ s, x ≠ 0 := by
     by_contra h
@@ -193,7 +193,7 @@ lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     refine FG.exists_ray h1 (fun h3 ↦ ?_) h2
     replace h : (F : PointedCone R M).rank ≥ 1 := h
     simp [(F : PointedCone R M).bot_iff_rank_zero.mpr h3] at h
-  let test : Face C := ⟨PointedCone.span R {x}, hxF.trans F.isFaceOf⟩
+  let test : Face C := ⟨PointedCone.hull R {x}, hxF.trans F.isFaceOf⟩
   have t_rank : test.rank = 1 := rank_one_of_ray hx0
   have : test ≤ F := hxF.le
   rcases (IsAtom.le_iff hF).1 this with h | h

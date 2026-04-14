@@ -18,33 +18,6 @@ open Pointwise
 
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
-/-- The lineality space of a cone `C` is the submodule given by `C ⊓ -C`. -/
-def lineal (C : PointedCone R M) : Submodule R M where
-  __ := C ⊓ -C
-  smul_mem' r _ hx := by
-    obtain hr | hr := le_total 0 r
-    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
-    · rw [← neg_nonneg] at hr
-      simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
-
--- TODO: maybe do not make this a simp lemma. Seems more annoying than helpful.
-@[simp]
-lemma coe_lineal (C : PointedCone R M) : C.lineal = C ⊓ -C :=
-  rfl
-
-lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
-  rfl
-
--- TODO: make cone argument implicit?
-/-- The lineality space is contained in the cone. -/
-lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
-
-/-- The lineality space of a cone is the largest submodule contained in the cone. -/
-theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
-  refine le_antisymm (le_sSup (lineal_le C)) fun x hx => ?_
-  have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
-  exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
-
 /-- Every submodule contain int he cone is also contained in the lineality space. -/
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := by simp only [lineal_eq_sSup]; exact le_sSup hS
@@ -67,12 +40,12 @@ def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [mem_lineal]; aesop
 
-@[simp] lemma ofSubmodule_lineal (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
+@[simp] lemma submodule_lineal (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
   ext x; simp [mem_lineal]
 
-@[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := ofSubmodule_lineal ⊤
+@[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := submodule_lineal ⊤
 
-@[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := ofSubmodule_lineal ⊥
+@[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := submodule_lineal ⊥
 
 lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal := by
   intro x hx
@@ -165,18 +138,18 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
       have h' : 1 ≤ c ↔ 0 ≤ c - 1 := by simp
       rw [h'] at h1c
       replace h' := smul_mem C h1c hx
-      exact lineal_isExtreme_right h' hx hcx
+      exact lineal_isExtreme_right h' hx sorry
 
 -- TODO: maybe this result is not really necessary. See `inf_sup_eq_self_of_le_of_codisjoint` below.
 /-- If `C` is a cone and `S` is complementary to the cone's linealiry space, then `C` can
   be written as `(C ⊓ S) ⊔ C.lineal`. -/
 lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
-  simp [-coe_lineal, ← inf_sup_assoc_of_submodule_le _ (lineal_le _), ← coe_sup, hCS.symm.eq_top]
+  sorry
 
 lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone R M}
     {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint S T) : (C ⊓ S) ⊔ T = C := by
-  simp [← inf_sup_assoc_of_submodule_le _ hT, hST.eq_top]
+  simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
 
 lemma lineal_le_linSpan (C : PointedCone R M) : C.lineal ≤ C.linSpan :=
   ofSubmodule_mono.mpr <| le_trans (lineal_le C) (le_linSpan C)
@@ -260,11 +233,11 @@ lemma lineal_isExtreme_sum' {C : PointedCone R M} {xs : Finset M} (hxs : (xs : S
     · exact H hxs.2 hc.2 <| lineal_isExtreme_right (C.smul_mem (le_of_lt hc.1) hxs.1) hxsC h
 
 variable (R) in
-lemma span_inter_lineal_eq_lineal (s : Set M) :
-    span R (s ∩ (span R s).lineal) = (span R s).lineal := by
+lemma hull_inter_lineal_eq_lineal (s : Set M) :
+    hull R (s ∩ (hull R s).lineal) = (hull R s).lineal := by
   rw [le_antisymm_iff]
   constructor
-  · rw [← Submodule.span_eq <| ofSubmodule ((span R s).lineal)]
+  · rw [← Submodule.span_eq <| ofSubmodule ((hull R s).lineal)]
     refine Submodule.span_mono ?_
     simp only [Submodule.coe_restrictScalars, Set.inter_subset_right]
   · sorry
@@ -317,8 +290,8 @@ omit [IsOrderedRing R] in
 end Nonneg
 
 set_option backward.isDefEq.respectTransparency false in
-lemma salient_span_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
-    (span R s).Salient := by classical
+lemma salient_hull_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
+    (hull R s).Salient := by classical
   rw [salient_iff_mem_neg]
   intro x hxp hx0 hxn
   absurd hx0
@@ -346,10 +319,10 @@ section IsDomain
 
 variable [IsDomain R] [IsTorsionFree R M]
 
-lemma salient_span_singleton (x : M) : (span R {x}).Salient := by
+lemma salient_hull_singleton (x : M) : (hull R {x}).Salient := by
   by_cases h : x = 0
   · simp [h]
-  · exact salient_span_of_linearIndepOn (by simp [h])
+  · exact salient_hull_of_linearIndepOn (by simp [h])
 
 -- NOTE: there is alos `ofSubmodule_salient_iff_eq_bot` below, which proven something stronger
 --  for general rings, BUT assumes linear order. Is one setting better than the other?
@@ -387,14 +360,14 @@ lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = �
 
 @[simp] lemma ofSubmodule_salient_iff_eq_bot {S : Submodule R M} :
     (S : PointedCone R M).Salient ↔ S = ⊥ := by
-  nth_rw 2 [← ofSubmodule_lineal S]
+  nth_rw 2 [← submodule_lineal S]
   exact salient_iff_lineal_bot
 
 /-- If `S` is a submodule disjoint to the lineality space of a cone `C`, then `C ⊓ S`
   is salient. -/
 lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.lineal S) :
     (C ⊓ S).Salient := by
-  simp only [salient_iff_lineal_bot, lineal_inf, ofSubmodule_lineal, ← disjoint_iff, hCS]
+  simp only [salient_iff_lineal_bot, lineal_inf, submodule_lineal, ← disjoint_iff, hCS]
 
 -- ## MAP
 
@@ -451,7 +424,7 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
     exact (Submodule.Quotient.mk_eq_zero C.lineal).mpr h
   apply this
   have : (C.lineal).mkQ (y+y') = 0 := by
-    rw [map_add, hy, hy', add_neg_cancel]; rfl
+    rw [map_add, hy, hy', add_neg_cancel]
   have sum_lineal : y+y' ∈ C.lineal := by
     rw [← Submodule.ker_mkQ C.lineal]
     exact LinearMap.mem_ker.mpr this
@@ -466,7 +439,7 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
 @[simp] lemma salientQuot_of_submodule (S : Submodule R M) :
     (S : PointedCone R M).salientQuot = ⊥ := by
   unfold salientQuot
-  rw [ofSubmodule_lineal, ← Submodule.span_eq S]
+  rw [submodule_lineal, ← Submodule.span_eq S]
   simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
   rw [← coe_ofSubmodule, quot_span]
 
