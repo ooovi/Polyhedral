@@ -21,27 +21,27 @@ variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
 variable (p) in
-/-- A cone is `FGDual` if it is the dual of a finite set.
+/-- A cone is `DualFG` if it is the dual of a finite set.
   This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
-def FGDual (S : Submodule R N) : Prop := ∃ s : Finset M, dual p s = S
+def DualFG (S : Submodule R N) : Prop := ∃ s : Finset M, dual p s = S
 
-/-- A FGDual cone is the dual of a finite set. -/
-lemma FGDual.exists_finset_dual {S : Submodule R N} (hS : S.FGDual p) :
+/-- A DualFG cone is the dual of a finite set. -/
+lemma DualFG.exists_finset_dual {S : Submodule R N} (hS : S.DualFG p) :
     ∃ s : Finset M, dual p s = S := by
   obtain ⟨s, hs⟩ := hS; use s
 
-/-- A FGDual cone is the dual of a finite set. -/
-lemma FGDual.exists_finite_dual {S : Submodule R N} (hS : S.FGDual p) :
+/-- A DualFG cone is the dual of a finite set. -/
+lemma DualFG.exists_finite_dual {S : Submodule R N} (hS : S.DualFG p) :
     ∃ s : Set M, s.Finite ∧ dual p s = S := by
   obtain ⟨s, hs⟩ := hS; exact ⟨s, s.finite_toSet, hs⟩
 
-/-- A FGDual cone is the dual of an FG cone. -/
-lemma FGDual.exists_fg_dual {S : Submodule R N} (hS : S.FGDual p) :
+/-- A DualFG cone is the dual of an FG cone. -/
+lemma DualFG.exists_fg_dual {S : Submodule R N} (hS : S.DualFG p) :
     ∃ T : Submodule R M, T.FG ∧ dual p T = S := by
   obtain ⟨s, hs⟩ := hS; exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
 
-/-- A FGDual cone is FGDual w.r.t. the standard pairing. -/
-lemma FGDual.to_id {S : Submodule R N} (hS : S.FGDual p) : S.FGDual .id
+/-- A DualFG cone is DualFG w.r.t. the standard pairing. -/
+lemma DualFG.to_id {S : Submodule R N} (hS : S.DualFG p) : S.DualFG .id
     := by classical
   obtain ⟨s, hs⟩ := hS
   use Finset.image p s
@@ -49,69 +49,69 @@ lemma FGDual.to_id {S : Submodule R N} (hS : S.FGDual p) : S.FGDual .id
 
 variable (p) in
 /-- The dual of a `Finset` is co-FG. -/
-lemma fgdual_of_finset (s : Finset M) : (dual p s).FGDual p := by use s
+lemma dualfg_of_finset (s : Finset M) : (dual p s).DualFG p := by use s
 
 variable (p) in
 /-- The dual of a finite set is co-FG. -/
-lemma fgdual_of_finite {s : Set M} (hs : s.Finite) : (dual p s).FGDual p := by
+lemma dualfg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).DualFG p := by
   use hs.toFinset; simp
 
 variable (p) in
 /-- The dual of an FG-cone is co-FG. -/
-lemma fgdual_of_fg {S : Submodule R M} (hS : S.FG) : (dual p S).FGDual p := by
+lemma dual_of_fg {S : Submodule R M} (hS : S.FG) : (dual p S).DualFG p := by
   obtain ⟨s, rfl⟩ := hS
   use s; rw [← dual_span]
 
-alias FG.dual_fgdual := fgdual_of_fg
+alias FG.dual_dualfg := dual_of_fg
 
-/-- The intersection of two FGDual cones i FGDual. -/
-lemma inf_fgdual {S T : Submodule R N} (hS : S.FGDual p) (hT : T.FGDual p) :
-    (S ⊓ T).FGDual p := by classical
+/-- The intersection of two DualFG cones i DualFG. -/
+lemma inf_dualfg {S T : Submodule R N} (hS : S.DualFG p) (hT : T.DualFG p) :
+    (S ⊓ T).DualFG p := by classical
   obtain ⟨s, rfl⟩ := hS
   obtain ⟨t, rfl⟩ := hT
   use s ∪ t; rw [Finset.coe_union, dual_union]
 
 -- -- ### HIGH PRIORITY! This is needed in the cone theory!
 -- -- variable [Fact p.flip.IsFaithfulPair] in
--- lemma sup_fgdual {S T : Submodule R N} (hC : S.FGDual p) (hD : T.FGDual p) : (S ⊔ T).FGDual p := by
---   unfold FGDual
+-- lemma sup_dualfg {S T : Submodule R N} (hC : S.DualFG p) (hD : T.DualFG p) : (S ⊔ T).DualFG p := by
+--   unfold DualFG
 
 --   sorry
 
-/-- The double dual of a FGDual cone is the cone itself. -/
+/-- The double dual of a DualFG cone is the cone itself. -/
 @[simp]
-lemma FGDual.dual_dual_flip {S : Submodule R N} (hS : S.FGDual p) :
+lemma DualFG.dual_dual_flip {S : Submodule R N} (hS : S.DualFG p) :
     dual p (dual p.flip S) = S := by
-  obtain ⟨T, hfgdual, rfl⟩ := exists_fg_dual hS
+  obtain ⟨T, hdualfg, rfl⟩ := exists_fg_dual hS
   exact dual_dual_flip_dual (p := p) T
 
-/-- The double dual of a FGDual cone is the cone itself. -/
+/-- The double dual of a DualFG cone is the cone itself. -/
 @[simp]
-lemma FGDual.dual_flip_dual {S : Submodule R M} (hS : S.FGDual p.flip) :
+lemma DualFG.dual_flip_dual {S : Submodule R M} (hS : S.DualFG p.flip) :
     dual p.flip (dual p S) = S := hS.dual_dual_flip
 
-lemma FGDual.dualClosed {S : Submodule R M} (hS : S.FGDual p.flip) :
+lemma DualFG.dualClosed {S : Submodule R M} (hS : S.DualFG p.flip) :
     S.DualClosed p := hS.dual_flip_dual
 
-lemma FGDual.dualClosed_flip {S : Submodule R N} (hS : S.FGDual p) :
+lemma DualFG.dualClosed_flip {S : Submodule R N} (hS : S.DualFG p) :
     S.DualClosed p.flip := hS.dual_dual_flip
 
-@[simp] lemma FGDual.ker_le {S : Submodule R N} (hS : S.FGDual p) : ker p.flip ≤ S := by
+@[simp] lemma DualFG.ker_le {S : Submodule R N} (hS : S.DualFG p) : ker p.flip ≤ S := by
   rw [← dual_dual_flip hS]
   exact ker_le_dual _
 
--- lemma FGDual.sup_ker {S : Submodule R N} (hS : S.FGDual p) : (S ⊔ ker p.flip).FGDual p := by
+-- lemma DualFG.sup_ker {S : Submodule R N} (hS : S.DualFG p) : (S ⊔ ker p.flip).DualFG p := by
 --   obtain ⟨s, rfl⟩ := hS
 --   use s
 --   simp [ker_le_dual]
 
 -----
 
-/-- The top submodule is FGDual. -/
-lemma fgdual_top : (⊤ : Submodule R N).FGDual p := ⟨⊥, by simp⟩
+/-- The top submodule is DualFG. -/
+lemma dualfg_top : (⊤ : Submodule R N).DualFG p := ⟨⊥, by simp⟩
 
-/-- The bottom submodule is FGDual in finite dimensional space. -/
-lemma fgdual_bot [Module.Finite R N] : (⊥ : Submodule R N).FGDual p := by
+/-- The bottom submodule is DualFG in finite dimensional space. -/
+lemma dualfg_bot [Module.Finite R N] : (⊥ : Submodule R N).DualFG p := by
   -- obtain ⟨s, hs⟩ := fg_top ⊤
   -- use
   sorry
@@ -128,13 +128,13 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 variable (p)
 
 variable [Fact p.IsFaithfulPair] in -- Separating should suffice, no?
-/-- For an FG submodule `S`, there exists an FGDual submodule `T` that is disjoint to `S`. -/
-lemma FG.exists_fgdual_inf_bot {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.FGDual p ∧ S ⊓ T = ⊥ := by classical
+/-- For an FG submodule `S`, there exists an DualFG submodule `T` that is disjoint to `S`. -/
+lemma FG.exists_dualfg_inf_bot {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.DualFG p ∧ S ⊓ T = ⊥ := by classical
   obtain ⟨g, hg⟩ : Fact p.IsFaithfulPair := inferInstance
   use dual p (Submodule.map g S)
   constructor
-  · exact fgdual_of_fg p (Submodule.FG.map g hS)
+  · exact dual_of_fg p (Submodule.FG.map g hS)
   · rw [dual_bilin_dual_id_submodule, ← map_comp, ← dual_bilin_dual_id_submodule]
     ext x
     simp only [mem_inf, mem_dual, SetLike.mem_coe, mem_bot]
@@ -143,8 +143,8 @@ lemma FG.exists_fgdual_inf_bot {S : Submodule R N} (hS : S.FG) :
       exact (hg x) (hS.2 hS.1).symm
     · simp +contextual
 
--- lemma fgdual_of_fg_sup_fgdual {C D : Submodule R N} (hC : C.FG) (hD : D.FGDual p) :
-    -- (C ⊔ D).FGDual p := by
+-- lemma dual_of_fg_sup_dualfg {C D : Submodule R N} (hC : C.FG) (hD : D.DualFG p) :
+    -- (C ⊔ D).DualFG p := by
   -- classical
   -- obtain ⟨_, b⟩ := Free.exists_basis R M
   -- obtain ⟨s, rfl⟩ := hC
@@ -160,30 +160,30 @@ lemma FG.exists_fgdual_inf_bot {S : Submodule R N} (hS : S.FG) :
   --   simp
     -- sorry
 -- omit [Free R M] [LinearOrder R] [IsStrictOrderedRing R] in
--- lemma FGDual.fgdual_id_of_fgdual_toDual {ι : Type*} [DecidableEq ι] {S : Submodule R M}
---      {b : Basis ι R M} (hS : S.FGDual b.toDual) : S.FGDual .id := by classical
+-- lemma DualFG.dualfg_id_of_dualfg_toDual {ι : Type*} [DecidableEq ι] {S : Submodule R M}
+--      {b : Basis ι R M} (hS : S.DualFG b.toDual) : S.DualFG .id := by classical
 --   obtain ⟨s, rfl⟩ := hS
 --   use Finset.image b.toDual s
 --   ext x; simp
 
 -- Q: Is this true? If so, also implement with `IsCompl`.
-lemma exists_fgdual_sup_top {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.FGDual p ∧ S ⊔ T = ⊤ := by
+lemma exists_dualfg_sup_top {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.DualFG p ∧ S ⊔ T = ⊤ := by
   -- classical
   -- obtain ⟨_, b⟩ := Free.exists_basis R M
   -- use dual b.toDual S
   -- constructor
-  -- · exact Submodule.fgdual_of_fg _ hS
+  -- · exact Submodule.dual_of_fg _ hS
   -- · ext x
   --   simp only [mem_sup, mem_dual, SetLike.mem_coe, mem_top, iff_true]
   sorry
 
-lemma FG.exists_fgdual_inf_of_le {S S' : Submodule R N} (hS : S.FG) (hS' : S'.FG) (hSS' : S ≤ S') :
-    ∃ T : Submodule R N, T.FGDual p ∧ S' ⊓ T = S := by sorry
+lemma FG.exists_dualfg_inf_of_le {S S' : Submodule R N} (hS : S.FG) (hS' : S'.FG) (hSS' : S ≤ S') :
+    ∃ T : Submodule R N, T.DualFG p ∧ S' ⊓ T = S := by sorry
   -- classical
   -- obtain ⟨s, rfl⟩ := hS
   -- induction s using Finset.induction with
-  -- | empty => simp [exists_fgdual_inf_bot hS']
+  -- | empty => simp [exists_dualfg_inf_bot hS']
   -- | insert w s hws hs =>
   --   obtain ⟨t, ht⟩ := hs
   --   use (auxGenSet .id t.toSet w).toFinset
@@ -200,15 +200,15 @@ variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- -- ## PRIORITY
--- lemma sup_fgdual_fg {S : Submodule R N} (T : Submodule R N) (hS : S.FGDual p) : (S ⊔ T).FGDual p :=
+-- lemma sup_dualfg_fg {S : Submodule R N} (T : Submodule R N) (hS : S.DualFG p) : (S ⊔ T).DualFG p :=
 
 --   sorry
 
-lemma FG.exists_fgdual_dual {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R M, T.FGDual p.flip ∧ dual p T = S := by
+lemma FG.exists_dualfg_dual {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R M, T.DualFG p.flip ∧ dual p T = S := by
   use dual p.flip S
   -- constructor
-  -- · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (ofSubmodule_fg_of_fg hS)
+  -- · exact sup_fg_dualfg hfg <| dual_of_fg p.flip (ofSubmodule_fg_of_fg hS)
   -- · simp [dual_sup_dual_inf_dual, Submodule.FG.dual_dual_flip hS]
   sorry
 
@@ -258,15 +258,15 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-theorem FGDual.cofg {S : Submodule R N} (hS : S.FGDual p) : S.CoFG := by
+theorem DualFG.cofg {S : Submodule R N} (hS : S.DualFG p) : S.CoFG := by
   obtain ⟨s, rfl⟩ := hS.exists_finset_dual
   exact dual_finset_cofg p s
 
 variable (p) in
-theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := (hS.dual_fgdual p).cofg
+theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := (hS.dual_dualfg p).cofg
 
-theorem fg_of_isCompl_fgdual {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FGDual p) :
-    T.FG := CoFG.fg_of_isCompl hST (FGDual.cofg hS)
+theorem fg_of_isCompl_dualfg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.DualFG p) :
+    T.FG := CoFG.fg_of_isCompl hST (DualFG.cofg hS)
 
 end IsNoetherianRing
 
@@ -279,36 +279,36 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) [Fact p.SeparatingRight] in
-/-- For an FG submodule `S`, there exists an FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
-lemma FG.exists_fgdual_disjoint {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.FGDual p ∧ Disjoint S T := by
+/-- For an FG submodule `S`, there exists an DualFG submodule `T` so that `S ⊓ T = ⊥`. -/
+lemma FG.exists_dualfg_disjoint {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.DualFG p ∧ Disjoint S T := by
   obtain ⟨V, hfg, hV⟩ := (hS.dual_cofg p.flip).exists_fg_codisjoint
   use dual p V
   constructor
-  · exact hfg.dual_fgdual _
+  · exact hfg.dual_dualfg _
   · exact disjoint_dual_of_codisjoint_dual _ hV
 
 -- WARNING: CoFG.disjoint_fg is not yet proven
 -- Does this need Field?
-theorem fg_of_disjoint_fgdual {S T : Submodule R N} (hST : Disjoint S T) (hS : S.FGDual p) :
-    T.FG := CoFG.disjoint_fg hST (FGDual.cofg hS)
+theorem fg_of_disjoint_dualfg {S T : Submodule R N} (hST : Disjoint S T) (hS : S.DualFG p) :
+    T.FG := CoFG.disjoint_fg hST (DualFG.cofg hS)
 
 variable (p) [p.IsPerfPair] in
-theorem fgdual_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
-    T.FGDual p := by
+theorem dualfg_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
+    T.DualFG p := by
   have hST := IsCompl.dual p.flip hST
-  have hS := FG.dual_fgdual p.flip hS
-  simpa [Submodule.dual_dual_flip] using fgdual_of_fg p (fg_of_isCompl_fgdual hST hS)
+  have hS := FG.dual_dualfg p.flip hS
+  simpa [Submodule.dual_dual_flip] using dual_of_fg p (fg_of_isCompl_dualfg hST hS)
 
 variable (p) [Fact (Surjective p)] [Fact p.flip.IsFaithfulPair] in
-theorem fgdual_of_isCompl_fg'' {S T : Submodule R N} (hST : Codisjoint S T) (hS : S.FG) :
-    T.FGDual p := by
+theorem dualfg_of_isCompl_fg'' {S T : Submodule R N} (hST : Codisjoint S T) (hS : S.FG) :
+    T.DualFG p := by
   have hST := disjoint_dual_of_codisjoint p.flip hST
-  have hS := FG.dual_fgdual p.flip hS
-  simpa [Submodule.dual_dual_flip] using fgdual_of_fg p (fg_of_disjoint_fgdual hST hS)
+  have hS := FG.dual_dualfg p.flip hS
+  simpa [Submodule.dual_dual_flip] using dual_of_fg p (fg_of_disjoint_dualfg hST hS)
 
 -- example {S T : Submodule R (Dual R M)} (hST : Codisjoint S T) (hS : S.FG) :
---   T.FGDual .id := cofg_of_isCompl_fg'' _ hST hS
+--   T.DualFG .id := cofg_of_isCompl_fg'' _ hST hS
 
 example {ι : Type*} [DecidableEq ι] [Finite ι] (b : Basis ι R M) (s : Set ι) :
   IsCompl (span R ((fun i => b i )'' s)) (dual .id ((fun i => b.dualBasis i) '' sᶜ))
@@ -316,9 +316,9 @@ example {ι : Type*} [DecidableEq ι] [Finite ι] (b : Basis ι R M) (s : Set ι
 
 -- The proof can maybe be much shorter, see above
 variable (p) [Fact (Surjective p)] in
-/-- A complement of an FG submodule is FGDual. -/
-theorem fgdual_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
-    T.FGDual p := by classical
+/-- A complement of an FG submodule is DualFG. -/
+theorem dualfg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
+    T.DualFG p := by classical
   obtain ⟨s, ⟨b⟩⟩ := Basis.exists_basis R S
   haveI := Module.Finite.iff_fg.mpr hS
   haveI := Module.Finite.finite_basis b
@@ -346,20 +346,20 @@ theorem CoFG.exists_finset_dual {S : Submodule R N} (hS : S.CoFG) :
     ∃ s : Finset M, dual p s = S := by
   obtain ⟨T, hST⟩ := exists_isCompl S
   have h := disjoint_fg hST.disjoint hS
-  exact fgdual_of_isCompl_fg p hST.symm h
+  exact dualfg_of_isCompl_fg p hST.symm h
 
 variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not sure yet
-theorem CoFG.fgdual {S : Submodule R N} (hS : S.CoFG) : S.FGDual p := by
+theorem CoFG.dualfg {S : Submodule R N} (hS : S.CoFG) : S.DualFG p := by
   obtain ⟨s, hs⟩ := exists_finset_dual p hS; use s
 
 -- variable (p) [Fact (Surjective p)] in
--- /-- For an FG submodule `S`, there exists a FGDual submodule `T` so that `S ⊓ T = ⊥`. -/
--- lemma FG.exists_fgdual_inf_bot' {S : Submodule R N} (hS : S.FG) :
---     ∃ T : Submodule R N, T.FGDual p ∧ S ⊓ T = ⊥ := by
+-- /-- For an FG submodule `S`, there exists a DualFG submodule `T` so that `S ⊓ T = ⊥`. -/
+-- lemma FG.exists_dualfg_inf_bot' {S : Submodule R N} (hS : S.FG) :
+--     ∃ T : Submodule R N, T.DualFG p ∧ S ⊓ T = ⊥ := by
 --   obtain ⟨T, hT⟩ := exists_isCompl S
 --   use T
 --   constructor
---   · exact fgdual_of_isCompl_fg p hT hS
+--   · exact dualfg_of_isCompl_fg p hT hS
 --   · exact hT.disjoint.eq_bot
 
 end Field

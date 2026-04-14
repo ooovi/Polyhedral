@@ -9,10 +9,10 @@ Currently the project implements:
 * co-finitely generated submodules (`CoFG`)
 * duality for submodules w.r.t. a general bilinear pairing.
 * dual closed subspaces (`DualClosed`) which expresses that a subspace is its own double dual.
-* `FGDual` submodules, which are the dual of `FG` (finitely generated) submodules.
+* `DualFG` submodules, which are the dual of `FG` (finitely generated) submodules.
 * duality theory for `FG` submodules
 * dual closed pointed cones
-* `FGDual` pointed cones
+* `DualFG` pointed cones
 * duality theory for `FG` pointed cones, in particular, a version of the Minkowski-Weyl theorem that works to infinite dimensional modules.
 * polyhedral cones as cones that can be written as the sum of an `FG` cone and a submodule.
 * duality theory of polyhedral cones

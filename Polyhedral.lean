@@ -2,13 +2,13 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FGDual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FGDual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed

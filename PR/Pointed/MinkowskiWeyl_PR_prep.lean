@@ -8,7 +8,7 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FGDual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFG
 
 /-!
 # Polyhedral cones
@@ -40,20 +40,20 @@ namespace PointedCone
 theorem FG.dual_inf (hC : C.FG) (hD : FG D) :
     dual p (C ⊓ D) = dual p C ⊔ dual p D := sorry
 
-theorem FG.dual_inf_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : FGDual p D) :
+theorem FG.dual_inf_dualfg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : DualFG p D) :
     dual p.flip (C ⊓ D) = dual p.flip C ⊔ dual p.flip D := sorry
 
-theorem FGDual.dual_inf_fg {C D : PointedCone 𝕜 N} (hC : FGDual p C) (hD : D.FG) :
+theorem DualFG.dual_inf_fg {C D : PointedCone 𝕜 N} (hC : DualFG p C) (hD : D.FG) :
     dual p.flip (C ⊓ D) = dual p.flip C ⊔ dual p.flip D := sorry
 
-theorem FGDual.dual_inf {C D : PointedCone 𝕜 N} (hC : FGDual p C) (hD : D.FGDual p) :
+theorem DualFG.dual_inf {C D : PointedCone 𝕜 N} (hC : DualFG p C) (hD : D.DualFG p) :
     dual p.flip (C ⊓ D) = dual p.flip C ⊔ dual p.flip D := sorry
 
 @[simp]
 theorem FG.dual_dual (hC : C.FG) : dual p.flip (dual p C) = C := sorry
 
-theorem FGDual.dual_fg {C : PointedCone 𝕜 N} (hC : C.FGDual p) : FG (dual p.flip C) := by
-  obtain ⟨D, hfg, rfl⟩ := FGDual.exists_fg_dual hC
+theorem DualFG.dual_fg {C : PointedCone 𝕜 N} (hC : C.DualFG p) : FG (dual p.flip C) := by
+  obtain ⟨D, hfg, rfl⟩ := DualFG.exists_fg_dual hC
   simp [FG.dual_dual, hfg]
 
 theorem FG.inf (hC : C.FG) (hD : D.FG) : FG (C ⊓ D) := sorry
@@ -61,39 +61,39 @@ theorem FG.inf (hC : C.FG) (hD : D.FG) : FG (C ⊓ D) := sorry
 theorem FG.inf_submodule {S : Submodule 𝕜 M} (hC : C.FG) : FG (C ⊓ S) := sorry
 theorem FG.submodule_inf {S : Submodule 𝕜 M} (hC : C.FG) : FG (S ⊓ C : PointedCone 𝕜 M) := sorry
 
-theorem FGDual.sup {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FGDual p) : FG (C ⊔ D) := sorry
+theorem DualFG.sup {C D : PointedCone 𝕜 N} (hC : C.DualFG p) (hD : D.DualFG p) : FG (C ⊔ D) := sorry
 
-theorem FGDual.sup_submodule {C : PointedCone 𝕜 N} {S : Submodule 𝕜 N} (hC : C.FGDual p) :
-    FGDual p (C ⊔ S) := sorry
-theorem FGDual.submodule_sup {C : PointedCone 𝕜 N} {S : Submodule 𝕜 N} (hC : C.FGDual p) :
-    FGDual p (S ⊔ C) := sorry
+theorem DualFG.sup_submodule {C : PointedCone 𝕜 N} {S : Submodule 𝕜 N} (hC : C.DualFG p) :
+    DualFG p (C ⊔ S) := sorry
+theorem DualFG.submodule_sup {C : PointedCone 𝕜 N} {S : Submodule 𝕜 N} (hC : C.DualFG p) :
+    DualFG p (S ⊔ C) := sorry
 
-theorem FG.inf_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) : FG (C ⊓ D) := sorry
+theorem FG.inf_dualfg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.DualFG p) : FG (C ⊓ D) := sorry
 
-theorem FGDual.inf_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) : FG (C ⊓ D) := sorry
+theorem DualFG.inf_fg {C D : PointedCone 𝕜 N} (hC : C.DualFG p) (hD : D.FG) : FG (C ⊓ D) := sorry
 
-theorem FG.sup_fgdual {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FGDual p) :
-    FGDual p (C ⊔ D) := sorry
+theorem FG.sup_dualfg {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.DualFG p) :
+    DualFG p (C ⊔ D) := sorry
 
-theorem FGDual.sup_fg {C D : PointedCone 𝕜 N} (hC : C.FGDual p) (hD : D.FG) :
-    FGDual p (C ⊔ D) := sorry
+theorem DualFG.sup_fg {C D : PointedCone 𝕜 N} (hC : C.DualFG p) (hD : D.FG) :
+    DualFG p (C ⊔ D) := sorry
 
 section Finite
 
 variable {C : PointedCone 𝕜 N}
 
 variable [Module.Finite 𝕜 N] in
-theorem FGDual.fg (hC : C.FGDual p) : FG C := by simpa using hC.inf_fg fg_top
+theorem DualFG.fg (hC : C.DualFG p) : FG C := by simpa using hC.inf_fg fg_top
 
 variable [Module.Finite 𝕜 M] [Fact p.SeparatingLeft] in
-theorem FG.fgdual (hC : C.FG) : FGDual p C := by simpa using FG.sup_fgdual hC FGDual.bot
+theorem FG.dualfg (hC : C.FG) : DualFG p C := by simpa using FG.sup_dualfg hC DualFG.bot
 
 variable [Module.Finite 𝕜 N] [Module.Finite 𝕜 M] [Fact p.SeparatingLeft] in
   -- this is IsPerfPair, no?
-theorem fg_iff_fgdual : FG C ↔ FGDual p C := ⟨FG.fgdual, FGDual.fg⟩
+theorem fg_iff_dualfg : FG C ↔ DualFG p C := ⟨FG.dualfg, DualFG.fg⟩
 
 variable [Module.Finite 𝕜 N] in
-theorem FG.dual_fg {C : PointedCone 𝕜 M} (hC : FG C) : FG (dual p C) := (fgdual_of_fg p hC).fg
+theorem FG.dual_fg {C : PointedCone 𝕜 M} (hC : FG C) : FG (dual p C) := (dual_of_fg p hC).fg
 
 end Finite
 

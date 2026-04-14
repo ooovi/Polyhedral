@@ -617,7 +617,7 @@ variable {R M N : Type*}
   [AddCommMonoid N] [Module R N]
   {p : M →ₗ[R] N →ₗ[R] R}
 
-/- This can be useful because it is the more abstract version of the one for FG/FGDual cones. -/
+/- This can be useful because it is the more abstract version of the one for FG/DualFG cones. -/
 lemma dual_inf_dual_sup_dual_of_dualClosed'' (S T : Submodule R M)
     (hS : S.DualClosed p) (hT : T.WeakDualClosed p)
     (hST : (dual p S ⊔ dual p T).WeakDualClosed p.flip) :

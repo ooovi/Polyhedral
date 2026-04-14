@@ -12,7 +12,7 @@ import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.SetTheory.Cardinal.Defs
 
--- import Polyhedral.PR.FGDual.FGDual_PR
+-- import Polyhedral.PR.DualFG.FGDual_PR
 -- import Polyhedral.PR.Pointed.Dual_PR
 
 namespace PointedCone
@@ -25,14 +25,14 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
--- TODO: rename `FGDual` to `FGDual` everywhere
+-- TODO: rename `DualFG` to `DualFG` everywhere
 
 variable (p) in
-/-- A cone is `FGDual` if it is the dual of a finite set.
+/-- A cone is `DualFG` if it is the dual of a finite set.
   This is in analogy to `FG` (finitely generated) which is the span of a finite set. -/
-def FGDual (C : PointedCone R N) : Prop := ∃ s : Finset M, dual p s = C
+def DualFG (C : PointedCone R N) : Prop := ∃ s : Finset M, dual p s = C
 
-lemma FGDual.top : FGDual p ⊤ := ⟨∅, by simp⟩
+lemma DualFG.top : DualFG p ⊤ := ⟨∅, by simp⟩
 
 section
 
@@ -43,7 +43,7 @@ variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
 variable [Module.Finite R M] [Fact p.SeparatingLeft] in
-lemma FGDual.bot : FGDual p ⊥ := by
+lemma DualFG.bot : DualFG p ⊥ := by
   have h := Module.Finite.fg_top (R := R) (M := M)
   have h := coe_fg h
   obtain ⟨s, hs⟩ := h
@@ -54,23 +54,23 @@ lemma FGDual.bot : FGDual p ⊥ := by
 
 end
 
-/-- A FGDual cone is the dual of a finite set. -/
-lemma FGDual.exists_finset_dual {C : PointedCone R N} (hC : C.FGDual p) :
+/-- A DualFG cone is the dual of a finite set. -/
+lemma DualFG.exists_finset_dual {C : PointedCone R N} (hC : C.DualFG p) :
     ∃ s : Finset M, dual p s = C := by
   obtain ⟨s, hs⟩ := hC; use s
 
-/-- A FGDual cone is the dual of a finite set. -/
-lemma FGDual.exists_finite_dual {C : PointedCone R N} (hC : C.FGDual p) :
+/-- A DualFG cone is the dual of a finite set. -/
+lemma DualFG.exists_finite_dual {C : PointedCone R N} (hC : C.DualFG p) :
     ∃ s : Set M, s.Finite ∧ dual p s = C := by
   obtain ⟨s, hs⟩ := hC; exact ⟨s, s.finite_toSet, hs⟩
 
-/-- A FGDual cone is the dual of an FG cone. -/
-lemma FGDual.exists_fg_dual {C : PointedCone R N} (hC : C.FGDual p) :
+/-- A DualFG cone is the dual of an FG cone. -/
+lemma DualFG.exists_fg_dual {C : PointedCone R N} (hC : C.DualFG p) :
     ∃ D : PointedCone R M, D.FG ∧ dual p D = C := by
   obtain ⟨s, hs⟩ := hC; exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
 
-/-- A FGDual cone is FGDual w.r.t. the standard pairing. -/
-lemma FGDual.to_id {C : PointedCone R N} (hC : C.FGDual p) : C.FGDual .id
+/-- A DualFG cone is DualFG w.r.t. the standard pairing. -/
+lemma DualFG.to_id {C : PointedCone R N} (hC : C.DualFG p) : C.DualFG .id
     := by classical
   obtain ⟨s, hs⟩ := hC
   use Finset.image p s
@@ -78,43 +78,43 @@ lemma FGDual.to_id {C : PointedCone R N} (hC : C.FGDual p) : C.FGDual .id
 
 variable (p) in
 /-- The dual of a `Finset` is co-FG. -/
-lemma fgdual_of_finset (s : Finset M) : (dual p s).FGDual p := by use s
+lemma dualfg_of_finset (s : Finset M) : (dual p s).DualFG p := by use s
 
 variable (p) in
 /-- The dual of a finite set is co-FG. -/
-lemma fgdual_of_finite {s : Set M} (hs : s.Finite) : (dual p s).FGDual p := by
+lemma dualfg_of_finite {s : Set M} (hs : s.Finite) : (dual p s).DualFG p := by
   use hs.toFinset; simp
 
 variable (p) in
 /-- The dual of an FG-cone is co-FG. -/
-lemma fgdual_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).FGDual p := by
+lemma dual_of_fg {C : PointedCone R M} (hC : C.FG) : (dual p C).DualFG p := by
   obtain ⟨s, rfl⟩ := hC
   use s; rw [← dual_span]
 
-alias FG.dual_fgdual := fgdual_of_fg
+alias FG.dual_dualfg := dual_of_fg
 
-/-- The intersection of two FGDual cones i FGDual. -/
-lemma inf_fgdual {C D : PointedCone R N} (hC : C.FGDual p) (hD : D.FGDual p) :
-    (C ⊓ D).FGDual p := by classical
+/-- The intersection of two DualFG cones i DualFG. -/
+lemma inf_dualfg {C D : PointedCone R N} (hC : C.DualFG p) (hD : D.DualFG p) :
+    (C ⊓ D).DualFG p := by classical
   obtain ⟨S, rfl⟩ := hC; obtain ⟨T, rfl⟩ := hD
   use S ∪ T; rw [Finset.coe_union, dual_union]
 
-/-- The double dual of a FGDual cone is the cone itself. -/
+/-- The double dual of a DualFG cone is the cone itself. -/
 @[simp]
-lemma FGDual.dual_dual_flip {C : PointedCone R N} (hC : C.FGDual p) :
+lemma DualFG.dual_dual_flip {C : PointedCone R N} (hC : C.DualFG p) :
     dual p (dual p.flip C) = C := by
-  obtain ⟨D, hfgdual, rfl⟩ := exists_fg_dual hC
+  obtain ⟨D, hdualfg, rfl⟩ := exists_fg_dual hC
   exact dual_dual_flip_dual (p := p) D
 
-/-- The double dual of a FGDual cone is the cone itself. -/
+/-- The double dual of a DualFG cone is the cone itself. -/
 @[simp]
-lemma FGDual.dual_flip_dual {C : PointedCone R M} (hC : C.FGDual p.flip) :
+lemma DualFG.dual_flip_dual {C : PointedCone R M} (hC : C.DualFG p.flip) :
     dual p.flip (dual p C) = C := hC.dual_dual_flip
 
-lemma FGDual.dualClosed {C : PointedCone R M} (hC : C.FGDual p.flip) :
+lemma DualFG.dualClosed {C : PointedCone R M} (hC : C.DualFG p.flip) :
     C.DualClosed p := hC.dual_flip_dual
 
-lemma FGDual.dualClosed_flip {C : PointedCone R N} (hC : C.FGDual p) :
+lemma DualFG.dualClosed_flip {C : PointedCone R N} (hC : C.DualFG p) :
     C.DualClosed p.flip := hC.dual_dual_flip
 
 -----
@@ -127,38 +127,38 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
-lemma FGDual.coe {S : Submodule R N} (hS : S.FGDual p) : (S : PointedCone R N).FGDual p := by
+lemma DualFG.coe {S : Submodule R N} (hS : S.DualFG p) : (S : PointedCone R N).DualFG p := by
   obtain ⟨T, hfg, rfl⟩ := hS.exists_fg_dual
   rw [← coe_dual]
-  exact fgdual_of_fg p (coe_fg hfg)
+  exact dual_of_fg p (coe_fg hfg)
 
-alias coe_fgdual := FGDual.coe
+alias coe_dualfg := DualFG.coe
 
 -- Q: is this problematic?
-instance {S : Submodule R N} : Coe (S.FGDual p) (FGDual p (S : PointedCone R N)) := ⟨coe_fgdual⟩
+instance {S : Submodule R N} : Coe (S.DualFG p) (DualFG p (S : PointedCone R N)) := ⟨coe_dualfg⟩
 
-@[simp] lemma coe_fgdual_iff {S : Submodule R N} :
-    (S : PointedCone R N).FGDual p ↔ S.FGDual p := by -- classical
-  -- unfold FGDual Submodule.FGDual
+@[simp] lemma coe_dualfg_iff {S : Submodule R N} :
+    (S : PointedCone R N).DualFG p ↔ S.DualFG p := by -- classical
+  -- unfold DualFG Submodule.DualFG
   constructor
-  · intro hfgdual
-    obtain ⟨s, hs⟩ := hfgdual
+  · intro hdualfg
+    obtain ⟨s, hs⟩ := hdualfg
     use s
     sorry
-  · exact coe_fgdual
+  · exact coe_dualfg
 
-lemma FGDual.lineal_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.lineal.FGDual p := by
+lemma DualFG.lineal_dualfg {C : PointedCone R N} (hC : C.DualFG p) : C.lineal.DualFG p := by
   obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
   rw [dual_span_lineal_dual, ← Submodule.dual_span]
-  exact Submodule.fgdual_of_fg p (submodule_span_fg hfg)
+  exact Submodule.dual_of_fg p (submodule_span_fg hfg)
 
 end LinearOrder
 
 @[deprecated]
-lemma FGDual.dual_inf_dual_sup_dual' {C D : PointedCone R N} (hC : C.FGDual p) (hD : D.FGDual p) :
+lemma DualFG.dual_inf_dual_sup_dual' {C D : PointedCone R N} (hC : C.DualFG p) (hD : D.DualFG p) :
     dual p.flip (C ⊓ D : PointedCone R N) = (dual p.flip C) ⊔ (dual p.flip D) := by
-  have ⟨C', hCfg, hC'⟩ := FGDual.exists_fg_dual hC
-  have ⟨D', hDfg, hD'⟩ := FGDual.exists_fg_dual hD
+  have ⟨C', hCfg, hC'⟩ := DualFG.exists_fg_dual hC
+  have ⟨D', hDfg, hD'⟩ := DualFG.exists_fg_dual hD
   rw [← hC', ← hD', ← dual_sup_dual_inf_dual]
   rw [dual_flip_dual (by sorry)] -- not true
   rw [dual_flip_dual (by sorry)] -- not true

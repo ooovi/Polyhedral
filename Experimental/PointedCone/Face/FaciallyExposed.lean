@@ -41,7 +41,7 @@ variable (p) [Fact (Function.Surjective p.flip)] in
   rw [← dual_span_lineal_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
   nth_rw 3 [← PointedCone.ofSubmodule_coe]
-  rw [FGDual.dual_inf_dual_sup_dual ?_ ?_]
+  rw [DualFG.dual_inf_dual_sup_dual ?_ ?_]
   · rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
     rw [hC]
     nth_rw 2 [← Submodule.dual_span]
@@ -50,9 +50,9 @@ variable (p) [Fact (Function.Surjective p.flip)] in
       sorry
     rw [H]
     exact IsFaceOf.inf_span hF
-  · simpa using FG.dual_fgdual _ sorry -- hC
-  · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (FG.span_fg <| hF.fg_of_fg sorry) -- hC)
+  · simpa using FG.dual_dualfg _ sorry -- hC
+  · rw [LinearMap.flip_flip, coe_dualfg_iff, ← Submodule.dual_span]
+    exact Submodule.FG.dual_dualfg _ (FG.span_fg <| hF.fg_of_fg sorry) -- hC)
 
 end PointedCone
 

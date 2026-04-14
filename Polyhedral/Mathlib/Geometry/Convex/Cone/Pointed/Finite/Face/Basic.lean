@@ -57,7 +57,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
   rw [← dual_span_lineal_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
   nth_rw 3 [← PointedCone.coe_ofSubmodule]
-  rw [FGDual.dual_inf_dual_sup_dual ?_ ?_]
+  rw [DualFG.dual_inf_dual_sup_dual ?_ ?_]
   · rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
     rw [FG.dual_flip_dual p hC]
     nth_rw 2 [← Submodule.dual_span]
@@ -66,9 +66,9 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
       sorry
     rw [H]
     exact hF.inf_span
-  · simpa using FG.dual_fgdual _ hC
-  · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (FG.span_fg <| IsFaceOf.fg hC hF)
+  · simpa using FG.dual_dualfg _ hC
+  · rw [LinearMap.flip_flip, coe_dualfg_iff, ← Submodule.dual_span]
+    exact Submodule.FG.dual_dualfg _ (FG.span_fg <| IsFaceOf.fg hC hF)
 
 open Module in
 /-- Every face of an FG cone is exposed. -/
