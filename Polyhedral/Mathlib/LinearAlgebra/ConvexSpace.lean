@@ -1,0 +1,44 @@
+import Mathlib.LinearAlgebra.ConvexSpace
+import Mathlib.Order.Closure
+import Mathlib.Order.OmegaCompletePartialOrder
+
+universe u v w
+
+section Convex
+
+namespace ConvexSpace
+
+variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R] [ConvexSpace R M]
+
+/-- Convexity of sets in convex spaces. -/
+def Convex (s : Set M) : Prop :=
+  ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → ∀ ⦃a b : R⦄ (hs : 0 ≤ a) (ht : 0 ≤ b) (h : a + b = 1),
+    (convexComboPair a b hs ht h x y) ∈ s
+
+theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R (⋂₀ S) :=
+  fun _ xs _ ys _ _ hs ht h1 t ts =>
+    h t ts ((Set.mem_sInter.mpr xs) _ ts) ((Set.mem_sInter.mpr ys) _ ts) hs ht h1
+
+/-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
+def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter R
+
+/-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
+the base semiring has some element between `0` and `1`. -/
+def openSegment (x y : M) : Set M :=
+  { z : M | ∃ (a b : R) (a0 : 0 < a) (b0 : 0 < b) (ab : a + b = 1),
+    convexComboPair a b a0.le b0.le ab x y = z }
+
+/-- A set `B` is an extreme subset of `A` if `B ⊆ A` and all points of `B` only belong to open
+segments whose ends are in `B`.
+
+Our definition only requires that the left endpoint of the segment lies in `B`,
+but by symmetry of open segments, the right endpoint must also lie in `B`. -/
+@[mk_iff]
+structure IsExtreme (A B : Set M) : Prop where
+  subset : B ⊆ A
+  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ A → ∀ ⦃y⦄, y ∈ A →
+    ∀ ⦃z⦄, z ∈ B → z ∈ openSegment R x y → x ∈ B
+
+end ConvexSpace
+
+end Convex
