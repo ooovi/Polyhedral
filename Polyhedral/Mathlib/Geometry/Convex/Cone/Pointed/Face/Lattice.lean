@@ -123,6 +123,8 @@ instance : Nonempty (Face C) := ⟨⊤⟩
 
 instance : CompleteLattice (Face C) where
 
+@[simp] lemma eq_self_iff_eq_top : F = C ↔ F = ⊤ := by sorry
+
 
 end Semiring
 

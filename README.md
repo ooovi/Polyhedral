@@ -30,7 +30,7 @@ A more detailled overview of all open and merged PRs is given [on Zulip](https:/
 - Face-lattices of cones: [#33664](https://github.com/leanprover-community/mathlib4/pull/33664)
 - Duality operator for submodules: [#34007](https://github.com/leanprover-community/mathlib4/pull/34007)
 - Cone duality theory: [#35323](https://github.com/leanprover-community/mathlib4/pull/35323) (merged)
-- Duals of finitely generated cones: [#36946](https://github.com/leanprover-community/mathlib4/pull/36946)
+- Duals of finitely generated cones: [#36946](https://github.com/leanprover-community/mathlib4/pull/36946) (merged)
 
 <!-- not a serious PR (!) - https://github.com/leanprover-community/mathlib4/pull/34703 -->
 

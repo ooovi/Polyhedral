@@ -30,15 +30,12 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 
-variable [Module.Finite R M] [Fact p.SeparatingLeft] in
+variable [Module.Finite R M] [Fact p.SeparatingRight] in
 lemma FGDual.bot : FGDual p ⊥ := by
-  have h := Module.Finite.fg_top (R := R) (M := M)
-  have h := FG.coe_fg h
-  obtain ⟨s, hs⟩ := h
+  obtain ⟨s, hs⟩ := FG.coe_fg <| Module.Finite.fg_top (R := R) (M := M)
   use s
-  rw [← dual_span, span, hs]
-  -- exact dual_univ
-  sorry
+  rw [← dual_span]
+  simp [hs]
 
 end
 
@@ -118,7 +115,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
 lemma FGDual.coe {S : Submodule R N} (hS : S.FGDual p) : (S : PointedCone R N).FGDual p := by
   obtain ⟨T, hfg, rfl⟩ := hS.exists_fg_dual
   rw [← coe_dual]
-  exact fgdual_of_fg p (coe_fg hfg)
+  exact fgdual_of_fg p (FG.coe_fg hfg)
 
 alias coe_fgdual := FGDual.coe
 
@@ -142,7 +139,7 @@ lemma FGDual.lineal_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.lineal.FG
 
 end LinearOrder
 
-@[deprecated]
+@[deprecated "Not proven"]
 lemma FGDual.dual_inf_dual_sup_dual' {C D : PointedCone R N} (hC : C.FGDual p) (hD : D.FGDual p) :
     dual p.flip (C ⊓ D : PointedCone R N) = (dual p.flip C) ⊔ (dual p.flip D) := by
   have ⟨C', hCfg, hC'⟩ := FGDual.exists_fg_dual hC
