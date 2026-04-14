@@ -13,6 +13,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 namespace PointedCone
 
 open Module Function
+open Submodule (span)
 
 section CommSemiring
 
@@ -54,31 +55,19 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   le_l_u _ := subset_hull
   choice_eq _ _ := rfl
 
--- lemma span_inf_left (s t : Set M) : span R (s ∩ t) ≤ span R s := by
---   apply Submodule.span_mono
---   simp only [Set.inter_subset_left]
-
-
 -- ## LINSPAN
 
 /-- The linear span of the cone. -/
-abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
+@[deprecated Submodule.span (since := "")]
+abbrev linSpan (C : PointedCone R M) : Submodule R M := span R C
 
-@[simp high] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
-    by simp [linSpan]
-
-@[deprecated (since := "today")]
-alias coe_linSpan := ofSubmodule_linSpan
-
-@[deprecated (since := "today")]
-alias submodule_linSpan := ofSubmodule_linSpan
-
-@[deprecated (since := "today")]
-alias linSpan_eq := ofSubmodule_linSpan
+@[deprecated Submodule.span_eq (since := "")]
+lemma ofSubmodule_linSpan (S : Submodule R M) :
+  (S : PointedCone R M).linSpan = S := Submodule.span_eq _
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma linSpan_hull_eq_submodule_span (s : Set M) :
-    (hull R s).linSpan = Submodule.span R s := Submodule.span_span_of_tower ..
+    span R (hull R s) = Submodule.span R s := Submodule.span_span_of_tower ..
 
 @[deprecated (since := "today")]
 alias span_submodule_span := linSpan_hull_eq_submodule_span
@@ -158,17 +147,20 @@ lemma hull_le_submodule_span (s : Set M) : hull R s ≤ Submodule.span R s :=
 lemma hull_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : hull R s ≤ Submodule.span R t
   := le_trans (hull_le_submodule_span s) (Submodule.span_mono hst)
 
+@[deprecated Submodule.subset_span (since := "")]
 lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := Submodule.subset_span
 
-@[deprecated (since := "today")]
+-- lemma le_span (C : PointedCone R M) : C ≤ span R (C : Set M) := Submodule.subset_span
+
+@[deprecated (since := "")]
 alias le_submodule_span_self := le_linSpan
 
 @[deprecated (since := "today")]
 alias le_submodule_span := le_linSpan
 
 @[deprecated "We don't need this, the proof is short" (since := "today")]
-lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) : C ≤ D.linSpan :=
-  le_trans hCD (le_linSpan D)
+lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) : C ≤ span R (D : Set M) :=
+  le_trans hCD Submodule.subset_span
 
 @[deprecated (since := "today")]
 alias le_span := subset_span
@@ -194,10 +186,10 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 
 -- TODO: write version with `restrictScalars` instead. (Or have I already??)
 lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R M}
-  (hS : Disjoint C.linSpan S) : (C ⊔ S) ⊓ C.linSpan = C := by
+  (hS : Disjoint (span R C) S) : (C ⊔ S) ⊓ span R (C : Set M) = C := by
   rw [sup_inf_assoc_of_le_submodule]
   · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
-  · exact le_linSpan C
+  · exact Submodule.subset_span
 
 end Ring
 
@@ -504,7 +496,7 @@ section Pointwise
 
 open Pointwise
 
-lemma sup_neg_eq_linSpan (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
+lemma sup_neg_eq_linSpan (C : PointedCone R M) : -C ⊔ C = span R (C : Set M) := by
   nth_rw 1 2 [← Submodule.span_eq C]
   rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
   exact hull_union_neg_eq_submodule_span (C : Set M)
@@ -512,17 +504,17 @@ lemma sup_neg_eq_linSpan (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
 -- NOTE: I think only one of `neg_eq_iff_eq_linSpan` and `neg_eq_iff_eq_linSpan` is needed.
 --  I don't know which.
 
-lemma neg_eq_iff_eq_linSpan {C : PointedCone R M} : -C = C ↔ C.linSpan = C := by
+lemma neg_eq_iff_eq_linSpan {C : PointedCone R M} : -C = C ↔ span R (C : Set M) = C := by
   rw [← sup_neg_eq_linSpan, sup_eq_right]
   exact Submodule.neg_eq_self_iff_neg_le
 
-lemma neg_le_iff_eq_linSpan {C : PointedCone R M} : -C ≤ C ↔ C.linSpan = C :=
+lemma neg_le_iff_eq_linSpan {C : PointedCone R M} : -C ≤ C ↔ span R (C : Set M) = C :=
   Iff.trans Submodule.neg_eq_self_iff_neg_le.symm neg_eq_iff_eq_linSpan
 
 end Pointwise
 
-lemma mem_linSpan {C : PointedCone R M} {x : M} :
-    x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
+lemma mem_span {C : PointedCone R M} {x : M} :
+    x ∈ span R C ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
   rw [← mem_ofSubmodule_iff, ← sup_neg_eq_linSpan, Submodule.mem_sup]
   simp only [Submodule.mem_neg]
   constructor <;> intro h
@@ -541,11 +533,11 @@ variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup
 open Submodule in
 lemma uniq_decomp_of_zero_inter {C D : PointedCone R M} {xC xD yC yD : M}
     (mxc : xC ∈ C) (myc : yC ∈ C) (mxd : xD ∈ D) (myd : yD ∈ D)
-    (hCD : Disjoint C.linSpan D.linSpan)
+    (hCD : Disjoint (span R (C : Set M)) (span R D))
     (s : xC + xD = yC + yD) :
     xC = yC ∧ xD = yD := by
   let sub_mem_span {C : PointedCone R M} {x y} (mx : x ∈ C) (my : y ∈ C) :=
-    C.linSpan.sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
+    (span R (C : Set M)).sub_mem (mem_span_of_mem my) (mem_span_of_mem mx)
   replace hCD := disjoint_def.mp hCD
   constructor
   · refine (sub_eq_zero.mp <| hCD _ (sub_mem_span mxc myc) ?_).symm
@@ -636,8 +628,8 @@ lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 
 /-- The linear span of a quotient cone is the image of the linear span under the quotient map. -/
 @[simp] lemma linSpan_quot (C : PointedCone R M) (S : Submodule R M) :
-    (C.quot S).linSpan = Submodule.map S.mkQ C.linSpan := by
-  simpa [PointedCone.quot, PointedCone.linSpan] using
+    span R (C.quot S) = Submodule.map S.mkQ (span R C) := by
+  simpa [PointedCone.quot] using
     (Submodule.span_image (f := S.mkQ) (s := (C : Set M)))
 
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :

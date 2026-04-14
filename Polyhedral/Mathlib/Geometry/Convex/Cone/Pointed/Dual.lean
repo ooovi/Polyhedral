@@ -9,6 +9,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 namespace PointedCone
 
 open Module LinearMap
+open Submodule (span)
 
 variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
@@ -134,7 +135,7 @@ variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 {p : M →ₗ[R] N →ₗ[R] R} in
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
-lemma span_dual_le_dual_lineal {C : PointedCone R M} : (dual p C).linSpan ≤ .dual p C.lineal := by
+lemma span_dual_le_dual_lineal {C : PointedCone R M} : span R (dual p C) ≤ .dual p C.lineal := by
   simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
   refine sInf_le_sInf ?_
   intro T
@@ -460,7 +461,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed p) :
-    .dual p C.lineal = (dual p C).linSpan := by
+    .dual p C.lineal = span R (dual p C) := by
   rw [← hC, dual_span_lineal_dual]
   nth_rw 1 [← flip_flip p]
   nth_rw 2 [← Submodule.dual_span]
@@ -614,8 +615,8 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   sorry
 
 
-lemma DualClosed.dual_dual_linSpan {C : PointedCone R M} (hC : C.DualClosed p) :
-    (dual p.flip (dual p C)).linSpan = .dual p.flip (Submodule.dual p C.linSpan) := by
+lemma DualClosed.dual_dual_span {C : PointedCone R M} (hC : C.DualClosed p) :
+    span R (dual p.flip (dual p C)) = .dual p.flip (Submodule.dual p (span R (C : Set M))) := by
   sorry
 
 lemma DualClosed.dual_dual_lineal {C : PointedCone R M} (hC : C.DualClosed p) :
@@ -626,8 +627,8 @@ lemma DualClosed.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
     C.lineal.DualClosed p := by
   sorry
 
-lemma DualClosed.linSpan {C : PointedCone R M} (hC : C.DualClosed p) :
-    C.linSpan.DualClosed p := by
+lemma DualClosed.span {C : PointedCone R M} (hC : C.DualClosed p) :
+    (span R C).DualClosed p := by
   sorry
 
 variable (p) [Fact (Surjective p.flip)] in

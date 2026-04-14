@@ -195,7 +195,7 @@
 -- lemma neg_le_iff_eq_linSpan {C : PointedCone R M} : -C ≤ C ↔ C.linSpan = C :=
 --   Iff.trans Submodule.neg_le_iff_neg_eq neg_eq_iff_eq_linSpan
 
--- lemma mem_linSpan {C : PointedCone R M} {x : M} :
+-- lemma mem_span {C : PointedCone R M} {x : M} :
 --     x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
 --   rw [← mem_coe, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
 --   simp only [Submodule.mem_neg]

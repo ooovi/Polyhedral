@@ -351,7 +351,6 @@ variable {R M N : Type*}
     - move dual stuff to Face/Dual.lean
     * prove the priority stuff
     * prove sorry-s
-    * replace span by linSpan
     * something else to add?
 -/
 
@@ -375,10 +374,10 @@ variable [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
   [AddCommGroup M] [Module R M]
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
-lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
-    x ∈ F.linSpan ↔ x ∈ F := by
+lemma mem_span_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
+    x ∈ span R F ↔ x ∈ F := by
   constructor <;> intro hxF
-  · obtain ⟨_, hyF, _, hzF, rfl⟩ := F.mem_linSpan.1 hxF
+  · obtain ⟨_, hyF, _, hzF, rfl⟩ := F.mem_span.1 hxF
     exact hF.mem_of_add_mem hx (hF.le hzF) hyF
   · exact Submodule.subset_span hxF
 
@@ -388,22 +387,22 @@ lemma mem_linSpan_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) :
 -- and F the face of nonnegative constant polynomials.
 -- Then F is a face of C, but 1 ∈ F, so F.linSpan = ⊤.
 -- Hence C ⊓ F.linSpan = C ≠ F.
-lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+lemma inf_span (hF : F.IsFaceOf C) : C ⊓ span R (F : Set M) = F := by
   apply le_antisymm <;> intro _ hx
-  · exact (hF.mem_linSpan_iff_mem hx.1).mp hx.2
+  · exact (hF.mem_span_iff_mem hx.1).mp hx.2
   · exact ⟨hF.le hx, Submodule.subset_span hx⟩
 
 -- old proof
--- lemma inf_linSpan (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
+-- lemma inf_span (hF : F.IsFaceOf C) : C ⊓ F.linSpan = F := by
 --   apply le_antisymm
 --   · intro x ⟨hxC, hxF⟩
---     obtain ⟨_, hyF, _, hzF, rfl⟩ := (mem_linSpan F).1 hxF
+--     obtain ⟨_, hyF, _, hzF, rfl⟩ := (mem_span F).1 hxF
 --     exact hF.mem_of_add_mem hxC (hF.le hzF) hyF
 --   · simpa using ⟨hF.le, Submodule.subset_span⟩
 
-lemma le_linSpan_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) :
-    C₁ ≤ F.linSpan ↔ C₁ ≤ F := by
-  nth_rw 2 [← hG.inf_linSpan]
+lemma le_span_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) :
+    C₁ ≤ span R (F : Set M) ↔ C₁ ≤ F := by
+  nth_rw 2 [← hG.inf_span]
   simpa using fun _ => hD
 
 end DirectedOrderRing
@@ -418,21 +417,21 @@ theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
 
 /-- Quotient by the linear span of a face is salient. -/
 lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
-    (C.quot F.linSpan).Salient := by
+    (C.quot (span R F)).Salient := by
   intro z hzC hz0 hzNeg
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
   rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
-  have hxySpan : x + y ∈ F.linSpan := by
-    rw [← Submodule.ker_mkQ F.linSpan]
+  have hxySpan : x + y ∈ span R F := by
+    rw [← Submodule.ker_mkQ (span R (F : Set M))]
     exact LinearMap.mem_ker.mpr (by simp [map_add, hy])
   have hxyF : x + y ∈ F := by
-    rw [← hF.inf_linSpan]
+    rw [← hF.inf_span]
     exact ⟨C.add_mem hxC hyC, hxySpan⟩
   have hxF : x ∈ F := hF.mem_of_add_mem hxC hyC hxyF
-  have hx0 : (F.linSpan).mkQ x = 0 := by
+  have hx0 : (span R F).mkQ x = 0 := by
     simpa [Submodule.mkQ_apply] using
-      (Submodule.Quotient.mk_eq_zero (p := F.linSpan) (x := x)).2
-        (PointedCone.le_linSpan F hxF)
+      (Submodule.Quotient.mk_eq_zero (p := span R F) (x := x)).2
+        (Submodule.subset_span hxF)
   exact hz0 (by simp only [mkQ_apply]; exact hx0)
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
@@ -528,7 +527,7 @@ lemma hull_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 
     {f : ι → s} {i : ι} (hF : F.IsFaceOf (hull R s)) (h : ∑ i, c i • (f i).val ∈ F)
     (cpos : 0 < c i) : (f i).val ∈ F := by
   refine mem_of_sum_smul_mem hF ?_ hcc h i cpos
-  simpa [mem_span] using fun i _ su => su (Subtype.coe_prop (f i))
+  simpa [Submodule.mem_span] using fun i _ su => su (Subtype.coe_prop (f i))
 
 -- lemma mem_of_sum_smul_memm {s : Finset M} (hF : F.IsFaceOf C) (hsC : (s : Set M) ⊆ C)
 --     (hs : ∑ x ∈ s, x ∈ F) (x : M) (xs : x ∈ s) : x ∈ F := by
@@ -562,7 +561,7 @@ set_option backward.isDefEq.respectTransparency false in
 lemma hull_inter_face_hull_inf_face (hF : F.IsFaceOf (hull R s)) :
     hull R (s ∩ F) = F := by
   ext x; constructor
-  · simpa only [mem_span] using fun h => h F Set.inter_subset_right
+  · simpa only [Submodule.mem_span] using fun h => h F Set.inter_subset_right
   · intro h
     obtain ⟨n, c, g, xfg⟩ := mem_span_set'.mp (hF.le h)
     subst xfg
@@ -610,7 +609,7 @@ variable {C F : PointedCone R M}
 -- ## QUOT / FIBER
 
 set_option backward.isDefEq.respectTransparency false in
-lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ F.linSpan) :
+lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ span R F) :
     (F.quot S).IsFaceOf (C.quot S) := by
   refine ⟨map_mono hF.le, ?_⟩
   intro x y a hx hy ha hxy
@@ -621,12 +620,12 @@ lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ F.linSpan) :
     rw [← Submodule.ker_mkQ S]
     change S.mkQ (z - (a • x' + y')) = 0
     simp [map_sub, hzq]
-  have hxy_lin : a • x' + y' ∈ F.linSpan := by
-    have hz_lin : z ∈ F.linSpan := Submodule.subset_span hzF₁
-    exact (F.linSpan.sub_mem_iff_right hz_lin).mp (hS hzsub)
+  have hxy_lin : a • x' + y' ∈ span R F := by
+    have hz_lin : z ∈ span R F := Submodule.subset_span hzF₁
+    exact ((span R (F : Set M)).sub_mem_iff_right hz_lin).mp (hS hzsub)
   have hxy_F : a • x' + y' ∈ F := by
     have hxy_C : a • x' + y' ∈ C := C.add_mem (C.smul_mem (le_of_lt ha) hx'C) hy'C
-    simpa [hF.inf_linSpan] using show a • x' + y' ∈ C ⊓ F.linSpan from ⟨hxy_C, hxy_lin⟩
+    simpa [hF.inf_span] using show a • x' + y' ∈ C ⊓ (span R (F : Set M)) from ⟨hxy_C, hxy_lin⟩
   exact PointedCone.mem_map.mpr ⟨x', hF.mem_of_smul_add_mem hx'C hy'C ha hxy_F, rfl⟩
 
 end DirectedOrderRing

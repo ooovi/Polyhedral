@@ -135,7 +135,7 @@ instance {S : Submodule R N} : Coe (S.FGDual p) (FGDual p (S : PointedCone R N))
 lemma FGDual.lineal_fgdual {C : PointedCone R N} (hC : C.FGDual p) : C.lineal.FGDual p := by
   obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
   rw [dual_span_lineal_dual, ← Submodule.dual_span]
-  exact Submodule.fgdual_of_fg p (FG.linSpan_fg hfg)
+  exact Submodule.fgdual_of_fg p (FG.span_fg hfg)
 
 end LinearOrder
 

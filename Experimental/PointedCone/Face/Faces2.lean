@@ -9,10 +9,10 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
-import Polyhedral.Halfspace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 
 /-!
 # Polyhedral cones
@@ -591,7 +591,7 @@ def inf_combEquiv_of_isCompl_lineal (hS : IsCompl S C.lineal) :
     -- · rw [← inf_sup_assoc_of_submodule_le] at h
     --   · simpa [← coe_sup, hS.codisjoint.eq_top] using h
     --   · exact lineal_le C
-    -- · rw [submodule_linSpan]
+    -- · rw [ofSubmodule_linSpan]
     --   refine Disjoint.mono_left ?_ hS.disjoint
     --   nth_rw 2 [← span_eq S]
     --   exact span_monotone (by simp)

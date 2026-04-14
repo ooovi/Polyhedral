@@ -9,6 +9,7 @@ This file collects rank constructions for pointed cones and the associated dimen
 namespace PointedCone
 
 open Module Cardinal
+open Submodule (span)
 
 /-! ### Basic rank notions -/
 
@@ -17,15 +18,15 @@ section Semiring
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M]
 
-noncomputable abbrev rank (C : PointedCone R M) := Module.rank R C.linSpan
+noncomputable abbrev rank (C : PointedCone R M) := Module.rank R (span R (C : Set M))
 
-noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R C.linSpan
+noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R (span R (C : Set M))
 
 -- NOTE: this is not the same as Module.Finite or FG!
-abbrev FinRank (C : PointedCone R M) := C.linSpan.FG
+abbrev FinRank (C : PointedCone R M) := (span R (C : Set M)).FG
 
 @[simp] lemma finRank_of_isNoetherian [IsNoetherian R M] (C : PointedCone R M) : C.FinRank :=
-  IsNoetherian.noetherian C.linSpan
+  IsNoetherian.noetherian (span R (C : Set M))
 
 set_option backward.isDefEq.respectTransparency false in
 lemma FG.finRank {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
@@ -46,7 +47,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
 variable {C : PointedCone R M}
 
 lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
-  have hlin : C.linSpan = (⊥ : Submodule R M) :=
+  have hlin : span R C = (⊥ : Submodule R M) :=
     (Submodule.rank_eq_zero).1 (by simpa [PointedCone.rank] using h)
   exact le_bot_iff.mp (by simpa [hlin] using C.le_linSpan)
 
@@ -207,8 +208,9 @@ lemma rank_eq_rank_lineal_add_salRank (C : PointedCone R M) :
     (F := ((C.lineal : Submodule R M) : PointedCone R M)) C.lineal_le
   have hlineal :
       (((C.lineal : Submodule R M) : PointedCone R M)).rank = Module.rank R C.lineal := by
-    rw [PointedCone.rank, coe_linSpan]
-  rw [hlineal, coe_linSpan] at h
+    simp only [PointedCone.rank, ofSubmodule_linSpan]
+    sorry
+  rw [hlineal, ofSubmodule_linSpan] at h
   simpa [PointedCone.rank, PointedCone.salRank, PointedCone.salientQuot, add_comm] using h
 
 /-- Dimension-addition for finrank, split into lineality and salient quotient. -/
@@ -220,8 +222,9 @@ lemma finrank_eq_finrank_lineal_add_salFinrank (C : PointedCone R M)
     (F := ((C.lineal : Submodule R M) : PointedCone R M)) hC C.lineal_le
   have hlineal :
       (((C.lineal : Submodule R M) : PointedCone R M)).finrank = Module.finrank R C.lineal := by
-    rw [PointedCone.finrank, coe_linSpan]
-  rw [hlineal, coe_linSpan] at h
+    simp only [PointedCone.finrank, ofSubmodule_linSpan];
+    sorry
+  rw [hlineal, ofSubmodule_linSpan] at h
   simpa [PointedCone.finrank, PointedCone.salFinrank, PointedCone.salientQuot, add_comm] using h
 
 /-- A cone with trivial lineality has salient rank equal to rank. -/

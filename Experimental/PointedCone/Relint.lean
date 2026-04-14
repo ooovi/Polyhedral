@@ -9,10 +9,10 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
-import Polyhedral.Halfspace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual DualClosed

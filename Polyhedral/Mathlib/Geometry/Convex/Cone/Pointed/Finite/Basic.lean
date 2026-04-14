@@ -1,5 +1,7 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 
+open Submodule (span)
+
 namespace PointedCone
 
 namespace FG
@@ -24,7 +26,7 @@ lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
-lemma linSpan_fg {C : PointedCone R M} (hC : C.FG) : C.linSpan.FG := hC.span
+lemma span_fg {C : PointedCone R M} (hC : C.FG) : (span R (C : Set M)).FG := hC.span
 
 lemma top [Module.Finite R M] : (⊤ : PointedCone R M).FG := coe_fg Module.Finite.fg_top
 

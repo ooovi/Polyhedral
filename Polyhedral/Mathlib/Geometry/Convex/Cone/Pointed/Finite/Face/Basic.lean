@@ -65,10 +65,10 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     have H : (C ⊔ F.linSpan).lineal = F.linSpan := by
       sorry
     rw [H]
-    exact hF.inf_linSpan
+    exact hF.inf_span
   · simpa using FG.dual_fgdual _ hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (FG.linSpan_fg <| IsFaceOf.fg hC hF)
+    exact Submodule.FG.dual_fgdual _ (FG.span_fg <| IsFaceOf.fg hC hF)
 
 open Module in
 /-- Every face of an FG cone is exposed. -/
@@ -77,7 +77,7 @@ lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
   wlog _ : Module.Finite R M with exposed -- reduction to finite dimensional case
   · let S : Submodule R M := .span R C
     have H := exposed (FG.restrict_fg S hC) (IsFaceOf.restrict S hF)
-      (Finite.iff_fg.mpr <| FG.linSpan_fg hC)
+      (Finite.iff_fg.mpr <| FG.span_fg hC)
     have hC : C ≤ Submodule.span R (C : Set M) := Submodule.le_span
     simpa [S, hC, le_trans hF.le hC] using H.embed
   rw [← FG.dual_flip_dual (Dual.eval R M) hC]

@@ -9,13 +9,13 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Order.Partition.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.MinkowskiWeyl
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Faces2
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.FG
-import Polyhedral.Hyperplane
-import Polyhedral.Halfspace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Hyperplane
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 
 open Module
 
@@ -49,10 +49,10 @@ variable (p) [Fact (Function.Surjective p.flip)] in
     have H : (C ⊔ Submodule.span R (F : Set M)).lineal = Submodule.span R F := by
       sorry
     rw [H]
-    exact IsFaceOf.inf_linSpan hF
+    exact IsFaceOf.inf_span hF
   · simpa using FG.dual_fgdual _ sorry -- hC
   · rw [LinearMap.flip_flip, coe_fgdual_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_fgdual _ (FG.linSpan_fg <| hF.fg_of_fg sorry) -- hC)
+    exact Submodule.FG.dual_fgdual _ (FG.span_fg <| hF.fg_of_fg sorry) -- hC)
 
 end PointedCone
 

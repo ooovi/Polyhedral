@@ -89,10 +89,10 @@ def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
 /-- The linear span of the cone. -/
 abbrev linSpan (C : PointedCone R M) : Submodule R M := .span R C
 
-@[simp] lemma submodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
+@[simp] lemma ofSubmodule_linSpan (S : Submodule R M) : (S : PointedCone R M).linSpan = S :=
     by simp [linSpan]
 
-alias linSpan_eq := submodule_linSpan
+alias ofSubmodule_linSpan := ofSubmodule_linSpan
 
 -- section Ring
 
@@ -567,7 +567,7 @@ lemma neg_self_iff_eq_span_submodule' {C : PointedCone R M} :
     -C ≤ C ↔ Submodule.span R (C : Set M) = C
   := Iff.trans neg_eq_self_iff_neg_le.symm neg_self_iff_eq_span_submodule
 
-lemma mem_linSpan (C : PointedCone R M) {x : M} :
+lemma mem_span (C : PointedCone R M) {x : M} :
     x ∈ C.linSpan ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
   rw [← mem_coe, ← sup_neg_eq_submodule_span, Submodule.mem_sup]
   simp only [Submodule.mem_neg]

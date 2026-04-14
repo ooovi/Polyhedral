@@ -8,7 +8,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
 open Function Module OrderDual LinearMap
-open Submodule hiding span dual DualClosed
+open Submodule hiding dual DualClosed
 open PointedCone
 
 
@@ -218,7 +218,7 @@ lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
   simp only [Function.comp_apply, h, ← coe_sup_submodule_span, Submodule.coe_restrictScalars,
     Submodule.span_union, span_coe_eq_restrictScalars] at hh
-  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (FG.linSpan_fg <| hC.fg_inf_of_isCompl hS)
+  refine FG.codisjoint_cofg (codisjoint_iff.mpr hh) (FG.span_fg <| hC.fg_inf_of_isCompl hS)
 
 -- lemma IsPolyhedral.exists_fg_salient_sup_lineal (hC : C.IsPolyhedral) :
 --     ∃ D : PointedCone R M, D.FG ∧ D.Salient ∧ D ⊔ C.lineal = C := by
@@ -379,7 +379,7 @@ variable (p) [Fact (Surjective p)] in
   then `C ⊔ S` is FGDual. This is the counterpart to `IsPolyhedral.fgdual_inf_of_disjoint_lineal`.
 -/
 lemma IsPolyhedral.fgdual_sup_of_codisjoint_span {C : PointedCone R N} (hC : C.IsPolyhedral)
-    {S : Submodule R N} (hS : Codisjoint C.linSpan S) : FGDual p (C ⊔ S) := by
+    {S : Submodule R N} (hS : Codisjoint (span R C) S) : FGDual p (C ⊔ S) := by
   refine fgdual_of_lineal_fgdual (hC.sup_submodule S) (CoFG.fgdual p ?_)
   refine cofg_lineal_of_span_top (hC.sup_submodule _) ?_
   simpa [← coe_sup_submodule_span, Submodule.span_union] using codisjoint_iff.mp hS
@@ -388,7 +388,7 @@ variable (p) [Fact (Surjective p)] in
 /-- A polyhedral cone `C` can be written as the intersection of a FGDual cone with the
   linear span of `C`. -/
 lemma IsPolyhedral.exists_fgdual_inf_span {C : PointedCone R N} (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R N, D.FGDual p ∧ D ⊓ C.linSpan = C := by
+    ∃ D : PointedCone R N, D.FGDual p ∧ D ⊓ (span R (C : Set N)) = C := by
   have ⟨S, hS⟩ := Submodule.exists_isCompl (Submodule.span R (C : Set N))
   exact ⟨C ⊔ S, hC.fgdual_sup_of_codisjoint_span p hS.codisjoint,
     sup_inf_submodule_span_of_disjoint hS.disjoint⟩
@@ -437,7 +437,7 @@ lemma IsPolyhedral.inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
   --replace h := le_trans h (span_inter_le _ _)
   rw [← Submodule.coe_inf, ← hD₁, ← hD₂] at h
   --
-  obtain ⟨P, hPfg, hP⟩ := aux (FG.linSpan_fg hfg₁) (FG.linSpan_fg hfg₂) C₁.lineal C₂.lineal
+  obtain ⟨P, hPfg, hP⟩ := aux (FG.span_fg hfg₁) (FG.span_fg hfg₂) C₁.lineal C₂.lineal
   simp_rw [Submodule.restrictScalars_self, hP] at h
   nth_rw 2 [← coe_ofSubmodule] at h
   rw [Set.le_iff_subset] at h

@@ -15,27 +15,27 @@ variable {C : PointedCone R M}
 open Submodule in
 lemma finrank_strictMono (hCfg : C.FG) : StrictMono (fun F : Face C => F.finrank) := by
   intro G F hFG
-  haveI := (Submodule.fg_iff_finiteDimensional _).mp (FG.linSpan_fg <| F.isFaceOf.fg hCfg)
+  haveI := (Submodule.fg_iff_finiteDimensional _).mp (FG.span_fg <| F.isFaceOf.fg hCfg)
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
   · exact span_mono (R := R) hFG.le
   · intro h
     have : G.toSubmodule < F.toSubmodule := gt_iff_lt.mp hFG
-    rw [← IsFaceOf.inf_linSpan F.isFaceOf, ← IsFaceOf.inf_linSpan G.isFaceOf] at this
-    simp [linSpan, h] at this
+    rw [← IsFaceOf.inf_span F.isFaceOf, ← IsFaceOf.inf_span G.isFaceOf] at this
+    simp [h] at this
 
 lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank = F.finrank + 1 := by
   obtain ⟨hfg, hc⟩ := hFG
   -- suffices to show quotient has rank 1
-  have hgfg := quot_fg (G.isFaceOf.fg hCfg) F.linSpan
+  have hgfg := quot_fg (G.isFaceOf.fg hCfg) F.span
   convert
-    finrank_eq_finrank_add_finrank_quot_linSpan (FG.linSpan_fg (G.isFaceOf.fg hCfg)) hfg.le
+    finrank_eq_finrank_add_finrank_quot_linSpan (FG.span_fg (G.isFaceOf.fg hCfg)) hfg.le
     -- G/F has a ray
   have FfG : (F : PointedCone R M).IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
-  have : ¬(G : PointedCone R M) ≤ F.linSpan := by
-    simpa [Face.le_linSpan_iff_le] using not_le_of_gt hfg
+  have : ¬(G : PointedCone R M) ≤ F.span := by
+    simpa [Face.le_span_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
     FG.exists_ray hgfg ((PointedCone.quot_eq_bot_iff _ _).not.mpr this) FfG.quot_salient
-  set ray : Face (quot G.toSubmodule F.linSpan) := ⟨hull R {v}, hvray⟩
+  set ray : Face (quot G.toSubmodule F.span) := ⟨hull R {v}, hvray⟩
   -- pull ray back to get face of G with F < H
   let H := ray.fiberFace (F := ⟨_, FfG⟩)
   have : F < H := by

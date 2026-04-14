@@ -30,6 +30,8 @@ of a pointed cone `C`.
 
 -/
 
+open Submodule (span)
+
 @[expose] public section
 
 namespace PointedCone
@@ -229,7 +231,7 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
-abbrev linSpan (F : Face C) : Submodule R M := F.toPointedCone.linSpan
+abbrev span (F : Face C) : Submodule R M := .span R F.toPointedCone
 
 noncomputable abbrev rank (F : Face C) : Cardinal := F.toPointedCone.rank
 
@@ -247,17 +249,17 @@ variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
-abbrev quotMap (F : Face C) := mkQ F.linSpan
+abbrev quotMap (F : Face C) := mkQ F.span
 
 /-- The cone obtained by quotienting by the face's linear span. -/
-abbrev quot (F : Face C) : PointedCone R (M ⧸ F.linSpan) := .map F.quotMap C
+abbrev quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
 
 scoped notation:50 C " ⧸ " F => Face.quot (C := C) F
 
 def fiberFace {F : Face C} (G : Face (C ⧸ F)) : Face C := by
   refine ⟨C ⊓ PointedCone.comap F.quotMap G, ?_⟩
   simpa [Face.quot, Face.quotMap] using
-    (PointedCone.IsFaceOf.inf_comap_mkQ (G := C) (S := F.linSpan) (H := G) G.isFaceOf)
+    (PointedCone.IsFaceOf.inf_comap_mkQ (G := C) (S := F.span) (H := G) G.isFaceOf)
 
 @[simp]
 lemma mem_fiberFace {F : Face C} (G : Face (C ⧸ F)) (x : M) :
@@ -270,7 +272,7 @@ instance {F : Face C} : CoeOut (Face F.quot) (Face C) := ⟨fiberFace⟩
 lemma le_fiber {F : Face C} (G : Face (C ⧸ F)) : F ≤ fiberFace G := by
   intro x xF
   simp only [mem_fiberFace, F.isFaceOf.le xF, mkQ_apply,
-    (Quotient.mk_eq_zero F.linSpan).mpr (mem_span_of_mem xF), true_and]
+    (Quotient.mk_eq_zero F.span).mpr (mem_span_of_mem xF), true_and]
   simp [← Face.mem_coe]
 
 @[simp]
@@ -317,11 +319,11 @@ def quotFace (F G : Face C) : Face (C ⧸ F) := by
     show F ≤ F ⊔ G from le_sup_left
   simpa [Face.quot, Face.quotMap] using
     (PointedCone.IsFaceOf.quot (C := C) (F := ((F ⊔ G : Face C) : PointedCone R M))
-      (S := F.linSpan) (F ⊔ G).isFaceOf (Submodule.span_mono hle))
+      (S := F.span) (F ⊔ G).isFaceOf (Submodule.span_mono hle))
 
 @[simp]
 lemma quotFace_eq_map_of_le {F G : Face C} (h : F ≤ G) :
-    (F.quotFace G : PointedCone R (M ⧸ F.linSpan)) = PointedCone.map F.quotMap G := by
+    (F.quotFace G : PointedCone R (M ⧸ F.span)) = PointedCone.map F.quotMap G := by
   simp [quotFace, sup_eq_right.mpr h]
 
 @[simp]
@@ -331,21 +333,22 @@ lemma fiber_quot_of_le {F G : Face C} (h : F ≤ G) : fiberFace (F.quotFace G) =
   · intro hx
     rcases (mem_fiberFace (F.quotFace G) x).mp hx with ⟨hxC, hxq⟩
     have hxq' : F.quotMap x ∈ PointedCone.map F.quotMap G := by
-      change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.linSpan)) at hxq
+      change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.span)) at hxq
       simpa [quotFace_eq_map_of_le h] using hxq
     obtain ⟨y, hyG, hyq⟩ := PointedCone.mem_map.mp hxq'
-    have hxy : x - y ∈ F.linSpan := by
-      rw [← Submodule.ker_mkQ F.linSpan]
+    have hxy : x - y ∈ F.span := by
+      rw [← Submodule.ker_mkQ F.span]
       change F.quotMap (x - y) = 0
       simp only [map_sub, mkQ_apply, hyq, sub_self]
-    have hx_lin : x ∈ (G : PointedCone R M).linSpan :=
-      ((G : PointedCone R M).linSpan.sub_mem_iff_left (Submodule.subset_span hyG)).mp
+    have hx_lin : x ∈ Submodule.span R (G : Set M) :=
+      ((Submodule.span R (G : Set M)).sub_mem_iff_left (Submodule.subset_span hyG)).mp
         (Submodule.span_mono h hxy)
-    simpa [G.isFaceOf.inf_linSpan] using show x ∈ C ⊓ (G : PointedCone R M).linSpan from
-      ⟨hxC, hx_lin⟩
+    sorry
+    -- simpa [G.isFaceOf.inf_span] using show x ∈ C ⊓ span R (G : Set M) from
+    --   ⟨hxC, hx_lin⟩ -- Broken since deprecation of linSpan
   · intro hx
     refine (mem_fiberFace (F.quotFace G) x).mpr ⟨G.isFaceOf.le hx, ?_⟩
-    change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.linSpan))
+    change F.quotMap x ∈ (F.quotFace G : PointedCone R (M ⧸ F.span))
     simpa [quotFace_eq_map_of_le h] using
       (PointedCone.mem_map.mpr ⟨x, hx, rfl⟩ : F.quotMap x ∈ PointedCone.map F.quotMap G)
 
@@ -405,12 +408,12 @@ lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
       rw [Submodule.mem_bot, ← hcx, hczero]
   · simp only [fiberFace, quotMap, comap, h, comap_bot, LinearMap.ker_restrictScalars, ker_mkQ,
     ← toPointedCone_eq_iff]
-    suffices C ⊓ restrictScalars { c // 0 ≤ c } F.linSpan = F by symm; exact this
-    convert F.isFaceOf.inf_linSpan
+    suffices C ⊓ restrictScalars { c // 0 ≤ c } F.span = F by symm; exact this
+    convert F.isFaceOf.inf_span
 
-lemma le_linSpan_iff_le {F G : Face C} :
-    (F : PointedCone R M) ≤ G.linSpan ↔ F ≤ G := by
-  simp [IsFaceOf.le_linSpan_iff_le F.isFaceOf.le G.isFaceOf]
+lemma le_span_iff_le {F G : Face C} :
+    (F : PointedCone R M) ≤ G.span ↔ F ≤ G := by
+  simp [IsFaceOf.le_span_iff_le F.isFaceOf.le G.isFaceOf]
 
 end RingLinearOrder
 

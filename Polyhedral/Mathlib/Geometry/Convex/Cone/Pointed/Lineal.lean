@@ -8,7 +8,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 namespace PointedCone
 
 open Module
-
+open Submodule (span)
 
 -- ## LINEAL
 
@@ -106,14 +106,14 @@ lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D
 
 -- ## PRIORITY
 --isnt this false when C and D are two rays pointing in opposite directions?
-lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : C.linSpan ⊓ D.lineal ≤ C.lineal) :
+lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : span R C ⊓ D.lineal ≤ C.lineal) :
     (C ⊔ D).lineal = C.lineal ⊔ D.lineal := by
   rw [le_antisymm_iff, and_comm]
   constructor
   · exact lineal_sup_le ..
   intro x
   simp [Submodule.mem_sup, mem_lineal]
-  simp [SetLike.le_def, mem_lineal, mem_linSpan] at hCD
+  simp [SetLike.le_def, mem_lineal] at hCD
   intro y hy z hz hyz w hw v hv hwv
   have h := hCD
   sorry
@@ -151,12 +151,13 @@ lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone
     {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint S T) : (C ⊓ S) ⊔ T = C := by
   simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
 
-lemma lineal_le_linSpan (C : PointedCone R M) : C.lineal ≤ C.linSpan :=
-  ofSubmodule_mono.mpr <| le_trans (lineal_le C) (le_linSpan C)
+lemma lineal_le_span (C : PointedCone R M) : C.lineal ≤ span R C := by
+  rw [← ofSubmodule_mono]
+  exact le_trans (lineal_le C) Submodule.subset_span
 
 /-- The linear span of `C ⊓ -C` is the lineality space of `C`. -/
-lemma linSpan_inf_neg_eq_lineal (C : PointedCone R M) : (C ⊓ -C).linSpan = C.lineal := by
-  simpa [coe_lineal] using (ofSubmodule_linSpan (R := R) (M := M) C.lineal)
+lemma span_inf_neg_eq_lineal (C : PointedCone R M) : span R (C ⊓ -C) = C.lineal := by
+  simpa [coe_lineal] using (Submodule.span_eq C.lineal)
 
 
 -- ## MAP
@@ -225,7 +226,7 @@ lemma lineal_isExtreme_sum' {C : PointedCone R M} {xs : Finset M} (hxs : (xs : S
   induction xs using Finset.induction_on with
   | empty => simp
   | insert y xs hy H =>
-    simp only [Set.subset_def, Finset.mem_coe, SetLike.mem_coe, ne_eq, Finset.coe_insert,
+    simp only [Set.subset_def, SetLike.mem_coe, ne_eq, Finset.coe_insert,
       Set.mem_insert_iff, forall_eq_or_imp, Finset.mem_insert, Finset.sum_insert hy] at *
     have hxsC := C.sum_mem (fun x hx => C.smul_mem (le_of_lt <| hc.2 x hx) (hxs.2 x hx))
     constructor

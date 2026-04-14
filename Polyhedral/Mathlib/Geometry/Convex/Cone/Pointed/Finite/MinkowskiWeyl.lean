@@ -7,7 +7,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.FGDual
 
 open Function Module LinearMap
-open Submodule hiding span dual
+open Submodule hiding dual
 open Set
 
 variable {𝕜 M N : Type*}
@@ -192,16 +192,16 @@ lemma FG.exists_fgdual_inf_submodule {C : PointedCone 𝕜 N} (hC : C.FG)
 
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone can be written as the intersection of its linear span with a FGDual cone. -/
-lemma FG.exists_fgdual_inf_linSpan {C : PointedCone 𝕜 N} (hC : C.FG) :
-      ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ C.linSpan = C :=
-  exists_fgdual_inf_submodule p hC (FG.linSpan_fg hC) Submodule.subset_span
+lemma FG.exists_fgdual_inf_span {C : PointedCone 𝕜 N} (hC : C.FG) :
+      ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ D ⊓ span 𝕜 (C : Set N) = C :=
+  exists_fgdual_inf_submodule p hC (FG.span_fg hC) Submodule.subset_span
 
 -- variable (p) [Fact p.SeparatingRight] in
 -- /-- An FG cone can be written as the intersection of a FGDual cone and an FG submodule. -/
 -- lemma FG.exists_fgdual_inf_fg_submodule {C : PointedCone 𝕜 N} (hC : C.FG) :
 --       ∃ D : PointedCone 𝕜 N, D.FGDual p ∧ ∃ S : Submodule 𝕜 N, S.FG ∧ D ⊓ S = C := by
---   obtain ⟨D, hfgdual, hD⟩ := exists_fgdual_inf_linSpan p hC
---   exact ⟨D, hfgdual, Submodule.span 𝕜 C, FG.linSpan_fg hC, hD⟩
+--   obtain ⟨D, hfgdual, hD⟩ := exists_fgdual_inf_span p hC
+--   exact ⟨D, hfgdual, Submodule.span 𝕜 C, FG.span_fg hC, hD⟩
 
 -- variable (p) [Fact p.SeparatingRight] in
 -- /-- An FG cone is the dual of a FGDual cone. -/
@@ -220,10 +220,10 @@ variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone is the dual of a FGDual cone. -/
 lemma FG.exists_fgdual_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
     ∃ D : PointedCone 𝕜 M, D.FGDual p.flip ∧ dual p D = C := by
-  obtain ⟨D, hD, h⟩ := exists_fgdual_inf_linSpan p hC
+  obtain ⟨D, hD, h⟩ := exists_fgdual_inf_span p hC
   rw [← h]
   obtain ⟨C', hfg, rfl⟩ := hD.exists_fg_dual
-  use C' ⊔ dual p.flip C.linSpan
+  use C' ⊔ dual p.flip (span 𝕜 (C : Set N))
   have hC := hC.span (A := 𝕜)
   constructor
   · exact sup_fg_fgdual hfg <| fgdual_of_fg p.flip (coe_fg hC)
@@ -358,12 +358,12 @@ end Module.Finite
 lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG := by
   wlog _ : Module.Finite 𝕜 M with h
   · let CD : Submodule 𝕜 M := .span 𝕜 (C ⊔ D : PointedCone 𝕜 M)
-    have hCle : C ≤ CD := le_trans le_sup_left (le_linSpan _)
-    have hDle : D ≤ CD := le_trans le_sup_right (le_linSpan _)
+    have hCle : C ≤ CD := le_trans le_sup_left Submodule.subset_span
+    have hDle : D ≤ CD := le_trans le_sup_right Submodule.subset_span
     specialize h (restrict_fg_of_fg_le hCle hC) (restrict_fg_of_fg_le hDle hD)
-      (Finite.iff_fg.mpr <| FG.linSpan_fg <| sup_fg hC hD)
+      (Finite.iff_fg.mpr <| FG.span_fg <| sup_fg hC hD)
     rw [← restrict_inf] at h
-    exact fg_of_restrict_le (le_trans inf_le_sup <| le_linSpan _) h
+    exact fg_of_restrict_le (le_trans inf_le_sup <| Submodule.subset_span) h
   · exact FGDual.fg <| inf_fgdual (FG.fgdual .id hC) (FG.fgdual .id hD) -- inf_fg' hC hD
 
 /- TODO: the equivalent of the below statement with FGDual instead of FG can likely be proven
@@ -372,7 +372,7 @@ lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG :
 /-- The intersection of an FG cone with an arbitrary submodule is FG. -/
 lemma inf_fg_submodule {C : PointedCone 𝕜 M} (hC : C.FG) (S : Submodule 𝕜 M) : (C ⊓ S).FG := by
   rw [left_eq_inf.mpr C.le_linSpan, inf_assoc, ← coe_inf]
-  exact inf_fg hC <| FG.coe_fg <| FG.of_le (FG.linSpan_fg hC) inf_le_left
+  exact inf_fg hC <| FG.coe_fg <| FG.of_le (FG.span_fg hC) inf_le_left
 
 lemma inf_submodule_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG)
     : (S ⊓ C : PointedCone 𝕜 M).FG := by rw [inf_comm]; exact inf_fg_submodule hC S

@@ -8,6 +8,8 @@ This file collects rank constructions for faces and the dimension formulas attac
 inclusions.
 -/
 
+open Submodule (span)
+
 namespace PointedCone
 
 namespace Face
@@ -49,7 +51,7 @@ variable {C F G : PointedCone R M}
 /-- Dimension-addition for salient finrank along a face inclusion. -/
 lemma salFinrank_eq_salFinrank_add_finrank_quot_linSpan {F G : PointedCone R M}
     (hF : F.IsFaceOf G) (hG : G.FinRank) :
-    G.salFinrank = F.salFinrank + (G.quot F.linSpan).finrank := by
+    G.salFinrank = F.salFinrank + (G.quot (span R F)).finrank := by
   have hFfin : F.FinRank :=
     PointedCone.finRank_of_le hG hF.le
   have hFG := PointedCone.finrank_eq_finrank_add_finrank_quot_linSpan
@@ -62,21 +64,21 @@ lemma salFinrank_eq_salFinrank_add_finrank_quot_linSpan {F G : PointedCone R M}
 /-- Dimension-addition for salient finrank along a face inclusion. -/
 lemma salFinrank_eq_salFinrank_add_salFinrank_quot_linSpan {F G : PointedCone R M}
     (hF : F.IsFaceOf G) (hG : G.FinRank) :
-    G.salFinrank = F.salFinrank + (G.quot F.linSpan).salFinrank := by
-  have hqlineal : (G.quot F.linSpan).lineal = ⊥ :=
+    G.salFinrank = F.salFinrank + (G.quot (span R F)).salFinrank := by
+  have hqlineal : (G.quot (span R F)).lineal = ⊥ :=
     PointedCone.salient_iff_lineal_bot.mp (hF.quot_salient)
-  have hqfin : (G.quot F.linSpan).FinRank :=
+  have hqfin : (G.quot (span R F)).FinRank :=
     PointedCone.finRank_quot_linSpan hG
-  have hq : (G.quot F.linSpan).salFinrank = (G.quot F.linSpan).finrank :=
+  have hq : (G.quot (span R F)).salFinrank = (G.quot (span R F)).finrank :=
     PointedCone.salFinrank_eq_finrank_of_lineal_eq_bot
-      (C := G.quot F.linSpan) hqfin hqlineal
+      (C := G.quot (span R F)) hqfin hqlineal
   simpa [hq] using
     salFinrank_eq_salFinrank_add_finrank_quot_linSpan hF hG
 
 /-- Dimension-addition for salient rank along a face inclusion (finite lineality case). -/
 lemma salRank_eq_salRank_add_rank_quot_linSpan {F G : PointedCone R M}
     (hF : F.IsFaceOf G) (hlinealG : G.lineal.FG) :
-    G.salRank = F.salRank + (G.quot F.linSpan).rank := by
+    G.salRank = F.salRank + (G.quot (span R F)).rank := by
   letI : Module.Finite R G.lineal := Module.Finite.iff_fg.mpr hlinealG
   have hFG := PointedCone.rank_eq_rank_add_rank_quot_linSpan
       hF.le
@@ -91,11 +93,11 @@ lemma salRank_eq_salRank_add_rank_quot_linSpan {F G : PointedCone R M}
 /-- Dimension-addition for salient rank along a face inclusion (finite lineality case). -/
 lemma salRank_eq_salRank_add_salRank_quot_linSpan {F G : PointedCone R M}
     (hF : F.IsFaceOf G) (hlinealG : G.lineal.FG) :
-    G.salRank = F.salRank + (G.quot F.linSpan).salRank := by
-  have hqlineal : (G.quot F.linSpan).lineal = ⊥ :=
+    G.salRank = F.salRank + (G.quot (span R F)).salRank := by
+  have hqlineal : (G.quot (span R F)).lineal = ⊥ :=
     PointedCone.salient_iff_lineal_bot.mp (hF.quot_salient)
-  have hq : (G.quot F.linSpan).salRank = (G.quot F.linSpan).rank :=
-    PointedCone.salRank_eq_rank_of_lineal_eq_bot (C := G.quot F.linSpan) hqlineal
+  have hq : (G.quot (span R F)).salRank = (G.quot (span R F)).rank :=
+    PointedCone.salRank_eq_rank_of_lineal_eq_bot (C := G.quot (span R F)) hqlineal
   simpa [hq] using salRank_eq_salRank_add_rank_quot_linSpan hF hlinealG
 
 end Salient
