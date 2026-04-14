@@ -18,31 +18,6 @@ open Pointwise
 
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
-/-- The lineality space of a cone `C` is the submodule given by `C ⊓ -C`. -/
-def lineal (C : PointedCone R M) : Submodule R M where
-  __ := C ⊓ -C
-  smul_mem' r _ hx := by
-    obtain hr | hr := le_total 0 r
-    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
-    · rw [← neg_nonneg] at hr
-      simpa using And.intro (C.smul_mem hr hx.2) (C.smul_mem hr hx.1)
-
-@[simp]
-lemma coe_lineal (C : PointedCone R M) : C.lineal = C ⊓ -C :=
-  rfl
-
-lemma mem_lineal {C : PointedCone R M} {x : M} : x ∈ C.lineal ↔ x ∈ C ∧ -x ∈ C := by
-  rfl
-
-/-- The lineality space is contained in the cone. -/
-lemma lineal_le (C : PointedCone R M) : C.lineal ≤ C := by simp
-
-/-- The lineality space of a cone is the largest submodule contained in the cone. -/
-theorem lineal_eq_sSup (C : PointedCone R M) : C.lineal = sSup {S : Submodule R M | S ≤ C} := by
-  refine le_antisymm (le_sSup (lineal_le C)) fun x hx => ?_
-  have hC : sSup {S : Submodule R M | S ≤ C} ≤ C := by simp
-  exact mem_lineal.mpr ⟨hC hx, hC (neg_mem hx : -x ∈ _)⟩
-
 /-- Every submodule contain int he cone is also contained in the lineality space. -/
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := by simp only [lineal_eq_sSup]; exact le_sSup hS
@@ -165,7 +140,7 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
       have h' : 1 ≤ c ↔ 0 ≤ c - 1 := by simp
       rw [h'] at h1c
       replace h' := smul_mem C h1c hx
-      exact lineal_isExtreme_right h' hx hcx
+      exact lineal_isExtreme_right h' hx sorry
 
 
 -- Q: Can we shorten the proof, see `inf_sup_lineal_eq_of_isCompl` below.
@@ -278,11 +253,11 @@ lemma lineal_isExtreme_sum' {C : PointedCone R M} {xs : Finset M} (hxs : (xs : S
     · exact H hxs.2 hc.2 <| lineal_isExtreme_right (C.smul_mem (le_of_lt hc.1) hxs.1) hxsC h
 
 variable (R) in
-lemma span_inter_lineal_eq_lineal (s : Set M) :
-    span R (s ∩ (span R s).lineal) = (span R s).lineal := by
+lemma hull_inter_lineal_eq_lineal (s : Set M) :
+    hull R (s ∩ (hull R s).lineal) = (hull R s).lineal := by
   rw [le_antisymm_iff]
   constructor
-  · rw [← Submodule.span_eq <| ofSubmodule ((span R s).lineal)]
+  · rw [← Submodule.span_eq <| ofSubmodule ((hull R s).lineal)]
     refine Submodule.span_mono ?_
     simp only [Submodule.coe_restrictScalars, Set.inter_subset_right]
   · sorry
@@ -304,8 +279,8 @@ lemma span_inter_lineal_eq_lineal (s : Set M) :
 lemma FG.lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG := by classical
   obtain ⟨s, hs⟩ := hC
   use (s.finite_toSet.inter_of_left C.lineal).toFinset -- means {x ∈ s | x ∈ C.lineal}
-  rw [submodule_span_of_span]
-  simpa [← hs] using span_inter_lineal_eq_lineal R (s : Set M)
+  rw [submodule_span_of_hull]
+  simpa [← hs] using hull_inter_lineal_eq_lineal R (s : Set M)
 
 end DivisionRing
 
@@ -455,7 +430,7 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
     exact (Submodule.Quotient.mk_eq_zero C.lineal).mpr h
   apply this
   have : (C.lineal).mkQ (y+y') = 0 := by
-    rw [map_add, hy, hy', add_neg_cancel]; rfl
+    rw [map_add, hy, hy', add_neg_cancel]
   have sum_lineal : y+y' ∈ C.lineal := by
     rw [← Submodule.ker_mkQ C.lineal]
     exact LinearMap.mem_ker.mpr this

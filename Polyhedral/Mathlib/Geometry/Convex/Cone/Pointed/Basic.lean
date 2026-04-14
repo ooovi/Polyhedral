@@ -43,24 +43,19 @@ set_option backward.isDefEq.respectTransparency false in
 
 -- ## SPAN
 
-/- Intended new name for `PointedCone.span` to better avoid name clashes and confusion
-  with `Submodule.span`. -/
-alias hull := span
-
 set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma span_submodule_span (s : Set M) :
-    Submodule.span R (span R s) = Submodule.span R s := Submodule.span_span_of_tower ..
+@[simp] lemma hull_submodule_span (s : Set M) :
+    Submodule.span R (hull R s) = Submodule.span R s := Submodule.span_span_of_tower ..
 
-def span_gi : GaloisInsertion (span R : Set M → PointedCone R M) (↑) where
-  choice s _ := span R s
+def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
+  choice s _ := hull R s
   gc _ _ := Submodule.span_le
-  le_l_u _ := subset_span
+  le_l_u _ := subset_hull
   choice_eq _ _ := rfl
 
 -- lemma span_inf_left (s t : Set M) : span R (s ∩ t) ≤ span R s := by
 --   apply Submodule.span_mono
 --   simp only [Set.inter_subset_left]
-
 
 -- ## LINSPAN
 
@@ -130,25 +125,25 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
 @[deprecated "Really needed?" (since := "today")]
-lemma span_insert (x) (s : Set M) : span R (insert x s) = span R {x} ⊔ span R s :=
+lemma hull_insert (x) (s : Set M) : hull R (insert x s) = hull R {x} ⊔ hull R s :=
   Submodule.span_insert x s
 
 lemma coe_sup_submodule_span' {s t : Set M} :
-    Submodule.span R (s ∪ t) = Submodule.span R (span R s ⊔ span R t) := by simp
+    Submodule.span R (s ∪ t) = Submodule.span R (hull R s ⊔ hull R t) := by simp
 
 -- Has this anything to do with cones? See version above
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
     Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
-  rw [← span_submodule_span]
+  rw [← hull_submodule_span]
   simp [Submodule.span_union]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma span_le_submodule_span (s : Set M) : span R s ≤ Submodule.span R s :=
+lemma hull_le_submodule_span (s : Set M) : hull R s ≤ Submodule.span R s :=
     Submodule.span_le_restrictScalars _ _ s
 
 @[deprecated "We don't need this, the proof is short" (since := "today")]
-lemma span_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : span R s ≤ Submodule.span R t
-  := le_trans (span_le_submodule_span s) (Submodule.span_mono hst)
+lemma hull_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : hull R s ≤ Submodule.span R t
+  := le_trans (hull_le_submodule_span s) (Submodule.span_mono hst)
 
 lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := Submodule.subset_span
 
@@ -167,7 +162,7 @@ alias le_span := subset_span
 
 -- should be in `Submodule.Basic`
 @[deprecated "Really needed?" (since := "today")]
-lemma submodule_span_of_span {s : Set M} {S : Submodule R M} (hsS : span R s = S) :
+lemma submodule_span_of_hull {s : Set M} {S : Submodule R M} (hsS : hull R s = S) :
     Submodule.span R s = S := by
   simpa using congrArg (Submodule.span R ∘ SetLike.coe) hsS
 
@@ -176,7 +171,7 @@ lemma submodule_span_of_span {s : Set M} {S : Submodule R M} (hsS : span R s = S
 --   obtain ⟨S, hS⟩ := h; rw [hS]
 --   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
-lemma span_union (s t : Set M) : span R (s ∪ t) = span R s ⊔ span R t :=
+lemma hull_union (s t : Set M) : hull R (s ∪ t) = hull R s ⊔ hull R t :=
     Submodule.span_union s t
 
 section Ring
@@ -428,7 +423,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 -- Mathematically, this lemma is equivalent to directedness of the order on `R`: for `M = R`
 -- and `x = 1`, it says every element of `R` is a difference of two nonnegative elements.
 variable (R) in
-@[simp] lemma span_neg_pair_eq_span_singleton (x : M) : span R {-x, x} = R ∙ x := by
+@[simp] lemma hull_neg_pair_eq_span_singleton (x : M) : hull R {-x, x} = R ∙ x := by
   rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
   ext y
   simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair,
@@ -449,8 +444,8 @@ variable (R) in
         rw [sub_smul]
         abel
 
-@[simp] lemma span_sup_span_neg_eq_submodule_span (s : Set M) :
-    span R s ⊔ span R (-s) = Submodule.span R s := by
+@[simp] lemma hull_sup_hull_neg_eq_submodule_span (s : Set M) :
+    hull R s ⊔ hull R (-s) = Submodule.span R s := by
   ext x
   constructor <;> intro h
   · obtain ⟨_, hy, _, hz, rfl⟩ := Submodule.mem_sup.mp h
@@ -461,11 +456,11 @@ variable (R) in
         simpa using p.neg_mem (hp (Set.mem_neg.mp hy)))
   · rw [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
     obtain ⟨n, f, g, rfl⟩ := h
-    have hx : ∑ i, f i • (g i : M) ∈ span R (-s ∪ s) := by
+    have hx : ∑ i, f i • (g i : M) ∈ hull R (-s ∪ s) := by
       refine sum_mem ?_
       intro i _
-      have hpair : f i • (g i : M) ∈ span R ({-(g i : M), (g i : M)} : Set M) := by
-        rw [span_neg_pair_eq_span_singleton (R := R) (x := (g i : M))]
+      have hpair : f i • (g i : M) ∈ hull R ({-(g i : M), (g i : M)} : Set M) := by
+        rw [hull_neg_pair_eq_span_singleton (R := R) (x := (g i : M))]
         exact Submodule.mem_span_singleton.mpr ⟨f i, by simp⟩
       exact Set.mem_of_subset_of_mem (Submodule.span_mono <| by
         intro z hz
@@ -473,14 +468,14 @@ variable (R) in
         · exact Set.mem_union_left _ (by simp [(g i).property])
         · rcases Set.mem_singleton_iff.mp hz with rfl
           exact Set.mem_union_right _ (g i).property) hpair
-    simpa [span_union, sup_comm, Set.union_comm] using hx
+    simpa [hull_union, sup_comm, Set.union_comm] using hx
 
 -- NOTE: if this is implemented, it is more general than what mathlib already provides
 -- for converting submodules into pointed cones. Especially the proof that R≥0 is an FG
 -- submodule of R should be easier with this.
 set_option backward.isDefEq.respectTransparency false in
-@[simp] lemma span_union_neg_eq_submodule_span (s : Set M) :
-    span R (-s ∪ s) = Submodule.span R s := by
+@[simp] lemma hull_union_neg_eq_submodule_span (s : Set M) :
+    hull R (-s ∪ s) = Submodule.span R s := by
   ext x
   simp only [Submodule.mem_span, Set.union_subset_iff, and_imp,
     Submodule.restrictScalars_mem]
@@ -491,17 +486,17 @@ set_option backward.isDefEq.respectTransparency false in
   · intro nsB
     have : x ∈ (Submodule.span R s : PointedCone R M) :=
       h (Submodule.span R s) Submodule.subset_span
-    rw [← span_sup_span_neg_eq_submodule_span] at this
+    rw [← hull_sup_hull_neg_eq_submodule_span] at this
     obtain ⟨_, h₁, _, h₂, h⟩ := Submodule.mem_sup.mp this
     rw [← h]
     apply add_mem
     · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr nsB) h₁
     · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr sB) h₂
 
-lemma span_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
-    span R s = Submodule.span R s := by
+lemma hull_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
+    hull R s = Submodule.span R s := by
   nth_rw 1 [← Set.union_self s, hs]
-  exact span_union_neg_eq_submodule_span s
+  exact hull_union_neg_eq_submodule_span s
 
 section Pointwise
 
@@ -510,7 +505,7 @@ open Pointwise
 lemma sup_neg_eq_submodule_span (C : PointedCone R M) : -C ⊔ C = C.linSpan := by
   nth_rw 1 2 [← Submodule.span_eq C]
   rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
-  exact span_union_neg_eq_submodule_span (C : Set M)
+  exact hull_union_neg_eq_submodule_span (C : Set M)
 
 -- NOTE: I think only one of `neg_eq_iff_eq_linSpan` and `neg_eq_iff_eq_linSpan` is needed.
 --  I don't know which.
@@ -571,7 +566,7 @@ section Map
 
 variable {M' : Type*} [AddCommMonoid M'] [Module R M']
 
-lemma map_span (f : M →ₗ[R] M') (s : Set M) : map f (span R s) = span R (f '' s) :=
+lemma map_hull (f : M →ₗ[R] M') (s : Set M) : map f (hull R s) = hull R (f '' s) :=
   Submodule.map_span _ _
 
 end Map
@@ -703,7 +698,7 @@ theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • 
 
 -- analogue of `Submodule.span_singleton_smul_eq`
 set_option backward.isDefEq.respectTransparency false in
-theorem span_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : span R {r • x} = span R {x} := by
+theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : hull R {r • x} = hull R {x} := by
   ext y
   simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop]
   constructor <;> intro h <;> obtain ⟨a, ha, h⟩ := h
