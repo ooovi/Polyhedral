@@ -121,11 +121,11 @@ lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   exact eq_zero_of_add_nonpos_left (hφ _ hx) (hφ _ hy) (le_of_eq h)
 
 -- probably the better formulation of the below
-lemma IsExposedFaceOf.quot_iff' {S : Submodule R M} (hF : F.IsFaceOf C) (hF : S ≤ F.linSpan) :
+lemma IsExposedFaceOf.quot_iff' {S : Submodule R M} (hF : F.IsFaceOf C) (hF : S ≤ span R F) :
     F.IsExposedFaceOf C ↔ (F.quot S).IsExposedFaceOf (C.quot S) := sorry
 
 lemma IsExposedFaceOf.quot_iff (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C) (hF : F₂ ≤ F₁) :
-    F₁.IsExposedFaceOf C ↔ (F₁.quot F₂.linSpan).IsExposedFaceOf (C.quot F₂.linSpan) := sorry
+    F₁.IsExposedFaceOf C ↔ (F₁.quot (span R F₂)).IsExposedFaceOf (C.quot (span R F₂)) := sorry
 
 variable {S : Submodule R M}
 

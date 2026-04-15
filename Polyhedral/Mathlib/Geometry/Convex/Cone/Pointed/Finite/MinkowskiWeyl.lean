@@ -371,7 +371,7 @@ lemma inf_fg {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG) : (C ⊓ D).FG :
 
 /-- The intersection of an FG cone with an arbitrary submodule is FG. -/
 lemma inf_fg_submodule {C : PointedCone 𝕜 M} (hC : C.FG) (S : Submodule 𝕜 M) : (C ⊓ S).FG := by
-  rw [left_eq_inf.mpr C.le_linSpan, inf_assoc, ← coe_inf]
+  rw [left_eq_inf.mpr (le_span (C := C)), inf_assoc, ← coe_inf]
   exact inf_fg hC <| FG.coe_fg <| FG.of_le (FG.span_fg hC) inf_le_left
 
 lemma inf_submodule_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG)

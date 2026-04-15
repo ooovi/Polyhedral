@@ -53,10 +53,11 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- ## TODO: remove `isPerfPair` from everything below.
 
-lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) : (C ⊔ (span R (F : Set M))).lineal = F.linSpan := by
+lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) :
+    (C ⊔ (span R (F : Set M))).lineal = span R F := by
   rw [sup_comm]
   rw [_lineal_sup_eq] <;> simp -- WARNING: is `_lineal_sup_eq` even true?
-  simpa using le_trans hF.lineal_le (le_linSpan F)
+  simpa using le_trans hF.lineal_le le_span
   -- ext x
   -- simp [mem_lineal, mem_span, Submodule.mem_sup]
   -- constructor
@@ -89,7 +90,8 @@ lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   wlog h : C.FG with exposed -- reduction to salient case
   · have h' := hF.quot (Eq.trans_le hF.lineal_eq_lineal.symm (lineal_le_span F))
-    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, PointedCone.ofSubmodule_linSpan]
+    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, coe_ofSubmodule,
+      Submodule.span_eq]
     simpa using exposed hC.salientQuot h' hC.salientQuot_fg
   exact IsFaceOf.FG.exposed h hF
 

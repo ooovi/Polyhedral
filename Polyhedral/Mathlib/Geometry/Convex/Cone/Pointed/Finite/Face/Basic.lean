@@ -8,6 +8,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
 namespace PointedCone
 
+open Submodule (span)
+
 section DivisionRingLemmas
 
 variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -62,7 +64,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     rw [FG.dual_flip_dual p hC]
     nth_rw 2 [← Submodule.dual_span]
     rw [Submodule.dual_flip_dual p]
-    have H : (C ⊔ F.linSpan).lineal = F.linSpan := by
+    have H : (C ⊔ span R (F : Set M)).lineal = span R F := by
       sorry
     rw [H]
     exact hF.inf_span
@@ -185,7 +187,7 @@ variable {C : PointedCone R M}
 lemma Face.rank_one_of_atom (hfg : C.FG) (hsal : C.Salient)
     (F : Face C) (hF : IsAtom F) : F.rank = 1 := by
   by_cases! h : F.rank < 1
-  · absurd (Face.bot_iff_rank_zero hsal).mp <| Cardinal.lt_one_iff_zero.mp h
+  · absurd (Face.bot_iff_rank_zero hsal).mp <| Cardinal.lt_one_iff.mp h
     exact hF.ne_bot
   have h1 : (F : PointedCone R M).FG := IsFaceOf.fg hfg F.isFaceOf
   have h2 : (F : PointedCone R M).Salient := IsFaceOf.salient hsal F.isFaceOf

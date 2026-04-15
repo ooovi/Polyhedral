@@ -82,16 +82,10 @@ alias span_submodule_span := linSpan_hull_eq_submodule_span
 
 -- end Ring
 
-
-end Semiring
-
-
 -- ## COE
 
-section Semiring_AddCommGroup
-
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
@@ -147,10 +141,10 @@ lemma hull_le_submodule_span (s : Set M) : hull R s ≤ Submodule.span R s :=
 lemma hull_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : hull R s ≤ Submodule.span R t
   := le_trans (hull_le_submodule_span s) (Submodule.span_mono hst)
 
-@[deprecated Submodule.subset_span (since := "")]
-lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := Submodule.subset_span
+lemma le_span {C : PointedCone R M} : C ≤ span R (C : Set M) := Submodule.subset_span
 
--- lemma le_span (C : PointedCone R M) : C ≤ span R (C : Set M) := Submodule.subset_span
+@[deprecated le_span (since := "")]
+lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := le_span
 
 @[deprecated (since := "")]
 alias le_submodule_span_self := le_linSpan
@@ -162,8 +156,8 @@ alias le_submodule_span := le_linSpan
 lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) : C ≤ span R (D : Set M) :=
   le_trans hCD Submodule.subset_span
 
-@[deprecated (since := "today")]
-alias le_span := subset_span
+-- @[deprecated (since := "today")]
+-- alias le_span := subset_span
 
 -- should be in `Submodule.Basic`
 @[deprecated "Really needed?" (since := "today")]
@@ -322,7 +316,7 @@ lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
 
 -- Submodule.submoduleOf_sup_of_le
 
-end Semiring_AddCommGroup
+end Semiring
 
 
 
