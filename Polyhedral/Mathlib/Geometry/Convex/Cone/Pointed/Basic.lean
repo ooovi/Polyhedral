@@ -439,7 +439,7 @@ variable (R) in
         abel
 
 @[simp] lemma hull_sup_hull_neg_eq_submodule_span (s : Set M) :
-    hull R s ⊔ hull R (-s) = Submodule.span R s := by
+    hull R s ⊔ hull R (-s) = span R s := by
   ext x
   constructor <;> intro h
   · obtain ⟨_, hy, _, hz, rfl⟩ := Submodule.mem_sup.mp h
@@ -469,7 +469,7 @@ variable (R) in
 -- submodule of R should be easier with this.
 set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma hull_union_neg_eq_submodule_span (s : Set M) :
-    hull R (-s ∪ s) = Submodule.span R s := by
+    hull R (-s ∪ s) = span R s := by
   ext x
   simp only [Submodule.mem_span, Set.union_subset_iff, and_imp,
     Submodule.restrictScalars_mem]
