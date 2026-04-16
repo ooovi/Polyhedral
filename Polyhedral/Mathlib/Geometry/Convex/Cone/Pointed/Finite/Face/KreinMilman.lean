@@ -14,7 +14,7 @@ section opt
 
 set_option backward.isDefEq.respectTransparency false in
 /- The minimum of `f/g` on a salient cone. -/
-def opt (C : PointedCone R M) (f g : M →ₗ[R] R) (_ : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) :
+def opt (C : PointedCone R M) (f g : M →ₗ[R] R) :
     PointedCone R M where
   carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
   add_mem' := by
@@ -35,7 +35,7 @@ def opt (C : PointedCone R M) (f g : M →ₗ[R] R) (_ : ∀ x ∈ C, 0 ≤ g x 
     simp only [LinearMap.map_smul_of_tower, Algebra.smul_mul_assoc, Algebra.mul_smul_comm]
     exact (smul_le_smul_iff_of_pos_left h).mpr <| hx.2 y hy
 
-lemma IsSalient.of_opt (C : PointedCone R M) (_ g : M →ₗ[R] R)
+lemma IsSalient.of_opt (C : PointedCone R M) (g : M →ₗ[R] R)
     (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.Salient := by
   intro x hx x_ne_0 hxn
   have h1 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
@@ -45,14 +45,14 @@ lemma IsSalient.of_opt (C : PointedCone R M) (_ g : M →ₗ[R] R)
   linarith
 
 lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : (C.opt f g hg).IsFaceOf C := by
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : (C.opt f g).IsFaceOf C := by
   refine { le := fun _ hx ↦ hx.1, mem_of_smul_add_mem := ?_ }
   intro x y a hx hy ha ⟨h2, h⟩
   by_cases! x_ne_0 : x = 0
-  · rw [x_ne_0]; exact zero_mem (C.opt f g hg)
+  · rw [x_ne_0]; exact zero_mem (C.opt f g)
   by_cases! t_ne_0 : a • x + y = 0
   · exfalso
-    apply (IsSalient.of_opt C f g hg) (a • x)
+    apply (IsSalient.of_opt C g hg) (a • x)
     · exact C.smul_mem (le_of_lt ha) hx
     · exact smul_ne_zero (ne_of_gt ha) x_ne_0
     rw [neg_eq_of_add_eq_zero_right t_ne_0]
@@ -76,12 +76,12 @@ lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
 
 set_option backward.isDefEq.respectTransparency false in
 lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g hg := by
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g := by
   classical
   obtain ⟨s, hs⟩ := hC
   have hs0 : ∃ z ∈ s, z ≠ 0 := by
     by_contra hs0
-    push_neg at hs0
+    push Not at hs0
     exact hC0 <| by rw [← hs]; exact Submodule.span_eq_bot.mpr hs0
   have hg_pos : ∀ {z : M}, z ∈ C → z ≠ 0 → 0 < g z := by
     intro z hz hz0
@@ -119,7 +119,7 @@ lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ �
         using hy'
 
 lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.opt f g hg ≠ ⊥ := by
+    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.opt f g ≠ ⊥ := by
   rcases FG.exists_ne_zero_mem_opt C hC hC0 f g hg with ⟨x, hx0, hxopt⟩
   intro hbot
   exact hx0 <| by simpa [hbot] using hxopt
@@ -128,9 +128,9 @@ end opt
 
 /- For every ray `x` of the span of a set `s`, there is a member of `s` that also spans the ray. -/
 lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
-    (hspan : (hull R {x}).IsFaceOf (hull R s)) : ∃ y ∈ s, ∃ c : R, 0 < c ∧ y = c • x := by
+    (hspan : (R ∙₊ x).IsFaceOf (hull R s)) : ∃ y ∈ s, ∃ c : R, 0 < c ∧ y = c • x := by
   have h := hspan.hull_inter_face_hull_inf_face
-  have ⟨y, hy, hy0⟩ : ∃ w ∈ s ∩ (hull R {x}), w ≠ 0 := by
+  have ⟨y, hy, hy0⟩ : ∃ w ∈ s ∩ (R ∙₊ x), w ≠ 0 := by
     by_contra H
     absurd hx
     push Not at H
@@ -144,15 +144,16 @@ lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
 open Module in
 -- TODO: this proof uses FG only at one point: to show that opt is non-empty. This should
 --  generalize to dual-closed.
-/- Krein-Milman theorem: Every finitely generated cone is spanned by a finite set of its rays. -/
+/- Krein-Milman theorem: Every finitely generated cone is spanned by its rays, that is,
+  by the finite set of its 1-dimensional faces. -/
 lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
-    ∃ s : Finset M, hull R s = C ∧ ∀ x ∈ s, (hull R {x}).IsFaceOf C := by
+    ∃ s : Finset M, hull R s = C ∧ ∀ x ∈ s, (R ∙₊ x).IsFaceOf C := by
   classical
   let ⟨s, hs⟩ := hfg
   by_cases hs' : s = ∅
   · exact ⟨∅, by simp [← hs, hs']⟩
   by_contra! h
-  let t := s.filter fun x => (hull R {x}).IsFaceOf C
+  let t := s.filter fun x => (R ∙₊ x).IsFaceOf C
   specialize h t
   have hts : t ⊆ s := by simp [t]
   have hst : ¬(s : Set M) ⊆ hull R (t : Set M) := by
@@ -178,7 +179,7 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   rw [hs] at hsal
   simp only [Dual.eval_apply, gt_iff_lt] at hf hf' hg
   rw [hs] at hg
-  let F := C.opt f g hg
+  let F := C.opt f g
   have hF : F.IsFaceOf C := IsFaceOf.of_opt C f g hg
   have hC0 : C ≠ ⊥ := by
     intro hC0
