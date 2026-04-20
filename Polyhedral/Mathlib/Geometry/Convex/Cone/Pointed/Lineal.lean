@@ -34,7 +34,7 @@ def lineal_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by
   ext x; simp
 
 def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
-  ext x; simpa using mem_lineal
+  ext x; simp
 
 @[simp]
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
@@ -51,6 +51,15 @@ lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal 
   intro x hx
   rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
+
+lemma lineal_le_ker_of_le_positive {C : PointedCone R M} {f : M →ₗ[R] R}
+    (h : C ≤ f.positive) : C.lineal ≤ f.ker := by
+  simpa using lineal_mono h
+
+-- this is just a special case of s ⊆ C → hull R s ⊆ C
+example {s : Set M} {f : M →ₗ[R] R} (h : s ⊆ f.positive) : hull R s ≤ f.positive := by
+  rw [← Submodule.span_eq f.positive]
+  exact Submodule.span_mono h
 
 /- In this section we show properties of lineal that also follow from lineal
   being a face. But we need this earlier than faces, so we need to prove that
@@ -290,6 +299,11 @@ omit [IsOrderedRing R] in
 
 end Nonneg
 
+lemma salient_of_pos_linearMap {C : PointedCone R M} {f : M →ₗ[R] R}
+    (h : ∀ c ∈ C, c ≠ 0 → 0 < f c) : C.Salient := by
+  sorry
+
+-- NOTE: an easier proof via `salient_of_pos_linearMap` seems only possible if `R` is a field.
 set_option backward.isDefEq.respectTransparency false in
 lemma salient_hull_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
     (hull R s).Salient := by classical

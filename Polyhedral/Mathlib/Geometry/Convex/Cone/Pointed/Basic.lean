@@ -69,6 +69,50 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   le_l_u _ := subset_hull
   choice_eq _ _ := rfl
 
+-- lemma span_inf_left (s t : Set M) : span R (s ∩ t) ≤ span R s := by
+--   apply Submodule.span_mono
+--   simp only [Set.inter_subset_left]
+
+-- ## POSITIVE
+
+section
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+-- variable {M₂ : Type*} [AddCommGroup M₂] [Module R M₂]
+-- variable [LinearOrder M₂] [IsOrderedAddMonoid M₂]
+
+set_option backward.isDefEq.respectTransparency false in
+def _root_.LinearMap.positive (f : M →ₗ[R] R) : PointedCone R M where
+  carrier := {x : M | 0 ≤ f x}
+  add_mem' hx hy := by simpa using add_nonneg hx hy
+  zero_mem' := by simp
+  smul_mem' r x hx := by simpa using smul_nonneg r.2 hx
+
+@[simp] lemma _root_.LinearMap.mem_positive {f : M →ₗ[R] R} {x : M} :
+  x ∈ f.positive ↔ 0 ≤ f x := .rfl
+
+lemma _root_.LinearMap.ker_le_positive {f : M →ₗ[R] R} : f.ker ≤ f.positive := by
+  intro x
+  simp +contextual
+
+variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
+  [Module R M] {S : Set M}
+
+@[simp] lemma _root_.LinearMap.positive_lineal_eq_ker {f : M →ₗ[R] R} :
+    f.positive.lineal = f.ker := by
+  ext x
+  simp only [mem_lineal, LinearMap.mem_positive, map_neg, Left.nonneg_neg_iff,
+    LinearMap.mem_ker]
+  rw [and_comm]
+  exact le_antisymm_iff.symm
+
+open Pointwise in
+@[simp] lemma _root_.LinearMap.neg_positive {f : M →ₗ[R] R} : (-f).positive = -f.positive := by
+  ext x; simp
+
+end
+
 -- ## LINSPAN
 
 /-- The linear span of the cone. -/
