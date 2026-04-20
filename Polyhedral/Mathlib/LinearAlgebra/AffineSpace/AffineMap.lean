@@ -88,12 +88,20 @@ theorem affineMap_convexComboPair (f : P1 →ᵃ[k] W) (finj : Injective f) {a :
       · exact (hne h'.symm).elim
       · simp [h]
 
-theorem AffineMap.convex (f : P1 →ᵃ[k] W) (finj : Function.Injective f) (s : Set P1)
+theorem AffineMap.convex_of_injective {f : P1 →ᵃ[k] W} {s : Set P1} (finj : Function.Injective f)
     (hs : ConvexSpace.Convex k s) : Convex k (f '' s) := by
   intro x xs y ys a b ao bo ab
   use convexComboPair a b ao bo ab xs.choose ys.choose
   refine ⟨hs xs.choose_spec.1 ys.choose_spec.1 _ _ _, ?_⟩
   simp [← convexComboPair_eq_smul_add_smul ao bo (ab := ab), affineMap_convexComboPair _ finj,
     xs.choose_spec, ys.choose_spec]
+
+theorem AffineMap.preimage_convex_of_injective {f : P1 →ᵃ[k] W} {s : Set W}
+    (finj : Function.Injective f)
+    (hs : Convex k s) : ConvexSpace.Convex k (f ⁻¹' s) := by
+  intro x xs y ys a b ao bo ab
+  simp only [Set.mem_preimage, affineMap_convexComboPair _ finj,
+    convexComboPair_eq_smul_add_smul ao bo]
+  exact hs (Set.mem_preimage.mp xs) (Set.mem_preimage.mp ys) ao bo ab
 
 end Ordered
