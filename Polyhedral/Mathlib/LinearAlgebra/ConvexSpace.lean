@@ -23,9 +23,17 @@ theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R
 /-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
 def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter R
 
-theorem empty_convex : Convex R (M := M) ∅ := sorry
+theorem empty_convex : Convex R (M := M) ∅ := by
+  intro x hx y hy a b ha hb h
+  simp only [Set.mem_empty_iff_false]
+  contradiction
 
-theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := sorry
+theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := by
+  unfold Convex
+  simp only [convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset, Set.iInf_eq_iInter,
+    Set.mem_iInter, Subtype.forall, and_imp]
+  intro x hx y hy a b ha hb h w hw ht
+  exact (ht (hx w hw ht) (hy w hw ht) ha hb h)
 
 /-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
 the base semiring has some element between `0` and `1`. -/
