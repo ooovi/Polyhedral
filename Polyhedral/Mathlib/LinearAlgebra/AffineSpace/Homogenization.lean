@@ -1,4 +1,7 @@
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Mathlib.Geometry.Convex.Cone.Pointed
+import Polyhedral.Mathlib.LinearAlgebra.ConvexSpace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 
 open Function Submodule
 
@@ -77,9 +80,119 @@ theorem embed_range_isSpanning : span R (hom.embed.range : Set W) = ⊤ := by
   simpa using
     Submodule.add_mem _ (hlin hom x a₀) <| smul_mem _ (hom.height x) (subset_span ⟨a₀, rfl⟩)
 
+section HomCone
+
+variable [PartialOrder R] [IsOrderedRing R]
+
+-- TODO redefine as "smul span" of the set, prove its a pointed salient cone in case the set is convex
+def cone (P : Set A) := PointedCone.hull R (hom.embed '' P)
+
+def homogenizationHom :
+    OrderHom (Set A) (PointedCone R W) where
+  toFun P := hom.cone P
+  monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
+
+theorem empty_homogenization : hom.cone (∅ : Set A) = ⊥ := by simp [cone]
+
+end HomCone
+
 end Homogenization
 
 end Ring
+
+section Field
+
+variable {R A : Type*}
+variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
+variable {W : Type*} [AddCommGroup W] [Module R W]
+variable {V : Type*} [AddCommGroup V] [Module R V]
+variable [AddTorsor V A]
+variable (hom : Affine.Homogenization R A W)
+
+namespace Homogenization
+
+theorem cone_salient {P : Set A} : PointedCone.Salient (hom.cone P) := by
+  simp [ConvexCone.Salient, cone]
+  intro x xm xn0
+  sorry
+
+
+/-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other
+points, then `q` lies in the open segment between them. -/
+theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
+    (h₁ : 0 < r₁) (h₂ : 0 < r₂) (hₜ : 0 < t)
+    (h : r₁ • hom.embed p₁ + r₂ • hom.embed p₂ = t • hom.embed q) :
+    q ∈ ConvexSpace.openSegment R p₁ p₂ := by
+  have : r₁ + r₂ = t := by simpa [hom.height_one, map_add, map_smul] using congr_arg hom.height h
+  have : t⁻¹ • r₁ + t⁻¹ • r₂ = 1 := by
+      simp_rw [← smul_add, smul_eq_mul, this, mul_comm, Field.mul_inv_cancel _ hₜ.ne.symm]
+  use (t⁻¹ • r₁), (t⁻¹ • r₂), (smul_pos (by positivity) h₁), (smul_pos (by positivity) h₂), this
+  apply hom.inj
+  have : t⁻¹ • (r₁ • hom.embed p₁ + r₂ • hom.embed p₂) = hom.embed q := by
+    rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
+  simp [affineMap_convexComboPair _ hom.inj, Affine.convexComboPair_eq_smul_add_smul, ← this,
+    smul_smul]
+
+open Set Pointwise ConvexSpace PointedCone
+
+variable {P F : Set A}
+
+
+theorem homogenization_isFaceOf_of_empty (hpc : Convex R P) :
+    (hom.cone ∅).IsFaceOf (hom.cone P) where
+  le := by simp [cone]
+  mem_of_smul_add_mem := by simp [cone]; sorry -- use salient
+
+
+theorem homogenization_isFaceOf_of_nonempty (hpc : Convex R P) (hc : Convex R F)
+    (he : IsExtreme R P F) (hnf : F.Nonempty) :
+    (hom.cone F).IsFaceOf (hom.cone P) where
+  le := (hom.homogenizationHom).monotone' he.subset
+  mem_of_smul_add_mem := by
+    · intro v w a hv hw ha havw
+      have cF := hom.embed.convex hom.inj F hc
+      apply (mem_hull_of_convex (hnf.image _) cF).mpr
+      have cP := hom.embed.convex hom.inj P hpc
+      have hnp : (hom.embed '' P).Nonempty := (hnf.image _).mono (image_mono he.subset)
+      by_cases hv0 : v ≠ 0
+      · obtain ⟨rv, rv0, p, ⟨p', pp, rfl⟩, _, _⟩ := smul_pos_of_mem_hull hnp cP hv hv0
+        by_cases hw0 : w ≠ 0
+        · obtain ⟨rw, rw0, q, ⟨q', qq, rfl⟩, _, _⟩ := smul_pos_of_mem_hull hnp cP hw hw0
+          have :  a • (rv • hom.embed p') + (rw • hom.embed q') ≠ 0 := by
+            simp at hw0 ⊢
+            push Not at hw0 ⊢
+            simp_all
+            push Not
+            have := hom.embed_ne_zero p'
+            have := hom.embed_ne_zero q'
+            sorry
+          obtain ⟨rvw, rvw0, qp, ⟨pq', qqp, rfl⟩, pdp⟩ := smul_pos_of_mem_hull (hnf.image _) cF havw this
+          have := he.left_mem_of_mem_openSegment pp qq qqp ?_
+          · use rv, rv0.le
+            exact smul_mem_smul_set <| mem_image_of_mem (⇑hom.embed) this
+          rw [← smul_assoc _ rv] at pdp
+          exact hom.pos_combo_openSegment (smul_pos ha rv0) rw0 rvw0 pdp.symm
+        · simp only [ne_eq, not_not] at hw0
+          subst hw0
+          obtain ⟨r', h, hh, hhh, hhhh⟩ :=
+            (mem_hull_of_convex (hnf.image _) (hom.convex hom.inj _ hc)).mp havw
+          use r', h
+          simp at hhhh
+          sorry
+      · simp only [ne_eq, not_not] at hv0
+        subst hv0
+        use 0, le_rfl
+        apply Set.mem_smul_set.mpr
+        simpa using hnf
+
+def Face.homogenizationHom (hpc : Convex R P) :
+    OrderHom (⟨P, hpc⟩ : ConvexSet R A).Face (hom.cone P).Face where
+  toFun F := sorry -- ⟨_, hom.homogenization_isFaceOf F⟩
+  monotone' _ _ h := sorry -- Submodule.span_mono (Set.image_mono h)
+
+end Homogenization
+
+end Field
 
 #exit
 

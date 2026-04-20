@@ -8,7 +8,8 @@ section Convex
 
 namespace ConvexSpace
 
-variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R] [ConvexSpace R M]
+variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
+  [ConvexSpace R M]
 
 /-- Convexity of sets in convex spaces. -/
 def Convex (s : Set M) : Prop :=
@@ -21,6 +22,10 @@ theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R
 
 /-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
 def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter R
+
+theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := sorry
+
+theorem empty_convex : Convex R (M := M) ∅ := sorry
 
 /-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
 the base semiring has some element between `0` and `1`. -/
@@ -38,6 +43,43 @@ structure IsExtreme (A B : Set M) : Prop where
   subset : B ⊆ A
   left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ A → ∀ ⦃y⦄, y ∈ A →
     ∀ ⦃z⦄, z ∈ B → z ∈ openSegment R x y → x ∈ B
+
+theorem isExtreme_empty {S : Set M} : IsExtreme R S ∅ where
+  subset := S.empty_subset
+  left_mem_of_mem_openSegment := by simp
+
+variable (M) in
+structure ConvexSet where
+  carrier : Set M
+  convex : ConvexSpace.Convex R carrier
+
+namespace ConvexSet
+
+instance : SetLike (ConvexSet R M) M where
+  coe F := F.carrier
+  coe_injective' := by sorry
+
+instance : PartialOrder (ConvexSet R M) := .ofSetLike _ M
+
+variable {R}
+
+def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C.carrier F.carrier
+
+/-- A face of a convex set `P`. Represents the face lattice of `P`. -/
+structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
+  isFaceOf : IsFaceOf toConvexSet P
+
+variable {P : ConvexSet R M}
+
+instance : SetLike (Face P) M where
+  coe F := F.toConvexSet
+  coe_injective' := by sorry
+
+instance : PartialOrder (Face P) := .ofSetLike (Face P) M
+
+instance : Bot (Face P) := ⟨⟨∅, ConvexSpace.empty_convex _⟩, sorry⟩
+
+end ConvexSet
 
 end ConvexSpace
 

@@ -675,7 +675,7 @@ end Quotient
 section DivisionRing
 
 variable {R M : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M] {S : Set M}
+  [Module R M] {S T : Set M}
 
 -- TODO: golf this
 theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C := by
@@ -700,6 +700,48 @@ theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : hull R {r • x} =
     · exact mul_nonneg ha (le_of_lt (inv_pos.mpr hr))
     · simpa [smul_smul, inv_mul_cancel_right₀ (ne_of_lt hr).symm] using h
 
+variable {C D : PointedCone R M} {s : Set M}
+
+lemma hull_min (hsC : s ⊆ C) : hull R s ≤ C := sInf_le hsC
+
 end DivisionRing
+
+section Field
+
+variable {R M : Type*} [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
+  [Module R M] {s : Set M}
+
+open Set LinearMap Pointwise
+
+/-- The cone hull of a convex set is the union of the closed halflines through that set. -/
+lemma mem_hull_of_convex {x : M} (hs : s.Nonempty) (hc : Convex R s) :
+    x ∈ hull R s ↔ ∃ r : R, 0 ≤ r ∧ x ∈ r • s where
+  mp hx := PointedCone.hull_min (C := {
+              carrier := {y | ∃ r : R, 0 ≤ r ∧ y ∈ r • s}
+              smul_mem' := by
+                intro c x ⟨r, rpos, hr⟩
+                use c.val • r, mul_nonneg c.prop rpos
+                obtain ⟨m, hm, rfl⟩ := hr
+                exact ⟨m, hm, by simp [mul_smul]; rfl⟩
+              add_mem' := by
+                rintro y₁ y₂ ⟨r₁, hr₁, hy₁⟩ ⟨r₂, hr₂, hy₂⟩
+                refine ⟨r₁ + r₂, add_nonneg hr₁ hr₂, ?_⟩
+                rw [hc.add_smul hr₁ hr₂]
+                exact add_mem_add hy₁ hy₂
+              zero_mem' := by
+                use 0; simpa using ⟨hs.choose, hs.choose_spec, zero_smul R (Exists.choose hs)⟩
+            }) (fun y hy ↦ ⟨1, by simpa⟩) hx
+  mpr := by
+    rintro ⟨r, hr, y, hy, rfl⟩
+    exact (hull R s).smul_mem hr <| subset_hull hy
+
+theorem smul_pos_of_mem_hull {x : M} (hs : s.Nonempty) (hc : Convex R s)
+    (h : x ∈ hull R s) (hx : x ≠ 0) : ∃ r : R, 0 < r ∧ x ∈ r • s := by
+  obtain ⟨r, rpos, hr⟩ := (mem_hull_of_convex hs hc).mp h
+  rcases eq_or_ne 0 r with rfl | h
+  · simp_all
+  exact ⟨r, lt_of_le_of_ne rpos h, hr⟩
+
+end Field
 
 end PointedCone
