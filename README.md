@@ -9,15 +9,16 @@ Currently the project implements:
 * co-finitely generated submodules (`CoFG`)
 * duality for submodules w.r.t. a general bilinear pairing.
 * dual closed subspaces (`DualClosed`) which expresses that a subspace is its own double dual.
-* `DualFG` submodules, which are the dual of `FG` (finitely generated) submodules.
+* `FGDual` submodules, which are the dual of `FG` (finitely generated) submodules.
 * duality theory for `FG` submodules
 * dual closed pointed cones
-* `DualFG` pointed cones
+* `FGDual` pointed cones
 * duality theory for `FG` pointed cones, in particular, a version of the Minkowski-Weyl theorem that works to infinite dimensional modules.
 * polyhedral cones as cones that can be written as the sum of an `FG` cone and a submodule.
 * duality theory of polyhedral cones
 * faces and exposed faces of cones
 * the face lattice of a cone
+* Krein-Milman theorem for FG cones
 * face theory of polyhedral cones (all faces are exposed, the face lattice is graded, etc.)
 
 <!--blueprint:  https://ooovi.github.io/Polyhedral/-->
