@@ -14,7 +14,7 @@ variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedR
 /-- Convexity of sets in convex spaces. -/
 def Convex (s : Set M) : Prop :=
   ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → ∀ ⦃a b : R⦄ (hs : 0 ≤ a) (ht : 0 ≤ b) (h : a + b = 1),
-    (convexComboPair a b hs ht h x y) ∈ s
+    convexComboPair a b hs ht h x y ∈ s
 
 theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R (⋂₀ S) :=
   fun _ xs _ ys _ _ hs ht h1 t ts =>
@@ -23,9 +23,9 @@ theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R
 /-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
 def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter R
 
-theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := sorry
-
 theorem empty_convex : Convex R (M := M) ∅ := sorry
+
+theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := sorry
 
 /-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
 the base semiring has some element between `0` and `1`. -/

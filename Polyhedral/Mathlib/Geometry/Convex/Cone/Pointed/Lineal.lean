@@ -289,6 +289,14 @@ omit [IsOrderedRing R] in
 
 end Nonneg
 
+lemma salient_of_pos_linearMap {C : PointedCone R M} {f : M →ₗ[R] R}
+    (h : ∀ c ∈ C, c ≠ 0 → 0 < f c) : C.Salient := by
+  -- sketch: if a point c is in the cone, f c is positive.
+  -- since f is linear, f -c is negative.
+  -- by hypothesis h, -c cannot be in the cone. so the cone is salient.
+  -- issue #35
+  sorry
+
 set_option backward.isDefEq.respectTransparency false in
 lemma salient_hull_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
     (hull R s).Salient := by classical

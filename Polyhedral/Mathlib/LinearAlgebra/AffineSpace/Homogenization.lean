@@ -26,21 +26,21 @@ class Homogenization extends embed : A →ᵃ[R] W where
 
 namespace Homogenization
 
-variable (hom : Homogenization R A W)
+variable [hom : Homogenization R A W]
 
 /-- Embedding the underlying vector space is exactly the height-0 hyperplane. -/
 theorem embed_linear_range_eq_height_ker : hom.linear.range = hom.height.ker := by
   ext x
   let a₀ := Classical.arbitrary A
   simp only [LinearMap.mem_range, LinearMap.mem_ker]
-  have : (∃ y, hom.linear y = x) ↔ ∃ a b : A, hom.linear (a -ᵥ b) = x :=
+  have : (∃ y, hom.linear y = x) ↔ ∃ a b : A, embed.linear (a -ᵥ b) = x :=
     ⟨fun ⟨y, hy⟩ => ⟨y +ᵥ a₀, a₀, by simp [vadd_vsub, hy]⟩, fun ⟨a, b, hab⟩ => ⟨a -ᵥ b, hab⟩⟩
   rw [this]
   have hh := Set.ext_iff.mp hom.embed_height
   constructor
   · rintro ⟨a, b, hab⟩
     simp only [Set.mem_preimage, Set.mem_singleton_iff] at hh
-    simp [← hab, map_sub, (hh (hom.embed b)).mp ⟨b, rfl⟩, (hh (hom.embed a)).mp ⟨a, rfl⟩]
+    simp [← hab, map_sub, (hh (embed b)).mp ⟨b, rfl⟩, (hh (embed a)).mp ⟨a, rfl⟩]
   · intro h
     have ha := Set.mem_preimage.mp <| (hh (hom.embed a₀)).mp (by simp)
     obtain ⟨b, hb⟩ : x + hom.embed a₀ ∈ (hom.embed.range : Set W) := by
@@ -57,7 +57,7 @@ variable [Nontrivial R] in
 theorem embed_ne_zero (x : A) : hom.embed x ≠ (0 : W) := by
   intro hn
   have := congrArg hom.height hn
-  simp [height_one hom x] at this
+  simp [height_one x] at this
 
 /-- The homogenization of a point in `V` has height 0. -/
 lemma height_zero (v : V) : hom.height (hom.linear v) = 0 := by
@@ -67,7 +67,7 @@ lemma height_zero (v : V) : hom.height (hom.linear v) = 0 := by
 lemma hlin (x : W) (a₀ : A) :
     x - hom.height x • hom.embed a₀ ∈ Submodule.span R hom.embed.range := by
   obtain ⟨v, hv⟩ : x - hom.height x • hom.embed a₀ ∈ hom.linear.range := by
-    simp [embed_linear_range_eq_height_ker, height_one hom a₀]
+    simp [embed_linear_range_eq_height_ker, height_one a₀]
   have : hom.linear v = hom.embed (v +ᵥ a₀) - hom.embed a₀ := by simp
   rw [← hv, this]
   apply Submodule.sub_mem <;> apply Submodule.subset_span
@@ -78,21 +78,22 @@ theorem embed_range_isSpanning : span R (hom.embed.range : Set W) = ⊤ := by
   refine eq_top_iff'.mpr (fun x ↦ ?_)
   let a₀ := Classical.arbitrary A
   simpa using
-    Submodule.add_mem _ (hlin hom x a₀) <| smul_mem _ (hom.height x) (subset_span ⟨a₀, rfl⟩)
+    Submodule.add_mem _ (hlin x a₀) <| smul_mem _ (hom.height x) (subset_span ⟨a₀, rfl⟩)
 
 section HomCone
 
 variable [PartialOrder R] [IsOrderedRing R]
 
 -- TODO redefine as "smul span" of the set, prove its a pointed salient cone in case the set is convex
+variable (R W)
 def cone (P : Set A) := PointedCone.hull R (hom.embed '' P)
 
 def homogenizationHom :
     OrderHom (Set A) (PointedCone R W) where
-  toFun P := hom.cone P
+  toFun P := cone R W P
   monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
 
-theorem empty_homogenization : hom.cone (∅ : Set A) = ⊥ := by simp [cone]
+theorem empty_homogenization : cone R W (∅ : Set A) = ⊥ := by simp [cone]
 
 end HomCone
 
@@ -107,15 +108,15 @@ variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable [AddTorsor V A]
-variable (hom : Affine.Homogenization R A W)
+variable [hom : Affine.Homogenization R A W]
 
 namespace Homogenization
 
-theorem cone_salient {P : Set A} : PointedCone.Salient (hom.cone P) := by
-  simp [ConvexCone.Salient, cone]
-  intro x xm xn0
+theorem cone_salient {P : Set A} : PointedCone.Salient (cone R W P) := by
+  simp [cone]
+  -- use salient_of_pos_linearMap with hom.height
+  -- issue #33
   sorry
-
 
 /-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other
 points, then `q` lies in the open segment between them. -/
@@ -139,14 +140,14 @@ variable {P F : Set A}
 
 
 theorem homogenization_isFaceOf_of_empty (hpc : Convex R P) :
-    (hom.cone ∅).IsFaceOf (hom.cone P) where
+    (cone R W (A := A) ∅).IsFaceOf (cone R W P) where
   le := by simp [cone]
   mem_of_smul_add_mem := by simp [cone]; sorry -- use salient
 
 
 theorem homogenization_isFaceOf_of_nonempty (hpc : Convex R P) (hc : Convex R F)
     (he : IsExtreme R P F) (hnf : F.Nonempty) :
-    (hom.cone F).IsFaceOf (hom.cone P) where
+    (cone R W F).IsFaceOf (cone R W P) where
   le := (hom.homogenizationHom).monotone' he.subset
   mem_of_smul_add_mem := by
     · intro v w a hv hw ha havw
@@ -186,7 +187,7 @@ theorem homogenization_isFaceOf_of_nonempty (hpc : Convex R P) (hc : Convex R F)
         simpa using hnf
 
 def Face.homogenizationHom (hpc : Convex R P) :
-    OrderHom (⟨P, hpc⟩ : ConvexSet R A).Face (hom.cone P).Face where
+    OrderHom (⟨P, hpc⟩ : ConvexSet R A).Face (cone R W P).Face where
   toFun F := sorry -- ⟨_, hom.homogenization_isFaceOf F⟩
   monotone' _ _ h := sorry -- Submodule.span_mono (Set.image_mono h)
 
@@ -203,8 +204,8 @@ variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable {U : Type*} [AddCommGroup U] [Module R U]
-variable (hom : Homogenization R A W)
-variable (hom' : Homogenization R A U)
+variable [hom : Homogenization R A W]
+variable [hom' : Homogenization R A U]
 
 variable [FiniteDimensional R W] in
 noncomputable def Homogenization.uniqueUpToIso : W ≃ U where
