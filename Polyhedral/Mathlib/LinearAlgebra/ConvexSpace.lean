@@ -63,7 +63,7 @@ instance : PartialOrder (ConvexSet R M) := .ofSetLike _ M
 
 variable {R}
 
-def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C.carrier F.carrier
+def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C F.carrier
 
 /-- A face of a convex set `P`. Represents the face lattice of `P`. -/
 structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
