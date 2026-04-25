@@ -69,6 +69,16 @@ instance : SetLike (ConvexSet R M) M where
 
 instance : PartialOrder (ConvexSet R M) := .ofSetLike _ M
 
+@[simp]
+theorem coe_carrier {F : ConvexSet R M} : SetLike.coe F = F.carrier := by rfl
+
+instance : OrderBot (ConvexSet R M) where
+  bot := ⟨∅, empty_convex _⟩
+  bot_le _ := Set.subset_iff_notMem.mpr fun ⦃_⦄ _ a ↦ a
+
+@[ext]
+theorem ext {F₁ F₂ : ConvexSet R M} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+
 variable {R}
 
 def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C F.carrier

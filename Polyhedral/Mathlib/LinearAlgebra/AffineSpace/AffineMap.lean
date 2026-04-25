@@ -1,6 +1,7 @@
 import Mathlib.Analysis.Convex.Basic
 import Mathlib.LinearAlgebra.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.LinearAlgebra.ConvexSpace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 
 open Affine Module
 
@@ -35,7 +36,8 @@ variable {𝕜 E P : Type*} [Ring 𝕜] [PartialOrder 𝕜] [IsStrictOrderedRing
    [Module 𝕜 E]
 
 -- we need affine space for convexCombo_eq_sum but we can probably do better
-lemma convexComboPair_eq_smul_add_smul {x y a b ab} (a0 : (0 : 𝕜) ≤ a) (b0 : (0 : 𝕜) ≤ b) :
+lemma convexComboPair_eq_smul_add_smul {x y a b} (a0 : (0 : 𝕜) ≤ a) (b0 : (0 : 𝕜) ≤ b)
+      (ab : a + b = 1) :
     convexComboPair (M := E) a b a0 b0 ab x y = a • x + b • y := by
   classical
   simp only [convexComboPair, convexCombination_eq_sum (StdSimplex.duple x y a0 b0 ab)]
@@ -64,7 +66,8 @@ variable [PartialOrder k] [IsStrictOrderedRing k]
 variable {W : Type*} [AddCommGroup W] [Module k W]
 
 open Finsupp Function in
-theorem affineMap_convexComboPair (f : P1 →ᵃ[k] W) (finj : Injective f) {a : k} {b hs ht h x y} :
+theorem affineMap_convexComboPair_of_injective {f : P1 →ᵃ[k] W} {a : k} {b hs ht h x y}
+    (finj : Injective f) :
     f (convexComboPair a b hs ht h x y) = convexComboPair a b hs ht h (f x) (f y) := by
   simp only [convexComboPair, ConvexSpace.convexCombination, AddTorsor.convexCombination,
     StdSimplex.duple, Finsupp.coe_add]
@@ -93,15 +96,29 @@ theorem AffineMap.convex_of_injective {f : P1 →ᵃ[k] W} {s : Set P1} (finj : 
   intro x xs y ys a b ao bo ab
   use convexComboPair a b ao bo ab xs.choose ys.choose
   refine ⟨hs xs.choose_spec.1 ys.choose_spec.1 _ _ _, ?_⟩
-  simp [← convexComboPair_eq_smul_add_smul ao bo (ab := ab), affineMap_convexComboPair _ finj,
+  simp [← convexComboPair_eq_smul_add_smul ao bo ab, affineMap_convexComboPair_of_injective finj,
     xs.choose_spec, ys.choose_spec]
 
 theorem AffineMap.preimage_convex_of_injective {f : P1 →ᵃ[k] W} {s : Set W}
     (finj : Function.Injective f)
     (hs : Convex k s) : ConvexSpace.Convex k (f ⁻¹' s) := by
   intro x xs y ys a b ao bo ab
-  simp only [Set.mem_preimage, affineMap_convexComboPair _ finj,
+  simp only [Set.mem_preimage, affineMap_convexComboPair_of_injective finj,
     convexComboPair_eq_smul_add_smul ao bo]
   exact hs (Set.mem_preimage.mp xs) (Set.mem_preimage.mp ys) ao bo ab
+
+def Convex.preimage {f : P1 →ᵃ[k] W} {s : Set W} (hs : Convex k s) (finj : Function.Injective f) :
+    ConvexSpace.ConvexSet k P1 :=
+  ⟨_, AffineMap.preimage_convex_of_injective finj hs⟩
+
+open AffineMap in
+theorem preimage_isFaceOf {F C : PointedCone k W} {f : P1 →ᵃ[k] W} (hf : F.IsFaceOf C) (finj : Function.Injective f) :
+    (Convex.preimage F.convex finj).IsFaceOf (Convex.preimage C.convex finj) where
+  subset := Set.preimage_mono hf.le
+  left_mem_of_mem_openSegment  := by
+    rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
+    refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
+    rwa [← convexComboPair_eq_smul_add_smul ha.le hb.le hab,
+      ← affineMap_convexComboPair_of_injective finj, hzo]
 
 end Ordered
