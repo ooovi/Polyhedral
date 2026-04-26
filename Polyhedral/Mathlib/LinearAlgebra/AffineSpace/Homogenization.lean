@@ -18,7 +18,7 @@ variable (R A W) in
 /-- An embedding of an affine space `A` into a vector space `W` s.t. the image of `A` is exactly the
 height-1 hyperplane under a given linear height map. -/
 class Homogenization extends embed : A →ᵃ[R] W where
-  inj : embed.toFun.Injective
+  inj : Injective embed
   height : W →ₗ[R] R
   embed_height : embed.range = height ⁻¹' {1}
   extend (U : Type*) [AddCommGroup U] [Module R U] (f : A →ᵃ[R] U) :
@@ -49,9 +49,9 @@ theorem embed_linear_range_eq_height_ker : hom.linear.range = hom.height.ker := 
 
 /-- The homogenization of a point in `A` has height 1. -/
 lemma height_one (a₀ : A) : hom.height (hom.embed a₀) = 1 := by
-    convert Set.ext_iff.mp hom.embed_height (hom.embed a₀)
-    simp [SetLike.mem_coe, AffineMap.mem_range, exists_apply_eq_apply, Set.mem_preimage,
-      Set.mem_singleton_iff, true_iff]
+  convert Set.ext_iff.mp hom.embed_height (hom.embed a₀)
+  simp [SetLike.mem_coe, AffineMap.mem_range, exists_apply_eq_apply, Set.mem_preimage,
+    Set.mem_singleton_iff, true_iff]
 
 variable [Nontrivial R] in
 theorem embed_ne_zero (x : A) : hom.embed x ≠ (0 : W) := by
@@ -61,7 +61,7 @@ theorem embed_ne_zero (x : A) : hom.embed x ≠ (0 : W) := by
 
 /-- The homogenization of a point in `V` has height 0. -/
 lemma height_zero (v : V) : hom.height (hom.linear v) = 0 := by
-    simp [LinearMap.mem_ker.mp, ← embed_linear_range_eq_height_ker]
+  simp [LinearMap.mem_ker.mp, ← embed_linear_range_eq_height_ker]
 
 -- projecting x to height 0 along a₀ gives sth in the span of image of embed
 lemma hlin (x : W) (a₀ : A) :
