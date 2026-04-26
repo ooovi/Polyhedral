@@ -127,7 +127,7 @@ set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma linSpan_hull_eq_submodule_span (s : Set M) :
     span R (hull R s) = Submodule.span R s := Submodule.span_span_of_tower ..
 
-@[deprecated (since := "today")]
+@[deprecated (since := "")]
 alias span_submodule_span := linSpan_hull_eq_submodule_span
 
 -- section Ring

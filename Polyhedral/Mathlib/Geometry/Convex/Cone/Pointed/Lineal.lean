@@ -334,12 +334,12 @@ section IsDomain
 
 variable [IsDomain R] [IsTorsionFree R M]
 
-lemma salient_hull_singleton (x : M) : (hull R {x}).Salient := by
+lemma salient_hull_singleton (x : M) : (R ∙₊ x).Salient := by
   by_cases h : x = 0
   · simp [h]
   · exact salient_hull_of_linearIndepOn (by simp [h])
 
--- NOTE: there is alos `ofSubmodule_salient_iff_eq_bot` below, which proven something stronger
+-- NOTE: there is also `ofSubmodule_salient_iff_eq_bot` below, which proven something stronger
 --  for general rings, BUT assumes linear order. Is one setting better than the other?
 lemma top_not_salient (h : Module.rank R M ≠ 0) : ¬(⊤ : PointedCone R M).Salient := by
   simpa [Salient, ConvexCone.Salient, rank_zero_iff_forall_zero] using h
