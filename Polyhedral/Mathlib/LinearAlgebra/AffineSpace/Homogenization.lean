@@ -92,7 +92,18 @@ def cone (P : ConvexSet R A) := PointedCone.hull R (hom.embed '' P)
 
 -- TODO this urgently needs a better name
 variable (A) in
-def csection (C : PointedCone R W) := (PointedCone.convex C).preimage hom.inj
+def csection (C : PointedCone R W) := C.convex.preimage hom.inj
+
+lemma embed_csection_eq_inter_embed (C : PointedCone R W) :
+    hom.embed '' (csection A C : Set A) = (C : Set W) ∩ hom.embed.range := by
+  ext x
+  simp only [csection, Convex.preimage, ConvexSet.coe_carrier, Set.mem_image, Set.mem_preimage,
+    SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
+  constructor
+  · rintro ⟨y, hy, rfl⟩
+    exact ⟨hy, by use y⟩
+  · rintro ⟨hxC, y, rfl⟩
+    use y
 
 def homogenizationHom :
     OrderHom (ConvexSet R A) (PointedCone R W) where
