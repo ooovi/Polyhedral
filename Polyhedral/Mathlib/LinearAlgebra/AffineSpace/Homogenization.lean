@@ -293,7 +293,7 @@ end DivisionRing
 
 section Field
 
-variable {R : Type*} [Field R] [PartialOrder R] [IsStrictOrderedRing R]
+variable {R : Type*} [Field R] [PartialOrder R] [IsOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
