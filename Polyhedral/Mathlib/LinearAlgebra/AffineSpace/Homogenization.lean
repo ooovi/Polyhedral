@@ -95,7 +95,7 @@ variable (A) in
 def csection (C : PointedCone R W) := C.convex.preimage hom.inj
 
 lemma embed_csection_eq_inter_embed (C : PointedCone R W) :
-    hom.embed '' (csection A C : Set A) = (C : Set W) ∩ hom.embed.range := by
+    hom.embed '' (csection A C : Set A) = (C : Set W) ∩ hom.range := by
   ext x
   simp only [csection, Convex.preimage, ConvexSet.coe_carrier, Set.mem_image, Set.mem_preimage,
     SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
