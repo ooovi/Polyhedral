@@ -111,7 +111,7 @@ end Ring
 section Field
 
 variable {R A : Type*}
-variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
+variable [LinearOrder R] [Field R] [IsOrderedRing R]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable [AddTorsor V A]
