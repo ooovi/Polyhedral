@@ -1,4 +1,6 @@
 import Experimental.AbstractPolytope
+import Experimental.AffineSpace.Defs
+import Experimental.AffineSpace.Map
 import Experimental.Closure
 import Experimental.DualTopology
 import Experimental.Dual_Generic
