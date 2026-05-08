@@ -1,7 +1,8 @@
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Mathlib.Geometry.Convex.Cone.Pointed
-import Polyhedral.Mathlib.LinearAlgebra.ConvexSpace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
+
 
 open Function Submodule
 
@@ -79,6 +80,17 @@ theorem embed_range_isSpanning : span R (hom.range : Set W) = ⊤ := by
   simpa using
     Submodule.add_mem _ hlin <| smul_mem _ (hom.height x) (subset_span ⟨a₀, rfl⟩)
 
+open AffineMap LinearEquiv in
+/-- The linear equivalence between the unterlying vector space and its embedding. -/
+noncomputable def homRangeEquiv : LinearEquiv (RingHom.id R) V hom.linear.range := {
+  toFun v := ⟨hom.linear v, hom.linear.mem_range_self v⟩
+  map_add' v w := by simp
+  map_smul' r v := by simp
+  invFun v := (ofInjective hom.linear (linear_injective_iff _ |>.mpr hom.inj)).invFun v
+  left_inv v := (ofInjective hom.linear (linear_injective_iff _ |>.mpr hom.inj)).left_inv v
+  right_inv v' := by simp
+}
+
 section HomCone
 
 variable [PartialOrder R] [IsStrictOrderedRing R]
@@ -89,15 +101,16 @@ variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
 def homogenize (P : ConvexSet R A) := PointedCone.hull R (hom.embed '' P)
 
--- TODO this urgently needs a better name
+lemma homogenize_bot_eq_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by simp [homogenize, Bot.bot]
+
 variable (A) in
-def dehomogenize (C : PointedCone R W) := C.convex.preimage hom.inj
+def dehomogenize (C : PointedCone R W) := (pointedCone_convex C).preimage hom.inj
 
 lemma embed_dehomogenize_eq_inter_embed (C : PointedCone R W) :
     hom.embed '' (dehomogenize A C : Set A) = (C : Set W) ∩ hom.range := by
   ext x
-  simp only [dehomogenize, Convex.preimage, ConvexSet.coe_carrier, Set.mem_image, Set.mem_preimage,
-    SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
+  simp only [dehomogenize, IsConvex.preimage, ConvexSet.coe_carrier, Set.mem_image,
+    Set.mem_preimage, SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
   constructor
   · rintro ⟨y, hy, rfl⟩
     exact ⟨hy, by use y⟩
@@ -109,7 +122,7 @@ def homogenizationHom :
   toFun P := homogenize W P
   monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
 
-theorem homogenize_empty_eq_bot : homogenize W (⟨∅, empty_convex R A⟩ : ConvexSet R A) = ⊥ := by
+theorem homogenize_empty_eq_bot : homogenize W (⟨∅, isConvex_empty⟩ : ConvexSet R A) = ⊥ := by
   simp [homogenize, SetLike.coe]
 
 end HomCone
@@ -144,12 +157,12 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
   apply hom.inj
   have : t⁻¹ • (r₁ • hom.embed p₁ + r₂ • hom.embed p₂) = hom.embed q := by
     rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
-  simp [affineMap_convexComboPair_of_injective hom.inj, Affine.convexComboPair_eq_smul_add_smul,
+  simp [affineMap_convexComboPair_of_injective hom.inj, convexComboPair_eq_smul_add_smul,
     ← this, smul_smul]
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Ioi (0 : R) • hom.embed '' (P : Set A) :=
-  (mem_hull_iff_mem_pos_smul_of_convex_nonzero (convex_of_injective hom.inj P.convex) hx).mp h
+  (mem_hull_iff_mem_pos_smul_of_convex_nonzero' (convex_of_injective hom.inj P.convex) hx).mp h
 
 lemma height_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     0 < hom.height x := by
@@ -187,7 +200,7 @@ theorem homogenize_dehomogenize_eq_id_of_pos {C : PointedCone R W}
     (hC : ∀ x ∈ C, x ≠ 0 → 0 < hom.height x) :
     homogenize W (dehomogenize A C) = (C : PointedCone R W) := by
   by_cases hbot : C = ⊥
-  · simp [hbot, homogenize, dehomogenize, Convex.preimage]
+  · simp [hbot, homogenize, dehomogenize, IsConvex.preimage]
   · apply SetLike.ext'
     unfold homogenize
     rw [eq_nonneg_smul_base hC zero_lt_one hbot, embed_dehomogenize_eq_inter_embed, ← hom.embed_height]
@@ -213,7 +226,7 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     intro v w a hv hw ha hvw
     by_cases hnf : (F : Set A).Nonempty
     · have cF := convex_of_injective hom.inj F.convex
-      apply (PointedCone.mem_hull_iff_of_convex (hnf.image _) cF _).mpr
+      apply (mem_hull_iff_of_convex' (hnf.image _) cF _).mpr
       by_cases hv0 : v = 0
       · exact ⟨0, le_rfl, Set.mem_smul_set.mpr (by simpa [hv0] using hnf)⟩
       · by_cases hw0 : w = 0

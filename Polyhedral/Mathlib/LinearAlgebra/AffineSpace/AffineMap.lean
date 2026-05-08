@@ -79,7 +79,7 @@ theorem convex_of_injective {s : Set P1} (finj : Function.Injective f)
 
 lemma range_convex_of_injective (finj : Function.Injective f) :
     IsConvex k (f.range : Set W) := by
-  simpa [range, SetLike.coe, ← Set.image_univ] using convex_of_injective finj (isConvex_univ k)
+  simpa [range, SetLike.coe, ← Set.image_univ] using convex_of_injective finj isConvex_univ
 
 theorem preimage_convex_of_injective {s : Set W}
     (finj : Function.Injective f)
