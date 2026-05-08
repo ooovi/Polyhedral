@@ -109,7 +109,7 @@ def homogenizationHom :
   toFun P := homogenize W P
   monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
 
-theorem homogenize_empty_eq_bot : homogenize W (⟨∅, empty_convex _⟩ : ConvexSet R A) = ⊥ := by
+theorem homogenize_empty_eq_bot : homogenize W (⟨∅, empty_convex R A⟩ : ConvexSet R A) = ⊥ := by
   simp [homogenize, SetLike.coe]
 
 end HomCone

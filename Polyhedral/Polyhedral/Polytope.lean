@@ -26,7 +26,7 @@ structure Polytope where
   FG : IsPolytope R carrier
 
 theorem carrier_convex {F : Polytope R A} : Convex R F.carrier := by
-  rw [F.FG.choose_spec]; exact convexHull_convex R
+  rw [F.FG.choose_spec]; exact convexHull_convex
 
 instance : Coe (Polytope R A) (ConvexSet R A) where
   coe s := ⟨s.carrier, carrier_convex⟩
@@ -44,7 +44,7 @@ instance : Bot (Polytope R A) := ⟨{
     simp only [ConvexSpace.convexHull, Finset.coe_empty, ClosureOperator.ofCompletePred_apply,
       Set.le_eq_subset, Set.iInf_eq_iInter, Eq.symm]; symm
     rw [Set.iInter_eq_empty_iff]
-    exact fun i ↦ ⟨⟨∅, ⟨Set.empty_subset ∅, empty_convex _⟩⟩, Set.notMem_empty i⟩
+    exact fun i ↦ ⟨⟨∅, ⟨Set.empty_subset ∅, empty_convex R A⟩⟩, Set.notMem_empty i⟩
 }⟩
 
 end Polytope

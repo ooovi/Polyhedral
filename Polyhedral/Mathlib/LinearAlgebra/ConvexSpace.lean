@@ -18,6 +18,12 @@ def Convex (s : Set M) : Prop :=
   ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → ∀ ⦃a b : R⦄ (hs : 0 ≤ a) (ht : 0 ≤ b) (h : a + b = 1),
     convexComboPair a b hs ht h x y ∈ s
 
+variable (R M) in
+theorem empty_convex : Convex R (∅ : Set M) := by simp [Convex]
+
+variable (R M) in
+theorem univ_convex : Convex R (Set.univ : Set M) := by simp [Convex]
+
 theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R (⋂₀ S) :=
   fun _ xs _ ys _ _ hs ht h1 t ts =>
     h t ts ((Set.mem_sInter.mpr xs) _ ts) ((Set.mem_sInter.mpr ys) _ ts) hs ht h1
@@ -29,15 +35,14 @@ variable (R) in
 /-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
 def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter
 
-variable (R M) in
-theorem empty_convex : Convex R (∅ : Set M) := by simp [Convex]
-
 theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := by
   unfold Convex
   simp only [convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset, Set.iInf_eq_iInter,
     Set.mem_iInter, Subtype.forall, and_imp]
   intro x hx y hy a b ha hb h w hw ht
   exact (ht (hx w hw ht) (hy w hw ht) ha hb h)
+
+-- If we introduce openSegment, then we should also use it for convexity itself
 
 variable (R) in
 /-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
