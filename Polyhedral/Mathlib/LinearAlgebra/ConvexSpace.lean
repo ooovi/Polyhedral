@@ -2,16 +2,18 @@ import Mathlib.LinearAlgebra.ConvexSpace
 import Mathlib.Order.Closure
 import Mathlib.Order.OmegaCompletePartialOrder
 
-universe u v w
-
 section Convex
 
+-- Eventually, most of the below will become global names
 namespace ConvexSpace
 
-variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
+variable {R : Type*} {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
   [ConvexSpace R M]
 
-/-- Convexity of sets in convex spaces. -/
+-- TODO: rename to `IsConvex`
+
+variable (R) in
+/-- A set is convex if it contains all convex combinations of any two of its points. -/
 def Convex (s : Set M) : Prop :=
   ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → ∀ ⦃a b : R⦄ (hs : 0 ≤ a) (ht : 0 ≤ b) (h : a + b = 1),
     convexComboPair a b hs ht h x y ∈ s
@@ -20,13 +22,15 @@ theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R
   fun _ xs _ ys _ _ hs ht h1 t ts =>
     h t ts ((Set.mem_sInter.mpr xs) _ ts) ((Set.mem_sInter.mpr ys) _ ts) hs ht h1
 
-/-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
-def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter R
+theorem convex_inter {s t : Set M} (hs : Convex R s) (ht : Convex R t) : Convex R (s ∩ t) := by
+  simpa using convex_sInter (S := {s,t}) (by simpa using ⟨hs, ht⟩)
 
-theorem empty_convex : Convex R (M := M) ∅ := by
-  intro x hx y hy a b ha hb h
-  simp only [Set.mem_empty_iff_false]
-  contradiction
+variable (R) in
+/-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
+def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter
+
+variable (R M) in
+theorem empty_convex : Convex R (∅ : Set M) := by simp [Convex]
 
 theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := by
   unfold Convex
@@ -35,12 +39,14 @@ theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := by
   intro x hx y hy a b ha hb h w hw ht
   exact (ht (hx w hw ht) (hy w hw ht) ha hb h)
 
+variable (R) in
 /-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
 the base semiring has some element between `0` and `1`. -/
 def openSegment (x y : M) : Set M :=
   { z : M | ∃ (a b : R) (a0 : 0 < a) (b0 : 0 < b) (ab : a + b = 1),
     convexComboPair a b a0.le b0.le ab x y = z }
 
+variable (R) in
 /-- A set `B` is an extreme subset of `A` if `B ⊆ A` and all points of `B` only belong to open
 segments whose ends are in `B`.
 
@@ -56,7 +62,7 @@ theorem isExtreme_empty {S : Set M} : IsExtreme R S ∅ where
   subset := S.empty_subset
   left_mem_of_mem_openSegment := by simp
 
-variable (M) in
+variable (R M) in
 structure ConvexSet where
   carrier : Set M
   convex : ConvexSpace.Convex R carrier
@@ -73,13 +79,11 @@ instance : PartialOrder (ConvexSet R M) := .ofSetLike _ M
 theorem coe_carrier {F : ConvexSet R M} : SetLike.coe F = F.carrier := by rfl
 
 instance : OrderBot (ConvexSet R M) where
-  bot := ⟨∅, empty_convex _⟩
+  bot := ⟨∅, empty_convex R M⟩
   bot_le _ := Set.subset_iff_notMem.mpr fun ⦃_⦄ _ a ↦ a
 
 @[ext]
 theorem ext {F₁ F₂ : ConvexSet R M} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
-
-variable {R}
 
 def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C F.carrier
 
@@ -95,7 +99,7 @@ instance : SetLike (Face P) M where
 
 instance : PartialOrder (Face P) := .ofSetLike (Face P) M
 
-instance : Bot (Face P) := ⟨⟨∅, ConvexSpace.empty_convex _⟩, sorry⟩
+instance : Bot (Face P) := ⟨⟨∅, ConvexSpace.empty_convex R M⟩, sorry⟩
 
 end ConvexSet
 
