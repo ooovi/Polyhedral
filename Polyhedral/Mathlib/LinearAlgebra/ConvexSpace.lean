@@ -1,8 +1,7 @@
-import Mathlib.LinearAlgebra.ConvexSpace
-import Mathlib.Order.Closure
-import Mathlib.Order.OmegaCompletePartialOrder
+import Mathlib.LinearAlgebra.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 
-section Convex
+section Semiring
 
 -- Eventually, most of the below will become global names
 namespace ConvexSpace
@@ -10,42 +9,69 @@ namespace ConvexSpace
 variable {R : Type*} {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
   [ConvexSpace R M]
 
--- TODO: rename to `IsConvex`
+-- we redefine what we need using `ConvexSpace`.
 
 variable (R) in
 /-- A set is convex if it contains all convex combinations of any two of its points. -/
-def Convex (s : Set M) : Prop :=
+def IsConvex (s : Set M) : Prop :=
   ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → ∀ ⦃a b : R⦄ (hs : 0 ≤ a) (ht : 0 ≤ b) (h : a + b = 1),
     convexComboPair a b hs ht h x y ∈ s
 
-variable (R M) in
-theorem empty_convex : Convex R (∅ : Set M) := by simp [Convex]
-
-variable (R M) in
-theorem univ_convex : Convex R (Set.univ : Set M) := by simp [Convex]
-
-theorem convex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, Convex R s) : Convex R (⋂₀ S) :=
+theorem isConvex_sInter {S : Set (Set M)} (h : ∀ s ∈ S, IsConvex R s) : IsConvex R (⋂₀ S) :=
   fun _ xs _ ys _ _ hs ht h1 t ts =>
     h t ts ((Set.mem_sInter.mpr xs) _ ts) ((Set.mem_sInter.mpr ys) _ ts) hs ht h1
 
-theorem convex_inter {s t : Set M} (hs : Convex R s) (ht : Convex R t) : Convex R (s ∩ t) := by
-  simpa using convex_sInter (S := {s,t}) (by simpa using ⟨hs, ht⟩)
+theorem isConvex_inter {s t : Set M} (hs : IsConvex R s) (ht : IsConvex R t) : IsConvex R (s ∩ t) := by
+  simpa using isConvex_sInter (S := {s,t}) (by simpa using ⟨hs, ht⟩)
 
 variable (R) in
 /-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
-def convexHull : ClosureOperator (Set M) := .ofCompletePred (Convex R) fun _ ↦ convex_sInter
+def convexHull : ClosureOperator (Set M) := .ofCompletePred (IsConvex R) fun _ ↦ isConvex_sInter
 
-theorem convexHull_convex {s : Set M} : Convex R (convexHull R s) := by
-  unfold Convex
+theorem isConvex_empty : IsConvex R (M := M) ∅ := by
+  intro x hx y hy a b ha hb h
+  simp only [Set.mem_empty_iff_false]
+  contradiction
+
+theorem isConvex_univ : IsConvex R (Set.univ : Set M) := by simp [IsConvex]
+
+theorem isConvex_convexHull {s : Set M} : IsConvex R (convexHull R s) := by
+  unfold IsConvex
   simp only [convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset, Set.iInf_eq_iInter,
     Set.mem_iInter, Subtype.forall, and_imp]
   intro x hx y hy a b ha hb h w hw ht
   exact (ht (hx w hw ht) (hy w hw ht) ha hb h)
 
--- If we introduce openSegment, then we should also use it for convexity itself
+theorem convexHull_min {s t : Set M} (hs : s ⊆ t) (hc : IsConvex R t) : convexHull R s ⊆ t :=
+  Set.iInter_subset (fun (b : { b // s ⊆ b ∧ IsConvex R b }) => (b : Set M)) ⟨t, ⟨hs, hc⟩⟩
+
+theorem convexCombination_mem_convexHull {s} (w : StdSimplex R M) (h : IsConvex R s) :
+    convexCombination w ∈ s := by
+  sorry
+  -- this needs a way to split convexCombination into convexComboPair.
+
+theorem Finset.convexHull_eq (s : Finset M) : convexHull R ↑s =
+    { x : M | ∃ (w : StdSimplex R M), convexCombination w = x } := by
+  classical
+  refine Set.Subset.antisymm (convexHull_min ?_ ?_) ?_
+  · intro x hx
+    rw [Finset.mem_coe] at hx
+    use StdSimplex.single x
+    simp
+  · intro _
+    simp [convexComboPair]
+  · rintro x hx a ⟨⟨aa, ⟨aale, ha⟩⟩, rfl⟩
+    obtain ⟨w, rfl⟩ := hx
+    exact convexCombination_mem_convexHull w ha
+
+theorem Finset.mem_convexHull {s : Finset M} {x : M} :
+    x ∈ (convexHull R) s ↔ ∃ (w : StdSimplex R M), convexCombination w = x := by
+  simp [Finset.convexHull_eq]
+
+-- the following is copied from the mathlib convexity def and adapted to ours
 
 variable (R) in
-/-- Open segment in a vector space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
+/-- Open segment in a convex space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
 the base semiring has some element between `0` and `1`. -/
 def openSegment (x y : M) : Set M :=
   { z : M | ∃ (a b : R) (a0 : 0 < a) (b0 : 0 < b) (ab : a + b = 1),
@@ -67,10 +93,12 @@ theorem isExtreme_empty {S : Set M} : IsExtreme R S ∅ where
   subset := S.empty_subset
   left_mem_of_mem_openSegment := by simp
 
+-- these correspond to our pointed cones, so we define the face lattice
+
 variable (R M) in
 structure ConvexSet where
   carrier : Set M
-  convex : ConvexSpace.Convex R carrier
+  convex : ConvexSpace.IsConvex R carrier
 
 namespace ConvexSet
 
@@ -84,7 +112,7 @@ instance : PartialOrder (ConvexSet R M) := .ofSetLike _ M
 theorem coe_carrier {F : ConvexSet R M} : SetLike.coe F = F.carrier := by rfl
 
 instance : OrderBot (ConvexSet R M) where
-  bot := ⟨∅, empty_convex R M⟩
+  bot := ⟨∅, isConvex_empty⟩
   bot_le _ := Set.subset_iff_notMem.mpr fun ⦃_⦄ _ a ↦ a
 
 @[ext]
@@ -96,18 +124,134 @@ def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C F.carrier
 structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
   isFaceOf : IsFaceOf toConvexSet P
 
+namespace Face
+
 variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
   coe F := F.toConvexSet
   coe_injective' := by sorry
 
+@[simp]
+theorem coe_carrier {F : Face P} : SetLike.coe F = F.carrier := by rfl
+
+@[ext]
+theorem ext {F₁ F₂ : Face P} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+
 instance : PartialOrder (Face P) := .ofSetLike (Face P) M
 
-instance : Bot (Face P) := ⟨⟨∅, ConvexSpace.empty_convex R M⟩, sorry⟩
+instance : Bot (Face P) := ⟨⟨∅, isConvex_empty⟩, by simp [IsFaceOf, isExtreme_empty]⟩
+
+lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := by
+  rw [Set.nonempty_iff_ne_empty]
+  intro heq
+  apply h
+  ext
+  simp [← SetLike.mem_coe, heq, Bot.bot]
+
+end Face
 
 end ConvexSet
 
 end ConvexSpace
 
-end Convex
+end Semiring
+
+section Ring
+
+variable {R M P : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
+   [Module R M]
+
+lemma convexComboPair_eq_smul_add_smul {x y a b} (a0 : (0 : R) ≤ a) (b0 : (0 : R) ≤ b)
+      (ab : a + b = 1) :
+    convexComboPair (M := M) a b a0 b0 ab x y = a • x + b • y := by
+  classical
+  simp only [convexComboPair, convexCombination_eq_sum (StdSimplex.duple x y a0 b0 ab)]
+  unfold StdSimplex.duple
+  rw [Finsupp.sum_add_index]
+  · simp [Finsupp.sum_single_index]
+  · exact (fun i j => zero_smul _ _)
+  · simp [add_smul]
+
+namespace ConvexSpace
+
+-- for now, a way to translate from our convexity to mathlib convexity in case of a vector space.
+-- eventually, these should be proven directly...
+
+/-- In a vector space, convexity is equivalent to star-convexity at all points. -/
+private theorem convex_iff_StarConvex (s : Set M) :
+    ConvexSpace.IsConvex R s ↔ ∀ ⦃x : M⦄, x ∈ s → StarConvex R x s := by
+  simp [ConvexSpace.IsConvex, StarConvex, convexComboPair_eq_smul_add_smul]
+
+theorem submodule_convex (S : Submodule R M) : ConvexSpace.IsConvex R (S : Set M) := by
+  rw [convex_iff_StarConvex]
+  exact S.convex
+
+theorem pointedCone_convex (P : PointedCone R M) : ConvexSpace.IsConvex R (P : Set M) := by
+  rw [convex_iff_StarConvex]
+  exact P.convex
+
+variable (R) in
+theorem Submodule.span_convexHull_eq_span (t : Set M) :
+    Submodule.span R t = Submodule.span R (ConvexSpace.convexHull R t) := by
+  ext x; constructor <;> intro h
+  · exact Submodule.span_mono (by simpa [ConvexSpace.convexHull] using fun _ a _ ↦ a) h
+  apply Submodule.mem_span.mp h
+  simp only [ConvexSpace.convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset,
+    Set.iInf_eq_iInter]
+  intro a am
+  simp only [Set.mem_iInter, Subtype.forall, and_imp, SetLike.mem_coe, Submodule.mem_span] at ⊢ am
+  exact fun p hp ↦ am _ hp <| submodule_convex p
+
+open PointedCone in
+variable (R) in
+theorem PointedCone.hull_convexHull_eq_hull (t : Set M) :
+    hull R t = hull R (ConvexSpace.convexHull R t) := by
+  ext x; constructor <;> intro h
+  · exact Submodule.span_mono (by simpa [ConvexSpace.convexHull] using fun _ a _ ↦ a) h
+  apply Submodule.mem_span.mp h
+  simp only [ConvexSpace.convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset,
+    Set.iInf_eq_iInter]
+  intro a am
+  simp only [Set.mem_iInter, Subtype.forall, and_imp, SetLike.mem_coe, Submodule.mem_span] at ⊢ am
+  exact fun p hp ↦ am _ hp <| pointedCone_convex p
+
+end ConvexSpace
+
+end Ring
+
+section Field
+
+variable {R M P : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
+   [Module R M]
+
+open PointedCone Set Pointwise
+
+namespace ConvexSpace
+
+variable {s : Set M}
+
+-- the following two lemmas exist for mathlib convexity but we need them for our convexity :(
+
+/-- The cone hull of a convex set is the union of the closed halflines through that set. -/
+lemma mem_hull_iff_of_convex' (hs : s.Nonempty) (hc : ConvexSpace.IsConvex R s) (x : M) :
+    x ∈ hull R s ↔ x ∈ Ici (0 : R) • s := by
+  rw [convex_iff_StarConvex] at hc
+  exact mem_hull_iff_of_convex (R := R) hs hc x
+
+/-- Every nonzero member of the conic hull of a convex set is a pos. smultiple of a set member. -/
+theorem mem_hull_iff_mem_pos_smul_of_convex_nonzero' {x : M} {s} (hc : ConvexSpace.IsConvex R s)
+    (hx : x ≠ 0) :
+    x ∈ hull R s ↔ x ∈ Ioi (0 : R) • s := by
+  by_cases hs : s.Nonempty
+  · constructor <;> intro h
+    · obtain ⟨r, rpos, hr⟩ := (mem_hull_iff_of_convex' hs hc _).mp h
+      rcases eq_or_ne 0 r with rfl | h
+      · simp_all
+      exact ⟨r, lt_of_le_of_ne rpos h, hr⟩
+    · simp [mem_hull_iff_of_convex' hs hc, Set.smul_subset_smul_right Ioi_subset_Ici_self h]
+  · simp [Set.not_nonempty_iff_eq_empty.mp hs, hx]
+
+end ConvexSpace
+
+end Field
