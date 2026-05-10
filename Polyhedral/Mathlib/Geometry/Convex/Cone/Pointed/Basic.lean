@@ -376,7 +376,20 @@ lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
 
 end Semiring
 
+section AddCommGroup
 
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+@[simps!]
+def linealCone (C : PointedCone R M) : PointedCone R M where
+  __ := C.support
+  smul_mem' r _ hx := by
+    by_cases hr : 0 ≤ r
+    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
+    · by_contra; exact hr r.2
+
+end AddCommGroup
 
 section Ring
 
