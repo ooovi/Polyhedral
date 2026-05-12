@@ -89,6 +89,8 @@ instance : SetLike (ConvexSet R M) M where
 
 @[ext] theorem ext {F₁ F₂ : ConvexSet R M} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
 
+@[simp] theorem mem_mk {s h x} : x ∈ (⟨s, h⟩ : ConvexSet R M) ↔ x ∈ s := .rfl
+
 instance : PartialOrder (ConvexSet R M) := .ofSetLike ..
 
 instance : OrderBot (ConvexSet R M) where
@@ -97,7 +99,7 @@ instance : OrderBot (ConvexSet R M) where
 
 def convexHull (s : Set M) : ConvexSet R M := ⟨_, isConvex_convexHull (s := s)⟩
 
-def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C F.carrier
+def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C (F : Set M)
 
 /-- A face of a convex set `P`. Represents the face lattice of `P`. -/
 structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
@@ -119,7 +121,8 @@ instance : SetLike (Face P) M where
 
 instance : PartialOrder (Face P) := .ofSetLike ..
 
-instance : Bot (Face P) := ⟨⟨∅, isConvex_empty⟩, by simp [IsFaceOf, isExtreme_empty]⟩
+instance : Bot (Face P) :=
+  ⟨⟨∅, isConvex_empty⟩, by simp [IsFaceOf, ← ConvexSet.carrier_eq_coe, isExtreme_empty]⟩
 
 lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := by
   rw [Set.nonempty_iff_ne_empty]
