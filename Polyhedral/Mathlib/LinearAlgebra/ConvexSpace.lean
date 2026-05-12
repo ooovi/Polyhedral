@@ -45,29 +45,6 @@ theorem isConvex_convexHull {s : Set M} : IsConvex R (convexHull R s) := by
 theorem convexHull_min {s t : Set M} (hs : s ⊆ t) (hc : IsConvex R t) : convexHull R s ⊆ t :=
   Set.iInter_subset (fun (b : { b // s ⊆ b ∧ IsConvex R b }) => (b : Set M)) ⟨t, ⟨hs, hc⟩⟩
 
-theorem convexCombination_mem_convexHull {s} (w : StdSimplex R M) (h : IsConvex R s) :
-    convexCombination w ∈ s := by
-  sorry
-  -- this needs a way to split convexCombination into convexComboPair.
-
-theorem Finset.convexHull_eq (s : Finset M) : convexHull R ↑s =
-    { x : M | ∃ (w : StdSimplex R M), convexCombination w = x } := by
-  classical
-  refine Set.Subset.antisymm (convexHull_min ?_ ?_) ?_
-  · intro x hx
-    rw [Finset.mem_coe] at hx
-    use StdSimplex.single x
-    simp
-  · intro _
-    simp [convexComboPair]
-  · rintro x hx a ⟨⟨aa, ⟨aale, ha⟩⟩, rfl⟩
-    obtain ⟨w, rfl⟩ := hx
-    exact convexCombination_mem_convexHull w ha
-
-theorem Finset.mem_convexHull {s : Finset M} {x : M} :
-    x ∈ (convexHull R) s ↔ ∃ (w : StdSimplex R M), convexCombination w = x := by
-  simp [Finset.convexHull_eq]
-
 -- the following is copied from the mathlib convexity def and adapted to ours
 
 variable (R) in
@@ -104,19 +81,21 @@ namespace ConvexSet
 
 instance : SetLike (ConvexSet R M) M where
   coe F := F.carrier
-  coe_injective' := by sorry
+  coe_injective' K₁ K₂ _ := by cases K₁; cases K₂; congr
 
-instance : PartialOrder (ConvexSet R M) := .ofSetLike _ M
+@[simp] theorem carrier_eq_coe {P : ConvexSet R M} : P.carrier = P := by rfl
 
-@[simp]
-theorem coe_carrier {F : ConvexSet R M} : SetLike.coe F = F.carrier := by rfl
+@[simp] theorem mem_coe {P : ConvexSet R M} (x : M) : x ∈ P.carrier ↔ x ∈ P := .rfl
+
+@[ext] theorem ext {F₁ F₂ : ConvexSet R M} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+
+instance : PartialOrder (ConvexSet R M) := .ofSetLike ..
 
 instance : OrderBot (ConvexSet R M) where
   bot := ⟨∅, isConvex_empty⟩
   bot_le _ := Set.subset_iff_notMem.mpr fun ⦃_⦄ _ a ↦ a
 
-@[ext]
-theorem ext {F₁ F₂ : ConvexSet R M} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+def convexHull (s : Set M) : ConvexSet R M := ⟨_, isConvex_convexHull (s := s)⟩
 
 def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C F.carrier
 
@@ -132,13 +111,13 @@ instance : SetLike (Face P) M where
   coe F := F.toConvexSet
   coe_injective' := by sorry
 
-@[simp]
-theorem coe_carrier {F : Face P} : SetLike.coe F = F.carrier := by rfl
+@[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 
-@[ext]
-theorem ext {F₁ F₂ : Face P} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+@[simp] theorem mem_coe {F : Face P} (x : M) : x ∈ F.carrier ↔ x ∈ F := .rfl
 
-instance : PartialOrder (Face P) := .ofSetLike (Face P) M
+@[ext] theorem ext {F₁ F₂ : Face P} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+
+instance : PartialOrder (Face P) := .ofSetLike ..
 
 instance : Bot (Face P) := ⟨⟨∅, isConvex_empty⟩, by simp [IsFaceOf, isExtreme_empty]⟩
 
@@ -148,6 +127,7 @@ lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := 
   apply h
   ext
   simp [← SetLike.mem_coe, heq, Bot.bot]
+  sorry
 
 end Face
 
@@ -228,6 +208,33 @@ variable {R M P : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddC
 open PointedCone Set Pointwise
 
 namespace ConvexSpace
+
+-- yaël realized the following three don't hold over non-fields
+theorem convexCombination_mem_convexHull {s} (w : StdSimplex R M) (h : IsConvex R s) :
+    letI : ConvexSpace R M := AddTorsor.instConvexSpace
+    convexCombination w ∈ s := by
+  sorry
+  -- this needs a way to split convexCombination into convexComboPair.
+
+theorem Finset.convexHull_eq (s : Finset M) : convexHull R ↑s =
+    letI : ConvexSpace R M := AddTorsor.instConvexSpace
+    { x : M | ∃ (w : StdSimplex R M), convexCombination w = x } := by
+  classical
+  refine Set.Subset.antisymm (convexHull_min ?_ ?_) ?_
+  · intro x hx
+    rw [Finset.mem_coe] at hx
+    use StdSimplex.single x
+    simp
+  · intro _
+    simp [convexComboPair]
+  · rintro x hx a ⟨⟨aa, ⟨aale, ha⟩⟩, rfl⟩
+    obtain ⟨w, rfl⟩ := hx
+    exact convexCombination_mem_convexHull w ha
+
+theorem Finset.mem_convexHull {s : Finset M} {x : M} :
+    letI : ConvexSpace R M := AddTorsor.instConvexSpace
+    x ∈ convexHull R s ↔ ∃ (w : StdSimplex R M), convexCombination w = x := by
+  simp [Finset.convexHull_eq]
 
 variable {s : Set M}
 
