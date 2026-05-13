@@ -102,7 +102,7 @@ variable (W) in
 def homogenize (P : ConvexSet R A) := PointedCone.hull R (hom.embed '' P)
 
 lemma homogenize_bot_eq_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
-  simp [homogenize]
+  simp [homogenize, Bot.bot]
 
 variable (A) in
 def dehomogenize (C : PointedCone R W) := (pointedCone_convex C).preimage hom.inj
@@ -110,15 +110,14 @@ def dehomogenize (C : PointedCone R W) := (pointedCone_convex C).preimage hom.in
 lemma embed_dehomogenize_eq_inter_embed (C : PointedCone R W) :
     hom.embed '' (dehomogenize A C : Set A) = (C : Set W) ∩ hom.range := by
   ext x
-  simp only [Set.mem_image, SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
-  -- simp only [dehomogenize, IsConvex.preimage, ConvexSet.coe_carrier, Set.mem_image,
-    -- Set.mem_preimage, SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
+  simp only [dehomogenize, IsConvex.preimage, Set.mem_image, SetLike.mem_coe, Set.mem_inter_iff,
+    AffineMap.mem_range]
   constructor
   · rintro ⟨y, hy, rfl⟩
     exact ⟨hy, by use y⟩
   · rintro ⟨hxC, y, rfl⟩
     use y
-    sorry
+    simpa
 
 def homogenizationHom :
     OrderHom (ConvexSet R A) (PointedCone R W) where
@@ -266,7 +265,7 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
 variable (A) in
 theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     (dehomogenize A F).IsFaceOf (dehomogenize A C) where
-  subset := sorry -- preimage_mono hf.le
+  subset := preimage_mono (fun _ x ↦ hf.le x)
   left_mem_of_mem_openSegment  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_

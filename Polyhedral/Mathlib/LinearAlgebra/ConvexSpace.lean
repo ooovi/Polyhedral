@@ -91,6 +91,8 @@ instance : SetLike (ConvexSet R M) M where
 
 @[simp] theorem mem_mk {s h x} : x ∈ (⟨s, h⟩ : ConvexSet R M) ↔ x ∈ s := .rfl
 
+@[simp] theorem mk_eq {s h} : (⟨s, h⟩ : ConvexSet R M) = s := by ext; simp
+
 instance : PartialOrder (ConvexSet R M) := .ofSetLike ..
 
 instance : OrderBot (ConvexSet R M) where
@@ -114,7 +116,7 @@ variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
   coe F := F.toConvexSet
-  coe_injective' := by sorry
+  coe_injective' := sorry
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 
