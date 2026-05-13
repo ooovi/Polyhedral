@@ -97,6 +97,9 @@ instance : OrderBot (ConvexSet R M) where
   bot := ⟨∅, isConvex_empty⟩
   bot_le _ := Set.subset_iff_notMem.mpr fun ⦃_⦄ _ a ↦ a
 
+@[simp] lemma not_mem_bot (x : M) : x ∉ (⊥ : ConvexSet R M) := by
+  change x ∉ (∅ : Set M); simp
+
 def convexHull (s : Set M) : ConvexSet R M := ⟨_, isConvex_convexHull (s := s)⟩
 
 def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C (F : Set M)

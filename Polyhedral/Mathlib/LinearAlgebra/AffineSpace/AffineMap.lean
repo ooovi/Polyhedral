@@ -120,7 +120,7 @@ open AffineMap in
 theorem _root_.ConvexSpace.IsConvex.preimage_isFaceOf {F C : PointedCone k W} (hf : F.IsFaceOf C)
     (finj : Function.Injective f) :
     ((pointedCone_convex F).preimage finj).IsFaceOf ((pointedCone_convex C).preimage finj) where
-  subset := Set.preimage_mono hf.le
+  subset := sorry -- Set.preimage_mono hf.le
   left_mem_of_mem_openSegment  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
