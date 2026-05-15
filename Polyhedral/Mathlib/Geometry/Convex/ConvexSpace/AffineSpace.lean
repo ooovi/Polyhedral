@@ -39,9 +39,6 @@ namespace AddTorsor
 def convexCombination (s : StdSimplex R P) : P :=
   s.weights.support.affineCombination R id s.weights
 
-lemma Finsupp.support_single {α : Type u_1} {M : Type*} [Zero M] {b : M} (a : α) (hb : b ≠ 0) :
-  (Finsupp.single a b).support = {a} := if_neg hb
-
 theorem convexCombination_single (x : P) :
     convexCombination (StdSimplex.single x : StdSimplex R P) = x := by
   simp only [convexCombination, StdSimplex.single]
@@ -79,9 +76,9 @@ theorem convexCombination_assoc (f : StdSimplex R (StdSimplex R P)) :
   -- Expand RHS using sum_finsetSum_index
   let h : P → R → V := fun x w => w • (x -ᵥ b)
   have h_rhs : (∑ d ∈ f.weights.support, f.weights d • d.weights).sum h
-      = ∑ d ∈ f.weights.support, (f.weights d • d.weights).sum h := sorry
-    -- (Finsupp.sum_finsetSum_index (h := h) (fun _ => zero_smul _ _)
-    --   (fun _ _ _ => add_smul _ _ _)).symm
+      = ∑ d ∈ f.weights.support, (f.weights d • d.weights).sum h :=
+    (Finsupp.sum_finsetSum_index (h := h) (fun _ => zero_smul _ _)
+      (fun _ _ _ => add_smul _ _ _)).symm
   simp only [Finsupp.sum] at h_rhs ⊢
   rw [h_rhs]
   -- Both sides are now double sums; show the inner sums match

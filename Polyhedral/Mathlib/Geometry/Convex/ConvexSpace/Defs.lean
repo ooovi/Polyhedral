@@ -296,7 +296,6 @@ lemma convexComboPair_restrict_restrict_compl (w : StdSimplex K I) (s : Set I) (
   ext : 1
   simp only [Set.mem_compl_iff] at hs'
   simp [weights_restrict, smul_inv_smul₀, restrict_ne_zero_aux, hs, hs']
-  sorry
 
 end StdSimplex
 
