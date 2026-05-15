@@ -260,9 +260,9 @@ private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.
     (hM₁ : P₁ ≤ M₁) (hM₂ : P₂ ≤ M₂) (hc₁ : IsCompl L₁ M₁) (hc₂ : IsCompl L₂ M₂) :
     ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
   set X := ((P₁ ⊓ M₁) ⊔ L₁) ⊓ ((P₂ ⊓ M₂) ⊔ L₂)
-  let f : X →ₗ[R] M := (hc₁.projection - hc₂.projection).comp X.subtype
+  let f : X →ₗ[R] M := ((projection _ _ hc₁) - (projection _ _ hc₂)).comp X.subtype
   have cmem_zero {P L : Submodule R M} {x} (hx : x ∈ P) (c : IsCompl L P) :
-      c.projection x = 0 := by rwa [← mem_ker, c.projection_ker]
+      projection _ _ c x = 0 := by rwa [← mem_ker, ker_projection c]
   have range_le : range f ≤ P₁ ⊔ P₂ := by
     intro x xm
     apply mem_sup.mpr
@@ -270,7 +270,7 @@ private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.
       mem_inf, mem_sup, exists_prop, X, f] at xm
     obtain ⟨-, ⟨⟨⟨b, ⟨e, h, j, rfl⟩⟩, ⟨ed, ⟨hd, _, dd, ddd⟩⟩⟩, rfl⟩⟩ := xm
     use -b, P₁.neg_mem e.1, ed, hd.1
-    rw [map_add hc₁.projection, cmem_zero e.2 hc₁, hc₁.projection_isProj.map_id _ j, ← ddd,
+    rw [map_add (projection _ _ hc₁), cmem_zero e.2 hc₁, hc₁.projection_isProj.map_id _ j, ← ddd,
       map_add, cmem_zero hd.2 hc₂, hc₂.projection_isProj.map_id _ dd]
     grind only
   obtain ⟨S, hs⟩ := (ker f).exists_isCompl
@@ -288,7 +288,7 @@ private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.
     simp only [mem_inf, mem_sup, mem_ker, sub_apply]
     constructor
     · intro ⟨xX, xxh⟩
-      refine ⟨x - hc₁.projection x, ⟨?_, ⟨hc₁.projection x, ?_⟩⟩⟩
+      refine ⟨x - (projection _ _ hc₁ x), ⟨?_, ⟨projection _ _ hc₁ x, ?_⟩⟩⟩
       · obtain ⟨⟨_, ⟨hp₁, hm₁⟩, y, hl₁, hx₁⟩, _, ⟨hp₂, hm₂⟩, _, hl₂, hx₂⟩ := xX
         constructor
         · simp_rw [← hc₁.projection_eq_self_sub_projection, IsCompl.projection_apply_mem, ← hx₁]

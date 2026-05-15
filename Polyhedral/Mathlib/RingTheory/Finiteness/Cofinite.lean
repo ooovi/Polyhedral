@@ -96,7 +96,7 @@ lemma CoFG._exists_fg_compl {S : Submodule R M} (hS : S.CoFG) :
 lemma sSup_cofg {s : Set (Submodule R M)} (hs : ∃ S ∈ s, S.CoFG) :
     (sSup s).CoFG := by
   obtain ⟨_, hS, hcofg⟩ := hs
-  exact hcofg.of_cofg_le (le_sSup hS)
+  exact hcofg.of_le (le_sSup hS)
 
 section StrongRankCondition
 
@@ -182,7 +182,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 lemma CoFG.disjoint_fg {S T : Submodule R M}
     (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
   obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
-  exact (hS.of_cofg_le hSU).fg_of_isCompl hUT
+  exact (hS.of_le hSU).fg_of_isCompl hUT
 
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
   obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
