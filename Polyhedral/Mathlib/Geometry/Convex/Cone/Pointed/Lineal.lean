@@ -306,7 +306,8 @@ lemma salient_of_pos_linearMap {C : PointedCone R M} {f : M →ₗ[R] R}
 -- NOTE: an easier proof via `salient_of_pos_linearMap` seems only possible if `R` is a field.
 set_option backward.isDefEq.respectTransparency false in
 lemma salient_hull_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
-    (hull R s).Salient := by classical
+    (hull R s).Salient := by
+  classical
   rw [salient_iff_mem_neg]
   intro x hxp hx0 hxn
   absurd hx0
@@ -327,7 +328,7 @@ lemma salient_hull_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
       refine Finset.sum_union_eq_right fun _ _ h ↦ ?_
       simp [fn.notMem_support.mp fun h2 ↦ h <| hftn h2]
     rw [hsum1, hsum2, hsum, add_neg_cancel]
-  rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg (zero_le _) (zero_le _)] at hlin
+  rw [Nonneg.coe_eq_zero, add_eq_zero_iff_of_nonneg zero_le zero_le] at hlin
   simp only [hlin, zero_smul]
 
 section IsDomain

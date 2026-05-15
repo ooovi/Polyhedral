@@ -322,7 +322,7 @@ theorem dualfg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.F
   obtain ⟨s, ⟨b⟩⟩ := Basis.exists_basis R S
   haveI := Module.Finite.iff_fg.mpr hS
   haveI := Module.Finite.finite_basis b
-  let proj := linearProjOfIsCompl S T hST
+  let proj := projectionOnto S T hST
   have hp : Surjective p := Fact.elim inferInstance
   let f := fun i => surjInv hp (Basis.dualBasis b i ∘ₗ proj)
   use (Set.finite_range f).toFinset
@@ -333,12 +333,12 @@ theorem dualfg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.F
     replace h := fun x => Eq.symm (h x rfl)
     simp only [f, surjInv_eq hp] at h
     simp only [coe_comp, Function.comp_apply, Basis.coe_dualBasis] at h
-    rw [← linearProjOfIsCompl_ker hST, mem_ker]
+    rw [← ker_projectionOnto hST, mem_ker]
     exact b.forall_coord_eq_zero_iff.mp h
   · intro hxT y z rfl
     rw [surjInv_eq hp]
     rw [coe_comp, Function.comp_apply]
-    rw [linearProjOfIsCompl_apply_right' _ _ hxT]
+    rw [projectionOnto_apply_of_mem_right _ hxT]
     rw [map_zero]
 
 variable (p) [Fact (Surjective p)] in -- [Fact p.IsFaithfulPair] in
