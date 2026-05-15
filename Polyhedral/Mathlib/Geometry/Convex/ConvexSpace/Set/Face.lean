@@ -1,7 +1,8 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 section Semiring
 
@@ -50,7 +51,7 @@ variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
   coe F := F.toConvexSet.carrier
-  coe_injective' := sorry
+  coe_injective' a b _ := sorry
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 
