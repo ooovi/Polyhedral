@@ -25,6 +25,7 @@ variable {R X Y : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [
 
 variable (R) in
 /-- The convex hull of a set `s` is the minimal convex set that includes `s`. -/
+@[expose]
 def convexHull (s : Set X) : Set X :=
   ClosureOperator.ofCompletePred (IsConvexSet R) (fun _ ↦ .sInter) s
 
