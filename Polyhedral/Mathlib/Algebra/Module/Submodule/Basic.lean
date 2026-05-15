@@ -351,8 +351,8 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
   toFun x := ⟨quotientEquivOfIsCompl _ _ hpq x, by
     obtain ⟨y, hys, hy⟩ := x.2; rw [← hy]
     obtain ⟨yp, yq, rfl, _⟩ := existsUnique_add_of_isCompl hpq y
-    rw [← Submodule.quotientEquivOfIsCompl_apply_mk_coe _ _ hpq yq]
-    simp only [quotientEquivOfIsCompl_apply_mk_coe, LinearMap.coe_restrictScalars, mkQ_apply,
+    rw [← Submodule.quotientEquivOfIsCompl_apply_mk_right hpq yq]
+    simp only [LinearMap.coe_restrictScalars, mkQ_apply,
       map_add, coe_add, mem_inf, restrictScalars_mem, (Quotient.mk_eq_zero p).mpr yp.2]
     simpa using add_mem (hps <| neg_mem (S := Submodule R M) yp.2) hys
   ⟩
@@ -363,7 +363,7 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
   right_inv x := by
     have H : (x : M) = (⟨x.1, x.2.2⟩ : q) := rfl
     ext; simp only [mkQ_apply]; rw [H]; congr
-    exact Submodule.quotientEquivOfIsCompl_apply_mk_coe ..
+    exact Submodule.quotientEquivOfIsCompl_apply_mk_right ..
 
 noncomputable example {p q : Submodule R M} (hpq : IsCompl p q)
     {s : Submodule R M} (hps : p ≤ s) :
@@ -413,9 +413,9 @@ example {x : M} : span R {-x, x} = R ∙ x := by simp
   -- span_insert_eq_span_of_mem (Set.mem_singleton x)
 
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
-    IsProj S (IsCompl.projection hST) where
-  map_mem := projection_apply_mem hST
-  map_id x hx := projection_apply_left hST ⟨x, hx⟩
+    IsProj S (Submodule.projection _ _ hST) where
+  map_mem := Submodule.projection_apply_mem hST
+  map_id x hx := Submodule.projection_apply_left hST ⟨x, hx⟩
 
 end Ring
 
