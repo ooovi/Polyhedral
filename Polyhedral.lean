@@ -1,8 +1,8 @@
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
+import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
@@ -25,6 +25,10 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Pointwise
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Defs
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite

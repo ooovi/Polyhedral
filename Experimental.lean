@@ -1,4 +1,7 @@
 import Experimental.AbstractPolytope
+import Experimental.AffineSpace.Convex.Basic
+import Experimental.AffineSpace.Convex.Star
+import Experimental.AffineSpace.Extreme
 import Experimental.Closure
 import Experimental.DualTopology
 import Experimental.Dual_Generic
