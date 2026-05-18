@@ -77,3 +77,22 @@ lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := 
 end Convexity.ConvexSet.Face
 
 end Semiring
+
+section Ring
+
+variable {R A : Type*}
+variable [PartialOrder R] [Ring R] [IsStrictOrderedRing R]
+variable {V : Type*} [AddCommGroup V] [Module R V]
+variable [AddTorsor V A]
+
+namespace Convexity.ConvexSet.Face
+
+variable {C : ConvexSet R A}
+
+noncomputable abbrev rank (F : C.Face) : Cardinal := F.toConvexSet.rank
+
+noncomputable abbrev finrank (F : C.Face) : ℕ := F.toConvexSet.finrank
+
+end Convexity.ConvexSet.Face
+
+end Ring
