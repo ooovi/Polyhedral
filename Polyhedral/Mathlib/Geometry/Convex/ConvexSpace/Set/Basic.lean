@@ -5,9 +5,17 @@ Authors: Yaël Dillies
 -/
 module
 
+public import Mathlib.Algebra.Field.IsField
+public import Mathlib.RingTheory.LocalRing.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Defs
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
-import Mathlib.Data.Fintype.Order
+
+public import Mathlib.Tactic.Field
+public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+public import Mathlib.Tactic.NoncommRing
+
+
 
 /-!
 # Convex sets
@@ -163,5 +171,50 @@ lemma IsConvexSet.of_convexCombPair_mem
   exact hs _ _ _ _ _ _ (hw <| by simp) _ <| ih (by grw [← hw, ← Finset.subset_cons])
     (by simp [← hsw]; grind)
 
+open Pointwise
+
+variable [AddCommGroup X] [Module K X]
+
+-- /-- Alternative definition of star-convexity, using division. -/
+-- theorem isConvexSet_iff_div : IsConvexSet K s ↔ ∀ ⦃y⦄, y ∈ s →
+--     ∀ ⦃a b : K⦄, 0 ≤ a → 0 ≤ b → 0 < a + b → (a / (a + b)) • x + (b / (a + b)) • y ∈ s :=
+--   ⟨fun h y hy a b ha hb hab => by
+--     have hap : 0 ≤ a / (a + b) := by positivity
+--     have hbp : 0 ≤ b / (a + b) := by positivity
+--     have h1 : a / (a + b) + b / (a + b) = 1 := by rw [← add_div]; exact div_self hab.ne'
+--     rw[← Convexity.convexCombPair_eq_add (R := K) hap hbp h1 x y]
+--     have := h.convexCombPair_mem ?_ hy (x := x) hap hbp h1
+--     sorry
+
+--     , sorry⟩
+
+--   -- fun h y hy a b ha hb hab => by
+--   --   have h' := h hy ha hb
+--   --   rw [hab, div_one, div_one] at h'
+--   --   exact h' zero_lt_one⟩
+
+-- /-- Alternative definition of set convexity, using division. -/
+-- theorem convex_iff_div :
+--     IsConvexSet K s ↔ ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s →
+--       ∀ ⦃a b : K⦄, 0 ≤ a → 0 ≤ b → 0 < a + b → (a / (a + b)) • x + (b / (a + b)) • y ∈ s :=
+--   forall₂_congr fun _ _ => isConvexSet_iff_div
+
+-- theorem exists_mem_add_smul_eq (h : IsConvexSet K s) {x y : X} {p q : K} (hx : x ∈ s) (hy : y ∈ s)
+--     (hp : 0 ≤ p) (hq : 0 ≤ q) : ∃ z ∈ s, (p + q) • z = p • x + q • y := by
+--   rcases _root_.em (p = 0 ∧ q = 0) with (⟨rfl, rfl⟩ | hpq)
+--   · use x, hx
+--     simp
+--   · replace hpq : 0 < p + q :=
+--       (add_nonneg hp hq).lt_of_ne' (mt (add_eq_zero_iff_of_nonneg hp hq).1 hpq)
+--     refine ⟨_, convex_iff_div.1 h hx hy hp hq hpq, ?_⟩
+--     match_scalars <;> field
+
+open Pointwise Set in
+protected theorem IsConvexSet.add_smul  {s : Set X}
+    (h_conv : IsConvexSet K s) {p q : K} (hp : 0 ≤ p) (hq : 0 ≤ q) :
+    (p + q) • s = p • s + q • s := by
+  sorry
+
 end Field
+
 end Convexity

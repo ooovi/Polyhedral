@@ -28,10 +28,17 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Defs
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+import Polyhedral.Mathlib.Order.Hom.Basic
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces
+import Polyhedral.Polyhedral.Polytope
