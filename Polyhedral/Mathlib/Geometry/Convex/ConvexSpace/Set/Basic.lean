@@ -20,10 +20,6 @@ To allow full generality on the coefficients, for `s` to be convex we require th
 convex combinations of points of `s` lie in `s`, instead of merely binary ones as is customary.
 
 Since its body is an implementation detail, the predicate `IsConvexSet` is unexposed.
-
-## TODO
-
-Prove that cartesian products of convex sets are convex.
 -/
 
 open Finsupp Set
@@ -134,6 +130,11 @@ protected lemma IsConvexSet.image (hf : IsAffineMap R f) (hs : IsConvexSet R s) 
   · sorry
     -- rw [mapDomain_of_not_mem_image_support (by simp [← huw] at ⊢ hy; tauto)]
     -- simp_all
+
+protected lemma IsConvexSet.prod {u : Set Y} (hs : IsConvexSet R s) (hu : IsConvexSet R u) : IsConvexSet R (s ×ˢ u) := by
+  intro w hw
+  exact ⟨hs.iConvexComb_mem fun x hx ↦ (hw <| by simpa using hx).1,
+    hu.iConvexComb_mem fun x hx ↦ (hw <| by simpa using hx).2⟩
 
 end Semiring
 

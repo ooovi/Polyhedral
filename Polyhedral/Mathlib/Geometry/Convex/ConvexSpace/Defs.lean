@@ -99,3 +99,20 @@ lemma convexCombPair_restrict_restrict_compl (w : StdSimplex K I) (s : Set I) (h
 end StdSimplex
 
 end Convexity
+
+
+namespace Convexity
+
+variable {R X Y : Type*}
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [ConvexSpace R Y]
+
+noncomputable instance instConvexSpaceProd : ConvexSpace R (X × Y) where
+  sConvexComb w := (w.iConvexComb Prod.fst, w.iConvexComb Prod.snd)
+  sConvexComb_single x := by
+    ext <;> simp
+  assoc w := by
+    ext <;>
+      simpa [sConvexComb_map, Function.comp_def] using
+        iConvexComb_assoc w (id : StdSimplex R (X × Y) → StdSimplex R (X × Y)) _
+end Convexity
