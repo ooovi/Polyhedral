@@ -1,8 +1,9 @@
 module
 
+import Mathlib.Data.Fintype.Order
+
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Mathlib.Data.Fintype.Order
 
 namespace Convexity
 
@@ -116,6 +117,8 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
       intro x xm
       simp only [mem_mk, Set.mem_iInter, Subtype.forall, Set.iUnion_subset_iff, and_imp] at xm
       exact xm _ hL L.isConvexSet
+
+instance : Lattice (ConvexSet R X) where
 
 end ConvexSet
 
