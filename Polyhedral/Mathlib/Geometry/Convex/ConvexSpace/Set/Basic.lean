@@ -164,4 +164,5 @@ lemma IsConvexSet.of_convexCombPair_mem
     (by simp [← hsw]; grind)
 
 end Field
+
 end Convexity

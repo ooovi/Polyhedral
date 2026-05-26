@@ -112,7 +112,7 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
     constructor <;> intro L hL
     · intro l hl
       exact (Set.subset_iUnion₂_of_subset _ hL fun ⦃_⦄ a ↦ a).trans subset_convexHull_self hl
-    · simp only [sSup, convexHull, convexHull, Convexity.convexHull,
+    · simp only [sSup, convexHull, Convexity.convexHull,
         ClosureOperator.ofCompletePred_apply, Set.le_eq_subset, Set.iInf_eq_iInter]
       intro x xm
       simp only [mem_mk, Set.mem_iInter, Subtype.forall, Set.iUnion_subset_iff, and_imp] at xm
