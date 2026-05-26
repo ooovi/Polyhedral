@@ -8,7 +8,7 @@ import Mathlib.Geometry.Convex.Set
 import Mathlib.Geometry.Convex.ConvexSpace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Algebra.Group.Pointwise.Set.Basic
-
+import Mathlib.Geometry.Convex.Set
 
 public section
 
