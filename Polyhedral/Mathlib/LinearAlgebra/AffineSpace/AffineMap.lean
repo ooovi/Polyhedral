@@ -26,6 +26,8 @@ theorem AffineMap.mem_range (f : P →ᵃ[k] P2) (x : P2) : x ∈ f.range ↔ �
 
 open AffineMap Convexity
 
+attribute [local instance] AddTorsor.toConvexSpace
+
 variable [PartialOrder k] [IsStrictOrderedRing k]
 lemma AffineMap.range_isConvexSet (f : P →ᵃ[k] P2) : IsConvexSet k (f.range : Set P2) := by
   simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)

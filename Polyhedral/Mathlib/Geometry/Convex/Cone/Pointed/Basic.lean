@@ -238,12 +238,14 @@ end Semiring
 
 section Ring
 
+open Submodule (span)
+
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 -- TODO: write version with `restrictScalars` instead. (Or have I already??)
 lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R M}
-  (hS : Disjoint (Submodule.span R C) S) : (C ⊔ S) ⊓ Submodule.span R (C : Set M) = C := by
+  (hS : Disjoint (span R C) S) : (C ⊔ S) ⊓ span R (C : Set M) = C := by
   rw [sup_inf_assoc_of_le_submodule]
   · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
   · exact Submodule.subset_span

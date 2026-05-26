@@ -1,7 +1,9 @@
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Mathlib.Geometry.Convex.Cone.Pointed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+-- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 
 open Function Submodule
 
@@ -92,6 +94,8 @@ noncomputable def homRangeEquiv : LinearEquiv (RingHom.id R) V hom.linear.range 
 
 section HomCone
 
+open Convexity
+
 variable [PartialOrder R] [IsStrictOrderedRing R]
 
 open Convexity
@@ -102,6 +106,18 @@ def homogenize (P : ConvexSet R A) := PointedCone.hull R (hom.embed '' P)
 
 lemma homogenize_bot_eq_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
+
+def homogenizationHom :
+    OrderHom (ConvexSet R A) (PointedCone R W) where
+  toFun P := homogenize W P
+  monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
+
+theorem homogenize_empty_eq_bot : homogenize W (⟨∅, IsConvexSet.empty⟩ : ConvexSet R A) = ⊥ := by
+  simp [homogenize, SetLike.coe]
+
+section ModuleConvex
+
+variable [IsModuleConvexSpace R W]
 
 variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
@@ -119,13 +135,8 @@ lemma embed_dehomogenize_eq_inter_embed (C : PointedCone R W) :
     use y
     simpa
 
-def homogenizationHom :
-    OrderHom (ConvexSet R A) (PointedCone R W) where
-  toFun P := homogenize W P
-  monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
+end ModuleConvex
 
-theorem homogenize_empty_eq_bot : homogenize W (⟨∅, IsConvexSet.empty⟩ : ConvexSet R A) = ⊥ := by
-  simp [homogenize, SetLike.coe]
 
 end HomCone
 
@@ -145,21 +156,6 @@ variable [hom : Affine.Homogenization R A W]
 namespace Homogenization
 
 open Pointwise Set Convexity AffineMap PointedCone
-
-/-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other
-points, then `q` lies in the open segment between them. -/
-theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
-    (h₁ : 0 < r₁) (h₂ : 0 < r₂) (hₜ : 0 < t)
-    (h : r₁ • hom.embed p₁ + r₂ • hom.embed p₂ = t • hom.embed q) :
-    q ∈ Convexity.openSegment R p₁ p₂ := by
-  have : r₁ + r₂ = t := by simpa [height_one, map_add, map_smul] using congr_arg hom.height h
-  have : t⁻¹ • r₁ + t⁻¹ • r₂ = 1 := by
-      simp_rw [← smul_add, smul_eq_mul, this, mul_comm, Field.mul_inv_cancel _ hₜ.ne.symm]
-  use (t⁻¹ • r₁), (t⁻¹ • r₂), (smul_pos (by positivity) h₁), (smul_pos (by positivity) h₂), this
-  apply hom.inj
-  have : t⁻¹ • (r₁ • hom.embed p₁ + r₂ • hom.embed p₂) = hom.embed q := by
-    rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
-  simp [hom.isAffineMap.map_convexCombPair, convexCombPair_eq_add, ← this, smul_smul]
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Ioi (0 : R) • hom.embed '' (P : Set A) :=
@@ -191,6 +187,31 @@ lemma embed_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
   obtain ⟨_, _, hxx'⟩ := h'
   simpa [← hom.inj hxx']
 
+theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by
+  simp [homogenize]
+  -- use salient_of_pos_linearMap with hom.height and height_nonneg_of_mem_homogenize
+  -- issue #33
+  sorry
+
+section ModuleConvex
+
+variable [IsModuleConvexSpace R W]
+
+/-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other
+points, then `q` lies in the open segment between them. -/
+theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
+    (h₁ : 0 < r₁) (h₂ : 0 < r₂) (hₜ : 0 < t)
+    (h : r₁ • hom.embed p₁ + r₂ • hom.embed p₂ = t • hom.embed q) :
+    q ∈ Convexity.openSegment R p₁ p₂ := by
+  have : r₁ + r₂ = t := by simpa [height_one, map_add, map_smul] using congr_arg hom.height h
+  have : t⁻¹ • r₁ + t⁻¹ • r₂ = 1 := by
+      simp_rw [← smul_add, smul_eq_mul, this, mul_comm, Field.mul_inv_cancel _ hₜ.ne.symm]
+  use (t⁻¹ • r₁), (t⁻¹ • r₂), (smul_pos (by positivity) h₁), (smul_pos (by positivity) h₂), this
+  apply hom.inj
+  have : t⁻¹ • (r₁ • hom.embed p₁ + r₂ • hom.embed p₂) = hom.embed q := by
+    rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
+  simp [hom.isAffineMap.map_convexCombPair, convexCombPair_eq_sum, ← this, smul_smul]
+
 /-- Dehomogenizing the homogenization of a convex set yields the same set again. -/
 theorem dehomogenize_homogenize_eq_id (P : ConvexSet R A) :
     dehomogenize A (homogenize W P) = P := by
@@ -214,14 +235,9 @@ theorem homogenize_dehomogenize_eq_id_of_pos {C : PointedCone R W}
       use (hom.height y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (hC y hyC hy0).le) hyC
       simp [← hy']
 
-theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by
-  simp [homogenize]
-  -- use salient_of_pos_linearMap with hom.height and height_nonneg_of_mem_homogenize
-  -- issue #33
-  sorry
-
 section Faces
 
+variable [IsModuleConvexSpace R W] in
 theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     (homogenize W F).IsFaceOf (homogenize W P) where
   le := (hom.homogenizationHom).monotone' he.subset
@@ -270,7 +286,7 @@ theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
   left_mem_of_mem_openSegment  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
-    rwa [← convexCombPair_eq_add ha.le hb.le hab,
+    rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,
       ← hom.isAffineMap.map_convexCombPair, hzo]
 
 def Face.homogenizationIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P).Face where
@@ -288,6 +304,8 @@ def Face.homogenizationIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P
     simp [this]
 
 end Faces
+
+end ModuleConvex
 
 end Homogenization
 

@@ -1,6 +1,10 @@
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Mathlib.Data.Fintype.Order
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
 namespace Convexity
@@ -127,6 +131,8 @@ variable {R A : Type*}
 variable [PartialOrder R] [Ring R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable [AddTorsor V A]
+
+attribute [local instance] AddTorsor.toConvexSpace
 
 variable {C : ConvexSet R A}
 

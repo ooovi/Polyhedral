@@ -87,6 +87,8 @@ variable [AddTorsor V A]
 
 namespace Convexity.ConvexSet.Face
 
+attribute [local instance] AddTorsor.toConvexSpace
+
 variable {C : ConvexSet R A}
 
 noncomputable abbrev rank (F : C.Face) : Cardinal := F.toConvexSet.rank

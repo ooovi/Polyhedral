@@ -1,6 +1,5 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
-import Polyhedral.Mathlib.Order.Hom.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Data.Finset.Lattice.Basic
@@ -64,6 +63,7 @@ open Affine Homogenization
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
+variable [IsModuleConvexSpace R W]
 
 variable [hom : Homogenization R A W]
 
@@ -87,6 +87,7 @@ variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
+variable [IsModuleConvexSpace R W]
 
 variable [hom : Homogenization R A W]
 
@@ -114,7 +115,7 @@ private noncomputable def faceHomogenizationGradeOrder
   -- we just lift the grading we have for PointedCone.Face already
   refine GradeOrder.liftRight (β := (hom.homogenize W C).Face) _
     Homogenization.Face.homogenizationIso.strictMono ?_
-  exact fun x y ↦ (OrderIso.covBy_iff_covBy _).mp
+  exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 
 end DivisionRing

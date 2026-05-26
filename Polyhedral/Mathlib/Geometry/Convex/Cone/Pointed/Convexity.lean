@@ -1,6 +1,7 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 section Convexity
 
@@ -11,12 +12,12 @@ open Convexity
 section Ring
 
 variable {R M : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
-    [Module R M] {s : Set M}
+    [Module R M] [ConvexSpace R M] [IsModuleConvexSpace R M] {s : Set M}
 
 lemma isConvexSet (P : PointedCone R M) :
-    Convexity.IsConvexSet R (P : Set M) := by
+    IsConvexSet R (P : Set M) := by
   intro w hw
-  rw [Convexity.sConvexComb_eq_sum w]
+  rw [sConvexComb_eq_sum w]
   refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
   exact P.smul_mem (w.weights_nonneg c) <| hw (Finsupp.mem_support_iff.mpr hc)
 
@@ -37,16 +38,12 @@ end Ring
 section Field
 
 variable {R M : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
-    [Module R M] {s : Set M}
+    [Module R M] [ConvexSpace R M] {s : Set M}
 
 open Pointwise Set
 
-protected theorem _root_.IsConvexSet.add_smul (h_conv : Convexity.IsConvexSet R s) {p q : R}
-    (hp : 0 ≤ p) (hq : 0 ≤ q) :
-    (p + q) • s = p • s + q • s := sorry
-
 /-- The cone hull of a convex set is the union of the closed halflines through that set. -/
-lemma mem_hull_iff_of_convex (hs : s.Nonempty) (hc : Convexity.IsConvexSet R s) (x : M) :
+lemma mem_hull_iff_of_convex (hs : s.Nonempty) (hc : IsConvexSet R s) (x : M) :
     x ∈ hull R s ↔ x ∈ Ici (0 : R) • s where
   mp hx := hull_min (C := {
               carrier := {y | ∃ r : R, 0 ≤ r ∧ y ∈ r • s}
