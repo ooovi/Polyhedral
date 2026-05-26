@@ -1,9 +1,8 @@
-module
-
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Mathlib.Data.Fintype.Order
-
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
 namespace Convexity
 
@@ -118,10 +117,28 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
       simp only [mem_mk, Set.mem_iInter, Subtype.forall, Set.iUnion_subset_iff, and_imp] at xm
       exact xm _ hL L.isConvexSet
 
-instance : Lattice (ConvexSet R X) where
-
 end ConvexSet
 
 end Semiring
+
+
+namespace ConvexSet
+
+variable {R A : Type*}
+variable [PartialOrder R] [Ring R] [IsStrictOrderedRing R]
+variable {V : Type*} [AddCommGroup V] [Module R V]
+variable [AddTorsor V A]
+
+attribute [local instance] AddTorsor.toConvexSpace
+
+variable {C : ConvexSet R A}
+
+-- Affine.rank needs ring
+
+noncomputable abbrev rank (C : ConvexSet R A) := Affine.rank R (C : Set A)
+
+noncomputable abbrev finrank (C : ConvexSet R A) := Affine.finrank R (C : Set A)
+
+end ConvexSet
 
 end Convexity

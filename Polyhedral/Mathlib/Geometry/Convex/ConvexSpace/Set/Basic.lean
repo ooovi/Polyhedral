@@ -5,7 +5,7 @@ Authors: Yaël Dillies
 -/
 module
 
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Defs
+public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 
 import Mathlib.Data.Fintype.Order
 

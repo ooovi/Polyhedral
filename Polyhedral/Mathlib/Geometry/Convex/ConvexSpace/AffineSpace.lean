@@ -29,25 +29,29 @@ open Convexity
 
 namespace AffineMap
 
+attribute [local instance] AddTorsor.toConvexSpace
+
+-- PR #39437
 open Finset AddTorsor in
-theorem isAffineMap (f : P →ᵃ[R] P2) : Convexity.IsAffineMap R f where
+lemma isAffineMap {V2 P2 : Type*} [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
+    (f : P →ᵃ[R] P2) : IsAffineMap R f where
   map_sConvexComb s:= by
     classical
-    simp only [sConvexComb, convexCombination, map_affineCombination _ _ _ s.total,
-      StdSimplex.weights_map, Finsupp.mapDomain, Finsupp.sum, Finsupp.coe_finsetSum]
+    simp_rw [sConvexComb_eq_affineCombination, StdSimplex.weights_map, Finsupp.mapDomain,
+      map_affineCombination _ _ _ s.total, Finsupp.sum, Finsupp.coe_finsetSum]
     simp only [affineCombination_apply, weightedVSubOfPoint_apply, map_sum]
     congr
     ext i
-    rw [sum_eq_single (f i)]
+    rw [sum_eq_single (f i) fun _ _ hx ↦ by simp [hx.symm]]
     · simp
-    · intro _ _ hx; simp [hx.symm]
     · intro h
-      simp only [Finsupp.mem_support_iff, Finsupp.coe_finsetSum, sum_apply, Finsupp.single_apply,
-        ne_eq, Decidable.not_not] at h
+      simp only [Finsupp.mem_support_iff, Finsupp.coe_finsetSum, sum_apply,
+        Decidable.not_not, Finsupp.single_apply] at h
       have hwi : s.weights i = 0 := by
         by_contra hi
-        convert (sum_eq_zero_iff_of_nonneg (fun _ _ ↦ ?_)).mp h i (Finsupp.mem_support_iff.mpr hi)
-        · simpa
+        have := sum_eq_zero_iff_of_nonneg (fun _ _ ↦ ?_) |>.mp h i (Finsupp.mem_support_iff.mpr hi)
+        · simp at this
+          contradiction
         · split_ifs <;> simp
       simp [hwi]
 
