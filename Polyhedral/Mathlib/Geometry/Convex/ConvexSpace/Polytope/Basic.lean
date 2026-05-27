@@ -1,13 +1,24 @@
+/-
+Copyright (c) 2019 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter, Olivia Röhrig
+-/
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
+/-! ... -/
+
 namespace Convexity
+
+variable {R X Y V : Type*}
 
 open ConvexSpace
 
-variable {R X Y : Type*}
+section Semiring
+
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X]
 
@@ -15,7 +26,14 @@ variable (R) in
 /-- A set is a polytope if it is the convex hull of finitely many points. -/
 def IsPolytope (s : Set X) : Prop := ∃ t : Finset X, s = convexHull R t
 
+end Semiring
+
 namespace IsPolytope
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X]
 
 variable {P P₁ P₂ : Set X}
 
@@ -46,7 +64,7 @@ lemma convexHull_union (h₁ : IsPolytope R P₁) (h₂ : IsPolytope R P₂) :
   use v₁ ∪ v₂
   simp [convexHull_union_convexHull_right, convexHull_convexHull_union]
 
-lemma convexHull_iUnion {p : Set (Set X)} (hp : p.Finite)
+lemma convexHull_iUnion_finite {p : Set (Set X)} (hp : p.Finite)
     (h : ∀ P ∈ p, IsPolytope R P) : IsPolytope R (convexHull R (⋃ P ∈ p, P)) := by
   induction p, hp using Set.Finite.induction_on with
   | empty => simp
@@ -63,17 +81,25 @@ protected lemma image (hf : IsAffineMap R f) (hP : IsPolytope R P) :
   use v.image f
   simpa using hf.image_convexHull v
 
-variable {R X Y : Type*}
+end Semiring
+
+section Field
+
 variable [Field R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X]
+variable [AddCommGroup V] [Module R V]
+variable [AddTorsor V X]
+
+attribute [local instance] AddTorsor.toConvexSpace
 
 variable {P P₁ P₂ : Set X}
 
 protected theorem inter (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
     IsPolytope R (P₁ ∩ P₂) := by
-  -- homogenize to a cone
-  -- use that the homogenization is FG
-  -- use orderIso structure
+  -- TODO:
+  -- * homogenize to a cone
+  -- * use that the homogenization is FG
+  -- * use orderIso structure
   sorry
 
 protected theorem sInter {s : Set (Set X)} (hs : s.Finite) (hs' : s.Nonempty)
@@ -92,6 +118,8 @@ protected theorem iInter {s : Set (Set X)} (hs : s.Finite) (hs' : s.Nonempty)
     (h : ∀ P ∈ s, IsPolytope R P) : IsPolytope R (⋂ P ∈ s, P) := by
   rw [← Set.sInter_eq_biInter]
   exact IsPolytope.sInter hs hs' h
+
+end Field
 
 end IsPolytope
 
