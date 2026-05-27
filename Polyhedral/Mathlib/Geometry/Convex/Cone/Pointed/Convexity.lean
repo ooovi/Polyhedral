@@ -30,15 +30,15 @@ lemma isConvexSet (P : PointedCone R M) :
 
 open PointedCone in
 theorem hull_convexHull_eq_hull (t : Set M) :
-    hull R t = hull R (Convexity.convexHull R t) := by
+    hull R (Convexity.convexHull R t) = hull R t := by
   ext x; constructor <;> intro h
+  · apply Submodule.mem_span.mp h
+    simp only [Convexity.convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset,
+      Set.iInf_eq_iInter]
+    intro a am
+    simp only [Set.mem_iInter, Subtype.forall, and_imp, SetLike.mem_coe, Submodule.mem_span] at ⊢ am
+    exact fun p hp ↦ am _ hp <| isConvexSet p
   · exact Submodule.span_mono (by simpa [Convexity.convexHull] using fun _ a _ ↦ a) h
-  apply Submodule.mem_span.mp h
-  simp only [Convexity.convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset,
-    Set.iInf_eq_iInter]
-  intro a am
-  simp only [Set.mem_iInter, Subtype.forall, and_imp, SetLike.mem_coe, Submodule.mem_span] at ⊢ am
-  exact fun p hp ↦ am _ hp <| isConvexSet p
 
 end Ring
 
