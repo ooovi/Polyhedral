@@ -1,0 +1,100 @@
+
+import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+
+section Polytope
+
+namespace Convexity
+
+open ConvexSpace
+
+variable {R X Y : Type*}
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X]
+
+variable (R) in
+/-- A set is a polytope if it is the convex hull of finitely many points. -/
+def IsPolytope (s : Set X) : Prop := ∃ t : Finset X, s = convexHull R t
+
+namespace IsPolytope
+
+variable {P P₁ P₂ : Set X}
+
+lemma isConvexSet (hP : IsPolytope R P) : IsConvexSet R P := by
+  obtain ⟨_, rfl⟩ := hP
+  exact IsConvexSet.convexHull
+
+variable (R X) in
+@[simp] protected lemma empty : IsPolytope R (∅ : Set X) := by
+  use ∅; simp
+
+variable (R) in
+@[simp] protected lemma singleton (x : X) : IsPolytope R {x} := by
+  use {x}; simp
+
+variable (R) in
+lemma of_subsingleton (hP : P.Subsingleton) : IsPolytope R P := by
+  obtain rfl | ⟨x, rfl⟩ := hP.eq_empty_or_singleton <;> simp
+
+variable (R) in
+lemma of_convexHull_finite {v : Set X} (hv : v.Finite) :
+    IsPolytope R (convexHull R v) := by use hv.toFinset; simp
+
+lemma of_convexHull_union (h₁ : IsPolytope R P₁) (h₂ : IsPolytope R P₂) :
+    IsPolytope R (convexHull R (P₁ ∪ P₂)) := by classical
+  obtain ⟨v₁, rfl⟩ := h₁
+  obtain ⟨v₂, rfl⟩ := h₂
+  use v₁ ∪ v₂
+  simp [convexHull_union_convexHull_right, convexHull_convexHull_union]
+
+lemma of_convexHull_iUnion {p : Set (Set X)} (hp : p.Finite)
+    (h : ∀ P ∈ p, IsPolytope R P) : IsPolytope R (convexHull R (⋃ P ∈ p, P)) := by
+  induction p, hp using Set.Finite.induction_on with
+  | empty => simp
+  | insert _ _ h' =>
+    simp only [Set.mem_insert_iff, Set.iUnion_iUnion_eq_or_left, forall_eq_or_imp] at ⊢ h
+    rw [← convexHull_union_convexHull_right]
+    exact of_convexHull_union h.1 (h' h.2)
+
+variable [ConvexSpace R Y] {f : X → Y}
+
+protected lemma image (hf : IsAffineMap R f) (hP : IsPolytope R P) :
+    IsPolytope R (f '' P) := by classical
+  obtain ⟨v, rfl⟩ := hP
+  use v.image f
+  simpa using hf.image_convexHull v
+
+variable {R X Y : Type*}
+variable [Field R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X]
+
+variable {P P₁ P₂ : Set X}
+
+protected theorem inter (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
+    IsPolytope R (P₁ ∩ P₂) := by
+  -- homogenize to a cone
+  -- use that the homogenization is FG
+  -- use orderIso structure
+  sorry
+
+protected theorem sInter {s : Set (Set X)} (hs : s.Finite) (hs' : s.Nonempty)
+    (h : ∀ P ∈ s, IsPolytope R P) : IsPolytope R (⋂₀ s) := by
+  induction s, hs using Set.Finite.induction_on with
+  | empty => simp at hs'
+  | insert _ _ h' =>
+    rename Set (Set X) => t
+    simp only [Set.mem_insert_iff, forall_eq_or_imp, Set.sInter_insert] at ⊢ h
+    by_cases htt : t.Nonempty
+    · exact IsPolytope.inter h.1 (h' htt h.2)
+    · rw [Set.not_nonempty_iff_eq_empty] at htt
+      simp [htt, h.1]
+
+protected theorem iInter {s : Set (Set X)} (hs : s.Finite) (hs' : s.Nonempty)
+    (h : ∀ P ∈ s, IsPolytope R P) : IsPolytope R (⋂ P ∈ s, P) := by
+  rw [← Set.sInter_eq_biInter]
+  exact IsPolytope.sInter hs hs' h
+
+end IsPolytope
+
+end Convexity
