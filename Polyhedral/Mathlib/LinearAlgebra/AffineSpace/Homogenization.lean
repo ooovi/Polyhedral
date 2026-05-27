@@ -1,9 +1,7 @@
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
-import Mathlib.Geometry.Convex.Cone.Pointed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
--- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 open Function Submodule
 
@@ -157,6 +155,16 @@ namespace Homogenization
 
 open Pointwise Set Convexity AffineMap PointedCone
 
+theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by
+  simp [homogenize]
+  -- use salient_of_pos_linearMap with hom.height and height_nonneg_of_mem_homogenize
+  -- issue #33
+  sorry
+
+section ModuleConvex
+
+variable [IsModuleConvexSpace R W]
+
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Ioi (0 : R) • hom.embed '' (P : Set A) :=
   (mem_hull_iff_mem_pos_smul_of_convex_nonzero (P.isConvexSet.image hom.isAffineMap) hx).mp h
@@ -186,16 +194,6 @@ lemma embed_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
   simp only [this, Set.mem_image, one_smul, exists_eq_right] at h'
   obtain ⟨_, _, hxx'⟩ := h'
   simpa [← hom.inj hxx']
-
-theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by
-  simp [homogenize]
-  -- use salient_of_pos_linearMap with hom.height and height_nonneg_of_mem_homogenize
-  -- issue #33
-  sorry
-
-section ModuleConvex
-
-variable [IsModuleConvexSpace R W]
 
 /-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other
 points, then `q` lies in the open segment between them. -/
@@ -310,6 +308,8 @@ end ModuleConvex
 end Homogenization
 
 end Field
+
+#min_imports
 
 #exit
 
