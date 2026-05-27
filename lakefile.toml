@@ -29,6 +29,3 @@ name = "Polyhedral"
 [[lean_lib]]
 name = "Experimental"
 
-[[moreServerOptions]]
-name = "linter.style.header"
-value = false

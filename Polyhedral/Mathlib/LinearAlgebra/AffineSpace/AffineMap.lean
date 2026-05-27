@@ -1,8 +1,4 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Mathlib.Geometry.Convex.Set
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 open Affine Module
@@ -33,14 +29,3 @@ lemma AffineMap.range_isConvexSet (f : P →ᵃ[k] P2) : IsConvexSet k (f.range 
   simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
 
 end
-
--- open AffineMap in
--- theorem Convexity.IsConvexSet.preimage_isFaceOf {F C : PointedCone k W} (hf : F.IsFaceOf C)
---     (finj : Function.Injective f) :
---     ((IsConvexSet.pointedCone F).preimage f finj).IsFaceOf ((IsConvexSet.pointedCone C).preimage finj) where
---   subset := Set.preimage_mono (fun _ xm ↦ hf.le xm)
---   left_mem_of_mem_openSegment  := by
---     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
---     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
---     rwa [← convexCombPair_eq_smul_add_smul ha.le hb.le hab,
---       ←  f.isAffineMap.map_convexCombPair finj, hzo]
