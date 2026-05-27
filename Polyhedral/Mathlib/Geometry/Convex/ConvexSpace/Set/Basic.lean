@@ -4,11 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yaël Dillies
 -/
 
-import Mathlib.Geometry.Convex.Set
-import Mathlib.Geometry.Convex.ConvexSpace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Algebra.Group.Pointwise.Set.Basic
-import Mathlib.Geometry.Convex.Set
 
 public section
 

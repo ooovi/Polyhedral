@@ -33,7 +33,6 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 import Polyhedral.Mathlib.Order.Hom.Basic
