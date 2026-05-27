@@ -1,8 +1,4 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Mathlib.Geometry.Convex.Set
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 open Affine Module

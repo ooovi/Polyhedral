@@ -19,22 +19,22 @@ This file shows that every affine space is a convex space.
 public noncomputable section
 
 open scoped Affine
+open Convexity
 
 variable {R V V2 P P2 I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
 variable [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
 
+attribute [instance] AddTorsor.toConvexSpace
+
 open Convexity
 
 namespace AffineMap
 
-attribute [local instance] AddTorsor.toConvexSpace
-
 -- PR #39437
 open Finset AddTorsor in
-lemma isAffineMap {V2 P2 : Type*} [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
-    (f : P →ᵃ[R] P2) : IsAffineMap R f where
+lemma isAffineMap (f : P →ᵃ[R] P2) : IsAffineMap R f where
   map_sConvexComb s:= by
     classical
     simp_rw [sConvexComb_eq_affineCombination, StdSimplex.weights_map, Finsupp.mapDomain,

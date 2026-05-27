@@ -1,7 +1,5 @@
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Mathlib.Data.Fintype.Order
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
 namespace Convexity

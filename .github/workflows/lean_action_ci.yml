@@ -19,3 +19,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
       - uses: leanprover-community/docgen-action@v1
+        

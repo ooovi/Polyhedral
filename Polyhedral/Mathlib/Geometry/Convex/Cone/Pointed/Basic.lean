@@ -1,4 +1,3 @@
-
 import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.Geometry.Convex.Cone.Dual
 import Mathlib.RingTheory.Finiteness.Basic
@@ -6,9 +5,12 @@ import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.SetTheory.Cardinal.Defs
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+
+section Semiring
 
 namespace LinearMap
 
@@ -50,10 +52,9 @@ open Pointwise in
 
 end LinearMap
 
-namespace PointedCone
+end Semiring
 
-open Module Function
-open Submodule (span)
+namespace PointedCone
 
 section CommSemiring
 
@@ -71,6 +72,9 @@ example : CommSemiring R≥0 := inferInstance
 end CommSemiring
 
 section Semiring
+
+open Module Function
+open Submodule (span)
 
 variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M] {S : Set M}
@@ -125,7 +129,7 @@ lemma ofSubmodule_linSpan (S : Submodule R M) :
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma linSpan_hull_eq_submodule_span (s : Set M) :
-    span R (hull R s) = Submodule.span R s := Submodule.span_span_of_tower ..
+    span R (hull R s) = span R s := Submodule.span_span_of_tower ..
 
 @[deprecated (since := "")]
 alias span_submodule_span := linSpan_hull_eq_submodule_span
@@ -141,9 +145,6 @@ alias span_submodule_span := linSpan_hull_eq_submodule_span
 -- end Ring
 
 -- ## COE
-
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
@@ -231,7 +232,13 @@ lemma submodule_span_of_hull {s : Set M} {S : Submodule R M} (hsS : hull R s = S
 lemma hull_union (s t : Set M) : hull R (s ∪ t) = hull R s ⊔ hull R t :=
     Submodule.span_union s t
 
+lemma hull_min {s : Set M} {C : PointedCone R M} (hsC : s ⊆ C) : hull R s ≤ C := sInf_le hsC
+
+end Semiring
+
 section Ring
+
+open Submodule (span)
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
@@ -244,6 +251,15 @@ lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R 
   · exact Submodule.subset_span
 
 end Ring
+
+
+section Semiring
+
+open Module Function
+open Submodule (span)
+
+variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
+  [Module R M] {S : Set M}
 
 --------------------------
 
@@ -376,6 +392,7 @@ lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
 
 end Semiring
 
+
 section AddCommGroup
 
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
@@ -448,6 +465,8 @@ end Pointwise
 end PartialOrder
 
 section DirectedOrder
+
+open Submodule (span)
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
@@ -659,6 +678,8 @@ end Ring
 /- Most, if not everything, from this section should be proven for general restricted scalars. -/
 
 section Quotient
+
+open Submodule (span)
 
 variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
