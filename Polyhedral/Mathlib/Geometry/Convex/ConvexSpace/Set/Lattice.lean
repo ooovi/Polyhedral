@@ -54,7 +54,7 @@ example : (K₁ : Set X) ≤ K₂ ↔ K₁ ≤ K₂ := by simp [Set.le_eq_subset
 instance : Min (ConvexSet R X) where
   min K₁ K₂ := ⟨_, K₁.isConvexSet.inter K₂.isConvexSet⟩
 
-instance : SemilatticeInf (ConvexSet R X) where
+instance instSemilatticeInf : SemilatticeInf (ConvexSet R X) where
   inf := min
   inf_le_left _ _ _ hx := hx.1
   inf_le_right _ _ _ hx := hx.2
@@ -82,7 +82,7 @@ instance : OrderTop (ConvexSet R X) where
   top := ⟨Set.univ, IsConvexSet.univ⟩
   le_top _ _ _ := by simp
 
-instance : Inhabited (ConvexSet R X) := ⟨⊤⟩
+instance : Inhabited (ConvexSet R X) := ⟨⊥⟩
 
 variable {K K₁ K₂ : ConvexSet R X}
 
@@ -93,9 +93,9 @@ def convexHull (s : Set X) : ConvexSet R X := ⟨Convexity.convexHull R s, .conv
 instance : Max (ConvexSet R X) where
   max K₁ K₂ := convexHull R (K₁ ∪ K₂)
 
-lemma sup_eq_convexHull_union : (K₁ ⊔ K₂).carrier = Convexity.convexHull R (K₁ ∪ K₂) := by rfl
+lemma coe_sup_eq_convexHull_union : (K₁ ⊔ K₂).carrier = Convexity.convexHull R (K₁ ∪ K₂) := by rfl
 
-instance : SemilatticeSup (ConvexSet R X) where
+instance instSemilatticeSup : SemilatticeSup (ConvexSet R X) where
   sup := max
   le_sup_left _ _ _ hs := by
     apply subset_convexHull_self
@@ -104,7 +104,7 @@ instance : SemilatticeSup (ConvexSet R X) where
     apply subset_convexHull_self
     simp [hs]
   sup_le K₁ K₂ K₃ h₁₂ h₂₃ x hx := by
-    rw [mem_mk, sup_eq_convexHull_union, mem_convexHull_iff] at hx
+    rw [mem_mk, coe_sup_eq_convexHull_union, mem_convexHull_iff] at hx
     refine hx K₃ ?_ K₃.isConvexSet
     simp [h₂₃, h₁₂]
 
