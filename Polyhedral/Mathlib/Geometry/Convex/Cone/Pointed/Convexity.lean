@@ -29,6 +29,7 @@ lemma isConvexSet (P : PointedCone R M) :
   exact P.smul_mem (w.weights_nonneg c) <| hw (Finsupp.mem_support_iff.mpr hc)
 
 open PointedCone in
+@[simp]
 theorem hull_convexHull_eq_hull (t : Set M) :
     hull R (Convexity.convexHull R t) = hull R t := by
   ext x; constructor <;> intro h
