@@ -38,7 +38,7 @@ end Ring
 section Field
 
 variable {R M : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
-    [Module R M] [ConvexSpace R M] {s : Set M}
+    [Module R M] [ConvexSpace R M] [IsModuleConvexSpace R M] {s : Set M}
 
 open Pointwise Set
 
@@ -55,8 +55,13 @@ lemma mem_hull_iff_of_convex (hs : s.Nonempty) (hc : IsConvexSet R s) (x : M) :
               add_mem' := by
                 rintro y₁ y₂ ⟨r₁, hr₁, hy₁⟩ ⟨r₂, hr₂, hy₂⟩
                 refine ⟨r₁ + r₂, add_nonneg hr₁ hr₂, ?_⟩
-                rw [IsConvexSet.add_smul hc hr₁ hr₂]
-                exact add_mem_add hy₁ hy₂
+                by_cases h : r₁ + r₂ = 0
+                · have h₁ : r₁ = 0 := by linarith
+                  have h₂ : r₂ = 0 := by linarith
+                  simp only [h₁, h₂, hs, zero_smul_set, mem_zero] at hy₂ hy₁
+                  simp [hy₁, hy₂, h, zero_smul_set hs]
+                · rw [IsConvexSet.add_smul hc hr₁ hr₂ h]
+                  exact add_mem_add hy₁ hy₂
               zero_mem' := by
                 use 0; simpa using ⟨hs.choose, hs.choose_spec, zero_smul R (Exists.choose hs)⟩
             }) (fun y hy ↦ ⟨1, by simpa⟩) hx
