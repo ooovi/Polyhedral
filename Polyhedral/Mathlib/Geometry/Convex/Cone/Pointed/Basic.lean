@@ -1,4 +1,3 @@
-import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.Geometry.Convex.Cone.Dual
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
@@ -16,8 +15,6 @@ namespace LinearMap
 
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
--- variable {M₂ : Type*} [AddCommGroup M₂] [Module R M₂]
--- variable [LinearOrder M₂] [IsOrderedAddMonoid M₂]
 
 set_option backward.isDefEq.respectTransparency false in
 def positive (f : M →ₗ[R] R) : PointedCone R M where
@@ -780,5 +777,56 @@ theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : hull R {r • x} =
     · simpa [smul_smul, inv_mul_cancel_right₀ (ne_of_lt hr).symm] using h
 
 end DivisionRing
+
+section Field
+
+variable {R M : Type*} [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
+  [Module R M] {S : Set M}
+
+open Set Pointwise
+
+/-- If there is a linear map that is positive on the entire cone except 0, the cone is the sMul-span
+of any positive level set of the map. -/
+lemma eq_Ioi_zero_smul_inter_preimage_of_pos {C : PointedCone R M} {f : M →ₗ[R] R} {r : R}
+    (hf : ∀ x ∈ C, x ≠ 0 → 0 < f x) (hr : 0 < r) :
+    (C : Set M) \ {0} = Set.Ioi (0 : R) • ((C : Set M) ∩ f ⁻¹' {r}) := by
+  ext x
+  constructor
+  · intro ⟨hxC, hx0⟩
+    refine ⟨r⁻¹ • f x, smul_pos (inv_pos.mpr hr) <| hf x hxC hx0, (r • (f x)⁻¹) • x, ⟨?_, ?_⟩, ?_⟩
+    · exact C.smul_mem (smul_pos hr <| inv_pos.mpr (hf _ hxC hx0)).le hxC
+    · simp [inv_mul_cancel₀ (ne_of_gt (hf x hxC hx0)), mul_assoc]
+    · simp only [smul_eq_mul, smul_smul]
+      field_simp [ne_of_gt (hf x hxC hx0)]
+      exact MulAction.one_smul x
+  · rintro ⟨r, hri, y, ⟨hyC, hfy⟩, rfl⟩
+    have hy0 : y ≠ 0 := by intro hc; simp only [hc, mem_preimage, map_zero,
+      Set.mem_singleton_iff] at hfy; exact hr.ne hfy
+    exact ⟨C.smul_mem (mem_Ioi.mp hri).le hyC, by simp [ne_of_gt hri, hy0]⟩
+
+/-- If there is a linear map that is positive on the entire cone except 0, the cone is the closed
+sMul-span of any positive level set of the map. -/
+lemma eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot {C : PointedCone R M} {f : M →ₗ[R] R} {r : R}
+    (hf : ∀ x ∈ C, x ≠ 0 → 0 < f x) (hr : 0 < r) (hC : C ≠ ⊥) :
+    C = Set.Ici (0 : R) • ((C : Set M) ∩ f ⁻¹' {r}) := by
+  ext x
+  by_cases hx : x = 0
+  · subst hx
+    simp only [SetLike.mem_coe, zero_mem, true_iff]
+    use 0, le_rfl
+    simp only [mem_inter_iff, SetLike.mem_coe, mem_preimage, mem_singleton_iff, zero_smul, and_true]
+    obtain ⟨x, hx⟩ := C.ne_bot_iff.mp hC
+    use r • (f x)⁻¹ • x
+    have fxpos : 0 < f x := hf x hx.1 hx.2
+    simp only [← smul_assoc, smul_eq_mul, map_smul]
+    refine ⟨C.smul_mem (mul_pos hr (inv_pos.mpr fxpos)).le hx.1, ?_⟩
+    simp [mul_assoc, inv_mul_cancel₀ fxpos.ne.symm]
+  · constructor <;> intro h
+    · apply Set.smul_subset_smul_right Ioi_subset_Ici_self
+      exact eq_Ioi_zero_smul_inter_preimage_of_pos hf hr ▸ mem_diff_singleton.mpr ⟨h, hx⟩
+    · obtain ⟨_, hr, _, hy, b⟩ := h
+      simpa [← b] using C.smul_mem hr (mem_of_mem_inter_left hy)
+
+end Field
 
 end PointedCone

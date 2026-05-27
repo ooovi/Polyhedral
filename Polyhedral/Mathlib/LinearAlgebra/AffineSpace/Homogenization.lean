@@ -224,8 +224,8 @@ theorem homogenize_dehomogenize_eq_id_of_pos {C : PointedCone R W}
   · simp [hbot, homogenize, dehomogenize]
   · apply SetLike.ext'
     unfold homogenize
-    rw [eq_nonneg_smul_base hC zero_lt_one hbot, embed_dehomogenize_eq_inter_embed,
-      ← hom.embed_height]
+    rw [eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot hC zero_lt_one hbot,
+      embed_dehomogenize_eq_inter_embed, ← hom.embed_height]
     convert hull_eq_smul ?_ (C.isConvexSet.inter hom.range_isConvexSet)
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
       obtain ⟨_, hy'⟩ : (hom.height y)⁻¹ • y ∈ (hom.range : Set W) := by
@@ -308,8 +308,6 @@ end ModuleConvex
 end Homogenization
 
 end Field
-
-#min_imports
 
 #exit
 
