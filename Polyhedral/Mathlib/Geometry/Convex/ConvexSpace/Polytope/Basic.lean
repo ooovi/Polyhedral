@@ -3,8 +3,6 @@ import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
-section Polytope
-
 namespace Convexity
 
 open ConvexSpace
@@ -34,28 +32,28 @@ variable (R) in
   use {x}; simp
 
 variable (R) in
-lemma of_subsingleton (hP : P.Subsingleton) : IsPolytope R P := by
+lemma subsingleton (hP : P.Subsingleton) : IsPolytope R P := by
   obtain rfl | ⟨x, rfl⟩ := hP.eq_empty_or_singleton <;> simp
 
 variable (R) in
-lemma of_convexHull_finite {v : Set X} (hv : v.Finite) :
+lemma convexHull_finite {v : Set X} (hv : v.Finite) :
     IsPolytope R (convexHull R v) := by use hv.toFinset; simp
 
-lemma of_convexHull_union (h₁ : IsPolytope R P₁) (h₂ : IsPolytope R P₂) :
+lemma convexHull_union (h₁ : IsPolytope R P₁) (h₂ : IsPolytope R P₂) :
     IsPolytope R (convexHull R (P₁ ∪ P₂)) := by classical
   obtain ⟨v₁, rfl⟩ := h₁
   obtain ⟨v₂, rfl⟩ := h₂
   use v₁ ∪ v₂
   simp [convexHull_union_convexHull_right, convexHull_convexHull_union]
 
-lemma of_convexHull_iUnion {p : Set (Set X)} (hp : p.Finite)
+lemma convexHull_iUnion {p : Set (Set X)} (hp : p.Finite)
     (h : ∀ P ∈ p, IsPolytope R P) : IsPolytope R (convexHull R (⋃ P ∈ p, P)) := by
   induction p, hp using Set.Finite.induction_on with
   | empty => simp
   | insert _ _ h' =>
     simp only [Set.mem_insert_iff, Set.iUnion_iUnion_eq_or_left, forall_eq_or_imp] at ⊢ h
     rw [← convexHull_union_convexHull_right]
-    exact of_convexHull_union h.1 (h' h.2)
+    exact convexHull_union h.1 (h' h.2)
 
 variable [ConvexSpace R Y] {f : X → Y}
 

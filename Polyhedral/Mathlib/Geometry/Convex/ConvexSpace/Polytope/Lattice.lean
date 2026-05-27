@@ -59,10 +59,10 @@ variable {K P₁ P₂ : Polytope R X}
 variable (R) in
 /-- The convex hull of a `Finset s` as a `Polytope`. -/
 def convexHull (s : Finset X) : Polytope R X :=
-  ⟨_, IsPolytope.of_convexHull_finite R s.finite_toSet⟩
+  ⟨_, IsPolytope.convexHull_finite R s.finite_toSet⟩
 
 instance : Max (Polytope R X) where
-  max P₁ P₂ := ⟨_, P₁.isPolytope.of_convexHull_union P₂.isPolytope⟩
+  max P₁ P₂ := ⟨_, P₁.isPolytope.convexHull_union P₂.isPolytope⟩
 
 lemma coe_sup_eq_convexHull_union :
   ((P₁ ⊔ P₂ : Polytope R X) : Set X) = Convexity.convexHull R (P₁ ∪ P₂) := rfl
