@@ -28,4 +28,3 @@ name = "Polyhedral"
 
 [[lean_lib]]
 name = "Experimental"
-
