@@ -442,8 +442,6 @@ end SetLike
 
 /- # Min # -/
 
--- TODO: replace by `HasConcreteInf` because `SemilatticeInf` takes an inf and defines
---  a `Min` instance itself.
 class IsConcreteMin (A : Type*) (B : outParam Type*) [SetLike A B] [Min A] where
   protected coe_min' (a b : A) : (a ⊓ b : A) = (a ∩ b : Set B)
 
@@ -464,6 +462,7 @@ variable (A B) in
   inf_le_right := by simp [← coe_subset_coe]
   le_inf a b c := by simpa only [← coe_subset_coe, coe_min] using le_inf
 
+-- Alternative:
 -- instance : SemilatticeInf A where
 --   inf := min
 --   inf_le_left := by simp [← coe_subset_coe]
@@ -495,14 +494,9 @@ variable (A B) in
 @[reducible] def _root_.CompleteSemilatticeInf.ofSetLike : CompleteSemilatticeInf A where
   isGLB_sInf := by simp [isGLB_iff_le_iff, ← SetLike.coe_subset_coe, lowerBounds]
 
+-- Alternative:
 -- instance : CompleteSemilatticeInf A where
---   isGLB_sInf := by
---     intro s
---     unfold IsGLB IsGreatest lowerBounds upperBounds
---     simp [← coe_subset_coe]
---     -- haveI : CompleteSemilatticeInf (Set B) := inferInstance
---     -- exact isGLB_sInf (α := Set B) (SetLike.coe '' s)
---     sorry
+--   isGLB_sInf := by simp [isGLB_iff_le_iff, ← SetLike.coe_subset_coe, lowerBounds]
 
 end PartialOrder
 
