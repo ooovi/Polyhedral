@@ -1,3 +1,5 @@
+import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
