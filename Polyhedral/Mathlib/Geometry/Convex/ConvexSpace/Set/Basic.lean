@@ -1,24 +1,52 @@
 /-
-Copyright (c) 2026 Yaël Dillies. All rights reserved.
+Copyright (c) 2026 Martin Winter, Olivia Röhrig. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yaël Dillies
+Authors: Martin Winter, Olivia Röhrig
 -/
 module
 
 public import Mathlib.Geometry.Convex.ConvexSpace.Module
 
+/-! ... -/
+
 public section
 
 variable {ι R K X Y : Type*}
 
+namespace Convexity
+
 section Semiring
 
-open Convexity
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
+
+variable {K K₁ K₂ : Set X}
+
+section Pointwise
+
+open Pointwise
+
+protected lemma IsConvexSet.neg [Neg X] (hK : IsConvexSet R K) : IsConvexSet R (-K) := by
+  sorry
+
+variable [ConvexSpace R Y]
+
+/- Minkowski addition preserves convexity. -/
+protected lemma IsConvexSet.vadd [VAdd X Y] {K₁ : Set X} {K₂ : Set Y}
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ +ᵥ K₂) := by
+  sorry
+
+/- Minkowski addition preserves convexity. -/
+protected lemma IsConvexSet.add [Add X] (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) :
+    IsConvexSet R (K₁ + K₂) := IsConvexSet.vadd hK₁ hK₂
+
+end Pointwise
+
+-- TODO: move the below to Module.lean
 
 variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M] [PartialOrder R]
   [IsStrictOrderedRing R] [ConvexSpace R M] [IsModuleConvexSpace R M]
 
-lemma Submodule.isConvexSet (P : Submodule R M) : IsConvexSet R (P : Set M) := by
+lemma _root_.Submodule.isConvexSet (P : Submodule R M) : IsConvexSet R (P : Set M) := by
   apply IsConvexSet.of_sConvexComb_mem
   intro w hw
   rw [sConvexComb_eq_sum w]
@@ -28,8 +56,6 @@ lemma Submodule.isConvexSet (P : Submodule R M) : IsConvexSet R (P : Set M) := b
 end Semiring
 
 section Field
-
-namespace Convexity
 
 variable [Field K] [LinearOrder K] [IsStrictOrderedRing K] [ConvexSpace K X] {w : StdSimplex K X}
   {s t : Set X} {x y : X}
@@ -54,8 +80,6 @@ protected theorem IsConvexSet.add_smul {s : Set X}
     · exact mul_nonneg hq (inv_nonneg.mpr (add_nonneg hp hq))
     · simp [← add_mul, mul_inv_cancel₀ h]
 
-end Convexity
-
 end Field
 
-end
+end Convexity
