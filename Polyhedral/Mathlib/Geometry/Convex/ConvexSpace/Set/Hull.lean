@@ -3,8 +3,10 @@ Copyright (c) 2026 Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yaël Dillies
 -/
-import Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Order.Closure
+module
+
+public import Mathlib.Geometry.Convex.ConvexSpace.Module
+public import Mathlib.Order.Closure
 
 /-!
 # IsConvexSet hull
@@ -115,3 +117,5 @@ lemma IsAffineMap.image_convexHull {f : X → Y} (hf : IsAffineMap R f) (s : Set
   exact ⟨subset_convexHull_self, image_mono subset_convexHull_self⟩
 
 end Convexity
+
+end

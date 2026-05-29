@@ -80,8 +80,8 @@ theorem embed_range_isSpanning : span R (hom.range : Set W) = ⊤ := by
     Submodule.add_mem _ hlin <| smul_mem _ (hom.height x) (subset_span ⟨a₀, rfl⟩)
 
 open AffineMap LinearEquiv in
-/-- The linear equivalence between the unterlying vector space and its embedding. -/
-noncomputable def homRangeEquiv : LinearEquiv (RingHom.id R) V hom.linear.range := {
+/-- The linear equivalence between the underlying vector space and its embedding. -/
+noncomputable def homLinearRangeEquiv : LinearEquiv (RingHom.id R) V hom.linear.range := {
   toFun v := ⟨hom.linear v, hom.linear.mem_range_self v⟩
   map_add' v w := by simp
   map_smul' r v := by simp
@@ -89,6 +89,14 @@ noncomputable def homRangeEquiv : LinearEquiv (RingHom.id R) V hom.linear.range 
   left_inv v := (ofInjective hom.linear (linear_injective_iff _ |>.mpr hom.inj)).left_inv v
   right_inv v' := by simp
 }
+
+/-- The affine equivalence between the affine space space and its embedding. -/
+public noncomputable def homRangeEquiv : AffineEquiv R A hom.embed.range :=
+  .ofBijective ⟨hom.rangeRestrict_injective_iff.mpr hom.inj, fun ⟨_, a, rfl⟩ => ⟨a, rfl⟩⟩
+
+lemma apply_homRangeEquiv_symm (x : hom.range) : hom.embed (hom.homRangeEquiv.symm x) = x := by
+  rw [← hom.homRangeEquiv.right_inv x]
+  congr; exact hom.homRangeEquiv.symm_apply_apply _
 
 section HomCone
 
@@ -235,7 +243,6 @@ theorem homogenize_dehomogenize_eq_id_of_pos {C : PointedCone R W}
 
 section Faces
 
-variable [IsModuleConvexSpace R W] in
 theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     (homogenize W F).IsFaceOf (homogenize W P) where
   le := (hom.homogenizationHom).monotone' he.subset
@@ -308,3 +315,5 @@ end ModuleConvex
 end Homogenization
 
 end Field
+
+end Affine
