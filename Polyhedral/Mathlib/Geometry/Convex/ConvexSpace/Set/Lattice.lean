@@ -9,30 +9,28 @@ import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
--- import Polyhedral.Mathlib.Data.Pointwise.SetLike.IsConcrete
--- import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 
 /-! ... -/
 
+variable {ι R K X Y : Type*}
+
 namespace Convexity
 
-variable {ι R K X Y : Type*}
+/-- A bundled convex set. -/
+structure ConvexSet (R X : Type*) [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+    [ConvexSpace R X] where
+  /-- The carrier set. -/
+  carrier : Set X
+  isConvexSet : IsConvexSet R carrier
+
+namespace ConvexSet
 
 public section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
 
-variable (R X) in
-/-- A bundled convex set. -/
-structure ConvexSet where
-  /-- The carrier set. -/
-  carrier : Set X
-  isConvexSet : IsConvexSet R carrier
-
 variable {K K₁ K₂ : ConvexSet R X}
-
-namespace ConvexSet
 
 instance : SetLike (ConvexSet R X) X where
   coe := ConvexSet.carrier
@@ -127,15 +125,20 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
 
 instance : CompleteLattice (ConvexSet R X) where
 
+end Semiring
+
 section Pointwise
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
 
 open Pointwise
 
 /-! ### Negation -/
 
 section Neg
-
-variable [Neg X]
 
 instance : Neg (ConvexSet R X) where
   neg K := ⟨_, K.isConvexSet.neg⟩
@@ -144,11 +147,16 @@ instance : IsConcreteNeg (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
 end Neg
 
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
 /-! ### Minkowski addition -/
 
 section Add
-
-variable [Add X]
 
 instance : Add (ConvexSet R X) where
   add K₁ K₂ := ⟨_, K₁.isConvexSet.add K₂.isConvexSet⟩
@@ -159,7 +167,9 @@ end Add
 
 section VAdd
 
-variable [ConvexSpace R Y] [VAdd X Y]
+variable [AddTorsor X Y]
+
+noncomputable instance : ConvexSpace R Y := AddTorsor.toConvexSpace
 
 instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
   vadd K₁ K₂ := ⟨_, K₁.isConvexSet.vadd K₂.isConvexSet⟩
@@ -168,11 +178,11 @@ instance : IsConcreteVAdd (ConvexSet R X) X (ConvexSet R Y) Y := ⟨fun _ _ => r
 
 end VAdd
 
+end Ring
+
 end Pointwise
 
 end ConvexSet
-
-end Semiring
 
 
 namespace ConvexSet
