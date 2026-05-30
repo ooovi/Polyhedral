@@ -165,7 +165,7 @@ section VAdd
 
 variable [AddTorsor X Y]
 
-noncomputable instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
 
 instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
   vadd K₁ K₂ := ⟨_, K₁.isConvexSet.vadd K₂.isConvexSet⟩

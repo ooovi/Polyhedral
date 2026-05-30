@@ -140,8 +140,6 @@ variable [ConvexSpace R X]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V X]
 
-attribute [local instance] AddTorsor.toConvexSpace
-
 variable {P P₁ P₂ : Set X}
 
 protected theorem inter (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :

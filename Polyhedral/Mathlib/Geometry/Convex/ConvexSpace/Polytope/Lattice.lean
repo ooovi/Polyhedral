@@ -41,7 +41,7 @@ instance : SetLike (Polytope R X) X where
 
 variable {P P₁ P₂ : Polytope R X}
 
-variable (K) in
+variable (P) in
 @[simp] lemma carrier_eq_coe : P.carrier = P := rfl
 
 @[ext] theorem ext (h : ∀ x, x ∈ P₁ ↔ x ∈ P₂) : P₁ = P₂ := SetLike.ext h
@@ -153,7 +153,7 @@ section VAdd
 
 variable [AddTorsor X Y]
 
-noncomputable instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
 
 instance : VAdd (Polytope R X) (Polytope R Y) where
   vadd K₁ K₂ := ⟨_, K₁.isPolytope.vadd K₂.isPolytope⟩
