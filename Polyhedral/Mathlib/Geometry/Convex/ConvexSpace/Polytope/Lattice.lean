@@ -6,6 +6,7 @@ Authors: Martin Winter, Olivia Röhrig
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
+import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 
 /-! ... -/
 
@@ -54,11 +55,13 @@ instance : PartialOrder (Polytope R X) := .ofSetLike ..
 instance : Coe (Polytope R X) (ConvexSet R X) where
   coe P := ⟨P, P.isPolytope.isConvexSet⟩
 
-instance : OrderBot (Polytope R X) where
+instance : Bot (Polytope R X) where
   bot := ⟨∅, IsPolytope.empty R X⟩
-  bot_le _ _ hx := by simp at hx
+
+instance : IsConcreteBot (Polytope R X) X := ⟨rfl⟩
 
 instance : Inhabited (Polytope R X) := ⟨⊥⟩
+
 variable (R) in
 /-- The convex hull of a `Finset s` as a `Polytope`. -/
 def convexHull (s : Finset X) : Polytope R X :=
@@ -100,15 +103,68 @@ attribute [local instance] AddTorsor.toConvexSpace
 instance : Min (Polytope R X) where
   min P₁ P₂ := ⟨_, P₁.isPolytope.inter P₂.isPolytope⟩
 
-variable {P P₁ P₂ : Polytope R X}
+instance : IsConcreteMin (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SemilatticeInf (Polytope R X) := .ofSetLike ..
 
 instance : Lattice (Polytope R X) where
-  inf := min
-  inf_le_left _ _ _ hx := hx.1
-  inf_le_right _ _ _ hx := hx.2
-  le_inf _ _ _ h₁₂ h₂₃ _ hx := ⟨h₁₂ hx, h₂₃ hx⟩
 
 end Field
+
+section Pointwise
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
+open Pointwise
+
+/-! ### Negation -/
+
+section Neg
+
+instance : Neg (Polytope R X) where
+  neg K := ⟨_, K.isPolytope.neg⟩
+
+instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
+
+end Neg
+
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
+/-! ### Minkowski addition -/
+
+section Add
+
+instance : Add (Polytope R X) where
+  add K₁ K₂ := ⟨_, K₁.isPolytope.add K₂.isPolytope⟩
+
+instance : IsConcreteAdd (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+end Add
+
+section VAdd
+
+variable [AddTorsor X Y]
+
+noncomputable instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+
+instance : VAdd (Polytope R X) (Polytope R Y) where
+  vadd K₁ K₂ := ⟨_, K₁.isPolytope.vadd K₂.isPolytope⟩
+
+instance : IsConcreteVAdd (Polytope R X) X (Polytope R Y) Y := ⟨fun _ _ => rfl⟩
+
+end VAdd
+
+end Ring
+
+end Pointwise
 
 end Polytope
 

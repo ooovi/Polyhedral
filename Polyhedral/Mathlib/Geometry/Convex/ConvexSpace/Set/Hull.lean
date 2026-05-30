@@ -20,6 +20,7 @@ public section
 open Set
 
 namespace Convexity
+
 variable {R X Y : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
   [ConvexSpace R Y] {C s t : Set X} {x y : X}
 
@@ -115,5 +116,37 @@ lemma IsAffineMap.image_convexHull {f : X → Y} (hf : IsAffineMap R f) (s : Set
     image_subset_iff, (IsConvexSet.convexHull.preimage hf).convexHull_subset_iff,
     ← image_subset_iff, (IsConvexSet.convexHull.image hf).convexHull_subset_iff]
   exact ⟨subset_convexHull_self, image_mono subset_convexHull_self⟩
+
+section Pointwise
+
+open Pointwise
+
+variable {R V A : Type*}
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+@[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by
+  sorry
+
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [AddTorsor V A]
+
+noncomputable local instance : ConvexSpace R A := AddTorsor.toConvexSpace
+
+lemma convexHull_vadd (s₁ : Set V) (s₂ : Set A) :
+    convexHull R (s₁ +ᵥ s₂) = convexHull R s₁ +ᵥ convexHull R s₂ := by
+  sorry
+
+end Ring
+
+end Pointwise
 
 end Convexity

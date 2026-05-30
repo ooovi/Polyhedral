@@ -41,7 +41,7 @@ variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R 
 variable [AddTorsor V A]
 
 local instance : ConvexSpace R A := AddTorsor.toConvexSpace
--- TODO: add class expressing compatbility between the convex structures on A and V
+-- TODO: add class expressing compatibility between the convex structures on A and V
 
 /- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set A}
