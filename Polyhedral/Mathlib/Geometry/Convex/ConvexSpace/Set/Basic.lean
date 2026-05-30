@@ -3,55 +3,80 @@ Copyright (c) 2026 Martin Winter, Olivia Röhrig. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
-module
 
-public import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.Geometry.Convex.Cone.Pointed
+import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+
+-- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Nonneg
 
 /-! ... -/
 
-public section
+noncomputable section
 
-variable {ι R K X Y : Type*}
+variable {ι R K X Y V A W B : Type*}
 
 namespace Convexity
-
-section Semiring
-
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
-
-variable {K K₁ K₂ : Set X}
 
 section Pointwise
 
 open Pointwise
 
-protected lemma IsConvexSet.neg [Neg X] (hK : IsConvexSet R K) : IsConvexSet R (-K) := by
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+variable {K K₁ K₂ : Set V}
+
+protected lemma IsConvexSet.neg (hK : IsConvexSet R K) : IsConvexSet R (-K) := by
   sorry
 
-variable [ConvexSpace R Y]
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [AddTorsor V A]
+
+local instance : ConvexSpace R A := AddTorsor.toConvexSpace
+-- TODO: add class expressing compatbility between the convex structures on A and V
 
 /- Minkowski addition preserves convexity. -/
-protected lemma IsConvexSet.vadd [VAdd X Y] {K₁ : Set X} {K₂ : Set Y}
+protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set A}
     (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ +ᵥ K₂) := by
+  -- TODO: use `AddTorsor.sConvexComb_eq_affineCombination`
   sorry
 
 /- Minkowski addition preserves convexity. -/
-protected lemma IsConvexSet.add [Add X] (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) :
-    IsConvexSet R (K₁ + K₂) := IsConvexSet.vadd hK₁ hK₂
+protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) :=
+  -- TODO: use `IsConvexSet.vadd hK₁ hK₂`
+  -- this likely requires a compatbility class between affine and linear convexity
+  sorry
+
+end Ring
 
 end Pointwise
+
+section Semiring
 
 -- TODO: move the below to Module.lean
 
 variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M] [PartialOrder R]
   [IsStrictOrderedRing R] [ConvexSpace R M] [IsModuleConvexSpace R M]
 
-lemma _root_.Submodule.isConvexSet (P : Submodule R M) : IsConvexSet R (P : Set M) := by
+@[simp]
+lemma _root_.Submodule.isConvexSet (S : Submodule R M) : IsConvexSet R (S : Set M) := by
   apply IsConvexSet.of_sConvexComb_mem
   intro w hw
   rw [sConvexComb_eq_sum w]
-  refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
-  exact Submodule.smul_mem P (w.weights c) <| hw <| Finsupp.mem_support_iff.mpr hc
+  refine S.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
+  exact Submodule.smul_mem S (w.weights c) <| hw <| Finsupp.mem_support_iff.mpr hc
+
+-- example (C : PointedCone R M) : IsConvexSet R (C : Set M) := by
+--   exact Submodule.isConvexSet C
 
 end Semiring
 

@@ -53,15 +53,13 @@ variable (K) in
 
 instance : PartialOrder (ConvexSet R X) := .ofSetLike ..
 
-instance : OrderBot (ConvexSet R X) where
+instance : Bot (ConvexSet R X) where
   bot := ⟨∅, IsConvexSet.empty⟩
-  bot_le _ _ hx := by simp at hx
 
 instance : IsConcreteBot (ConvexSet R X) X := ⟨rfl⟩
 
-instance : OrderTop (ConvexSet R X) where
+instance : Top (ConvexSet R X) where
   top := ⟨Set.univ, IsConvexSet.univ⟩
-  le_top _ _ _ := by simp
 
 instance : IsConcreteTop (ConvexSet R X) X := ⟨rfl⟩
 

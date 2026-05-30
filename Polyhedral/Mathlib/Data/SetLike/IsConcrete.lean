@@ -35,7 +35,7 @@ section LE
 variable [LE A] [IsConcreteLE A B]
 
 instance : OrderBot A where
-  bot_le:= by simp [← coe_subset_coe]
+  bot_le := by simp [← coe_subset_coe]
 
 end LE
 
