@@ -18,6 +18,16 @@ variable {ι R K X Y V A W B : Type*}
 
 namespace Convexity
 
+namespace Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
+
+protected lemma IsConvexSet.biInter {S : Set (Set X)} (hS : ∀ s ∈ S, IsConvexSet R s) :
+    IsConvexSet R (⋂ s ∈ S, s) := by
+  simp +contextual [IsConvexSet, (hS _ _).sConvexComb_mem]
+
+end Semiring
+
 section Pointwise
 
 open Pointwise

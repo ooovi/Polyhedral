@@ -71,10 +71,6 @@ instance : IsConcreteMin (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
 instance : SemilatticeInf (ConvexSet R X) := .ofSetLike ..
 
-protected lemma _root_.Convexity.IsConvexSet.biInter {S : Set (Set X)}
-    (hS : ∀ s ∈ S, IsConvexSet R s) :
-    IsConvexSet R (⋂ s ∈ S, s) := by simp +contextual [IsConvexSet, (hS _ _).sConvexComb_mem]
-
 instance : InfSet (ConvexSet R X) where
   sInf S := ⟨⋂ a ∈ S, a, by
     apply IsConvexSet.sInter
