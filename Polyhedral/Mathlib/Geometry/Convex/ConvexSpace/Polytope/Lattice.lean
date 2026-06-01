@@ -58,9 +58,14 @@ instance : Coe (Polytope R X) (ConvexSet R X) where
 instance : Bot (Polytope R X) where
   bot := ⟨∅, IsPolytope.empty R X⟩
 
+instance : Inhabited (Polytope R X) := ⟨⊥⟩
+
 instance : IsConcreteBot (Polytope R X) X := ⟨rfl⟩
 
-instance : Inhabited (Polytope R X) := ⟨⊥⟩
+instance : Singleton X (Polytope R X) where
+  singleton x := ⟨{x}, .singleton R x⟩
+
+instance : IsConcreteSingleton (Polytope R X) X := ⟨fun _ => rfl⟩
 
 variable (R) in
 /-- The convex hull of a `Finset s` as a `Polytope`. -/

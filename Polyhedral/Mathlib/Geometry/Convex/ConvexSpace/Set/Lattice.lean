@@ -56,12 +56,17 @@ instance : Bot (ConvexSet R X) where
 
 instance : IsConcreteBot (ConvexSet R X) X := ⟨rfl⟩
 
+instance : Inhabited (ConvexSet R X) := ⟨⊥⟩
+
 instance : Top (ConvexSet R X) where
   top := ⟨Set.univ, IsConvexSet.univ⟩
 
 instance : IsConcreteTop (ConvexSet R X) X := ⟨rfl⟩
 
-instance : Inhabited (ConvexSet R X) := ⟨⊥⟩
+instance : Singleton X (ConvexSet R X) where
+  singleton x := ⟨{x}, .singleton⟩
+
+instance : IsConcreteSingleton (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
 /-- The infimum of two convex sets is a convex set. -/
 instance : Min (ConvexSet R X) where
