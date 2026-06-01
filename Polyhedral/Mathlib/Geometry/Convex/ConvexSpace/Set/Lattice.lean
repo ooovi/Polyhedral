@@ -155,6 +155,17 @@ variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R 
 
 open Pointwise
 
+/-! ### Zero -/
+
+section Zero
+
+instance : Zero (ConvexSet R X) where
+  zero := ⟨0, .singleton⟩
+
+instance : IsConcreteZero (ConvexSet R X) X := ⟨rfl⟩
+
+end Zero
+
 /-! ### Negation -/
 
 section Neg
@@ -177,16 +188,19 @@ variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R 
 
 /-! ### Minkowski addition -/
 
-section Add
-
 instance : Add (ConvexSet R X) where
   add K₁ K₂ := ⟨_, K₁.isConvexSet.add K₂.isConvexSet⟩
 
 instance : IsConcreteAdd (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
-end Add
+/-! ### Scalar multiplication -/
 
-section VAdd
+instance : SMul R (ConvexSet R X) where
+  smul r K := ⟨_, K.isConvexSet.smul r⟩
+
+instance : IsConcreteSMulSet R (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+section AddTorsor
 
 variable [AddTorsor X Y]
 
@@ -197,7 +211,7 @@ instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
 
 instance : IsConcreteVAdd (ConvexSet R X) X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
 
-end VAdd
+end AddTorsor
 
 end Ring
 

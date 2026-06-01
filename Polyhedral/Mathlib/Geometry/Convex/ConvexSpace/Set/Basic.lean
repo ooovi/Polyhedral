@@ -60,10 +60,22 @@ protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set A}
   sorry
 
 /- Minkowski addition preserves convexity. -/
+lemma IsConvexSet.translate (t : V) {K : Set A} (hK : IsConvexSet R K) :
+    IsConvexSet R (t +ᵥ K) := by
+  -- TODO: use `IsConvexSet.vadd hK₁ hK₂` by setting `K₁ := {t}` and
+  --  some missing vadd lemmas
+  -- this likely requires a compatbility class between affine and linear convexity
+  sorry
+
+/- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
     (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) :=
   -- TODO: use `IsConvexSet.vadd hK₁ hK₂`
   -- this likely requires a compatbility class between affine and linear convexity
+  sorry
+
+protected lemma IsConvexSet.smul (r : R) {K : Set V} (hK : IsConvexSet R K) :
+    IsConvexSet R (r • K) := by
   sorry
 
 end Ring

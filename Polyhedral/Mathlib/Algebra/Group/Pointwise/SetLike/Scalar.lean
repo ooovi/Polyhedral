@@ -15,7 +15,7 @@ variable [SetLike α V] [SetLike β W]
 
 open Pointwise
 
-/- # VAdd Set (Translation) # -/
+/- # VAdd Set / SMul Set # -/
 
 class IsConcreteVAddSet (V β W : Type*) [SetLike β W] [VAdd V W] [VAdd V β] where
   coe_vaddSet' (x : V) (b : β) : (x +ᵥ b : β) = x +ᵥ (b : Set W)
@@ -34,7 +34,7 @@ lemma coe_smulSet (x : V) (b : β) : (x • b : β) = x • (b : Set W) :=
 
 end SetLike
 
-/- # VAdd # -/
+/- # VAdd / SMul # -/
 
 class IsConcreteVAdd (α V β W : Type*) [SetLike α V] [SetLike β W] [VAdd V W] [VAdd α β] where
   coe_vadd' (a : α) (b : β) : (a +ᵥ b : β) = (a : Set V) +ᵥ (b : Set W)

@@ -16,7 +16,25 @@ variable [SetLike α V]
 
 open Pointwise
 
-/- # Neg # -/
+/- # Zero / One # -/
+
+class IsConcreteZero (α V : Type*) [SetLike α V] [Zero V] [Zero α] where
+  coe_zero' : (0 : α) = (0 : Set V)
+
+@[to_additive]
+class IsConcreteOne (α V : Type*) [SetLike α V] [One V] [One α] where
+  coe_one' : (1 : α) = (1 : Set V)
+
+namespace SetLike
+
+variable [One V] [One α] [IsConcreteOne α V]
+
+@[to_additive (attr := simp, grind =)]
+lemma coe_one : (1 : α) = (1 : Set V) := IsConcreteOne.coe_one'
+
+end SetLike
+
+/- # Neg / Inv # -/
 
 class IsConcreteNeg (α V : Type*) [SetLike α V] [Neg V] [Neg α] where
   coe_neg' (a : α) : (-a : α) = (-a : Set V)
@@ -34,7 +52,7 @@ lemma coe_inv (a : α) : (a⁻¹ : α) = (a⁻¹ : Set V) := IsConcreteInv.coe_i
 
 end SetLike
 
-/- # Neg # -/
+/- # InvolutiveNeg / InvolutiveInv # -/
 
 namespace SetLike
 
@@ -47,7 +65,7 @@ def _root_.InvolutiveInv.ofSetLike : InvolutiveInv α where
 end SetLike
 
 
-/- # Add # -/
+/- # Add / Mul # -/
 
 class IsConcreteAdd (α V : Type*) [SetLike α V] [Add V] [Add α] where
   coe_add' (a b : α) : (a + b : α) = (a + b : Set V)
