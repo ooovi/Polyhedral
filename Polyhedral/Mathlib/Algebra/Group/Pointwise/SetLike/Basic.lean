@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
 
 import Mathlib.Algebra.Group.Equiv.Basic
 import Mathlib.Algebra.Group.Prod
@@ -5,10 +10,11 @@ import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
 import Mathlib.Data.Set.NAry
 import Mathlib.Data.SetLike.Basic
 import Mathlib.Algebra.Group.Pointwise.Set.Basic
+import Mathlib.Algebra.Group.Defs
 
 import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 
-/-! ... -/
+/-! This files defines the pointwise operations on `SetLike` that are inherited from `Set`-/
 
 variable {α V : Type*}
 
@@ -64,7 +70,6 @@ def _root_.InvolutiveInv.ofSetLike : InvolutiveInv α where
 
 end SetLike
 
-
 /- # Add / Mul # -/
 
 class IsConcreteAdd (α V : Type*) [SetLike α V] [Add V] [Add α] where
@@ -82,3 +87,76 @@ variable [Mul V] [Mul α] [IsConcreteMul α V]
 lemma coe_mul (a b : α) : (a * b : α) = (a * b : Set V) := IsConcreteMul.coe_mul' a b
 
 end SetLike
+
+/- # Div / Sub # -/
+
+class IsConcreteSub (α V : Type*) [SetLike α V] [Sub V] [Sub α] where
+  coe_sub' (a b : α) : (a - b : α) = (a - b : Set V)
+
+@[to_additive]
+class IsConcreteDiv (α V : Type*) [SetLike α V] [Div V] [Div α] where
+  coe_div' (a b : α) : (a / b : α) = (a / b : Set V)
+
+namespace SetLike
+
+variable [Div V] [Div α] [IsConcreteDiv α V]
+
+@[to_additive (attr := simp, grind =)]
+lemma coe_div (a b : α) : (a / b : α) = (a / b : Set V) := IsConcreteDiv.coe_div' a b
+
+end SetLike
+
+-- TODO: implement `SetLike.NPow`?
+
+/- # Algebraic Hierarchy # -/
+
+@[reducible, to_additive]
+def Semigroup.ofSetLike [Semigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
+    Semigroup α where
+  mul_assoc := by simp [← SetLike.coe_set_eq, mul_assoc]
+
+@[reducible, to_additive]
+def CommSemigroup.ofSetLike [CommSemigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
+    CommSemigroup α where
+  __ := Semigroup.ofSetLike
+  mul_comm := by simp [← SetLike.coe_set_eq, mul_comm]
+
+@[reducible, to_additive]
+def MulOneClass.ofSetLike [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+    [Mul α] [IsConcreteMul α V] : MulOneClass α where
+  one_mul := by simp [← SetLike.coe_set_eq]
+  mul_one := by simp [← SetLike.coe_set_eq]
+
+@[reducible, to_additive]
+def Monoid.ofSetLike [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+    [Mul α] [IsConcreteMul α V] : Monoid α where
+  __ := Semigroup.ofSetLike
+  __ := MulOneClass.ofSetLike
+  -- TODO: provide explicit NPow?
+
+@[reducible, to_additive]
+def CommMonoid.ofSetLike [CommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+    [Mul α] [IsConcreteMul α V] : CommMonoid α where
+  __ := Monoid.ofSetLike
+  __ := CommSemigroup.ofSetLike
+
+@[reducible, to_additive]
+def DivisionMonoid.ofSetLike [DivisionMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+    [Inv α] [IsConcreteInv α V] [Mul α] [IsConcreteMul α V] [Div α] [IsConcreteDiv α V] :
+    DivisionMonoid α where
+  __ := Monoid.ofSetLike
+  __ := InvolutiveInv.ofSetLike
+  div_eq_mul_inv := by simp [← SetLike.coe_set_eq, div_eq_mul_inv]
+  mul_inv_rev := by simp [← SetLike.coe_set_eq]
+  inv_eq_of_mul s t h := by
+    -- NOTE: the obvious way to prove this runs into a diamond between `this.toMul` and `Set.mul`.
+    simp only [← SetLike.coe_set_eq, SetLike.coe_mul, SetLike.coe_one, SetLike.coe_inv] at ⊢ h
+    obtain ⟨a, b, ha, hb, hab⟩ := Set.mul_eq_one_iff.1 h
+    rw [ha, hb, Set.inv_singleton, inv_eq_of_mul_eq_one_right hab]
+
+@[reducible, to_additive]
+def DivisionCommMonoid.ofSetLike [DivisionCommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+    [Inv α] [IsConcreteInv α V] [Mul α] [IsConcreteMul α V] [Div α] [IsConcreteDiv α V] :
+    DivisionCommMonoid α where
+  __ := DivisionMonoid.ofSetLike
+  __ := CommMonoid.ofSetLike
