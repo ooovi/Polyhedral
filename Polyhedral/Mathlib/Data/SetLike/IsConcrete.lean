@@ -462,13 +462,6 @@ variable (A B) in
   inf_le_right := by simp [← coe_subset_coe]
   le_inf a b c := by simpa only [← coe_subset_coe, coe_min] using le_inf
 
--- Alternative:
--- instance : SemilatticeInf A where
---   inf := min
---   inf_le_left := by simp [← coe_subset_coe]
---   inf_le_right := by simp [← coe_subset_coe]
---   le_inf a b c := by simpa only [← coe_subset_coe, coe_min] using le_inf
-
 end PartialOrder
 
 -- TODO: add theorems
@@ -493,10 +486,6 @@ variable [PartialOrder A] [IsConcreteLE A B]
 variable (A B) in
 @[reducible] def _root_.CompleteSemilatticeInf.ofSetLike : CompleteSemilatticeInf A where
   isGLB_sInf := by simp [isGLB_iff_le_iff, ← SetLike.coe_subset_coe, lowerBounds]
-
--- Alternative:
--- instance : CompleteSemilatticeInf A where
---   isGLB_sInf := by simp [isGLB_iff_le_iff, ← SetLike.coe_subset_coe, lowerBounds]
 
 end PartialOrder
 

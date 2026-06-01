@@ -164,6 +164,8 @@ instance : Neg (ConvexSet R X) where
 
 instance : IsConcreteNeg (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
+instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
+
 end Neg
 
 end Semiring
