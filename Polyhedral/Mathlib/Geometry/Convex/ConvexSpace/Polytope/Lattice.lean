@@ -50,10 +50,14 @@ variable (P) in
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : Polytope R X) = s := by ext; simp
 
-instance : PartialOrder (Polytope R X) := .ofSetLike ..
-
 instance : Coe (Polytope R X) (ConvexSet R X) where
   coe P := ⟨P, P.isPolytope.isConvexSet⟩
+
+/- # LE -/
+
+instance : PartialOrder (Polytope R X) := .ofSetLike ..
+
+/- # Bot -/
 
 instance : Bot (Polytope R X) where
   bot := ⟨∅, IsPolytope.empty R X⟩
@@ -62,10 +66,16 @@ instance : Inhabited (Polytope R X) := ⟨⊥⟩
 
 instance : IsConcreteBot (Polytope R X) X := ⟨rfl⟩
 
+instance : OrderBot (Polytope R X) := .ofSetLike ..
+
+/- # Singleton -/
+
 instance : Singleton X (Polytope R X) where
   singleton x := ⟨{x}, .singleton R x⟩
 
 instance : IsConcreteSingleton (Polytope R X) X := ⟨fun _ => rfl⟩
+
+/- # Max -/
 
 variable (R) in
 /-- The convex hull of a `Finset s` as a `Polytope`. -/
@@ -103,6 +113,8 @@ variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V X]
 
 attribute [local instance] AddTorsor.toConvexSpace
+
+/- # Min -/
 
 /-- The infimum of two convex sets is a convex set. -/
 instance : Min (Polytope R X) where

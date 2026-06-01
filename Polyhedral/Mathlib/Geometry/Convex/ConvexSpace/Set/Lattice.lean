@@ -45,28 +45,38 @@ variable (K) in
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : ConvexSet R X) = s := by ext; simp
 
-/-!
-### Complete lattice
--/
+/- # LE -/
 
 instance : PartialOrder (ConvexSet R X) := .ofSetLike ..
+
+/- # Bot -/
 
 instance : Bot (ConvexSet R X) where
   bot := ⟨∅, IsConvexSet.empty⟩
 
+instance : Inhabited (ConvexSet R X) := ⟨⊥⟩
+
 instance : IsConcreteBot (ConvexSet R X) X := ⟨rfl⟩
 
-instance : Inhabited (ConvexSet R X) := ⟨⊥⟩
+instance : OrderBot (ConvexSet R X) := .ofSetLike ..
+
+/- # Top -/
 
 instance : Top (ConvexSet R X) where
   top := ⟨Set.univ, IsConvexSet.univ⟩
 
 instance : IsConcreteTop (ConvexSet R X) X := ⟨rfl⟩
 
+instance : OrderTop (ConvexSet R X) := .ofSetLike ..
+
+/- # Singleton -/
+
 instance : Singleton X (ConvexSet R X) where
   singleton x := ⟨{x}, .singleton⟩
 
 instance : IsConcreteSingleton (ConvexSet R X) X := ⟨fun _ => rfl⟩
+
+/- # Min -/
 
 /-- The infimum of two convex sets is a convex set. -/
 instance : Min (ConvexSet R X) where
@@ -75,6 +85,8 @@ instance : Min (ConvexSet R X) where
 instance : IsConcreteMin (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
 instance : SemilatticeInf (ConvexSet R X) := .ofSetLike ..
+
+/- # InfSet -/
 
 instance : InfSet (ConvexSet R X) where
   sInf S := ⟨⋂ a ∈ S, a, by
@@ -87,6 +99,8 @@ instance : InfSet (ConvexSet R X) where
 instance : IsConcreteInfSet (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
 instance : CompleteSemilatticeInf (ConvexSet R X) := .ofSetLike ..
+
+/- # Max -/
 
 variable (R) in
 /-- The convex hull of a set `s`, bundled as a `ConvexSet`. -/
@@ -110,6 +124,8 @@ instance instSemilatticeSup : SemilatticeSup (ConvexSet R X) where
     refine hx K₃ ?_ K₃.isConvexSet
     simp [h₂₃, h₁₂]
 
+/- # SupSet -/
+
 instance : SupSet (ConvexSet R X) where
   sSup S := convexHull R (⋃ s ∈ S, s)
 
@@ -123,6 +139,8 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
       intro x xm
       simp only [mem_mk, Set.mem_iInter, Subtype.forall, Set.iUnion_subset_iff, and_imp] at xm
       exact xm _ hL L.isConvexSet
+
+/- # Complet Lattice -/
 
 instance : CompleteLattice (ConvexSet R X) where
 

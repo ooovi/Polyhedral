@@ -34,15 +34,15 @@ section LE
 
 variable [LE A] [IsConcreteLE A B]
 
-instance : OrderBot A where
+@[reducible] def _root_.OrderBot.ofSetLike : OrderBot A where
   bot_le := by simp [← coe_subset_coe]
 
 end LE
 
+end SetLike
+
 
 /- # Empty # -/
-
-end SetLike
 
 class IsConcreteEmpty (A : Type*) (B : outParam Type*) [SetLike A B] [EmptyCollection A] where
   protected coe_empty' : (∅ : A) = (∅ : Set B)
@@ -129,7 +129,7 @@ section LE
 
 variable [LE A] [IsConcreteLE A B]
 
-instance : OrderTop A where
+@[reducible] def _root_.OrderTop.ofSetLike : OrderTop A where
   le_top := by simp [← coe_subset_coe]
 
 end LE
