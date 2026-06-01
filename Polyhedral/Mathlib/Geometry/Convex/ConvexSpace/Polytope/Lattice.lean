@@ -146,6 +146,8 @@ instance : Neg (Polytope R X) where
 
 instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
 
+instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
+
 end Neg
 
 end Semiring
