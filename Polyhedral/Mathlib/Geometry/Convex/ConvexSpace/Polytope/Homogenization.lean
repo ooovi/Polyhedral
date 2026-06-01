@@ -11,30 +11,31 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
-variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] [IsModuleConvexSpace R W]
+variable [IsModuleConvexSpace R (Homogenization R A)]
 variable {C : ConvexSet R A}
 
-open PointedCone
+open PointedCone Homogenization
 
 /-- The homogenization cone of a polytope is finitely generated. -/
 theorem IsPolytope.homogenize_FG (hCfg : IsPolytope R (C : Set A)) :
-    (Homogenization.homogenize W C).FG := by
+    (homogenize C).FG := by
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
-  rw [congrArg hom.homogenize this]
-  use t.map ⟨_, hom.inj⟩
-  simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Homogenization.homogenize,
-    PointedCone.hull, ConvexSet.mk_eq]
-  rw [hom.isAffineMap.image_convexHull t]
-  exact (PointedCone.hull_convexHull_eq_hull (hom.embed '' t)).symm
+  rw [congrArg homogenize this]
+  use t.map ⟨_, ofPoint_injective⟩
+  simp only [Finset.coe_map, Function.Embedding.coeFn_mk, homogenize, hull, ConvexSet.mk_eq]
+  rw [ofPoint.isAffineMap.image_convexHull (t : Set A)]
+  exact (PointedCone.hull_convexHull_eq_hull (ofPoint '' (t : Set A))).symm
 
 end Ring
 
 section Field
 
+open Homogenization
+
 variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
-variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] [IsModuleConvexSpace R W]
+variable [IsModuleConvexSpace R (Homogenization R A)]
 variable {C : ConvexSet R A}
 
 variable (W) in
@@ -42,10 +43,10 @@ variable (W) in
 @[reducible]
 private noncomputable def Polytope.faceHomogenizationGradeOrder
     (hCfg : IsPolytope R (C : Set A)) : GradeOrder ℕ C.Face := by
-  have : PointedCone.FG (hom.homogenize W C) := IsPolytope.homogenize_FG hCfg
+  have : PointedCone.FG (homogenize C) := IsPolytope.homogenize_FG hCfg
   letI := PointedCone.FG.gradeOrder_finrank this
   -- we just lift the grading we have for PointedCone.Face already
-  refine GradeOrder.liftRight (β := (hom.homogenize W C).Face) _
+  refine GradeOrder.liftRight (β := (homogenize C).Face) _
     Homogenization.Face.homogenizationIso.strictMono ?_
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
