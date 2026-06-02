@@ -148,6 +148,8 @@ end Semiring
 
 section Pointwise
 
+-- TODO: every instance below should be scoped to Pointwise
+
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
@@ -186,14 +188,19 @@ section Ring
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
 
-/-! ### Minkowski addition -/
+/-! ### Minkowski addition / subtraction -/
 
 instance : Add (ConvexSet R X) where
   add K₁ K₂ := ⟨_, K₁.isConvexSet.add K₂.isConvexSet⟩
 
 instance : IsConcreteAdd (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
-instance : AddCommMonoid (ConvexSet R X) := .ofSetLike ..
+instance : Sub (ConvexSet R X) where
+  sub K₁ K₂ := ⟨_, K₁.isConvexSet.sub K₂.isConvexSet⟩
+
+instance : IsConcreteSub (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SubtractionMonoid (ConvexSet R X) := .ofSetLike ..
 
 /-! ### Scalar multiplication -/
 
@@ -204,16 +211,25 @@ instance : IsConcreteSMulSet R (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
 instance : DistribMulAction R (ConvexSet R X) := .ofSetLike ..
 
-section AddTorsor
+noncomputable section AddTorsor
 
 variable [AddTorsor X Y]
 
-noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+
+instance : VAdd X (ConvexSet R Y) where
+  vadd v K := ⟨_, K.isConvexSet.translate v⟩
+
+instance : IsConcreteVAddSet X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction X (ConvexSet R Y) := .ofSetLike_set ..
 
 instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
   vadd K₁ K₂ := ⟨_, K₁.isConvexSet.vadd K₂.isConvexSet⟩
 
 instance : IsConcreteVAdd (ConvexSet R X) X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction (ConvexSet R X) (ConvexSet R Y) := .ofSetLike ..
 
 end AddTorsor
 

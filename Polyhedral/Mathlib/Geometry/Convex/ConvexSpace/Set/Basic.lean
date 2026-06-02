@@ -74,6 +74,12 @@ protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
   -- this likely requires a compatbility class between affine and linear convexity
   sorry
 
+/- Minkowski addition preserves convexity. -/
+protected lemma IsConvexSet.sub {K₁ : Set V} {K₂ : Set V}
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ - K₂) :=
+  -- TODO: use `IsConvexSet.vadd` and `IsConvexSet.neg`
+  sorry
+
 protected lemma IsConvexSet.smul (r : R) {K : Set V} (hK : IsConvexSet R K) :
     IsConvexSet R (r • K) := by
   sorry

@@ -73,8 +73,8 @@ def MulAction.ofSetLike [SetLike ρ R] [Monoid R] [Monoid ρ] [IsConcreteOne ρ 
   mul_smul := by simp [← SetLike.coe_set_eq, mul_smul]
   one_smul := by simp [← SetLike.coe_set_eq]
 
-@[reducible, to_additive AddActionSet.ofSetLike]
-def MulActionSet.ofSetLike [Monoid R] [SetLike α V] [MulAction R V] [SMul R α]
+@[to_additive (attr := reducible)]
+def MulAction.ofSetLike_set [Monoid R] [SetLike α V] [MulAction R V] [SMul R α]
     [IsConcreteSMulSet R α V] : MulAction R α where
   mul_smul := by simp [← SetLike.coe_set_eq, mul_smul]
   one_smul := by simp [← SetLike.coe_set_eq]
@@ -103,7 +103,7 @@ def DistribSMul.ofSetLike [SetLike α V] [AddZeroClass V] [AddZeroClass α]
 def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoid α]
     [IsConcreteZero α V] [IsConcreteAdd α V] [DistribMulAction R V] [SMul R α]
     [IsConcreteSMulSet R α V] : DistribMulAction R α where
-  __ := MulActionSet.ofSetLike ..
+  __ := MulAction.ofSetLike_set ..
   smul_add := by simp [← SetLike.coe_set_eq, smul_add]
   smul_zero :=  by simp [← SetLike.coe_set_eq]
 
@@ -111,6 +111,6 @@ def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoi
 def MulDistribMulAction.ofSetLike [Monoid R] [SetLike α V] [Monoid V] [Monoid α]
     [IsConcreteOne α V] [IsConcreteMul α V] [MulDistribMulAction R V] [SMul R α] [IsConcreteSMulSet R α V] :
     MulDistribMulAction R α where
-  __ := MulActionSet.ofSetLike ..
+  __ := MulAction.ofSetLike_set ..
   smul_one := by simp [← SetLike.coe_set_eq, smul_one]
   smul_mul := by simp [← SetLike.coe_set_eq, smul_mul]
