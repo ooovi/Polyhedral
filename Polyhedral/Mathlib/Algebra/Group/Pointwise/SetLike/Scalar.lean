@@ -66,10 +66,8 @@ end SetLike
 
 variable (ρ R α V)
 
--- TODO: add IsConcrete classes for algebraic hierarchy to prevent instance mismatches downstream
-
-@[reducible, to_additive]
-def MulAction.ofSetLike [SetLike ρ R] [Monoid R] [Monoid ρ] [IsConcreteMonoid ρ R]
+@[to_additive (attr := reducible)]
+def MulAction.ofSetLike [SetLike ρ R] [Monoid R] [Monoid ρ] [IsConcreteOne ρ R] [IsConcreteMul ρ R]
     [SetLike α V] [MulAction R V] [SMul ρ α] [IsConcreteSMul ρ R α V] :
     MulAction ρ α where
   mul_smul := by simp [← SetLike.coe_set_eq, mul_smul]
@@ -96,14 +94,14 @@ def SMulZeroClass.ofSetLike [SetLike α V] [Zero V] [Zero α] [IsConcreteZero α
 
 @[reducible]
 def DistribSMul.ofSetLike [SetLike α V] [AddZeroClass V] [AddZeroClass α]
-    [IsConcreteAddZeroClass α V] [DistribSMul R V] [SMul R α] [IsConcreteSMulSet R α V] :
+    [IsConcreteZero α V] [IsConcreteAdd α V] [DistribSMul R V] [SMul R α] [IsConcreteSMulSet R α V] :
     DistribSMul R α where
   __ := SMulZeroClass.ofSetLike ..
   smul_add := by simp [← SetLike.coe_set_eq, smul_add]
 
 @[reducible]
 def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoid α]
-    [IsConcreteAddMonoid α V] [DistribMulAction R V] [SMul R α]
+    [IsConcreteZero α V] [IsConcreteAdd α V] [DistribMulAction R V] [SMul R α]
     [IsConcreteSMulSet R α V] : DistribMulAction R α where
   __ := MulActionSet.ofSetLike ..
   smul_add := by simp [← SetLike.coe_set_eq, smul_add]
@@ -111,7 +109,7 @@ def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoi
 
 @[reducible]
 def MulDistribMulAction.ofSetLike [Monoid R] [SetLike α V] [Monoid V] [Monoid α]
-    [IsConcreteMonoid α V] [MulDistribMulAction R V] [SMul R α] [IsConcreteSMulSet R α V] :
+    [IsConcreteOne α V] [IsConcreteMul α V] [MulDistribMulAction R V] [SMul R α] [IsConcreteSMulSet R α V] :
     MulDistribMulAction R α where
   __ := MulActionSet.ofSetLike ..
   smul_one := by simp [← SetLike.coe_set_eq, smul_one]
