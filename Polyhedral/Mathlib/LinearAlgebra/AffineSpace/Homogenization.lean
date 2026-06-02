@@ -29,6 +29,17 @@ namespace Homogenization
 
 variable [hom : Homogenization R A W]
 
+variable [PartialOrder R] [IsStrictOrderedRing R] in
+instance : Convexity.IsModuleConvexSpace R W where
+  sConvexComb_eq_sum c := by
+    simp only [AddTorsor.sConvexComb_eq_affineCombination, Finset.affineCombination,
+      Finset.weightedVSubOfPoint_apply, id_eq, vsub_eq_sub, vadd_eq_add, AffineMap.coe_mk,
+      Finsupp.sum, smul_sub, Finset.sum_sub_distrib]
+    have := c.total
+    rw [Finsupp.sum] at this
+    rw [← Finset.sum_smul, this, one_smul]
+    abel
+
 /-- Embedding the underlying vector space is exactly the height-0 hyperplane. -/
 theorem embed_linear_range_eq_height_ker : hom.linear.range = hom.height.ker := by
   ext x
@@ -64,7 +75,7 @@ theorem embed_ne_zero (x : A) : hom.embed x ≠ (0 : W) := by
 lemma height_zero (v : V) : hom.height (hom.linear v) = 0 := by
   simp [LinearMap.mem_ker.mp, ← embed_linear_range_eq_height_ker]
 
-theorem embed_range_isSpanning : span R (hom.range : Set W) = ⊤ := by
+theorem span_range_embed : span R (hom.range : Set W) = ⊤ := by
   refine eq_top_iff'.mpr (fun x ↦ ?_)
   let a₀ := Classical.arbitrary A
   -- projecting x to height 0 along a₀ gives sth in the span of image of embed
@@ -98,6 +109,15 @@ lemma apply_homRangeEquiv_symm (x : hom.range) : hom.embed (hom.homRangeEquiv.sy
   rw [← hom.homRangeEquiv.right_inv x]
   congr; exact hom.homRangeEquiv.symm_apply_apply _
 
+@[simp]
+theorem linear_vsub {p q : A} : hom.linear (k := R) (p -ᵥ q) = hom.embed p - hom.embed q :=
+  hom.linearMap_vsub p q
+
+@[simp]
+theorem linear_smul' {S : Type*} [Semiring S] [Module S R] [Module S V] [IsScalarTower S R V]
+    {r : R} {v : V} : hom.linear (r • v) = r • hom.linear (k := R) v :=
+  LinearMap.CompatibleSMul.map_smul hom.linear r v
+
 section HomCone
 
 open Convexity
@@ -121,10 +141,6 @@ def homogenizationHom :
 theorem homogenize_empty_eq_bot : homogenize W (⟨∅, IsConvexSet.empty⟩ : ConvexSet R A) = ⊥ := by
   simp [homogenize, SetLike.coe]
 
-section ModuleConvex
-
-variable [IsModuleConvexSpace R W]
-
 variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
   ⟨_, C.isConvexSet.preimage hom.isAffineMap⟩
@@ -140,9 +156,6 @@ lemma embed_dehomogenize_eq_inter_embed (C : PointedCone R W) :
   · rintro ⟨hxC, y, rfl⟩
     use y
     simpa
-
-end ModuleConvex
-
 
 end HomCone
 
@@ -168,10 +181,6 @@ theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize
   -- use salient_of_pos_linearMap with hom.height and height_nonneg_of_mem_homogenize
   -- issue #33
   sorry
-
-section ModuleConvex
-
-variable [IsModuleConvexSpace R W]
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Ioi (0 : R) • hom.embed '' (P : Set A) :=
@@ -309,8 +318,6 @@ def Face.homogenizationIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P
     simp [this]
 
 end Faces
-
-end ModuleConvex
 
 end Homogenization
 

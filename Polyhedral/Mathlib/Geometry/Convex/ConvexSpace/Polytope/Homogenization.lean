@@ -1,6 +1,8 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.CanonicalHomogenization
 
 
 variable {R V W A : Type*}
@@ -11,11 +13,11 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
-variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] [IsModuleConvexSpace R W]
 variable {C : ConvexSet R A}
 
 open PointedCone
 
+variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] in
 /-- The homogenization cone of a polytope is finitely generated. -/
 theorem IsPolytope.homogenize_FG (hCfg : IsPolytope R (C : Set A)) :
     (Homogenization.homogenize W C).FG := by
@@ -34,8 +36,28 @@ section Field
 
 variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
-variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] [IsModuleConvexSpace R W]
 variable {C : ConvexSet R A}
+
+variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] in
+open Pointwise Submodule in
+/-- Dehomogenizing a finitely generated salient cone yields a polytope. -/
+theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
+    (hc : ∀ c ∈ C, c ≠ 0 → 0 < hom.height c) :
+    IsPolytope R (hom.dehomogenize A C : Set A) := by sorry
+
+/-- Faces of polytopes are polytopes. -/
+theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolytope R (F : Set A) :=
+    by
+  -- have to pick the universe level?! otherwise lean can't choose which of the infinitely many
+  -- instances to use :(
+  letI hom : Homogenization.{_, _, _, _, 1} R A (CanonicalHomogenization R A) := inferInstance
+  have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
+  have homF := hom.homogenize_isFaceOf F.isFaceOf
+  have := PointedCone.IsFaceOf.fg homC homF
+  convert FG.dehomogenize_isPolytope this (fun _ a b ↦ hom.height_pos_of_mem_homogenize a b)
+  simp [hom.dehomogenize_homogenize_eq_id]
+
+variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W]
 
 variable (W) in
 /-- The face lattice of a polytope is graded by homogenization cone face dimension. -/
