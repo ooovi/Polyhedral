@@ -114,9 +114,9 @@ variable [AddTorsor V A]
 local instance : ConvexSpace R A := AddTorsor.toConvexSpace
 -- TODO: add class expressing compatibility between the convex structures on A and V
 
-/- The Minkowski addition of two polytopes is a polytope. -/
-protected lemma vadd {P₁ : Set V} {P₂ : Set A}
-    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ +ᵥ P₂) := by classical
+/- The Minkowski sum of two polytopes is a polytope. -/
+protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
+    IsPolytope R (P₁ +ᵥ P₂) := by classical
   obtain ⟨s₁, rfl⟩ := hP₁
   obtain ⟨s₂, rfl⟩ := hP₂
   use s₁ +ᵥ s₂
