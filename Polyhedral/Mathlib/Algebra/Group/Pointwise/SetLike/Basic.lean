@@ -108,44 +108,118 @@ end SetLike
 
 -- TODO: implement `SetLike.NPow`?
 
+variable (α V)
+
 /- # Algebraic Hierarchy # -/
+
+/- # Semigroup -/
 
 @[reducible, to_additive]
 def Semigroup.ofSetLike [Semigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
     Semigroup α where
   mul_assoc := by simp [← SetLike.coe_set_eq, mul_assoc]
 
+class IsConcreteAddSemigroup [SetLike α V] [AddSemigroup V] [AddSemigroup α]
+    extends IsConcreteAdd α V
+
+@[to_additive]
+class IsConcreteSemigroup [SetLike α V] [Semigroup V] [Semigroup α]
+    extends IsConcreteMul α V
+
+@[to_additive]
+instance [Semigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
+    letI := Semigroup.ofSetLike α V; IsConcreteSemigroup α V :=
+  letI := Semigroup.ofSetLike α V; { }
+
+/- # CommSemigroup -/
+
 @[reducible, to_additive]
 def CommSemigroup.ofSetLike [CommSemigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
     CommSemigroup α where
-  __ := Semigroup.ofSetLike
+  __ := Semigroup.ofSetLike ..
   mul_comm := by simp [← SetLike.coe_set_eq, mul_comm]
 
+class IsConcreteAddCommSemigroup [SetLike α V] [AddSemigroup V] [AddSemigroup α]
+    extends IsConcreteAddSemigroup α V
+
+@[to_additive]
+class IsConcreteCommSemigroup [SetLike α V] [Semigroup V] [Semigroup α]
+    extends IsConcreteSemigroup α V
+
+@[to_additive]
+instance [CommSemigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
+    letI := CommSemigroup.ofSetLike α V; IsConcreteCommSemigroup α V :=
+  letI := CommSemigroup.ofSetLike α V; { }
+
+/- # MulOneClass -/
+
 @[reducible, to_additive]
-def MulOneClass.ofSetLike [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+def MulOneClass.ofSetLike [MulOneClass V] [SetLike α V] [One α] [IsConcreteOne α V]
     [Mul α] [IsConcreteMul α V] : MulOneClass α where
   one_mul := by simp [← SetLike.coe_set_eq]
   mul_one := by simp [← SetLike.coe_set_eq]
 
+class IsConcreteAddZeroClass [SetLike α V] [AddZeroClass V] [AddZeroClass α]
+    extends IsConcreteZero α V, IsConcreteAdd α V
+
+@[to_additive]
+class IsConcreteMulOneClass [SetLike α V] [MulOneClass V] [MulOneClass α]
+    extends IsConcreteOne α V, IsConcreteMul α V
+
+@[to_additive]
+instance [MulOneClass V] [SetLike α V] [One α] [IsConcreteOne α V] [Mul α] [IsConcreteMul α V] :
+    letI := MulOneClass.ofSetLike α V; IsConcreteMulOneClass α V :=
+  letI := MulOneClass.ofSetLike α V; { }
+
+/- # Monoid -/
+
 @[reducible, to_additive]
 def Monoid.ofSetLike [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V]
     [Mul α] [IsConcreteMul α V] : Monoid α where
-  __ := Semigroup.ofSetLike
-  __ := MulOneClass.ofSetLike
+  __ := Semigroup.ofSetLike ..
+  __ := MulOneClass.ofSetLike ..
   -- TODO: provide explicit NPow?
+
+class IsConcreteAddMonoid [SetLike α V] [AddMonoid V] [AddMonoid α]
+    extends IsConcreteAddSemigroup α V, IsConcreteAddZeroClass α V
+
+@[to_additive]
+class IsConcreteMonoid [SetLike α V] [Monoid V] [Monoid α]
+    extends IsConcreteSemigroup α V, IsConcreteMulOneClass α V
+
+@[to_additive]
+instance [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V] [Mul α] [IsConcreteMul α V] :
+    letI := Monoid.ofSetLike α V; IsConcreteMonoid α V :=
+  letI := Monoid.ofSetLike α V; { }
+
+/- # CommMonoid -/
 
 @[reducible, to_additive]
 def CommMonoid.ofSetLike [CommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
     [Mul α] [IsConcreteMul α V] : CommMonoid α where
-  __ := Monoid.ofSetLike
-  __ := CommSemigroup.ofSetLike
+  __ := Monoid.ofSetLike ..
+  __ := CommSemigroup.ofSetLike ..
+
+class IsConcreteAddCommMonoid [SetLike α V] [AddCommMonoid V] [AddCommMonoid α]
+    extends IsConcreteAddCommSemigroup α V, IsConcreteAddMonoid α V
+
+@[to_additive]
+class IsConcreteCommMonoid [SetLike α V] [CommMonoid V] [CommMonoid α]
+    extends IsConcreteCommSemigroup α V, IsConcreteMonoid α V
+
+@[to_additive]
+instance [CommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V] [Mul α] [IsConcreteMul α V] :
+    letI := CommMonoid.ofSetLike α V; IsConcreteCommMonoid α V :=
+  letI := CommMonoid.ofSetLike α V; { }
+
+/- # DivisionMonoid -/
 
 @[reducible, to_additive]
 def DivisionMonoid.ofSetLike [DivisionMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
     [Inv α] [IsConcreteInv α V] [Mul α] [IsConcreteMul α V] [Div α] [IsConcreteDiv α V] :
     DivisionMonoid α where
-  __ := Monoid.ofSetLike
-  __ := InvolutiveInv.ofSetLike
+  __ := Monoid.ofSetLike ..
+  __ := InvolutiveInv.ofSetLike ..
   div_eq_mul_inv := by simp [← SetLike.coe_set_eq, div_eq_mul_inv]
   mul_inv_rev := by simp [← SetLike.coe_set_eq]
   inv_eq_of_mul s t h := by
@@ -154,9 +228,11 @@ def DivisionMonoid.ofSetLike [DivisionMonoid V] [SetLike α V] [One α] [IsConcr
     obtain ⟨a, b, ha, hb, hab⟩ := Set.mul_eq_one_iff.1 h
     rw [ha, hb, Set.inv_singleton, inv_eq_of_mul_eq_one_right hab]
 
+/- # DivisionCommMonoid -/
+
 @[reducible, to_additive]
 def DivisionCommMonoid.ofSetLike [DivisionCommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
     [Inv α] [IsConcreteInv α V] [Mul α] [IsConcreteMul α V] [Div α] [IsConcreteDiv α V] :
     DivisionCommMonoid α where
-  __ := DivisionMonoid.ofSetLike
-  __ := CommMonoid.ofSetLike
+  __ := DivisionMonoid.ofSetLike ..
+  __ := CommMonoid.ofSetLike ..

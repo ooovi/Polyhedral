@@ -193,12 +193,16 @@ instance : Add (ConvexSet R X) where
 
 instance : IsConcreteAdd (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
+instance : AddCommMonoid (ConvexSet R X) := .ofSetLike ..
+
 /-! ### Scalar multiplication -/
 
 instance : SMul R (ConvexSet R X) where
   smul r K := ⟨_, K.isConvexSet.smul r⟩
 
 instance : IsConcreteSMulSet R (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+instance : DistribMulAction R (ConvexSet R X) := .ofSetLike ..
 
 section AddTorsor
 
