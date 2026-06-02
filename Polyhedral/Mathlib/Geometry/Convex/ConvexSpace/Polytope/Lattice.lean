@@ -137,9 +137,14 @@ variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R 
 
 open Pointwise
 
-/-! ### Negation -/
+/-! ### Zero -/
 
-section Neg
+instance : Zero (Polytope R X) where
+  zero := ⟨0, .singleton ..⟩
+
+instance : IsConcreteZero (Polytope R X) X := ⟨rfl⟩
+
+/-! ### Negation -/
 
 instance : Neg (Polytope R X) where
   neg K := ⟨_, K.isPolytope.neg⟩
@@ -147,8 +152,6 @@ instance : Neg (Polytope R X) where
 instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
 
 instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
-
-end Neg
 
 end Semiring
 
@@ -159,25 +162,46 @@ variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R 
 
 /-! ### Minkowski addition -/
 
-section Add
-
 instance : Add (Polytope R X) where
-  add K₁ K₂ := ⟨_, K₁.isPolytope.add K₂.isPolytope⟩
+  add P₁ P₂ := ⟨_, P₁.isPolytope.add P₂.isPolytope⟩
 
 instance : IsConcreteAdd (Polytope R X) X := ⟨fun _ _ => rfl⟩
 
-end Add
+instance : Sub (Polytope R X) where
+  sub P₁ P₂ := ⟨_, P₁.isPolytope.sub P₂.isPolytope⟩
 
-section VAdd
+instance : IsConcreteSub (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SubtractionMonoid (Polytope R X) := .ofSetLike ..
+
+/-! ### Scalar multiplication -/
+
+instance : SMul R (Polytope R X) where
+  smul r P := ⟨_, P.isPolytope.smul r⟩
+
+instance : IsConcreteSMulSet R (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : DistribMulAction R (Polytope R X) := .ofSetLike ..
+
+noncomputable section VAdd
 
 variable [AddTorsor X Y]
 
 noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
 
+instance : VAdd X (Polytope R Y) where
+  vadd v P := ⟨_, P.isPolytope.translate v⟩
+
+instance : IsConcreteVAddSet X (Polytope R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction X (Polytope R Y) := .ofSetLike_set ..
+
 instance : VAdd (Polytope R X) (Polytope R Y) where
   vadd K₁ K₂ := ⟨_, K₁.isPolytope.vadd K₂.isPolytope⟩
 
 instance : IsConcreteVAdd (Polytope R X) X (Polytope R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction (Polytope R X) (Polytope R Y) := .ofSetLike ..
 
 end VAdd
 

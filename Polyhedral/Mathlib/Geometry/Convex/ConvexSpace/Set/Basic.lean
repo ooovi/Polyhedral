@@ -10,7 +10,7 @@ import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 -- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Nonneg
 
-/-! ... -/
+/-! This file proves basic properties of convex sets. -/
 
 noncomputable section
 

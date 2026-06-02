@@ -11,7 +11,7 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 
-/-! ... -/
+/-! This file defines bundled convex sets. -/
 
 variable {ι R K X Y : Type*}
 
@@ -159,18 +159,12 @@ open Pointwise
 
 /-! ### Zero -/
 
-section Zero
-
 instance : Zero (ConvexSet R X) where
   zero := ⟨0, .singleton⟩
 
 instance : IsConcreteZero (ConvexSet R X) X := ⟨rfl⟩
 
-end Zero
-
 /-! ### Negation -/
-
-section Neg
 
 instance : Neg (ConvexSet R X) where
   neg K := ⟨_, K.isConvexSet.neg⟩
@@ -178,8 +172,6 @@ instance : Neg (ConvexSet R X) where
 instance : IsConcreteNeg (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
 instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
-
-end Neg
 
 end Semiring
 
@@ -228,8 +220,6 @@ instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
   vadd K₁ K₂ := ⟨_, K₁.isConvexSet.vadd K₂.isConvexSet⟩
 
 instance : IsConcreteVAdd (ConvexSet R X) X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
-
-instance : AddAction (ConvexSet R X) (ConvexSet R Y) := .ofSetLike ..
 
 end AddTorsor
 

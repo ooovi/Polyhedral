@@ -10,7 +10,7 @@ import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
-/-! ... -/
+/-! This file introduces `IsPolytope` and proves basic properties about convex polytopes. -/
 
 noncomputable section
 
@@ -122,11 +122,24 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A}
   use s₁ +ᵥ s₂
   rw [Finset.coe_vadd, convexHull_vadd]
 
+/- Minkowski addition preserves convexity. -/
+lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ K) := by
+  sorry
+
 /- The Minkowski addition of two polytopes is a polytope. -/
 protected lemma add {P₁ : Set V} {P₂ : Set V}
     (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ + P₂) :=
   -- TODO: use `IsPolytope.vadd hP₁ hP₂`
   -- this likely requires a compatbility class between affine and linear convexity
+  sorry
+
+/- The Minkowski addition of two polytopes is a polytope. -/
+protected lemma sub {P₁ : Set V} {P₂ : Set V}
+    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ - P₂) :=
+  sorry
+
+protected lemma smul (r : R) {K : Set V} (hK : IsPolytope R K) :
+    IsPolytope R (r • K) := by
   sorry
 
 end Ring
