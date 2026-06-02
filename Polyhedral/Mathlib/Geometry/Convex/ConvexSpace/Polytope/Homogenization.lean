@@ -18,7 +18,7 @@ variable {C : ConvexSet R A}
 open PointedCone
 
 variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] in
-/-- The homogenization cone of a polytope is finitely generated. -/
+/-- The Homogenization cone of a polytope is finitely generated. -/
 theorem IsPolytope.homogenize_FG (hCfg : IsPolytope R (C : Set A)) :
     (Homogenization.homogenize W C).FG := by
   obtain ⟨t, ht⟩ := hCfg
@@ -27,7 +27,7 @@ theorem IsPolytope.homogenize_FG (hCfg : IsPolytope R (C : Set A)) :
   use t.map ⟨_, hom.inj⟩
   simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Homogenization.homogenize,
     PointedCone.hull, ConvexSet.mk_eq]
-  rw [hom.isAffineMap.image_convexHull t]
+  rw [hom.embed.isAffineMap.image_convexHull t]
   exact (PointedCone.hull_convexHull_eq_hull (hom.embed '' t)).symm
 
 end Ring
@@ -48,9 +48,7 @@ theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
 /-- Faces of polytopes are polytopes. -/
 theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolytope R (F : Set A) :=
     by
-  -- have to pick the universe level?! otherwise lean can't choose which of the infinitely many
-  -- instances to use :(
-  letI hom : Homogenization.{_, _, _, _, 1} R A (CanonicalHomogenization R A) := inferInstance
+  letI hom : Homogenization R A (CanonicalHomogenization R A) := inferInstance
   have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
   have homF := hom.homogenize_isFaceOf F.isFaceOf
   have := PointedCone.IsFaceOf.fg homC homF
@@ -60,7 +58,7 @@ theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolyt
 variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W]
 
 variable (W) in
-/-- The face lattice of a polytope is graded by homogenization cone face dimension. -/
+/-- The face lattice of a polytope is graded by Homogenization cone face dimension. -/
 @[reducible]
 private noncomputable def Polytope.faceHomogenizationGradeOrder
     (hCfg : IsPolytope R (C : Set A)) : GradeOrder ℕ C.Face := by

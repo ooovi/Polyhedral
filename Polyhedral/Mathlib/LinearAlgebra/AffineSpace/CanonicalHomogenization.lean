@@ -14,8 +14,6 @@ import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Module
 import Mathlib.Tactic.NoncommRing
 
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
-
 /-!
 # Homogenization of an affine space
 
@@ -598,12 +596,9 @@ theorem ofPoint_range_eq_preimage_weight_one :
   simp [weight_eq_one_iff]
   simp [eq_comm]
 
-instance : Affine.Homogenization k P (CanonicalHomogenization k P) where
-  embed := ofPoint
-  inj := ofPoint_injective
-  height := weight
-  embed_height := ofPoint_range_eq_preimage_weight_one
-  extend U _ _ f := by
+theorem extend (U : Type*) [AddCommGroup U] [Module k U]
+    (f : P →ᵃ[k] U) :
+    ∃! (F : (CanonicalHomogenization k P) →ₗ[k] U), F ∘ ofPoint = f := by
     use lift.toFun f
     refine ⟨by ext x; simp [lift_apply_ofPoint], fun y hy ↦ hom_ext fun x ↦ ?_⟩
     simpa using congrFun hy x

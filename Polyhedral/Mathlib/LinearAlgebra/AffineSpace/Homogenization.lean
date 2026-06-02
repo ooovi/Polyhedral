@@ -1,7 +1,9 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.CanonicalHomogenization
 
 open Function Submodule
 
@@ -14,21 +16,6 @@ variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 
-variable (R A W) in
-/-- An embedding of an affine space `A` into a vector space `W` s.t. the image of `A` is exactly the
-height-1 hyperplane under a given linear height map.
-Follows Definition 4.2 in https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
-class Homogenization extends embed : A →ᵃ[R] W where
-  inj : Injective embed
-  height : W →ₗ[R] R
-  embed_height : embed.range = height ⁻¹' {1}
-  extend (U : Type*) [AddCommGroup U] [Module R U] (f : A →ᵃ[R] U) :
-    ∃! (F : W →ₗ[R] U), F ∘ embed = f
-
-namespace Homogenization
-
-variable [hom : Homogenization R A W]
-
 variable [PartialOrder R] [IsStrictOrderedRing R] in
 instance : Convexity.IsModuleConvexSpace R W where
   sConvexComb_eq_sum c := by
@@ -40,12 +27,61 @@ instance : Convexity.IsModuleConvexSpace R W where
     rw [← Finset.sum_smul, this, one_smul]
     abel
 
-/-- Embedding the underlying vector space is exactly the height-0 hyperplane. -/
-theorem embed_linear_range_eq_height_ker : hom.linear.range = hom.height.ker := by
+variable (R A W) in
+/-- A homogenization of an affine space `A` is a vector space that is linearly equivalent to the
+canonical homogenization of `A` together with an embedding and a height function that correspond to
+those of the canonical homogenization. -/
+class Homogenization where
+  embed : A →ᵃ[R] W
+  height : W →ₗ[R] R
+  equiv_canonical' : W ≃ₗ[R] CanonicalHomogenization R A
+  equiv_canonical_embed : equiv_canonical' ∘ embed = CanonicalHomogenization.ofPoint
+  weight_equiv_canonical' : CanonicalHomogenization.weight ∘ equiv_canonical' = height
+
+namespace Homogenization
+
+variable [hom : Homogenization R A W]
+
+/-- The canonical homogenization is a homogenization. -/
+@[reducible] instance canonical : Homogenization R A (CanonicalHomogenization R A) where
+  embed := CanonicalHomogenization.ofPoint
+  height := CanonicalHomogenization.weight
+  equiv_canonical' := .refl ..
+  equiv_canonical_embed := by simp [LinearEquiv.refl]
+  weight_equiv_canonical' := by simp [LinearEquiv.refl]
+
+-- proving the axioms hold
+
+theorem inj : Injective hom.embed := by
+  apply Injective.of_comp (f := hom.equiv_canonical')
+  simpa [equiv_canonical_embed] using CanonicalHomogenization.ofPoint_injective
+
+theorem embed_height : hom.embed.range = hom.height ⁻¹' {1} := by
+  apply hom.equiv_canonical'.injective.image_injective
+  simp [AffineMap.range, SetLike.coe, ← Set.range_comp, hom.equiv_canonical_embed,
+    CanonicalHomogenization.ofPoint_range_eq_preimage_weight_one , ← weight_equiv_canonical',
+    Set.preimage_comp, Set.image_preimage_eq _ equiv_canonical'.surjective]
+
+theorem extend (U : Type*) [AddCommGroup U] [Module R U]
+    (f : A →ᵃ[R] U) :
+    ∃! (F : W →ₗ[R] U), F ∘ hom.embed = f := by
+  obtain ⟨F, hF, uF⟩ := CanonicalHomogenization.extend U f
+  use LinearMap.comp F hom.equiv_canonical'.toLinearMap
+  simp only [← hom.equiv_canonical_embed] at hF
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, comp_assoc, hF, true_and]
+  intro g hg
+  have := uF (g ∘ₗ equiv_canonical'.symm.toLinearMap) ?_
+  · rw [← this, LinearMap.comp_assoc]
+    simp
+  · ext x
+    simp [← hg, ← hom.equiv_canonical_embed]
+
+/-- embedding the underlying vector space is exactly the height-0 hyperplane. -/
+theorem embed_linear_range_eq_height_ker : hom.embed.linear.range = hom.height.ker := by
   ext x
   let a₀ := Classical.arbitrary A
   simp only [LinearMap.mem_range, LinearMap.mem_ker]
-  have : (∃ y, hom.linear y = x) ↔ ∃ a b : A, embed.linear (a -ᵥ b) = x :=
+  have : (∃ y, hom.embed.linear y = x) ↔ ∃ a b : A, hom.embed.linear (a -ᵥ b) = x :=
     ⟨fun ⟨y, hy⟩ => ⟨y +ᵥ a₀, a₀, by simp [vadd_vsub, hy]⟩, fun ⟨a, b, hab⟩ => ⟨a -ᵥ b, hab⟩⟩
   rw [this]
   have hh := Set.ext_iff.mp hom.embed_height
@@ -55,7 +91,7 @@ theorem embed_linear_range_eq_height_ker : hom.linear.range = hom.height.ker := 
     simp [← hab, map_sub, (hh (embed b)).mp ⟨b, rfl⟩, (hh (embed a)).mp ⟨a, rfl⟩]
   · intro h
     have ha := Set.mem_preimage.mp <| (hh (hom.embed a₀)).mp (by simp)
-    obtain ⟨b, hb⟩ : x + hom.embed a₀ ∈ (hom.range : Set W) := by
+    obtain ⟨b, hb⟩ : x + hom.embed a₀ ∈ (hom.embed.range : Set W) := by
       simpa [hom.embed_height, Set.mem_preimage, map_add, h]
     exact ⟨b, a₀, by simp [AffineMap.linearMap_vsub, hb]⟩
 
@@ -72,17 +108,17 @@ theorem embed_ne_zero (x : A) : hom.embed x ≠ (0 : W) := by
   simp [height_one x] at this
 
 /-- The homogenization of a point in `V` has height 0. -/
-lemma height_zero (v : V) : hom.height (hom.linear v) = 0 := by
+lemma height_zero (v : V) : hom.height (hom.embed.linear v) = 0 := by
   simp [LinearMap.mem_ker.mp, ← embed_linear_range_eq_height_ker]
 
-theorem span_range_embed : span R (hom.range : Set W) = ⊤ := by
+theorem span_range_embed : span R (hom.embed.range : Set W) = ⊤ := by
   refine eq_top_iff'.mpr (fun x ↦ ?_)
   let a₀ := Classical.arbitrary A
   -- projecting x to height 0 along a₀ gives sth in the span of image of embed
-  have hlin : x - hom.height x • hom.embed a₀ ∈ Submodule.span R hom.range := by
-    obtain ⟨v, hv⟩ : x - hom.height x • hom.embed a₀ ∈ hom.linear.range := by
+  have hlin : x - hom.height x • hom.embed a₀ ∈ Submodule.span R hom.embed.range := by
+    obtain ⟨v, hv⟩ : x - hom.height x • hom.embed a₀ ∈ hom.embed.linear.range := by
       simp [embed_linear_range_eq_height_ker, height_one a₀]
-    have : hom.linear v = hom.embed (v +ᵥ a₀) - hom.embed a₀ := by simp
+    have : hom.embed.linear v = hom.embed (v +ᵥ a₀) - hom.embed a₀ := by simp
     rw [← hv, this]
     apply Submodule.sub_mem <;> apply Submodule.subset_span
     · exact ⟨v +ᵥ a₀, rfl⟩
@@ -90,33 +126,39 @@ theorem span_range_embed : span R (hom.range : Set W) = ⊤ := by
   simpa using
     Submodule.add_mem _ hlin <| smul_mem _ (hom.height x) (subset_span ⟨a₀, rfl⟩)
 
+theorem hom_ext {U : Type*} [AddCommGroup U] [Module R U] {f g : W →ₗ[R] U}
+    (h : ∀ x, f (hom.embed x) = g (hom.embed x)) : f = g := by
+  rw [← LinearMap.eqLocus_eq_top, eq_top_iff, ← span_range_embed (A := A), Submodule.span_le]
+  apply Set.range_subset_iff.mpr
+  simpa
+
 open AffineMap LinearEquiv in
 /-- The linear equivalence between the underlying vector space and its embedding. -/
-noncomputable def homLinearRangeEquiv : LinearEquiv (RingHom.id R) V hom.linear.range := {
-  toFun v := ⟨hom.linear v, hom.linear.mem_range_self v⟩
+noncomputable def homLinearRangeEquiv : LinearEquiv (RingHom.id R) V hom.embed.linear.range := {
+  toFun v := ⟨hom.embed.linear v, hom.embed.linear.mem_range_self v⟩
   map_add' v w := by simp
   map_smul' r v := by simp
-  invFun v := (ofInjective hom.linear (linear_injective_iff _ |>.mpr hom.inj)).invFun v
-  left_inv v := (ofInjective hom.linear (linear_injective_iff _ |>.mpr hom.inj)).left_inv v
+  invFun v := (ofInjective hom.embed.linear (linear_injective_iff _ |>.mpr hom.inj)).invFun v
+  left_inv v := (ofInjective hom.embed.linear (linear_injective_iff _ |>.mpr hom.inj)).left_inv v
   right_inv v' := by simp
 }
 
 /-- The affine equivalence between the affine space space and its embedding. -/
 public noncomputable def homRangeEquiv : AffineEquiv R A hom.embed.range :=
-  .ofBijective ⟨hom.rangeRestrict_injective_iff.mpr hom.inj, fun ⟨_, a, rfl⟩ => ⟨a, rfl⟩⟩
+  .ofBijective ⟨hom.embed.rangeRestrict_injective_iff.mpr hom.inj, fun ⟨_, a, rfl⟩ => ⟨a, rfl⟩⟩
 
-lemma apply_homRangeEquiv_symm (x : hom.range) : hom.embed (hom.homRangeEquiv.symm x) = x := by
+lemma apply_homRangeEquiv_symm (x : hom.embed.range) : hom.embed (hom.homRangeEquiv.symm x) = x := by
   rw [← hom.homRangeEquiv.right_inv x]
   congr; exact hom.homRangeEquiv.symm_apply_apply _
 
 @[simp]
-theorem linear_vsub {p q : A} : hom.linear (k := R) (p -ᵥ q) = hom.embed p - hom.embed q :=
-  hom.linearMap_vsub p q
+theorem linear_vsub {p q : A} : hom.embed.linear (k := R) (p -ᵥ q) = hom.embed p - hom.embed q :=
+  hom.embed.linearMap_vsub p q
 
 @[simp]
 theorem linear_smul' {S : Type*} [Semiring S] [Module S R] [Module S V] [IsScalarTower S R V]
-    {r : R} {v : V} : hom.linear (r • v) = r • hom.linear (k := R) v :=
-  LinearMap.CompatibleSMul.map_smul hom.linear r v
+    {r : R} {v : V} : hom.embed.linear (r • v) = r • hom.embed.linear (k := R) v :=
+  LinearMap.CompatibleSMul.map_smul hom.embed.linear r v
 
 section HomCone
 
@@ -143,10 +185,10 @@ theorem homogenize_empty_eq_bot : homogenize W (⟨∅, IsConvexSet.empty⟩ : C
 
 variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
-  ⟨_, C.isConvexSet.preimage hom.isAffineMap⟩
+  ⟨_, C.isConvexSet.preimage hom.embed.isAffineMap⟩
 
 lemma embed_dehomogenize_eq_inter_embed (C : PointedCone R W) :
-    hom.embed '' (dehomogenize A C) = (C : Set W) ∩ hom.range := by
+    hom.embed '' (dehomogenize A C) = (C : Set W) ∩ hom.embed.range := by
   ext x
   simp only [dehomogenize, Set.mem_image, SetLike.mem_coe, Set.mem_inter_iff,
     AffineMap.mem_range]
@@ -184,7 +226,7 @@ theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Ioi (0 : R) • hom.embed '' (P : Set A) :=
-  (mem_hull_iff_mem_pos_smul_of_convex_nonzero (P.isConvexSet.image hom.isAffineMap) hx).mp h
+  (mem_hull_iff_mem_pos_smul_of_convex_nonzero (P.isConvexSet.image hom.embed.isAffineMap) hx).mp h
 
 lemma height_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     0 < hom.height x := by
@@ -225,7 +267,7 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
   apply hom.inj
   have : t⁻¹ • (r₁ • hom.embed p₁ + r₂ • hom.embed p₂) = hom.embed q := by
     rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
-  simp [hom.isAffineMap.map_convexCombPair, convexCombPair_eq_sum, ← this, smul_smul]
+  simp [hom.embed.isAffineMap.map_convexCombPair, convexCombPair_eq_sum, ← this, smul_smul]
 
 /-- Dehomogenizing the homogenization of a convex set yields the same set again. -/
 theorem dehomogenize_homogenize_eq_id (P : ConvexSet R A) :
@@ -243,9 +285,9 @@ theorem homogenize_dehomogenize_eq_id_of_pos {C : PointedCone R W}
     unfold homogenize
     rw [eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot hC zero_lt_one hbot,
       embed_dehomogenize_eq_inter_embed, ← hom.embed_height]
-    convert hull_eq_smul ?_ (C.isConvexSet.inter hom.range_isConvexSet)
+    convert hull_eq_smul ?_ (C.isConvexSet.inter hom.embed.range_isConvexSet)
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
-      obtain ⟨_, hy'⟩ : (hom.height y)⁻¹ • y ∈ (hom.range : Set W) := by
+      obtain ⟨_, hy'⟩ : (hom.height y)⁻¹ • y ∈ (hom.embed.range : Set W) := by
         simpa [hom.embed_height] using inv_mul_cancel₀ (hC y hyC hy0).ne.symm
       use (hom.height y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (hC y hyC hy0).le) hyC
       simp [← hy']
@@ -258,7 +300,7 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
   mem_of_smul_add_mem := by
     intro v w a hv hw ha hvw
     by_cases hnf : (F : Set A).Nonempty
-    · have cF := F.isConvexSet.image hom.isAffineMap
+    · have cF := F.isConvexSet.image hom.embed.isAffineMap
       apply (mem_hull_iff_of_convex (hnf.image _) cF _).mpr
       by_cases hv0 : v = 0
       · exact ⟨0, le_rfl, Set.mem_smul_set.mpr (by simpa [hv0] using hnf)⟩
@@ -301,7 +343,7 @@ theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
     rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,
-      ← hom.isAffineMap.map_convexCombPair, hzo]
+      ← hom.embed.isAffineMap.map_convexCombPair, hzo]
 
 def Face.homogenizationIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P).Face where
   toFun F := ⟨_, hom.homogenize_isFaceOf F.isFaceOf⟩
