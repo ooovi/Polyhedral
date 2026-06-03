@@ -41,7 +41,7 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
-/-- A cone is polyhedral if it is the sum of an FG cone and a submodule. -/
+/-- A cone is polyhedral if and only if it is the sum of an FG cone and a submodule. -/
 lemma exists_fg_submoduel_eq_sup :
   C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S := .rfl
 
@@ -104,198 +104,240 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
-/-- A cone is polyhedral if it is the sum of an FG cone and a submodule. -/
-lemma exists_fg_eq_sup_lineal :
+/-- A polyhedral cone is the sum of an FG cone with its lineality space. -/
+lemma exists_fg_eq_sup_lineal (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R M, D.FG ∧ C = D ⊔ C.lineal := by
+  obtain ⟨D, hD, S, h⟩ := hC
+  refine ⟨D, hD, le_antisymm ?_ (by simp [h])⟩
+  have : lineal S ≤ C.lineal := lineal_mono (by simp [h])
+  rw [submodule_lineal] at this
+  nth_rw 1 [h]
+  apply sup_le_sup_left
+  exact this
+
+/-- A cone is polyhedral if and only if it is the sum of an FG cone with its lineality space. -/
+lemma exists_fg_eq_sup_lineal_iff :
     C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ C = D ⊔ C.lineal where
   mpr := by
     rintro ⟨D, hD, h⟩
     exact ⟨D, hD, C.lineal, h⟩
-  mp := by
-    rintro ⟨D, hD, S, rfl⟩
-    refine ⟨D, hD, ?_⟩
-    congr
-    rw [sup_lineal_eq]
-    sorry
-
-end Ring
-
-section Field
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
-variable {C C₁ C₂ F : PointedCone R M}
-
-end Field
-
-end IsPolyhedral
-
-----
-
-/-- A cone is polyhedral if its salient quotient is finitely generated. -/
-abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
-
-lemma IsPolyhedral.def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
-
-lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
-
-/-- Submodules are polyhedral cones. -/
-@[simp] lemma IsPolyhedral.of_submodule (S : Submodule R M) :
-    (S : PointedCone R M).IsPolyhedral := by
-  simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
-
-/-- FG cones are polyhedral. -/
-lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := hC.salientQuot_fg
-
-lemma IsPolyhedral.bot : (⊥ : PointedCone R M).IsPolyhedral := IsPolyhedral.of_submodule ⊥
-
-lemma IsPolyhedral.top : (⊤ : PointedCone R M).IsPolyhedral := IsPolyhedral.of_submodule ⊤
-
-lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
-    FG.isPolyhedral hC.salientQuot_fg
-
-/-- The hull of a finite set is polyhedral. -/
-lemma IsPolyhedral.of_hull_finite {s : Set M} (hs : s.Finite) : (hull R s).IsPolyhedral :=
-  FG.isPolyhedral (fg_def.mpr ⟨s, hs, rfl⟩)
-
-/-- The hull of a finite set is polyhedral. -/
-lemma isPolyhedral_of_hull_finset (s : Finset M) : (hull (E := M) R s).IsPolyhedral :=
-  .of_hull_finite s.finite_toSet
-
-set_option backward.isDefEq.respectTransparency false in
-/- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
-lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
-    C.IsPolyhedral := by
-  simpa only [IsPolyhedral, map, ← factor_comp_mk <| le_lineal hS,
-    restrictScalars_comp, map_comp] using FG.map _ hC
-
-/-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
-   FG cone by the lineality space of `C`. -/
-lemma IsPolyhedral.exists_finset_hull_quot_lineal (hC : C.IsPolyhedral) :
-    ∃ s : Finset M, (hull R s).quot C.lineal = C.salientQuot := by classical
-  obtain ⟨s, hs⟩ := hC
-  use Finset.image (surjInv <| mkQ_surjective _) s
-  simp only [map_hull, Finset.coe_image, Set.image_image, surjInv_eq, Set.image_id', hs]
-
--- lemma IsPolyhedral.exists_finset_inter_hull_quot_lineal (hC : C.IsPolyhedral) :
---     ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (hull R s).quot C.lineal = C.salientQuot := by
---   classical
---   obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
---   use {x ∈ s | x ∉ C.lineal}
---   constructor
---   · ext; simp
---   · rw [← hs]
---     simp
---     ext x
---     simp [mem_sup]
---     sorry
-
-/-- A polyhedral cone can be written as the sum of its lineality space with an FG cone. -/
-lemma IsPolyhedral.exists_finset_sup_lineal (hC : C.IsPolyhedral) :
-    ∃ s : Finset M, hull R s ⊔ C.lineal = C := by classical
-  obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
-  exact ⟨s, by simpa [quot_eq_iff_sup_eq] using hs⟩
-
-/-- A polyhedral cone can be written as the sum of its lineality space with an FG cone. -/
-lemma IsPolyhedral.exists_fg_sup_lineal (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R M, D.FG ∧ D ⊔ C.lineal = C := by
-  obtain ⟨s, hs⟩ := hC.exists_finset_sup_lineal
-  exact ⟨hull R s, fg_span s.finite_toSet, hs⟩
-
+  mp := exists_fg_eq_sup_lineal
 
 /-- A polyhedral cone with FG lineality space is FG. -/
-lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : C.lineal.FG) : C.FG := by
-  obtain ⟨D, hD, hD'⟩ := hC.exists_fg_sup_lineal
-  rw [← hD']
-  exact sup_fg hD (FG.coe_fg_iff.mpr h)
+lemma fg_of_fg_lineal (hC : C.IsPolyhedral) (h : C.lineal.FG) : C.FG := by
+  obtain ⟨D, hD, hD'⟩ := hC.exists_fg_eq_sup_lineal
+  rw [hD']
+  exact Submodule.sup_fg hD (FG.coe_fg_iff.mpr h)
 
 /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
-lemma IsPolyhedral.iff_fg_of_fg_lineal {h : C.lineal.FG} : C.IsPolyhedral ↔ C.FG :=
+lemma iff_fg_of_fg_lineal {h : C.lineal.FG} : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_fg_lineal · h), FG.isPolyhedral⟩
 
 /-- A salient polyhedral cone is FG. -/
-lemma IsPolyhedral.fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG :=
+lemma fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG :=
   hC.fg_of_fg_lineal (by simpa [salient_iff_lineal_bot.mp hsal] using fg_bot)
 
 /-- A salient cone is polyhedral if and only if it is FG. -/
-lemma IsPolyhedral.iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
+lemma iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_salient · hC), FG.isPolyhedral⟩
+
+end Ring
 
 section CommRing
 
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+
 variable {C C₁ C₂ F : PointedCone R M}
 
-/-- If `C` is polyhedral and `S` is a submodule complementary to `C`'s linearlity spacen,
+/-- If `C` is polyhedral and `S` is a submodule complementary to `C`'s linearlity space,
   then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
   is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
-lemma IsPolyhedral.fg_inf_of_isCompl (hC : C.IsPolyhedral)
-    {S : Submodule R M} (hS : IsCompl C.lineal S) : FG (C ⊓ S) :=
-  hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
+lemma fg_inf_of_isCompl (hC : C.IsPolyhedral) {S : Submodule R M} (hS : IsCompl C.lineal S) :
+    FG (C ⊓ S) := hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
 
 end CommRing
 
--- ## SUP
 
-/-- The sum of an FG cone with a submodule is polyhedral. -/
-lemma IsPolyhedral.of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
-    (C ⊔ S).IsPolyhedral := by
-  refine .of_quot_fg le_sup_right ?_
-  simpa [sup_quot_eq_quot] using quot_fg hC S
+-- ----
 
-/-- The sum of two polyhedral cones is polyhedral -/
-lemma IsPolyhedral.sup (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
-    (C₁ ⊔ C₂).IsPolyhedral := by
-  obtain ⟨D₁, hD₁, hD₁'⟩ := h₁.exists_fg_sup_lineal
-  obtain ⟨D₂, hD₂, hD₂'⟩ := h₂.exists_fg_sup_lineal
-  rw [← hD₁', ← hD₂', sup_assoc]
-  nth_rw 2 [sup_comm]
-  rw [sup_assoc, ← sup_assoc, ← coe_sup]
-  exact .of_fg_sup_submodule (sup_fg hD₁ hD₂) _
+-- /-- A cone is polyhedral if its salient quotient is finitely generated. -/
+-- abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
 
-/-- The sum of a polyhedral cone with a submodule is polyhedral. -/
-lemma IsPolyhedral.sup_submodule (hC : C.IsPolyhedral) (S : Submodule R M) :
-    (C ⊔ S).IsPolyhedral := hC.sup (.of_submodule S)
+-- lemma IsPolyhedral.def : C.IsPolyhedral ↔ FG C.salientQuot := by rfl
 
-/-- The sum of a polyhedral cone with an FG cone is polyhedral. -/
-lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG) :
-    (C ⊔ D).IsPolyhedral := hC.sup (FG.isPolyhedral hD)
+-- lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
+
+-- /-- Submodules are polyhedral cones. -/
+-- @[simp] lemma IsPolyhedral.of_submodule (S : Submodule R M) :
+--     (S : PointedCone R M).IsPolyhedral := by
+--   simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
+
+-- /-- FG cones are polyhedral. -/
+-- lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := hC.salientQuot_fg
+
+-- lemma IsPolyhedral.bot : (⊥ : PointedCone R M).IsPolyhedral := IsPolyhedral.of_submodule ⊥
+
+-- lemma IsPolyhedral.top : (⊤ : PointedCone R M).IsPolyhedral := IsPolyhedral.of_submodule ⊤
+
+-- lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
+--     FG.isPolyhedral hC.salientQuot_fg
+
+-- /-- The hull of a finite set is polyhedral. -/
+-- lemma IsPolyhedral.of_hull_finite {s : Set M} (hs : s.Finite) : (hull R s).IsPolyhedral :=
+--   FG.isPolyhedral (fg_def.mpr ⟨s, hs, rfl⟩)
+
+-- /-- The hull of a finite set is polyhedral. -/
+-- lemma isPolyhedral_of_hull_finset (s : Finset M) : (hull (E := M) R s).IsPolyhedral :=
+--   .of_hull_finite s.finite_toSet
+
+-- set_option backward.isDefEq.respectTransparency false in
+-- /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
+-- lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
+--     C.IsPolyhedral := by
+--   simpa only [IsPolyhedral, map, ← factor_comp_mk <| le_lineal hS,
+--     restrictScalars_comp, map_comp] using FG.map _ hC
+
+-- /-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an
+--    FG cone by the lineality space of `C`. -/
+-- lemma IsPolyhedral.exists_finset_hull_quot_lineal (hC : C.IsPolyhedral) :
+--     ∃ s : Finset M, (hull R s).quot C.lineal = C.salientQuot := by classical
+--   obtain ⟨s, hs⟩ := hC
+--   use Finset.image (surjInv <| mkQ_surjective _) s
+--   simp only [map_hull, Finset.coe_image, Set.image_image, surjInv_eq, Set.image_id', hs]
+
+-- -- lemma IsPolyhedral.exists_finset_inter_hull_quot_lineal (hC : C.IsPolyhedral) :
+-- --     ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (hull R s).quot C.lineal = C.salientQuot := by
+-- --   classical
+-- --   obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
+-- --   use {x ∈ s | x ∉ C.lineal}
+-- --   constructor
+-- --   · ext; simp
+-- --   · rw [← hs]
+-- --     simp
+-- --     ext x
+-- --     simp [mem_sup]
+-- --     sorry
+
+-- /-- A polyhedral cone can be written as the sum of its lineality space with an FG cone. -/
+-- lemma IsPolyhedral.exists_finset_sup_lineal (hC : C.IsPolyhedral) :
+--     ∃ s : Finset M, hull R s ⊔ C.lineal = C := by classical
+--   obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
+--   exact ⟨s, by simpa [quot_eq_iff_sup_eq] using hs⟩
+
+-- /-- A polyhedral cone can be written as the sum of its lineality space with an FG cone. -/
+-- lemma IsPolyhedral.exists_fg_sup_lineal (hC : C.IsPolyhedral) :
+--     ∃ D : PointedCone R M, D.FG ∧ D ⊔ C.lineal = C := by
+--   obtain ⟨s, hs⟩ := hC.exists_finset_sup_lineal
+--   exact ⟨hull R s, fg_span s.finite_toSet, hs⟩
 
 
--- ## MAP / COMAP
+-- /-- A polyhedral cone with FG lineality space is FG. -/
+-- lemma IsPolyhedral.fg_of_fg_lineal (hC : C.IsPolyhedral) (h : C.lineal.FG) : C.FG := by
+--   obtain ⟨D, hD, hD'⟩ := hC.exists_fg_sup_lineal
+--   rw [← hD']
+--   exact sup_fg hD (FG.coe_fg_iff.mpr h)
 
-set_option backward.isDefEq.respectTransparency false in
-lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsPolyhedral := by
-  obtain ⟨D, hfg, hD'⟩ := hC.exists_fg_sup_lineal
-  rw [← hD']
-  simp only [PointedCone.map, Submodule.map_sup] -- `map` should be an abbrev
-  refine sup ?_ ?_
-  · exact FG.isPolyhedral (FG.map _ hfg)
-  · rw [← restrictScalars_map]
-    simp
+-- /-- If the lineality space is FG then a cone is polyhedral if and only if it is FG. -/
+-- lemma IsPolyhedral.iff_fg_of_fg_lineal {h : C.lineal.FG} : C.IsPolyhedral ↔ C.FG :=
+--   ⟨(IsPolyhedral.fg_of_fg_lineal · h), FG.isPolyhedral⟩
 
-lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f).IsPolyhedral := by
-  unfold IsPolyhedral PointedCone.salientQuot quot at *
-  -- apply FG.map
-  rw [comap_lineal]
-  sorry
+-- /-- A salient polyhedral cone is FG. -/
+-- lemma IsPolyhedral.fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG :=
+--   hC.fg_of_fg_lineal (by simpa [salient_iff_lineal_bot.mp hsal] using fg_bot)
 
-lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
-    (C.quot S).IsPolyhedral := hC.map _
+-- /-- A salient cone is polyhedral if and only if it is FG. -/
+-- lemma IsPolyhedral.iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
+--   ⟨(IsPolyhedral.fg_of_salient · hC), FG.isPolyhedral⟩
 
-open Pointwise in
-@[simp] lemma IsPolyhedral.neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
-  mp := by
-    intro hC;
-    simp [← map_id_eq_neg] at hC;
-    simpa [map_map] using hC.map (-.id)
-  mpr := fun hC => by simpa only [← map_id_eq_neg] using hC.map _
+-- section CommRing
 
-open Pointwise in
-lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
+-- variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+-- variable {M : Type*} [AddCommGroup M] [Module R M]
+-- variable {N : Type*} [AddCommGroup N] [Module R N]
+-- variable {C C₁ C₂ F : PointedCone R M}
 
+-- /-- If `C` is polyhedral and `S` is a submodule complementary to `C`'s linearlity spacen,
+--   then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
+--   is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
+-- lemma IsPolyhedral.fg_inf_of_isCompl (hC : C.IsPolyhedral)
+--     {S : Submodule R M} (hS : IsCompl C.lineal S) : FG (C ⊓ S) :=
+--   hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
+
+-- end CommRing
+
+-- -- ## SUP
+
+-- /-- The sum of an FG cone with a submodule is polyhedral. -/
+-- lemma IsPolyhedral.of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) :
+--     (C ⊔ S).IsPolyhedral := by
+--   refine .of_quot_fg le_sup_right ?_
+--   simpa [sup_quot_eq_quot] using quot_fg hC S
+
+-- /-- The sum of two polyhedral cones is polyhedral -/
+-- lemma IsPolyhedral.sup (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
+--     (C₁ ⊔ C₂).IsPolyhedral := by
+--   obtain ⟨D₁, hD₁, hD₁'⟩ := h₁.exists_fg_sup_lineal
+--   obtain ⟨D₂, hD₂, hD₂'⟩ := h₂.exists_fg_sup_lineal
+--   rw [← hD₁', ← hD₂', sup_assoc]
+--   nth_rw 2 [sup_comm]
+--   rw [sup_assoc, ← sup_assoc, ← coe_sup]
+--   exact .of_fg_sup_submodule (sup_fg hD₁ hD₂) _
+
+-- /-- The sum of a polyhedral cone with a submodule is polyhedral. -/
+-- lemma IsPolyhedral.sup_submodule (hC : C.IsPolyhedral) (S : Submodule R M) :
+--     (C ⊔ S).IsPolyhedral := hC.sup (.of_submodule S)
+
+-- /-- The sum of a polyhedral cone with an FG cone is polyhedral. -/
+-- lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG) :
+--     (C ⊔ D).IsPolyhedral := hC.sup (FG.isPolyhedral hD)
+
+
+-- -- ## MAP / COMAP
+
+-- set_option backward.isDefEq.respectTransparency false in
+-- lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsPolyhedral := by
+--   obtain ⟨D, hfg, hD'⟩ := hC.exists_fg_sup_lineal
+--   rw [← hD']
+--   simp only [PointedCone.map, Submodule.map_sup] -- `map` should be an abbrev
+--   refine sup ?_ ?_
+--   · exact FG.isPolyhedral (FG.map _ hfg)
+--   · rw [← restrictScalars_map]
+--     simp
+
+-- lemma IsPolyhedral.comap (hC : C.IsPolyhedral) (f : N →ₗ[R] M) : (C.comap f).IsPolyhedral := by
+--   unfold IsPolyhedral PointedCone.salientQuot quot at *
+--   -- apply FG.map
+--   rw [comap_lineal]
+--   sorry
+
+-- lemma IsPolyhedral.quot (hC : C.IsPolyhedral) (S : Submodule R M) :
+--     (C.quot S).IsPolyhedral := hC.map _
+
+-- open Pointwise in
+-- @[simp] lemma IsPolyhedral.neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
+--   mp := by
+--     intro hC;
+--     simp [← map_id_eq_neg] at hC;
+--     simpa [map_map] using hC.map (-.id)
+--   mpr := fun hC => by simpa only [← map_id_eq_neg] using hC.map _
+
+-- open Pointwise in
+-- lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
+
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+variable {C C₁ C₂ F : PointedCone R M}
+
+/-- A polyhedral cone is FG if and only if its lineality space is FG. -/
+lemma fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
+  ⟨lineal_fg, hC.fg_of_fg_lineal⟩
+
+end DivisionRing
 
 
 section Field
@@ -303,20 +345,17 @@ section Field
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
+
 variable {C C₁ C₂ F : PointedCone R M}
-
-/-- A polyhedral cone is FG if and only if its lineality space is FG. -/
-lemma IsPolyhedral.fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
-  ⟨lineal_fg, hC.fg_of_fg_lineal⟩
-
 
 -- ## DUAL
 
 -- FIX: fix `fg_inf_of_isCompl` first
 -- Q: Is DivisionRing necessary?
 /-- The lineality space of a full-dimensional cone is CoFG. -/
-lemma IsPolyhedral.cofg_lineal_of_span_top (hC : C.IsPolyhedral)
+lemma cofg_lineal_of_span_top (hC : C.IsPolyhedral)
     (h : Submodule.span R (C : Set M) = ⊤) : CoFG C.lineal := by
   obtain ⟨_, hS⟩ := Submodule.exists_isCompl C.lineal
   have hh := congrArg (Submodule.span R ∘ SetLike.coe) <| inf_sup_lineal hS.codisjoint
@@ -733,6 +772,8 @@ lemma IsPolyhedral.FG (hC : C.IsPolyhedral) : C.FG :=
 lemma IsPolyhedral.iff_FG : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.FG, FG.isPolyhedral⟩
 
 end IsNoetherian
+
+end IsPolyhedral
 
 
 
