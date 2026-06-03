@@ -113,7 +113,6 @@ protected lemma comap (f : N →ₗ[R] M) (hC : C.IsPolyhedral) : (C.comap f).Is
   mpr := .map e.toLinearMap
   mp h := by simpa [map_map] using h.map e.symm.toLinearMap
 
-
 end Semiring
 
 section Ring
@@ -160,6 +159,36 @@ lemma fg_of_salient (hC : C.IsPolyhedral) (hsal : C.Salient) : C.FG :=
 lemma iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
   ⟨(IsPolyhedral.fg_of_salient · hC), FG.isPolyhedral⟩
 
+lemma quot (hC : C.IsPolyhedral) (S : Submodule R M) :
+    (C.quot S).IsPolyhedral := hC.map _
+
+lemma salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := sorry
+
+lemma salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
+  hC.salientQuot_fg.isPolyhedral
+
+open Pointwise
+
+@[simp] protected lemma neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
+  mpr := fun hC => by simpa only [← map_id_eq_neg] using hC.map _
+  mp hC := by
+    simp [← map_id_eq_neg] at hC
+    simpa [map_map] using hC.map (-.id)
+
+protected lemma neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
+
+section IsNoetherian
+
+variable [IsNoetherian R M]
+
+/-- A polyhedral cone is finitely generated. -/
+protected lemma fg (hC : C.IsPolyhedral) : C.FG :=
+  fg_of_fg_lineal hC (IsNoetherian.noetherian _)
+
+lemma iff_FG : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.fg, FG.isPolyhedral⟩
+
+end IsNoetherian
+
 end Ring
 
 section CommRing
@@ -173,7 +202,7 @@ variable {C C₁ C₂ F : PointedCone R M}
   then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
   is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
 lemma fg_inf_of_isCompl (hC : C.IsPolyhedral) {S : Submodule R M} (hS : IsCompl C.lineal S) :
-    FG (C ⊓ S) := hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
+    FG (C ⊓ S) := sorry -- hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
 
 end CommRing
 
@@ -778,17 +807,6 @@ lemma exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
 --     · sorry
 --     -- exact left_eq_sup.mp hE.symm
 
-section IsNoetherian
-
-variable [IsNoetherian R M]
-/-- A polyhedral cone is finitely generated. -/
-protected lemma fg (hC : C.IsPolyhedral) : C.FG :=
-  fg_of_fg_lineal hC (IsNoetherian.noetherian _)
-
-lemma iff_FG : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.fg, FG.isPolyhedral⟩
-
-end IsNoetherian
-
 end Field
 
 end IsPolyhedral
@@ -847,16 +865,16 @@ def of_FG {C : PointedCone R M} (hC : C.FG) : PolyhedralCone R M
 
 variable (R) in
 /-- The hull of finitely many elements as a polyhedral cone. -/
-def finhull (s : Finset M) : PolyhedralCone R M := ⟨_, isPolyhedral_of_hull_finset s⟩
+def finhull (s : Finset M) : PolyhedralCone R M := ⟨_, .of_hull_finset s⟩
 
 @[simp] lemma finhull_eq_hull (s : Finset M) : finhull R s = hull (E := M) R s := rfl
 
 def finhull_lineal (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
-  ⟨hull R s ⊔ S, IsPolyhedral.sup (isPolyhedral_of_hull_finset s) (by simp)⟩
+  ⟨hull R s ⊔ S, IsPolyhedral.sup (.of_hull_finset s) (by simp)⟩
 
 variable [IsNoetherian R M] in
 /-- A polyhedral cone is finitely generated. -/
-def FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.FG
+def FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.fg
 
 
 
