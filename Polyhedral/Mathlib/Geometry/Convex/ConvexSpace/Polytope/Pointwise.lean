@@ -6,6 +6,7 @@ Authors: Martin Winter, Olivia Röhrig
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.Algebra.Group.Pointwise.Finset.Basic
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
@@ -36,9 +37,8 @@ variable {P P₁ P₂ : Set V}
 
 protected lemma neg (hP : IsPolytope R P) : IsPolytope R (-P) := by classical
   obtain ⟨s, rfl⟩ := hP
-  -- use -s -- TODO: `Neg (Finset V)` seems to be not implemented
-  -- rw [convexHull_neg]
-  sorry
+  use -s
+  simp only [convexHull_neg, Finset.coe_neg]
 
 end Semiring
 

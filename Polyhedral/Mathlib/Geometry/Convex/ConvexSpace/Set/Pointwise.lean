@@ -32,6 +32,9 @@ variable {K K₁ K₂ : Set V}
 protected lemma IsConvexSet.neg (hK : IsConvexSet R K) : IsConvexSet R (-K) := by
   sorry
 
+@[simp] protected lemma IsConvexSet.neg_iff : IsConvexSet R (-K) ↔ IsConvexSet R K := by
+  sorry
+
 end Semiring
 
 section Ring

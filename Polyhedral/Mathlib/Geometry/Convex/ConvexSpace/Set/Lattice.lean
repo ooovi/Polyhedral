@@ -194,7 +194,7 @@ instance : Sub (ConvexSet R X) where
 
 instance : IsConcreteSub (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
-instance : SubtractionMonoid (ConvexSet R X) := .ofSetLike ..
+instance : SubtractionCommMonoid (ConvexSet R X) := .ofSetLike ..
 
 /-! ### Scalar multiplication -/
 
@@ -204,6 +204,9 @@ instance : SMul R (ConvexSet R X) where
 instance : IsConcreteSMulSet R (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
 
 instance : DistribMulAction R (ConvexSet R X) := .ofSetLike ..
+
+/- NOTE: Nonempty convex sets form a semi-module and hence have the structure of a convex
+    space themselves. But we have no obvious way to exclude the empty set. -/
 
 noncomputable section AddTorsor
 

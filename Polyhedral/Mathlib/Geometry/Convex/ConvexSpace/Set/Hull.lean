@@ -129,7 +129,11 @@ variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 
 @[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by
-  sorry
+  ext x
+  simp only [mem_neg, mem_convexHull_iff]
+  constructor <;> intro h t hst hcvx
+  · exact neg_mem_neg.mp <| h (-t) (neg_subset.mp hst) hcvx.neg
+  · exact mem_neg.mp <| h (-t) (neg_subset_neg.mpr hst) hcvx.neg
 
 end Semiring
 

@@ -94,8 +94,8 @@ def SMulZeroClass.ofSetLike [SetLike α V] [Zero V] [Zero α] [IsConcreteZero α
 
 @[reducible]
 def DistribSMul.ofSetLike [SetLike α V] [AddZeroClass V] [AddZeroClass α]
-    [IsConcreteZero α V] [IsConcreteAdd α V] [DistribSMul R V] [SMul R α] [IsConcreteSMulSet R α V] :
-    DistribSMul R α where
+    [IsConcreteZero α V] [IsConcreteAdd α V] [DistribSMul R V] [SMul R α]
+    [IsConcreteSMulSet R α V] : DistribSMul R α where
   __ := SMulZeroClass.ofSetLike ..
   smul_add := by simp [← SetLike.coe_set_eq, smul_add]
 
@@ -109,8 +109,11 @@ def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoi
 
 @[reducible]
 def MulDistribMulAction.ofSetLike [Monoid R] [SetLike α V] [Monoid V] [Monoid α]
-    [IsConcreteOne α V] [IsConcreteMul α V] [MulDistribMulAction R V] [SMul R α] [IsConcreteSMulSet R α V] :
-    MulDistribMulAction R α where
+    [IsConcreteOne α V] [IsConcreteMul α V] [MulDistribMulAction R V] [SMul R α]
+    [IsConcreteSMulSet R α V] : MulDistribMulAction R α where
   __ := MulAction.ofSetLike_set ..
   smul_one := by simp [← SetLike.coe_set_eq, smul_one]
   smul_mul := by simp [← SetLike.coe_set_eq, smul_mul]
+
+/- NOTE: `SMulWithZero` and `Module` can only be defined on non-empty sets for which we
+    have no predefined type. -/
