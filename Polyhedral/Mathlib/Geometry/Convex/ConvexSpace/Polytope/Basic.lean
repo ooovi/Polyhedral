@@ -6,14 +6,17 @@ Authors: Martin Winter, Olivia Röhrig
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
-/-! ... -/
+/-! This file introduces `IsPolytope` and proves basic properties about convex polytopes. -/
+
+noncomputable section
 
 namespace Convexity
 
-variable {R X Y V : Type*}
+variable {R X Y V A : Type*}
 
 open ConvexSpace
 
@@ -89,8 +92,6 @@ variable [Field R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V X]
-
-attribute [local instance] AddTorsor.toConvexSpace
 
 variable {P P₁ P₂ : Set X}
 
