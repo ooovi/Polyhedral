@@ -5,10 +5,9 @@ Authors: Martin Winter, Olivia Röhrig
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
-import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
 
-/-! ... -/
+/-! This file defines polytopes as bundles objects. -/
 
 namespace Convexity
 

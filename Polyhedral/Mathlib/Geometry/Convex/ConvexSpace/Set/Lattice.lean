@@ -6,10 +6,11 @@ Authors: Olivia Röhrig, Martin Winter
 
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 /-! This file defines bundled convex sets. -/
 

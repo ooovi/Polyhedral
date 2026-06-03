@@ -6,7 +6,7 @@ Authors: Yaël Dillies
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Order.Closure
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 /-!
 # IsConvexSet hull
