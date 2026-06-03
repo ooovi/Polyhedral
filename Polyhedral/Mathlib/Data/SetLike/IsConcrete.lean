@@ -11,7 +11,10 @@ import Mathlib.Data.Set.Lattice
 import Mathlib.Order.SetNotation
 import Mathlib.Order.CompleteLattice.Defs
 
-/-! ... -/
+/-! This file defines properties of `SetLike` structures that are inherited from sets.
+
+  Zulip: https://leanprover.zulipchat.com/#narrow/channel/287929-mathlib4/topic/More.20.60IsConcrete.60.20classes.20for.20.60SetLike.60
+-/
 
 /- ## Concrete ## -/
 
