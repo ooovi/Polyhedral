@@ -134,6 +134,9 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
 
+-- TODO: maybe pointwise instances should be scoped?
+--  see also issue: https://github.com/ooovi/Polyhedral/issues/58#issue-4580609207
+
 open Pointwise
 
 /-! ### Zero -/

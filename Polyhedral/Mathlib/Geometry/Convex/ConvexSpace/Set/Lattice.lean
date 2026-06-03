@@ -149,7 +149,8 @@ end Semiring
 
 section Pointwise
 
--- TODO: every instance below should be scoped to Pointwise
+-- TODO: maybe pointwise instances should be scoped?
+--  see also issue: https://github.com/ooovi/Polyhedral/issues/58#issue-4580609207
 
 section Semiring
 
