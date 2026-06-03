@@ -25,10 +25,112 @@ open PointedCone
 
 namespace PointedCone
 
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+
+/-- ... -/
+def IsPolyhedral (C : PointedCone R M) :=
+  ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S
+
+namespace IsPolyhedral
+
+section Semiring
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+
+variable {C C₁ C₂ F : PointedCone R M}
+
+/-- A cone is polyhedral if it is the sum of an FG cone and a submodule. -/
+lemma exists_fg_submoduel_eq_sup :
+  C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S := .rfl
+
+/-- Submodules are polyhedral cones. -/
+@[simp] lemma of_submodule (S : Submodule R M) :
+    (S : PointedCone R M).IsPolyhedral := ⟨⊥, fg_bot, S, by simp⟩
+
+/-- Submodules are polyhedral cones. -/
+@[simp] lemma of_fg (hC : C.FG) : C.IsPolyhedral := ⟨C, hC, ⊥, by simp⟩
+
+alias _root_.PointedCone.FG.isPolyhedral := of_fg
+
+/-- The hull of a finite set is polyhedral. -/
+lemma of_hull_finite {s : Set M} (hs : s.Finite) : (hull R s).IsPolyhedral :=
+  of_fg <| fg_span hs
+
+/-- The hull of a finite set is polyhedral. -/
+@[simp] lemma of_hull_finset (s : Finset M) : (hull R (s : Set M)).IsPolyhedral :=
+  of_fg ⟨s, rfl⟩
+
+lemma of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) : IsPolyhedral (C ⊔ S) :=
+  ⟨C, hC, S, rfl⟩
+
+lemma of_submodule_sup_fg (S : Submodule R M) (hC : C.FG) : IsPolyhedral (S ⊔ C) :=
+  ⟨C, hC, S, by ac_rfl⟩
+
+@[simp] protected lemma bot : (⊥ : PointedCone R M).IsPolyhedral := .of_submodule ⊥
+
+@[simp] protected lemma top : (⊤ : PointedCone R M).IsPolyhedral := .of_submodule ⊤
+
+protected lemma sup (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhedral) :
+    IsPolyhedral (C₁ ⊔ C₂) := by
+  obtain ⟨D₁, hD₁, S₁, rfl⟩ := hC₁
+  obtain ⟨D₂, hD₂, S₂, rfl⟩ := hC₂
+  use D₁ ⊔ D₂
+  constructor
+  · exact sup_fg hD₁ hD₂
+  use S₂ ⊔ S₁
+  rw [coe_sup]
+  ac_rfl
+
+lemma sup_fg (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.FG) : IsPolyhedral (C₁ ⊔ C₂) :=
+  hC₁.sup (of_fg hC₂)
+
+lemma fg_sup (hC₁ : C₁.FG) (hC₂ : C₂.IsPolyhedral) : IsPolyhedral (C₁ ⊔ C₂) :=
+  .sup (of_fg hC₁) hC₂
+
+lemma sup_submodule (hC : C.IsPolyhedral) (S : Submodule R M) :
+  IsPolyhedral (C ⊔ S) := hC.sup (of_submodule S)
+
+lemma submodule_sup (S : Submodule R M) (hC : C.IsPolyhedral) :
+  IsPolyhedral (S ⊔ C) := .sup (of_submodule S) hC
+
+end Semiring
+
+section Ring
+
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+
 variable {C C₁ C₂ F : PointedCone R M}
+
+/-- A cone is polyhedral if it is the sum of an FG cone and a submodule. -/
+lemma exists_fg_eq_sup_lineal :
+    C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ C = D ⊔ C.lineal where
+  mpr := by
+    rintro ⟨D, hD, h⟩
+    exact ⟨D, hD, C.lineal, h⟩
+  mp := by
+    rintro ⟨D, hD, S, rfl⟩
+    refine ⟨D, hD, ?_⟩
+    congr
+    rw [sup_lineal_eq]
+    sorry
+
+end Ring
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+variable {C C₁ C₂ F : PointedCone R M}
+
+end Field
+
+end IsPolyhedral
+
+----
 
 /-- A cone is polyhedral if its salient quotient is finitely generated. -/
 abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
