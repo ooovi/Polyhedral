@@ -215,7 +215,7 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C C₁ C₂ F : PointedCone R M}
 
 -- TODO: likely needs field
-protected lemma comap {f : N →ₗ[R] M} (hC : C.IsPolyhedral) :
+protected lemma comap (f : N →ₗ[R] M) (hC : C.IsPolyhedral) :
     (C.comap f).IsPolyhedral := by
   obtain ⟨D, hD, S, rfl⟩ := hC
   sorry
