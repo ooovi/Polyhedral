@@ -14,7 +14,8 @@ variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable [hom : Affine.Homogenization R A W]
-variable [IsModuleConvexSpace R W]
+
+attribute [local instance] AddTorsor.toConvexSpace
 
 variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
@@ -30,6 +31,8 @@ def homogenizationHom :
 
 theorem homogenize_empty_eq_bot : homogenize W (⟨∅, IsConvexSet.empty⟩ : ConvexSet R A) = ⊥ := by
   simp [homogenize, SetLike.coe]
+
+variable [IsModuleConvexSpace R W]
 
 variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
@@ -59,6 +62,8 @@ variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable [hom : Affine.Homogenization R A W]
+
+attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by

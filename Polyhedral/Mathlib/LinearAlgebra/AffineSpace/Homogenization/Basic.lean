@@ -198,6 +198,7 @@ namespace Homogenization
 
 open Convexity
 
+attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 /-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other

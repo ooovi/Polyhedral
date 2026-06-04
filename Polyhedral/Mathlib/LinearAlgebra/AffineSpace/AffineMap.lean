@@ -56,6 +56,7 @@ lemma rangeRestrict_injective_iff (f : P →ᵃ[k] P2) :
   simp [Function.Injective, rangeRestrict]
 
 variable [PartialOrder k] [IsStrictOrderedRing k] in
+attribute [local instance] AddTorsor.toConvexSpace in
 open Convexity in
 lemma range_isConvexSet (f : P →ᵃ[k] P2) : IsConvexSet k (f.range : Set P2) := by
   simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)

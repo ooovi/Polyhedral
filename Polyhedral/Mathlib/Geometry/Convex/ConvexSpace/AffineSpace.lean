@@ -28,7 +28,7 @@ variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
 variable [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
 
-attribute [instance] AddTorsor.toConvexSpace
+attribute [local instance] AddTorsor.toConvexSpace
 
 open Convexity
 

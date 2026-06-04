@@ -1,6 +1,7 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.ConvexSet
 
 variable {R V W A : Type*}
@@ -11,6 +12,7 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+attribute [local instance] AddTorsor.toConvexSpace
 variable {C : ConvexSet R A}
 
 open PointedCone
@@ -34,6 +36,7 @@ section Field
 
 variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+attribute [local instance] AddTorsor.toConvexSpace
 variable {C : ConvexSet R A}
 
 variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : Homogenization R A W] in
@@ -47,7 +50,7 @@ theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
 theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolytope R (F : Set A) :=
     by
   letI hom : Homogenization R A (CanonicalHomogenization R A) := inferInstance
-  letI : IsModuleConvexSpace R (CanonicalHomogenization R A) := sorry -- IsModuleConvexSpace.ofModule (R := R) (M := (CanonicalHomogenization R A))
+  letI := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
   have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
   have homF := hom.homogenize_isFaceOf F.isFaceOf
   have := PointedCone.IsFaceOf.fg homC homF
@@ -59,7 +62,7 @@ theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolyt
 private noncomputable def Polytope.faceHomogenizationGradeOrder
     (hCfg : IsPolytope R (C : Set A)) : GradeOrder ℕ C.Face := by
   letI hom : Homogenization R A (CanonicalHomogenization R A) := inferInstance
-  letI : IsModuleConvexSpace R (CanonicalHomogenization R A) := sorry -- IsModuleConvexSpace.ofModule (R := R) (M := (CanonicalHomogenization R A))
+  letI := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
   have : PointedCone.FG (hom.homogenize (CanonicalHomogenization R A) C) :=
     IsPolytope.homogenize_FG hCfg
   letI := PointedCone.FG.gradeOrder_finrank this
