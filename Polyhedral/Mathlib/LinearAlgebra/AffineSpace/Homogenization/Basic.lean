@@ -4,7 +4,8 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
+-- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 
 namespace Affine
