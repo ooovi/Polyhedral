@@ -161,7 +161,7 @@ lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone
   simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
 
 lemma lineal_le_span (C : PointedCone R M) : C.lineal ≤ span R C := by
-  rw [← ofSubmodule_mono]
+  rw [← ofSubmodule_le_ofSubmodule]
   exact le_trans (lineal_le C) Submodule.subset_span
 
 /-- The linear span of `C ⊓ -C` is the lineality space of `C`. -/
@@ -458,6 +458,12 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
   rw [submodule_lineal, ← Submodule.span_eq S]
   simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
   rw [← coe_ofSubmodule, quot_span]
+
+@[simp] lemma salientQuot_bot : (⊥ : PointedCone R M).salientQuot = ⊥ :=
+  salientQuot_of_submodule ⊥
+
+@[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
+  salientQuot_of_submodule ⊤
 
 end LinearOrderedRing
 

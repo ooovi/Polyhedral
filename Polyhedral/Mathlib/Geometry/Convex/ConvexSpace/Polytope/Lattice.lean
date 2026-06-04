@@ -5,9 +5,9 @@ Authors: Martin Winter, Olivia Röhrig
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
 
-/-! ... -/
+/-! This file defines polytopes as bundles objects. -/
 
 namespace Convexity
 
@@ -40,7 +40,7 @@ instance : SetLike (Polytope R X) X where
 
 variable {P P₁ P₂ : Polytope R X}
 
-variable (K) in
+variable (P) in
 @[simp] lemma carrier_eq_coe : P.carrier = P := rfl
 
 @[ext] theorem ext (h : ∀ x, x ∈ P₁ ↔ x ∈ P₂) : P₁ = P₂ := SetLike.ext h
@@ -49,16 +49,33 @@ variable (K) in
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : Polytope R X) = s := by ext; simp
 
-instance : PartialOrder (Polytope R X) := .ofSetLike ..
-
 instance : Coe (Polytope R X) (ConvexSet R X) where
   coe P := ⟨P, P.isPolytope.isConvexSet⟩
 
-instance : OrderBot (Polytope R X) where
+/- # LE -/
+
+instance : PartialOrder (Polytope R X) := .ofSetLike ..
+
+/- # Bot -/
+
+instance : Bot (Polytope R X) where
   bot := ⟨∅, IsPolytope.empty R X⟩
-  bot_le _ _ hx := by simp at hx
 
 instance : Inhabited (Polytope R X) := ⟨⊥⟩
+
+instance : IsConcreteBot (Polytope R X) X := ⟨rfl⟩
+
+instance : OrderBot (Polytope R X) := .ofSetLike ..
+
+/- # Singleton -/
+
+instance : Singleton X (Polytope R X) where
+  singleton x := ⟨{x}, .singleton R x⟩
+
+instance : IsConcreteSingleton (Polytope R X) X := ⟨fun _ => rfl⟩
+
+/- # Max -/
+
 variable (R) in
 /-- The convex hull of a `Finset s` as a `Polytope`. -/
 def convexHull (s : Finset X) : Polytope R X :=
@@ -96,19 +113,103 @@ variable [AddTorsor V X]
 
 attribute [local instance] AddTorsor.toConvexSpace
 
+/- # Min -/
+
 /-- The infimum of two convex sets is a convex set. -/
 instance : Min (Polytope R X) where
   min P₁ P₂ := ⟨_, P₁.isPolytope.inter P₂.isPolytope⟩
 
-variable {P P₁ P₂ : Polytope R X}
+instance : IsConcreteMin (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SemilatticeInf (Polytope R X) := .ofSetLike ..
 
 instance : Lattice (Polytope R X) where
-  inf := min
-  inf_le_left _ _ _ hx := hx.1
-  inf_le_right _ _ _ hx := hx.2
-  le_inf _ _ _ h₁₂ h₂₃ _ hx := ⟨h₁₂ hx, h₂₃ hx⟩
 
 end Field
+
+section Pointwise
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
+-- TODO: maybe pointwise instances should be scoped?
+--  see also issue: https://github.com/ooovi/Polyhedral/issues/58#issue-4580609207
+
+open Pointwise
+
+/-! ### Zero -/
+
+instance : Zero (Polytope R X) where
+  zero := ⟨0, .singleton ..⟩
+
+instance : IsConcreteZero (Polytope R X) X := ⟨rfl⟩
+
+/-! ### Negation -/
+
+instance : Neg (Polytope R X) where
+  neg K := ⟨_, K.isPolytope.neg⟩
+
+instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
+
+instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
+
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
+/-! ### Minkowski addition -/
+
+instance : Add (Polytope R X) where
+  add P₁ P₂ := ⟨_, P₁.isPolytope.add P₂.isPolytope⟩
+
+instance : IsConcreteAdd (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : Sub (Polytope R X) where
+  sub P₁ P₂ := ⟨_, P₁.isPolytope.sub P₂.isPolytope⟩
+
+instance : IsConcreteSub (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SubtractionMonoid (Polytope R X) := .ofSetLike ..
+
+/-! ### Scalar multiplication -/
+
+instance : SMul R (Polytope R X) where
+  smul r P := ⟨_, P.isPolytope.smul r⟩
+
+instance : IsConcreteSMulSet R (Polytope R X) X := ⟨fun _ _ => rfl⟩
+
+instance : DistribMulAction R (Polytope R X) := .ofSetLike ..
+
+noncomputable section VAdd
+
+variable [AddTorsor X Y]
+
+noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+
+instance : VAdd X (Polytope R Y) where
+  vadd v P := ⟨_, P.isPolytope.translate v⟩
+
+instance : IsConcreteVAddSet X (Polytope R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction X (Polytope R Y) := .ofSetLike_set ..
+
+instance : VAdd (Polytope R X) (Polytope R Y) where
+  vadd K₁ K₂ := ⟨_, K₁.isPolytope.vadd K₂.isPolytope⟩
+
+instance : IsConcreteVAdd (Polytope R X) X (Polytope R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction (Polytope R X) (Polytope R Y) := .ofSetLike ..
+
+end VAdd
+
+end Ring
+
+end Pointwise
 
 end Polytope
 

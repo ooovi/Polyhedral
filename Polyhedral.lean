@@ -1,3 +1,5 @@
+import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
@@ -6,6 +8,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
+import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
@@ -32,13 +35,23 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+<<<<<<< homogenization_instance
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.ConvexSet
+=======
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
+>>>>>>> main
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite

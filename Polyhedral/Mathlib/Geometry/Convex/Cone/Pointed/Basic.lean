@@ -9,6 +9,8 @@ import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 
+/-! ... -/
+
 section Semiring
 
 namespace LinearMap
@@ -80,13 +82,6 @@ variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommM
 abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
 
 ----
-
-set_option backward.isDefEq.respectTransparency false in
-@[mono] lemma ofSubmodule_monotone : Monotone (ofSubmodule : Submodule R M → PointedCone R M) :=
-  Submodule.restrictScalars_monotone ..
-
-@[simp] lemma ofSubmodule_mono {S T : Submodule R M} : ofSubmodule S ≤ ofSubmodule T ↔ S ≤ T := by
-  rfl
 
 -- ## SPAN
 

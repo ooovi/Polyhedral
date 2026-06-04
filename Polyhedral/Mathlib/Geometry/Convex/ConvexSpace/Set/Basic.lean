@@ -1,35 +1,49 @@
 /-
-Copyright (c) 2026 Yaël Dillies. All rights reserved.
+Copyright (c) 2026 Martin Winter, Olivia Röhrig. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yaël Dillies
+Authors: Martin Winter, Olivia Röhrig
 -/
-module
 
-public import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.Geometry.Convex.Cone.Pointed
+import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
-public section
+/-! This file proves basic properties of convex sets. -/
 
-variable {ι R K X Y : Type*}
+noncomputable section
+
+variable {ι R K X Y V A W B : Type*}
+
+namespace Convexity
+
+namespace Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
+
+protected lemma IsConvexSet.biInter {S : Set (Set X)} (hS : ∀ s ∈ S, IsConvexSet R s) :
+    IsConvexSet R (⋂ s ∈ S, s) := by
+  simp +contextual [IsConvexSet, (hS _ _).sConvexComb_mem]
+
+end Semiring
 
 section Semiring
 
-open Convexity
+-- TODO: move the below to Module.lean
 
 variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M] [PartialOrder R]
   [IsStrictOrderedRing R] [ConvexSpace R M] [IsModuleConvexSpace R M]
 
-lemma Submodule.isConvexSet (P : Submodule R M) : IsConvexSet R (P : Set M) := by
+@[simp]
+lemma _root_.Submodule.isConvexSet (S : Submodule R M) : IsConvexSet R (S : Set M) := by
   apply IsConvexSet.of_sConvexComb_mem
   intro w hw
   rw [sConvexComb_eq_sum w]
-  refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
-  exact Submodule.smul_mem P (w.weights c) <| hw <| Finsupp.mem_support_iff.mpr hc
+  refine S.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
+  exact Submodule.smul_mem S (w.weights c) <| hw <| Finsupp.mem_support_iff.mpr hc
 
 end Semiring
 
 section Field
-
-namespace Convexity
 
 variable [Field K] [LinearOrder K] [IsStrictOrderedRing K] [ConvexSpace K X] {w : StdSimplex K X}
   {s t : Set X} {x y : X}
@@ -54,8 +68,6 @@ protected theorem IsConvexSet.add_smul {s : Set X}
     · exact mul_nonneg hq (inv_nonneg.mpr (add_nonneg hp hq))
     · simp [← add_mul, mul_inv_cancel₀ h]
 
-end Convexity
-
 end Field
 
-end
+end Convexity
