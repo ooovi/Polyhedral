@@ -163,7 +163,7 @@ instance : Add (CanonicalHomogenization k P) where
         constructor <;>
         solve | affine P | linear_combination (norm := affine P) h)
 
-private theorem mk_add_mk {v₁ v₂ : V} {c₁ c₂ : k} {p : P} :
+theorem mk_add_mk {v₁ v₂ : V} {c₁ c₂ : k} {p : P} :
     mk (.mk v₁ c₁ p) + mk (.mk v₂ c₂ p) = mk (.mk (v₁ + v₂) (c₁ + c₂) p) :=
   Quot.sound <| .mk_mk <| by affine P
 
@@ -178,7 +178,7 @@ instance : SMul R (CanonicalHomogenization k P) where
         constructor
       rw [← smul_sub, h, smul_assoc])
 
-private theorem smul_mk {r : R} {v : V} {c : k} {p : P} :
+theorem smul_mk {r : R} {v : V} {c : k} {p : P} :
     r • mk (.mk v c p) = mk (.mk (r • v) (r • c) p) :=
   rfl
 

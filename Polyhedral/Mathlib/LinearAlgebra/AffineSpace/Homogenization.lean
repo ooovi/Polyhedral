@@ -28,53 +28,27 @@ instance : Convexity.IsModuleConvexSpace R W where
     abel
 
 variable (R A W) in
-/-- A homogenization of an affine space `A` is a vector space that is linearly equivalent to the
-canonical homogenization of `A` together with an embedding and a height function that correspond to
-those of the canonical homogenization. -/
-class Homogenization where
-  embed : A →ᵃ[R] W
+/-- An embedding of an affine space `A` into a vector space `W` s.t. the image of `A` is exactly the
+height-1 hyperplane under a given linear height map.
+Follows Definition 4.2 in https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
+class Homogenization extends embed : A →ᵃ[R] W where
+  inj : Injective embed
   height : W →ₗ[R] R
-  equiv_canonical' : W ≃ₗ[R] CanonicalHomogenization R A
-  equiv_canonical_embed : equiv_canonical' ∘ embed = CanonicalHomogenization.ofPoint
-  weight_equiv_canonical' : CanonicalHomogenization.weight ∘ equiv_canonical' = height
+  embed_height : embed.range = height ⁻¹' {1}
+
+open CanonicalHomogenization in
+instance : Homogenization R A (CanonicalHomogenization R A) where
+  embed := ofPoint
+  inj := ofPoint_injective
+  height := weight
+  embed_height := ofPoint_range_eq_preimage_weight_one
 
 namespace Homogenization
 
 variable [hom : Homogenization R A W]
 
-/-- The canonical homogenization is a homogenization. -/
-@[reducible] instance canonical : Homogenization R A (CanonicalHomogenization R A) where
-  embed := CanonicalHomogenization.ofPoint
-  height := CanonicalHomogenization.weight
-  equiv_canonical' := .refl ..
-  equiv_canonical_embed := by simp [LinearEquiv.refl]
-  weight_equiv_canonical' := by simp [LinearEquiv.refl]
-
--- proving the axioms hold
-
-theorem inj : Injective hom.embed := by
-  apply Injective.of_comp (f := hom.equiv_canonical')
-  simpa [equiv_canonical_embed] using CanonicalHomogenization.ofPoint_injective
-
-theorem embed_height : hom.embed.range = hom.height ⁻¹' {1} := by
-  apply hom.equiv_canonical'.injective.image_injective
-  simp [AffineMap.range, SetLike.coe, ← Set.range_comp, hom.equiv_canonical_embed,
-    CanonicalHomogenization.ofPoint_range_eq_preimage_weight_one , ← weight_equiv_canonical',
-    Set.preimage_comp, Set.image_preimage_eq _ equiv_canonical'.surjective]
-
-theorem extend (U : Type*) [AddCommGroup U] [Module R U]
-    (f : A →ᵃ[R] U) :
-    ∃! (F : W →ₗ[R] U), F ∘ hom.embed = f := by
-  obtain ⟨F, hF, uF⟩ := CanonicalHomogenization.extend U f
-  use LinearMap.comp F hom.equiv_canonical'.toLinearMap
-  simp only [← hom.equiv_canonical_embed] at hF
-  simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, comp_assoc, hF, true_and]
-  intro g hg
-  have := uF (g ∘ₗ equiv_canonical'.symm.toLinearMap) ?_
-  · rw [← this, LinearMap.comp_assoc]
-    simp
-  · ext x
-    simp [← hg, ← hom.equiv_canonical_embed]
+theorem linear_inj : Injective hom.embed.linear := by
+  simp [hom.inj]
 
 /-- embedding the underlying vector space is exactly the height-0 hyperplane. -/
 theorem embed_linear_range_eq_height_ker : hom.embed.linear.range = hom.height.ker := by
@@ -159,6 +133,64 @@ theorem linear_vsub {p q : A} : hom.embed.linear (k := R) (p -ᵥ q) = hom.embed
 theorem linear_smul' {S : Type*} [Semiring S] [Module S R] [Module S V] [IsScalarTower S R V]
     {r : R} {v : V} : hom.embed.linear (r • v) = r • hom.embed.linear (k := R) v :=
   LinearMap.CompatibleSMul.map_smul hom.embed.linear r v
+
+open CanonicalHomogenization HomogenizationExpr in
+/-- Every homogenization is linearly equivalent to the canonical homogenization. -/
+noncomputable def canonEquiv : W ≃ₗ[R] CanonicalHomogenization R A where
+  toFun x := by
+    let a₀ := Classical.arbitrary A
+    have v : x - hom.height x • hom.embed a₀ ∈ hom.embed.linear.range := by
+        simp [embed_linear_range_eq_height_ker, height_one a₀]
+    exact .mk (.mk ((LinearEquiv.ofInjective _ hom.linear_inj).invFun ⟨_, v⟩) (hom.height x) a₀)
+  map_add' x y := by
+    simp [CanonicalHomogenization.mk_add_mk, add_smul, ← LinearEquiv.map_add]
+    abel_nf
+  map_smul' c x := by
+    simp only [map_smul, smul_assoc, LinearEquiv.invFun_eq_symm, RingHom.id_apply, smul_mk,
+      ← LinearEquiv.map_smul, SetLike.mk_smul_mk]
+    abel_nf
+    simp
+  invFun v := CanonicalHomogenization.lift hom.embed v
+  left_inv x := by
+    simp [CanonicalHomogenization.lift]
+  right_inv v := by
+    obtain ⟨v, rfl⟩ := Quotient.exists_rep v
+    rcases v with ⟨v, c, p⟩ | v <;> apply Quotient.sound
+    · simp only [lift, lift.aux, AddEquiv.coe_mk, Equiv.coe_fn_mk, LinearMap.coe_mk, AddHom.coe_mk,
+      Quotient.lift_mk, map_add, height_zero, map_smul, height_one, smul_eq_mul, mul_one, zero_add,
+      LinearEquiv.invFun_eq_symm]
+      refine Equiv.mk_mk ((Equiv.ofInjective _ hom.linear_inj).injective ?_)
+      simp [smul_sub]
+      abel
+    · have : (LinearEquiv.ofInjective _ hom.linear_inj).symm ⟨_, Set.mem_range_self v⟩ = v :=
+        (LinearEquiv.symm_apply_eq (LinearEquiv.ofInjective embed.linear hom.linear_inj)).mpr rfl
+      simpa [lift, lift.aux, height_zero, this] using Equiv.mk_ofVector
+
+theorem canonEquiv_canonical_embed :
+    hom.canonEquiv ∘ hom.embed = CanonicalHomogenization.ofPoint := by
+  ext x
+  simp only [canonEquiv, LinearEquiv.invFun_eq_symm, LinearEquiv.coe_mk, LinearMap.coe_mk,
+    AddHom.coe_mk, comp_apply, height_one, one_smul]
+  apply Quotient.sound ∘ HomogenizationExpr.Equiv.mk_mk
+  exact ((Equiv.ofInjective _ hom.linear_inj).injective (by simp))
+
+theorem weight_canonEquiv : CanonicalHomogenization.weight ∘ hom.canonEquiv = hom.height := by
+  sorry
+
+-- proving the universal property using the equiv
+theorem extend (U : Type*) [AddCommGroup U] [Module R U]
+    (f : A →ᵃ[R] U) :
+    ∃! (F : W →ₗ[R] U), F ∘ hom.embed = f := by
+  obtain ⟨F, hF, uF⟩ := CanonicalHomogenization.extend U f
+  use LinearMap.comp F hom.canonEquiv.toLinearMap
+  simp only [← hom.canonEquiv_canonical_embed] at hF
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, comp_assoc, hF, true_and]
+  intro g hg
+  have := uF (g ∘ₗ hom.canonEquiv.symm.toLinearMap) ?_
+  · rw [← this, LinearMap.comp_assoc]
+    simp
+  · ext x
+    simp [← hg, ← hom.canonEquiv_canonical_embed]
 
 section HomCone
 

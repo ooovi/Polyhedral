@@ -35,6 +35,7 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.CanonicalHomogenization
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
