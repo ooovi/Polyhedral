@@ -44,7 +44,7 @@ open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated salient cone yields a polytope. -/
 theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
     (hc : ∀ c ∈ C, c ≠ 0 → 0 < hom.weight c) :
-    IsPolytope R (hom.dehomogenize A C : Set A) := by sorry
+    IsPolytope R (hom.dehomogenize A C : Set A) := by sorry -- issue #60
 
 /-- Faces of polytopes are polytopes. -/
 theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolytope R (F : Set A) :=
