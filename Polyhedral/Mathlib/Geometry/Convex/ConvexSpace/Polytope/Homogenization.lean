@@ -1,9 +1,7 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.CanonicalHomogenization
-
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.ConvexSet
 
 variable {R V W A : Type*}
 
@@ -24,11 +22,11 @@ theorem IsPolytope.homogenize_FG (hCfg : IsPolytope R (C : Set A)) :
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
   rw [congrArg hom.homogenize this]
-  use t.map ⟨_, hom.inj⟩
+  use t.map ⟨_, hom.ofPoint_injective⟩
   simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Homogenization.homogenize,
     PointedCone.hull, ConvexSet.mk_eq]
-  rw [hom.embed.isAffineMap.image_convexHull t]
-  exact (PointedCone.hull_convexHull_eq_hull (hom.embed '' t)).symm
+  rw [hom.ofPoint.isAffineMap.image_convexHull t]
+  exact (PointedCone.hull_convexHull_eq_hull (hom.ofPoint '' t)).symm
 
 end Ring
 
@@ -42,7 +40,7 @@ variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W] in
 open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated salient cone yields a polytope. -/
 theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
-    (hc : ∀ c ∈ C, c ≠ 0 → 0 < hom.height c) :
+    (hc : ∀ c ∈ C, c ≠ 0 → 0 < hom.weight c) :
     IsPolytope R (hom.dehomogenize A C : Set A) := by sorry
 
 /-- Faces of polytopes are polytopes. -/
@@ -52,7 +50,7 @@ theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolyt
   have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
   have homF := hom.homogenize_isFaceOf F.isFaceOf
   have := PointedCone.IsFaceOf.fg homC homF
-  convert FG.dehomogenize_isPolytope this (fun _ a b ↦ hom.height_pos_of_mem_homogenize a b)
+  convert FG.dehomogenize_isPolytope this (fun _ a b ↦ hom.weight_pos_of_mem_homogenize a b)
   simp [hom.dehomogenize_homogenize_eq_id]
 
 variable [AddCommGroup W] [Module R W] [hom : Homogenization R A W]

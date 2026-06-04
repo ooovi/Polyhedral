@@ -307,7 +307,8 @@ theorem ofVector_injective : Function.Injective (ofVector (k := k) (P := P)) := 
 theorem ofPoint_injective : Function.Injective (ofPoint (k := k) (P := P)) :=
   ofPoint.linear_injective_iff.mp ofVector_injective
 
-/-- Every element of the Canonicalhomogenization can be written in the form `ofVector v + c • ofPoint p`.
+/-- Every element of the Canonicalhomogenization can be written in the form
+`ofVector v + c • ofPoint p`.
 
 See also `induction_of_point` and `ofVector_ofPoint_cases`. -/
 @[induction_eliminator, cases_eliminator]
@@ -319,17 +320,18 @@ theorem induction_on {motive : CanonicalHomogenization k P → Prop} (x : Canoni
   change mk (.mk ..) = mk (.mk ..)
   simp
 
-/-- Every element of the Canonicalhomogenization can be written in the form `ofVector v + c • ofPoint p`,
-where `p` can be chosen arbitrarily. -/
-theorem induction_of_point {motive : CanonicalHomogenization k P → Prop} (p : P) (x : CanonicalHomogenization k P)
+/-- Every element of the Canonicalhomogenization can be written in the form
+`ofVector v + c • ofPoint p`, where `p` can be chosen arbitrarily. -/
+theorem induction_of_point {motive : CanonicalHomogenization k P → Prop} (p : P)
+     (x : CanonicalHomogenization k P)
     (h : ∀ (v : V) (c : k), motive (ofVector v + c • ofPoint p)) : motive x := by
   cases x with | _ v c q =>
   convert h (v - c • (p -ᵥ q)) c using 1
   simp only [map_sub, map_smul, ofVector_vsub]
   match_scalars <;> norm_num
 
-/-- Over a division ring `k`, every element of `CanonicalHomogenization k P` is either a nonzero multiple of
-a point of `P`, or an element of the vector space associated to `P`. -/
+/-- Over a division ring `k`, every element of `CanonicalHomogenization k P` is either a nonzero
+multiple of a point of `P`, or an element of the vector space associated to `P`. -/
 theorem ofVector_ofPoint_cases {k V P : Type*} [DivisionRing k] [AddCommGroup V] [Module k V]
     [AddTorsor V P] (x : CanonicalHomogenization k P) {motive : CanonicalHomogenization k P → Prop}
     (smul_ofPoint : ∀ (c : k) p, c ≠ 0 → motive (c • ofPoint p))
@@ -412,7 +414,8 @@ theorem lift_apply_ofVector {f : P →ᵃ[k] W} {v : V} : lift f (ofVector v) = 
     add_sub_cancel_right]
 
 @[simp]
-theorem lift_symm_apply {f : CanonicalHomogenization k P →ₗ[k] W} {p : P} : lift.symm f p = f (ofPoint p) :=
+theorem lift_symm_apply {f : CanonicalHomogenization k P →ₗ[k] W} {p : P} :
+    lift.symm f p = f (ofPoint p) :=
   rfl
 
 @[simp]
@@ -467,11 +470,13 @@ theorem weight_ofVector {v : V} : weight (k := k) (P := P) (ofVector v) = 0 := b
 theorem weight_ofPoint {p : P} : weight (k := k) (ofPoint p) = 1 := by
   simp [weight]
 
-theorem weight_eq_zero_iff {x : CanonicalHomogenization k P} : weight x = 0 ↔ ∃ v, x = ofVector v where
+theorem weight_eq_zero_iff {x : CanonicalHomogenization k P} :
+    weight x = 0 ↔ ∃ v, x = ofVector v where
   mp := by cases x; simp_all
   mpr := by rintro ⟨_, rfl⟩; rw [weight_ofVector]
 
-theorem weight_eq_one_iff {x : CanonicalHomogenization k P} : weight x = 1 ↔ ∃ p, x = ofPoint p where
+theorem weight_eq_one_iff {x : CanonicalHomogenization k P} :
+    weight x = 1 ↔ ∃ p, x = ofPoint p where
   mp h := by
     cases x with | _ v c p =>
     exists v +ᵥ p
@@ -505,7 +510,8 @@ theorem map_comp {f : P1 →ᵃ[k] P2} {g : P2 →ᵃ[k] P3} : map (g.comp f) = 
   hom_ext <| by simp
 
 @[simp]
-theorem weight_map {f : P1 →ᵃ[k] P2} {x : CanonicalHomogenization k P1} : weight (map f x) = weight x := by
+theorem weight_map {f : P1 →ᵃ[k] P2} {x : CanonicalHomogenization k P1} :
+    weight (map f x) = weight x := by
   cases x; simp
 
 theorem lift_map {f : P1 →ᵃ[k] P2} {g : P2 →ᵃ[k] V3} {x : CanonicalHomogenization k P1} :
@@ -568,7 +574,8 @@ theorem congr_trans (f : P1 ≃ᵃ[k] P2) (g : P2 ≃ᵃ[k] P3) :
     congr (f.trans g) = congr f ≪≫ₗ congr g := by
   ext; simp [map_comp]
 
-/-- The Canonicalhomogenization of a vector space `V` over `k` is canonically isomorphic to `V × k` -/
+/-- The Canonicalhomogenization of a vector space `V` over `k` is canonically isomorphic to `V × k`
+-/
 @[expose, simps! -isSimp]
 def toProd : CanonicalHomogenization k V ≃ₗ[k] V × k where
   __ := (lift (.id ..)).prod weight
