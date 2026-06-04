@@ -30,18 +30,6 @@ variable [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
 
 attribute [instance] AddTorsor.toConvexSpace
 
--- this is very confusing
-variable {W : Type*} [AddCommGroup W] [Module R W] in
-instance : Convexity.IsModuleConvexSpace R W where
-  sConvexComb_eq_sum c := by
-    simp only [AddTorsor.sConvexComb_eq_affineCombination, Finset.affineCombination,
-      Finset.weightedVSubOfPoint_apply, id_eq, vsub_eq_sub, vadd_eq_add, AffineMap.coe_mk,
-      Finsupp.sum, smul_sub, Finset.sum_sub_distrib]
-    have := c.total
-    rw [Finsupp.sum] at this
-    rw [← Finset.sum_smul, this, one_smul]
-    abel
-
 open Convexity
 
 namespace AffineMap

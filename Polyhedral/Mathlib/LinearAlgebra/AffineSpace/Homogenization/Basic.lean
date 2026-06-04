@@ -1,12 +1,7 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
--- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Geometry.Convex.ConvexSpace.Module
-
 
 namespace Affine
 
@@ -203,6 +198,8 @@ namespace Homogenization
 
 open Convexity
 
+variable [IsModuleConvexSpace R W]
+
 /-- If homogenizing a point `q` yields a positive combination of the homogenizations of two other
 points, then `q` lies in the open segment between them. -/
 theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
@@ -217,7 +214,6 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
   have : t⁻¹ • (r₁ • hom.ofPoint p₁ + r₂ • hom.ofPoint p₂) = hom.ofPoint q := by
     rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
   simp [hom.ofPoint.isAffineMap.map_convexCombPair, convexCombPair_eq_sum, ← this, smul_smul]
-
 
 end Homogenization
 

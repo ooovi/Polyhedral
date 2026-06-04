@@ -3,10 +3,8 @@ Copyright (c) 2026 Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yaël Dillies
 -/
-module
-
-public import Mathlib.Geometry.Convex.ConvexSpace.Module
-public import Mathlib.Order.Closure
+import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.Order.Closure
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 

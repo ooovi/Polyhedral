@@ -1,3 +1,5 @@
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 namespace Affine.Homogenization
@@ -12,6 +14,7 @@ variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable [hom : Affine.Homogenization R A W]
+variable [IsModuleConvexSpace R W]
 
 variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
@@ -48,14 +51,15 @@ end Ring
 
 section Field
 
+open Pointwise Set Convexity PointedCone Submodule
+
 variable {R : Type*} [Field R]
 variable [LinearOrder R] [IsOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 variable [hom : Affine.Homogenization R A W]
-
-open Pointwise Set Convexity PointedCone Submodule
+variable [IsModuleConvexSpace R W]
 
 theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by
   simp [homogenize]
