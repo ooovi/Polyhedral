@@ -28,7 +28,11 @@ namespace PointedCone
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 
-/-- ... -/
+/-- We implement polyhedral cones as sums of FG cones with submodules. This agrees with FG cones
+in finite dimensional modules, and behaves well in infinite dimensions with respect to
+intersection and duality.
+
+If `R` is a linearly ordered ring, an equiavlent defintion is `FG C.salientQuot`. -/
 def IsPolyhedral (C : PointedCone R M) :=
   ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S
 
@@ -42,14 +46,14 @@ variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {C C₁ C₂ F : PointedCone R M}
 
 /-- A cone is polyhedral if and only if it is the sum of an FG cone and a submodule. -/
-lemma exists_fg_submoduel_eq_sup :
+lemma iff_exists_fg_submoduel_eq_sup :
   C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S := .rfl
 
 /-- Submodules are polyhedral cones. -/
 @[simp] lemma of_submodule (S : Submodule R M) :
     (S : PointedCone R M).IsPolyhedral := ⟨⊥, fg_bot, S, by simp⟩
 
-/-- Submodules are polyhedral cones. -/
+/-- FG cones are polyhedral cones. -/
 @[simp] lemma of_fg (hC : C.FG) : C.IsPolyhedral := ⟨C, hC, ⊥, by simp⟩
 
 alias _root_.PointedCone.FG.isPolyhedral := of_fg
@@ -76,10 +80,7 @@ protected lemma sup (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhedral) :
     IsPolyhedral (C₁ ⊔ C₂) := by
   obtain ⟨D₁, hD₁, S₁, rfl⟩ := hC₁
   obtain ⟨D₂, hD₂, S₂, rfl⟩ := hC₂
-  use D₁ ⊔ D₂
-  constructor
-  · exact sup_fg hD₁ hD₂
-  use S₂ ⊔ S₁
+  refine ⟨D₁ ⊔ D₂, sup_fg hD₁ hD₂, S₂ ⊔ S₁, ?_⟩
   rw [coe_sup]
   ac_rfl
 
@@ -103,24 +104,121 @@ protected lemma map (f : M →ₗ[R] N) (hC : C.IsPolyhedral) : (C.map f).IsPoly
   simp only [map, Submodule.map_sup]
   rfl
 
--- likely needs Field
-protected lemma comap (f : N →ₗ[R] M) (hC : C.IsPolyhedral) : (C.comap f).IsPolyhedral := by
-  obtain ⟨D, hD, S, rfl⟩ := hC
-  sorry
-
 @[simp] lemma linearEquiv_map (e : M ≃ₗ[R] N) :
     (C.map e.toLinearMap).IsPolyhedral ↔ C.IsPolyhedral where
   mpr := .map e.toLinearMap
   mp h := by simpa [map_map] using h.map e.symm.toLinearMap
 
+-- TODO: move this and the below
+-- NOTE: over a (Semi)Field the surjectivity assumption is not necessary because we can intersect
+--   `C` with `f.range`, which is still FG.
+omit [PartialOrder R] [IsOrderedRing R] in
+lemma _root_.Submodule.FG.exists_fg_eq_map_of_surjective {f : N →ₗ[R] M}
+    (hf : Surjective f) {S : Submodule R M} (hS : S.FG) :
+      ∃ T : Submodule R N, T.FG ∧ S = T.map f := by classical
+  obtain ⟨s, rfl⟩ := hS
+  use span R (Finset.image (surjInv hf) s)
+  constructor
+  · use Finset.image (surjInv hf) s
+  simp [Submodule.map_span, Set.image_image, surjInv_eq]
+
+-- NOTE: over a Field the surjectivity assumption is not necessary because we can intersect
+--   `C` with `f.range`, which is still FG.
+lemma _root_.PointedCone.FG.exists_fg_eq_map_of_surjective {f : N →ₗ[R] M} (hf : Surjective f)
+    (hC : C.FG) : ∃ D : PointedCone R N, D.FG ∧ C = D.map f :=
+  Submodule.FG.exists_fg_eq_map_of_surjective (R := {c : R // 0 ≤ c}) hf hC
+
 end Semiring
+
+section AddCommGroup
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+variable {C C₁ C₂ F : PointedCone R M}
+
+-- TODO: move
+/- TODO: does this need AddCommGroup?? Can I do it more directly without going via
+  `exists_fg_eq_map_of_surjective`? -/
+omit [PartialOrder R] [IsOrderedRing R] in
+lemma _root_.Submodule.FG.exists_fg_comap_eq_sup_ker_of_surjective {f : N →ₗ[R] M}
+    (hf : Surjective f) {S : Submodule R M} (hS : S.FG) :
+      ∃ T : Submodule R N, T.FG ∧ S.comap f = T ⊔ f.ker := by
+  obtain ⟨T, hT, rfl⟩ := hS.exists_fg_eq_map_of_surjective hf
+  rw [comap_map_eq]
+  exact ⟨T, hT, rfl⟩
+
+-- TODO: move
+lemma _root_.PointedCOne.FG.exists_fg_comap_eq_sup_ker_of_surjective {f : N →ₗ[R] M}
+    (hf : Surjective f) (hC : C.FG) : ∃ D : PointedCone R N, D.FG ∧ C.comap f = D ⊔ f.ker :=
+  Submodule.FG.exists_fg_comap_eq_sup_ker_of_surjective (R := {c : R // 0 ≤ c}) hf hC
+
+lemma comap_fg_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) (hC : C.FG) :
+    (C.comap f).IsPolyhedral := by
+  obtain ⟨D, hD, rfl⟩ := hC.exists_fg_eq_map_of_surjective hf
+  simp only [map, comap, comap_map_eq]
+  exact ⟨D, hD, by aesop⟩
+
+-- TODO: move (also golf, this is AI-written)
+omit [PartialOrder R] [IsOrderedRing R] in
+lemma comap_sup_of_surjective {f : M →ₗ[R] N} (hf : Function.Surjective f) (D S : Submodule R N) :
+    (D ⊔ S).comap f = D.comap f ⊔ S.comap f := by
+  apply le_antisymm
+  · intro x hx
+    rw [Submodule.mem_comap] at hx
+    rw [Submodule.mem_sup] at hx ⊢
+    rcases hx with ⟨d, hd, s, hs, hds⟩
+    rcases hf d with ⟨y, rfl⟩
+    rcases hf s with ⟨z, rfl⟩
+    refine ⟨y + (x - (y + z)), ?_, z, ?_, ?_⟩
+    · rw [Submodule.mem_comap]
+      have hk : f (x - (y + z)) = 0 := by
+        rw [map_sub, map_add, hds.symm, sub_self]
+      rw [map_add, hk, add_zero]
+      exact hd
+    · rw [Submodule.mem_comap]
+      exact hs
+    · abel
+  · exact sup_le (comap_mono le_sup_left) (comap_mono le_sup_right)
+
+-- NOTE: over a Field the surjectivity assumption is not necessary because we can intersect
+--   `C` with `f.range`, which is still polyhedral.
+lemma comap_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) (hC : C.IsPolyhedral) :
+    (C.comap f).IsPolyhedral := by
+  obtain ⟨D, hD, S, rfl⟩ := hC
+  unfold comap
+  rw [comap_sup_of_surjective]
+  · refine IsPolyhedral.sup (comap_fg_of_surjective hf hD) ?_
+    change IsPolyhedral <| ofSubmodule <| Submodule.comap f S
+    exact of_submodule _
+  · exact hf
+
+-- NOTE: over a Field the surjectivity assumption is not necessary. See above
+lemma comap_iff_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) :
+    (C.comap f).IsPolyhedral ↔ C.IsPolyhedral where
+  mp h := by
+    have h := h.map f
+    unfold map comap at h
+    rwa [map_comap_eq_of_surjective] at h
+    exact hf
+  mpr := comap_of_surjective hf
+
+end AddCommGroup
 
 section Ring
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
 
 variable {C C₁ C₂ F : PointedCone R M}
+
+-- TODO: likely needs field
+protected lemma comap {f : N →ₗ[R] M} (hC : C.IsPolyhedral) :
+    (C.comap f).IsPolyhedral := by
+  obtain ⟨D, hD, S, rfl⟩ := hC
+  sorry
 
 /-- A polyhedral cone is the sum of an FG cone with its lineality space. -/
 lemma exists_fg_eq_sup_lineal (hC : C.IsPolyhedral) :
@@ -162,10 +260,12 @@ lemma iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
 lemma quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     (C.quot S).IsPolyhedral := hC.map _
 
-lemma salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := sorry
+-- TODO: prove `C.IsPolyhedral ↔ FG C.salientQuot`
 
-lemma salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
-  hC.salientQuot_fg.isPolyhedral
+-- lemma salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := sorry
+
+-- lemma salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
+--   hC.salientQuot_fg.isPolyhedral
 
 open Pointwise
 
@@ -193,7 +293,7 @@ end Ring
 
 section CommRing
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R] -- do I need Comm?
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 variable {C C₁ C₂ F : PointedCone R M}
@@ -202,7 +302,9 @@ variable {C C₁ C₂ F : PointedCone R M}
   then `C ⊓ S` is FG. A stronger version that only requires `S` to be disjoint to the lineality
   is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
 lemma fg_inf_of_isCompl (hC : C.IsPolyhedral) {S : Submodule R M} (hS : IsCompl C.lineal S) :
-    FG (C ⊓ S) := sorry -- hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
+    FG (C ⊓ S) := by
+  obtain ⟨D, hD, T, rfl⟩ := hC
+  sorry -- hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
 
 end CommRing
 
@@ -659,7 +761,7 @@ lemma dual (hC : C.IsPolyhedral) : (dual p C).IsPolyhedral := by
 
 variable (p) in
 -- I believe proving this requires a lot of other work to be done before (above).
--- Essentially, in a lot of lemmas we need to replace `[Fact (Surjective p)]` by an
+-- Essentially, in a lot of lemmas we need to replace `[Fact (Surjective p)]` by
 -- an assumption about lineal, most likely, that lineal is dual closed.
 -- However, the assumption `[Fact (Surjective p)]` is preferable because it can be
 -- inferred automatically in the finite dimensional case.
