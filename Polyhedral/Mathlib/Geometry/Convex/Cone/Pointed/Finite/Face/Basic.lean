@@ -25,10 +25,8 @@ lemma exists_fg_hull_subset_face {s : Finset M} (hF : F.IsFaceOf (hull R s)) :
 /-- Faces of FG cones are FG. -/
 lemma IsFaceOf.fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   obtain ⟨_, rfl⟩ := hC
-  let ⟨t, _, tt⟩ := exists_fg_hull_subset_face hF
+  obtain ⟨t, _, tt⟩ := exists_fg_hull_subset_face hF
   use t, tt
-
-lemma lineal_fg (hC : C.FG) : C.lineal.FG := FG.coe_fg_iff.mp ((IsFaceOf.lineal C).fg hC)
 
 end DivisionRing
 

@@ -213,6 +213,16 @@ lemma lineal_restrict (S : Submodule R M) (C : PointedCone R M) :
 lemma lineal_embed (S : Submodule R M) (C : PointedCone R S) :
     (embed C).lineal = .embed C.lineal := by simp [map_lineal]
 
+section IsNoetherianRing
+
+variable [IsNoetherianRing R]
+
+/-- The lineality space of an FG cone is FG. -/
+lemma lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG :=
+  Submodule.FG.of_le hC.span <| lineal_le_span C
+
+end IsNoetherianRing
+
 end LinearOrderedRing
 
 
