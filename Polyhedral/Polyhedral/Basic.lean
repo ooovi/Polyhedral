@@ -58,13 +58,19 @@ lemma iff_exists_fg_submoduel_eq_sup :
 
 alias _root_.PointedCone.FG.isPolyhedral := of_fg
 
-/-- The hull of a finite set is polyhedral. -/
+variable (R) in
+/-- The hull of a finite set is a polyhedral cone. -/
 lemma of_hull_finite {s : Set M} (hs : s.Finite) : (hull R s).IsPolyhedral :=
   of_fg <| fg_span hs
 
-/-- The hull of a finite set is polyhedral. -/
+variable (R) in
+/-- The hull of a finite set is a polyhedral cone. -/
 @[simp] lemma of_hull_finset (s : Finset M) : (hull R (s : Set M)).IsPolyhedral :=
   of_fg ⟨s, rfl⟩
+
+/-- A ray is a polyhedral cone. -/
+@[simp] lemma of_hull_singleton (x : M) : IsPolyhedral (R ∙₊ x) :=
+  of_hull_finite R (Set.finite_singleton x)
 
 lemma of_fg_sup_submodule (hC : C.FG) (S : Submodule R M) : IsPolyhedral (C ⊔ S) :=
   ⟨C, hC, S, rfl⟩
@@ -282,13 +288,38 @@ section IsNoetherian
 
 variable [IsNoetherian R M]
 
-/-- A polyhedral cone is finitely generated. -/
+/-- A polyhedral cone is finitely generated. This assumes that the ambient module is noetherian. -/
 protected lemma fg (hC : C.IsPolyhedral) : C.FG :=
-  fg_of_fg_lineal hC (IsNoetherian.noetherian _)
+  fg_of_fg_lineal hC <| IsNoetherian.noetherian _
 
-lemma iff_FG : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.fg, FG.isPolyhedral⟩
+lemma iff_fg : C.IsPolyhedral ↔ C.FG := ⟨IsPolyhedral.fg, FG.isPolyhedral⟩
 
 end IsNoetherian
+
+section IsNoetherianRing
+
+variable [IsNoetherianRing R]
+
+-- MOVE
+lemma _root_.PointedCone.submodule_fg_of_le_fg (hC : C.FG) {S : Submodule R M} (hS : S ≤ C) :
+    S.FG := by
+  refine .of_le (Submodule.FG.span hC) ?_
+  rw [← ofSubmodule_le_ofSubmodule]
+  exact le_trans hS Submodule.le_span
+
+lemma fg_of_span_fg (hC : C.IsPolyhedral) (h : (span R C : Submodule R M).FG) : C.FG := by
+  obtain ⟨D, hD, S, rfl⟩ := hC
+  refine Submodule.sup_fg hD (FG.coe_fg (.of_le h ?_))
+  rw [← ofSubmodule_le_ofSubmodule]
+  exact le_trans le_sup_right Submodule.le_span
+
+lemma fg_iff_span_fg (hC : C.IsPolyhedral) : C.FG ↔ (span R C : Submodule R M).FG :=
+  ⟨.span, fg_of_span_fg hC⟩
+
+lemma lineal_fg_iff (hC : C.IsPolyhedral) : C.FG ↔ C.lineal.FG :=
+  ⟨lineal_fg, fg_of_fg_lineal hC⟩
+
+end IsNoetherianRing
 
 end Ring
 
@@ -968,12 +999,12 @@ def of_FG {C : PointedCone R M} (hC : C.FG) : PolyhedralCone R M
 
 variable (R) in
 /-- The hull of finitely many elements as a polyhedral cone. -/
-def finhull (s : Finset M) : PolyhedralCone R M := ⟨_, .of_hull_finset s⟩
+def finhull (s : Finset M) : PolyhedralCone R M := ⟨_, .of_hull_finset R s⟩
 
 @[simp] lemma finhull_eq_hull (s : Finset M) : finhull R s = hull (E := M) R s := rfl
 
 def finhull_lineal (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
-  ⟨hull R s ⊔ S, IsPolyhedral.sup (.of_hull_finset s) (by simp)⟩
+  ⟨hull R s ⊔ S, IsPolyhedral.sup (.of_hull_finset R s) (by simp)⟩
 
 variable [IsNoetherian R M] in
 /-- A polyhedral cone is finitely generated. -/
