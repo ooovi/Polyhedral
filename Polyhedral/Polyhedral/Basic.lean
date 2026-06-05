@@ -194,7 +194,8 @@ lemma comap_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) (hC : C.IsPoly
     exact of_submodule _
   · exact hf
 
--- NOTE: over a Field the surjectivity assumption is not necessary. See above
+/-- The preimage of a cone is polyhedral if and only if the cone itself is polyhdral,
+assuming tha the map is surjective. -/
 lemma comap_iff_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) :
     (C.comap f).IsPolyhedral ↔ C.IsPolyhedral where
   mp h := by
