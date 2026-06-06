@@ -13,7 +13,6 @@ attribute [local instance] AddTorsor.toConvexSpace
 
 -- TODO we need this because IsModuleConvexSpace.ofModule uses the wrong convex space
 -- hopefully this problem will go away at some point...
-attribute [local instance] AddTorsor.toConvexSpace in
 lemma IsModuleConvexSpace.ofAddTorsor : IsModuleConvexSpace R V where
   sConvexComb_eq_sum c := by
     simp only [AddTorsor.sConvexComb_eq_affineCombination, Finset.affineCombination,
@@ -23,3 +22,5 @@ lemma IsModuleConvexSpace.ofAddTorsor : IsModuleConvexSpace R V where
     rw [Finsupp.sum] at this
     rw [← Finset.sum_smul, this, one_smul]
     abel
+
+end Ring

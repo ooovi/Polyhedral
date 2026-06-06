@@ -1,34 +1,39 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.ConvexSet
 
 variable {R V W A : Type*}
 
-open Convexity Affine
+open Convexity Affine IsHomogenization
 
 section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
 attribute [local instance] AddTorsor.toConvexSpace
-variable {C : ConvexSet R A}
+variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : IsHomogenization R A W]
 
 open PointedCone
 
-variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : Homogenization R A W] in
 /-- The Homogenization cone of a polytope is finitely generated. -/
-theorem IsPolytope.homogenize_FG (hCfg : IsPolytope R (C : Set A)) :
-    (Homogenization.homogenize W C).FG := by
+theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
+    (homogenize W C).FG := by
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
   rw [congrArg hom.homogenize this]
   use t.map ⟨_, hom.ofPoint_injective⟩
-  simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Homogenization.homogenize,
+  simp only [Finset.coe_map, Function.Embedding.coeFn_mk, homogenize,
     PointedCone.hull, ConvexSet.mk_eq]
   rw [hom.ofPoint.isAffineMap.image_convexHull t]
   exact (PointedCone.hull_convexHull_eq_hull (hom.ofPoint '' t)).symm
+
+/-- A convex set is a polytope iff its homogenization cone is finitely generated. -/
+theorem IsPolytope.iff_homogenize_FG {C : ConvexSet R A} :
+    IsPolytope R (C : Set A) ↔ (homogenize W C).FG := by
+  refine ⟨fun P ↦ IsPolytope.of_homogenize_FG P, ?_⟩
+  sorry -- issue #62
 
 end Ring
 
@@ -37,38 +42,12 @@ section Field
 variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
 attribute [local instance] AddTorsor.toConvexSpace
-variable {C : ConvexSet R A}
+variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : IsHomogenization R A W]
 
-variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : Homogenization R A W] in
 open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated salient cone yields a polytope. -/
 theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
     (hc : ∀ c ∈ C, c ≠ 0 → 0 < hom.weight c) :
-    IsPolytope R (hom.dehomogenize A C : Set A) := by sorry -- issue #60
-
-/-- Faces of polytopes are polytopes. -/
-theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) : IsPolytope R (F : Set A) :=
-    by
-  letI hom : Homogenization R A (CanonicalHomogenization R A) := inferInstance
-  letI := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
-  have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
-  have homF := hom.homogenize_isFaceOf F.isFaceOf
-  have := PointedCone.IsFaceOf.fg homC homF
-  convert FG.dehomogenize_isPolytope this (fun _ a b ↦ hom.weight_pos_of_mem_homogenize a b)
-  simp [hom.dehomogenize_homogenize_eq_id]
-
-/-- The face lattice of a polytope is graded by Homogenization cone face dimension. -/
-@[reducible]
-private noncomputable def Polytope.faceHomogenizationGradeOrder
-    (hCfg : IsPolytope R (C : Set A)) : GradeOrder ℕ C.Face := by
-  letI hom : Homogenization R A (CanonicalHomogenization R A) := inferInstance
-  letI := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
-  have : PointedCone.FG (hom.homogenize (CanonicalHomogenization R A) C) :=
-    IsPolytope.homogenize_FG hCfg
-  letI := PointedCone.FG.gradeOrder_finrank this
-  -- we just lift the grading we have for PointedCone.Face already
-  refine GradeOrder.liftRight (β := (hom.homogenize  (CanonicalHomogenization R A) C).Face) _
-    Homogenization.Face.homogenizationIso.strictMono ?_
-  exact fun x y ↦ (apply_covBy_apply_iff _).mpr
+    IsPolytope R (dehomogenize A C : Set A) := by sorry -- issue #60
 
 end Field

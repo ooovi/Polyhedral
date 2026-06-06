@@ -1,9 +1,5 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+import Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 open Affine Module
 
@@ -54,12 +50,6 @@ def rangeRestrict (f : P →ᵃ[k] P2) : P →ᵃ[k] f.range where
 lemma rangeRestrict_injective_iff (f : P →ᵃ[k] P2) :
     (rangeRestrict f).toFun.Injective ↔ f.toFun.Injective := by
   simp [Function.Injective, rangeRestrict]
-
-variable [PartialOrder k] [IsStrictOrderedRing k] in
-attribute [local instance] AddTorsor.toConvexSpace in
-open Convexity in
-lemma range_isConvexSet (f : P →ᵃ[k] P2) : IsConvexSet k (f.range : Set P2) := by
-  simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
 
 end AffineMap
 
