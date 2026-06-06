@@ -222,9 +222,8 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C C₁ C₂ F : PointedCone R M}
 
 /-- A cone is polyhedral if and only if it is the sum of a salient FG cone and a submodule. -/
-lemma iff_exists_fg_saleint_submoduel_eq_sup (hC : C.IsPolyhedral) :
+lemma iff_exists_fg_salient_submoduel_eq_sup (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R M, D.FG ∧ Salient D ∧ C = D ⊔ C.lineal := by
-  
   sorry
 
 -- TODO: likely needs field
