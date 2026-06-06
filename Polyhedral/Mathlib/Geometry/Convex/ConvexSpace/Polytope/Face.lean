@@ -37,7 +37,7 @@ private noncomputable def Polytope.faceHomogenizationGradeOrder
   letI := PointedCone.FG.gradeOrder_finrank this
   -- we just lift the grading we have for PointedCone.Face already
   refine GradeOrder.liftRight (β := (hom.homogenize  (CanonicalHomogenization R A) C).Face) _
-    IsHomogenization.Face.homogenizationIso.strictMono ?_
+    IsHomogenization.Face.homogenizeIso.strictMono ?_
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 end Field

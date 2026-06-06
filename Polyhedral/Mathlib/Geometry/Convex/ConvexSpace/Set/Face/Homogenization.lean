@@ -84,7 +84,7 @@ theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,
       ← hom.ofPoint.isAffineMap.map_convexCombPair, hzo]
 
-def Face.homogenizationIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P).Face where
+def Face.homogenizeIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P).Face where
   toFun F := ⟨_, hom.homogenize_isFaceOf F.isFaceOf⟩
   invFun F := ⟨_, by simpa [dehomogenize_homogenize] using dehomogenize_isFaceOf A F.isFaceOf⟩
   map_rel_iff' := by
