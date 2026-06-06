@@ -156,7 +156,7 @@ theorem extend (U : Type*) [AddCommGroup U] [Module R U]
 
 open AffineMap LinearEquiv in
 /-- The linear equivalence between the underlying vector space and its embedding. -/
-noncomputable def homLinearRangeEquiv : V ≃ₗ[R] hom.ofVector.range := {
+noncomputable def ofVectorRangeEquiv : V ≃ₗ[R] hom.ofVector.range := {
   toFun v := ⟨hom.ofVector v, hom.ofVector.mem_range_self v⟩
   map_add' v w := by simp
   map_smul' r v := by simp
@@ -168,14 +168,14 @@ noncomputable def homLinearRangeEquiv : V ≃ₗ[R] hom.ofVector.range := {
 }
 
 /-- The affine equivalence between the affine space space and its embedding. -/
-public noncomputable def homRangeEquiv : A ≃ᵃ[R] hom.ofPoint.range :=
+public noncomputable def ofPointRangeEquiv : A ≃ᵃ[R] hom.ofPoint.range :=
   .ofBijective
     ⟨hom.ofPoint.rangeRestrict_injective_iff.mpr hom.ofPoint_injective, fun ⟨_, a, rfl⟩ => ⟨a, rfl⟩⟩
 
-lemma apply_homRangeEquiv_symm (x : hom.ofPoint.range) :
-    hom.ofPoint (homRangeEquiv.symm x) = x := by
-  rw [← homRangeEquiv.right_inv x]
-  congr; exact homRangeEquiv.symm_apply_apply _
+lemma apply_ofPointRangeEquiv_symm (x : hom.ofPoint.range) :
+    hom.ofPoint (ofPointRangeEquiv.symm x) = x := by
+  rw [← ofPointRangeEquiv.right_inv x]
+  congr; exact ofPointRangeEquiv.symm_apply_apply _
 
 end IsHomogenization
 
