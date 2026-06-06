@@ -289,6 +289,9 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 /-- A salient cone has trivial lineality space, see `salient_iff_lineal_bot`. -/
 abbrev Salient (C : PointedCone R M) := C.toConvexCone.Salient
 
+-- Potential formulation that works with semiring
+abbrev Salient' (C : PointedCone R M) := ∀ x ∈ C, ∀ y ∈ C, x + y = 0 → x = 0
+
 @[simp] lemma bot_salient : (⊥ : PointedCone R M).Salient := by
   simp [Salient, ConvexCone.Salient]
 
@@ -401,11 +404,13 @@ open Function
 
 variable {N : Type*} [AddCommGroup N] [Module R N]
 
+-- MOVE
 omit [LinearOrder R] [IsOrderedRing R] in
 -- TODO: generalize and move to the right place
 @[simp] lemma injective_neg {f : N →ₗ[R] M} : Injective (-f) ↔ Injective f := by
   simp [Injective]
 
+-- MOVE
 omit [LinearOrder R] [IsOrderedRing R] in
 @[simp] lemma surjective_neg {f : N →ₗ[R] M} : Surjective (-f) ↔ Surjective f := by
   constructor
@@ -423,6 +428,15 @@ lemma salient_comap {C : PointedCone R M} {f : N →ₗ[R] M} (hC : C.Salient) (
     (C.comap f).Salient := by
   rw [salient_iff_lineal_bot] at *
   simpa [comap_lineal, hC] using LinearMap.ker_eq_bot_of_injective hf
+
+lemma salient_map_iff (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
+    (C.map f).Salient ↔ C.Salient where
+  mpr h := salient_map h hf
+  mp h := by
+    have h := salient_comap h hf
+    unfold comap map at h
+    rwa [Submodule.comap_map_eq_of_injective] at h
+    exact hf
 
 open Pointwise in
 lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
@@ -474,6 +488,27 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
 
 @[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
   salientQuot_of_submodule ⊤
+
+lemma salient_hull_surjInv {s : Set N} {f : M →ₗ[R] N} (hs : (hull R s).Salient)
+    (hf : Surjective f) : (hull R (surjInv hf '' s)).Salient := by
+  intro x h hx
+  -- possible but annoying (need to work with sums perhaps?)
+  sorry
+
+lemma exists_salient_eq_map {C : PointedCone R N} {f : M →ₗ[R] N} (hC : C.Salient)
+    (hf : Surjective f) : ∃ D : PointedCone R M, D.Salient ∧ C = D.map f := by
+  use hull R (surjInv hf '' C)
+  constructor
+  · sorry -- exact salient_hull_surjInv (s := C) (by sorry) hf
+  · simp [map_hull, Set.image_image, surjInv_eq]
+
+lemma exists_salient_eq_sup_lineal (C : PointedCone R M) :
+    ∃ D : PointedCone R M, D.Salient ∧ C = D ⊔ C.lineal := by
+  let f := C.lineal.mkQ
+  let D := C.map f
+  have : D.Salient := salient_salientQuot C
+
+  sorry
 
 end LinearOrderedRing
 
