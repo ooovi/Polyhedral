@@ -14,7 +14,7 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 /-! This file defines bundled convex sets. -/
 
-variable {ι R K X Y : Type*}
+variable {ι R X Y : Type*}
 
 namespace Convexity
 
@@ -144,6 +144,16 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
 /- # Complet Lattice -/
 
 instance : CompleteLattice (ConvexSet R X) where
+
+/- # Map -/
+
+variable [ConvexSpace R Y]
+
+protected def map (C : ConvexSet R X) {f : X → Y} (hf : IsAffineMap R f) : ConvexSet R Y :=
+  ⟨_, C.isConvexSet.image hf⟩
+
+protected def comap (C : ConvexSet R Y) {f : X → Y} (hf : IsAffineMap R f) : ConvexSet R X :=
+  ⟨_, C.isConvexSet.preimage hf⟩
 
 end Semiring
 
