@@ -47,7 +47,7 @@ variable {C C₁ C₂ F : PointedCone R M}
 
 /-- A cone is polyhedral if and only if it is the sum of an FG cone and a submodule. -/
 lemma iff_exists_fg_submoduel_eq_sup :
-  C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S := .rfl
+    C.IsPolyhedral ↔ ∃ D : PointedCone R M, D.FG ∧ ∃ S : Submodule R M, C = D ⊔ S := .rfl
 
 /-- Submodules are polyhedral cones. -/
 @[simp] lemma of_submodule (S : Submodule R M) :
@@ -221,6 +221,12 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
+/-- A cone is polyhedral if and only if it is the sum of a salient FG cone and a submodule. -/
+lemma iff_exists_fg_saleint_submoduel_eq_sup (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R M, D.FG ∧ Salient D ∧ C = D ⊔ C.lineal := by
+  
+  sorry
+
 -- TODO: likely needs field
 protected lemma comap (f : N →ₗ[R] M) (hC : C.IsPolyhedral) :
     (C.comap f).IsPolyhedral := by
@@ -316,7 +322,7 @@ lemma fg_of_span_fg (hC : C.IsPolyhedral) (h : (span R C : Submodule R M).FG) : 
 lemma fg_iff_span_fg (hC : C.IsPolyhedral) : C.FG ↔ (span R C : Submodule R M).FG :=
   ⟨.span, fg_of_span_fg hC⟩
 
-lemma lineal_fg_iff (hC : C.IsPolyhedral) : C.FG ↔ C.lineal.FG :=
+lemma fg_iff_lineal_fg (hC : C.IsPolyhedral) : C.FG ↔ C.lineal.FG :=
   ⟨lineal_fg, fg_of_fg_lineal hC⟩
 
 end IsNoetherianRing
@@ -336,6 +342,7 @@ variable {C C₁ C₂ F : PointedCone R M}
 lemma fg_inf_of_isCompl (hC : C.IsPolyhedral) {S : Submodule R M} (hS : IsCompl C.lineal S) :
     FG (C ⊓ S) := by
   obtain ⟨D, hD, T, rfl⟩ := hC
+  #check inf_sup_lineal
   sorry -- hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
 
 end CommRing
