@@ -119,10 +119,7 @@ lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x 
     have hxC' : -t • x ∈ C' := C'.smul_mem (neg_nonneg.mpr ht) hxC'
     rw [neg_smul] at hxC'
     have hCC' : C ≤ C' := by simp [C']
-    have hC : ∀ x ∈ C', -x ∈ C' → x = 0 := by -- this should actually be the definition of salient
-      intro x hx hx'
-      by_contra h
-      exact hC _ hx h hx'
+    rw [salient_iff_forall_mem_eq_zero_of_neg_mem] at hC
     have h0 := hC _ (hCC' h) hxC'
     rw [h0, Eq.comm, add_eq_zero_iff_eq_neg] at hyz
     rw [hyz] at hy'

@@ -40,6 +40,7 @@ lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = hull R 
     · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha0 <| Submodule.mem_span_singleton_self x
     exfalso
     have ha : a < 0 := lt_of_not_ge ha0
+    rw [salient_iff_convexCone_salient] at hS -- TODO: this line is a quick fix
     apply hS x hxC hx0
     have hnegx : -x = (-a⁻¹) • (a • x) := by
       have ha' : a ≠ 0 := ne_of_lt ha
