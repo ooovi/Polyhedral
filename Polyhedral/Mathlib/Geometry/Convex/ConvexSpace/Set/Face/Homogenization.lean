@@ -102,7 +102,7 @@ def Face.homogenizeIso {P : ConvexSet R A} : P.Face ≃o (P.homogenize W).Face w
     exact (ofPoint_mem_homogenize_iff_mem W x a.toConvexSet).mpr xm
   left_inv _ := by simp [dehomogenize_homogenize]
   right_inv F := by
-    have := homogenize_dehomogenize_of_pos
+    have := homogenize_dehomogenize_of_le_positive
       (fun _ h n ↦ weight_pos_of_mem_homogenize (F.isFaceOf.le h) n)
     simp [this]
 

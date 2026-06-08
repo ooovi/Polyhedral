@@ -38,6 +38,9 @@ lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive 
   -- one may use `positive_eq_hull_preimage_singleton`
   sorry
 
+lemma homogenize_mono {K₁ K₂ : ConvexSet R A} (h : K₁ ≤ K₂) :
+    K₁.homogenize W ≤ K₂.homogenize W := span_mono <| Set.image_mono h
+
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
 
@@ -46,6 +49,17 @@ def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
   ⟨_, C.isConvexSet.preimage hom.ofPoint.isAffineMap⟩
 
 alias _root_.PointedCone.dehomogenize := dehomogenize
+
+lemma dehomogenize_bot : dehomogenize A (⊥ : PointedCone R W) = ⊥ := sorry
+
+lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := sorry
+
+lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ := sorry
+
+variable (A) in
+lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :
+    dehomogenize A C₁ ≤ dehomogenize A C₂ := Set.preimage_mono <| Set.preimage_mono h
+    -- Q: why Set.preimage_mono twice?
 
 -- TODO: both sides of the equality are convex sets. The equality should therefore be written
 --  as a comparison of `ConvexSet`. This requires new features: at least ConvexSet.map, and a coe
@@ -108,17 +122,8 @@ lemma homogenize_le_weight_positive (K : ConvexSet R A) :
 lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
   Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
 
--- Issue #66
-/-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the
-positive cone. -/
-def homogenizeOrderEquiv : ConvexSet R A ≃o Set.Iic hom.weight.positive where
-  toFun K := ⟨_, K.homogenize_le_weight_positive⟩
-  invFun C := C.1.dehomogenize A
-  left_inv := sorry
-  right_inv := sorry
-  map_rel_iff' := sorry
-
--- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction).
+-- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction) and then
+--  applied here as a special case.
 variable (W) in
 lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
     hom.ofPoint x ∈ homogenize W P ↔ x ∈ P := by
@@ -132,14 +137,14 @@ lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
   simpa [← hom.ofPoint_injective hxx']
 
 /-- Dehomogenizing the homogenization of a convex set yields the same set again. -/
-theorem dehomogenize_homogenize (P : ConvexSet R A) :
+@[simp] theorem dehomogenize_homogenize (P : ConvexSet R A) :
     dehomogenize A (homogenize W P) = P := by
   ext x; exact ofPoint_mem_homogenize_iff_mem _ _ _
 
 /-- If the entire cone save the origin are at positive weight, homogenizing the dehomogenization
 of the homogenize yields the cone again. -/
-theorem homogenize_dehomogenize_of_pos {C : PointedCone R W} (hC : C ≤ hom.weight.positive) :
-    homogenize W (dehomogenize A C) = C := by
+theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
+    (hC : C ≤ hom.weight.positive) : homogenize W (dehomogenize A C) = C := by
   by_cases hbot : C = ⊥
   · simp [hbot, homogenize, dehomogenize]
   · apply SetLike.ext'
@@ -153,6 +158,21 @@ theorem homogenize_dehomogenize_of_pos {C : PointedCone R W} (hC : C ≤ hom.wei
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
       simp [← hy']
+
+lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
+    K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where
+  mp h := by simpa using dehomogenize_mono A h
+  mpr := homogenize_mono
+
+-- Issue #66
+/-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the
+positive cone. -/
+def homogenizeOrderEquiv : ConvexSet R A ≃o Set.Iic hom.weight.positive where
+  toFun K := ⟨_, K.homogenize_le_weight_positive⟩
+  invFun C := dehomogenize A C.1
+  left_inv K := dehomogenize_homogenize K
+  right_inv C := by dsimp; congr; exact homogenize_dehomogenize_of_le_positive C.2
+  map_rel_iff' := homogenize_mono_iff
 
 end Field
 
