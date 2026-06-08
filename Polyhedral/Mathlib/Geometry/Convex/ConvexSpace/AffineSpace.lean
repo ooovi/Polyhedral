@@ -1,32 +1,15 @@
-/-
-Copyright (c) 2026 Lean FRO, LLC. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Kim Morrison
--/
-module
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.Geometry.Convex.Set
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
-public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-public import Mathlib.LinearAlgebra.AffineSpace.Combination
-public import Mathlib.LinearAlgebra.AffineSpace.AffineMap
-
-/-!
-# Affine spaces are convex spaces
-
-This file shows that every affine space is a convex space.
-
--/
-
-public noncomputable section
-
-open scoped Affine
-open Convexity
+open Affine Convexity
 
 variable {R V V2 P P2 I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
 variable [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
 
-attribute [instance] AddTorsor.toConvexSpace
+attribute [local instance] AddTorsor.toConvexSpace
 
 open Convexity
 
@@ -54,5 +37,8 @@ lemma isAffineMap (f : P →ᵃ[R] P2) : IsAffineMap R f where
           contradiction
         · split_ifs <;> simp
       simp [hwi]
+
+lemma range_isConvexSet (f : P →ᵃ[R] P2) : IsConvexSet R (f.range : Set P2) := by
+  simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
 
 end AffineMap
