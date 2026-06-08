@@ -25,6 +25,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Pointwise
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray

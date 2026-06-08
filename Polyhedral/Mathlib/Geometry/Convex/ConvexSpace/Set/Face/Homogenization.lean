@@ -38,6 +38,10 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
   le := (hom.homogenizeHom).monotone' he.subset
   mem_of_smul_add_mem := by
     intro v w a hv hw ha hvw
+    --- vvv this quick fix was made necessary due to a change in the definition of `Salient`
+    have hhom : (homogenize W P).Salient := homogenize_salient
+    rw [salient_iff_convexCone_salient] at hhom -- rewrites to old definition
+    --- ^^^
     by_cases hnf : (F : Set A).Nonempty
     · have cF := F.isConvexSet.image hom.ofPoint.isAffineMap
       apply (mem_hull_iff_of_convex (hnf.image _) cF _).mpr
@@ -57,9 +61,10 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
           obtain ⟨rv, rv0, _, ⟨p', pp, rfl⟩, _, _⟩ := smul_pos_of_mem_homogenize hv hv0
           have : a • (rv • hom.ofPoint p') + (rw • hom.ofPoint q') ≠ 0 := by
             intro hc
-            have := homogenize_salient _ hw (smul_ne_zero rw0.ne.symm (ofPoint_ne_zero q'))
-            rw [add_eq_zero_iff_neg_eq'.mp hc] at this
-            exact this <| PointedCone.smul_mem _ ha.le hv
+            -- vvv quick fix used here
+            specialize hhom _ hw (smul_ne_zero rw0.ne.symm (ofPoint_ne_zero q'))
+            rw [add_eq_zero_iff_neg_eq'.mp hc] at hhom
+            exact hhom <| PointedCone.smul_mem _ ha.le hv
           obtain ⟨_, rvw0, _, ⟨_, qqp, rfl⟩, pdp⟩ := smul_pos_of_mem_homogenize hvw this
           have := he.left_mem_of_mem_openSegment pp qq qqp ?_
           · refine ⟨rv, rv0.le, smul_mem_smul_set <| mem_image_of_mem ofPoint this⟩
@@ -68,7 +73,8 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     · have := not_nonempty_iff_eq_empty.mp hnf
       simp_all only [homogenize, SetLike.coe, image_empty, span_empty, mem_bot]
       by_contra hxx
-      apply homogenize_salient _ hv hxx
+      -- vvv quick fix used here
+      apply hhom _ hv hxx
       have : -v = a⁻¹ • w := by
         simp [← neg_eq_of_add_eq_zero_right hvw, smul_neg, smul_smul, inv_mul_cancel₀ (ne_of_gt ha)]
       rw [this]
