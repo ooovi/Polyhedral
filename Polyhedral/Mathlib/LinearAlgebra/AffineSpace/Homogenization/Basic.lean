@@ -2,6 +2,8 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 
+/-! This file defines affine homogenization. -/
+
 namespace Affine
 
 section Ring
@@ -17,7 +19,8 @@ variable (R A W) in
 /-- An embedding of an affine space `A` into a vector space `W` s.t. the image of `A` is exactly the
 weight-1 hyperplane under a given linear weight map.
 Follows Definition 4.2 in https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
-class IsHomogenization extends ofPoint : A →ᵃ[R] W where
+class IsHomogenization where
+  ofPoint : A →ᵃ[R] W
   ofPoint_injective : Injective ofPoint
   weight : W →ₗ[R] R
   ofPoint_range_eq_preimage_weight_one : ofPoint.range = weight ⁻¹' {1}
@@ -138,8 +141,8 @@ theorem weight_canonEquiv : CanonicalHomogenization.weight ∘ hom.canonEquiv = 
   sorry
 
 -- proving the universal property using the equiv
-/-- A IsHomogenization `W` of `A` satisfies the universal property that every affine map from `A` into
-any vector space extends uniquely to a linear map from `W` to the vector space. -/
+/-- A IsHomogenization `W` of `A` satisfies the universal property that every affine map from `A`
+into any vector space extends uniquely to a linear map from `W` to the vector space. -/
 theorem extend (U : Type*) [AddCommGroup U] [Module R U]
     (f : A →ᵃ[R] U) :
     ∃! (F : W →ₗ[R] U), F ∘ hom.ofPoint = f := by
