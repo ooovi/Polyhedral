@@ -1,8 +1,8 @@
-import Polyhedral.Mathlib.LinearAlgebra.ConvexSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
 import Mathlib.Analysis.Convex.Segment
 
 
-open ConvexSpace
+open Convexity
 
 namespace ConvexSet
 
@@ -16,7 +16,7 @@ theorem refl (S : ConvexSet R M) : S.IsFaceOf S := by
     apply hx
 
 theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
-  unfold ConvexSpace.openSegment
+  unfold Convexity.openSegment
   ext z
   apply Iff.intro
   · intro h
@@ -25,8 +25,8 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
     use n, m, hn, hm
     rw [add_comm] at hmn
     use hmn
-    unfold convexComboPair
-    unfold convexCombination
+    unfold convexCombPair
+    unfold sConvexComb
     sorry
   · intro h
     simp only [Set.mem_setOf_eq]
@@ -65,11 +65,11 @@ F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
       specialize hh₁ hhx hhy hz hhz
       apply hh₁
 
-theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : Convex R  (S₁.carrier ∩ S₂.carrier ) := by
+theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S₁.carrier ∩ S₂.carrier ) := by
   have hs₁ := S₁.2
   have hs₂ := S₂.2
-  unfold ConvexSpace.Convex at hs₁ hs₂
-  unfold ConvexSpace.Convex
+  unfold Convexity.IsConvexSet at hs₁ hs₂
+  unfold Convexity.IsConvexSet
   intro x hx y hy a b ha hb h
   have hx1 := hx.1
   have hx2 := hx.2
@@ -81,13 +81,13 @@ theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : Convex R  (S₁.ca
 
 def Inter (A B : ConvexSet R M) : ConvexSet R M := {
   carrier := (A.carrier ∩ B.carrier),
-  convex := by
-    have h_sInter : Convex R (⋂₀ {A.carrier, B.carrier}) := by
-      apply ConvexSpace.convex_sInter
+  isConvexSet := by
+    have h_sInter : IsConvexSet R (⋂₀ {A.carrier, B.carrier}) := by
+      apply Convexity.IsConvexSet.sInter
       intro s hs
       rcases hs with rfl | rfl
-      · exact A.convex
-      · exact B.convex
+      · exact A.isConvexSet
+      · exact B.isConvexSet
     exact Set.sInter_pair A.carrier B.carrier ▸ h_sInter
   }
 
