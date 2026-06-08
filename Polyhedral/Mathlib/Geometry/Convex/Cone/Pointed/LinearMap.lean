@@ -87,6 +87,14 @@ lemma positive_le_nonneg {f : M →ₗ[R] R} : f.positive ≤ f.nonneg := by
   · simp [hx0]
   exact le_of_lt (hx hx0)
 
+lemma positive_inf_ker {f : M →ₗ[R] R} : f.positive ⊓ f.ker = ⊥ := by
+  ext x
+  constructor
+  · intro h
+    by_contra hx
+    exact ne_of_lt (h.1 hx) h.2.symm
+  · simp +contextual
+
 @[simp] lemma positive_zero : positive (0 : M →ₗ[R] R) = ⊥ := by ext x; simp
 
 end IsStrictOrderedRing
@@ -96,18 +104,16 @@ section Ring
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
 
-open PointedCone
+open PointedCone Pointwise
 
-@[simp] lemma nonneg_lineal_eq_ker {f : M →ₗ[R] R} :
-    f.nonneg.lineal = f.ker := by
+@[simp] lemma nonneg_lineal_eq_ker {f : M →ₗ[R] R} : f.nonneg.lineal = f.ker := by
   ext x
   simp only [mem_lineal, LinearMap.mem_nonneg, map_neg, Left.nonneg_neg_iff,
     LinearMap.mem_ker]
   rw [and_comm]
   exact le_antisymm_iff.symm
 
-open Pointwise in
-@[simp] lemma _root_.LinearMap.neg_nonneg {f : M →ₗ[R] R} : (-f).nonneg = -f.nonneg := by
+@[simp] lemma neg_nonneg {f : M →ₗ[R] R} : (-f).nonneg = -f.nonneg := by
   ext x; simp
 
 end Ring
