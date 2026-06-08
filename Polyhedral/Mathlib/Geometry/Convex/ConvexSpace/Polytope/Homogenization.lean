@@ -4,14 +4,17 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 
+/-! This file proves results about polytopes, FG cones and homogenization. -/
+
 variable {R V W A : Type*}
 
-open Convexity Affine IsHomogenization
+open Convexity ConvexSet Affine IsHomogenization
 
 section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+
 attribute [local instance] AddTorsor.toConvexSpace
 variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : IsHomogenization R A W]
 
@@ -22,7 +25,8 @@ theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C 
     (homogenize W C).FG := by
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
-  rw [congrArg hom.homogenize this]
+  have := congrArg (ConvexSet.homogenize W) this
+  rw [this]
   use t.map ⟨_, hom.ofPoint_injective⟩
   simp only [Finset.coe_map, Function.Embedding.coeFn_mk, homogenize,
     PointedCone.hull, ConvexSet.mk_eq]

@@ -2,9 +2,11 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 
+/-! This files proves results about faces of convex sets / cones and homogenization. -/
+
 section Field
 
-open Pointwise Set Convexity PointedCone Submodule Affine.IsHomogenization
+open Pointwise Set Convexity ConvexSet PointedCone Submodule Affine.IsHomogenization
 
 variable {R : Type*} [Field R]
 variable [LinearOrder R] [IsOrderedRing R]
@@ -34,12 +36,12 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
   simp [hom.ofPoint.isAffineMap.map_convexCombPair, convexCombPair_eq_sum, ← this, smul_smul]
 
 theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
-    (homogenize W F).IsFaceOf (homogenize W P) where
-  le := (hom.homogenizeHom).monotone' he.subset
+    (F.homogenize W).IsFaceOf (P.homogenize W) where
+  le := homogenizeOrderHom.monotone' he.subset
   mem_of_smul_add_mem := by
     intro v w a hv hw ha hvw
     --- vvv this quick fix was made necessary due to a change in the definition of `Salient`
-    have hhom : (homogenize W P).Salient := homogenize_salient
+    have hhom : (P.homogenize W).Salient := homogenize_salient
     rw [salient_iff_convexCone_salient] at hhom -- rewrites to old definition
     --- ^^^
     by_cases hnf : (F : Set A).Nonempty
@@ -82,7 +84,7 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
 
 variable (A) in
 theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
-    (dehomogenize A F).IsFaceOf (dehomogenize A C) where
+    (ConvexSet.dehomogenize A F).IsFaceOf (ConvexSet.dehomogenize A C) where
   subset := preimage_mono (fun _ x ↦ hf.le x)
   left_mem_of_mem_openSegment  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
@@ -90,7 +92,7 @@ theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,
       ← hom.ofPoint.isAffineMap.map_convexCombPair, hzo]
 
-def Face.homogenizeIso {P : ConvexSet R A} : OrderIso P.Face (homogenize W P).Face where
+def Face.homogenizeIso {P : ConvexSet R A} : P.Face ≃o (P.homogenize W).Face where
   toFun F := ⟨_, hom.homogenize_isFaceOf F.isFaceOf⟩
   invFun F := ⟨_, by simpa [dehomogenize_homogenize] using dehomogenize_isFaceOf A F.isFaceOf⟩
   map_rel_iff' := by

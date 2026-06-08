@@ -325,7 +325,7 @@ lemma _root_.eq_zero_iff_eq_zero_of_add_zero {x y : M} (h : x + y = 0) : x = 0 �
 lemma _root_.ne_zero_iff_ne_zero_of_add_zero {x y : M} (h : x + y = 0) : x ≠ 0 ↔ y ≠ 0 :=
   .not <| eq_zero_iff_eq_zero_of_add_zero h
 
-lemma positive_salient (f : M →ₗ[R] R) : f.positive.Salient := by
+lemma _root_.LinearMap.positive_salient (f : M →ₗ[R] R) : f.positive.Salient := by
   intro _ hx _ hy hxy
   by_contra hx'
   have h' := add_pos (hx hx') (hy <| (ne_zero_iff_ne_zero_of_add_zero hxy).mp hx')
@@ -334,7 +334,7 @@ lemma positive_salient (f : M →ₗ[R] R) : f.positive.Salient := by
   simp [h] at h'
 
 lemma Salient.of_le_positive {C : PointedCone R M} {f : M →ₗ[R] R} (h : C ≤ f.positive) :
-    C.Salient := of_le_salient (positive_salient f) h
+    C.Salient := of_le_salient f.positive_salient h
 
 end IsStrictOrderedRing
 

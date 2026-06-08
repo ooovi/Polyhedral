@@ -4,14 +4,17 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
-namespace Affine.IsHomogenization
+/-! This file defines homogenization of convex sets in affine spaces. -/
+
+open Convexity Pointwise Set PointedCone Submodule
+
+namespace Convexity.ConvexSet
 
 section Ring
 
 open Convexity
 
-variable {R : Type*} [Ring R]
-variable [PartialOrder R] [IsStrictOrderedRing R]
+variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
@@ -21,27 +24,36 @@ attribute [local instance] AddTorsor.toConvexSpace
 
 variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
-def homogenize (P : ConvexSet R A) := PointedCone.hull R (hom.ofPoint '' P)
+def homogenize (P : ConvexSet R A) : PointedCone R W := hull R (hom.ofPoint '' P)
+
+/-- Homogenization from convex set to convex cones as an order homomorphism. -/
+def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
+  toFun := homogenize W
+  monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
 
 lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
 
-def homogenizeHom :
-    OrderHom (ConvexSet R A) (PointedCone R W) where
-  toFun P := homogenize W P
-  monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
+lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
+  -- one may use `positive_eq_hull_preimage_singleton`
+  sorry
 
-variable [IsModuleConvexSpace R W]
+attribute [local instance] AddTorsor.toConvexSpace
+variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
 
 variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
   ⟨_, C.isConvexSet.preimage hom.ofPoint.isAffineMap⟩
 
+alias _root_.PointedCone.dehomogenize := dehomogenize
+
+-- TODO: both sides of the equality are convex sets. The equality should therefore be written
+--  as a comparison of `ConvexSet`. This requires new features: at least ConvexSet.map, and a coe
+--  from affine subspaces to ConvexSet.
 lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
-    hom.ofPoint '' (dehomogenize A C) = (C : Set W) ∩ hom.ofPoint.range := by
+    hom.ofPoint '' dehomogenize A C = (C : Set W) ∩ hom.ofPoint.range := by
   ext x
-  simp only [dehomogenize, Set.mem_image, SetLike.mem_coe, Set.mem_inter_iff,
-    AffineMap.mem_range]
+  simp only [Set.mem_image, SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
   constructor
   · rintro ⟨y, hy, rfl⟩
     exact ⟨hy, by use y⟩
@@ -53,10 +65,7 @@ end Ring
 
 section Field
 
-open Pointwise Set Convexity PointedCone Submodule
-
-variable {R : Type*} [Field R]
-variable [LinearOrder R] [IsOrderedRing R]
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
 variable {W : Type*} [AddCommGroup W] [Module R W]
@@ -65,22 +74,26 @@ variable [hom : Affine.IsHomogenization R A W]
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
-theorem homogenize_salient {P : ConvexSet R A} : PointedCone.Salient (homogenize W P) := by
-  simp [homogenize]
-  -- use salient_of_pos_linearMap with hom.weight and weight_nonneg_of_mem_homogenize
-  -- issue #33
-  sorry
-
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
-    x ∈ Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=
-  (mem_hull_iff_mem_pos_smul_of_convex_nonzero (P.isConvexSet.image ofPoint.isAffineMap) hx).mp h
+    x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=
+  (mem_hull_iff_mem_pos_smul_of_convex_nonzero
+    (P.isConvexSet.image hom.ofPoint.isAffineMap) hx).mp h
 
+/- This should not need Field: express x has a linear combination with nonneg coefficients.
+Apply weight. Then weight x becomes a sum of nonneg numbers. Hence weight x is itself nonneg. Since
+x is not zero, some coefficient must have been positive.
+
+TODO: generalize this, and all of the below to Semiring/Ring and move them up.
+TODO: also we don't actually want this lemma, but only its `homogenize_le_weight_positive` version.
+
+See Issue #65
+-/
 lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     0 < hom.weight x := by
   obtain ⟨_, r0, ⟨_, ⟨_, _, hy⟩, hry⟩⟩ := smul_pos_of_mem_homogenize h hx
   apply congrArg hom.weight at hy
   by_contra
-  simp only [← hry, map_smul, ← hy, weight_one, smul_eq_mul, mul_one] at this
+  simp only [← hry, map_smul, ← hy, hom.weight_one, smul_eq_mul, mul_one] at this
   simp_all
 
 lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize W P) :
@@ -89,14 +102,31 @@ lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ hom
   · simp [hx]
   · exact (weight_pos_of_mem_homogenize h hx).le
 
+lemma homogenize_le_weight_positive (K : ConvexSet R A) :
+    homogenize W K ≤ hom.weight.positive := fun _ => weight_pos_of_mem_homogenize
+
+lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
+  Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
+
+-- Issue #66
+/-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the
+positive cone. -/
+def homogenizeOrderEquiv : ConvexSet R A ≃o Set.Iic hom.weight.positive where
+  toFun K := ⟨_, K.homogenize_le_weight_positive⟩
+  invFun C := C.1.dehomogenize A
+  left_inv := sorry
+  right_inv := sorry
+  map_rel_iff' := sorry
+
+-- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction).
 variable (W) in
 lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
     hom.ofPoint x ∈ homogenize W P ↔ x ∈ P := by
-  refine ⟨fun h ↦ ?_, fun h ↦ by simpa using mem_span_of_mem (Set.mem_image_of_mem ofPoint h)⟩
-  obtain ⟨_, _, h'⟩ := smul_pos_of_mem_homogenize (Set.mem_preimage.mpr h) (ofPoint_ne_zero x)
+  refine ⟨fun h ↦ ?_, fun h ↦ by simpa using mem_span_of_mem (Set.mem_image_of_mem hom.ofPoint h)⟩
+  obtain ⟨_, _, h'⟩ := smul_pos_of_mem_homogenize (Set.mem_preimage.mpr h) (hom.ofPoint_ne_zero x)
   obtain ⟨_, ⟨_, _, hyy'⟩, hy'⟩ := Set.mem_smul_set.mp h'
   have := congrArg hom.weight hy'
-  simp [← hyy', weight_one] at this
+  simp [← hyy', hom.weight_one] at this
   simp only [this, Set.mem_image, one_smul, exists_eq_right] at h'
   obtain ⟨_, _, hxx'⟩ := h'
   simpa [← hom.ofPoint_injective hxx']
@@ -108,8 +138,7 @@ theorem dehomogenize_homogenize (P : ConvexSet R A) :
 
 /-- If the entire cone save the origin are at positive weight, homogenizing the dehomogenization
 of the homogenize yields the cone again. -/
-theorem homogenize_dehomogenize_of_pos {C : PointedCone R W}
-    (hC : ∀ x ∈ C, x ≠ 0 → 0 < hom.weight x) :
+theorem homogenize_dehomogenize_of_pos {C : PointedCone R W} (hC : C ≤ hom.weight.positive) :
     homogenize W (dehomogenize A C) = C := by
   by_cases hbot : C = ⊥
   · simp [hbot, homogenize, dehomogenize]
@@ -120,12 +149,11 @@ theorem homogenize_dehomogenize_of_pos {C : PointedCone R W}
     convert hull_eq_smul ?_ (C.isConvexSet.inter hom.ofPoint.range_isConvexSet)
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
       obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (hom.ofPoint.range : Set W) := by
-        simpa [ofPoint_range_eq_preimage_weight_one] using inv_mul_cancel₀ (hC y hyC hy0).ne.symm
-      use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (hC y hyC hy0).le) hyC
+        simpa [hom.ofPoint_range_eq_preimage_weight_one]
+          using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
+      use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
       simp [← hy']
 
 end Field
 
-end IsHomogenization
-
-end Affine
+end Convexity.ConvexSet

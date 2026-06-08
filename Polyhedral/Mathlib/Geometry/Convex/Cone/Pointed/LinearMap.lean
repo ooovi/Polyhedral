@@ -97,6 +97,10 @@ lemma positive_inf_ker {f : M →ₗ[R] R} : f.positive ⊓ f.ker = ⊥ := by
 
 @[simp] lemma positive_zero : positive (0 : M →ₗ[R] R) = ⊥ := by ext x; simp
 
+lemma positive_eq_hull_preimage_singleton (f : M →ₗ[R] R) (c : R) (hc : c ≠ 0) :
+    f.positive = PointedCone.hull R (f ⁻¹' {c}) := by
+  sorry
+
 end IsStrictOrderedRing
 
 section Ring
