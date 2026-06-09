@@ -8,7 +8,6 @@ open Affine Convexity
 variable (R : Type*) {M N : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
   [ConvexSpace R M] [ConvexSpace R N]
 
-
 namespace ConvexSet
 
 theorem refl (S : ConvexSet R M) : S.IsFaceOf S := by
@@ -145,23 +144,31 @@ F.IsFaceOf (Inter R S₁ S₂) := by
     specialize @h1 x hx.1 y hy.1 z hz hhz
     use h1
 
-theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F C : ConvexSet R M) (hF : F.IsFaceOf C) :
+theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F C : ConvexSet R M)
+  (hF : F.IsFaceOf C) :
   (F.map hhf).IsFaceOf (C.map hhf) := by
   constructor
   · have hF1 := hF.1
     intro x hx
-    rcases hx with ⟨ y, hy, rfl⟩
+    rcases hx with ⟨y , hy, rfl⟩
     have hy1 : y ∈ C.carrier := Set.mem_of_mem_of_subset hy hF1
     apply Set.mem_image_of_mem
     use hy1
-  · have hF2 := hF.2
-    intro x hx y hy z hz hhz
-    rcases hx with ⟨ m, hm, rfl⟩
-    rcases hy with ⟨ n, hn, rfl⟩
-    rcases hz with ⟨ l, hl, rfl⟩
+  · intro x hx y hy z hz hhz
+    rcases hx with ⟨m , hmC, rfl⟩
+    rcases hy with ⟨n , hnC, rfl⟩
+    rcases hz with ⟨l , hlF, rfl⟩
+    have hl : l ∈ Convexity.openSegment R m n := by
+      rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
+      have hfcomb := (hhf.map_sConvexComb)
+      have h : f (convexCombPair a b ha.le hb.le hab m n) =
+      convexCombPair a b ha.le hb.le hab (f m) (f n) := hhf.map_convexCombPair ha.le hb.le hab m n
+      have hh : f (convexCombPair a b ha.le hb.le hab m n) = f l := by
+        simpa [h] using hcomb
+      exact ⟨ a, b, ha, hb, hab, hf hh⟩
+    have hF2 := hF.2
+    specialize @hF2 m hmC n hnC l hlF hl
+    apply Set.mem_image_of_mem
+    use hF2
 
-    rcases hhz with ⟨ a, b, ha, hb , hab, hh⟩
-    have H : convexCombPair a b ha.le hb.le hab m n = l := Convexity.IsAffineMap.map_convexCombPair a b ha.le hb.le hab hh
-    specialize @hF2 m hm n hn l hl
-    sorry
 end ConvexSet
