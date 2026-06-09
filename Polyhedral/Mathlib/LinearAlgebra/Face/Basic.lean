@@ -5,14 +5,8 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 open Convexity
 open Affine Convexity
 
-variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
-  [ConvexSpace R M]
-variable {K V V2 P P2 I N L : Type*}
-variable [Ring K] [PartialOrder K] [IsStrictOrderedRing K]
-variable [AddCommGroup N] [Module K N] [ConvexSpace K N]
-variable [AddCommGroup L] [Module K L]
-variable [AddCommGroup V] [Module K V] [AddTorsor V P]
-variable [AddCommGroup V2] [Module K V2] [AffineSpace V2 P2]
+variable (R : Type*) {M N : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
+  [ConvexSpace R M] [ConvexSpace R N]
 
 namespace ConvexSet
 
@@ -150,10 +144,31 @@ F.IsFaceOf (Inter R S₁ S₂) := by
     specialize @h1 x hx.1 y hy.1 z hz hhz
     use h1
 
-theorem convexmap (f : N →ᵃ[K] L) (C : ConvexSet K N) : (C.map f).isConvexSet := by
-  sorry
+theorem map {f : M -> N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F C : ConvexSet R M)
+  (hF : F.IsFaceOf C) :
+  (F.map hhf).IsFaceOf (C.map hhf) := by
+  constructor
+  · have hF1 := hF.1
+    intro x hx
+    rcases hx with ⟨y , hy, rfl⟩
+    have hy1 : y ∈ C.carrier := Set.mem_of_mem_of_subset hy hF1
+    apply Set.mem_image_of_mem
+    use hy1
+  · intro x hx y hy z hz hhz
+    rcases hx with ⟨m , hmC, rfl⟩
+    rcases hy with ⟨n , hnC, rfl⟩
+    rcases hz with ⟨l , hlF, rfl⟩
+    have hl : l ∈ Convexity.openSegment R m n := by
+      rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
+      have hfcomb := (hhf.map_sConvexComb)
+      have h : f (convexCombPair a b ha.le hb.le hab m n) =
+      convexCombPair a b ha.le hb.le hab (f m) (f n) := hhf.map_convexCombPair ha.le hb.le hab m n
+      have hh : f (convexCombPair a b ha.le hb.le hab m n) = f l := by
+        simpa [h] using hcomb
+      exact ⟨ a, b, ha, hb, hab, hf hh⟩
+    have hF2 := hF.2
+    specialize @hF2 m hmC n hnC l hlF hl
+    apply Set.mem_image_of_mem
+    use hF2
 
-theorem map (f : N →ᵃ[K] L) (hf : Function.Injective f) (F C : ConvexSet K N) (hF : F.IsFaceOf C) :
-  (F.map f).IsFaceOf (C.map f) := by
-  sorry
 end ConvexSet
