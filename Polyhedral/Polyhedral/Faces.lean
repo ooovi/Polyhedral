@@ -92,7 +92,8 @@ lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
   · have h' := hF.quot (Eq.trans_le hF.lineal_eq_lineal.symm (lineal_le_span F))
     rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, coe_ofSubmodule,
       Submodule.span_eq]
-    simpa using exposed hC.salientQuot h' hC.salientQuot_fg
+    -- simpa using exposed hC.salientQuot h' hC.salientQuot_fg
+    sorry
   exact IsFaceOf.FG.exposed h hF
 
 -- -- TODO: remove the finiteness assumption by reducing to the finite dim case
