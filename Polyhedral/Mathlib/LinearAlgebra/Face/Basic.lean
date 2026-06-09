@@ -1,4 +1,4 @@
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Mathlib.Analysis.Convex.Segment
 
 
@@ -20,20 +20,17 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   ext z
   apply Iff.intro
   · intro h
-    simp only [Set.mem_setOf_eq]
     rcases h with ⟨m, n, hm , hn , hmn , hz⟩
     use n, m, hn, hm
+    rw [convexCombPair_symm] at hz
     rw [add_comm] at hmn
     use hmn
-    unfold convexCombPair
-    unfold sConvexComb
-    sorry
   · intro h
-    simp only [Set.mem_setOf_eq]
-    rcases h with ⟨m,n,hm,hn,hmn,hz⟩
-    use n,m,hn,hm
+    rcases h with ⟨m, n, hm , hn , hmn , hz⟩
+    use n, m, hn, hm
+    rw [convexCombPair_symm] at hz
     rw [add_comm] at hmn
-    sorry
+    use hmn
 
 theorem trans (S F₁ F₂ : ConvexSet R M) (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf S) :
 F₂.IsFaceOf S := by
@@ -70,14 +67,13 @@ theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S�
   have hs₂ := S₂.2
   unfold Convexity.IsConvexSet at hs₁ hs₂
   unfold Convexity.IsConvexSet
-  intro x hx y hy a b ha hb h
-  have hx1 := hx.1
-  have hx2 := hx.2
-  have hy1 := hy.1
-  have hy2 := hy.2
-  specialize @hs₁ x hx1 y hy1 a b ha hb h
-  specialize @hs₂ x hx2 y hy2 a b ha hb h
-  exact Set.mem_inter hs₁ hs₂
+  intro w hw
+  simp at hw
+  constructor
+  · specialize @hs₁ w hw.1
+    apply hs₁
+  · specialize @hs₂ w hw.2
+    apply hs₂
 
 def Inter (A B : ConvexSet R M) : ConvexSet R M := {
   carrier := (A.carrier ∩ B.carrier),
@@ -132,6 +128,7 @@ theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : 
     specialize @h1 x hx y hy z hz.1 hhz
     specialize @h2 x hx y hy z hz.2 hhz
     use h1
+    use h2
 
 theorem inf_right (S₁ S₂ F : ConvexSet R M) (h₁ : F.IsFaceOf S₁) (h₂ : F.IsFaceOf S₂) :
 F.IsFaceOf (Inter R S₁ S₂) := by
@@ -145,5 +142,9 @@ F.IsFaceOf (Inter R S₁ S₂) := by
     have h1 := h₁.2
     specialize @h1 x hx.1 y hy.1 z hz hhz
     use h1
+
+#check AffineMap
+
+
 
 end ConvexSet
