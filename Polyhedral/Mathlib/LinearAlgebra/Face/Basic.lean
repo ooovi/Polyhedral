@@ -63,13 +63,14 @@ F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
       specialize hh₁ hhx hhy hz hhz
       apply hh₁
 
-theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S₁.carrier ∩ S₂.carrier ) := by
+theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S₁.carrier ∩ S₂.carrier )
+:= by
   have hs₁ := S₁.2
   have hs₂ := S₂.2
   unfold Convexity.IsConvexSet at hs₁ hs₂
   unfold Convexity.IsConvexSet
   intro w hw
-  simp at hw
+  rw [Set.subset_inter_iff] at  hw
   specialize @hs₁ w hw.1
   specialize @hs₂ w hw.2
   use hs₁
