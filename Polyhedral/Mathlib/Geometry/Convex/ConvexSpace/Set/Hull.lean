@@ -154,3 +154,5 @@ end Ring
 end Pointwise
 
 end Convexity
+
+end

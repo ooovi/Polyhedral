@@ -412,12 +412,12 @@ variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R 
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient :=
-  hC.anti hF.le
+    F.Salient := hC.of_le_salient hF.le
 
 /-- Quotient by the linear span of a face is salient. -/
 lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
     (C.quot (span R F)).Salient := by
+  rw [salient_iff_convexCone_salient] -- TODO: this line is a quick fix
   intro z hzC hz0 hzNeg
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
   rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩

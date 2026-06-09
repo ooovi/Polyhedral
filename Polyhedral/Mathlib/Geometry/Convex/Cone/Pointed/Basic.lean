@@ -9,49 +9,7 @@ import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 
-/-! ... -/
-
-section Semiring
-
-namespace LinearMap
-
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
-set_option backward.isDefEq.respectTransparency false in
-def positive (f : M →ₗ[R] R) : PointedCone R M where
-  carrier := {x : M | 0 ≤ f x}
-  add_mem' hx hy := by simpa using add_nonneg hx hy
-  zero_mem' := by simp
-  smul_mem' r x hx := by simpa using smul_nonneg r.2 hx
-
-@[simp] lemma mem_positive {f : M →ₗ[R] R} {x : M} :
-  x ∈ f.positive ↔ 0 ≤ f x := .rfl
-
-lemma ker_le_positive {f : M →ₗ[R] R} : f.ker ≤ f.positive := by
-  intro x
-  simp +contextual
-
-variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M] {S : Set M}
-
-open PointedCone
-
-@[simp] lemma positive_lineal_eq_ker {f : M →ₗ[R] R} :
-    f.positive.lineal = f.ker := by
-  ext x
-  simp only [mem_lineal, LinearMap.mem_positive, map_neg, Left.nonneg_neg_iff,
-    LinearMap.mem_ker]
-  rw [and_comm]
-  exact le_antisymm_iff.symm
-
-open Pointwise in
-@[simp] lemma _root_.LinearMap.neg_positive {f : M →ₗ[R] R} : (-f).positive = -f.positive := by
-  ext x; simp
-
-end LinearMap
-
-end Semiring
+/-! This file proves basic facts intended for mathlib's Pointed/Basic.lean. -/
 
 namespace PointedCone
 
