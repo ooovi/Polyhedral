@@ -61,9 +61,7 @@ lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :
     dehomogenize A C₁ ≤ dehomogenize A C₂ := Set.preimage_mono <| Set.preimage_mono h
     -- Q: why Set.preimage_mono twice?
 
--- TODO: both sides of the equality are convex sets. The equality should therefore be written
---  as a comparison of `ConvexSet`. This requires new features: at least ConvexSet.map, and a coe
---  from affine subspaces to ConvexSet.
+-- This lemma is just `Set.image_preimage_eq_inter_range` in disguise. It is likely not needed.
 lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
     hom.ofPoint '' dehomogenize A C = (C : Set W) ∩ hom.ofPoint.range := by
   ext x
