@@ -1,13 +1,20 @@
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Mathlib.Analysis.Convex.Segment
-
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 open Convexity
-
-namespace ConvexSet
+open Affine Convexity
 
 variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
   [ConvexSpace R M]
+variable {K V V2 P P2 I N L : Type*}
+variable [Ring K] [PartialOrder K] [IsStrictOrderedRing K]
+variable [AddCommGroup N] [Module K N] [ConvexSpace K N]
+variable [AddCommGroup L] [Module K L]
+variable [AddCommGroup V] [Module K V] [AddTorsor V P]
+variable [AddCommGroup V2] [Module K V2] [AffineSpace V2 P2]
+
+namespace ConvexSet
 
 theorem refl (S : ConvexSet R M) : S.IsFaceOf S := by
   constructor
@@ -20,20 +27,17 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   ext z
   apply Iff.intro
   · intro h
-    simp only [Set.mem_setOf_eq]
     rcases h with ⟨m, n, hm , hn , hmn , hz⟩
     use n, m, hn, hm
+    rw [convexCombPair_symm] at hz
     rw [add_comm] at hmn
     use hmn
-    unfold convexCombPair
-    unfold sConvexComb
-    sorry
   · intro h
-    simp only [Set.mem_setOf_eq]
     rcases h with ⟨m,n,hm,hn,hmn,hz⟩
     use n,m,hn,hm
+    rw [convexCombPair_symm] at hz
     rw [add_comm] at hmn
-    sorry
+    use hmn
 
 theorem trans (S F₁ F₂ : ConvexSet R M) (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf S) :
 F₂.IsFaceOf S := by
@@ -70,14 +74,11 @@ theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S�
   have hs₂ := S₂.2
   unfold Convexity.IsConvexSet at hs₁ hs₂
   unfold Convexity.IsConvexSet
-  intro x hx y hy a b ha hb h
-  have hx1 := hx.1
-  have hx2 := hx.2
-  have hy1 := hy.1
-  have hy2 := hy.2
-  specialize @hs₁ x hx1 y hy1 a b ha hb h
-  specialize @hs₂ x hx2 y hy2 a b ha hb h
-  exact Set.mem_inter hs₁ hs₂
+  intro w hw
+  simp at hw
+  specialize @hs₁ w hw.1
+  specialize @hs₂ w hw.2
+  use hs₁
 
 def Inter (A B : ConvexSet R M) : ConvexSet R M := {
   carrier := (A.carrier ∩ B.carrier),
@@ -117,6 +118,7 @@ theorem inf (S₁ S₂ F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S₁) (h
     · use hh1
     · use hh2
 
+/- The intersection of two faces is a face.-/
 theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : F₂.IsFaceOf S) :
 (Inter R F₁ F₂).IsFaceOf S := by
   have hh1 := h₁.1
@@ -132,7 +134,9 @@ theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : 
     specialize @h1 x hx y hy z hz.1 hhz
     specialize @h2 x hx y hy z hz.2 hhz
     use h1
+    use h2
 
+/- The face of two convexsets is a face of the intersection.-/
 theorem inf_right (S₁ S₂ F : ConvexSet R M) (h₁ : F.IsFaceOf S₁) (h₂ : F.IsFaceOf S₂) :
 F.IsFaceOf (Inter R S₁ S₂) := by
   constructor
@@ -146,4 +150,10 @@ F.IsFaceOf (Inter R S₁ S₂) := by
     specialize @h1 x hx.1 y hy.1 z hz hhz
     use h1
 
+theorem convexmap (f : N →ᵃ[K] L) (C : ConvexSet K N) : (C.map f).isConvexSet := by
+  sorry
+
+theorem map (f : N →ᵃ[K] L) (hf : Function.Injective f) (F C : ConvexSet K N) (hF : F.IsFaceOf C) :
+  (F.map f).IsFaceOf (C.map f) := by
+  sorry
 end ConvexSet
