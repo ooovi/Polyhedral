@@ -1,13 +1,15 @@
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Mathlib.Analysis.Convex.Segment
-
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 open Convexity
+open Affine Convexity
+
+variable (R : Type*) {M N : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
+  [ConvexSpace R M] [ConvexSpace R N]
+
 
 namespace ConvexSet
-
-variable (R : Type*) {M : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
-  [ConvexSpace R M]
 
 theorem refl (S : ConvexSet R M) : S.IsFaceOf S := by
   constructor
@@ -69,11 +71,9 @@ theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S�
   unfold Convexity.IsConvexSet
   intro w hw
   simp at hw
-  constructor
-  · specialize @hs₁ w hw.1
-    apply hs₁
-  · specialize @hs₂ w hw.2
-    apply hs₂
+  specialize @hs₁ w hw.1
+  specialize @hs₂ w hw.2
+  use hs₁
 
 def Inter (A B : ConvexSet R M) : ConvexSet R M := {
   carrier := (A.carrier ∩ B.carrier),
@@ -113,6 +113,7 @@ theorem inf (S₁ S₂ F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S₁) (h
     · use hh1
     · use hh2
 
+/- The intersection of two faces is a face.-/
 theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : F₂.IsFaceOf S) :
 (Inter R F₁ F₂).IsFaceOf S := by
   have hh1 := h₁.1
@@ -130,6 +131,7 @@ theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : 
     use h1
     use h2
 
+/- The face of two convexsets is a face of the intersection.-/
 theorem inf_right (S₁ S₂ F : ConvexSet R M) (h₁ : F.IsFaceOf S₁) (h₂ : F.IsFaceOf S₂) :
 F.IsFaceOf (Inter R S₁ S₂) := by
   constructor
@@ -143,8 +145,23 @@ F.IsFaceOf (Inter R S₁ S₂) := by
     specialize @h1 x hx.1 y hy.1 z hz hhz
     use h1
 
-#check AffineMap
+theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F C : ConvexSet R M) (hF : F.IsFaceOf C) :
+  (F.map hhf).IsFaceOf (C.map hhf) := by
+  constructor
+  · have hF1 := hF.1
+    intro x hx
+    rcases hx with ⟨ y, hy, rfl⟩
+    have hy1 : y ∈ C.carrier := Set.mem_of_mem_of_subset hy hF1
+    apply Set.mem_image_of_mem
+    use hy1
+  · have hF2 := hF.2
+    intro x hx y hy z hz hhz
+    rcases hx with ⟨ m, hm, rfl⟩
+    rcases hy with ⟨ n, hn, rfl⟩
+    rcases hz with ⟨ l, hl, rfl⟩
 
-
-
+    rcases hhz with ⟨ a, b, ha, hb , hab, hh⟩
+    have H : convexCombPair a b ha.le hb.le hab m n = l := Convexity.IsAffineMap.map_convexCombPair a b ha.le hb.le hab hh
+    specialize @hF2 m hm n hn l hl
+    sorry
 end ConvexSet
