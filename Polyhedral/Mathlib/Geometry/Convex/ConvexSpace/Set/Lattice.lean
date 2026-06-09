@@ -1,31 +1,41 @@
+/-
+Copyright (c) 2019 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
+
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
+
+import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
+
+/-! This file defines bundled convex sets. -/
+
+variable {ι R X Y : Type*}
 
 namespace Convexity
 
-variable {ι R K X Y : Type*}
-
-public section Semiring
-
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
-
-variable (R X) in
 /-- A bundled convex set. -/
-structure ConvexSet where
+structure ConvexSet (R X : Type*) [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+    [ConvexSpace R X] where
   /-- The carrier set. -/
   carrier : Set X
   isConvexSet : IsConvexSet R carrier
 
 namespace ConvexSet
 
+public section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
+
+variable {K K₁ K₂ : ConvexSet R X}
+
 instance : SetLike (ConvexSet R X) X where
   coe := ConvexSet.carrier
   coe_injective' K₁ K₂ _ := by cases K₁; cases K₂; congr
-
-instance : PartialOrder (ConvexSet R X) := .ofSetLike ..
-
-variable {K K₁ K₂ : ConvexSet R X}
 
 variable (K) in
 @[simp] lemma carrier_eq_coe : K.carrier = K := rfl
@@ -36,47 +46,62 @@ variable (K) in
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : ConvexSet R X) = s := by ext; simp
 
-example : (K₁ : Set X) ≤ K₂ ↔ K₁ ≤ K₂ := by simp [Set.le_eq_subset, SetLike.coe_subset_coe]
+/- # LE -/
 
-/-!
-### Infimum, supremum and lattice
--/
+instance : PartialOrder (ConvexSet R X) := .ofSetLike ..
+
+/- # Bot -/
+
+instance : Bot (ConvexSet R X) where
+  bot := ⟨∅, IsConvexSet.empty⟩
+
+instance : Inhabited (ConvexSet R X) := ⟨⊥⟩
+
+instance : IsConcreteBot (ConvexSet R X) X := ⟨rfl⟩
+
+instance : OrderBot (ConvexSet R X) := .ofSetLike ..
+
+/- # Top -/
+
+instance : Top (ConvexSet R X) where
+  top := ⟨Set.univ, IsConvexSet.univ⟩
+
+instance : IsConcreteTop (ConvexSet R X) X := ⟨rfl⟩
+
+instance : OrderTop (ConvexSet R X) := .ofSetLike ..
+
+/- # Singleton -/
+
+instance : Singleton X (ConvexSet R X) where
+  singleton x := ⟨{x}, .singleton⟩
+
+instance : IsConcreteSingleton (ConvexSet R X) X := ⟨fun _ => rfl⟩
+
+/- # Min -/
 
 /-- The infimum of two convex sets is a convex set. -/
 instance : Min (ConvexSet R X) where
   min K₁ K₂ := ⟨_, K₁.isConvexSet.inter K₂.isConvexSet⟩
 
-instance : SemilatticeInf (ConvexSet R X) where
-  inf := min
-  inf_le_left _ _ _ hx := hx.1
-  inf_le_right _ _ _ hx := hx.2
-  le_inf _ _ _ h₁₂ h₂₃ _ hx := ⟨h₁₂ hx, h₂₃ hx⟩
+instance : IsConcreteMin (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SemilatticeInf (ConvexSet R X) := .ofSetLike ..
+
+/- # InfSet -/
 
 instance : InfSet (ConvexSet R X) where
-  sInf S := ⟨sInf (SetLike.coe '' S), .sInter (by simpa using fun K _ => K.2)⟩
+  sInf S := ⟨⋂ a ∈ S, a, by
+    apply IsConvexSet.sInter
+    rintro _ ⟨a, rfl⟩
+    apply IsConvexSet.sInter
+    rintro _ ⟨_, rfl⟩
+    exact a.2⟩
 
-instance : CompleteSemilatticeInf (ConvexSet R X) where
-  __ := instSemilatticeInf
-  isGLB_sInf S := by
-    constructor <;> intro L hL x hx
-    · simp only [sInf, Set.mem_image, forall_exists_index, and_imp,
-      forall_apply_eq_imp_iff₂, SetLike.mem_coe] at hx
-      exact hx L hL
-    · simp only [sInf, Set.mem_image, forall_exists_index, and_imp,
-      forall_apply_eq_imp_iff₂, SetLike.mem_coe]
-      exact fun l lS ↦ hL lS hx
+instance : IsConcreteInfSet (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
-instance : OrderBot (ConvexSet R X) where
-  bot := ⟨∅, IsConvexSet.empty⟩
-  bot_le _ _ hx := by simp at hx
+instance : CompleteSemilatticeInf (ConvexSet R X) := .ofSetLike ..
 
-instance : OrderTop (ConvexSet R X) where
-  top := ⟨Set.univ, IsConvexSet.univ⟩
-  le_top _ _ _ := by simp
-
-instance : Inhabited (ConvexSet R X) := ⟨⊤⟩
-
-variable {K K₁ K₂ : ConvexSet R X}
+/- # Max -/
 
 variable (R) in
 /-- The convex hull of a set `s`, bundled as a `ConvexSet`. -/
@@ -85,9 +110,9 @@ def convexHull (s : Set X) : ConvexSet R X := ⟨Convexity.convexHull R s, .conv
 instance : Max (ConvexSet R X) where
   max K₁ K₂ := convexHull R (K₁ ∪ K₂)
 
-lemma sup_eq_convexHull_union : (K₁ ⊔ K₂).carrier = Convexity.convexHull R (K₁ ∪ K₂) := by rfl
+lemma coe_sup_eq_convexHull_union : (K₁ ⊔ K₂).carrier = Convexity.convexHull R (K₁ ∪ K₂) := by rfl
 
-instance : SemilatticeSup (ConvexSet R X) where
+instance instSemilatticeSup : SemilatticeSup (ConvexSet R X) where
   sup := max
   le_sup_left _ _ _ hs := by
     apply subset_convexHull_self
@@ -96,15 +121,16 @@ instance : SemilatticeSup (ConvexSet R X) where
     apply subset_convexHull_self
     simp [hs]
   sup_le K₁ K₂ K₃ h₁₂ h₂₃ x hx := by
-    rw [mem_mk, sup_eq_convexHull_union, mem_convexHull_iff] at hx
+    rw [mem_mk, coe_sup_eq_convexHull_union, mem_convexHull_iff] at hx
     refine hx K₃ ?_ K₃.isConvexSet
     simp [h₂₃, h₁₂]
+
+/- # SupSet -/
 
 instance : SupSet (ConvexSet R X) where
   sSup S := convexHull R (⋃ s ∈ S, s)
 
 instance : CompleteSemilatticeSup (ConvexSet R X) where
-  __ := instSemilatticeSup
   isLUB_sSup K := by
     constructor <;> intro L hL
     · intro l hl
@@ -115,9 +141,108 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
       simp only [mem_mk, Set.mem_iInter, Subtype.forall, Set.iUnion_subset_iff, and_imp] at xm
       exact xm _ hL L.isConvexSet
 
-end ConvexSet
+/- # Complet Lattice -/
+
+instance : CompleteLattice (ConvexSet R X) where
+
+/- # Map -/
+
+variable [ConvexSpace R Y]
+
+protected def map (C : ConvexSet R X) {f : X → Y} (hf : IsAffineMap R f) : ConvexSet R Y :=
+  ⟨_, C.isConvexSet.image hf⟩
+
+protected def comap (C : ConvexSet R Y) {f : X → Y} (hf : IsAffineMap R f) : ConvexSet R X :=
+  ⟨_, C.isConvexSet.preimage hf⟩
 
 end Semiring
+
+section Pointwise
+
+-- TODO: maybe pointwise instances should be scoped?
+--  see also issue: https://github.com/ooovi/Polyhedral/issues/58#issue-4580609207
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
+open Pointwise
+
+/-! ### Zero -/
+
+instance : Zero (ConvexSet R X) where
+  zero := ⟨0, .singleton⟩
+
+instance : IsConcreteZero (ConvexSet R X) X := ⟨rfl⟩
+
+/-! ### Negation -/
+
+instance : Neg (ConvexSet R X) where
+  neg K := ⟨_, K.isConvexSet.neg⟩
+
+instance : IsConcreteNeg (ConvexSet R X) X := ⟨fun _ => rfl⟩
+
+instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
+
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
+/-! ### Minkowski addition / subtraction -/
+
+instance : Add (ConvexSet R X) where
+  add K₁ K₂ := ⟨_, K₁.isConvexSet.add K₂.isConvexSet⟩
+
+instance : IsConcreteAdd (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+instance : Sub (ConvexSet R X) where
+  sub K₁ K₂ := ⟨_, K₁.isConvexSet.sub K₂.isConvexSet⟩
+
+instance : IsConcreteSub (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+instance : SubtractionCommMonoid (ConvexSet R X) := .ofSetLike ..
+
+/-! ### Scalar multiplication -/
+
+instance : SMul R (ConvexSet R X) where
+  smul r K := ⟨_, K.isConvexSet.smul r⟩
+
+instance : IsConcreteSMulSet R (ConvexSet R X) X := ⟨fun _ _ => rfl⟩
+
+instance : DistribMulAction R (ConvexSet R X) := .ofSetLike ..
+
+/- NOTE: Nonempty convex sets form a semi-module and hence have the structure of a convex
+    space themselves. But we have no obvious way to exclude the empty set. -/
+
+noncomputable section AddTorsor
+
+variable [AddTorsor X Y]
+
+local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+
+instance : VAdd X (ConvexSet R Y) where
+  vadd v K := ⟨_, K.isConvexSet.translate v⟩
+
+instance : IsConcreteVAddSet X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
+
+instance : AddAction X (ConvexSet R Y) := .ofSetLike_set ..
+
+instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
+  vadd K₁ K₂ := ⟨_, K₁.isConvexSet.vadd K₂.isConvexSet⟩
+
+instance : IsConcreteVAdd (ConvexSet R X) X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
+
+end AddTorsor
+
+end Ring
+
+end Pointwise
+
+end ConvexSet
 
 
 namespace ConvexSet

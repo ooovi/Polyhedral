@@ -1,4 +1,8 @@
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+
+/-! In this file we prove the Krein-Milman theorem for FG cones. -/
 
 namespace PointedCone
 
@@ -9,13 +13,10 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable {C F F₁ F₂ : PointedCone R M}
 
-
 section opt
 
-set_option backward.isDefEq.respectTransparency false in
-/- The minimum of `f/g` on a salient cone. -/
-def opt (C : PointedCone R M) (f g : M →ₗ[R] R) :
-    PointedCone R M where
+/- The minimum of `f/g` on a cone. -/
+def opt (C : PointedCone R M) (f g : M →ₗ[R] R) : PointedCone R M where
   carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
   add_mem' := by
     intro a b ha hb
@@ -35,24 +36,22 @@ def opt (C : PointedCone R M) (f g : M →ₗ[R] R) :
     simp only [LinearMap.map_smul_of_tower, Algebra.smul_mul_assoc, Algebra.mul_smul_comm]
     exact (smul_le_smul_iff_of_pos_left h).mpr <| hx.2 y hy
 
-lemma IsSalient.of_opt (C : PointedCone R M) (g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.Salient := by
-  intro x hx x_ne_0 hxn
-  have h1 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
-  have h2 := lt_of_le_of_ne
-    (hg _ hxn).1 (fun h ↦ x_ne_0 (neg_eq_zero.mp <| (hg _ hxn).2 <| Eq.symm h))
-  simp only [_root_.map_neg, Left.neg_pos_iff] at h2
-  linarith
-
-lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : (C.opt f g).IsFaceOf C := by
-  refine { le := fun _ hx ↦ hx.1, mem_of_smul_add_mem := ?_ }
+-- TODO: the proof was modified after features changed and needs golfing:
+--  * `Salient.of_le_positive` was hacked in.
+--  * `mem_positive'` was hacked in to recover the previous form of `hg`.
+lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R) (hCg : C ≤ g.positive) :
+    (C.opt f g).IsFaceOf C := by
+  have hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0) := -- hacked in to recover `hg`
+    fun _ hx => g.mem_positive'.mp (hCg hx)
+  refine ⟨fun _ hx ↦ hx.1, ?_⟩
   intro x y a hx hy ha ⟨h2, h⟩
   by_cases! x_ne_0 : x = 0
   · rw [x_ne_0]; exact zero_mem (C.opt f g)
   by_cases! t_ne_0 : a • x + y = 0
   · exfalso
-    apply (IsSalient.of_opt C g hg) (a • x)
+    have hC' := Salient.of_le_positive hCg
+    rw [salient_iff_convexCone_salient] at hC'
+    apply hC' (a • x)
     · exact C.smul_mem (le_of_lt ha) hx
     · exact smul_ne_zero (ne_of_gt ha) x_ne_0
     rw [neg_eq_of_add_eq_zero_right t_ne_0]
@@ -74,10 +73,10 @@ lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R)
   rw [← mul_assoc, ← t3]
   linarith
 
-set_option backward.isDefEq.respectTransparency false in
 lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g := by
-  classical
+    (hCg : C ≤ g.positive) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g := by classical
+  have hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0) := -- hacked in to recover `hg`
+    fun _ hx => g.mem_positive'.mp (hCg hx)
   obtain ⟨s, hs⟩ := hC
   have hs0 : ∃ z ∈ s, z ≠ 0 := by
     by_contra hs0
@@ -119,10 +118,9 @@ lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ �
         using hy'
 
 lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
-    (hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0)) : C.opt f g ≠ ⊥ := by
-  rcases FG.exists_ne_zero_mem_opt C hC hC0 f g hg with ⟨x, hx0, hxopt⟩
-  intro hbot
-  exact hx0 <| by simpa [hbot] using hxopt
+     (hCg : C ≤ g.positive) : C.opt f g ≠ ⊥ := by
+  rcases FG.exists_ne_zero_mem_opt C hC hC0 f g hCg with ⟨x, hx0, hxopt⟩
+  exact fun hbot => hx0 <| by simpa [hbot] using hxopt
 
 end opt
 
@@ -140,10 +138,7 @@ lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
   obtain ⟨hys, a, ha, rfl⟩ := hy
   exact ⟨_, hys, a, lt_of_le_of_ne ha (fun h => hy0 (by simp [← h])), rfl⟩
 
-
 open Module in
--- TODO: this proof uses FG only at one point: to show that opt is non-empty. This should
---  generalize to dual-closed.
 /- Krein-Milman theorem: Every finitely generated cone is spanned by its rays, that is,
   by the finite set of its 1-dimensional faces. -/
 lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
@@ -180,12 +175,13 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   simp only [Dual.eval_apply, gt_iff_lt] at hf hf' hg
   rw [hs] at hg
   let F := C.opt f g
-  have hF : F.IsFaceOf C := IsFaceOf.of_opt C f g hg
+  have hgC : C ≤ g.positive := fun x hx => g.mem_positive'.mpr (hg x hx) -- this is a quick fix
+  have hF : F.IsFaceOf C := IsFaceOf.of_opt C f g hgC
   have hC0 : C ≠ ⊥ := by
     intro hC0
     have : x = 0 := by simpa [hC0] using hx
     exact hxt (by simp [this])
-  have hF' := opt_neq_bot C hfg hC0 f g hg
+  have hF' := opt_neq_bot C hfg hC0 f g hgC
   have hFsal := Salient.of_le_salient hsal hF.le
   obtain ⟨r, hr0, hrF⟩ := exists_ray (hF.fg hfg) hF' hFsal
   have hr := IsFaceOf.trans hrF hF

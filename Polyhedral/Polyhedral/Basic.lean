@@ -7,11 +7,11 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
+/-! ... -/
+
 open Function Module OrderDual LinearMap
 open Submodule hiding dual DualClosed
 open PointedCone
-
-
 
 /- WISHLIST:
  * in finite dim, fg = polyhedral
@@ -22,8 +22,6 @@ open PointedCone
  * finitely many faces / finite face lattice
  * dual closed
 -/
-
-
 
 namespace PointedCone
 
@@ -42,10 +40,14 @@ lemma IsPolyhedral.salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := hC
 /-- Submodules are polyhedral cones. -/
 @[simp] lemma IsPolyhedral.of_submodule (S : Submodule R M) :
     (S : PointedCone R M).IsPolyhedral := by
-  simp [IsPolyhedral, salientQuot_of_submodule, fg_bot]
+  simp [IsPolyhedral, salientQuot_submodule_eq_bot, fg_bot]
 
 /-- FG cones are polyhedral. -/
 lemma FG.isPolyhedral (hC : C.FG) : C.IsPolyhedral := hC.salientQuot_fg
+
+lemma IsPolyhedral.bot : (⊥ : PointedCone R M).IsPolyhedral := IsPolyhedral.of_submodule ⊥
+
+lemma IsPolyhedral.top : (⊤ : PointedCone R M).IsPolyhedral := IsPolyhedral.of_submodule ⊤
 
 lemma IsPolyhedral.salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
     FG.isPolyhedral hC.salientQuot_fg

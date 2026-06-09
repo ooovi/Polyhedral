@@ -19,7 +19,6 @@ variable [AddCommMonoid N] [Module R N]
 
 alias sup_fg := Submodule.FG.sup
 
-#check Submodule.fg_of_linearEquiv
 
 -- This seems to be the more appropriate version of `Submodule.fg_of_linearEquiv` which
 -- is probably better called `Module.fg_of_linearEquiv` or so.

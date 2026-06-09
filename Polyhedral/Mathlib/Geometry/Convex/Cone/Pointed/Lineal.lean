@@ -4,6 +4,9 @@ import Mathlib.Algebra.Order.Nonneg.Module
 import Mathlib.Geometry.Convex.Cone.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+
+/-! ... -/
 
 namespace PointedCone
 
@@ -53,12 +56,12 @@ lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal 
   exact ⟨h hx.1, h hx.2⟩
 
 lemma lineal_le_ker_of_le_positive {C : PointedCone R M} {f : M →ₗ[R] R}
-    (h : C ≤ f.positive) : C.lineal ≤ f.ker := by
+    (h : C ≤ f.nonneg) : C.lineal ≤ f.ker := by
   simpa using lineal_mono h
 
 -- this is just a special case of s ⊆ C → hull R s ⊆ C
-example {s : Set M} {f : M →ₗ[R] R} (h : s ⊆ f.positive) : hull R s ≤ f.positive := by
-  rw [← Submodule.span_eq f.positive]
+example {s : Set M} {f : M →ₗ[R] R} (h : s ⊆ f.nonneg) : hull R s ≤ f.nonneg := by
+  rw [← Submodule.span_eq f.nonneg]
   exact Submodule.span_mono h
 
 /- In this section we show properties of lineal that also follow from lineal
@@ -161,7 +164,7 @@ lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone
   simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
 
 lemma lineal_le_span (C : PointedCone R M) : C.lineal ≤ span R C := by
-  rw [← ofSubmodule_mono]
+  rw [← ofSubmodule_le_ofSubmodule]
   exact le_trans (lineal_le C) Submodule.subset_span
 
 /-- The linear span of `C ⊓ -C` is the lineality space of `C`. -/
@@ -212,6 +215,16 @@ lemma lineal_restrict (S : Submodule R M) (C : PointedCone R M) :
 
 lemma lineal_embed (S : Submodule R M) (C : PointedCone R S) :
     (embed C).lineal = .embed C.lineal := by simp [map_lineal]
+
+section IsNoetherianRing
+
+variable [IsNoetherianRing R]
+
+/-- The lineality space of an FG cone is FG. -/
+lemma lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG :=
+  Submodule.FG.of_le hC.span <| lineal_le_span C
+
+end IsNoetherianRing
 
 end LinearOrderedRing
 
@@ -268,47 +281,96 @@ lemma hull_inter_lineal_eq_lineal (s : Set M) :
 
 end DivisionRing
 
-section Ring
 
 -- ## SALIENT
+
+section Salient
+
+section Semiring
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+
+/-- A cone is salient if no two of its non-zero points add up to zero. If the module has negation,
+then equivalently the cone does not contain both a non-zero point and its negative.
+Over a linearly ordered ring, this is equivalent to the lineality space being ⊥.
+This property is also called being *pointed*. -/
+def Salient (C : PointedCone R M) := ∀ x ∈ C, ∀ y ∈ C, x + y = 0 → x = 0
+
+variable {C : PointedCone R M}
+
+lemma salient_iff_forall_mem_eq_zero_of_add_zero :
+    C.Salient ↔ ∀ x ∈ C, ∀ y ∈ C, x + y = 0 → x = 0 := .rfl
+
+@[simp] protected lemma Salient.bot : (⊥ : PointedCone R M).Salient := by simp [Salient]
+
+lemma Salient.of_le_salient {C D : PointedCone R M} (hC : C.Salient) (hD : D ≤ C) : D.Salient :=
+  fun _ hx _ hy => hC _ (hD hx) _ (hD hy)
+
+end Semiring
+
+section IsStrictOrderedRing
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
+
+-- TODO: generalize (to AddZeroClass) + move
+lemma _root_.eq_zero_iff_eq_zero_of_add_zero {x y : M} (h : x + y = 0) : x = 0 ↔ y = 0 := by
+  constructor; all_goals
+  · intro h'
+    rw [h'] at h
+    simpa using h
+
+-- TODO: generalize (to AddZeroClass) + move
+lemma _root_.ne_zero_iff_ne_zero_of_add_zero {x y : M} (h : x + y = 0) : x ≠ 0 ↔ y ≠ 0 :=
+  .not <| eq_zero_iff_eq_zero_of_add_zero h
+
+lemma _root_.LinearMap.positive_salient (f : M →ₗ[R] R) : f.positive.Salient := by
+  intro _ hx _ hy hxy
+  by_contra hx'
+  have h' := add_pos (hx hx') (hy <| (ne_zero_iff_ne_zero_of_add_zero hxy).mp hx')
+  have h := congrArg f hxy
+  simp at h
+  simp [h] at h'
+
+lemma Salient.of_le_positive {C : PointedCone R M} {f : M →ₗ[R] R} (h : C ≤ f.positive) :
+    C.Salient := of_le_salient f.positive_salient h
+
+end IsStrictOrderedRing
+
+section AddCommGroup
+
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+variable {C : PointedCone R M}
+
+lemma salient_iff_forall_mem_eq_zero_of_neg_mem : C.Salient ↔ ∀ x ∈ C, -x ∈ C → x = 0 where
+  mp h x hx hnx := h x hx (-x) hnx (add_neg_cancel _)
+  mpr h x hx y hy hxy := by
+    rw [add_comm, add_eq_zero_iff_eq_neg] at hxy
+    rw [hxy] at hy
+    exact h x hx hy
+
+-- compatibility lemma, will be removed eventually
+lemma salient_iff_convexCone_salient : C.Salient ↔ (C : ConvexCone R M).Salient := by
+  unfold ConvexCone.Salient
+  conv => rhs; intro _ _; rw [not_imp_not]
+  exact salient_iff_forall_mem_eq_zero_of_neg_mem
+
+end AddCommGroup
+
+section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
--- TODO: definition should probably be formulated without negation: x ∈ C → x = 0
-/-- A salient cone has trivial lineality space, see `salient_iff_lineal_bot`. -/
-abbrev Salient (C : PointedCone R M) := C.toConvexCone.Salient
-
-@[simp] lemma bot_salient : (⊥ : PointedCone R M).Salient := by
-  simp [Salient, ConvexCone.Salient]
-
-lemma salient_iff_mem_neg {C : PointedCone R M} : C.Salient ↔ ∀ x ∈ C, x ≠ 0 → -x ∉ C := by rfl
-
-lemma Salient.mem_neg_mem_zero {C : PointedCone R M} (hC : C.Salient)
-    {x : M} (hx : x ∈ C) (hx' : -x ∈ C) : x = 0 := by
-  specialize hC x hx
-  rw [not_imp_not] at hC
-  exact hC hx'
-
--- TODO: move to right place
-section Nonneg
-
-omit [IsOrderedRing R] in
-@[simp] lemma _root_.Nonneg.coe_eq_zero (a : {c : R // 0 ≤ c}) : (a : R) = 0 ↔ a = 0 := by
-  rw [Nonneg.mk_eq_zero]
-
-end Nonneg
-
-lemma salient_of_pos_linearMap {C : PointedCone R M} {f : M →ₗ[R] R}
-    (h : ∀ c ∈ C, c ≠ 0 → 0 < f c) : C.Salient := by
-  sorry
-
 -- NOTE: an easier proof via `salient_of_pos_linearMap` seems only possible if `R` is a field.
 set_option backward.isDefEq.respectTransparency false in
-lemma salient_hull_of_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
-    (hull R s).Salient := by
-  classical
-  rw [salient_iff_mem_neg]
+lemma Salient.of_hull_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
+    (hull R s).Salient := by classical
+  -- next line needs fixing once ConvexCone is removed
+  simp only [salient_iff_convexCone_salient, ConvexCone.Salient, mem_toConvexCone, ne_eq]
   intro x hxp hx0 hxn
   absurd hx0
   rw [Submodule.mem_span_iff_exists_finset_subset] at hxp hxn
@@ -335,61 +397,61 @@ section IsDomain
 
 variable [IsDomain R] [IsTorsionFree R M]
 
-lemma salient_hull_singleton (x : M) : (R ∙₊ x).Salient := by
+lemma Salient.of_hull_singleton (x : M) : (R ∙₊ x).Salient := by
   by_cases h : x = 0
   · simp [h]
-  · exact salient_hull_of_linearIndepOn (by simp [h])
+  · exact of_hull_linearIndepOn (by simp [h])
 
 -- NOTE: there is also `ofSubmodule_salient_iff_eq_bot` below, which proven something stronger
 --  for general rings, BUT assumes linear order. Is one setting better than the other?
-lemma top_not_salient (h : Module.rank R M ≠ 0) : ¬(⊤ : PointedCone R M).Salient := by
-  simpa [Salient, ConvexCone.Salient, rank_zero_iff_forall_zero] using h
+lemma not_top (h : Module.rank R M ≠ 0) : ¬(⊤ : PointedCone R M).Salient := by
+  simpa [salient_iff_convexCone_salient, ConvexCone.Salient, rank_zero_iff_forall_zero] using h
 
 end IsDomain
 
 end Ring
 
-section LinearOrderedRing
+section LinearOrder
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
-lemma Salient.of_le_salient {C D : PointedCone R M} (hC : C.Salient) (hD : D ≤ C) : D.Salient := by
-  rw [Salient, ConvexCone.salient_iff_not_flat] at *
-  by_contra h
-  apply hC
-  rcases h with ⟨x, xD, x_ne_0, neg_xD⟩
-  exact ⟨x, hD xD, x_ne_0, hD neg_xD⟩
-  -- have h' := h.mono hD
-
 lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = ⊥ := by
+  rw [salient_iff_forall_mem_eq_zero_of_neg_mem]
   constructor <;> intro h
   · ext x
     simp only [mem_lineal, Submodule.mem_bot]
-    exact ⟨fun H => h.mem_neg_mem_zero H.1 H.2, by simp +contextual⟩
-  · intro x hx
-    rw [not_imp_not]
-    intro hnx
+    exact ⟨fun H => h x H.1 H.2, by simp +contextual⟩
+  · intro x hx hnx
     have hlin := mem_lineal.mpr ⟨hx, hnx⟩
     rw [h] at hlin
     exact hlin
 
-@[simp] lemma ofSubmodule_salient_iff_eq_bot {S : Submodule R M} :
+@[simp] lemma salient_ofSubmodule_iff_eq_bot {S : Submodule R M} :
     (S : PointedCone R M).Salient ↔ S = ⊥ := by
   nth_rw 2 [← submodule_lineal S]
   exact salient_iff_lineal_bot
 
 /-- If `S` is a submodule disjoint to the lineality space of a cone `C`, then `C ⊓ S`
   is salient. -/
-lemma inf_salient {C : PointedCone R M} {S : Submodule R M} (hCS : Disjoint C.lineal S) :
-    (C ⊓ S).Salient := by
+lemma Salient.of_inf_disjoint_lineal {C : PointedCone R M} {S : Submodule R M}
+    (hCS : Disjoint C.lineal S) : (C ⊓ S).Salient := by
   simp only [salient_iff_lineal_bot, lineal_inf, submodule_lineal, ← disjoint_iff, hCS]
+
+end LinearOrder
+
+end Salient
+
 
 -- ## MAP
 
-open Function
+section Map
 
+variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
+
+open Function
 
 omit [LinearOrder R] [IsOrderedRing R] in
 -- TODO: generalize and move to the right place
@@ -418,17 +480,26 @@ open Pointwise in
 lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
   simpa [← map_id_eq_neg] using salient_map hC (injective_neg.mpr injective_id)
 
+end Map
+
+
+section SalientQuot
+
 -- ## SALIENT QUOT
+
+variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
 
 variable {C : PointedCone R M}
 
 /-- The quotient of a cone by its lineality space. -/
 abbrev salientQuot (C : PointedCone R M) := C.quot C.lineal
 
-lemma salientQuot_def (C : PointedCone R M) : C.salientQuot = C.quot C.lineal := rfl
+lemma salientQuot_eq_quot_lineal (C : PointedCone R M) : C.salientQuot = C.quot C.lineal := rfl
 
-lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
-  rw [Salient, ConvexCone.salient_iff_not_flat]
+lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
+  rw [salient_iff_convexCone_salient, ConvexCone.salient_iff_not_flat]
   intro h
   rcases h with ⟨x, hx, x_ne_0, hx'⟩
   rcases (Set.mem_image (⇑C.lineal.mkQ) (↑C) x).mp hx with ⟨y,yC, hy⟩
@@ -452,13 +523,19 @@ lemma salient_salientQuot (C : PointedCone R M) : Salient C.salientQuot := by
     exact Submodule.add_mem C yC' (sum_lineal.2)
   exact mem_lineal.mpr ⟨yC, this⟩
 
-@[simp] lemma salientQuot_of_submodule (S : Submodule R M) :
+@[simp] lemma salientQuot_submodule_eq_bot (S : Submodule R M) :
     (S : PointedCone R M).salientQuot = ⊥ := by
   unfold salientQuot
   rw [submodule_lineal, ← Submodule.span_eq S]
   simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
   rw [← coe_ofSubmodule, quot_span]
 
-end LinearOrderedRing
+@[simp] lemma salientQuot_bot : (⊥ : PointedCone R M).salientQuot = ⊥ :=
+  salientQuot_submodule_eq_bot ⊥
+
+@[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
+  salientQuot_submodule_eq_bot ⊤
+
+end SalientQuot
 
 end PointedCone
