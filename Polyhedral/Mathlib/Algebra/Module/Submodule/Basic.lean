@@ -10,6 +10,8 @@ import Mathlib.Algebra.Module.SpanRank
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 
+/-! This file proves basic properties about Submodule that should go into Submodule/Basic.lean -/
+
 namespace Submodule
 
 open Function LinearMap Module
@@ -85,7 +87,6 @@ abbrev quot (S T : Submodule R M) := map T.mkQ S
 theorem range_mkQ' (p : Submodule R M) : range (p.mkQ.restrictScalars S) = ⊤ :=
   eq_top_iff'.2 <| by rintro ⟨x⟩; exact ⟨x, rfl⟩
 
-#check range_mkQ
 example (p : Submodule R M) : range p.mkQ = ⊤ := range_mkQ' p
 
 /-- Restricted scalars version of `Submodule.ker_mkQ`. -/
@@ -109,7 +110,6 @@ theorem le_comap_mkQ' {p : Submodule R M} (p' : Submodule S (M ⧸ p)) :
     comap (p.mkQ.restrictScalars S) (map (p.mkQ.restrictScalars S) p')
       = p.restrictScalars S ⊔ p' := by simp [comap_map_eq, sup_comm]
 
-#check comap_map_mkQ
 example (p : Submodule R M) (p' : Submodule R M) :
   comap p.mkQ (map p.mkQ p') = p ⊔ p' := comap_map_mkQ p p'
 
