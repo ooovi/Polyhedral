@@ -1,0 +1,87 @@
+
+import Mathlib.Algebra.AddTorsor.Defs
+
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
+
+namespace Convexity
+
+open Convexity
+
+variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable {V : Type*} [AddCommGroup V] [Module R V] -- [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable {A : Type*} [AddTorsor V A]
+
+noncomputable local instance : ConvexSpace R A := AddTorsor.toConvexSpace
+
+variable (R A) in
+structure Polyhedron where
+  carrier : Set A
+  isPolyhedron : IsPolyhedron R carrier
+
+namespace Polyhedron
+
+instance : SetLike (Polyhedron R A) A where
+  coe := Polyhedron.carrier
+  coe_injective' P₁ P₂ _ := by cases P₁; cases P₂; congr
+
+variable {P P₁ P₂ : Polyhedron R A}
+
+variable (P) in
+@[simp] lemma carrier_eq_coe : P.carrier = P := rfl
+
+@[ext] theorem ext (h : ∀ A, A ∈ P₁ ↔ A ∈ P₂) : P₁ = P₂ := SetLike.ext h
+
+@[simp] theorem mem_mk {s h x} : x ∈ (⟨s, h⟩ : Polyhedron R A) ↔ x ∈ s := .rfl
+
+@[simp] theorem mk_eq {s h} : (⟨s, h⟩ : Polyhedron R A) = s := by ext; simp
+
+@[coe] def toPolytope (P : Polytope R A) : Polyhedron R A := ⟨P, P.isPolytope.isPolyhedron⟩
+
+instance : Coe (Polytope R A) (Polyhedron R A) := ⟨toPolytope⟩
+
+section IsModuleConvexSpace
+
+variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+@[coe] def toConvexSet (P : Polyhedron R A) : ConvexSet R A :=
+  ⟨P, P.isPolyhedron.isConvexSet⟩
+
+instance : Coe (Polyhedron R A) (ConvexSet R A) := ⟨toConvexSet⟩
+
+end IsModuleConvexSpace
+
+/- # LE -/
+
+instance : PartialOrder (Polyhedron R A) := .ofSetLike ..
+
+/- # Bot -/
+
+instance : Bot (Polyhedron R A) where
+  bot := ⟨∅, IsPolyhedron.empty R A⟩
+
+instance : Inhabited (Polyhedron R A) := ⟨⊥⟩
+
+instance : IsConcreteBot (Polyhedron R A) A := ⟨rfl⟩
+
+instance : OrderBot (Polyhedron R A) := .ofSetLike ..
+
+/- # Top -/
+
+instance : Top (Polyhedron R A) where
+  top := ⟨Set.univ, IsPolyhedron.univ R A⟩
+
+instance : IsConcreteTop (Polyhedron R A) A := ⟨rfl⟩
+
+instance : OrderTop (Polyhedron R A) := .ofSetLike ..
+
+/- # Singleton -/
+
+instance : Singleton A (Polyhedron R A) where
+  singleton x := ⟨{x}, .singleton R x⟩
+
+instance : IsConcreteSingleton (Polyhedron R A) A := ⟨fun _ => rfl⟩
+
+end Polyhedron
+
+end Convexity
