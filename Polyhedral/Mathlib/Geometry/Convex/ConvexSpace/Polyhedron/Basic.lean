@@ -4,6 +4,10 @@ import Polyhedral.Polyhedral.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 
+/-! This file defines polyhedral cones. We chose a definition that also works well
+in infinite dimensions and behaves nice w.r.t. duality. In particular, the definition
+gives is neither V (FG) nor H (DualFG). -/
+
 namespace Convexity
 
 open ConvexSpace Pointwise
