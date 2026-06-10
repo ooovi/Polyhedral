@@ -63,9 +63,11 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   le_l_u _ := subset_hull
   choice_eq _ _ := rfl
 
--- lemma span_inf_left (s t : Set M) : span R (s ∩ t) ≤ span R s := by
---   apply Submodule.span_mono
---   simp only [Set.inter_subset_left]
+lemma hull_hull {s : Set M} : hull R (hull R s) = hull R s := Submodule.span_span
+
+lemma hull_eq {S : PointedCone R M} : hull R S = S := Submodule.span_eq S
+
+lemma hull_mono {s t : Set M} (h : s ⊆ t) : hull R s ≤ hull R t := Submodule.span_mono h
 
 -- ## LINSPAN
 
@@ -182,6 +184,7 @@ lemma submodule_span_of_hull {s : Set M} {S : Submodule R M} (hsS : hull R s = S
 lemma hull_union (s t : Set M) : hull R (s ∪ t) = hull R s ⊔ hull R t :=
     Submodule.span_union s t
 
+-- delete?
 lemma hull_min {s : Set M} {C : PointedCone R M} (hsC : s ⊆ C) : hull R s ≤ C := sInf_le hsC
 
 end Semiring
