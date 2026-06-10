@@ -34,6 +34,20 @@ def closure (R : Type*) {M : Type*} [Zero M] [SMul R M] (s : Set M) :
     SubMulActionWithZero R M :=
   sInf { p | s ⊆ (p : Set M) }
 
+-- TODO: consider to use this definition, it has better definitional properties, but needs
+--  stronger assumptions.
+def closure' (R : Type*) [MonoidWithZero R] {M : Type*} [Zero M]
+    [MulActionWithZero R M] (s : Set M) : SubMulActionWithZero R M where
+  carrier := insert 0 {r • x | (x ∈ s) (r : R)}
+  zero_mem' := by simp
+  smul_mem' r x hx := by
+    rcases hx with hx0 | ⟨x, hx, r', rfl⟩
+    · simp [hx0]
+    · right; exact ⟨x, hx, r * r', by rw [smul_smul]⟩
+
+-- TODO: use definition with better definitional properties, such as
+--   `{r • x | (r : R) (x ∈ s)}` or `Ici (0 : R) • s`
+
 /- Note that the character `∙` U+2219 used below is different from the scalar multiplication
 character `•` U+2022. -/
 /-- Notation for the `SubMulActionWithZero` generated from a set `s`, short for
@@ -53,6 +67,9 @@ theorem subset_closure : s ⊆ closure R s := by
 
 theorem mem_closure_of_mem (hx : x ∈ s) : x ∈ closure R s :=
   subset_closure hx
+
+theorem smul_mem_closure_of_mem (hx : x ∈ s) (r : R) : r • x ∈ closure R s :=
+  smul_mem _ r (subset_closure hx)
 
 @[simp] theorem closure_eq (p : SubMulActionWithZero R M) :
     closure R p = p := by
@@ -139,35 +156,68 @@ variable [MonoidWithZero R] [Zero M] [MulActionWithZero R M]
 variable {s t : Set M} {x : M}
 
 theorem mem_closure_iff_exists_smul (hs : s.Nonempty) :
-    x ∈ closure R s ↔ ∃ y ∈ s, ∃ r : R, x = r • y where
+    x ∈ closure R s ↔ ∃ y ∈ s, ∃ r : R, r • y = x where
   mp := by
     intro h
     let p : SubMulActionWithZero R M := {
-      carrier := {r • x | (r : R) (x ∈ s)}
-      zero_mem' := by use 0; simpa using hs
-      smul_mem' := by
-        simp only [Set.mem_setOf_eq, forall_exists_index, and_imp]
-        intro r x t y hy rfl
-        exact ⟨r * t, y, hy, mul_smul _ _ _⟩
-    }
+      carrier := insert 0 {r • x | (x ∈ s) (r : R)}
+      zero_mem' := by simp
+      smul_mem' r x hx := by
+        rcases hx with hx0 | ⟨x, hx, r', rfl⟩
+        · simp [hx0]
+        · right; exact ⟨x, hx, r * r', by rw [smul_smul]⟩ }
     rw [mem_closure] at h
     have : s ⊆ p := by
       intro x hx
-      simpa [p] using ⟨1, x, hx, by simp⟩
-    specialize h p this
-    simp only [mem_mk, Set.mem_setOf_eq, p] at h
-    obtain ⟨r, x, hx, rfl⟩ := h
-    exact ⟨x, hx, r, rfl⟩
+      simp only [mk_eq, Set.mem_insert_iff, Set.mem_setOf_eq, p]
+      right; exact ⟨x, hx, 1, by simp⟩
+    rcases h p this with h | h
+    · simpa [h] using ⟨_, hs.choose_spec, 0, by simp⟩
+    · exact h
   mpr := by
     rintro ⟨y, hy, r, rfl⟩
     exact smul_mem _ r (subset_closure hy)
 
 theorem mem_closure_iff_exists_smul_of_not_zero (hx : x ≠ 0) :
-    x ∈ closure R s ↔ ∃ y ∈ s, ∃ r : R, x = r • y := by
+    x ∈ closure R s ↔ ∃ y ∈ s, ∃ r : R, r • y = x := by
   by_cases h : s.Nonempty
   · exact mem_closure_iff_exists_smul h
   rw [Set.not_nonempty_iff_eq_empty] at h
   simp [h, hx]
+
+-- This can become defeq if we change the definition of closure.
+theorem mem_closure_iff_not_zero_exists_smul :
+    x ∈ closure R s ↔ x = 0 ∨ ∃ y ∈ s, ∃ r : R, r • y = x where
+  mp h := by
+    by_cases hx0 : x = 0
+    · left; exact hx0
+    · right; exact (mem_closure_iff_exists_smul_of_not_zero hx0).mp h
+  mpr h := by
+    cases h with
+    | inl h => simp [h]
+    | inr h =>
+      obtain ⟨y, hy, r , rfl⟩ := h
+      exact smul_mem_closure_of_mem hy r
+
+-- theorem mem_closure_iff_not_zero_exists_smul :
+--     x ∈ closure R s ↔ x = 0 ∨ ∃ y ∈ s, ∃ r : R, r • y = x where
+--   mp := by
+--     intro h
+--     let p : SubMulActionWithZero R M := {
+--       carrier := insert 0 {r • x | (x ∈ s) (r : R)}
+--       zero_mem' := by simp
+--       smul_mem' r x hx := by
+--         rcases hx with hx0 | ⟨x, hx, r', rfl⟩
+--         · simp [hx0]
+--         · right; exact ⟨x, hx, r * r', by rw [smul_smul]⟩ }
+--     rw [mem_closure] at h
+--     refine h p (fun x hx => ?_)
+--     simp only [mk_eq, Set.mem_insert_iff, Set.mem_setOf_eq, p]
+--     right; exact ⟨x, hx, 1, by simp⟩
+--   mpr := by
+--     rintro (hx0 | ⟨y, hy, r, rfl⟩)
+--     · simp [hx0]
+--     exact smul_mem _ r (subset_closure hy)
 
 end MulActionWithZero
 

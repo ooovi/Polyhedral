@@ -12,7 +12,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 
 /-! This file defines homogenization of general sets. The homogenization is of type
-`SubMulActionWithZero`, which is closed under multiplication and always contains zero.
+`SubMulActionWithZero R≥0 W`, which is closed under multiplication and always contains zero.
 In particular, the homogenization is never empty. This enables to prove suitable order
 isomorphisms. -/
 
@@ -109,10 +109,10 @@ variable [IsOrderedRing R] in
   · rw [mem_closure_iff_exists_smul] at h
     · obtain ⟨y, ⟨z, hz, rfl⟩, r, h⟩ := h
       have := congrArg hom.weight h
-      simp only [weight_one, ← Nonneg.coe_smul, map_smul, smul_eq_mul, mul_one, Eq.comm,
+      simp only [weight_one, ← Nonneg.coe_smul, map_smul, smul_eq_mul, mul_one,
         Nonneg.coe_eq_one] at this
       simp only [this, one_smul] at h
-      rwa [hom.ofPoint_injective h]
+      rwa [hom.ofPoint_injective h.symm]
     · simpa using Set.nonempty_iff_ne_empty.mpr hs
   · rw [mem_closure]
     exact fun _ hp => hp (Set.mem_image_of_mem hom.ofPoint h)
