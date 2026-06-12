@@ -101,6 +101,12 @@ lemma positive_eq_hull_preimage_singleton (f : M →ₗ[R] R) (c : R) (hc : c �
     f.positive = PointedCone.hull R (f ⁻¹' {c}) := by
   sorry
 
+lemma hull_le_positive_of_subset_preimage_singleton {f : M →ₗ[R] R} {s : Set M} {c : R}
+    (hc : c ≠ 0) (hs : s ⊆ f ⁻¹' {c}) :
+    PointedCone.hull R s ≤ f.positive := by
+  rw [positive_eq_hull_preimage_singleton f c hc]
+  exact Submodule.span_mono hs
+
 end IsStrictOrderedRing
 
 section Ring
