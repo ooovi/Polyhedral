@@ -35,11 +35,32 @@ lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
 
 lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
-  -- one may use `positive_eq_hull_preimage_singleton`
-  sorry
+  rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight 1 one_ne_zero,
+    ← hom.ofPoint_range_eq_preimage_weight_one]
+  congr
+  ext x
+  simp
 
 lemma homogenize_mono {K₁ K₂ : ConvexSet R A} (h : K₁ ≤ K₂) :
     K₁.homogenize W ≤ K₂.homogenize W := span_mono <| Set.image_mono h
+
+lemma homogenize_le_weight_positive (K : ConvexSet R A) :
+    homogenize W K ≤ hom.weight.positive := by
+  exact LinearMap.hull_le_positive_of_subset_preimage_singleton one_ne_zero fun _ ↦ by
+    rintro ⟨x, -, rfl⟩
+    simp [hom.weight_one]
+
+lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P)
+    (hx : x ≠ 0) :
+    0 < hom.weight x :=
+  (homogenize_le_weight_positive (W := W) P h) hx
+
+lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize W P) :
+    0 ≤ hom.weight x :=
+  (LinearMap.mem_positive'.mp (homogenize_le_weight_positive (W := W) P h)).1
+
+lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
+  Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
 
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
@@ -90,35 +111,6 @@ lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W
     x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=
   (mem_hull_iff_mem_pos_smul_of_convex_nonzero
     (P.isConvexSet.image hom.ofPoint.isAffineMap) hx).mp h
-
-/- This should not need Field: express x has a linear combination with nonneg coefficients.
-Apply weight. Then weight x becomes a sum of nonneg numbers. Hence weight x is itself nonneg. Since
-x is not zero, some coefficient must have been positive.
-
-TODO: generalize this, and all of the below to Semiring/Ring and move them up.
-TODO: also we don't actually want this lemma, but only its `homogenize_le_weight_positive` version.
-
-See Issue #65
--/
-lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
-    0 < hom.weight x := by
-  obtain ⟨_, r0, ⟨_, ⟨_, _, hy⟩, hry⟩⟩ := smul_pos_of_mem_homogenize h hx
-  apply congrArg hom.weight at hy
-  by_contra
-  simp only [← hry, map_smul, ← hy, hom.weight_one, smul_eq_mul, mul_one] at this
-  simp_all
-
-lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize W P) :
-    0 ≤ hom.weight x := by
-  by_cases hx : x = 0
-  · simp [hx]
-  · exact (weight_pos_of_mem_homogenize h hx).le
-
-lemma homogenize_le_weight_positive (K : ConvexSet R A) :
-    homogenize W K ≤ hom.weight.positive := fun _ => weight_pos_of_mem_homogenize
-
-lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
-  Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
 
 -- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction) and then
 --  applied here as a special case.
