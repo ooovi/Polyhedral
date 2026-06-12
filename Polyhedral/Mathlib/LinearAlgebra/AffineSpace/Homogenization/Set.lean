@@ -247,10 +247,10 @@ lemma homogenize_le_weight_positive (s : Set A) :
 
 @[simp] theorem homogenize_dehomogenize_le_weight_positive {S : SubMulActionWithZero R≥0 W} :
     homogenize R W (S.dehomogenize A) ≤ S ⊓ hom.weight.positive := by
-  -- simp only [homogenize, dehomogenize, Set.image_preimage_eq_inter_range,
-  --   closure_inter, closure_eq]
-  -- congr; exact closure_ofPoint_range_le_weight_positive
-  sorry
+  have aux : Set.range hom.ofPoint = hom.ofPoint.range := rfl
+  simpa [homogenize, dehomogenize, Set.image_preimage_eq_inter_range,
+    smulSet_inter_left, aux] using le_trans inf_le_right
+      nonneg_smulSet_ofPoint_range_le_weight_positive
 
 end IsStrictOrderedRing
 
