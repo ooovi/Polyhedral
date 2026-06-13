@@ -478,6 +478,7 @@ end PartialOrder
 
 end SetLike
 
+
 /- # sInf # -/
 
 class IsConcreteInfSet (A : Type*) (B : outParam Type*) [SetLike A B] [InfSet A] where
@@ -496,6 +497,61 @@ variable [PartialOrder A] [IsConcreteLE A B]
 variable (A B) in
 @[reducible] def _root_.CompleteSemilatticeInf.ofSetLike : CompleteSemilatticeInf A where
   isGLB_sInf := by simp [isGLB_iff_le_iff, ← SetLike.coe_subset_coe, lowerBounds]
+
+end PartialOrder
+
+-- TODO: add theorems
+
+end SetLike
+
+
+/- # Max # -/
+
+class IsConcreteMax (A : Type*) (B : outParam Type*) [SetLike A B] [Max A] where
+  protected coe_max' (a b : A) : (a ⊔ b : A) = (a ∪ b : Set B)
+
+namespace SetLike
+
+variable {A B : Type*} [SetLike A B] [Max A] [IsConcreteMax A B]
+
+@[simp] lemma coe_max (a b : A) : (a ⊔ b : A) = (a ∪ b : Set B) := IsConcreteMax.coe_max' a b
+
+section PartialOrder
+
+variable [PartialOrder A] [IsConcreteLE A B]
+
+variable (A B) in
+@[reducible] def _root_.SemilatticeSup.ofSetLike : SemilatticeSup A where
+  sup := max
+  le_sup_left := by simp [← coe_subset_coe]
+  le_sup_right := by simp [← coe_subset_coe]
+  sup_le a b c := by simpa only [← coe_subset_coe, coe_max] using sup_le
+
+end PartialOrder
+
+-- TODO: add theorems
+
+end SetLike
+
+
+/- # sSup # -/
+
+class IsConcreteSupSet (A : Type*) (B : outParam Type*) [SetLike A B] [SupSet A] where
+  protected coe_sSup' (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B)
+
+namespace SetLike
+
+variable {A B : Type*} [SetLike A B] [SupSet A] [IsConcreteSupSet A B]
+
+@[simp] lemma coe_sSup (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B) := IsConcreteSupSet.coe_sSup' s
+
+section PartialOrder
+
+variable [PartialOrder A] [IsConcreteLE A B]
+
+variable (A B) in
+@[reducible] def _root_.CompleteSemilatticeSup.ofSetLike : CompleteSemilatticeSup A where
+  isLUB_sSup := by simp [isLUB_iff_le_iff, ← SetLike.coe_subset_coe, upperBounds]
 
 end PartialOrder
 
