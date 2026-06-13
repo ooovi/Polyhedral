@@ -103,52 +103,9 @@ lemma homogenize_sInf_le (s : Set (Set A)) :
     homogenize R W (sInf s) ≤ sInf (homogenize R W '' s) := by
   sorry
 
-variable (A) in
-def _root_.SubMulActionWithZero.dehomogenize (S : SubMulActionWithZero R≥0 W) : Set A :=
-  hom.ofPoint ⁻¹' S
-
-omit [IsOrderedRing R] in
-lemma dehomogenize_top : dehomogenize A (⊤ : SubMulActionWithZero R≥0 W) = Set.univ := by
-  ext x; simp [dehomogenize]
-
-omit [IsOrderedRing R] in
-lemma dehomogenize_inf (s t : SubMulActionWithZero R≥0 W) :
-    dehomogenize A (s ⊓ t) = dehomogenize A s ∩ dehomogenize A t := by
-  ext x; simp [dehomogenize]
-
-omit [IsOrderedRing R] in
-lemma dehomogenize_isup (s t : SubMulActionWithZero R≥0 W) :
-    dehomogenize A (s ⊔ t) = dehomogenize A s ∪ dehomogenize A t := by
-  ext x; simp [dehomogenize]
-
-def dehomogenizeLatticeHom : LatticeHom (SubMulActionWithZero R≥0 W) (Set A) where
-  toFun := dehomogenize A
-  map_sup' := dehomogenize_isup
-  map_inf' := dehomogenize_inf
-
-omit [IsOrderedRing R] in
-lemma dehomogenize_sInf (S : Set (SubMulActionWithZero R≥0 W)) :
-    dehomogenize A (sInf S) = sInf (dehomogenize A '' S) := by
-  ext x; simp [dehomogenize]
-
-lemma homogenize_gc : GaloisConnection (homogenize R W) (dehomogenize A) := by
-  -- TODO: we could use GaloisConnection.compose:
-  --  * homogenize = closure ∘ image
-  --  * dehomogenize = preimage ∘ coe
-  sorry
-
 section Nontrivial
 
 variable [Nontrivial R]
-
-lemma dehomogenize_sSup (S : Set (SubMulActionWithZero R≥0 W)) :
-    dehomogenize A (sSup S) = sSup (dehomogenize A '' S) := by
-  ext x; simpa [dehomogenize] using fun h => (ofPoint_ne_zero x h).elim
-
-def dehomogenizeCompleteLatticeHom : CompleteLatticeHom (SubMulActionWithZero R≥0 W) (Set A) where
-  toFun := dehomogenize A
-  map_sInf' := dehomogenize_sInf
-  map_sSup' := dehomogenize_sSup
 
 -- TODO: Move (needed for `ofPoint_mem_homogenize_iff`)
 omit [Nontrivial R] in
@@ -192,6 +149,49 @@ lemma homogenize_mono_iff {s t : Set A} :
 lemma homogenize_singleton_eq {x y : A} :
     homogenize R W {x} = homogenize R W {y} ↔ x = y := by simp
 
+end Nontrivial
+
+variable (A) in
+def _root_.SubMulActionWithZero.dehomogenize (S : SubMulActionWithZero R≥0 W) : Set A :=
+  hom.ofPoint ⁻¹' S
+
+omit [IsOrderedRing R] in
+lemma dehomogenize_top : dehomogenize A (⊤ : SubMulActionWithZero R≥0 W) = Set.univ := by
+  ext x; simp [dehomogenize]
+
+omit [IsOrderedRing R] in
+lemma dehomogenize_inf (s t : SubMulActionWithZero R≥0 W) :
+    dehomogenize A (s ⊓ t) = dehomogenize A s ∩ dehomogenize A t := by
+  ext x; simp [dehomogenize]
+
+omit [IsOrderedRing R] in
+lemma dehomogenize_sup (s t : SubMulActionWithZero R≥0 W) :
+    dehomogenize A (s ⊔ t) = dehomogenize A s ∪ dehomogenize A t := by
+  ext x; simp [dehomogenize]
+
+def dehomogenizeLatticeHom : LatticeHom (SubMulActionWithZero R≥0 W) (Set A) where
+  toFun := dehomogenize A
+  map_sup' := dehomogenize_sup
+  map_inf' := dehomogenize_inf
+
+omit [IsOrderedRing R] in
+lemma dehomogenize_sInf (S : Set (SubMulActionWithZero R≥0 W)) :
+    dehomogenize A (sInf S) = sInf (dehomogenize A '' S) := by
+  ext x; simp [dehomogenize]
+
+section Nontrivial
+
+variable [Nontrivial R]
+
+lemma dehomogenize_sSup (S : Set (SubMulActionWithZero R≥0 W)) :
+    dehomogenize A (sSup S) = sSup (dehomogenize A '' S) := by
+  ext x; simpa [dehomogenize] using fun h => (ofPoint_ne_zero x h).elim
+
+def dehomogenizeCompleteLatticeHom : CompleteLatticeHom (SubMulActionWithZero R≥0 W) (Set A) where
+  toFun := dehomogenize A
+  map_sInf' := dehomogenize_sInf
+  map_sSup' := dehomogenize_sSup
+
 @[simp] lemma dehomogenize_bot : (⊥ : SubMulActionWithZero R≥0 W).dehomogenize A = ∅ := by
   ext x; simpa using ofPoint_ne_zero _
 
@@ -201,6 +201,12 @@ lemma homogenize_singleton_eq {x y : A} :
   ext x; simp [dehomogenize]
 
 end Nontrivial
+
+lemma homogenize_gc : GaloisConnection (homogenize R W) (dehomogenize A) := by
+  -- TODO: we could use GaloisConnection.compose:
+  --  * homogenize = closure ∘ image
+  --  * dehomogenize = preimage ∘ coe
+  sorry
 
 end Ring
 
