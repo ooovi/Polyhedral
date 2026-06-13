@@ -8,9 +8,9 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 In particular, the homogenization is never empty. This enables to prove suitable order
 isomorphisms. -/
 
-namespace Affine.IsHomogenization
+namespace Affine
 
-open Function SubMulActionWithZero
+open Function SubMulActionWithZero IsHomogenization
 
 variable {R V A W : Type*}
 
@@ -367,4 +367,4 @@ def homogenizeOrderIso : Set A ≃o Set.Iic (hom.weight.positive : SubMulActionW
 
 end DivisionRing
 
-end Affine.IsHomogenization
+end Affine
