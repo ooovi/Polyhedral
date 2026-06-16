@@ -63,6 +63,23 @@ F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
       specialize hh₁ hhx hhy hz hhz
       apply hh₁
 
+lemma isFaceOf_iff (F C F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
+F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
+  apply Iff.intro
+  · intro h
+    constructor
+    · apply h.1
+    · apply trans R C F F₁ h H
+  · intro h
+    constructor
+    · apply h.1
+    · have h₁ := h.2.2
+      intro x hx y hy z hz hhz
+      have hhx : x ∈ C.carrier := Set.mem_of_mem_of_subset hx H.1
+      have hhy : y ∈ C.carrier := Set.mem_of_mem_of_subset hy H.1
+      specialize @h₁ x hhx y hhy z hz hhz
+      use h₁
+
 theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S₁.carrier ∩ S₂.carrier )
 := by
   have hs₁ := S₁.2
@@ -70,7 +87,7 @@ theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S�
   unfold Convexity.IsConvexSet at hs₁ hs₂
   unfold Convexity.IsConvexSet
   intro w hw
-  rw [Set.subset_inter_iff] at  hw
+  rw [Set.subset_inter_iff] at hw
   specialize @hs₁ w hw.1
   specialize @hs₂ w hw.2
   use hs₁
@@ -171,5 +188,31 @@ theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F
     specialize @hF2 m hmC n hnC l hlF hl
     apply Set.mem_image_of_mem
     use hF2
+
+theorem isFaceOf_map_iff (f : M → N) (hhf : IsAffineMap R f) (hf : Function.Injective f)
+(C F : ConvexSet R M):(F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
+  apply Iff.intro
+  · intro h
+    constructor
+    · have h₁ := h.1
+      have h' := (Set.image_subset_image_iff hf).mp h₁
+      use h'
+    · intro x hx y hy z hz hhz
+      have hx' : f x ∈ (C.map hhf) := Set.mem_image_of_mem f hx
+      have hy' : f y ∈ (C.map hhf) := Set.mem_image_of_mem f hy
+      have hz' : f z ∈ (F.map hhf) := Set.mem_image_of_mem f hz
+      have hhz' : f z ∈ Convexity.openSegment R (f x) (f y) := by
+        rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
+        have hff : f (convexCombPair a b ha.le hb.le hab x y) =
+        convexCombPair a b ha.le hb.le hab (f x) (f y) := hhf.map_convexCombPair ha.le hb.le hab x y
+        rw [hcomb] at hff
+        unfold Convexity.openSegment
+        use a, b, ha, hb, hab
+        use hff.symm
+      have h2 := h.2
+      specialize @h2 (f x) hx' (f y) hy' (f z) hz' hhz'
+      exact (Function.Injective.mem_set_image hf).mp h2
+  · intro h
+    apply map R hhf hf F C h
 
 end ConvexSet
