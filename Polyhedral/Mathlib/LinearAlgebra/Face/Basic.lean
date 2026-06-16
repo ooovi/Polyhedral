@@ -63,6 +63,8 @@ F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
       specialize hh₁ hhx hhy hz hhz
       apply hh₁
 
+/-A convex set is a face of a face iff it is contained in the face and it is a face
+of the ambient set-/
 lemma isFaceOf_iff (F C F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
 F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
   apply Iff.intro
@@ -80,6 +82,7 @@ F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
       specialize @h₁ x hhx y hhy z hz hhz
       use h₁
 
+/-intersection of two convex sets is a convex set -/
 theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S₁.carrier ∩ S₂.carrier )
 := by
   have hs₁ := S₁.2
@@ -162,6 +165,7 @@ F.IsFaceOf (Inter R S₁ S₂) := by
     specialize @h1 x hx.1 y hy.1 z hz hhz
     use h1
 
+/- The image of a face under an injective affine map is a face. -/
 theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F C : ConvexSet R M)
   (hF : F.IsFaceOf C) :
   (F.map hhf).IsFaceOf (C.map hhf) := by
@@ -189,6 +193,7 @@ theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f) (F
     apply Set.mem_image_of_mem
     use hF2
 
+/- F is a face of C iff the image of F is a face of the image of C under and injective affine map -/
 theorem isFaceOf_map_iff (f : M → N) (hhf : IsAffineMap R f) (hf : Function.Injective f)
 (C F : ConvexSet R M):(F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
   apply Iff.intro
@@ -214,5 +219,24 @@ theorem isFaceOf_map_iff (f : M → N) (hhf : IsAffineMap R f) (hf : Function.In
       exact (Function.Injective.mem_set_image hf).mp h2
   · intro h
     apply map R hhf hf F C h
+
+def comap {f : M → N} (hf : IsAffineMap R f) (C : ConvexSet R N) : ConvexSet R M := {
+  carrier := f ⁻¹' C.carrier,
+  isConvexSet := by apply Convexity.IsConvexSet.preimage hf C.isConvexSet
+}
+
+theorem of_comap_surjective {f : M → N} (hf : IsAffineMap R f) (hhf : Function.Surjective f) (F C : ConvexSet R N)
+(hF : (F.comap hf).IsFaceOf (C.comap hf)) : F.IsFaceOf C := by
+  constructor
+  · have hF1 := hF.1
+    have h1 : f '' (F.comap hf).carrier = F.carrier := by
+      apply Set.image_preimage_eq F hhf
+    have h2 : f '' (C.comap hf).carrier = C.carrier := by
+      apply Set.image_preimage_eq C hhf
+    have hF1' : f '' (F.comap hf).carrier ⊆ f '' (C.comap hf).carrier := by
+    sorry
+  · have hF1 := hF.2
+
+    sorry
 
 end ConvexSet
