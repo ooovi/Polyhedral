@@ -219,8 +219,17 @@ lemma smulSet_inter_right (s : Set M) (t : SubMulActionWithZero R M) :
     R ∙ (s ∩ t) = R ∙ s ⊓ R ∙ t := by
   rw [Set.inter_comm, inf_comm, smulSet_inter_left]
 
-lemma smulSet_sInf (s : Set (Set M)) : R ∙ (sInf s) ≤ sInf ((R ∙ ·) '' s) :=
-  sorry
+lemma smulSet_sInf_le (S : Set (Set M)) : R ∙ (sInf S) ≤ ⨅ s ∈ S, (R ∙ s) := by
+  intro x
+  simp only [iInf, SetLike.mem_sInf, mem_range, forall_exists_index, forall_apply_eq_imp_iff,
+    exists_prop, and_imp]
+  rintro (rfl | ⟨y, hy, r, rfl⟩) s hs
+  · exact zero_mem _
+  · exact smul_mem _ r <| subset_smulSet (hy s hs)
+
+lemma smulSet_sInf_le_sInf_smulSet_image (S : Set (Set M)) :
+    R ∙ (sInf S) ≤ sInf ((R ∙ ·) '' S) := by
+  simpa using smulSet_sInf_le S
 
 lemma smulSet_union (s t : Set M) : R ∙ (s ∪ t) = R ∙ s ⊔ R ∙ t := by
   sorry
