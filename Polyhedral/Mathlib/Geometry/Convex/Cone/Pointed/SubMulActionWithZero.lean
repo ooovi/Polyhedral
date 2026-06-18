@@ -93,12 +93,20 @@ lemma mulAction_closure_le_hull (s : Set M) : closure R≥0 s ≤ hull R s := by
   rw [mem_closure] at hx
   exact hx (hull R s) subset_hull
 
--- move
-@[simp] theorem hull_mulAction_closure_eq_hull (t : Set M) :
-    hull R (closure R≥0 t) = hull R t := by
+@[simp] theorem hull_mulAction_closure_eq_hull (s : Set M) :
+    hull R (closure R≥0 s) = hull R s := by
   refine le_antisymm ?_ <| hull_mono subset_closure
   nth_rw 2 [← hull_hull]
   exact hull_mono (mulAction_closure_le_hull _)
+
+lemma smulSet_le_hull (s : Set M) : R≥0 ∙ s ≤ hull R s := by
+  rw [← closure_eq_smulSet]
+  exact mulAction_closure_le_hull s
+
+@[simp] theorem hull_smulSet_eq_hull (s : Set M) :
+    hull R (R≥0 ∙ s) = hull R s := by
+  rw [← closure_eq_smulSet]
+  exact hull_mulAction_closure_eq_hull s
 
 end Semiring
 
