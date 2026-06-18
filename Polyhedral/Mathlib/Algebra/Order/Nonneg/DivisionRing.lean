@@ -13,9 +13,8 @@ public import Mathlib.Data.Nat.Cast.Order.Ring
 
 /-
 TODO:
-This file re-introduces lemmas/def previously written for Field, but generalizes them
-to DivisionRing. When this goes into mathlib one should instead generalize the Field
-versions directly.
+This file generalizes lemmas/defs previously written for Field with a dashed name,
+When this goes into mathlib one should instead generalize the Field versions directly.
 -/
 
 /-!
@@ -28,7 +27,8 @@ This is used to derive algebraic structures on `ℝ≥0` and `ℚ≥0` automatic
 
 ## Main declarations
 
-* `{x : α // 0 ≤ x}` is a `CanonicallyLinearOrderedDivisionSemiring` if `α` is a `LinearOrderedField`.
+* `{x : α // 0 ≤ x}` is a `CanonicallyLinearOrderedDivisionSemiring` if `α` is a
+`LinearOrderedField`.
 -/
 
 @[expose] public section
@@ -72,7 +72,8 @@ instance inv' : Inv { x : α // 0 ≤ x } :=
   ⟨fun x => ⟨x⁻¹, inv_nonneg.2 x.2⟩⟩
 
 @[simp, norm_cast]
-protected theorem coe_inv' (a : { x : α // 0 ≤ x }) : ((a⁻¹ : { x : α // 0 ≤ x }) : α) = (a : α)⁻¹ :=
+protected theorem coe_inv' (a : { x : α // 0 ≤ x }) :
+    ((a⁻¹ : { x : α // 0 ≤ x }) : α) = (a : α)⁻¹ :=
   rfl
 
 @[simp]
@@ -84,7 +85,8 @@ instance div' : Div { x : α // 0 ≤ x } :=
   ⟨fun x y => ⟨x / y, div_nonneg x.2 y.2⟩⟩
 
 @[simp, norm_cast]
-protected theorem coe_div' (a b : { x : α // 0 ≤ x }) : ((a / b : { x : α // 0 ≤ x }) : α) = a / b :=
+protected theorem coe_div' (a b : { x : α // 0 ≤ x }) :
+    ((a / b : { x : α // 0 ≤ x }) : α) = a / b :=
   rfl
 
 @[simp]
