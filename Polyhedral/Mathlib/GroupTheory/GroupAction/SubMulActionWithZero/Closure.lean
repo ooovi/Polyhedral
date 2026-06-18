@@ -294,6 +294,10 @@ lemma smulSet_smulSet_inter_left (s t : Set M) :
     · simp [hr0]
     · exact .inr ⟨y, ⟨mem_of_smul_mem hr0 hx, hy⟩, ⟨r, rfl⟩⟩
 
+lemma smulSet_smulSet_inter_right (s t : Set M) :
+    R ∙ (s ∩ (R ∙ t)) = R ∙ s ⊓ R ∙ t := by
+  rw [Set.inter_comm, inf_comm, smulSet_smulSet_inter_left]
+
 lemma smulSet_inter_left (s : SubMulActionWithZero R M) (t : Set M) :
     R ∙ (s ∩ t) = s ⊓ R ∙ t := by
   rw [← smulSet_eq s]

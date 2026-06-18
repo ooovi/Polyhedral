@@ -179,8 +179,7 @@ instance : Max (SubMulActionWithZero R M) where
     { carrier := p ∪ q
       zero_mem' := Or.inl p.zero_mem
       smul_mem' := by
-        intro c x hx
-        rcases hx with hx | hx
+        rintro c x (hx | hx)
         · exact Or.inl (p.smul_mem c hx)
         · exact Or.inr (q.smul_mem c hx) }
 
@@ -197,9 +196,7 @@ instance : Min (SubMulActionWithZero R M) where
   min p q :=
     { carrier := p ∩ q
       zero_mem' := ⟨p.zero_mem, q.zero_mem⟩
-      smul_mem' := by
-        intro c x hx
-        exact ⟨p.smul_mem c hx.1, q.smul_mem c hx.2⟩ }
+      smul_mem' c _ hx := ⟨p.smul_mem c hx.1, q.smul_mem c hx.2⟩ }
 
 instance : IsConcreteMin (SubMulActionWithZero R M) M := ⟨fun _ _ => rfl⟩
 
