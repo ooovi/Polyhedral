@@ -52,6 +52,45 @@ end LE
 end SetLike
 
 
+/- # Pointed Bot # -/
+
+class IsConcreteBot₀ (A : Type*) (B : outParam Type*) [Zero B] [SetLike A B] [Bot A] where
+  protected coe_bot₀' : (⊥ : A) = ({0} : Set B)
+  protected zero_mem' (a : A) : 0 ∈ a
+
+namespace SetLike
+
+variable {A B : Type*} [Zero B] [SetLike A B] [Bot A] [IsConcreteBot₀ A B]
+
+@[simp] lemma coe_bot₀ : (⊥ : A) = ({0} : Set B) := IsConcreteBot₀.coe_bot₀'
+
+@[simp] lemma zero_mem (a : A) : 0 ∈ a := IsConcreteBot₀.zero_mem' a
+
+@[simp, grind =, push]
+theorem mem_bot_iff_zero {x : B} : x ∈ (⊥ : A) ↔ x = 0 := by simp [← mem_coe]
+
+theorem eq_bot_iff_forall_eq_zer0 {a : A} : a = ⊥ ↔ ∀ x ∈ a, x = 0 := by
+  -- simp [← coe_set_eq]
+  sorry
+
+theorem eq_bot_of_forall_eq_zero {a : A} (h : ∀ x, x = 0) : a = ⊥ :=
+  -- eq_bot_iff_forall_notMem.mpr h
+  sorry
+
+theorem forall_mem_bot_iff_zero {p : B → Prop} : (∀ x ∈ (⊥ : A), p x) ↔ p 0 := by simp
+
+section LE
+
+variable [LE A] [IsConcreteLE A B]
+
+@[reducible] def _root_.OrderBot.ofSetLike₀ : OrderBot A where
+  bot_le := by simp [← coe_subset_coe]
+
+end LE
+
+end SetLike
+
+
 /- # Empty # -/
 
 class IsConcreteEmpty (A : Type*) (B : outParam Type*) [SetLike A B] [EmptyCollection A] where
@@ -354,15 +393,14 @@ theorem mem_singleton_iff : x ∈ ({y} : A) ↔ x = y := by simp [← mem_coe]
 
 theorem notMem_singleton_iff : x ∉ ({y} : A) ↔ x ≠ y := by simp [← mem_coe]
 
--- theorem mem_singleton (a : α) : a ∈ ({a} : Set α) :=
---   @rfl _ _
+theorem mem_singleton (a : B) : a ∈ ({a} : A) := by simp [← mem_coe]
 
--- theorem eq_of_mem_singleton {x y : α} (h : x ∈ ({y} : Set α)) : x = y :=
---   h
+theorem eq_of_mem_singleton {x y : B} (h : x ∈ ({y} : A)) : x = y := by
+  simpa [← mem_coe] using h
 
--- @[simp]
--- theorem singleton_eq_singleton_iff {x y : α} : {x} = ({y} : Set α) ↔ x = y :=
---   Set.ext_iff.trans eq_iff_eq_cancel_left
+@[simp]
+theorem singleton_eq_singleton_iff {x y : B} : {x} = ({y} : A) ↔ x = y := by
+  simp [← coe_set_eq]
 
 -- theorem singleton_injective : Injective (singleton : α → Set α) := fun _ _ =>
 --   singleton_eq_singleton_iff.mp
@@ -461,6 +499,13 @@ variable {A B : Type*} [SetLike A B] [Min A] [IsConcreteMin A B]
 
 @[simp] lemma coe_min (a b : A) : (a ⊓ b : A) = (a ∩ b : Set B) := IsConcreteMin.coe_min' a b
 
+alias coe_inf := coe_min
+
+@[simp] lemma mem_min (a b : A) (x : B) : x ∈ a ⊓ b ↔ x ∈ a ∧ x ∈ b := by
+  simp [← mem_coe]
+
+alias mem_inf := mem_min
+
 section PartialOrder
 
 variable [PartialOrder A] [IsConcreteLE A B]
@@ -481,6 +526,14 @@ end SetLike
 
 /- # sInf # -/
 
+/- TODO: what should `sInf` coerce to?
+  * {x : B | ∀ a ∈ s, x ∈ a}
+  * ⋂ a ∈ s, a
+  * sInf (SetLike.coe '' s)
+Analogous choices need to be implemented for `sSup` and `sSup₀`.
+The second option is how this will most likely be implemented by the user.
+But only the first version has a natural analogue for `sSup₀`.
+-/
 class IsConcreteInfSet (A : Type*) (B : outParam Type*) [SetLike A B] [InfSet A] where
   protected coe_sInf' (s : Set A) : sInf s = ⋂ a ∈ s, (a : Set B)
 
@@ -488,7 +541,11 @@ namespace SetLike
 
 variable {A B : Type*} [SetLike A B] [InfSet A] [IsConcreteInfSet A B]
 
-@[simp] lemma coe_sInf (s : Set A) : sInf s = ⋂ a ∈ s, (a : Set B) := IsConcreteInfSet.coe_sInf' s
+@[simp] lemma coe_sInf (s : Set A) : sInf s = ⋂ a ∈ s, (a : Set B) :=
+  IsConcreteInfSet.coe_sInf' s
+
+@[simp] lemma mem_sInf (s : Set A) (x : B) : x ∈ sInf s ↔ ∀ a ∈ s, x ∈ a := by
+  simp [← mem_coe]
 
 section PartialOrder
 
@@ -515,6 +572,13 @@ namespace SetLike
 variable {A B : Type*} [SetLike A B] [Max A] [IsConcreteMax A B]
 
 @[simp] lemma coe_max (a b : A) : (a ⊔ b : A) = (a ∪ b : Set B) := IsConcreteMax.coe_max' a b
+
+alias coe_sup := coe_max
+
+@[simp] lemma mem_max (a b : A) (x : B) : x ∈ a ⊔ b ↔ x ∈ a ∨ x ∈ b := by
+  simp [← mem_coe]
+
+alias mem_sup := mem_max
 
 section PartialOrder
 
@@ -543,7 +607,11 @@ namespace SetLike
 
 variable {A B : Type*} [SetLike A B] [SupSet A] [IsConcreteSupSet A B]
 
-@[simp] lemma coe_sSup (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B) := IsConcreteSupSet.coe_sSup' s
+@[simp] lemma coe_sSup (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B) :=
+  IsConcreteSupSet.coe_sSup' s
+
+@[simp] lemma mem_sSup (s : Set A) (x : B) : x ∈ sSup s ↔ ∃ a ∈ s, x ∈ a := by
+  simp [← mem_coe]
 
 section PartialOrder
 
@@ -552,6 +620,48 @@ variable [PartialOrder A] [IsConcreteLE A B]
 variable (A B) in
 @[reducible] def _root_.CompleteSemilatticeSup.ofSetLike : CompleteSemilatticeSup A where
   isLUB_sSup := by simp [isLUB_iff_le_iff, ← SetLike.coe_subset_coe, upperBounds]
+
+end PartialOrder
+
+-- TODO: add theorems
+
+end SetLike
+
+
+/- # Pointed sSup # -/
+
+-- class IsConcreteSupSet₀ (A : Type*) (B : outParam Type*) [Zero B] [SetLike A B] [SupSet A] where
+--   mem_coe_sSup₀ (s : Set A) (x : B) : x ∈ sSup s ↔ x = 0 ∨ ∃ a ∈ s, x ∈ a
+
+class IsConcreteSupSet₀ (A : Type*) (B : outParam Type*) [Zero B] [SetLike A B] [SupSet A] where
+  protected coe_sSup₀' (s : Set A) : sSup s = insert 0 (⋃ a ∈ s, (a : Set B))
+
+namespace SetLike
+
+variable {A B : Type*} [Zero B] [SetLike A B] [SupSet A] [IsConcreteSupSet₀ A B]
+
+@[simp] lemma coe_sSup₀ (s : Set A) : sSup s = insert 0 (⋃ a ∈ s, (a : Set B)) :=
+  IsConcreteSupSet₀.coe_sSup₀' s
+
+variable [Bot A] [IsConcreteBot₀ A B] in
+@[simp] lemma coe_sSup_eq_iUnion_of_nonempty {s : Set A} (hs : s.Nonempty) :
+    sSup s = ⋃ a ∈ s, (a : Set B) := by
+  ext
+  simp only [coe_sSup₀, Set.mem_insert_iff, Set.mem_iUnion, mem_coe, exists_prop,
+    or_iff_right_iff_imp]
+  intro rfl
+  exact ⟨_, hs.choose_spec, zero_mem _⟩
+
+@[simp] lemma mem_sSup₀ (s : Set A) (x : B) : x ∈ sSup s ↔ x = 0 ∨ ∃ a ∈ s, x ∈ a := by
+  simp [← mem_coe]
+
+section PartialOrder
+
+variable [PartialOrder A] [IsConcreteLE A B]
+
+variable (A B) [Bot A] [IsConcreteBot₀ A B] in
+@[reducible] def _root_.CompleteSemilatticeSup.ofSetLike₀ : CompleteSemilatticeSup A where
+  isLUB_sSup := by sorry
 
 end PartialOrder
 
