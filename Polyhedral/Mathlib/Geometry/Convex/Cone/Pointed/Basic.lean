@@ -182,7 +182,15 @@ lemma submodule_span_of_hull {s : Set M} {S : Submodule R M} (hsS : hull R s = S
 --   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
 lemma hull_union (s t : Set M) : hull R (s ∪ t) = hull R s ⊔ hull R t :=
-    Submodule.span_union s t
+  Submodule.span_union s t
+
+lemma sup_eq_hull_union (C D : PointedCone R M) : C ⊔ D = hull R (C ∪ D) := by
+  rw [← hull_eq (S := C), ← hull_eq (S := D), hull_union]
+  simp
+
+lemma sSup_eq_hull_iUnion (S : Set (PointedCone R M)) : sSup S = hull R (sSup (SetLike.coe '' S)) := by
+  -- TODO
+  sorry
 
 -- delete?
 lemma hull_min {s : Set M} {C : PointedCone R M} (hsC : s ⊆ C) : hull R s ≤ C := sInf_le hsC
