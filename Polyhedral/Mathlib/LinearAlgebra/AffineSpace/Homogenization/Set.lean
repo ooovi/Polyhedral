@@ -1,3 +1,10 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
+import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
 
@@ -268,9 +275,10 @@ lemma homogenize_le_weight_positive (s : Set A) :
 @[simp] theorem homogenize_dehomogenize_le_weight_positive {S : SubMulActionWithZero R≥0 W} :
     homogenize R W (S.dehomogenize A) ≤ S ⊓ hom.weight.positive := by
   have aux : Set.range hom.ofPoint = hom.ofPoint.range := rfl
-  simpa [homogenize, dehomogenize, Set.image_preimage_eq_inter_range,
-    smulSet_inter_left, aux] using le_trans inf_le_right
-      nonneg_smulSet_ofPoint_range_le_weight_positive
+  rw [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, aux]
+  refine le_trans (smulSet_inter_le _ _) ?_
+  simp only [smulSet_eq, le_inf_iff, inf_le_left, true_and]
+  exact le_trans inf_le_right nonneg_smulSet_ofPoint_range_le_weight_positive
 
 end IsStrictOrderedRing
 
@@ -303,7 +311,7 @@ lemma homogenize_inter (s t : Set A) :
   · exact homogenize_inter_le s t
   · rintro x hx
     obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize' hx.1
-    · exact SubMulActionWithZero.zero_mem _
+    · exact SubMulActionWithZero.zero_mem
     refine smul_ofPoint_mem_homogenize hr.le ⟨hys, ?_⟩
     exact (smul_ofPoint_mem_homogenize_iff hr t).mp hx.2
 
@@ -322,7 +330,7 @@ lemma homogenize_sInf {S : Set (Set A)} (hS : S.Nonempty) :
   simp only [SetLike.mem_sInf, Set.mem_image, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at hx
   obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize' (hx _ hS.choose_spec)
-  · exact SubMulActionWithZero.zero_mem _
+  · exact SubMulActionWithZero.zero_mem
   exact smul_ofPoint_mem_homogenize hr.le fun t ht =>
     (smul_ofPoint_mem_homogenize_iff hr t).mp (hx _ ht)
 
@@ -369,10 +377,21 @@ lemma nonneg_smulSet_ofPoint_range :
 @[simp] lemma homogenize_univ : homogenize R W (Set.univ : Set A) = hom.weight.positive := by
   simpa [homogenize] using nonneg_smulSet_ofPoint_range
 
+end DivisionRing
+
+section LinearOrderDivisionRing
+
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup V] [Module R V]
+variable [AddTorsor V A]
+variable [AddCommGroup W] [Module R W]
+
+variable [hom : IsHomogenization R A W]
+
 @[simp] theorem homogenize_dehomogenize {S : SubMulActionWithZero R≥0 W} :
     homogenize R W (S.dehomogenize A) = S ⊓ hom.weight.positive := by
   have aux : Set.range hom.ofPoint = hom.ofPoint.range := rfl
-  simp [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, smulSet_inter_left, aux,
+  rw [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, smulSet_inter_left, aux,
     nonneg_smulSet_ofPoint_range]
 
 @[simp] theorem homogenize_dehomogenize_of_le_weight_positive {S : SubMulActionWithZero R≥0 W}
@@ -386,6 +405,6 @@ def homogenizeOrderIso : Set A ≃o Set.Iic (hom.weight.positive : SubMulActionW
   right_inv S := by simp only [homogenize_dehomogenize_of_le_weight_positive S.2]
   map_rel_iff' := homogenize_mono_iff
 
-end DivisionRing
+end LinearOrderDivisionRing
 
 end Affine

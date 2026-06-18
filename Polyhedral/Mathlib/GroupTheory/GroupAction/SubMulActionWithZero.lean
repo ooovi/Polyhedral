@@ -141,7 +141,7 @@ theorem copy_eq (p : SubMulActionWithZero R M) (s : Set M) (hs : s = ↑p) :
   SetLike.coe_injective hs
 
 @[simp]
-theorem zero_mem (p : SubMulActionWithZero R M) : (0 : M) ∈ p :=
+theorem zero_mem {p : SubMulActionWithZero R M} : (0 : M) ∈ p :=
   p.zero_mem'
 
 theorem smul_mem (p : SubMulActionWithZero R M) (r : R) {x : M} (hx : x ∈ p) :
@@ -242,7 +242,7 @@ instance : Bot (SubMulActionWithZero R M) := ⟨{
 
 instance : IsConcreteBot₀ (SubMulActionWithZero R M) M where
   coe_bot₀' := rfl
-  zero_mem' := zero_mem
+  zero_mem' _ := zero_mem
 
 instance : OrderBot (SubMulActionWithZero R M) := .ofSetLike₀
 
@@ -308,5 +308,21 @@ theorem mem_ofClass (s : S) {x : M} :
   Iff.rfl
 
 end OfClass
+
+section GroupWithZero
+
+variable [GroupWithZero R] [Zero M] [MulActionWithZero R M]
+variable {s t : Set M} {x : M}
+
+lemma mem_of_smul_mem {s : SubMulActionWithZero R M} {r : R} (hr : r ≠ 0)
+    (hx : r • x ∈ s) : x ∈ s := by
+  simpa [smul_smul, inv_mul_cancel₀ hr] using smul_mem s r⁻¹ hx
+
+lemma smul_mem_iff_mem {s : SubMulActionWithZero R M} {r : R} (hr : r ≠ 0) :
+    r • x ∈ s ↔ x ∈ s where
+  mp := mem_of_smul_mem hr
+  mpr := smul_mem s r
+
+end GroupWithZero
 
 end SubMulActionWithZero
