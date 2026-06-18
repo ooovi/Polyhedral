@@ -544,6 +544,8 @@ variable {A B : Type*} [SetLike A B] [InfSet A] [IsConcreteInfSet A B]
 @[simp] lemma coe_sInf (s : Set A) : sInf s = ⋂ a ∈ s, (a : Set B) :=
   IsConcreteInfSet.coe_sInf' s
 
+lemma coe_sInf_eq_sInf_coe_image (s : Set A) : sInf s = sInf (SetLike.coe '' s) := by simp
+
 @[simp] lemma mem_sInf (s : Set A) (x : B) : x ∈ sInf s ↔ ∀ a ∈ s, x ∈ a := by
   simp [← mem_coe]
 
@@ -609,6 +611,8 @@ variable {A B : Type*} [SetLike A B] [SupSet A] [IsConcreteSupSet A B]
 
 @[simp] lemma coe_sSup (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B) :=
   IsConcreteSupSet.coe_sSup' s
+
+lemma coe_sSup_eq_sSup_coe_image (s : Set A) : sSup s = sSup (SetLike.coe '' s) := by simp
 
 @[simp] lemma mem_sSup (s : Set A) (x : B) : x ∈ sSup s ↔ ∃ a ∈ s, x ∈ a := by
   simp [← mem_coe]

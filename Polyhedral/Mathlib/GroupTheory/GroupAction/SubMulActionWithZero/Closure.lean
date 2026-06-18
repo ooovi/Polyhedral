@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026.
+Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: M Winter
+Authors: Martin Winter
 -/
 
 import Mathlib.Data.Set.Finite.Basic
@@ -96,8 +96,7 @@ theorem fg_iff {p : SubMulActionWithZero R M} :
     p.FG ↔ ∃ (s : Finset M), p = closure R s :=
   Set.exists_finite_iff_finset
 
-lemma closure_gc :
-    GaloisConnection (closure R : Set M → SubMulActionWithZero R M) (SetLike.coe) := by
+lemma closure_gc : GaloisConnection (closure R : Set M → SubMulActionWithZero R M) (↑) := by
   sorry
 
 end SMul
@@ -206,16 +205,14 @@ def smulSetOrderHom : Set M →o SubMulActionWithZero R M where
   monotone' := smulSet_monotone
 
 lemma smulSet_inter_le (s t : Set M) : R ∙ (s ∩ t) ≤ R ∙ s ⊓ R ∙ t := by
-  intro x hx
-  -- TODO
-  sorry
+  rintro x (rfl | ⟨y, hy, r, rfl⟩)
+  · exact zero_mem _
+  · exact ⟨smul_mem _ r (subset_smulSet hy.1), smul_mem _ r (subset_smulSet hy.2)⟩
 
 lemma smulSet_inter_left (s : SubMulActionWithZero R M) (t : Set M) :
     R ∙ (s ∩ t) = R ∙ s ⊓ R ∙ t := by
   apply le_antisymm
   · exact smulSet_inter_le ..
-  intro x hx
-  -- TODO
   sorry
 
 lemma smulSet_inter_right (s : Set M) (t : SubMulActionWithZero R M) :

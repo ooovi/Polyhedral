@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026.
+Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: M Winter
+Authors: Martin Winter
 -/
 
 import Mathlib.GroupTheory.GroupAction.SubMulAction
@@ -258,11 +258,11 @@ instance : SupSet (SubMulActionWithZero R M) where
 
 instance : IsConcreteSupSet₀ (SubMulActionWithZero R M) M := ⟨fun _ => rfl⟩
 
+instance : CompleteSemilatticeSup (SubMulActionWithZero R M) := .ofSetLike₀ ..
+
 @[simp]
 theorem mem_sSup {S : Set (SubMulActionWithZero R M)} {x : M} :
     x ∈ sSup S ↔ x = 0 ∨ ∃ p ∈ S, x ∈ p := SetLike.mem_sSup₀ _ _
-
-instance : CompleteSemilatticeSup (SubMulActionWithZero R M) := .ofSetLike₀ ..
 
 instance : CompleteLattice (SubMulActionWithZero R M) where
 
