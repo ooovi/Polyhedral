@@ -159,11 +159,11 @@ theorem val_smul {p : SubMulActionWithZero R M} (r : R) (x : p) :
   rfl
 
 instance : OrderTop (SubMulActionWithZero R M) where
-  top :=
-    { carrier := Set.univ
-      zero_mem' := by simp
-      smul_mem' := by simp }
-  le_top := sorry
+  top := {
+    carrier := Set.univ
+    zero_mem' := by simp
+    smul_mem' := by simp }
+  le_top _ _ := by simp
 
 @[simp]
 theorem mem_top {x : M} : x ∈ (⊤ : SubMulActionWithZero R M) :=
@@ -183,6 +183,10 @@ instance : Max (SubMulActionWithZero R M) where
         · exact Or.inl (p.smul_mem c hx)
         · exact Or.inr (q.smul_mem c hx) }
 
+instance : IsConcreteMax (SubMulActionWithZero R M) M := ⟨fun _ _ => rfl⟩
+
+instance : SemilatticeSup (SubMulActionWithZero R M) := .ofSetLike ..
+
 @[simp]
 theorem mem_sup {p q : SubMulActionWithZero R M} {x : M} :
     x ∈ p ⊔ q ↔ x ∈ p ∨ x ∈ q :=
@@ -196,38 +200,30 @@ instance : Min (SubMulActionWithZero R M) where
         intro c x hx
         exact ⟨p.smul_mem c hx.1, q.smul_mem c hx.2⟩ }
 
+instance : IsConcreteMin (SubMulActionWithZero R M) M := ⟨fun _ _ => rfl⟩
+
+instance : SemilatticeInf (SubMulActionWithZero R M) := .ofSetLike ..
+
 @[simp]
 theorem mem_inf {p q : SubMulActionWithZero R M} {x : M} :
     x ∈ p ⊓ q ↔ x ∈ p ∧ x ∈ q :=
   Iff.rfl
 
 instance : Lattice (SubMulActionWithZero R M) where
-  sup := max
-  le_sup_left := sorry
-  le_sup_right := sorry
-  sup_le := sorry
-  inf := min
-  inf_le_left := sorry
-  inf_le_right := sorry
-  le_inf := sorry
 
 instance : InfSet (SubMulActionWithZero R M) where
-  sInf S :=
-    { carrier := { x | ∀ p ∈ S, x ∈ p }
-      zero_mem' := by
-        intro p hp
-        exact p.zero_mem
-      smul_mem' := by
-        intro c x hx p hp
-        exact p.smul_mem c (hx p hp) }
+  sInf S := {
+    carrier := ⋂ s ∈ S, s
+    zero_mem' := by simp
+    smul_mem' := by simpa using fun c x hx p hp => p.smul_mem c (hx p hp) }
+
+instance : IsConcreteInfSet (SubMulActionWithZero R M) M := ⟨fun _ => rfl⟩
 
 @[simp]
 theorem mem_sInf {S : Set (SubMulActionWithZero R M)} {x : M} :
-    x ∈ sInf S ↔ ∀ p ∈ S, x ∈ p :=
-  Iff.rfl
+    x ∈ sInf S ↔ ∀ p ∈ S, x ∈ p := SetLike.mem_sInf _ _
 
-instance : CompleteSemilatticeInf (SubMulActionWithZero R M) where
-  isGLB_sInf := sorry
+instance : CompleteSemilatticeInf (SubMulActionWithZero R M) := .ofSetLike ..
 
 end Zero_SMul
 
@@ -235,42 +231,37 @@ section SMulZeroClass
 
 variable [Zero M] [SMulZeroClass R M]
 
-instance : OrderBot (SubMulActionWithZero R M) where
-  bot :=
-    { carrier := {0}
-      zero_mem' := by simp
-      smul_mem' c x hx := by
-        rw [Set.mem_singleton_iff] at hx ⊢
-        rw [hx, smul_zero] }
-  bot_le := sorry
+instance : Bot (SubMulActionWithZero R M) := ⟨{
+  carrier := {0}
+  zero_mem' := by simp
+  smul_mem' c x hx := by
+    rw [Set.mem_singleton_iff] at hx ⊢
+    rw [hx, smul_zero]
+  }⟩
 
-@[simp]
+instance : IsConcreteBot₀ (SubMulActionWithZero R M) M where
+  coe_bot₀' := rfl
+  zero_mem' := zero_mem
+
+instance : OrderBot (SubMulActionWithZero R M) := .ofSetLike₀
+
 theorem mem_bot {x : M} :
     x ∈ (⊥ : SubMulActionWithZero R M) ↔ x = 0 :=
-  Set.mem_singleton_iff
-
-theorem bot_le (p : SubMulActionWithZero R M) : ⊥ ≤ p := by
-  intro x hx
-  rw [mem_bot] at hx
-  simp [hx, p.zero_mem]
+  SetLike.mem_bot_iff_zero
 
 instance : SupSet (SubMulActionWithZero R M) where
-  sSup S :=
-    { carrier := { x | x = 0 ∨ ∃ p ∈ S, x ∈ p }
-      zero_mem' := Or.inl rfl
-      smul_mem' := by
-        intro c x hx
-        rcases hx with rfl | ⟨p, hpS, hxp⟩
-        · exact Or.inl (smul_zero c)
-        · exact Or.inr ⟨p, hpS, p.smul_mem c hxp⟩ }
+  sSup S := {
+    carrier := insert 0 (⋃ s ∈ S, s)
+    zero_mem' := Or.inl rfl
+    smul_mem' := by simpa using fun c x s hs hx => .inr ⟨s, hs, smul_mem s c hx⟩ }
+
+instance : IsConcreteSupSet₀ (SubMulActionWithZero R M) M := ⟨fun _ => rfl⟩
 
 @[simp]
 theorem mem_sSup {S : Set (SubMulActionWithZero R M)} {x : M} :
-    x ∈ sSup S ↔ x = 0 ∨ ∃ p ∈ S, x ∈ p :=
-  Iff.rfl
+    x ∈ sSup S ↔ x = 0 ∨ ∃ p ∈ S, x ∈ p := SetLike.mem_sSup₀ _ _
 
-instance : CompleteSemilatticeSup (SubMulActionWithZero R M) where
-  isLUB_sSup := sorry
+instance : CompleteSemilatticeSup (SubMulActionWithZero R M) := .ofSetLike₀ ..
 
 instance : CompleteLattice (SubMulActionWithZero R M) where
 

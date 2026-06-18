@@ -83,11 +83,11 @@ def closureOrderHom : Set M →o SubMulActionWithZero R M where
   monotone' := closure_monotone
 
 lemma closure_sInf (s : Set (Set M)) : closure R (sInf s) ≤ sInf (closure R '' s) := by
-  refine fun _ hx => hx _ fun _ hx => ?_
-  simpa using fun S hS => subset_closure (hx S hS)
+  intro _ ht
+  simpa using fun _ hx => closure_mono (sInf_le hx) ht
 
 lemma closure_inter_le (s t : Set M) : closure R (s ∩ t) ≤ closure R s ⊓ closure R t :=
-  fun _ hx => hx _ fun _ hx => ⟨subset_closure hx.1, subset_closure hx.2⟩
+  fun _ ha => ⟨closure_mono inf_le_left ha, closure_mono inf_le_right ha⟩
 
 /-- A `SubMulActionWithZero` is finitely generated if it is the closure of a finite set. -/
 def FG (p : SubMulActionWithZero R M) : Prop :=
@@ -169,6 +169,9 @@ theorem mem_smulSet_of_nonempty (hs : s.Nonempty) :
 theorem subset_smulSet : s ⊆ R ∙ s :=
   fun x hx => .inr ⟨x, hx, 1, (one_smul _ _).symm⟩
 
+theorem mem_smulSet_of_mem (hx : x ∈ s) : x ∈ R ∙ s :=
+  .inr ⟨x, hx, 1, (one_smul R x).symm⟩
+
 theorem smul_mem_smulSet_of_mem (r : R) (hx : x ∈ s) : r • x ∈ R ∙ s :=
   .inr ⟨x, hx, r, rfl⟩
 
@@ -242,7 +245,9 @@ theorem smulSet_empty : R ∙ (∅ : Set M) = ⊥ := by
 variable (R) in
 theorem closure_eq_smulSet (s : Set M) : closure R s = R ∙ s := by
   ext x; constructor
-  · exact fun h => h (R ∙ s) fun _ hx => subset_smulSet hx
+  · have := closure_mono (R := R) <| subset_smulSet (R := R) (s := s)
+    rw [closure_eq] at this
+    exact fun hx => this hx
   · rintro (rfl | ⟨y, hy, r, rfl⟩)
     · exact zero_mem _
     · exact smul_mem_closure_of_mem _ hy

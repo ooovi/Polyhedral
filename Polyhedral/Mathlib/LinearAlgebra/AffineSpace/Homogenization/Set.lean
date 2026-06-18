@@ -95,12 +95,12 @@ lemma homogenize_inter_le (s t : Set A) :
   rw [Set.image_inter hom.ofPoint_injective]
   exact smulSet_inter_le _ _
 
-lemma homogenize_sSup (s : Set (Set A)) :
-    homogenize R W (sSup s) = sSup (homogenize R W '' s) := by
+lemma homogenize_sSup (S : Set (Set A)) :
+    homogenize R W (sSup S) = ⨆ s ∈ S, homogenize R W s := by
   sorry -- simp only [homogenize, Set.image_sSup, smulSet_sSup]
 
-lemma homogenize_sInf_le (s : Set (Set A)) :
-    homogenize R W (sInf s) ≤ sInf (homogenize R W '' s) := by
+lemma homogenize_sInf_le (S : Set (Set A)) :
+    homogenize R W (sInf S) ≤ sInf (homogenize R W '' S) := by
   sorry
 
 section Nontrivial
@@ -154,6 +154,20 @@ end Nontrivial
 variable (A) in
 def _root_.SubMulActionWithZero.dehomogenize (S : SubMulActionWithZero R≥0 W) : Set A :=
   hom.ofPoint ⁻¹' S
+
+omit [IsOrderedRing R] in
+lemma dehomogenize_mono {S T : SubMulActionWithZero R≥0 W} (h : S ≤ T) :
+    dehomogenize A S ≤ dehomogenize A T :=
+  Set.preimage_mono h
+
+omit [IsOrderedRing R] in
+lemma dehomogenize_monotone : Monotone (dehomogenize A : SubMulActionWithZero R≥0 W → Set A) :=
+  fun _ _ => dehomogenize_mono
+
+/-- Homogenization from sets to `SubMulActionWithZero` as an order homomorphism. -/
+def dehomogenizeOrderHom : SubMulActionWithZero R≥0 W →o Set A where
+  toFun := dehomogenize A
+  monotone' := dehomogenize_monotone
 
 omit [IsOrderedRing R] in
 lemma dehomogenize_top : dehomogenize A (⊤ : SubMulActionWithZero R≥0 W) = Set.univ := by
@@ -219,7 +233,7 @@ variable [AddCommGroup W] [Module R W]
 
 variable [hom : IsHomogenization R A W]
 
-lemma dehomogenize_weight_positive :
+@[simp] lemma dehomogenize_weight_positive :
     dehomogenize A (hom.weight.positive : SubMulActionWithZero R≥0 W) = Set.univ := by
   ext x; simp [dehomogenize, weight_one]
 
@@ -299,22 +313,23 @@ def homogenizeLatticeHom : LatticeHom (Set A) (SubMulActionWithZero R≥0 W) whe
   map_sup' := homogenize_union
   map_inf' := homogenize_inter
 
-variable (R W) in
+-- variable (R W) in
 lemma homogenize_sInf {S : Set (Set A)} (hS : S.Nonempty) :
     homogenize R W (sInf S) = sInf (homogenize R W '' S) := by
   apply le_antisymm
   · exact homogenize_sInf_le S
   intro x hx
-  obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize' <| hx _ ⟨_, hS.choose_spec, rfl⟩
+  simp only [SetLike.mem_sInf, Set.mem_image, forall_exists_index, and_imp,
+    forall_apply_eq_imp_iff₂] at hx
+  obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize' (hx _ hS.choose_spec)
   · exact SubMulActionWithZero.zero_mem _
   exact smul_ofPoint_mem_homogenize hr.le fun t ht =>
-    (smul_ofPoint_mem_homogenize_iff hr t).mp <| hx _ ⟨t, ht, rfl⟩
+    (smul_ofPoint_mem_homogenize_iff hr t).mp (hx _ ht)
 
-variable (R W) in
 lemma homogenize_inter' (s t : Set A) :
     homogenize R W (s ∩ t) = homogenize R W s ⊓ homogenize R W t := by
   simpa only [sInf_insert, sInf_singleton, Set.inf_eq_inter, Set.image_pair] using
-    homogenize_sInf R W (S := {s, t}) (Set.insert_nonempty ..)
+    homogenize_sInf (R := R) (W := W) (S := {s, t}) (Set.insert_nonempty ..)
 
 end IsCancelMulZero_IsTorsionFree
 
