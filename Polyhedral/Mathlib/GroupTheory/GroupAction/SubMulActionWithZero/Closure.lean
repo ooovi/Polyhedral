@@ -148,6 +148,16 @@ scoped notation:70 R:70 " ∙ " s:70 => SubMulActionWithZero.smulSet R s
 theorem mem_smulSet :
     x ∈ R ∙ s ↔ x = 0 ∨ ∃ y ∈ s, ∃ r : R, x = r • y := .rfl
 
+theorem mem_smulSet_iff_exists_ne_zero (hx : x ∈ R ∙ s) :
+    x = 0 ∨ ∃ y ∈ s, y ≠ 0 ∧ ∃ r : R, r ≠ 0 ∧ x = r • y := by
+  rcases hx with (rfl | ⟨y, hy, r, rfl⟩)
+  · exact .inl rfl
+  · by_cases hy0 : y = 0
+    · simp [hy0]
+    by_cases hr0 : r = 0
+    · simp [hr0]
+    exact .inr ⟨y, hy, hy0, r, hr0, rfl⟩
+
 theorem mem_smulSet_of_ne_zero (hx : x ≠ 0) :
     x ∈ R ∙ s ↔ ∃ y ∈ s, ∃ r : R, x = r • y where
   mp := by
@@ -279,7 +289,7 @@ theorem mem_smulSet_iff_forall_mem_of_subset :
 
 end MulActionWithZero
 
-section DivisionRing
+section GroupWithZero
 
 variable [GroupWithZero R] [Zero M] [MulActionWithZero R M]
 variable {s t : Set M} {x : M}
@@ -307,6 +317,6 @@ lemma smulSet_inter_right (s : Set M) (t : SubMulActionWithZero R M) :
     R ∙ (s ∩ t) = R ∙ s ⊓ t := by
   rw [Set.inter_comm, inf_comm, smulSet_inter_left]
 
-end DivisionRing
+end GroupWithZero
 
 end SubMulActionWithZero

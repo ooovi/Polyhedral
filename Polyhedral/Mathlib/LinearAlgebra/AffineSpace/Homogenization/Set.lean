@@ -48,21 +48,17 @@ lemma mem_homogenize {s : Set A} {x : W} :
     x ∈ homogenize R W s ↔ x = 0 ∨ ∃ y ∈ s, ∃ r : R, 0 ≤ r ∧ x = r • hom.ofPoint y := by
   simp [homogenize, mem_smulSet]
 
--- TODO: make this more systematic by introducing an analogous lemma for `smulSet` and use it
--- TODO: write analogous lemmas for the `mem_homogenize` versions below
-lemma mem_homogenize' {s : Set A} {x : W} (hx : x ∈ homogenize R W s) :
+lemma mem_homogenize_iff_exist_lt_zero {s : Set A} {x : W} (hx : x ∈ homogenize R W s) :
     x = 0 ∨ ∃ y ∈ s, ∃ r : R, 0 < r ∧ x = r • hom.ofPoint y := by
-  rcases hx with (rfl | ⟨_, ⟨y, hy, rfl⟩, ⟨r, hr⟩, rfl⟩)
+  obtain (rfl | ⟨y, ⟨z, hz, rfl⟩, _, ⟨r, _⟩, hr0, rfl⟩) := mem_smulSet_iff_exists_ne_zero hx
   · exact .inl rfl
-  · by_cases hr0 : 0 = r
-    · simp [← hr0]
-    exact .inr ⟨y, hy, r, lt_of_le_of_ne hr hr0, rfl⟩
+  · exact .inr ⟨z, hz, r, by rwa [← zero_lt_iff] at hr0, rfl⟩
 
-lemma mem_homogenize_of_ne_zero {s : Set A} {x : W} (hx : x ≠ 0) :
+lemma mem_homogenize_iff_ne_zero {s : Set A} {x : W} (hx : x ≠ 0) :
     x ∈ homogenize R W s ↔ ∃ y ∈ s, ∃ r : R, 0 ≤ r ∧ x = r • hom.ofPoint y := by
   simp [homogenize, mem_smulSet_of_ne_zero hx]
 
-lemma mem_homogenize_of_nonempty {s : Set A} {x : W} (hs : s.Nonempty) :
+lemma mem_homogenize_iff_nonempty {s : Set A} {x : W} (hs : s.Nonempty) :
     x ∈ homogenize R W s ↔ ∃ y ∈ s, ∃ r : R, 0 ≤ r ∧ x = r • hom.ofPoint y := by
   have : (hom.ofPoint '' s).Nonempty := Set.image_nonempty.mpr hs
   simp [homogenize, mem_smulSet_of_nonempty this]
@@ -95,7 +91,6 @@ lemma homogenize_union (s t : Set A) :
     homogenize R W (s ∪ t) = homogenize R W s ⊔ homogenize R W t := by
   simp only [homogenize, Set.image_union, smulSet_union]
 
--- TODO: optimize proof
 lemma homogenize_inter_le (s t : Set A) :
     homogenize R W (s ∩ t) ≤ homogenize R W s ⊓ homogenize R W t := by
   unfold homogenize
@@ -310,7 +305,7 @@ lemma homogenize_inter (s t : Set A) :
   apply le_antisymm
   · exact homogenize_inter_le s t
   · rintro x hx
-    obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize' hx.1
+    obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize_iff_exist_lt_zero hx.1
     · exact SubMulActionWithZero.zero_mem
     refine smul_ofPoint_mem_homogenize hr.le ⟨hys, ?_⟩
     exact (smul_ofPoint_mem_homogenize_iff hr t).mp hx.2
@@ -321,7 +316,6 @@ def homogenizeLatticeHom : LatticeHom (Set A) (SubMulActionWithZero R≥0 W) whe
   map_sup' := homogenize_union
   map_inf' := homogenize_inter
 
--- variable (R W) in
 lemma homogenize_sInf {S : Set (Set A)} (hS : S.Nonempty) :
     homogenize R W (sInf S) = sInf (homogenize R W '' S) := by
   apply le_antisymm
@@ -329,7 +323,7 @@ lemma homogenize_sInf {S : Set (Set A)} (hS : S.Nonempty) :
   intro x hx
   simp only [SetLike.mem_sInf, Set.mem_image, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at hx
-  obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize' (hx _ hS.choose_spec)
+  obtain (rfl | ⟨y, hys, r, hr, rfl⟩) := mem_homogenize_iff_exist_lt_zero (hx _ hS.choose_spec)
   · exact SubMulActionWithZero.zero_mem
   exact smul_ofPoint_mem_homogenize hr.le fun t ht =>
     (smul_ofPoint_mem_homogenize_iff hr t).mp (hx _ ht)
