@@ -3,14 +3,13 @@ Copyright (c) 2026.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: M Winter
 -/
-module
 
-public import Mathlib.Data.Set.Finite.Basic
-public import Mathlib.Data.Set.Lattice
-public import Mathlib.Order.Hom.CompleteLattice
-public import Mathlib.Order.Monotone.Defs
+import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Data.Set.Lattice
+import Mathlib.Order.Hom.CompleteLattice
+import Mathlib.Order.Monotone.Defs
 
-public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
+import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 
 /-!
 # Closure and finiteness of `SubMulActionWithZero`

@@ -3,10 +3,11 @@ Copyright (c) 2026.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: M Winter
 -/
-module
 
-public import Mathlib.GroupTheory.GroupAction.SubMulAction
-public import Mathlib.Algebra.GroupWithZero.Action.Defs
+import Mathlib.GroupTheory.GroupAction.SubMulAction
+import Mathlib.Algebra.GroupWithZero.Action.Defs
+
+import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 
 /-!
 
