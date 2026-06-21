@@ -98,12 +98,26 @@ lemma homogenize_inter_le (s t : Set A) :
   exact smulSet_inter_le _ _
 
 lemma homogenize_sSup (S : Set (Set A)) :
-    homogenize R W (sSup S) = ⨆ s ∈ S, homogenize R W s := by
-  sorry -- simp only [homogenize, Set.image_sSup, smulSet_sSup]
+    homogenize R W (sSup S) = sSup (homogenize R W '' S) := by
+  unfold homogenize
+  rw [Set.image_sSup, smulSet_sSup, Set.image_image]
+
+def homogenizeSSupHom : sSupHom (Set A) (SubMulActionWithZero R≥0 W) where
+  toFun := homogenize R W
+  map_sSup' := homogenize_sSup
+
+-- TODO: move
+theorem _root_.Set.image_sInter_subset_sInf_image {α β : Type*} (S : Set (Set α)) (f : α → β) :
+    f '' ⋂₀ S ⊆ sInf ((fun s => f '' s) '' S) := by
+  rw [Set.sInf_eq_sInter, Set.sInter_image]
+  exact Set.image_sInter_subset _ _
 
 lemma homogenize_sInf_le (S : Set (Set A)) :
     homogenize R W (sInf S) ≤ sInf (homogenize R W '' S) := by
-  sorry
+  unfold homogenize
+  apply le_trans <| smulSet_mono (Set.image_sInter_subset_sInf_image _ _)
+  apply le_trans (smulSet_sInf_le _)
+  rw [Set.image_image]
 
 section Nontrivial
 

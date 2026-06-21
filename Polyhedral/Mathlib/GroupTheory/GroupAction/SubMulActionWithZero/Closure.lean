@@ -229,20 +229,13 @@ lemma smulSet_inter_le (s t : Set M) : R ∙ (s ∩ t) ≤ R ∙ s ⊓ R ∙ t :
   · exact zero_mem
   · exact ⟨smul_mem _ r (subset_smulSet hy.1), smul_mem _ r (subset_smulSet hy.2)⟩
 
-lemma smulSet_sInf_le (S : Set (Set M)) : R ∙ (sInf S) ≤ ⨅ s ∈ S, (R ∙ s) := by
+lemma smulSet_sInf_le (S : Set (Set M)) : R ∙ (sInf S) ≤ sInf (smulSet R '' S) := by
   intro x
-  simp only [iInf, SetLike.mem_sInf, mem_range, forall_exists_index, forall_apply_eq_imp_iff,
-    exists_prop, and_imp]
+  simp only [sInf_eq_sInter, SetLike.mem_sInf, mem_image, forall_exists_index, and_imp,
+    forall_apply_eq_imp_iff₂]
   rintro (rfl | ⟨y, hy, r, rfl⟩) s hs
   · exact zero_mem
   · exact smul_mem _ r <| subset_smulSet (hy s hs)
-
-lemma smulSet_sInf_le_sInf_image (S : Set (Set M)) : R ∙ (sInf S) ≤ sInf ((R ∙ ·) '' S) := by
-  simpa using smulSet_sInf_le S
-
-lemma smulSet_sInf_le_sInf_smulSet_image (S : Set (Set M)) :
-    R ∙ (sInf S) ≤ sInf ((R ∙ ·) '' S) := by
-  simpa using smulSet_sInf_le S
 
 lemma smulSet_union (s t : Set M) : R ∙ (s ∪ t) = R ∙ s ⊔ R ∙ t := by
   apply le_antisymm
@@ -257,7 +250,7 @@ lemma smulSet_union (s t : Set M) : R ∙ (s ∪ t) = R ∙ s ⊔ R ∙ t := by
       · exact zero_mem
       · exact smul_mem _ _ (subset_smulSet <| by simp [hy])
 
-lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup ((R ∙ ·) '' S) := by
+lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup (smulSet R '' S) := by
   apply le_antisymm
   · rintro x (rfl | ⟨y, hy, r, rfl⟩)
     · exact zero_mem
@@ -271,10 +264,6 @@ lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup ((R ∙ ·) '' S) :
       obtain ⟨⟨s, hs, rfl⟩, (rfl | ⟨z, hz, r, rfl⟩)⟩ := h
       · exact zero_mem
       · exact smul_mem _ _ <| (le_trans (le_sSup hs) subset_smulSet) hz
-
-lemma smulSet_sSup_eq_iSup_smulSet (S : Set (Set M)) : R ∙ (sSup S) = ⨆ s ∈ S, (R ∙ s) := by
-  rw [← sSup_image]
-  exact smulSet_sSup S
 
 variable (R) in
 theorem closure_eq_smulSet (s : Set M) : closure R s = R ∙ s := by
