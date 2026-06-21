@@ -286,7 +286,7 @@ variable [AddCommGroup W] [Module R W] [Module.IsTorsionFree R W]
 
 variable [hom : IsHomogenization R A W]
 
-/-- For the weaker vsion with `r = 1` see `ofPoint_mem_homogenize_iff`. -/
+/-- For the weaker version with `r = 1` see `ofPoint_mem_homogenize_iff`. -/
 @[simp] lemma smul_ofPoint_mem_homogenize_iff {r : R} (hr : 0 < r) {x : A} (s : Set A) :
     r • hom.ofPoint x ∈ homogenize R W s ↔ x ∈ s where
   mp := by
