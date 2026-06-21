@@ -63,17 +63,19 @@ lemma hull_singleton_le_iff_mem {C : PointedCone R M} {x : M} : R ∙₊ x ≤ C
 lemma hull_singleton_le {C : PointedCone R M} {x : M} (hx : x ∈ C) : R ∙₊ x ≤ C :=
   hull_singleton_le_iff_mem.mpr hx
 
-def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
-  choice s _ := hull R s
-  gc _ _ := Submodule.span_le
-  le_l_u _ := subset_hull
-  choice_eq _ _ := rfl
+lemma le_hull {s : Set M} : s ≤ hull R s := Submodule.subset_span
 
 lemma hull_hull {s : Set M} : hull R (hull R s) = hull R s := Submodule.span_span
 
 lemma hull_eq {S : PointedCone R M} : hull R S = S := Submodule.span_eq S
 
 lemma hull_mono {s t : Set M} (h : s ⊆ t) : hull R s ≤ hull R t := Submodule.span_mono h
+
+def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
+  choice s _ := hull R s
+  gc _ _ := Submodule.span_le
+  le_l_u _ := subset_hull
+  choice_eq _ _ := rfl
 
 -- ## LINSPAN
 
