@@ -245,8 +245,6 @@ variable [hom : IsHomogenization R A W]
     dehomogenize A (hom.weight.positive : SubMulActionWithZero R≥0 W) = Set.univ := by
   ext x; simp [dehomogenize, weight_one]
 
--- TODO: delete in favor of `nonneg_smulSet_preimage_one_le_positive`
-@[deprecated nonneg_smulSet_preimage_one_le_positive (since := "")]
 lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
     R≥0 ∙ (hom.ofPoint.range : Set W) ≤ hom.weight.positive := by
   rw [ofPoint_range_eq_preimage_weight_one]
@@ -337,8 +335,6 @@ variable [AddCommGroup W] [Module R W]
 
 variable [hom : IsHomogenization R A W]
 
--- TODO: delete in favor of `nonneg_smulSet_preimage_one_eq_positive`?
-@[deprecated nonneg_smulSet_preimage_one_eq_positive (since := "")]
 lemma nonneg_smulSet_ofPoint_range :
     R≥0 ∙ (hom.ofPoint.range : Set W) = hom.weight.positive := by
   rw [ofPoint_range_eq_preimage_weight_one]
