@@ -57,6 +57,12 @@ meta def hull.unexpander : Lean.PrettyPrinter.Unexpander
     | _ => throw ()
   | _ => throw ()
 
+lemma hull_singleton_le_iff_mem {C : PointedCone R M} {x : M} : R ∙₊ x ≤ C ↔ x ∈ C :=
+  Submodule.span_singleton_le_iff_mem x C
+
+lemma hull_singleton_le {C : PointedCone R M} {x : M} (hx : x ∈ C) : R ∙₊ x ≤ C :=
+  hull_singleton_le_iff_mem.mpr hx
+
 def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   choice s _ := hull R s
   gc _ _ := Submodule.span_le
@@ -726,8 +732,7 @@ theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • 
   · exact C.smul_mem (le_of_lt hc) h
 
 -- analogue of `Submodule.span_singleton_smul_eq`
-set_option backward.isDefEq.respectTransparency false in
-theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : hull R {r • x} = hull R {x} := by
+theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : R ∙₊ (r • x) = R ∙₊ x := by
   ext y
   simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop]
   constructor <;> intro h <;> obtain ⟨a, ha, h⟩ := h
