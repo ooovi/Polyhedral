@@ -319,11 +319,6 @@ lemma homogenize_sInf {S : Set (Set A)} (hS : S.Nonempty) :
   exact smul_ofPoint_mem_homogenize hr.le fun t ht =>
     (smul_ofPoint_mem_homogenize_iff hr t).mp (hx _ ht)
 
-lemma homogenize_inter' (s t : Set A) :
-    homogenize R W (s ∩ t) = homogenize R W s ⊓ homogenize R W t := by
-  simpa only [sInf_insert, sInf_singleton, Set.inf_eq_inter, Set.image_pair] using
-    homogenize_sInf (R := R) (W := W) (S := {s, t}) (Set.insert_nonempty ..)
-
 end IsCancelMulZero_IsTorsionFree
 
 section DivisionRing
