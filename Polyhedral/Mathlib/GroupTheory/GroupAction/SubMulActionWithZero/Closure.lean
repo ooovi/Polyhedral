@@ -237,6 +237,9 @@ lemma smulSet_sInf_le (S : Set (Set M)) : R ∙ (sInf S) ≤ ⨅ s ∈ S, (R ∙
   · exact zero_mem
   · exact smul_mem _ r <| subset_smulSet (hy s hs)
 
+lemma smulSet_sInf_le_sInf_image (S : Set (Set M)) : R ∙ (sInf S) ≤ sInf ((R ∙ ·) '' S) := by
+  simpa using smulSet_sInf_le S
+
 lemma smulSet_sInf_le_sInf_smulSet_image (S : Set (Set M)) :
     R ∙ (sInf S) ≤ sInf ((R ∙ ·) '' S) := by
   simpa using smulSet_sInf_le S
@@ -269,6 +272,10 @@ lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup ((R ∙ ·) '' S) :
       · exact zero_mem
       · exact smul_mem _ _ <| (le_trans (le_sSup hs) subset_smulSet) hz
 
+lemma smulSet_sSup_eq_iSup_smulSet (S : Set (Set M)) : R ∙ (sSup S) = ⨆ s ∈ S, (R ∙ s) := by
+  rw [← sSup_image]
+  exact smulSet_sSup S
+
 variable (R) in
 theorem closure_eq_smulSet (s : Set M) : closure R s = R ∙ s := by
   ext x; constructor
@@ -294,7 +301,7 @@ section GroupWithZero
 variable [GroupWithZero R] [Zero M] [MulActionWithZero R M]
 variable {s t : Set M} {x : M}
 
-lemma smulSet_smulSet_inter_left (s t : Set M) :
+lemma smulSet_smulSet_inter (s t : Set M) :
     R ∙ ((R ∙ s) ∩ t) = R ∙ s ⊓ R ∙ t := by
   apply le_antisymm
   · simpa only [smulSet_eq] using smulSet_inter_le (R := R) (R ∙ s) t
@@ -304,14 +311,14 @@ lemma smulSet_smulSet_inter_left (s t : Set M) :
     · simp [hr0]
     · exact .inr ⟨y, ⟨mem_of_smul_mem hr0 hx, hy⟩, ⟨r, rfl⟩⟩
 
-lemma smulSet_smulSet_inter_right (s t : Set M) :
+lemma smulSet_inter_smulSet (s t : Set M) :
     R ∙ (s ∩ (R ∙ t)) = R ∙ s ⊓ R ∙ t := by
-  rw [Set.inter_comm, inf_comm, smulSet_smulSet_inter_left]
+  rw [Set.inter_comm, inf_comm, smulSet_smulSet_inter]
 
 lemma smulSet_inter_left (s : SubMulActionWithZero R M) (t : Set M) :
     R ∙ (s ∩ t) = s ⊓ R ∙ t := by
   rw [← smulSet_eq s]
-  exact smulSet_smulSet_inter_left ..
+  exact smulSet_smulSet_inter ..
 
 lemma smulSet_inter_right (s : Set M) (t : SubMulActionWithZero R M) :
     R ∙ (s ∩ t) = R ∙ s ⊓ t := by

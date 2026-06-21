@@ -39,7 +39,6 @@ section SubMulActionWithZero
 @[coe] protected abbrev toSubMulActionWithZero (p : PointedCone R M) :
     SubMulActionWithZero R≥0 M := .ofClass (R := R≥0) p
 
-/- Is this coe a bad idea? -/
 instance instSubMulActionWithZero : Coe (PointedCone R M) (SubMulActionWithZero R≥0 M) :=
   ⟨PointedCone.toSubMulActionWithZero⟩
 
