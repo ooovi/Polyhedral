@@ -16,6 +16,7 @@ import Polyhedral.Mathlib.Data.Set.Lattice.Image
 import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
+import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual

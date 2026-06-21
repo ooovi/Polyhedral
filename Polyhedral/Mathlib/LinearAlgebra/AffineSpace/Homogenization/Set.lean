@@ -8,7 +8,7 @@ import Polyhedral.Mathlib.Data.Set.Lattice.Image
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
+import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
 
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
@@ -245,19 +245,6 @@ variable [hom : IsHomogenization R A W]
     dehomogenize A (hom.weight.positive : SubMulActionWithZero R≥0 W) = Set.univ := by
   ext x; simp [dehomogenize, weight_one]
 
--- TODO: move
--- TODO: have a version for `c ≥ 0` instead of 1 when `R` is a division ring?
-lemma nonneg_smulSet_preimage_one_le_positive (f : W →ₗ[R] R) :
-    R≥0 ∙ f ⁻¹' {1} ≤ f.positive := by
-  intro x h hx0
-  rw [mem_smulSet_of_ne_zero hx0] at h
-  obtain ⟨y, hy, ⟨r, hr⟩, rfl⟩ := h
-  rw [Set.mem_preimage, Set.mem_singleton_iff] at hy
-  rw [Nonneg.mk_smul, map_smul, hy, smul_eq_mul, mul_one]
-  by_cases hr0 : 0 = r
-  · simp [← hr0] at hx0
-  exact lt_of_le_of_ne hr hr0
-
 -- TODO: delete in favor of `nonneg_smulSet_preimage_one_le_positive`
 @[deprecated nonneg_smulSet_preimage_one_le_positive (since := "")]
 lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
@@ -349,23 +336,6 @@ variable [AddTorsor V A]
 variable [AddCommGroup W] [Module R W]
 
 variable [hom : IsHomogenization R A W]
-
--- TODO: move
--- TODO: generalize to `c ≥ 0` instead of 1?
-lemma nonneg_smulSet_preimage_one_eq_positive (f : W →ₗ[R] R) : --{c : R} (hc : 0 < c):
-    R≥0 ∙ (f ⁻¹' {1}) = f.positive := by
-  apply le_antisymm
-  · exact nonneg_smulSet_preimage_one_le_positive f
-  intro x h
-  by_cases hx0 : x = 0
-  · simp [hx0]
-  rw [mem_smulSet_of_ne_zero hx0]
-  use (f x)⁻¹ • x
-  specialize h hx0
-  constructor
-  · simp [inv_mul_cancel₀ h.ne.symm]
-  · use ⟨_, h.le⟩
-    simp [smul_smul, mul_inv_cancel₀ h.ne.symm]
 
 -- TODO: delete in favor of `nonneg_smulSet_preimage_one_eq_positive`?
 @[deprecated nonneg_smulSet_preimage_one_eq_positive (since := "")]

@@ -17,7 +17,7 @@ open Set
 
 variable {R : Type*}
 
-local notation3 "R≥0" => {c : R // 0 ≤ c} -- Nonneg R
+local notation3 "R≥0" => Nonneg R
 
 namespace Nonneg
 
