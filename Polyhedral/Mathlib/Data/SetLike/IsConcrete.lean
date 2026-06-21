@@ -526,14 +526,6 @@ end SetLike
 
 /- # sInf # -/
 
-/- TODO: what should `sInf` coerce to?
-  * {x : B | ∀ a ∈ s, x ∈ a}
-  * ⋂ a ∈ s, a
-  * sInf (SetLike.coe '' s)
-Analogous choices need to be implemented for `sSup` and `sSup₀`.
-The second option is how this will most likely be implemented by the user.
-But only the first version has a natural analogue for `sSup₀`.
--/
 class IsConcreteInfSet (A : Type*) (B : outParam Type*) [SetLike A B] [InfSet A] where
   protected coe_sInf' (s : Set A) : sInf s = ⋂₀ (SetLike.coe '' s)
 
@@ -645,9 +637,6 @@ end SetLike
 
 
 /- # Pointed sSup # -/
-
--- class IsConcreteSupSet₀ (A : Type*) (B : outParam Type*) [Zero B] [SetLike A B] [SupSet A] where
---   mem_coe_sSup₀ (s : Set A) (x : B) : x ∈ sSup s ↔ x = 0 ∨ ∃ a ∈ s, x ∈ a
 
 class IsConcreteSupSet₀ (A : Type*) (B : outParam Type*) [Zero B] [SetLike A B] [SupSet A] where
   protected coe_sSup₀' (s : Set A) : sSup s = insert 0 (⋃ a ∈ s, (a : Set B))
