@@ -159,16 +159,27 @@ lemma homogenize_singleton_eq {x y : A} :
 
 end Nontrivial
 
+end Ring
+
+section Ring_no_OrderedRing
+
+variable [Ring R] [PartialOrder R]
+variable [AddCommGroup V] [Module R V]
+variable [AddTorsor V A]
+variable [AddCommGroup W] [Module R W]
+
+variable [hom : IsHomogenization R A W]
+
+variable {x : A} {s : Set A}
+
 variable (A) in
 def _root_.SubMulActionWithZero.dehomogenize (S : SubMulActionWithZero R≥0 W) : Set A :=
   hom.ofPoint ⁻¹' S
 
-omit [IsOrderedRing R] in
 lemma dehomogenize_mono {S T : SubMulActionWithZero R≥0 W} (h : S ≤ T) :
     dehomogenize A S ≤ dehomogenize A T :=
   Set.preimage_mono h
 
-omit [IsOrderedRing R] in
 lemma dehomogenize_monotone : Monotone (dehomogenize A : SubMulActionWithZero R≥0 W → Set A) :=
   fun _ _ => dehomogenize_mono
 
@@ -177,16 +188,13 @@ def dehomogenizeOrderHom : SubMulActionWithZero R≥0 W →o Set A where
   toFun := dehomogenize A
   monotone' := dehomogenize_monotone
 
-omit [IsOrderedRing R] in
 lemma dehomogenize_top : dehomogenize A (⊤ : SubMulActionWithZero R≥0 W) = Set.univ := by
   ext x; simp [dehomogenize]
 
-omit [IsOrderedRing R] in
 lemma dehomogenize_inf (s t : SubMulActionWithZero R≥0 W) :
     dehomogenize A (s ⊓ t) = dehomogenize A s ∩ dehomogenize A t := by
   ext x; simp [dehomogenize]
 
-omit [IsOrderedRing R] in
 lemma dehomogenize_sup (s t : SubMulActionWithZero R≥0 W) :
     dehomogenize A (s ⊔ t) = dehomogenize A s ∪ dehomogenize A t := by
   ext x; simp [dehomogenize]
@@ -196,7 +204,6 @@ def dehomogenizeLatticeHom : LatticeHom (SubMulActionWithZero R≥0 W) (Set A) w
   map_sup' := dehomogenize_sup
   map_inf' := dehomogenize_inf
 
-omit [IsOrderedRing R] in
 lemma dehomogenize_sInf (S : Set (SubMulActionWithZero R≥0 W)) :
     dehomogenize A (sInf S) = sInf (dehomogenize A '' S) := by
   ext x; simp [dehomogenize]
@@ -217,6 +224,7 @@ def dehomogenizeCompleteLatticeHom : CompleteLatticeHom (SubMulActionWithZero R�
 @[simp] lemma dehomogenize_bot : (⊥ : SubMulActionWithZero R≥0 W).dehomogenize A = ∅ := by
   ext x; simpa using ofPoint_ne_zero _
 
+variable [IsOrderedRing R] in
 /-- Dehomogenizing the homogenization of a set yields the same set again. -/
 @[simp] theorem dehomogenize_homogenize (s : Set A) :
     dehomogenize A (homogenize R W s) = s := by
@@ -224,13 +232,14 @@ def dehomogenizeCompleteLatticeHom : CompleteLatticeHom (SubMulActionWithZero R�
 
 end Nontrivial
 
+variable [IsOrderedRing R] in
 lemma homogenize_gc : GaloisConnection (homogenize R W) (dehomogenize A) := by
   -- TODO: we could use GaloisConnection.compose:
   --  * homogenize = closure ∘ image
   --  * dehomogenize = preimage ∘ coe
   sorry
 
-end Ring
+end Ring_no_OrderedRing
 
 section IsStrictOrderedRing
 
