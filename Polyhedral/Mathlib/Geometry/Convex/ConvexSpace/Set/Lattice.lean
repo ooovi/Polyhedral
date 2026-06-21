@@ -90,7 +90,7 @@ instance : SemilatticeInf (ConvexSet R X) := .ofSetLike ..
 /- # InfSet -/
 
 instance : InfSet (ConvexSet R X) where
-  sInf S := ⟨⋂ K ∈ S, K, .iInter fun K => .iInter fun _ => K.isConvexSet⟩
+  sInf S := ⟨⋂₀ (_ '' S), .sInter (by simpa using fun K _ => K.2)⟩
 
 instance : IsConcreteInfSet (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
