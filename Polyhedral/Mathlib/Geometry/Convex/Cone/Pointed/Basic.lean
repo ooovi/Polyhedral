@@ -77,7 +77,7 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   le_l_u _ := subset_hull
   choice_eq _ _ := rfl
 
--- ## LINSPAN
+-- ## LINSPAN (deprecated)
 
 /-- The linear span of the cone. -/
 @[deprecated Submodule.span (since := "")]
