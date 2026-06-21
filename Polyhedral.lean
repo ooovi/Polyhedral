@@ -9,7 +9,9 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
+import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
+import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure

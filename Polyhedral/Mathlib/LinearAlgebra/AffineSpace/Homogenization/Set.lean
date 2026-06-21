@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
+import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
@@ -122,10 +123,6 @@ lemma homogenize_sInf_le (S : Set (Set A)) :
 section Nontrivial
 
 variable [Nontrivial R]
-
--- TODO: Move (needed for `ofPoint_mem_homogenize_iff`)
-omit [Nontrivial R] in
-@[simp] lemma _root_.Nonneg.coe_eq_one {a : R≥0} : (a : R) = 1 ↔ a = 1 := by aesop
 
 @[simp] lemma ofPoint_mem_homogenize_iff {x : A} {s : Set A} :
     hom.ofPoint x ∈ homogenize R W s ↔ x ∈ s where
