@@ -211,7 +211,7 @@ instance : Lattice (SubMulActionWithZero R M) where
 
 instance : InfSet (SubMulActionWithZero R M) where
   sInf S := {
-    carrier := ⋂ s ∈ S, s
+    carrier := ⋂₀ (SetLike.coe '' S)
     zero_mem' := by simp
     smul_mem' := by simpa using fun c x hx p hp => p.smul_mem c (hx p hp) }
 
