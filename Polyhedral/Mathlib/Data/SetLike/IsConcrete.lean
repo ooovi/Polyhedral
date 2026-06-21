@@ -535,19 +535,27 @@ The second option is how this will most likely be implemented by the user.
 But only the first version has a natural analogue for `sSup₀`.
 -/
 class IsConcreteInfSet (A : Type*) (B : outParam Type*) [SetLike A B] [InfSet A] where
-  protected coe_sInf' (s : Set A) : sInf s = ⋂ a ∈ s, (a : Set B)
+  protected coe_sInf' (s : Set A) : sInf s = ⋂₀ (SetLike.coe '' s)
 
 namespace SetLike
 
-variable {A B : Type*} [SetLike A B] [InfSet A] [IsConcreteInfSet A B]
+variable {A B : Type*} [setlike : SetLike A B] [InfSet A] [IsConcreteInfSet A B]
 
-@[simp] lemma coe_sInf (s : Set A) : sInf s = ⋂ a ∈ s, (a : Set B) :=
+@[simp] lemma coe_sInf (s : Set A) : sInf s = ⋂₀ (SetLike.coe '' s) :=
   IsConcreteInfSet.coe_sInf' s
-
-lemma coe_sInf_eq_sInf_coe_image (s : Set A) : sInf s = sInf (SetLike.coe '' s) := by simp
 
 @[simp] lemma mem_sInf (s : Set A) (x : B) : x ∈ sInf s ↔ ∀ a ∈ s, x ∈ a := by
   simp [← mem_coe]
+
+@[simp] lemma mem_iInf (s : Set A) (x : B) : x ∈ ⨅ a ∈ s, a ↔ ∀ a ∈ s, x ∈ a := by
+  simp [iInf]
+
+@[simp] lemma coe_iInf (s : Set A) : ⨅ a ∈ s, a = ⋂ a ∈ s, (a : Set B) := by
+  ext x; simp
+
+include setlike in
+lemma sInf_eq_iInf (s : Set A) : sInf s = ⨅ a ∈ s, a := by
+  simp [← SetLike.coe_set_eq]
 
 section PartialOrder
 
@@ -603,19 +611,23 @@ end SetLike
 /- # sSup # -/
 
 class IsConcreteSupSet (A : Type*) (B : outParam Type*) [SetLike A B] [SupSet A] where
-  protected coe_sSup' (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B)
+  protected coe_sSup' (s : Set A) : sSup s = ⋃₀ (SetLike.coe '' s)
 
 namespace SetLike
 
-variable {A B : Type*} [SetLike A B] [SupSet A] [IsConcreteSupSet A B]
+variable {A B : Type*} [setlike : SetLike A B] [SupSet A] [IsConcreteSupSet A B]
 
-@[simp] lemma coe_sSup (s : Set A) : sSup s = ⋃ a ∈ s, (a : Set B) :=
+@[simp] lemma coe_sSup (s : Set A) : sSup s = ⋃₀ (SetLike.coe '' s) :=
   IsConcreteSupSet.coe_sSup' s
-
-lemma coe_sSup_eq_sSup_coe_image (s : Set A) : sSup s = sSup (SetLike.coe '' s) := by simp
 
 @[simp] lemma mem_sSup (s : Set A) (x : B) : x ∈ sSup s ↔ ∃ a ∈ s, x ∈ a := by
   simp [← mem_coe]
+
+@[simp] lemma mem_iSup (s : Set A) (x : B) : x ∈ ⨆ a ∈ s, a ↔ ∃ a ∈ s, x ∈ a := by
+  simp [iSup]
+
+@[simp] lemma coe_iSup (s : Set A) : ⨆ a ∈ s, a = ⋃ a ∈ s, (a : Set B) := by
+  ext x; simp
 
 section PartialOrder
 
