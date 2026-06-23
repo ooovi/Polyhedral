@@ -1,6 +1,5 @@
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
-import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
@@ -9,14 +8,12 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
+import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 import Polyhedral.Mathlib.Data.Set.Lattice.Image
 import Polyhedral.Mathlib.Data.SetLike.IsConcrete
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
@@ -40,6 +37,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Face
@@ -53,6 +51,9 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
+import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
+import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
+import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic

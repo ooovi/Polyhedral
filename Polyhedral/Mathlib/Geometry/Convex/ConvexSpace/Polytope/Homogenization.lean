@@ -1,9 +1,6 @@
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Data.Finset.SDiff
 
 /-! This file proves results about polytopes, FG cones and homogenization. -/
 
@@ -21,7 +18,7 @@ variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : IsHomoge
 
 open PointedCone
 
-/-- The Homogenization cone of a polytope is finitely generated. -/
+/-- The homogenization cone of a polytope is finitely generated. -/
 theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
     (homogenize W C).FG := by
   obtain ⟨t, ht⟩ := hCfg
