@@ -233,11 +233,8 @@ variable [IsOrderedRing R] in
 end Nontrivial
 
 variable [IsOrderedRing R] in
-lemma homogenize_gc : GaloisConnection (homogenize R W) (dehomogenize A) := by
-  -- TODO: we could use GaloisConnection.compose:
-  --  * homogenize = closure ∘ image
-  --  * dehomogenize = preimage ∘ coe
-  sorry
+lemma homogenize_gc : GaloisConnection (homogenize R W) (dehomogenize A) :=
+  .compose Set.image_preimage smulSet_gc
 
 end Ring_no_OrderedRing
 

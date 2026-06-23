@@ -96,8 +96,8 @@ theorem fg_iff {p : SubMulActionWithZero R M} :
     p.FG ↔ ∃ (s : Finset M), p = closure R s :=
   Set.exists_finite_iff_finset
 
-lemma closure_gc : GaloisConnection (closure R : Set M → SubMulActionWithZero R M) (↑) := by
-  sorry
+lemma closure_gc : GaloisConnection (closure R : Set M → SubMulActionWithZero R M) (↑) :=
+  fun _ _ => ⟨le_trans subset_closure, (sInf_le ·)⟩
 
 end SMul
 
@@ -213,6 +213,12 @@ variable (R) in
 def smulSetOrderHom : Set M →o SubMulActionWithZero R M where
   toFun := smulSet R
   monotone' := smulSet_monotone
+
+lemma smulSet_gc : GaloisConnection (smulSet R : Set M → SubMulActionWithZero R M) (↑) :=
+  fun _ _=> ⟨le_trans subset_smulSet, by
+    rintro h _ (rfl | ⟨_, hy, _, rfl⟩)
+    · exact zero_mem
+    · exact smul_mem _ _ (h hy)⟩
 
 @[simp]
 theorem smulSet_empty : R ∙ (∅ : Set M) = ⊥ := by
