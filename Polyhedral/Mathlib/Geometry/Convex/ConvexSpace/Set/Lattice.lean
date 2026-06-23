@@ -90,16 +90,17 @@ instance : SemilatticeInf (ConvexSet R X) := .ofSetLike ..
 /- # InfSet -/
 
 instance : InfSet (ConvexSet R X) where
-  sInf S := ⟨⋂ a ∈ S, a, by
-    apply IsConvexSet.sInter
-    rintro _ ⟨a, rfl⟩
-    apply IsConvexSet.sInter
-    rintro _ ⟨_, rfl⟩
-    exact a.2⟩
+  sInf S := ⟨⋂₀ (_ '' S), .sInter (by simpa using fun K _ => K.2)⟩
 
 instance : IsConcreteInfSet (ConvexSet R X) X := ⟨fun _ => rfl⟩
 
 instance : CompleteSemilatticeInf (ConvexSet R X) := .ofSetLike ..
+
+/- TODO: We could define the `CompleteLattice` structure using
+`completeLatticeOfCompleteSemilatticeInf` as shown below, and then just proof that the
+resulting sup and sSup are propext to convex hulls.
+But I don't know how important it is to have the definitional to convex hull. -/
+-- instance : CompleteLattice (ConvexSet R X) := completeLatticeOfCompleteSemilatticeInf _
 
 /- # Max -/
 
@@ -110,7 +111,7 @@ def convexHull (s : Set X) : ConvexSet R X := ⟨Convexity.convexHull R s, .conv
 instance : Max (ConvexSet R X) where
   max K₁ K₂ := convexHull R (K₁ ∪ K₂)
 
-lemma coe_sup_eq_convexHull_union : (K₁ ⊔ K₂).carrier = Convexity.convexHull R (K₁ ∪ K₂) := by rfl
+lemma coe_sup : K₁ ⊔ K₂ = Convexity.convexHull R (K₁ ∪ K₂ : Set X) := rfl
 
 instance instSemilatticeSup : SemilatticeSup (ConvexSet R X) where
   sup := max
@@ -121,14 +122,17 @@ instance instSemilatticeSup : SemilatticeSup (ConvexSet R X) where
     apply subset_convexHull_self
     simp [hs]
   sup_le K₁ K₂ K₃ h₁₂ h₂₃ x hx := by
-    rw [mem_mk, coe_sup_eq_convexHull_union, mem_convexHull_iff] at hx
+    rw [← SetLike.mem_coe, coe_sup, mem_convexHull_iff] at hx
     refine hx K₃ ?_ K₃.isConvexSet
     simp [h₂₃, h₁₂]
 
 /- # SupSet -/
 
 instance : SupSet (ConvexSet R X) where
-  sSup S := convexHull R (⋃ s ∈ S, s)
+  sSup S := convexHull R (⋃ K ∈ S, K)
+
+lemma coe_sSup (S : Set (ConvexSet R X)) :
+    sSup S = Convexity.convexHull R (⋃ K ∈ S, K : Set X) := rfl
 
 instance : CompleteSemilatticeSup (ConvexSet R X) where
   isLUB_sSup K := by

@@ -57,11 +57,13 @@ meta def hull.unexpander : Lean.PrettyPrinter.Unexpander
     | _ => throw ()
   | _ => throw ()
 
-def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
-  choice s _ := hull R s
-  gc _ _ := Submodule.span_le
-  le_l_u _ := subset_hull
-  choice_eq _ _ := rfl
+lemma hull_singleton_le_iff_mem {C : PointedCone R M} {x : M} : R ∙₊ x ≤ C ↔ x ∈ C :=
+  Submodule.span_singleton_le_iff_mem x C
+
+lemma hull_singleton_le {C : PointedCone R M} {x : M} (hx : x ∈ C) : R ∙₊ x ≤ C :=
+  hull_singleton_le_iff_mem.mpr hx
+
+lemma le_hull {s : Set M} : s ≤ hull R s := Submodule.subset_span
 
 lemma hull_hull {s : Set M} : hull R (hull R s) = hull R s := Submodule.span_span
 
@@ -69,7 +71,13 @@ lemma hull_eq {S : PointedCone R M} : hull R S = S := Submodule.span_eq S
 
 lemma hull_mono {s t : Set M} (h : s ⊆ t) : hull R s ≤ hull R t := Submodule.span_mono h
 
--- ## LINSPAN
+def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
+  choice s _ := hull R s
+  gc _ _ := Submodule.span_le
+  le_l_u _ := subset_hull
+  choice_eq _ _ := rfl
+
+-- ## LINSPAN (deprecated)
 
 /-- The linear span of the cone. -/
 @[deprecated Submodule.span (since := "")]
@@ -182,7 +190,15 @@ lemma submodule_span_of_hull {s : Set M} {S : Submodule R M} (hsS : hull R s = S
 --   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
 lemma hull_union (s t : Set M) : hull R (s ∪ t) = hull R s ⊔ hull R t :=
-    Submodule.span_union s t
+  Submodule.span_union s t
+
+lemma sup_eq_hull_union (C D : PointedCone R M) : C ⊔ D = hull R (C ∪ D) := by
+  rw [← hull_eq (S := C), ← hull_eq (S := D), hull_union]
+  simp
+
+lemma sSup_eq_hull_iUnion (S : Set (PointedCone R M)) : sSup S = hull R (sSup (SetLike.coe '' S)) := by
+  -- TODO
+  sorry
 
 -- delete?
 lemma hull_min {s : Set M} {C : PointedCone R M} (hsC : s ⊆ C) : hull R s ≤ C := sInf_le hsC
@@ -718,8 +734,7 @@ theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • 
   · exact C.smul_mem (le_of_lt hc) h
 
 -- analogue of `Submodule.span_singleton_smul_eq`
-set_option backward.isDefEq.respectTransparency false in
-theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : hull R {r • x} = hull R {x} := by
+theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : R ∙₊ (r • x) = R ∙₊ x := by
   ext y
   simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop]
   constructor <;> intro h <;> obtain ⟨a, ha, h⟩ := h
