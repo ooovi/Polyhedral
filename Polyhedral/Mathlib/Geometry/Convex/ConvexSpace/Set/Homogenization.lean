@@ -120,6 +120,11 @@ lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
     use y
     simpa
 
+/-- The preimage of the conic hull of a set in the homogenization plane is the convex hull of the
+preimage of the set. -/
+theorem hull_image_ofPoint_eq_homogenize_convexHull {s : Set A} :
+    hull R (hom.ofPoint '' s) = homogenize W ⟨Convexity.convexHull R s, .convexHull⟩ := by
+  simp [homogenize, hom.ofPoint.isAffineMap.image_convexHull]
 
 end Module
 

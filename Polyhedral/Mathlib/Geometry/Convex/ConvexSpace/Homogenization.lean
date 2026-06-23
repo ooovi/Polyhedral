@@ -8,8 +8,6 @@ namespace Convexity
 
 section Ring
 
-open Convexity
-
 variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A]
@@ -66,11 +64,6 @@ theorem preimage_hull_eq_convexHull_preimage {s : Set W} (hs : s ⊆ Set.range h
   · apply Set.image_subset_iff.mp
     rw [hom.ofPoint.isAffineMap.image_convexHull, Set.image_preimage_eq_iff.mpr hs]
     exact (hull R s).isConvexSet.convexHull_subset_iff.mpr subset_hull
-
-theorem mem_convexHull_preimage_of_apply_mem_hull {x s} (hs : s ⊆ Set.range hom.ofPoint)
-    (h : hom.ofPoint x ∈ hull R s) : x ∈ Convexity.convexHull R (hom.ofPoint ⁻¹' s) := by
-  rw [← preimage_hull_eq_convexHull_preimage hs]
-  simpa [Set.image_preimage_eq_of_subset hs]
 
 end Module
 

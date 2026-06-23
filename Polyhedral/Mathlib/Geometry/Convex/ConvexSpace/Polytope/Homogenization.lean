@@ -44,17 +44,17 @@ theorem IsPolytope.iff_homogenize_FG {C : ConvexSet R A} :
   simp only [Finset.coe_preimage]
   apply le_antisymm
   · intro x hx
-    apply mem_convexHull_preimage_of_apply_mem_hull hs
+    rw [← preimage_hull_eq_convexHull_preimage hs]
     simp only [hg, homogenize]
     exact Submodule.mem_span_of_mem <| Set.mem_image_of_mem hom.ofPoint hx
   · apply C.isConvexSet.convexHull_subset_iff.mpr
-    rw [← C.isConvexSet.convexHull_eq_self]
     intro x hx
     simp only [Set.mem_preimage, SetLike.mem_coe] at hx
-    have := Submodule.mem_span_of_mem (R := {c : R // 0 ≤ c}) hx
-    simp_rw [hg] at this
-    have := mem_convexHull_preimage_of_apply_mem_hull (Set.image_subset_range _ _) this
-    simpa [Set.preimage_image_eq _ hom.ofPoint_injective]
+    have := Set.mem_preimage.mpr <| Submodule.mem_span_of_mem (R := {c : R // 0 ≤ c}) hx
+    simp_rw [hg, homogenize] at this
+    rw [preimage_hull_eq_convexHull_preimage (Set.image_subset_range hom.ofPoint C)] at this
+    rw [← C.isConvexSet.convexHull_eq_self]
+    simpa [← C.isConvexSet.convexHull_eq_self, Set.preimage_image_eq _ hom.ofPoint_injective]
 
 end Ring
 
