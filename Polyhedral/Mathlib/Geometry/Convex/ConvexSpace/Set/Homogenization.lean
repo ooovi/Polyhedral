@@ -22,6 +22,57 @@ variable [hom : Affine.IsHomogenization R A W]
 
 attribute [local instance] AddTorsor.toConvexSpace
 
+section Module
+
+variable [IsModuleConvexSpace R W]
+
+theorem exists_sConvexComb_preimage_of_mem_hull {x} {s : Set W} (hs : s ⊆ Set.range hom.ofPoint)
+    (hx : hom.ofPoint x ∈ hull R s) : ∃ c' : StdSimplex R A,
+      sConvexComb c' = x ∧ (c'.weights.support : Set A) ⊆ (hom.ofPoint ⁻¹' s) := by
+  obtain ⟨c, ha, hb, hc⟩ := mem_hull_set.mp hx
+  -- use the same weights, just un-embed the domain
+  use StdSimplex.mk (c.comapDomain hom.ofPoint hom.ofPoint_injective.injOn) ?_ ?_
+  constructor
+  · -- the convex combo yields x
+    apply hom.ofPoint_injective
+    rw [hom.ofPoint.isAffineMap.map_sConvexComb, sConvexComb_eq_sum,
+      StdSimplex.weights_map, ← hc, Finsupp.mapDomain_comapDomain _ hom.ofPoint_injective]
+    exact ha.trans hs
+  · -- the weights are a subset of the preimage of s
+    simpa using (Set.preimage_mono ha)
+  · -- they're always nonneg
+    intro y
+    simpa using hb (hom.ofPoint y)
+  · -- its actually a convex combo, i.e. weights sum to 1
+    have hsum : c.sum (fun a b => b * hom.weight a) = c.sum (fun a b => b) := by
+        refine Finsupp.sum_congr (fun a h => ?_)
+        obtain ⟨_, _, rfl⟩ := (ha.trans hs) h
+        simp [hom.weight_one]
+    -- apply weights map to both sides
+    have := congrArg hom.weight hc
+    simp only [map_finsuppSum, map_smul, smul_eq_mul, hsum, hom.weight_one] at this
+    rw [← this]
+    simp only [Finsupp.sum, Finsupp.comapDomain_support, Finsupp.comapDomain_apply]
+    rw [Finset.sum_preimage hom.ofPoint _ (hom.ofPoint_injective.injOn)]
+    exact fun _ hx hnx ↦ Finsupp.notMem_support_iff.mp fun _ ↦ hnx (hs (ha hx))
+
+theorem preimage_hull_eq_convexHull_preimage {s : Set W} (hs : s ⊆ Set.range hom.ofPoint) :
+    hom.ofPoint ⁻¹' hull R s = Convexity.convexHull R (hom.ofPoint ⁻¹' s) := by
+  refine subset_antisymm ?_ ?_
+  · intro x hx
+    obtain ⟨c', rfl, hs⟩ := exists_sConvexComb_preimage_of_mem_hull hs hx
+    exact IsConvexSet.convexHull.sConvexComb_mem (le_trans hs subset_convexHull_self)
+  · apply Set.image_subset_iff.mp
+    rw [hom.ofPoint.isAffineMap.image_convexHull, Set.image_preimage_eq_iff.mpr hs]
+    exact (hull R s).isConvexSet.convexHull_subset_iff.mpr subset_hull
+
+theorem mem_convexHull_preimage_of_apply_mem_hull {x s} (hs : s ⊆ Set.range hom.ofPoint)
+    (h : hom.ofPoint x ∈ hull R s) : x ∈ Convexity.convexHull R (hom.ofPoint ⁻¹' s) := by
+  rw [← preimage_hull_eq_convexHull_preimage hs]
+  simpa [Set.image_preimage_eq_of_subset hs]
+
+end Module
+
 variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
 def homogenize (P : ConvexSet R A) : PointedCone R W := hull R (hom.ofPoint '' P)
@@ -62,6 +113,32 @@ lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ hom
 lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
   Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
 
+theorem homogenize_FG_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG) :
+    ∃ g : Finset W, PointedCone.hull R g = homogenize W C ∧
+      (g : Set W) ⊆ Set.range hom.ofPoint := by
+  obtain ⟨g, hg⟩ := h
+  -- express each generator as a positive combo of stuff in the embedding of C
+  have gsum {x} (hx : x ∈ g) := mem_hull_set.mp (hg ▸ (Submodule.mem_span_of_mem hx))
+  classical
+  -- collect all said stuff and use as the new generators
+  let g' := g.attach.biUnion (fun x => (Classical.choose (gsum x.2)).support)
+  use g'
+
+  have g'sub : (g' : Set W) ⊆ hom.ofPoint '' C := by
+    simpa [g'] using fun _ b ↦ (Classical.choose_spec (gsum b)).1
+
+  have gsubhull : (g : Set W) ⊆ hull R (g' : Set W) := by
+    intro x hx
+    obtain ⟨_, hnn, hsum⟩ := Classical.choose_spec (gsum hx)
+    refine hsum ▸ mem_hull_set.mpr ⟨Classical.choose (gsum hx), ?_, hnn, rfl⟩
+    simpa using Finset.subset_biUnion_of_mem
+      (fun p ↦ (Classical.choose (gsum p.2)).support) (Finset.mem_attach g ⟨x, hx⟩)
+
+  refine ⟨le_antisymm (hull_mono g'sub) ?_, g'sub.trans (by simp)⟩
+  simpa [hg] using hull_mono (R := R) gsubhull
+
+section Module
+
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
 
@@ -93,6 +170,9 @@ lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
   · rintro ⟨hxC, y, rfl⟩
     use y
     simpa
+
+
+end Module
 
 end Ring
 
@@ -130,6 +210,12 @@ lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
 @[simp] theorem dehomogenize_homogenize (P : ConvexSet R A) :
     dehomogenize A (homogenize W P) = P := by
   ext x; exact ofPoint_mem_homogenize_iff_mem _ _ _
+
+lemma homogenize_injective : Function.Injective (homogenize (hom := hom) W) := by
+  intro P Q h
+  have hh := congr_arg (ConvexSet.dehomogenize A) h
+  simp [dehomogenize_homogenize] at hh
+  assumption
 
 /-- If the entire cone save the origin are at positive weight, homogenizing the dehomogenization
 of the homogenize yields the cone again. -/
