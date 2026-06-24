@@ -146,6 +146,13 @@ instance : Zero (Polytope R X) where
 
 instance : IsConcreteZero (Polytope R X) X := ⟨rfl⟩
 
+end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
+
 /-! ### Negation -/
 
 instance : Neg (Polytope R X) where
@@ -154,13 +161,6 @@ instance : Neg (Polytope R X) where
 instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
 
 instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
-
-end Semiring
-
-section Ring
-
-variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
 
 /-! ### Minkowski addition -/
 

@@ -30,7 +30,7 @@ open Pointwise
 
 section Semiring
 
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 
 variable {P P₁ P₂ : Set V}

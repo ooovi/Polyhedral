@@ -168,7 +168,7 @@ section Pointwise
 
 section Semiring
 
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X] [AddCommGroup X] [Module R X] [IsModuleConvexSpace R X]
 
 open Pointwise
