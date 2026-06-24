@@ -252,7 +252,7 @@ variable [hom : IsHomogenization R A W]
   ext x; simp [dehomogenize, weight_one]
 
 lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
-    R≥0 ∙ (hom.ofPoint.range : Set W) ≤ hom.weight.positive := by
+    R≥0 ∙ (Set.range hom.ofPoint) ≤ hom.weight.positive := by
   rw [ofPoint_range_eq_preimage_weight_one]
   exact nonneg_smulSet_preimage_one_le_positive _
 
@@ -337,7 +337,7 @@ variable [AddCommGroup W] [Module R W]
 variable [hom : IsHomogenization R A W]
 
 lemma nonneg_smulSet_ofPoint_range :
-    R≥0 ∙ (hom.ofPoint.range : Set W) = hom.weight.positive := by
+    R≥0 ∙ (Set.range hom.ofPoint) = hom.weight.positive := by
   rw [ofPoint_range_eq_preimage_weight_one]
   exact nonneg_smulSet_preimage_one_eq_positive _
 
@@ -357,8 +357,7 @@ variable [hom : IsHomogenization R A W]
 
 @[simp] theorem homogenize_dehomogenize {S : SubMulActionWithZero R≥0 W} :
     homogenize R W (S.dehomogenize A) = S ⊓ hom.weight.positive := by
-  have aux : Set.range hom.ofPoint = hom.ofPoint.range := rfl
-  rw [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, smulSet_inter_left, aux,
+  rw [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, smulSet_inter_left,
     nonneg_smulSet_ofPoint_range]
 
 @[simp] theorem homogenize_dehomogenize_of_le_weight_positive {S : SubMulActionWithZero R≥0 W}

@@ -38,7 +38,7 @@ lemma isAffineMap (f : P →ᵃ[R] P2) : IsAffineMap R f where
         · split_ifs <;> simp
       simp [hwi]
 
-lemma range_isConvexSet (f : P →ᵃ[R] P2) : IsConvexSet R (f.range : Set P2) := by
+lemma range_isConvexSet (f : P →ᵃ[R] P2) : IsConvexSet R (Set.range f) := by
   simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
 
 end AffineMap

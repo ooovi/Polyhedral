@@ -50,10 +50,8 @@ lemma homogenize_le_weight_positive (K : ConvexSet R A) :
     rintro ⟨x, -, rfl⟩
     simp [hom.weight_one]
 
-lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P)
-    (hx : x ≠ 0) :
-    0 < hom.weight x :=
-  (homogenize_le_weight_positive (W := W) P h) hx
+lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
+    0 < hom.weight x := homogenize_le_weight_positive P h hx
 
 lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize W P) :
     0 ≤ hom.weight x :=
@@ -61,6 +59,32 @@ lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ hom
 
 lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
   Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
+
+theorem homogenize_FG_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG) :
+    ∃ g : Finset W, PointedCone.hull R g = homogenize W C ∧
+      (g : Set W) ⊆ Set.range hom.ofPoint := by
+  obtain ⟨g, hg⟩ := h
+  -- express each generator as a positive combo of stuff in the embedding of C
+  have gsum {x} (hx : x ∈ g) := mem_hull_set.mp (hg ▸ (Submodule.mem_span_of_mem hx))
+  classical
+  -- collect all said stuff and use as the new generators
+  let g' := g.attach.biUnion (fun x => (Classical.choose (gsum x.2)).support)
+  use g'
+
+  have g'sub : (g' : Set W) ⊆ hom.ofPoint '' C := by
+    simpa [g'] using fun _ b ↦ (Classical.choose_spec (gsum b)).1
+
+  have gsubhull : (g : Set W) ⊆ hull R (g' : Set W) := by
+    intro x hx
+    obtain ⟨_, hnn, hsum⟩ := Classical.choose_spec (gsum hx)
+    refine hsum ▸ mem_hull_set.mpr ⟨Classical.choose (gsum hx), ?_, hnn, rfl⟩
+    simpa using Finset.subset_biUnion_of_mem
+      (fun p ↦ (Classical.choose (gsum p.2)).support) (Finset.mem_attach g ⟨x, hx⟩)
+
+  refine ⟨le_antisymm (hull_mono g'sub) ?_, g'sub.trans (by simp)⟩
+  simpa [hg] using hull_mono (R := R) gsubhull
+
+section Module
 
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
@@ -93,6 +117,14 @@ lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
   · rintro ⟨hxC, y, rfl⟩
     use y
     simpa
+
+/-- The preimage of the conic hull of a set in the homogenization plane is the convex hull of the
+preimage of the set. -/
+theorem hull_image_ofPoint_eq_homogenize_convexHull {s : Set A} :
+    hull R (hom.ofPoint '' s) = homogenize W ⟨Convexity.convexHull R s, .convexHull⟩ := by
+  simp [homogenize, hom.ofPoint.isAffineMap.image_convexHull]
+
+end Module
 
 end Ring
 
@@ -131,6 +163,12 @@ lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
     dehomogenize A (homogenize W P) = P := by
   ext x; exact ofPoint_mem_homogenize_iff_mem _ _ _
 
+lemma homogenize_injective : Function.Injective (homogenize (hom := hom) W) := by
+  intro P Q h
+  have hh := congr_arg (ConvexSet.dehomogenize A) h
+  simp [dehomogenize_homogenize] at hh
+  assumption
+
 /-- If the entire cone save the origin are at positive weight, homogenizing the dehomogenization
 of the homogenize yields the cone again. -/
 theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
@@ -143,7 +181,7 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
       ofPoint_dehomogenize_eq_inter_ofPoint, ← hom.ofPoint_range_eq_preimage_weight_one]
     convert hull_eq_smul ?_ (C.isConvexSet.inter hom.ofPoint.range_isConvexSet)
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
-      obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (hom.ofPoint.range : Set W) := by
+      obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (Set.range hom.ofPoint) := by
         simpa [hom.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
