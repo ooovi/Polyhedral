@@ -1,5 +1,7 @@
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Geometry.Convex.Set
+
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 open Affine Convexity
@@ -7,13 +9,13 @@ open Affine Convexity
 variable {R V V2 P P2 I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
-variable [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
-
-attribute [local instance] AddTorsor.toConvexSpace
+variable [AddCommGroup V2] [Module R V2] [AddTorsor V2 P2]
 
 open Convexity
 
 namespace AffineMap
+
+attribute [local instance] AddTorsor.toConvexSpace
 
 -- PR #39437
 open Finset AddTorsor in
@@ -42,3 +44,13 @@ lemma range_isConvexSet (f : P →ᵃ[R] P2) : IsConvexSet R (Set.range f) := by
   simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
 
 end AffineMap
+
+namespace LinearMap
+
+variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [ConvexSpace R V2] [IsModuleConvexSpace R V2]
+
+-- TODO: This must exist. But currently the obvious proof dails due to some instance diamonds
+lemma isAffineMap (f : V →ₗ[R] V2) : IsAffineMap R f := sorry -- f.toAffineMap.isAffineMap
+
+end LinearMap
