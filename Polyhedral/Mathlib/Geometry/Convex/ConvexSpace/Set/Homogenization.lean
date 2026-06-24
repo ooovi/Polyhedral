@@ -50,10 +50,8 @@ lemma homogenize_le_weight_positive (K : ConvexSet R A) :
     rintro ⟨x, -, rfl⟩
     simp [hom.weight_one]
 
-lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P)
-    (hx : x ≠ 0) :
-    0 < hom.weight x :=
-  (homogenize_le_weight_positive (W := W) P h) hx
+lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
+    0 < hom.weight x := homogenize_le_weight_positive P h hx
 
 lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize W P) :
     0 ≤ hom.weight x :=
@@ -183,7 +181,7 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
       ofPoint_dehomogenize_eq_inter_ofPoint, ← hom.ofPoint_range_eq_preimage_weight_one]
     convert hull_eq_smul ?_ (C.isConvexSet.inter hom.ofPoint.range_isConvexSet)
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
-      obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (hom.ofPoint.range : Set W) := by
+      obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (Set.range hom.ofPoint) := by
         simpa [hom.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
