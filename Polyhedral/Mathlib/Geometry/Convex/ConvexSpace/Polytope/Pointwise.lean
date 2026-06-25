@@ -61,6 +61,8 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (
 
 /- Minkowski addition preserves convexity. -/
 lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ K) := by
+  -- TODO: use `IsPolytope.vadd`
+  -- this likely requires a lemma `{t} + K = t + K`.
   sorry
 
 /- The Minkowski addition of two polytopes is a polytope. -/
