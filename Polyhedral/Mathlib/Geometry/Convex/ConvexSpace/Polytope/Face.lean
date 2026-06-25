@@ -26,7 +26,8 @@ theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) :
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
   simp [dehomogenize_homogenize]
 
-/-- The face lattice of a polytope is graded by Homogenization cone face dimension. -/
+/-- The face lattice of a polytope as a graded order with grading given by the dimensions of
+homogenization cones. -/
 @[reducible]
 private noncomputable def Polytope.faceHomogenizationGradeOrder
     (hCfg : IsPolytope R (C : Set A)) : GradeOrder ℕ C.Face := by
