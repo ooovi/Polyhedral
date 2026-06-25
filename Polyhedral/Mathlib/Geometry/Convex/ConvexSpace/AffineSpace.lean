@@ -4,12 +4,14 @@ import Mathlib.Geometry.Convex.Set
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
+/-! This file proves results about affine maps and convexity. -/
+
 open Affine Convexity
 
-variable {R V V2 P P2 I : Type*}
+variable {R V₁ V₂ P₁ P₂ I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [AddTorsor V P]
-variable [AddCommGroup V2] [Module R V2] [AddTorsor V2 P2]
+variable [AddCommGroup V₁] [Module R V₁] [AddTorsor V₁ P₁]
+variable [AddCommGroup V₂] [Module R V₂] [AddTorsor V₂ P₂]
 
 open Convexity
 
@@ -17,11 +19,12 @@ namespace AffineMap
 
 attribute [local instance] AddTorsor.toConvexSpace
 
+variable (f : P₁ →ᵃ[R] P₂)
+
 -- PR #39437
 open Finset AddTorsor in
-lemma isAffineMap (f : P →ᵃ[R] P2) : IsAffineMap R f where
-  map_sConvexComb s:= by
-    classical
+lemma isAffineMap : IsAffineMap R f where
+  map_sConvexComb s:= by classical
     simp_rw [sConvexComb_eq_affineCombination, StdSimplex.weights_map, Finsupp.mapDomain,
       map_affineCombination _ _ _ s.total, Finsupp.sum, Finsupp.coe_finsetSum]
     simp only [affineCombination_apply, weightedVSubOfPoint_apply, map_sum]
@@ -40,17 +43,36 @@ lemma isAffineMap (f : P →ᵃ[R] P2) : IsAffineMap R f where
         · split_ifs <;> simp
       simp [hwi]
 
-lemma range_isConvexSet (f : P →ᵃ[R] P2) : IsConvexSet R (Set.range f) := by
-  simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
+@[simp] lemma map_sConvexComb (w : StdSimplex R P₁) :
+    f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
+
+lemma image_isConvexSet {s : Set P₁} (hs : IsConvexSet R s) : IsConvexSet R (f '' s) :=
+  hs.image f.isAffineMap
+
+lemma range_isConvexSet : IsConvexSet R (Set.range f) := by
+  rw [← Set.image_univ]
+  exact f.image_isConvexSet .univ
 
 end AffineMap
 
 namespace LinearMap
 
-variable [ConvexSpace R V] [IsModuleConvexSpace R V]
-variable [ConvexSpace R V2] [IsModuleConvexSpace R V2]
+variable [ConvexSpace R V₁] [IsModuleConvexSpace R V₁]
+variable [ConvexSpace R V₂] [IsModuleConvexSpace R V₂]
 
--- TODO: This must exist. But currently the obvious proof dails due to some instance diamonds
-lemma isAffineMap (f : V →ₗ[R] V2) : IsAffineMap R f := sorry -- f.toAffineMap.isAffineMap
+variable (f : V₁ →ₗ[R] V₂)
+
+-- TODO: This must hold. But currently the obvious proof fails due to some instance diamonds
+lemma isAffineMap (f : V₁ →ₗ[R] V₂) : IsAffineMap R f := sorry -- f.toAffineMap.isAffineMap
+
+@[simp] lemma map_sConvexComb (w : StdSimplex R V₁) :
+    f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
+
+lemma image_isConvexSet {s : Set V₁} (hs : IsConvexSet R s) : IsConvexSet R (f '' s) :=
+  hs.image f.isAffineMap
+
+lemma range_isConvexSet : IsConvexSet R (Set.range f) := by
+  rw [← Set.image_univ]
+  exact f.image_isConvexSet .univ
 
 end LinearMap
