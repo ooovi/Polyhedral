@@ -22,7 +22,7 @@ variable [IsModuleConvexSpace R W]
 open PointedCone
 
 /-- The homogenization of a polytope is a finitely generated cone. -/
-theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
+theorem IsPolytope.homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
     (homogenize W C).FG := by
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
@@ -36,11 +36,10 @@ theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C 
 
 /-- A convex set is a polytope iff its homogenization is a finitely generated cone. -/
 theorem IsPolytope.iff_homogenize_FG {C : ConvexSet R A} :
-    IsPolytope R (C : Set A) ↔ (homogenize W C).FG := by
-  refine ⟨fun P ↦ IsPolytope.of_homogenize_FG P, fun hfg ↦ ?_⟩
+    IsPolytope R (C : Set A) ↔ (homogenize W C).FG := by classical
+  refine ⟨homogenize_FG, fun hfg ↦ ?_⟩
   -- get cone generators that lie in the embedding of A
   obtain ⟨g, hg, hs⟩ := homogenize_FG_ofPoint_range hfg
-  classical
   -- un-embed them
   use g.preimage hom.ofPoint hom.ofPoint_injective.injOn
   -- show they generate C
