@@ -65,15 +65,17 @@ section Field
 
 variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+variable [AddCommGroup W] [Module R W]
+variable [hom : IsHomogenization R A W]
+
 attribute [local instance] AddTorsor.toConvexSpace
-variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : IsHomogenization R A W]
+variable [IsModuleConvexSpace R W]
 
 open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated positive cone yields a polytope. -/
 theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
-    (hc : ∀ c ∈ C, c ≠ 0 → 0 < hom.weight c) :
-    IsPolytope R (dehomogenize A C : Set A) := by
-  apply (IsPolytope.iff_homogenize_FG (hom := hom)).mpr
+    (hc : C ≤ hom.weight.positive) : IsPolytope R (dehomogenize A C : Set A) := by
+  rw [IsPolytope.iff_homogenize_FG (W := W)]
   simpa [homogenize_dehomogenize_of_le_positive hc]
 
 end Field
