@@ -2,7 +2,8 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
-/-! This file proves results about polytopes, FG cones and homogenization. -/
+/-! This file proves results about the relation between polytopes and FG cones via
+homogenization. -/
 
 variable {R V W A : Type*}
 
@@ -12,13 +13,15 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+variable [AddCommGroup W] [Module R W]
+variable [hom : IsHomogenization R A W]
 
 attribute [local instance] AddTorsor.toConvexSpace
-variable [AddCommGroup W] [Module R W] [IsModuleConvexSpace R W] [hom : IsHomogenization R A W]
+variable [IsModuleConvexSpace R W]
 
 open PointedCone
 
-/-- The homogenization cone of a polytope is finitely generated. -/
+/-- The homogenization of a polytope is a finitely generated cone. -/
 theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
     (homogenize W C).FG := by
   obtain ⟨t, ht⟩ := hCfg
@@ -31,7 +34,7 @@ theorem IsPolytope.of_homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C 
   rw [hom.ofPoint.isAffineMap.image_convexHull t]
   exact (PointedCone.hull_convexHull_eq_hull (hom.ofPoint '' t)).symm
 
-/-- A convex set is a polytope iff its homogenization cone is finitely generated. -/
+/-- A convex set is a polytope iff its homogenization is a finitely generated cone. -/
 theorem IsPolytope.iff_homogenize_FG {C : ConvexSet R A} :
     IsPolytope R (C : Set A) ↔ (homogenize W C).FG := by
   refine ⟨fun P ↦ IsPolytope.of_homogenize_FG P, fun hfg ↦ ?_⟩
