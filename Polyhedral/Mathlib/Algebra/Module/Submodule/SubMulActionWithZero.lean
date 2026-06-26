@@ -3,75 +3,75 @@ import Mathlib.Algebra.Module.Submodule.Defs
 
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 
-/-! This file conains results about `Submodule` and `SubMulActionWithZero`. -/
+/-! This file conains results about `Submodule` and `SubMulAction₀`. -/
 
 namespace Submodule
 
 open Function Module
 
-section SubMulActionWithZero
+section SubMulAction₀
 
 variable {R M : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
 
-/-- Reinterpret a `Submodule` as a `SubMulActionWithZero`. -/
-@[coe] protected abbrev toSubMulActionWithZero (p : Submodule R M) :
-    SubMulActionWithZero R M :=
-  SubMulActionWithZero.ofClass (R := R) p
+/-- Reinterpret a `Submodule` as a `SubMulAction₀`. -/
+@[coe] protected abbrev toSubMulAction₀ (p : Submodule R M) :
+    SubMulAction₀ R M :=
+  SubMulAction₀.ofClass (R := R) p
 
 /- Is this coe a bad idea?
   * on the one hand, there is no such coercion from Submdule to SubMulAction.
-  * on the other hand will we need this coercion to work with SubMulActionWithZero conveniently.
+  * on the other hand will we need this coercion to work with SubMulAction₀ conveniently.
 -/
-instance instSubMulActionWithZero : Coe (Submodule R M) (SubMulActionWithZero R M) :=
-  ⟨Submodule.toSubMulActionWithZero⟩
+instance instSubMulAction₀ : Coe (Submodule R M) (SubMulAction₀ R M) :=
+  ⟨Submodule.toSubMulAction₀⟩
 
 @[simp]
-theorem coe_toSubMulActionWithZero (p : Submodule R M) :
-    (p.toSubMulActionWithZero : Set M) = p :=
+theorem coe_toSubMulAction₀ (p : Submodule R M) :
+    (p.toSubMulAction₀ : Set M) = p :=
   rfl
 
 @[simp]
-theorem mem_toSubMulActionWithZero (p : Submodule R M) {x : M} :
-    x ∈ p.toSubMulActionWithZero ↔ x ∈ p :=
+theorem mem_toSubMulAction₀ (p : Submodule R M) {x : M} :
+    x ∈ p.toSubMulAction₀ ↔ x ∈ p :=
   Iff.rfl
 
-theorem toSubMulActionWithZero_injective :
+theorem toSubMulAction₀_injective :
     Function.Injective
-      (Submodule.toSubMulActionWithZero (R := R) (M := M)) := by
+      (Submodule.toSubMulAction₀ (R := R) (M := M)) := by
   intro p q h
   ext x
-  change x ∈ p.toSubMulActionWithZero ↔ x ∈ q.toSubMulActionWithZero
+  change x ∈ p.toSubMulAction₀ ↔ x ∈ q.toSubMulAction₀
   rw [h]
 
 @[simp]
-theorem toSubMulActionWithZero_inj {p q : Submodule R M} :
-    p.toSubMulActionWithZero = q.toSubMulActionWithZero ↔ p = q :=
-  toSubMulActionWithZero_injective.eq_iff
+theorem toSubMulAction₀_inj {p q : Submodule R M} :
+    p.toSubMulAction₀ = q.toSubMulAction₀ ↔ p = q :=
+  toSubMulAction₀_injective.eq_iff
 
-theorem toSubMulActionWithZero_le {p q : Submodule R M} :
-    p.toSubMulActionWithZero ≤ q.toSubMulActionWithZero ↔ p ≤ q :=
+theorem toSubMulAction₀_le {p q : Submodule R M} :
+    p.toSubMulAction₀ ≤ q.toSubMulAction₀ ↔ p ≤ q :=
   Iff.rfl
 
 @[gcongr, mono]
-theorem toSubMulActionWithZero_strictMono :
+theorem toSubMulAction₀_strictMono :
     StrictMono
-      (Submodule.toSubMulActionWithZero (R := R) (M := M)) := by
+      (Submodule.toSubMulAction₀ (R := R) (M := M)) := by
   intro p q hpq
   exact hpq
 
 @[gcongr, mono]
-theorem toSubMulActionWithZero_mono :
+theorem toSubMulAction₀_mono :
     Monotone
-      (Submodule.toSubMulActionWithZero (R := R) (M := M)) :=
-  toSubMulActionWithZero_strictMono.monotone
+      (Submodule.toSubMulAction₀ (R := R) (M := M)) :=
+  toSubMulAction₀_strictMono.monotone
 
 /-- The order embedding from submodules to zero-containing smul invariant subsets. -/
-def toSubMulActionWithZeroOrderEmbedding :
-    Submodule R M ↪o SubMulActionWithZero R M where
-  toFun := Submodule.toSubMulActionWithZero
-  inj' := toSubMulActionWithZero_injective
-  map_rel_iff' := toSubMulActionWithZero_le
+def toSubMulAction₀OrderEmbedding :
+    Submodule R M ↪o SubMulAction₀ R M where
+  toFun := Submodule.toSubMulAction₀
+  inj' := toSubMulAction₀_injective
+  map_rel_iff' := toSubMulAction₀_le
 
-end SubMulActionWithZero
+end SubMulAction₀
 
 end Submodule

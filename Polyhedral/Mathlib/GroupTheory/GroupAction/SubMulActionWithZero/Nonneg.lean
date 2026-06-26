@@ -12,7 +12,7 @@ This file proves results about sets closed under multiplication by non-negative 
 
 @[expose] public section
 
-namespace SubMulActionWithZero
+namespace SubMulAction₀
 
 open Function Set
 
@@ -61,4 +61,4 @@ lemma nonneg_smulSet_preimage_one_eq_positive (f : M →ₗ[R] R) :
 
 end DivisionRing
 
-end SubMulActionWithZero
+end SubMulAction₀

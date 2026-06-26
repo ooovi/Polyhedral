@@ -10,13 +10,13 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
 
-/-! This file contains results involving both `PointedCone` and `SubMulActionWithZero`. -/
+/-! This file contains results involving both `PointedCone` and `SubMulAction₀`. -/
 
 variable {R M : Type*}
 
 namespace PointedCone
 
-open Function Module SubMulActionWithZero
+open Function Module SubMulAction₀
 
 section Semiring
 
@@ -27,65 +27,65 @@ variable [AddCommMonoid M] [Module R M]
 
 /- Note that the character `∙` U+2219 used below is different from the scalar multiplication
 character `•` U+2022. -/
-/-- Notation for the `SubMulActionWithZero` generated from a set `s` w.r.t. positive scalars,
-short for `SubMulActionWithZero.closure R≥0 s`. -/
+/-- Notation for the `SubMulAction₀` generated from a set `s` w.r.t. positive scalars,
+short for `SubMulAction₀.closure R≥0 s`. -/
 scoped notation:70 (priority := high) R:70 " ∙₊ " s:70 => { c : R // 0 ≤ c } ∙ s
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
-section SubMulActionWithZero
+section SubMulAction₀
 
-/-- Reinterpret a `PointedCone` as a `SubMulActionWithZero`. -/
-@[coe] protected abbrev toSubMulActionWithZero (p : PointedCone R M) :
-    SubMulActionWithZero R≥0 M := .ofClass (R := R≥0) p
+/-- Reinterpret a `PointedCone` as a `SubMulAction₀`. -/
+@[coe] protected abbrev toSubMulAction₀ (p : PointedCone R M) :
+    SubMulAction₀ R≥0 M := .ofClass (R := R≥0) p
 
-instance instSubMulActionWithZero : Coe (PointedCone R M) (SubMulActionWithZero R≥0 M) :=
-  ⟨PointedCone.toSubMulActionWithZero⟩
+instance instSubMulAction₀ : Coe (PointedCone R M) (SubMulAction₀ R≥0 M) :=
+  ⟨PointedCone.toSubMulAction₀⟩
 
 @[simp]
-theorem coe_toSubMulActionWithZero (p : PointedCone R M) :
-    (p.toSubMulActionWithZero : Set M) = p :=
+theorem coe_toSubMulAction₀ (p : PointedCone R M) :
+    (p.toSubMulAction₀ : Set M) = p :=
   rfl
 
 @[simp]
-theorem mem_toSubMulActionWithZero (p : PointedCone R M) {x : M} :
-    x ∈ p.toSubMulActionWithZero ↔ x ∈ p :=
+theorem mem_toSubMulAction₀ (p : PointedCone R M) {x : M} :
+    x ∈ p.toSubMulAction₀ ↔ x ∈ p :=
   Iff.rfl
 
-theorem toSubMulActionWithZero_injective :
-    Function.Injective (PointedCone.toSubMulActionWithZero (R := R) (M := M)) := by
+theorem toSubMulAction₀_injective :
+    Function.Injective (PointedCone.toSubMulAction₀ (R := R) (M := M)) := by
   intro p q h
   ext x
-  change x ∈ p.toSubMulActionWithZero ↔ x ∈ q.toSubMulActionWithZero
+  change x ∈ p.toSubMulAction₀ ↔ x ∈ q.toSubMulAction₀
   rw [h]
 
 @[simp]
-theorem toSubMulActionWithZero_inj {p q : PointedCone R M} :
-    p.toSubMulActionWithZero = q.toSubMulActionWithZero ↔ p = q :=
-  toSubMulActionWithZero_injective.eq_iff
+theorem toSubMulAction₀_inj {p q : PointedCone R M} :
+    p.toSubMulAction₀ = q.toSubMulAction₀ ↔ p = q :=
+  toSubMulAction₀_injective.eq_iff
 
-theorem toSubMulActionWithZero_le {p q : PointedCone R M} :
-    p.toSubMulActionWithZero ≤ q.toSubMulActionWithZero ↔ p ≤ q :=
+theorem toSubMulAction₀_le {p q : PointedCone R M} :
+    p.toSubMulAction₀ ≤ q.toSubMulAction₀ ↔ p ≤ q :=
   Iff.rfl
 
 @[gcongr, mono]
-theorem toSubMulActionWithZero_strictMono :
-    StrictMono (PointedCone.toSubMulActionWithZero (R := R) (M := M)) := by
+theorem toSubMulAction₀_strictMono :
+    StrictMono (PointedCone.toSubMulAction₀ (R := R) (M := M)) := by
   intro p q hpq
   exact hpq
 
 @[gcongr, mono]
-theorem toSubMulActionWithZero_mono :
-    Monotone (PointedCone.toSubMulActionWithZero (R := R) (M := M)) :=
-  toSubMulActionWithZero_strictMono.monotone
+theorem toSubMulAction₀_mono :
+    Monotone (PointedCone.toSubMulAction₀ (R := R) (M := M)) :=
+  toSubMulAction₀_strictMono.monotone
 
 /-- The order embedding from PointedCones to zero-containing smul invariant subsets. -/
-def toSubMulActionWithZeroOrderEmbedding : PointedCone R M ↪o SubMulActionWithZero R≥0 M where
-  toFun := PointedCone.toSubMulActionWithZero
-  inj' := toSubMulActionWithZero_injective
-  map_rel_iff' := toSubMulActionWithZero_le
+def toSubMulAction₀OrderEmbedding : PointedCone R M ↪o SubMulAction₀ R≥0 M where
+  toFun := PointedCone.toSubMulAction₀
+  inj' := toSubMulAction₀_injective
+  map_rel_iff' := toSubMulAction₀_le
 
-end SubMulActionWithZero
+end SubMulAction₀
 
 lemma mulAction_closure_le_hull (s : Set M) : closure R≥0 s ≤ hull R s := by
   intro x hx
