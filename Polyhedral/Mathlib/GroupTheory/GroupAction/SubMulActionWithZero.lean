@@ -291,7 +291,7 @@ variable [ZeroMemClass S M] [SMulMemClass S R M]
 
 /-- The actual `SubMulAction₀` obtained from any set-like type whose
 members contain `0` and are closed under scalar multiplication. -/
-def ofClass (s : S) : SubMulAction₀ R M where
+@[coe] def ofClass (s : S) : SubMulAction₀ R M where
   carrier := s
   zero_mem' := ZeroMemClass.zero_mem s
   smul_mem' := fun r _ hx => SMulMemClass.smul_mem r hx
