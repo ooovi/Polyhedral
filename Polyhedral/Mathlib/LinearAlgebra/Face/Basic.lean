@@ -142,7 +142,7 @@ theorem comap_face {f : M → N} (hf : IsAffineMap R f) (F C : ConvexSet R N)
     apply Set.mem_preimage.mp hF1
 
 /- F is a face of C iff the image of F is a face of the image of C under an injective affine map -/
-theorem isFaceOf_map_iff_2 (f : M → N) (hhf : IsAffineMap R f) (hf : Function.Injective f)
+theorem isFaceOf_map_iff (f : M → N) (hhf : IsAffineMap R f) (hf : Function.Injective f)
 (C F : ConvexSet R M):(F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
   apply Iff.intro
   · intro h
