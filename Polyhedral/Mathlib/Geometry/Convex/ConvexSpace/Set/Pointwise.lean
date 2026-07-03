@@ -10,7 +10,7 @@ import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 
 /-! This file proves basic pointwise properties of convex sets. -/
 

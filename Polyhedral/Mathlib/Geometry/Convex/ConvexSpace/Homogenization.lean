@@ -1,5 +1,5 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 open Convexity Pointwise Set PointedCone Submodule

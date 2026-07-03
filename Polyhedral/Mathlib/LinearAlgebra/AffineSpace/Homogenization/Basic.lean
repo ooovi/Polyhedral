@@ -1,6 +1,9 @@
+
+import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
-import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 /-! This file defines affine homogenization. -/
 

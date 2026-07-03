@@ -1,6 +1,6 @@
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
