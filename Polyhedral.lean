@@ -56,6 +56,7 @@ import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
