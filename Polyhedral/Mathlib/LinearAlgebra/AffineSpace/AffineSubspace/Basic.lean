@@ -42,7 +42,6 @@ section Module
 variable [Ring R]
 variable [AddCommGroup V] [Module R V]
 
-open Pointwise in
 instance : Neg (AffineSubspace R V) where
   neg p := {
     carrier := -p
