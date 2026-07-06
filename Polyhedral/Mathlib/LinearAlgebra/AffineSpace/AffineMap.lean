@@ -38,6 +38,9 @@ instance instNonemptyRange (f : P₁ →ᵃ[k] P₂) : Nonempty (range f) :=
 theorem mem_range (f : P₁ →ᵃ[k] P₂) (x : P₂) : x ∈ f.range ↔ ∃ (y : P₁), f y = x :=
   Iff.rfl
 
+@[simp]
+theorem coe_range (f : P₁ →ᵃ[k] P₂) : f.range = Set.range f := rfl
+
 lemma range_direction (f : P₁ →ᵃ[k] P₂) : f.range.direction = f.linear.range := by
   apply le_antisymm
   · apply Submodule.span_le.mpr
