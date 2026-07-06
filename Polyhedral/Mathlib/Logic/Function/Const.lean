@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Logic.Function.Basic
 
 /-!
@@ -64,7 +70,7 @@ theorem isConst_congr {f g : α → β} (hfg : ∀ x, f x = g x) :
     IsConst f ↔ IsConst g :=
   ⟨fun hf => hf.congr hfg, fun hg => hg.congr fun x => (hfg x).symm⟩
 
-/-- Postcomposition preserves constancy. -/
+/-- Postcomposition preserves being constant. -/
 theorem IsConst.comp {f : α → β} (hf : IsConst f) (g : β → γ) :
     IsConst (g ∘ f) :=
   fun x y => congrArg g (hf x y)
@@ -75,9 +81,7 @@ theorem IsConst.comp_left {g : β → γ} (hg : IsConst g) (f : α → β) :
   fun x y => hg (f x) (f y)
 
 theorem not_isConst_of_apply_ne {f : α → β} {x y : α} (h : f x ≠ f y) :
-    ¬ IsConst f := by
-  intro hf
-  exact h (hf x y)
+    ¬ IsConst f := fun hf => h (hf x y)
 
 theorem not_isConst_iff_exists_apply_ne {f : α → β} :
     ¬ IsConst f ↔ ∃ x y, f x ≠ f y := by classical
@@ -93,11 +97,7 @@ theorem not_isConst_iff_exists_apply_ne {f : α → β} :
 
 @[simp]
 theorem isConst_id_iff :
-    IsConst (id : α → α) ↔ Subsingleton α := by
-  constructor
-  · intro h
-    exact ⟨fun x y => h x y⟩
-  · intro h
-    exact isConst_of_subsingleton_domain (id : α → α)
+    IsConst (id : α → α) ↔ Subsingleton α :=
+  ⟨fun h => ⟨fun x y => h x y⟩, fun _ => isConst_of_subsingleton_domain _⟩
 
 end Function
