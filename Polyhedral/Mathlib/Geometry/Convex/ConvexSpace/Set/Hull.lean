@@ -125,7 +125,7 @@ variable {R V A : Type*}
 
 section Semiring
 
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 
 @[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by

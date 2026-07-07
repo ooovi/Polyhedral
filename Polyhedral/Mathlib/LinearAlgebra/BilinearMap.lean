@@ -7,6 +7,10 @@ Authors: Martin Winter
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 
+/-! This file provides instances for expressing that bilinear pairings are separating and
+nondegenarate. This is needed in duality theory since many lemmas depend on these properties
+of the pairing. -/
+
 open Module Function
 
 namespace LinearMap

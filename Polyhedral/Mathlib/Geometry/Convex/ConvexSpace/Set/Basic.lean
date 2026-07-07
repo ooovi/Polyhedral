@@ -49,6 +49,8 @@ variable [Field K] [LinearOrder K] [IsStrictOrderedRing K] [ConvexSpace K X] {w 
   {s t : Set X} {x y : X}
 variable [AddCommGroup X] [Module K X] [IsModuleConvexSpace K X]
 
+-- NOTE: Replace `p + q ≠ 0` by `s.Nonempty`. It still holds uisng `add_eq_zero_iff_of_nonneg`.
+-- NOTE: I tend to believe that this should be formulated on `ConvexSet`.
 open Pointwise Set in
 protected theorem IsConvexSet.add_smul {s : Set X}
     (h_conv : IsConvexSet K s) {p q : K} (hp : 0 ≤ p) (hq : 0 ≤ q) (h : p + q ≠ 0) :

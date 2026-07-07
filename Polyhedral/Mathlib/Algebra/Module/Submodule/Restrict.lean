@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 import Mathlib.LinearAlgebra.Dual.Defs
@@ -9,15 +15,7 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 
 -- import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 
-namespace Submodule
-
-open Function LinearMap Module
-
-section Semiring
-
-variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
-
-/- I suggest the alternative naming `restrict` for `submoduleOf` for the following reason:
+/-! This file suggest the alternative name `restrict` for `submoduleOf` for the following reason:
   we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
   makes no sense. Using the same name is preferred for consistency.
   Note also that this cannot be an alias of `submoduleOf` because the argument are in the
@@ -26,8 +24,18 @@ variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
   Finally, the "restrict" terminology is also used for e.g. `LinearMap.restrict`.
 -/
 
--- NOTE: Something fundamental like this should probably be implemted somewhere more upstream
+namespace Submodule
+
+open Function LinearMap Module
+
+section Semiring
+
+variable {M S R : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
+
+-- TODO: Something fundamental like this should probably be implemted somewhere more upstream
 --  starting from monoids or so.
+
+/- ## RESTRICT -/
 
 /-- The restriction of `S ⊓ T` reinterpreted as a submodule of `S`. -/
 abbrev restrict (S T : Submodule R M) : Submodule R S := T.submoduleOf S -- T.comap S.subtype
@@ -93,7 +101,7 @@ def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S whe
   toFun := restrict S
   monotone' _ _ := restrict_mono S
 
-
+/- ## EMBED -/
 
 -- TODO: remove the `abbrev`? It should never be unfolded I think
 /-- A submodule `T` of a submodule `S` of `M` reintepreted as a submodule of `M`. -/
