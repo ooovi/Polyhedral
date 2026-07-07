@@ -16,7 +16,6 @@ theorem refl (S : ConvexSet R M) : S.IsFaceOf S :=
 
 /- (x,y) = (y,x) -/
 theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
-  unfold Convexity.openSegment
   ext z
   constructor
   all_goals (intro h; rcases h with ⟨m, n, hm , hn , hmn , hz⟩; use n, m, hn, hm)
@@ -24,7 +23,7 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
 
 /- Transitivity of faces -/
 theorem trans (S F₁ F₂ : ConvexSet R M) (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf S) :
-F₂.IsFaceOf S := by
+    F₂.IsFaceOf S := by
   constructor
   · apply Set.Subset.trans h₁.1 h₂.1
   · intro x hx y hy z hz hhz
@@ -47,7 +46,7 @@ F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
 /- A convex set is a face of a face iff it is contained in the face and it is a face
 of the ambient set-/
 lemma isFaceOf_iff (F C F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
-F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
+    F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
   apply Iff.intro
   · exact fun h => ⟨h.1, trans R C F F₁ h H⟩
   · intro h
@@ -80,7 +79,7 @@ theorem inf_right (S₁ S₂ F : ConvexSet R M) (h₁ : F.IsFaceOf S₁) (h₂ :
 
 /- The image of a face under an injective affine map is a face. -/
 theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f)
-  (F C : ConvexSet R M) (hF : F.IsFaceOf C) : (F.map hhf).IsFaceOf (C.map hhf) := by
+    (F C : ConvexSet R M) (hF : F.IsFaceOf C) : (F.map hhf).IsFaceOf (C.map hhf) := by
   constructor
   · intro x hx
     rcases hx with ⟨y , hy, rfl⟩
@@ -122,11 +121,11 @@ theorem comap_face {f : M → N} (hf : IsAffineMap R f) (F C : ConvexSet R N)
 
 /- F is a face of C iff the image of F is a face of the image of C under an injective affine map -/
 theorem isFaceOf_map_iff (f : M → N) (hhf : IsAffineMap R f) (hf : Function.Injective f)
-(C F : ConvexSet R M):(F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
-  apply Iff.intro
+    (C F : ConvexSet R M):(F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
+  constructor
   · intro h
-    have hh:= comap_face R hhf (F.map hhf) (C.map hhf) h
-    have h (A: ConvexSet R M) : (A.map hhf).comap hhf = A := by
+    have hh := comap_face R hhf (F.map hhf) (C.map hhf) h
+    have h (A : ConvexSet R M) : (A.map hhf).comap hhf = A := by
       ext z
       constructor
       · intro hz
