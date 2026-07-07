@@ -8,13 +8,13 @@ open Affine Convexity
 variable (R : Type*) {M N : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
   [ConvexSpace R M] [ConvexSpace R N]
 
-namespace ConvexSet
+namespace ConvexSet.Face
 
-/- S is a face of itself -/
+/- A convex set is a face of itself -/
 theorem refl (S : ConvexSet R M) : S.IsFaceOf S :=
   ⟨by simp , by intro x hx y hy z hz h; apply hx⟩
 
-/- (x,y)=(y,x) -/
+/- (x,y) = (y,x) -/
 theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   unfold Convexity.openSegment
   ext z
@@ -22,7 +22,7 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   all_goals (intro h; rcases h with ⟨m, n, hm , hn , hmn , hz⟩; use n, m, hn, hm)
   all_goals (rw [convexCombPair_symm] at hz; rw [add_comm] at hmn; use hmn)
 
-/- transitivity of faces -/
+/- Transitivity of faces -/
 theorem trans (S F₁ F₂ : ConvexSet R M) (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf S) :
 F₂.IsFaceOf S := by
   constructor
@@ -32,7 +32,7 @@ F₂.IsFaceOf S := by
     exact @h₁.2 x (@h₂.2 x hx y hy z hz' hhz) y (@h₂.2 y hy x hx z hz' (by simpa [openSegment_symm]
     using hhz)) z hz hhz
 
-/- smaller faces are faces of bigger faces -/
+/- Smaller faces are faces of bigger faces -/
 theorem iff_le_of_isFaceOf (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S)
   (h₂ : F₂.IsFaceOf S) :
 F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
@@ -44,7 +44,7 @@ F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
     · intro x hx y hy z hz hhz
       exact h₁.2 (Set.mem_of_mem_of_subset hx h₂.1) (Set.mem_of_mem_of_subset hy h₂.1) hz hhz
 
-/-A convex set is a face of a face iff it is contained in the face and it is a face
+/- A convex set is a face of a face iff it is contained in the face and it is a face
 of the ambient set-/
 lemma isFaceOf_iff (F C F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
 F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
@@ -56,29 +56,9 @@ F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
     · intro x hx y hy z hz hhz
       exact @h.2.2 x (Set.mem_of_mem_of_subset hx H.1) y (Set.mem_of_mem_of_subset hy H.1) z hz hhz
 
-/-intersection of two convex sets is a convex set -/
-theorem intersection_convexsets (S₁ S₂ : ConvexSet R M) : IsConvexSet R  (S₁.carrier ∩ S₂.carrier )
-:= by
-  intro w hw
-  rw [Set.subset_inter_iff] at hw
-  exact ⟨@S₁.2 w hw.1, @S₂.2 w hw.2⟩
-
-/- definition of intersection of convex sets -/
-def Inter (A B : ConvexSet R M) : ConvexSet R M := {
-  carrier := (A.carrier ∩ B.carrier),
-  isConvexSet := by
-    have h_sInter : IsConvexSet R (⋂₀ {A.carrier, B.carrier}) := by
-      apply Convexity.IsConvexSet.sInter
-      intro s hs
-      rcases hs with rfl | rfl
-      · exact A.isConvexSet
-      · exact B.isConvexSet
-    exact Set.sInter_pair A.carrier B.carrier ▸ h_sInter
-  }
-
 /-The intersection of two faces of two convexsets is a face of the intersection of the convexsets-/
 theorem inf (S₁ S₂ F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S₁) (h₂ : F₂.IsFaceOf S₂) :
-(Inter R F₁ F₂).IsFaceOf (Inter R S₁ S₂) := by
+    (F₁ ⊓ F₂).IsFaceOf (S₁ ⊓ S₂) := by
   constructor
   · rw [@Set.subset_def]
     exact fun x hx => ⟨Set.mem_of_mem_of_subset hx.1 h₁.1, Set.mem_of_mem_of_subset hx.2 h₂.1⟩
@@ -87,7 +67,7 @@ theorem inf (S₁ S₂ F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S₁) (h
 
 /- The intersection of two faces is a face.-/
 theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : F₂.IsFaceOf S) :
-(Inter R F₁ F₂).IsFaceOf S := by
+    (F₁ ⊓ F₂).IsFaceOf S := by
   constructor
   · simpa [Set.inter_self] using Set.inter_subset_inter h₁.1 h₂.1
   · intro x hx y hy z hz hhz
@@ -95,7 +75,7 @@ theorem inf_left (S F₁ F₂ : ConvexSet R M) (h₁ : F₁.IsFaceOf S) (h₂ : 
 
 /- The face of two convexsets is a face of the intersection.-/
 theorem inf_right (S₁ S₂ F : ConvexSet R M) (h₁ : F.IsFaceOf S₁) (h₂ : F.IsFaceOf S₂) :
-F.IsFaceOf (Inter R S₁ S₂) :=
+    F.IsFaceOf (S₁ ⊓ S₂) :=
   ⟨Set.subset_inter h₁.1 h₂.1, by intro x hx y hy z hz hhz; exact @h₁.2 x hx.1 y hy.1 z hz hhz⟩
 
 /- The image of a face under an injective affine map is a face. -/
@@ -119,14 +99,13 @@ theorem map {f : M → N} (hhf : IsAffineMap R f) (hf : Function.Injective f)
     exact Set.mem_image_of_mem _ (@hF.2 m hmC n hnC l hlF hl)
 
 /- defiition of preimage of a convex set -/
-def comap {f : M → N} (hf : IsAffineMap R f) (C : ConvexSet R N) : ConvexSet R M := {
-  carrier := f ⁻¹' C.carrier,
+def comap {f : M → N} (hf : IsAffineMap R f) (C : ConvexSet R N) : ConvexSet R M where
+  carrier := f ⁻¹' C.carrier
   isConvexSet := by apply Convexity.IsConvexSet.preimage hf C.isConvexSet
-}
 
 /- The preimage of a face is a face -/
 theorem comap_face {f : M → N} (hf : IsAffineMap R f) (F C : ConvexSet R N)
- (hF : F.IsFaceOf C) : (F.comap hf).IsFaceOf (C.comap hf) := by
+    (hF : F.IsFaceOf C) : (F.comap hf).IsFaceOf (C.comap hf) := by
   constructor
   · apply Set.preimage_mono hF.1
   · have hF1 := hF.2
@@ -163,4 +142,4 @@ theorem isFaceOf_map_iff (f : M → N) (hhf : IsAffineMap R f) (hf : Function.In
   · intro h
     apply map R hhf hf F C h
 
-end ConvexSet
+end ConvexSet.Face
