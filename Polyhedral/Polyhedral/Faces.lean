@@ -1,5 +1,5 @@
 
-import Polyhedral.Polyhedral.Basic
+import Polyhedral.Polyhedral.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice

@@ -69,3 +69,4 @@ import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces
+import Polyhedral.Polyhedral.Lattice
