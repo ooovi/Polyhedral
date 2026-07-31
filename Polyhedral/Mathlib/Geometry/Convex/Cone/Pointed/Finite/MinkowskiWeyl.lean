@@ -215,7 +215,6 @@ lemma FG.exists_dualfg_inf_span {C : PointedCone 𝕜 N} (hC : C.FG) :
 --   · rw [dual_sup_dual_inf_dual]
 --     simp [Submodule.FG.dual_dual_flip _ hS] -- <-- submodule duality theory
 
-set_option backward.isDefEq.respectTransparency false in
 variable (p) [Fact p.SeparatingRight] in
 /-- An FG cone is the dual of a DualFG cone. -/
 lemma FG.exists_dualfg_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
@@ -327,7 +326,6 @@ lemma fg_iff_dualfg {C : PointedCone 𝕜 N} : C.FG ↔ C.DualFG p := ⟨FG.dual
 -- /-- A finite dimensional cone is FG if and only if it is DualFG. -/
 -- lemma fg_iff_dualfg {C : PointedCone 𝕜 N} : C.DualFG p ↔ C.FG := ⟨FGDual.fg, FG.dualfg p⟩
 
-set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 /-- In finite dimensional space, the dual of and FG cone is itself FG. -/
 lemma FG.dual_fg {C : PointedCone 𝕜 M} (hC : C.FG) : (dual p C).FG := by

@@ -60,7 +60,6 @@ lemma IsPolyhedral.of_hull_finite {s : Set M} (hs : s.Finite) : (hull R s).IsPol
 lemma isPolyhedral_of_hull_finset (s : Finset M) : (hull (E := M) R s).IsPolyhedral :=
   .of_hull_finite s.finite_toSet
 
-set_option backward.isDefEq.respectTransparency false in
 /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
 lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
     C.IsPolyhedral := by
@@ -164,7 +163,6 @@ lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG
 
 -- ## MAP / COMAP
 
-set_option backward.isDefEq.respectTransparency false in
 lemma IsPolyhedral.map (hC : C.IsPolyhedral) (f : M →ₗ[R] N) : (C.map f).IsPolyhedral := by
   obtain ⟨D, hfg, hD'⟩ := hC.exists_fg_sup_lineal
   rw [← hD']

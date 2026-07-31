@@ -91,7 +91,6 @@ variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
-set_option backward.isDefEq.respectTransparency false in
 open Submodule in
 /-- If a point `x` does not lie in a cone `C` but together with `C` spans a salient cone, then
   `x` spans a face of `hull R (C ∪ {x})`. -/

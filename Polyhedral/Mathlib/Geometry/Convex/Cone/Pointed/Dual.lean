@@ -286,11 +286,11 @@ lemma dual_embed_quot_dual (S : Submodule R M) (C : PointedCone R S) :
       simpa only [rp_apply] using h
     · rw [surjInv_eq (Submodule.dual p S).mkQ_surjective]
 
-set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma dual_quot_dual (S : Submodule R M) (C : PointedCone R M) :
     (dual p (S ∩ C)).quot (.dual p S) = dual (p.rp S) (restrict S C) := by
-  simp only [← coe_ofSubmodule S, ← Submodule.coe_inf, ← embed_restrict S C, ← dual_embed_quot_dual]
+  simpa only [embed_restrict, ← coe_ofSubmodule S, ← Submodule.coe_inf] using
+    dual_embed_quot_dual p S (restrict S C)
 
 alias dual_restrict := dual_quot_dual
 
@@ -304,7 +304,6 @@ alias dual_restrict_of_le := dual_quot_dual_of_le
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
-set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma comap_dual_mkQ_dual (S : Submodule R M) (C : PointedCone R S) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) C) = dual p (embed C) := by

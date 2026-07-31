@@ -394,7 +394,6 @@ lemma bot_face {F : Face C} (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥
   change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
   simp [h, hbotcone]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
     F = fiberFace G ↔ G.toPointedCone = ⊥ := by
   constructor <;> intro h

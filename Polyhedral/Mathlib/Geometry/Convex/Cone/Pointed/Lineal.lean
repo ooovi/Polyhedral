@@ -366,7 +366,6 @@ variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 -- NOTE: an easier proof via `salient_of_pos_linearMap` seems only possible if `R` is a field.
-set_option backward.isDefEq.respectTransparency false in
 lemma Salient.of_hull_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
     (hull R s).Salient := by classical
   -- next line needs fixing once ConvexCone is removed
