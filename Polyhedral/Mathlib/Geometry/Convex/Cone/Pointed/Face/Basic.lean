@@ -40,7 +40,7 @@ namespace PointedCone
 
 variable {R M N : Type*}
 
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M] [Module R M] in
 /-- A sub-cone `F` of a pointed cone `C` is a face of `C` if any two points of `C` with a strictly
 positive combination in `F` are also in `F`. -/
 structure IsFaceOf (F C : PointedCone R M) where
@@ -51,7 +51,7 @@ structure IsFaceOf (F C : PointedCone R M) where
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable [AddCommGroup M] [Module R M]
+variable [AddCommMonoid M] [Module R M]
 variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 theorem isFaceOf_iff_mem_of_smul_add_smul_mem : F.IsFaceOf C ↔
@@ -126,7 +126,8 @@ theorem sum_mem_iff_mem {ι : Type*} [Fintype ι] {f : ι → M} (hF : F.IsFaceO
   classical
   refine ⟨fun hs i => ?_, fun a ↦ Submodule.sum_mem F fun c _ => a c⟩
   refine hF.mem_of_add_mem (hsC i) (sum_mem (fun j (_ : j ∈ Finset.univ.erase i) => hsC j)) ?_
-  simp [hs]
+  rw [Finset.add_sum_erase Finset.univ f (Finset.mem_univ i)]
+  exact hs
 
 /-- If the positive combination of points of a cone is in a face, then all the points are
   in the face. -/
@@ -140,7 +141,7 @@ theorem mem_of_sum_smul_mem {ι : Type*} [Fintype ι] {f : ι → M} {c : ι →
 
 section Map
 
-variable [AddCommGroup N] [Module R N]
+variable [AddCommMonoid N] [Module R N]
 
 /-- The image of a face of a cone under an injective linear map is a face of the
   image of the cone. -/
@@ -184,7 +185,7 @@ lemma isFaceOf_iff (h : F.IsFaceOf C) : F₁.IsFaceOf F ↔ F₁ ≤ F ∧ F₁.
 
 end IsFaceOf
 
-variable [AddCommGroup N] [Module R N] in
+variable [AddCommMonoid N] [Module R N] in
 /-- The image of a cone `F` under an injective linear map is a face of the
   image of another cone `C` if and only if `F` is a face of `C`. -/
 theorem isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
@@ -199,12 +200,58 @@ theorem isFaceOf_map_iff {f : M →ₗ[R] N} (hf : Function.Injective f) :
       convert hx'
       exact hf hhx'.symm
 
-variable [AddCommGroup N] [Module R N] in
+variable [AddCommMonoid N] [Module R N] in
 /-- The comap of a cone `F` under a surjective linear map is a face of the
   comap of another cone `F` if and only if `F` is a face of `C`. -/
 theorem isFaceOf_comap_iff {f : N →ₗ[R] M} (hf : Function.Surjective f) :
     (F.comap f).IsFaceOf (C.comap f) ↔ F.IsFaceOf C := by
   refine ⟨IsFaceOf.of_comap_surjective hf, IsFaceOf.comap _⟩
+
+namespace IsFaceOf
+
+section Prod
+
+variable [AddCommMonoid N] [Module R N]
+
+/-- The product of two faces of two cones is a face of the product of the cones. -/
+theorem prod {C₁ F₁ : PointedCone R M} {C₂ F₂ : PointedCone R N}
+    (hF₁ : F₁.IsFaceOf C₁) (hF₂ : F₂.IsFaceOf C₂) : IsFaceOf (F₁.prod F₂) (C₁.prod C₂) := by
+  constructor
+  · intro x hx; simpa [mem_prod] using ⟨hF₁.le hx.1, hF₂.le hx.2⟩
+  · simp only [mem_prod, Prod.fst_add, Prod.smul_fst, Prod.snd_add,
+      Prod.smul_snd, and_imp, Prod.forall]
+    intro _ _ _ _ _ xc₁ xc₂ yc₁ yc₂ a0 hab₁ hab₂
+    constructor
+    · exact hF₁.mem_of_smul_add_mem xc₁ yc₁ a0 hab₁
+    · exact hF₂.mem_of_smul_add_mem xc₂ yc₂ a0 hab₂
+
+/-- The projection of a face of a product cone onto the first component is a face of the
+  projection of the product cone onto the first component. -/
+theorem fst {C₁ : PointedCone R M} {C₂ : PointedCone R N}
+    {F : PointedCone R (M × N)}
+    (hF : F.IsFaceOf (C₁.prod C₂)) : (F.map (.fst R M N)).IsFaceOf C₁ := by
+  constructor
+  · intro x hx
+    simp only [mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right, exists_eq_right] at hx
+    exact (Set.mem_prod.mp <| hF.le hx.choose_spec).1
+  · simp only [mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right, exists_eq_right,
+      forall_exists_index]
+    intro x y a hx hy ha z h
+    refine ⟨0, hF.mem_of_smul_add_mem (x := (x, 0)) (y := (y, z)) ?_ ?_ ha (by simpa)⟩
+    · exact mem_prod.mp ⟨hx, zero_mem C₂⟩
+    · exact mem_prod.mp ⟨hy, (hF.le h).2⟩
+
+/-- The projection of a face of a product cone onto the second component is a face of the
+  projection of the product cone onto the second component. -/
+theorem snd {C₁ : PointedCone R M} {C₂ : PointedCone R N} {F : PointedCone R (M × N)}
+    (hF : F.IsFaceOf (C₁.prod C₂)) : (F.map (.snd R M N)).IsFaceOf C₂ := by
+  have := map _ (LinearEquiv.prodComm R M N).injective hF
+  convert fst (by simpa [PointedCone.map, Submodule.map])
+  ext; simp
+
+end Prod
+
+end IsFaceOf
 
 end Semiring
 
@@ -285,48 +332,6 @@ lemma lineal_eq_lineal (hF : F.IsFaceOf C) : F.lineal = C.lineal := by
   · exact hF.mem_of_add_mem hx hx' (by simp)
   · exact hF.mem_of_add_mem hx' hx (by simp)
 
-section Prod
-
-variable [AddCommGroup N] [Module R N]
-
-/-- The product of two faces of two cones is a face of the product of the cones. -/
-theorem prod {C₁ F₁ : PointedCone R M} {C₂ F₂ : PointedCone R N}
-    (hF₁ : F₁.IsFaceOf C₁) (hF₂ : F₂.IsFaceOf C₂) : IsFaceOf (F₁.prod F₂) (C₁.prod C₂) := by
-  constructor
-  · intro x hx; simpa [mem_prod] using ⟨hF₁.le hx.1, hF₂.le hx.2⟩
-  · simp only [mem_prod, Prod.fst_add, Prod.smul_fst, Prod.snd_add,
-      Prod.smul_snd, and_imp, Prod.forall]
-    intro _ _ _ _ _ xc₁ xc₂ yc₁ yc₂ a0 hab₁ hab₂
-    constructor
-    · exact hF₁.mem_of_smul_add_mem xc₁ yc₁ a0 hab₁
-    · exact hF₂.mem_of_smul_add_mem xc₂ yc₂ a0 hab₂
-
-/-- The projection of a face of a product cone onto the first component is a face of the
-  projection of the product cone onto the first component. -/
-theorem fst {C₁ : PointedCone R M} {C₂ : PointedCone R N}
-    {F : PointedCone R (M × N)}
-    (hF : F.IsFaceOf (C₁.prod C₂)) : (F.map (.fst R M N)).IsFaceOf C₁ := by
-  constructor
-  · intro x hx
-    simp only [mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right, exists_eq_right] at hx
-    exact (Set.mem_prod.mp <| hF.le hx.choose_spec).1
-  · simp only [mem_map, LinearMap.fst_apply, Prod.exists, exists_and_right, exists_eq_right,
-      forall_exists_index]
-    intro x y a hx hy ha z h
-    refine ⟨0, hF.mem_of_smul_add_mem (x := (x, 0)) (y := (y, z)) ?_ ?_ ha (by simpa)⟩
-    · exact mem_prod.mp ⟨hx, zero_mem C₂⟩
-    · exact mem_prod.mp ⟨hy, (hF.le h).2⟩
-
-/-- The projection of a face of a product cone onto the second component is a face of the
-  projection of the product cone onto the second component. -/
-theorem snd {C₁ : PointedCone R M} {C₂ : PointedCone R N} {F : PointedCone R (M × N)}
-    (hF : F.IsFaceOf (C₁.prod C₂)) : (F.map (.snd R M N)).IsFaceOf C₂ := by
-  have := map _ (LinearEquiv.prodComm R M N).injective hF
-  convert fst (by simpa [PointedCone.map, Submodule.map])
-  ext; simp
-
-end Prod
-
 end IsFaceOf
 
 end Ring
@@ -362,9 +367,11 @@ namespace IsFaceOf
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable [AddCommGroup M] [Module R M]
+variable [AddCommMonoid M] [Module R M]
 variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
+theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
+    F.Salient := hC.of_le_salient hF.le
 
 end Semiring
 
@@ -410,9 +417,6 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 {C C₁ C₂ F F₁ F₂ : PointedCone R M}
-
-theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
-    F.Salient := hC.of_le_salient hF.le
 
 /-- Quotient by the linear span of a face is salient. -/
 lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
