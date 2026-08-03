@@ -417,13 +417,12 @@ theorem salient {C F : PointedCone R M} (hC : C.Salient) (hF : F.IsFaceOf C) :
 /-- Quotient by the linear span of a face is salient. -/
 lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
     (C.quot (span R F)).Salient := by
-  rw [salient_iff_convexCone_salient] -- TODO: this line is a quick fix
-  intro z hzC hz0 hzNeg
+  intro z hzC w hwC hzw
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
-  rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
+  rcases (PointedCone.mem_map).1 hwC with ⟨y, hyC, rfl⟩
   have hxySpan : x + y ∈ span R F := by
     rw [← Submodule.ker_mkQ (span R (F : Set M))]
-    exact LinearMap.mem_ker.mpr (by simp [map_add, hy])
+    exact LinearMap.mem_ker.mpr (by simpa [map_add] using hzw)
   have hxyF : x + y ∈ F := by
     rw [← hF.inf_span]
     exact ⟨C.add_mem hxC hyC, hxySpan⟩
@@ -432,7 +431,7 @@ lemma quot_salient [IsDirectedOrder R] (hF : F.IsFaceOf C) :
     simpa [Submodule.mkQ_apply] using
       (Submodule.Quotient.mk_eq_zero (p := span R F) (x := x)).2
         (Submodule.subset_span hxF)
-  exact hz0 (by simp only [mkQ_apply]; exact hx0)
+  simpa only [mkQ_apply] using hx0
 
 lemma inf_isFaceOf_inf (h : F₁.IsFaceOf C₁) (C₂ : PointedCone R M) : (F₁ ⊓ C₂).IsFaceOf (C₁ ⊓ C₂) :=
   inf h (refl _)
