@@ -28,7 +28,6 @@ abbrev FinRank (C : PointedCone R M) := (span R (C : Set M)).FG
 @[simp] lemma finRank_of_isNoetherian [IsNoetherian R M] (C : PointedCone R M) : C.FinRank :=
   IsNoetherian.noetherian (span R (C : Set M))
 
-set_option backward.isDefEq.respectTransparency false in
 lemma FG.finRank {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
 
 alias finRank_of_fg := FG.finRank

@@ -557,7 +557,6 @@ lemma hull_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} (hcc : ∀ i, 
 
 variable {s t : Set M}
 
-set_option backward.isDefEq.respectTransparency false in
 lemma hull_inter_face_hull_inf_face (hF : F.IsFaceOf (hull R s)) :
     hull R (s ∩ F) = F := by
   ext x; constructor
@@ -608,7 +607,6 @@ variable {C F : PointedCone R M}
 
 -- ## QUOT / FIBER
 
-set_option backward.isDefEq.respectTransparency false in
 lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ span R F) :
     (F.quot S).IsFaceOf (C.quot S) := by
   refine ⟨map_mono hF.le, ?_⟩

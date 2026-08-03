@@ -12,19 +12,16 @@ section LinearOrderRing
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommMonoid M]
   [Module R M]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma coe_fg {S : Submodule R M} (hS : S.FG) : (S : PointedCone R M).FG
     := Submodule.FG.restrictScalars hS
 
 -- Q: is this problematic?
 -- instance {S : Submodule R M} : Coe S.FG (S : PointedCone R M).FG := ⟨coe_fg⟩
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma coe_fg_iff {S : Submodule R M} : (S : PointedCone R M).FG ↔ S.FG :=
   ⟨Submodule.FG.of_restrictScalars _, coe_fg⟩
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
 lemma span_fg {C : PointedCone R M} (hC : C.FG) : (span R (C : Set M)).FG := hC.span
 
