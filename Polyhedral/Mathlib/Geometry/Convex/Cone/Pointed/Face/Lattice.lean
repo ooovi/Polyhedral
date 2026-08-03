@@ -39,7 +39,7 @@ namespace PointedCone
 variable {R M N : Type*}
 
 
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M] in
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M] [Module R M] in
 /-- A face of a pointed cone `C`. Represents the face lattice of `C`. -/
 structure Face (C : PointedCone R M) extends PointedCone R M where
   isFaceOf : IsFaceOf toSubmodule C
@@ -48,7 +48,7 @@ namespace Face
 
 section Semiring
 
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M] [Module R M]
 variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 
 /-- Converts a face of a pointed cone into a pointed cone. -/
@@ -133,7 +133,7 @@ end Semiring
 section Ring
 
 variable [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
-  [AddCommGroup N] [Module R N] {C C₁ : PointedCone R M} {C₂ : PointedCone R N}
+  {C C₁ : PointedCone R M}
 
 lemma lineal_bot : (⊥ : Face C) = ⟨_, IsFaceOf.lineal C⟩ :=
    le_antisymm bot_le (IsFaceOf.lineal_le (⊥ : Face C).isFaceOf)
@@ -142,9 +142,17 @@ lemma lineal_bot : (⊥ : Face C) = ⟨_, IsFaceOf.lineal C⟩ :=
 an abbrev for `⊥`. -/
 abbrev lineal : Face C := ⊥
 
+end Ring
+
 /-!
 ### Product
 -/
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommMonoid M] [Module R M] [AddCommMonoid N] [Module R N]
+variable {C₁ : PointedCone R M} {C₂ : PointedCone R N}
+
 section Prod
 
 open Submodule
@@ -206,7 +214,7 @@ def prodOrderIso (C : PointedCone R M) (D : PointedCone R N) :
 
 end Prod
 
-end Ring
+end Semiring
 
 end Face
 
@@ -223,7 +231,7 @@ namespace Face
 section Semiring
 
 variable {R M N : Type*}
-variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M] [Module R M]
 variable {C C₁ C₂ : PointedCone R M} {F F₁ F₂ : Face C}
 
 @[simp, norm_cast]
