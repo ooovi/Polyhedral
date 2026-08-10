@@ -3,18 +3,19 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
-/-! ... -/
+/-! This file defines polyhedral cones via the predicate `PointedCone.IsPolyhedral`. -/
 
 open Function Module OrderDual LinearMap
 open Submodule hiding dual DualClosed
 open PointedCone
 
-/- WISHLIST:
- * in finite dim, fg = polyhedral
+/- TODO:
+ * in finite dim, fg iff polyhedral
  * faces are polyhedral
  * quotients are polyhedral
  * halfspaces are polyhedral
@@ -526,7 +527,6 @@ lemma fg_iff_fg_lineal {hC : C.IsPolyhedral} : C.FG ↔ C.lineal.FG :=
 
 end DivisionRing
 
-
 section Field
 
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
@@ -903,8 +903,6 @@ lemma exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
   constructor
   · exact h'.sup_submodule _
   · rw [← h, ← dual_sup]
-
-
 
 -- private lemma IsPolyhedral.dual_fg_of_lineal_cofg {C : PointedCone R N}
 --     (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) :
