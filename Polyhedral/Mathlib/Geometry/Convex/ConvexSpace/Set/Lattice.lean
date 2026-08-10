@@ -97,9 +97,9 @@ instance : IsConcreteInfSet (ConvexSet R X) X := ⟨fun _ => rfl⟩
 instance : CompleteSemilatticeInf (ConvexSet R X) := .ofSetLike ..
 
 /- TODO: We could define the `CompleteLattice` structure using
-`completeLatticeOfCompleteSemilatticeInf` as shown below, and then just proof that the
+`completeLatticeOfCompleteSemilatticeInf` as shown below, and then just prove that the
 resulting sup and sSup are propext to convex hulls.
-But I don't know how important it is to have the definitional to convex hull. -/
+But I don't know how important it is to have the definitional equality to convex hull. -/
 -- instance : CompleteLattice (ConvexSet R X) := completeLatticeOfCompleteSemilatticeInf _
 
 /- # Max -/
