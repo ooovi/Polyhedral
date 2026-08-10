@@ -3,6 +3,7 @@ Copyright (c) 2025 Martin Winter, Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Yaël Dillies
 -/
+
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
@@ -13,26 +14,9 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 
 /-!
-# The algebraic dual of a cone
-
-Given a bilinear pairing `p` between two `R`-modules `M` and `N` and a set `s` in `M`, we define
-`PointedCone.dual p s` to be the pointed cone in `N` consisting of all points `y` such that
-`0 ≤ p x y` for all `x ∈ s`.
-
-When the pairing is perfect, this gives us the algebraic dual of a cone. This is developed here.
-When the pairing is continuous and perfect (as a continuous pairing), this gives us the topological
-dual instead. See `Mathlib/Analysis/Convex/Cone/Dual.lean` for that case.
-
-## Implementation notes
-
-We do not provide a `ConvexCone`-valued version of `PointedCone.dual` since the dual cone of any set
-always contains `0`, i.e. is a pointed cone.
-Furthermore, the strict version `{y | ∀ x ∈ s, 0 < p x y}` is a candidate to the name
-`ConvexCone.dual`.
-
-## TODO
-
-Deduce from `dual_flip_dual_dual_flip` that polyhedral cones are invariant under taking double duals
+This file implements a dual for submodules in analogy to `PointedCone.dual`.
+Mathlib will likely not use this terminology, but will use `orthogonal` or `orthogonalBilin`.
+See also the PR #40746.
 -/
 
 assert_not_exists TopologicalSpace Real -- Cardinal (comes with BilinearMap)
@@ -47,12 +31,14 @@ variable {R M N : Type*}
   [AddCommMonoid N] [Module R N]
   {p : M →ₗ[R] N →ₗ[R] R} {s t : Set M} {y : N}
 
--- TODO: I think `dual` should be renamed to `dualSpan` or so, and `dual` should become a map
---  from subspaces to subspaces. This allows us to implement it as a `PreDualityOperator`.
-
 variable (p s) in
-/-- The dual cone of a set `s` with respect to a bilinear pairing `p` is the cone consisting of all
-points `y` such that for all points `x ∈ s` we have `0 ≤ p x y`. -/
+/-- The dual submodule of a set `s` with respect to a bilinear pairing `p` is the cone consisting
+of all points `y` such that for all points `x ∈ s` we have `0 = p x y`.
+
+NOTE: This has an anologue in mathlib called `orthogonalBilin` whose features are currently
+developed. We will eventually replace `Submodule.dual` by `orthogonalBilin`. In the meantime
+we recommend to use `Submodule.dual` since its features are more developed.
+-/
 def dual : Submodule R N where
   carrier := {y | ∀ ⦃x⦄, x ∈ s → 0 = p x y}
   zero_mem' := by simp
@@ -107,7 +93,7 @@ lemma ker_le_dual (s : Set M) : ker p.flip ≤ dual p s := by
 lemma ker_le_dual_flip (s : Set N) : ker p ≤ dual p.flip s := by
   simp [← dual_flip_univ_ker, dual_antitone]
 
-/-- The inner dual cone of a singleton is given by the preimage of the positive cone under the
+/-- The inner dual submodule of a singleton is given by the preimage of zero under the
 linear map `p x`. -/
 lemma dual_singleton (x : M) : dual p {x} = ker (p x) := by
   ext x; simp [Eq.comm]
@@ -130,15 +116,15 @@ lemma dual_iUnion {ι : Sort*} (f : ι → Set M) : dual p (⋃ i, f i) = ⨅ i,
 lemma dual_sUnion (S : Set (Set M)) : dual p (⋃₀ S) = sInf (dual p '' S) := by
   ext; simp [forall_swap (α := M)]
 
-/-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
+/-- The dual submodule of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_iInter_dual_singleton (s : Set M) :
     dual p s = ⋂ i : s, (dual p {i.val} : Set N) := by ext; simp
 
-/-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
+/-- The dual submodule of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_Inf_dual_singleton (s : Set M) :
     dual p s = ⨅ x ∈ s, dual p {x} := by ext; simp
 
-/-- The dual cone of `s` equals the intersection of dual cones of the points in `s`. -/
+/-- The dual submodule of `s` equals the intersection of dual cones of the points in `s`. -/
 lemma dual_eq_Inf_dual_singleton' (s : Finset M) :
     dual p s = ⨅ x ∈ s, dual p {x} := by ext; simp
 
@@ -160,13 +146,13 @@ lemma dual_exists_fun_ker (s : Set M) : ∃ f : N →ₗ[R] (s → R), dual p s 
 lemma dual_exists_fun_ker' (s : Finset M) : ∃ f : N →ₗ[R] (s → R), dual p s = ker f
     := ⟨_, dual_ker_pi' s⟩
 
-/-- Any set is a subset of its double dual cone. -/
+/-- Any set is a subset of its double dual submodule. -/
 lemma subset_dual_dual : s ⊆ dual p.flip (dual p s) := fun _x hx _y hy ↦ hy hx
 
 alias le_dual_dual := subset_dual_dual
 
 -- variable (p) in
--- /-- Any cone is a subcone of its double dual cone. -/
+-- /-- Any submodule is a subcone of its double dual submodule. -/
 -- lemma le_dual_dual (S : Submodule R M) : S ≤ dual p.flip (dual p S) := subset_dual_dual
 
 lemma le_dual_of_le_dual {S : Submodule R M} {T : Submodule R N}
@@ -177,7 +163,7 @@ lemma dual_le_iff_dual_le {S : Submodule R M} {T : Submodule R N} :
     S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
 
 variable (p) in
-/-- Any cone is a subcone of its double dual cone. -/
+/-- Any submodule is a subcone of its double dual submodule. -/
 lemma dual_dual_mono {s t : Set M} (hST : s ⊆ t) :
     dual p.flip (dual p s) ≤ dual p.flip (dual p t) := by
   exact dual_antitone <| dual_antitone hST
@@ -200,7 +186,7 @@ lemma dual_span (s : Set M) : dual p (span R s) = dual p s := by
 
 -- ----------------
 
--- TODO: add `dual_image`, see cone thoery.
+-- TODO: add `dual_image`, see cone theory.
 
 /-- Conversion to the standard algebraic duality operator. -/
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp
@@ -736,7 +722,6 @@ lemma dual_inf_dual_sup_dual (S T : Submodule R M) :
   rw [← coe_inf]
   rw [← dual_sup_dual_inf_dual]
   exact dual_dual_flip p _
-
 
 
 -- ### HIGH PRIORITY! This is needed in the cone theory!

@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2020 ... . All rights reserved.
+Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: ...
+Authors: Martin Winter
 -/
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
@@ -9,8 +9,7 @@ import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 
 /-!
-# Affine spaces
-...
+This file adds features for affine spaces.
 -/
 
 noncomputable section

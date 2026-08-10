@@ -1,9 +1,17 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.LinearAlgebra.Dimension.Basic
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Dimension.RankNullity
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+
+/-! This file defines the corank of a submodule and proves basic properties. -/
 
 open Module Cardinal
 

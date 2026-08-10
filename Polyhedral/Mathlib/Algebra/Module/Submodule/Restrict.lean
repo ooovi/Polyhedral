@@ -16,12 +16,12 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 -- import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 
 /-! This file suggest the alternative name `restrict` for `submoduleOf` for the following reason:
-  we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
-  makes no sense. Using the same name is preferred for consistency.
-  Note also that this cannot be an alias of `submoduleOf` because the argument are in the
-  opposite order. This is in order to be consistent with `embed` for which the other order
-  is not possible. This also allows us to view `restrict S` as the restriction operator.
-  Finally, the "restrict" terminology is also used for e.g. `LinearMap.restrict`.
+we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
+makes no sense. Using the same name is preferred for consistency.
+Note also that this cannot be an alias of `submoduleOf` because the argument are in the
+opposite order. This is in order to be consistent with `embed` for which the other order
+is not possible. This also allows us to view `restrict S` as the restriction operator.
+Finally, the "restrict" terminology is also used for e.g. `LinearMap.restrict`.
 -/
 
 namespace Submodule

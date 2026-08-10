@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
 
 import Polyhedral.Polyhedral.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
@@ -7,6 +12,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 
+/-! This file proves basic fact about faces of polyhedral cones. -/
 
 namespace PointedCone
 

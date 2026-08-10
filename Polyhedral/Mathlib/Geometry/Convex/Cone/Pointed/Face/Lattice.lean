@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2025 Olivia Röhrig. All rights reserved.
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig
+Authors: Olivia Röhrig, Martin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
@@ -9,7 +9,6 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 import Mathlib.LinearAlgebra.Quotient.Defs
-
 
 /-!
 ## Face
@@ -394,7 +393,6 @@ lemma bot_face {F : Face C} (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥
   change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
   simp [h, hbotcone]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma fiberFace_eq_iff {F : Face C} (G : Face (C ⧸ F)) :
     F = fiberFace G ↔ G.toPointedCone = ⊥ := by
   constructor <;> intro h

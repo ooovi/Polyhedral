@@ -9,6 +9,8 @@ import Mathlib.LinearAlgebra.FreeModule.Basic
 import Mathlib.Algebra.Ring.SumsOfSquares
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
+/-! This file proves results about dual modules. -/
+
 open Module Function
 
 variable {ι : Type*} [DecidableEq ι]
