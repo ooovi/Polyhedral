@@ -121,20 +121,6 @@ lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D
   intro y hy hy' z hz hz' rfl
   exact ⟨⟨y, hy, by use z⟩, -y, hy', -z, hz', by simp [add_comm]⟩
 
--- ## PRIORITY
---isnt this false when C and D are two rays pointing in opposite directions?
-lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : span R C ⊓ D.lineal ≤ C.lineal) :
-    (C ⊔ D).lineal = C.lineal ⊔ D.lineal := by
-  rw [le_antisymm_iff, and_comm]
-  constructor
-  · exact lineal_sup_le ..
-  intro x
-  simp [Submodule.mem_sup, mem_lineal]
-  simp [SetLike.le_def, mem_lineal] at hCD
-  intro y hy z hz hyz w hw v hv hwv
-  have h := hCD
-  sorry
-
 -- !! only holds over fields or archimedean rings! Not in general.
 lemma mem_lineal_of_smul_mem_lineal' {C : PointedCone R M} :
   (∀ c > 0, ∃ d > 0, d * c ≥ 1) ↔ (∀ x ∈ C, ∀ c > 0, c • x ∈ C.lineal → x ∈ C.lineal) := sorry

@@ -30,17 +30,6 @@ open Submodule (span)
 
 -- ## IS FACE OF
 
-section Ring
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C C₁ C₂ F : PointedCone R M}
-
--- ...
-
-end Ring
-
 section Field
 
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
@@ -57,22 +46,20 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
     * etc.
 -/
 
--- ## TODO: remove `isPerfPair` from everything below.
+-- ## TODO: remove `isPerfPair` assumption from everything below.
 
 lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) :
     (C ⊔ (span R (F : Set M))).lineal = span R F := by
-  rw [sup_comm]
-  rw [_lineal_sup_eq] <;> simp -- WARNING: is `_lineal_sup_eq` even true?
-  simpa using le_trans hF.lineal_le le_span
-  -- ext x
-  -- simp [mem_lineal, mem_span, Submodule.mem_sup]
-  -- constructor
-  -- · intro ⟨h, h'⟩
-  --   obtain ⟨y, hy, z, ⟨p, hp, n, hn, h⟩, H⟩ := h
-  --   obtain ⟨y', hy', z', ⟨p', hp', n', hn', h'⟩, H'⟩ := h'
-  --   -- obtain ⟨y', hy', z', hz', b', hb', h'⟩ := h'
-  --   sorry
-  -- · sorry
+  ext x
+  simp only [mem_lineal, Submodule.mem_sup, Submodule.restrictScalars_mem, mem_span,
+    ↓existsAndEq, and_true]
+  constructor
+  · intro ⟨h, h'⟩
+    -- obtain ⟨y, hy, z, ⟨p, hp, n, hn, h⟩, H⟩ := h
+    -- obtain ⟨y', hy', z', ⟨p', hp', n', hn', h'⟩, H'⟩ := h'
+    -- obtain ⟨y', hy', z', hz', b', hb', h'⟩ := h'
+    sorry
+  · sorry
 
 variable (p) [p.IsPerfPair] in
 -- variable [Fact (Surjective p.flip)] in
@@ -129,27 +116,11 @@ lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCo
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
   sorry
 
-
 -- ## KREIN MILMAN
-
 
 end Field
 
-
-
-
 -- ## FACE
-
-section Ring
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C C₁ C₂ F : PointedCone R M}
-
- -- ...
-
-end Ring
 
 section Field
 
@@ -230,6 +201,7 @@ instance {C : PolyhedralCone R M} :
 -/
 
 def atoms : Set (Face (C : PointedCone R M)) := sorry
+
 def rays : Set (Face (C : PointedCone R M)) := sorry
 
 def coatoms : Set (Face (C : PointedCone R M)) := sorry

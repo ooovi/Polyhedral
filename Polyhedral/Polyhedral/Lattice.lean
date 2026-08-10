@@ -6,7 +6,7 @@ Authors: Martin Winter
 
 import Polyhedral.Polyhedral.Basic
 
-/-! ... -/
+/-! This file defines `PolyhedralCone` as a bundled object. -/
 
 open Function Module OrderDual LinearMap
 open Submodule hiding dual DualClosed
@@ -64,7 +64,6 @@ def finhull_lineal (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
 variable [IsNoetherian R M] in
 /-- A polyhedral cone is finitely generated. -/
 def FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.fg
-
 
 
 -- ## ORDER
