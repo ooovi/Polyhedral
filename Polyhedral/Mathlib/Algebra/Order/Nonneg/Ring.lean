@@ -8,7 +8,7 @@ import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 import Mathlib.Algebra.Order.Ring.Defs
 
 /-!
-...
+This file contains auxiliary lemmas for working with `Nonneg R`, where `R` is a semiring.
 -/
 
 assert_not_exists abs_inv

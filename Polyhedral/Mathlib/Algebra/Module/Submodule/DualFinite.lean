@@ -8,6 +8,10 @@ import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 
+/-! This file introduces the notion `DualFG` for submodules. A submodule is `DualFG` if it
+is the dual of a finitely generated submodule. Over fields this is the same as being both
+`CoFG` and dual closed. -/
+
 open Module Function LinearMap
 
 namespace Submodule

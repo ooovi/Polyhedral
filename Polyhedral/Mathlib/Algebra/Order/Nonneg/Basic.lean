@@ -7,7 +7,9 @@ Authors: Martin Winter
 import Mathlib.Algebra.Order.Nonneg.Basic
 
 /-!
-...
+This file defines the name `Nonneg R` for `{c : R // 0 ≤ c}`. Currently, mathlib files that
+use the latter type introduce a new notation `R≥0`. But since this notation depends on the
+input type being called `R`, this is not a global notation.
 -/
 
 assert_not_exists abs_inv

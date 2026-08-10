@@ -11,10 +11,11 @@ public import Mathlib.Algebra.Order.Nonneg.Field
 public import Mathlib.Algebra.Order.Positive.Ring
 public import Mathlib.Data.Nat.Cast.Order.Ring
 
-/-
-TODO:
+/-!
 This file generalizes lemmas/defs previously written for Field with a dashed name,
 When this goes into mathlib one should instead generalize the Field versions directly.
+
+See also PR #41135.
 -/
 
 /-!

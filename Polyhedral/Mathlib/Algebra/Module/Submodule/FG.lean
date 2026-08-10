@@ -3,10 +3,13 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.RingTheory.Noetherian.Basic
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+
+/-! This file contains useful results about FG submodules. -/
 
 open Module
 
@@ -19,13 +22,13 @@ variable [AddCommMonoid N] [Module R N]
 
 alias sup_fg := Submodule.FG.sup
 
-
 -- This seems to be the more appropriate version of `Submodule.fg_of_linearEquiv` which
 -- is probably better called `Module.fg_of_linearEquiv` or so.
 lemma FG.linearEquiv {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T) (hS : S.FG) :
     T.FG := by -- T.fg_top.mp <| fg_of_linearEquiv e.symm (S.fg_top.mpr hS)
   rw [← Submodule.fg_top] at *
   exact fg_of_linearEquiv e.symm hS
+
 
 -- ## RESTRICT / EMBED
 

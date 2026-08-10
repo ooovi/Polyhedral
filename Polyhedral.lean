@@ -6,7 +6,6 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
