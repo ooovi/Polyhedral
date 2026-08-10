@@ -1,8 +1,16 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Geometry.Convex.Cone.DualFinite
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+
+/-! This file proves results about duals of FG cones. -/
 
 variable {R M N : Type*}
 
@@ -43,7 +51,7 @@ section LinearOrder
 variable [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable [Module.Finite R M] [Fact p.SeparatingRight] in
 lemma DualFG.bot : DualFG p ⊥ := by

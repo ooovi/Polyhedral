@@ -3,8 +3,11 @@ Copyright (c) 2025 Justus Springer, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Justus Springer, Martin Winter
 -/
+
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
+
+/-! This file proves facts about the duals of finitly generated cones. -/
 
 open Function Module LinearMap
 open Submodule hiding dual

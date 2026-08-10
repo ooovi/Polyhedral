@@ -1,4 +1,12 @@
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+
+/-! This file contains results about finitely generated cones. -/
 
 open Submodule (span)
 

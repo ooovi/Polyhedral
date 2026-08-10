@@ -3,6 +3,7 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Mathlib.RingTheory.Finiteness.Cofinite
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.Projection
@@ -13,6 +14,8 @@ import Mathlib.Algebra.Exact
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
+
+/-! This file proces results about cofinitely generated submodules. -/
 
 open Module Function LinearMap
 

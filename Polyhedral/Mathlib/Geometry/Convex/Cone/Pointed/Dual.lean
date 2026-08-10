@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
 
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
@@ -5,6 +10,8 @@ import Mathlib.Geometry.Convex.Cone.Dual
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+
+/-! This file proves results about `PointedCone.dual` intended to go into Pointed/Dual. -/
 
 namespace PointedCone
 

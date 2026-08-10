@@ -3,7 +3,10 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+
+/-! This file defines the algebraic relative interior. -/
 
 open Function Module OrderDual LinearMap
 open Submodule hiding span dual DualClosed

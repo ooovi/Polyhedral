@@ -3,6 +3,7 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Pointed
@@ -11,9 +12,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 
 /-!
-# Halfspace
-
-...
+This file defines halfspaces in modules.
 -/
 
 open Function Module

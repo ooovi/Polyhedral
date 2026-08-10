@@ -1,6 +1,14 @@
+/-
+Copyright (c) 2026 .... All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: ...
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Mathlib.Analysis.Convex.Segment
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+
+/-! This file proves results about faces in convex spaces. -/
 
 open Convexity
 open Affine Convexity
