@@ -201,7 +201,7 @@ lemma comap_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) (hC : C.IsPoly
   · exact hf
 
 /-- The preimage of a cone is polyhedral if and only if the cone itself is polyhdral,
-assuming tha the map is surjective. -/
+assuming that the map is surjective. -/
 lemma comap_iff_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) :
     (C.comap f).IsPolyhedral ↔ C.IsPolyhedral where
   mp h := by
@@ -224,12 +224,6 @@ variable {C C₁ C₂ F : PointedCone R M}
 /-- A cone is polyhedral if and only if it is the sum of a salient FG cone and a submodule. -/
 lemma iff_exists_fg_salient_submoduel_eq_sup (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R M, D.FG ∧ Salient D ∧ C = D ⊔ C.lineal := by
-  sorry
-
--- TODO: likely needs field
-protected lemma comap (f : N →ₗ[R] M) (hC : C.IsPolyhedral) :
-    (C.comap f).IsPolyhedral := by
-  obtain ⟨D, hD, S, rfl⟩ := hC
   sorry
 
 /-- A polyhedral cone is the sum of an FG cone with its lineality space. -/
@@ -348,6 +342,8 @@ end CommRing
 
 
 -- ----
+
+-- ## NOTE: this is legacy code, that remains here for transferring some of the proofs.
 
 -- /-- A cone is polyhedral if its salient quotient is finitely generated. -/
 -- abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
@@ -480,7 +476,6 @@ end CommRing
 -- lemma IsPolyhedral.sup_fg (hC : C.IsPolyhedral) {D : PointedCone R M} (hD : D.FG) :
 --     (C ⊔ D).IsPolyhedral := hC.sup (FG.isPolyhedral hD)
 
-
 -- -- ## MAP / COMAP
 
 -- set_option backward.isDefEq.respectTransparency false in
@@ -573,125 +568,6 @@ lemma cofg_lineal_of_span_top (hC : C.IsPolyhedral)
 --     sorry -- use hs'
 --   · simpa [span_union, span_coe_eq_restrictScalars] using hs
 
--- TODO: move
-omit [LinearOrder R] [IsOrderedRing R] in
-lemma ker_compl_fg {X P : Submodule R M} {C : Submodule R X} (f : X →ₗ[R] M) (rg_le : range f ≤ P)
-    (fg : P.FG) (hC : IsCompl (ker f) C) : C.FG := by
-  have : Module.Finite R (↥X ⧸ ker f) := by -- iso thm
-    apply (Finite.equiv_iff (quotKerEquivRange f).symm).mp
-    have := isNoetherian_of_fg_of_noetherian _ fg
-    exact Module.Finite.of_injective (inclusion rg_le) (inclusion_injective _)
-  have := quotientEquivOfIsCompl _ _ hC
-  exact (Submodule.fg_top _).mp (Module.finite_def.mp (Finite.equiv this))
-
-omit [LinearOrder R] [IsOrderedRing R] in
-/- Auxiliarty lemma used for reducing polyhedral intersections to FG intersections. -/
-private lemma aux' {P₁ P₂ L₁ L₂ M₁ M₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG)
-    (hM₁ : P₁ ≤ M₁) (hM₂ : P₂ ≤ M₂) (hc₁ : IsCompl L₁ M₁) (hc₂ : IsCompl L₂ M₂) :
-    ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
-  set X := ((P₁ ⊓ M₁) ⊔ L₁) ⊓ ((P₂ ⊓ M₂) ⊔ L₂)
-  let f : X →ₗ[R] M := ((projection _ _ hc₁) - (projection _ _ hc₂)).comp X.subtype
-  have cmem_zero {P L : Submodule R M} {x} (hx : x ∈ P) (c : IsCompl L P) :
-      projection _ _ c x = 0 := by rwa [← mem_ker, ker_projection c]
-  have range_le : range f ≤ P₁ ⊔ P₂ := by
-    intro x xm
-    apply mem_sup.mpr
-    simp only [mem_range, coe_comp, coe_subtype, Function.comp_apply, sub_apply, Subtype.exists,
-      mem_inf, mem_sup, exists_prop, X, f] at xm
-    obtain ⟨-, ⟨⟨⟨b, ⟨e, h, j, rfl⟩⟩, ⟨ed, ⟨hd, _, dd, ddd⟩⟩⟩, rfl⟩⟩ := xm
-    use -b, P₁.neg_mem e.1, ed, hd.1
-    rw [map_add (projection _ _ hc₁), cmem_zero e.2 hc₁, hc₁.projection_isProj.map_id _ j, ← ddd,
-      map_add, cmem_zero hd.2 hc₂, hc₂.projection_isProj.map_id _ dd]
-    grind only
-  obtain ⟨S, hs⟩ := (ker f).exists_isCompl
-  use .embed S ⊔ (P₁ ⊓ P₂)
-  constructor
-  · refine FG.sup (Submodule.embed_fg_iff_fg.mpr (ker_compl_fg f range_le (FG.sup h₁ h₂) hs)) ?_
-    exact FG.of_le h₂ inf_le_right
-  · rw [left_eq_inf.mpr hM₁, left_eq_inf.mpr hM₂, sup_assoc]
-    have Xeq := congrArg (Submodule.map X.subtype) hs.symm.sup_eq_top.symm
-    simp_rw [Submodule.map_top, range_subtype, Submodule.map_sup, f, X] at Xeq
-    simp_rw [Xeq, X]
-    congr
-    simp_rw [ker_comp, map_comap_eq, range_subtype]
-    ext x
-    simp only [mem_inf, mem_sup, mem_ker, sub_apply]
-    constructor
-    · intro ⟨xX, xxh⟩
-      refine ⟨x - (projection _ _ hc₁ x), ⟨?_, ⟨projection _ _ hc₁ x, ?_⟩⟩⟩
-      · obtain ⟨⟨_, ⟨hp₁, hm₁⟩, y, hl₁, hx₁⟩, _, ⟨hp₂, hm₂⟩, _, hl₂, hx₂⟩ := xX
-        constructor
-        · simp_rw [← hc₁.projection_eq_self_sub_projection, IsCompl.projection_apply_mem, ← hx₁]
-          simpa [cmem_zero hl₁ hc₁.symm, hc₁.symm.projection_apply_left ⟨_, hm₁⟩]
-        · simp_rw [sub_eq_zero.mp xxh, ← hc₂.projection_eq_self_sub_projection,
-            IsCompl.projection_apply_mem, ← hx₂]
-          simpa [cmem_zero hl₂ hc₂.symm, hc₂.symm.projection_apply_left ⟨_, hm₂⟩]
-      · simp_rw [IsCompl.projection_apply_mem, true_and, sub_add_cancel, and_true,
-          sub_eq_zero.mp xxh, IsCompl.projection_apply_mem]
-    · rintro ⟨a, b, c, d, e⟩
-      refine ⟨⟨⟨a, b.1, c, d.1, e⟩, ⟨a, b.2, c, d.2, e⟩⟩, ?_⟩
-      simp [← e, hc₁.projection_isProj.map_id _ d.1, hc₂.projection_isProj.map_id _ d.2,
-        cmem_zero b.1.2 hc₁, cmem_zero b.2.2 hc₂]
-
-omit [LinearOrder R] [IsOrderedRing R] in
-private lemma aux'' {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M)
-    (hd₁ : Disjoint P₁ L₁) (hd₂ : Disjoint P₂ L₂) :
-    ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
-  obtain ⟨M₁, hle₁, hM₁⟩ := hd₁.exists_isCompl
-  obtain ⟨M₂, hle₂, hM₂⟩ := hd₂.exists_isCompl
-  have h₁ : (P₁ ⊓ M₁).FG := FG.of_le h₁ inf_le_left
-  have h₂ : (P₂ ⊓ M₂).FG := FG.of_le h₂ inf_le_left
-  obtain ⟨P, Pfg, Pdist⟩ := aux' h₁ h₂ inf_le_right inf_le_right hM₁.symm hM₂.symm
-  use P
-  simp [← Pdist, Pfg]
-  congr <;> simpa
-
-omit [LinearOrder R] [IsOrderedRing R] in
-private lemma aux {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M) :
-    ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
-  obtain ⟨P₁', hle₁, hdis₁, hP₁⟩ := exists_le_disjoint_sup_self P₁ L₁
-  obtain ⟨P₂', hle₂, hdis₂, hP₂⟩ := exists_le_disjoint_sup_self P₂ L₂
-  simpa [hP₁, hP₂] using aux'' (FG.of_le h₁ hle₁) (FG.of_le h₂ hle₂) L₁ L₂ hdis₁ hdis₂
-
-omit [LinearOrder R] [IsOrderedRing R] in
-private lemma auxi {P₁ P₂ : Submodule R M} (h₁ : P₁.FG) (h₂ : P₂.FG) (L₁ L₂ : Submodule R M) :
-    ∃ P : Submodule R M, P.FG ∧ (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) = P ⊔ (L₁ ⊓ L₂) := by
-  -- obtain ⟨P₁, hle₁, hdis₁, hP₁⟩ := exists_le_disjoint_sup_self P₁ L₁
-  -- obtain ⟨P₂, hle₂, hdis₂, hP₂⟩ := exists_le_disjoint_sup_self P₂ L₂
-  -- have h₁ : P₁.FG := fg_of_le_fg h₁ hle₁
-  -- have h₂ : P₂.FG := fg_of_le_fg h₂ hle₂
-  -- rw [← hP₁, ← hP₂]
-  set X := (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂)
-  set L := L₁ ⊓ L₂
-  let P₁' := Submodule.restrict X P₁
-  let P₂' := Submodule.restrict X P₂
-  let L₁' := Submodule.restrict X L₁
-  let L₂' := Submodule.restrict X L₂
-
-  obtain ⟨M₁, hM₁⟩ := Submodule.exists_isCompl L₁
-  obtain ⟨M₂, hM₂⟩ := Submodule.exists_isCompl L₂
-  let P₁ := P₁ ⊓ M₁
-  let P₂ := P₂ ⊓ M₂
-  have h₁ : P₁.FG := FG.of_le h₁ inf_le_left
-  have h₂ : P₂.FG := FG.of_le h₂ inf_le_left
-  have hPL₁ : Disjoint P₁ L₁ := hM₁.symm.disjoint.inf_left' _
-  have hPL₂ : Disjoint P₂ L₂ := hM₂.symm.disjoint.inf_left' _
-  let f₁ := hM₁.projection --
-  let f₂ := hM₂.projection
-  let f := f₁ - f₂
-  let g₁ := hM₁.symm.projection
-  let g₂ := hM₂.symm.projection
-  let g := g₂ - g₁
-  have hfg : f = g := sorry
-  have hker : ker f = (P₁ ⊓ P₂) ⊔ (L₁ ⊓ L₂) := sorry
-  have him : Submodule.FG (range g) := sorry
-  have iso := LinearMap.quotKerEquivRange f
-
-  obtain ⟨M, hM⟩ := Submodule.exists_isCompl (L₁ ⊔ L₂)
-  let P := (P₁ ⊔ L₁) ⊓ (P₂ ⊔ L₂) ⊓ M
-
-  sorry
-
 /-- A polyhedral cone with DualFG linearlity space is itself DualFG. -/
 lemma dualfg_of_lineal_dualfg {C : PointedCone R N}
     (hC : C.IsPolyhedral) (hlin : C.lineal.DualFG p) : DualFG p C := by
@@ -748,38 +624,35 @@ lemma fg_of_inf_fg_submodule (hC : C.IsPolyhedral)
   rw [← hD, inf_assoc, ← coe_inf]
   exact inf_dualfg_fg hcofg <| FG.coe_fg <| FG.of_le hS inf_le_right
 
-/-- The intersection of two polyhedral cones is polyhdral. -/
-lemma inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) :
-    (C₁ ⊓ C₂).IsPolyhedral := by
-  -- The proof reduces the problem to the case of intersecting FG cones using the aux lemma.
-  -- Then we can use `inf_fg` from the FG theory.
-  obtain ⟨D₁, hfg₁, hD₁⟩ := h₁.exists_fg_eq_sup_lineal
-  obtain ⟨D₂, hfg₂, hD₂⟩ := h₂.exists_fg_eq_sup_lineal
-  replace hD₁ := congrArg (Submodule.span R ∘ SetLike.coe) hD₁
-  replace hD₂ := congrArg (Submodule.span R ∘ SetLike.coe) hD₂
-  simp only [Function.comp_apply] at hD₁ hD₂
-  rw [← PointedCone.coe_sup_submodule_span, Submodule.span_union] at hD₁ hD₂
-  simp only [Submodule.coe_restrictScalars, span_coe_eq_restrictScalars] at hD₁ hD₂
-  --
-  have h := Submodule.le_span (R := R) (M := M) (s := (C₁ ⊓ C₂ : PointedCone R M))
-  replace h := le_trans h <| Set.subset_inter (span_mono inf_le_left) (span_mono inf_le_right)
-  --replace h := le_trans h (span_inter_le _ _)
-  rw [← Submodule.coe_inf, hD₁, hD₂] at h
-  --
-  obtain ⟨P, hPfg, hP⟩ := aux (FG.span_fg hfg₁) (FG.span_fg hfg₂) C₁.lineal C₂.lineal
-  simp_rw [Submodule.restrictScalars_self, hP] at h
-  nth_rw 2 [← coe_ofSubmodule] at h
-  rw [Set.le_iff_subset] at h
-  rw [SetLike.coe_subset_coe] at h
-  --
-  rw [← inf_eq_left.mpr h]
-  have H := inf_le_inf (lineal_le C₁) (lineal_le C₂)
-  rw [coe_sup, ← inf_sup_assoc_of_le_of_submodule_le _ H]
-  --
-  rw [← inf_idem P, inf_assoc, inf_comm, coe_inf, ← inf_assoc, inf_assoc]
-  refine .of_fg_sup_submodule (inf_fg ?_ ?_) _
-  · exact h₂.fg_of_inf_fg_submodule hPfg
-  · simpa [inf_comm] using h₁.fg_of_inf_fg_submodule hPfg
+lemma of_dualfg_inf_submodule (hC : C.DualFG .id) (S : Submodule R M) :
+    (C ⊓ S).IsPolyhedral := by
+  have h := (of_dualfg (DualFG.restrict_id hC S)).map S.subtype
+  change ((C.restrict S).embed).IsPolyhedral at h
+  simpa [inf_comm] using h
+
+lemma of_submodule_inf_dualfg (S : Submodule R M) (hC : C.DualFG .id) :
+    ((S : PointedCone R M) ⊓ C).IsPolyhedral := by
+  rw [inf_comm]
+  exact of_dualfg_inf_submodule hC S
+
+/-- The intersection of two polyhedral cones is polyhedral. -/
+lemma inf (h₁ : C₁.IsPolyhedral) (h₂ : C₂.IsPolyhedral) : (C₁ ⊓ C₂).IsPolyhedral := by
+  obtain ⟨D₁, hD₁, hD₁eq⟩ := h₁.exists_dualfg_inf_span .id
+  obtain ⟨D₂, hD₂, hD₂eq⟩ := h₂.exists_dualfg_inf_span .id
+  rw [← hD₁eq, ← hD₂eq]
+  let S : Submodule R M := span R C₁ ⊓ span R C₂
+  rw [show (D₁ ⊓ span R (C₁ : Set M)) ⊓ (D₂ ⊓ span R (C₂ : Set M)) = (D₁ ⊓ D₂) ⊓ S by
+    ext x; simp [S, and_assoc, and_left_comm]]
+  exact of_dualfg_inf_submodule (hD₁.inf hD₂) S
+
+protected lemma comap (f : N →ₗ[R] M) (hC : C.IsPolyhedral) :
+    (C.comap f).IsPolyhedral := by
+  obtain ⟨D, hD, hDC⟩ := hC.exists_dualfg_inf_span .id
+  rw [← hDC]
+  let S : Submodule R N := (span R (C : Set M)).comap f
+  rw [show (D ⊓ span R (C : Set M)).comap f = D.comap f ⊓ S by
+    ext x; simp [S]]
+  exact of_dualfg_inf_submodule (DualFG.comap hD f).id S
 
 /-- If `C` is a polyhedral cone and `S` is a submodule disjoint to its lineality, then
   `C ⊓ S` is FG. This is a strengthened version of `IsPolyhedral.fg_inf_of_isCompl`. -/
@@ -850,7 +723,6 @@ lemma dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhed
   * polyhedra are dual closed
   * dual (C ⊓ D) = dual C ⊔ dual D
 -/
-
 
 -- variable (p) [Fact p.IsFaithfulPair] in
 -- private lemma IsPolyhedral.dual_fg_of_lineal_cofg' {C : PointedCone R M}
