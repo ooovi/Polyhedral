@@ -1,44 +1,50 @@
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+/-
+Copyright (c) 2026 Yaël Dillies. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yaël Dillies
+-/
+
 import Mathlib.Geometry.Convex.Set
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.LinearAlgebra.AffineSpace.Combination
+import Mathlib.LinearAlgebra.AffineSpace.AffineMap
+import Mathlib.Geometry.Convex.ConvexSpace.Module
 
-open Affine Convexity
+/-!
+# Affine spaces are convex spaces
 
-variable {R V V2 P P2 I : Type*}
+This file shows that every affine space is a convex space.
+
+-/
+
+namespace Convexity
+
+variable {R V P I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
-variable [AddCommGroup V2] [Module R V2] [AffineSpace V2 P2]
 
-attribute [local instance] AddTorsor.toConvexSpace
+-- for consistent naming
+@[implicit_reducible]
+alias ConvexSpace.ofAddTorsor := AddTorsor.toConvexSpace
 
-open Convexity
+variable (R V P) [ConvexSpace R P] in
+/-- Typeclass for a convex space structure on an affine space to be given by affine
+combinations. -/
+class IsAffineConvexSpace : Prop where
+  sConvexComb_eq_convexComb (w : StdSimplex R P) :
+    w.sConvexComb = AddTorsor.convexCombination w
 
-namespace AffineMap
+export IsAffineConvexSpace (sConvexComb_eq_convexComb)
+attribute [simp] sConvexComb_eq_convexComb
 
--- PR #39437
-open Finset AddTorsor in
-lemma isAffineMap (f : P →ᵃ[R] P2) : IsAffineMap R f where
-  map_sConvexComb s:= by
-    classical
-    simp_rw [sConvexComb_eq_affineCombination, StdSimplex.weights_map, Finsupp.mapDomain,
-      map_affineCombination _ _ _ s.total, Finsupp.sum, Finsupp.coe_finsetSum]
-    simp only [affineCombination_apply, weightedVSubOfPoint_apply, map_sum]
-    congr
-    ext i
-    rw [sum_eq_single (f i) fun _ _ hx ↦ by simp [hx.symm]]
-    · simp
-    · intro h
-      simp only [Finsupp.mem_support_iff, Finsupp.coe_finsetSum, sum_apply,
-        Decidable.not_not, Finsupp.single_apply] at h
-      have hwi : s.weights i = 0 := by
-        by_contra hi
-        have := sum_eq_zero_iff_of_nonneg (fun _ _ ↦ ?_) |>.mp h i (Finsupp.mem_support_iff.mpr hi)
-        · simp at this
-          contradiction
-        · split_ifs <;> simp
-      simp [hwi]
+attribute [local instance] ConvexSpace.ofAddTorsor in
+instance IsAffineConvexSpace.ofAddTorsor : IsAffineConvexSpace R V P where
+  sConvexComb_eq_convexComb _ := rfl
 
-lemma range_isConvexSet (f : P →ᵃ[R] P2) : IsConvexSet R (f.range : Set P2) := by
-  simpa [range, SetLike.coe, ← Set.image_univ] using IsConvexSet.univ.image (f.isAffineMap)
+instance [ConvexSpace R V] [IsModuleConvexSpace R V] : IsAffineConvexSpace R V V where
+  sConvexComb_eq_convexComb w := by
+    rw [IsModuleConvexSpace.sConvexComb_eq_sum, AddTorsor.convexCombination,
+      Finset.affineCombination_eq_linear_combination _ _ _ w.total]
+    rfl
 
-end AffineMap
+end Convexity

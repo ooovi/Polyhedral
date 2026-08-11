@@ -6,6 +6,8 @@ Authors: Martin Winter
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 
+/-! This file defines exposed faces of cones. -/
+
 open Module
 open Submodule
 

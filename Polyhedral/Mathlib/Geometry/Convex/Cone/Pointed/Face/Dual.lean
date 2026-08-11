@@ -1,25 +1,19 @@
 /-
-Copyright (c) 2025 Olivia Röhrig. All rights reserved.
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig
--- -/
+Authors: Olivia Röhrig, Martin Winter
+-/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
-
 /-!
-# Faces of pointed cones
+This file proces results about the interaction of faces of cones and duals of cones.
 -/
 
 namespace PointedCone
 
 variable {R M N : Type*}
-
-
-/-!
-### Faces of the dual cone
--/
 
 section CommRing
 

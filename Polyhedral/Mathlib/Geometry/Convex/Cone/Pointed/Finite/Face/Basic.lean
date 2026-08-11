@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
+
 import Mathlib.Order.Grade
 import Mathlib.LinearAlgebra.Quotient.Basic
 
@@ -5,6 +11,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
+
+/-! This file proves basic facts intended for mathlib's Pointed/Basic.lean. -/
 
 namespace PointedCone
 
@@ -91,7 +99,6 @@ variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
-set_option backward.isDefEq.respectTransparency false in
 open Submodule in
 /-- If a point `x` does not lie in a cone `C` but together with `C` spans a salient cone, then
   `x` spans a face of `hull R (C ∪ {x})`. -/

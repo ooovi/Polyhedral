@@ -7,8 +7,10 @@ Authors: Martin Winter
 import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 
 /-! This file proves basic pointwise properties of convex sets. -/
 
@@ -24,16 +26,18 @@ open Pointwise
 
 section Semiring
 
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 
 variable {K K₁ K₂ : Set V}
 
 protected lemma IsConvexSet.neg (hK : IsConvexSet R K) : IsConvexSet R (-K) := by
-  sorry
+  rw [← Set.image_neg_eq_neg]
+  exact hK.image (LinearEquiv.neg R).toLinearMap.isAffineMap
 
-@[simp] protected lemma IsConvexSet.neg_iff : IsConvexSet R (-K) ↔ IsConvexSet R K := by
-  sorry
+@[simp] lemma IsConvexSet.neg_iff : IsConvexSet R (-K) ↔ IsConvexSet R K where
+  mp := by nth_rw 2 [← neg_neg K]; exact .neg
+  mpr := .neg
 
 end Semiring
 

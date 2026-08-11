@@ -3,14 +3,16 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 import Mathlib.LinearAlgebra.Dual.Lemmas
-import Mathlib.RingTheory.Finiteness.Basic
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
+
+/-! This file proves results about duality for finite dimensional subspaces. -/
 
 open Function Module LinearMap
 open Submodule hiding span dual
@@ -88,96 +90,53 @@ variable {S T : Submodule R M}
 --   rw [dual_span_eq_dual_auxSet (dual p S) w φ hφΦ hφ.symm]
 --   refine dual_dualClosed _ _
 
+-- This is an alternative direct proof of `FG.dual_flip_dual` below.
+variable (p) [Fact p.SeparatingLeft] in
+@[simp] lemma FG.dual_flip_dual' (hS : S.FG) :
+    dual p.flip (dual p S) = S := by
+  haveI := Module.Finite.iff_fg.mpr (hS.map p)
+  rw [dual_dualCoannihilator' p S, dual_dualAnnihilator' p.flip,
+    Subspace.dualCoannihilator_dualAnnihilator_eq]
+  exact comap_map_eq_self (by simp)
+
+/- The main trick: `T` is the generating set that will
+  appear on both sides on the identity as shown in h₁ and h₂:
+    * dual p T = dual p S ⊔ span R {w}
+    * span R T = S ⊓ dual p.flip {w}
+-/
 private lemma dual_inf_dual_singleton_dual_sup_singleton (hS : S.DualClosed p) (w : N) :
     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
   by_cases hw : w ∈ dual p S
   · rw [← span_eq (dual p S), ← span_union, ← hS]
     simp [← coe_inf, ← dual_union, hw]
   simp only [mem_dual, SetLike.mem_coe, not_forall] at hw
-  obtain ⟨s₀, hsS₀, hs₀⟩ := hw
-  push_neg at hs₀
-  ----
-  /- The next line is the main trick: `T` is the generating set that will
-    appear on both sides on the identity as shown in h₁ and h₂:
-     * dual p T = dual p S ⊔ span R {w}
-     * span R T = S ⊓ dual p.flip {w}
-  -/
-  let T := {p s w • s₀ - p s₀ w • s | (s ∈ S)}
-  have h₁ : dual p S ⊔ span R {w} = dual p T := by
-    ext x
-    simp [T, mem_sup, mem_span_singleton]
-    constructor
-    · intro ⟨y, hy, c, hc⟩ t ht
-      simp only [← hc, map_add, ← hy hsS₀, map_smul, smul_eq_mul, zero_add, ← hy ht]
-      ring
-    · intro h
-      simp_rw [mul_comm] at h
-      simp only [← smul_eq_mul] at h
-      simp only [← map_smul] at h
-      simp only [← map_sub] at h
-      use -(p s₀ w)⁻¹ • (p s₀ x • w - p s₀ w • x)
-      constructor
-      · intro x hx
-        simp [map_smul, ← h x hx]
-      · use (p s₀ w)⁻¹ * p s₀ x
-        simp only [smul_sub, neg_smul, sub_neg_eq_add]
-        repeat rw [← smul_assoc, smul_eq_mul]
-        simp [inv_mul_cancel₀ hs₀.symm]
-  have h₂ : T = S ⊓ dual p.flip {w} := by
-    rw [le_antisymm_iff]
-    constructor
-    · intro x ⟨y, hy, h⟩
-      rw [← h]
-      constructor
-      · exact sub_mem (S.smul_mem _ hsS₀) (S.smul_mem _ hy)
-      · simp [mul_comm, sub_self]
-    · unfold T
-      intro x ⟨hxS, hx⟩
-      simp at hxS hx
-      rw [← span_eq S] at hxS
-      rw [← Set.insert_eq_of_mem hsS₀] at hxS
-      rw [span_insert] at hxS
-      simp [mem_sup] at hxS
-      simp [mem_span_singleton] at hxS
-      obtain ⟨c, t, ht, rfl⟩ := hxS
-      simp at hx
-      simp
-      by_cases hc : c = 0
-      · rw [hc] at ⊢ hx
-        simp at ⊢ hx
-        use -((p s₀) w)⁻¹ • t
-        simp
-        constructor
-        · exact smul_mem S _ ht
-        rw [← hx]
-        simp
-        rw [← smul_assoc]
-        simp
-        rw [mul_comm]
-        rw [inv_mul_cancel₀ hs₀.symm]
-        simp
-      use (c * (p t w)⁻¹) • t
-      constructor
-      · exact S.smul_mem _ ht
-      rw [← smul_assoc]
-      simp
-      nth_rw 3 [mul_comm]
-      nth_rw 4 [mul_comm]
-      nth_rw 2 [mul_assoc]
-      have hx := neg_eq_of_add_eq_zero_left hx.symm
-      rw [← hx]
-      simp
-      have h : p t w ≠ 0 := by
-        by_contra h
-        rw [h] at hx
-        simp at hx
-        cases hx
-        case inl h => contradiction
-        case inr h => exact hs₀ h.symm
-      rw [mul_assoc]
-      rw [inv_mul_cancel₀ h]
-      simp
-  rw [h₁, h₂, coe_inf]
+  obtain ⟨s₀, hs₀, hw₀⟩ := hw
+  push Not at hw₀
+  ext x
+  simp only [mem_dual, Set.mem_inter_iff, SetLike.mem_coe, Set.mem_singleton_iff, flip_apply,
+    forall_eq, and_imp, mem_sup, mem_span_singleton, exists_exists_eq_and]
+  constructor
+  · intro hx
+    let c := (p s₀ w)⁻¹ * p s₀ x
+    refine ⟨x - c • w, ?_, c, sub_add_cancel _ _⟩
+    intro s hs
+    have h := hx (sub_mem
+        (S.smul_mem (p s w) hs₀)
+        (S.smul_mem (p s₀ w) hs))
+      (by simp [mul_comm])
+    simp only [map_sub, map_smul, smul_eq_mul] at h ⊢
+    rw [eq_comm, sub_eq_zero]
+    have h' : p s₀ w * p s x = p s w * p s₀ x :=
+      (sub_eq_zero.mp h.symm).symm
+    calc
+      p s x = (p s₀ w)⁻¹ * (p s₀ w * p s x) := by
+        rw [← mul_assoc, inv_mul_cancel₀ hw₀.symm, one_mul]
+      _ = (p s₀ w)⁻¹ * (p s w * p s₀ x) := by rw [h']
+      _ = c * p s w := by
+        dsimp [c]
+        ring
+  · rintro ⟨y, hy, c, rfl⟩ s hs hsw
+    simp [← hy hs, ← hsw]
 
 -- private lemma dual_inf_dual_singleton_dual_sup_singleton' (hS : S.DualClosed p) (w : N) :
 --     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
@@ -374,7 +333,7 @@ lemma mkQ_eq_zero_of_mem {S : Submodule R M} {x : M} (hx : x ∈ S) : S.mkQ x = 
   simpa only [← S.ker_mkQ, mem_ker] using hx
 
 def dualAnnihilator_linearEquiv_dual_quot (S : Submodule R M) :
-    S.dualAnnihilator ≃ₗ[R] Dual R (M ⧸ S)  where
+    S.dualAnnihilator ≃ₗ[R] Dual R (M ⧸ S) where
   toFun f := S.liftQ f.1 (le_ker_of_mem_dualAnnihilator f.2)
   invFun f := ⟨f ∘ₗ S.mkQ, by
     simp only [mem_dualAnnihilator, coe_comp, Function.comp_apply]

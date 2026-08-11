@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
 
 import Mathlib.Algebra.Module.Submodule.Pointwise
 import Mathlib.Algebra.Order.Nonneg.Module
@@ -6,7 +11,7 @@ import Mathlib.Geometry.Convex.Cone.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 
-/-! ... -/
+/-! This file proves facts about the lineality space of a cone. -/
 
 namespace PointedCone
 
@@ -21,7 +26,7 @@ open Pointwise
 
 variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
 
-/-- Every submodule contain int he cone is also contained in the lineality space. -/
+/-- Every submodule contain in the cone is also contained in the lineality space. -/
 lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := by simp only [lineal_eq_sSup]; exact le_sSup hS
 
@@ -115,20 +120,6 @@ lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D
   simp only [Submodule.mem_sup, mem_lineal, forall_exists_index, and_imp]
   intro y hy hy' z hz hz' rfl
   exact ⟨⟨y, hy, by use z⟩, -y, hy', -z, hz', by simp [add_comm]⟩
-
--- ## PRIORITY
---isnt this false when C and D are two rays pointing in opposite directions?
-lemma _lineal_sup_eq (C D : PointedCone R M) (hCD : span R C ⊓ D.lineal ≤ C.lineal) :
-    (C ⊔ D).lineal = C.lineal ⊔ D.lineal := by
-  rw [le_antisymm_iff, and_comm]
-  constructor
-  · exact lineal_sup_le ..
-  intro x
-  simp [Submodule.mem_sup, mem_lineal]
-  simp [SetLike.le_def, mem_lineal] at hCD
-  intro y hy z hz hyz w hw v hv hwv
-  have h := hCD
-  sorry
 
 -- !! only holds over fields or archimedean rings! Not in general.
 lemma mem_lineal_of_smul_mem_lineal' {C : PointedCone R M} :
@@ -366,7 +357,6 @@ variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 -- NOTE: an easier proof via `salient_of_pos_linearMap` seems only possible if `R` is a field.
-set_option backward.isDefEq.respectTransparency false in
 lemma Salient.of_hull_linearIndepOn {s : Set M} (h : LinearIndepOn R id s) :
     (hull R s).Salient := by classical
   -- next line needs fixing once ConvexCone is removed

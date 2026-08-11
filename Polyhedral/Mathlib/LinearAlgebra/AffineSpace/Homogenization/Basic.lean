@@ -1,6 +1,9 @@
+
+import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
-import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 /-! This file defines affine homogenization. -/
 
@@ -23,10 +26,10 @@ class IsHomogenization where
   ofPoint : A →ᵃ[R] W
   ofPoint_injective : Injective ofPoint
   weight : W →ₗ[R] R
-  ofPoint_range_eq_preimage_weight_one : ofPoint.range = weight ⁻¹' {1}
+  ofPoint_range_eq_preimage_weight_one : Set.range ofPoint = weight ⁻¹' {1}
 
 open CanonicalHomogenization in
-/-- The canonical IsHomogenization is a IsHomogenization. -/
+/-- The canonical homogenization is a homogenization. -/
 instance : IsHomogenization R A (CanonicalHomogenization R A) where
   ofPoint := ofPoint
   ofPoint_injective := ofPoint_injective
@@ -57,15 +60,14 @@ theorem ofVector_range_eq_weight_ker : hom.ofVector.range = hom.weight.ker := by
     simp [← hab, map_sub, (hh (ofPoint b)).mp ⟨b, rfl⟩, (hh (ofPoint a)).mp ⟨a, rfl⟩]
   · intro h
     have ha := Set.mem_preimage.mp <| (hh (hom.ofPoint a₀)).mp (by simp)
-    obtain ⟨b, hb⟩ : x + hom.ofPoint a₀ ∈ (hom.ofPoint.range : Set W) := by
+    obtain ⟨b, hb⟩ : x + hom.ofPoint a₀ ∈ (Set.range hom.ofPoint) := by
       simpa [hom.ofPoint_range_eq_preimage_weight_one, Set.mem_preimage, map_add, h]
     exact ⟨b, a₀, by simp [AffineMap.linearMap_vsub, hb]⟩
 
-/-- The IsHomogenization of a point in `A` has weight 1. -/
+/-- The homogenization of a point in `A` has weight 1. -/
 lemma weight_one (a₀ : A) : hom.weight (hom.ofPoint a₀) = 1 := by
   convert Set.ext_iff.mp hom.ofPoint_range_eq_preimage_weight_one (hom.ofPoint a₀)
-  simp [SetLike.mem_coe, AffineMap.mem_range, exists_apply_eq_apply, Set.mem_preimage,
-    Set.mem_singleton_iff, true_iff]
+  simp [exists_apply_eq_apply, Set.mem_preimage, Set.mem_singleton_iff, true_iff]
 
 variable [Nontrivial R] in
 theorem ofPoint_ne_zero (x : A) : hom.ofPoint x ≠ (0 : W) := by
@@ -73,11 +75,11 @@ theorem ofPoint_ne_zero (x : A) : hom.ofPoint x ≠ (0 : W) := by
   have := congrArg hom.weight hn
   simp [weight_one x] at this
 
-/-- The IsHomogenization of a point in `V` has weight 0. -/
+/-- The homogenization of a point in `V` has weight 0. -/
 lemma weight_zero (v : V) : hom.weight (hom.ofVector v) = 0 := by
   simp [LinearMap.mem_ker.mp, ← ofVector_range_eq_weight_ker]
 
-theorem span_range_ofPoint : span R (hom.ofPoint.range : Set W) = ⊤ := by
+theorem span_range_ofPoint : span R (Set.range hom.ofPoint) = ⊤ := by
   refine eq_top_iff'.mpr (fun x ↦ ?_)
   let a₀ := Classical.arbitrary A
   -- projecting x to weight 0 along a₀ gives sth in the span of image of ofPoint
@@ -93,7 +95,7 @@ theorem span_range_ofPoint : span R (hom.ofPoint.range : Set W) = ⊤ := by
     Submodule.add_mem _ hlin <| smul_mem _ (hom.weight x) (subset_span ⟨a₀, rfl⟩)
 
 open CanonicalHomogenization HomogenizationExpr in
-/-- Every IsHomogenization is linearly equivalent to the canonical IsHomogenization. -/
+/-- Every homogenization is linearly equivalent to the canonical homogenization. -/
 noncomputable def canonEquiv : W ≃ₗ[R] CanonicalHomogenization R A where
   toFun x := by
     -- pick an arbitrary base point
@@ -141,7 +143,7 @@ theorem weight_canonEquiv : CanonicalHomogenization.weight ∘ hom.canonEquiv = 
   sorry
 
 -- proving the universal property using the equiv
-/-- A IsHomogenization `W` of `A` satisfies the universal property that every affine map from `A`
+/-- A homogenization `W` of `A` satisfies the universal property that every affine map from `A`
 into any vector space extends uniquely to a linear map from `W` to the vector space. -/
 theorem extend (U : Type*) [AddCommGroup U] [Module R U]
     (f : A →ᵃ[R] U) :
