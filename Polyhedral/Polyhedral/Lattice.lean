@@ -160,8 +160,17 @@ instance : Coe (Submodule R M) (PolyhedralCone R M) where
 def map (f : M →ₗ[R] N) (C : PolyhedralCone R M) : PolyhedralCone R N :=
   ⟨_, C.isPolyhedral.map f⟩
 
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
 def comap (f : M →ₗ[R] N) (C : PolyhedralCone R N) : PolyhedralCone R M :=
   ⟨_, C.isPolyhedral.comap f⟩
+
+end Field
 
 
 -- ## QUOT
