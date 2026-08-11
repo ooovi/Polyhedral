@@ -1,12 +1,17 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Algebra.AddTorsor.Defs
 
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 
-/-! This file defines polyhedral cones. We chose a definition that also works well
-in infinite dimensions and behaves nice w.r.t. duality. In particular, the definition
-gives is neither V (FG) nor H (DualFG). -/
+/-! This file defines polyhedra. They are defined as the Minkowski sum of a polytope and
+a polyhedral cone. -/
 
 namespace Convexity
 
