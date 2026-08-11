@@ -10,8 +10,7 @@ import Polyhedral.Polyhedral.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 
-/-! This file defines polyhedra. They are defined as the Minkowski sum of a polytope and
-a polyhedral cone. -/
+/-! This file defines polyhedra as the Minkowski sums polytopes and polyhedral cones. -/
 
 namespace Convexity
 
