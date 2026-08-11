@@ -719,6 +719,19 @@ lemma dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhed
     ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
   exact dual_dual_flip p <| (hC₁.dual p).sup (hC₂.dual p)
 
+variable (p) [Fact (Surjective p)] in
+@[deprecated dualfg_of_lineal_cofg (since := "...")]
+private lemma dualfg_of_lineal_cofg {C : PointedCone R N}
+    (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) : DualFG p C := by
+  obtain ⟨_, hfg, hD⟩ := hC.exists_fg_eq_sup_lineal
+  rw [hD]
+  exact sup_fg_dualfg hfg (CoFG.dualfg p hlin)
+
+variable (p) [Fact (Surjective p.flip)] in
+lemma exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R N, D.IsPolyhedral ∧ PointedCone.dual p.flip D = C := by
+  exact ⟨PointedCone.dual p C, hC.dual p, hC.dual_flip_dual p⟩
+
 /- Wishlist:
   * polyhedra are dual closed
   * dual (C ⊓ D) = dual C ⊔ dual D
@@ -730,87 +743,6 @@ lemma dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhed
 --   obtain ⟨_, hfg, hD⟩ := hC.exists_fg_sup_lineal
 --   rw [← hD]
 --   exact DualFG.dual_fg (sup_fg_cofg hfg <| CoFG.cofg p.flip hlin)
-
-variable (p) [Fact (Surjective p)] in
-@[deprecated dualfg_of_lineal_cofg (since := "...")]
-private lemma dualfg_of_lineal_cofg {C : PointedCone R N}
-    (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) : DualFG p C := by
-  obtain ⟨_, hfg, hD⟩ := hC.exists_fg_eq_sup_lineal
-  rw [hD]
-  exact sup_fg_dualfg hfg (CoFG.dualfg p hlin)
-
-variable (p) [Fact (Surjective p.flip)] in -- [Fact p.IsFaithfulPair]
-lemma exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R N, D.IsPolyhedral ∧ PointedCone.dual p.flip D = C := by
-  -- wlog fact : Fact (Surjective p) with H
-  -- · rw [dual_id_map]
-  --   let C' := C.map p
-  --   have hC' : C'.IsPolyhedral := hC.map p
-  --   have h' : C' = C.map p := rfl
-  --   rw [← h']
-  --   clear h' hC
-  --   sorry
-  obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
-  let C' := C ⊔ S
-  have hC' : C'.IsPolyhedral := hC.sup_submodule S
-  have h : C = C' ⊓ Submodule.span R (C : Set M) := sorry
-  rw [h]
-  have hh : Submodule.span R (C' : Set M) = ⊤ := sorry
-  have h := hC'.dualfg_of_lineal_cofg p.flip (hC'.cofg_lineal_of_span_top hh)
-  --have h' := DualFG.dual_fg h -- we dont' need FG, we need polyhedral
-  have h' : (PointedCone.dual p C').IsPolyhedral := sorry -- FG.isPolyhedral (DualFG.dual_fg h)
-  have h'' := DualFG.dualClosed h
-  rw [← h'']
-  have h'' := Submodule.dualClosed p (Submodule.span R C)
-  rw [← h'']
-  rw [← dual_eq_submodule_dual]
-  have h (S : Submodule R N) : ((S : PointedCone R N) : Set N) = (S : Set N) := by simp
-  -- rw [← h]
-  --rw [← dual_eq_submodule_dual p]
-  rw [← PointedCone.dual_union]
-  simp
-  let D := Submodule.dual p (C : Set M)
-  use (PointedCone.dual p C') ⊔ D
-  unfold D
-  constructor
-  · exact h'.sup_submodule _
-  · rw [← h, ← dual_sup]
-
--- private lemma IsPolyhedral.dual_fg_of_lineal_cofg {C : PointedCone R N}
---     (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) :
---       ∃ D : PointedCone R M, D.IsPolyhedral ∧ PointedCone.dual p D = C := by
---   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
-
-  --have h : FG (Submodule.dual p (C.lineal : Set N)) := sorry
-  -- sorry
-
--- variable (p) in
--- lemma IsPolyhedral.dual' (hC : C.IsPolyhedral) : (PointedCone.dual p C).IsPolyhedral := by
---   rw [dual_id_map]
---   let C' := C.map p
---   have hC' : C'.IsPolyhedral := hC.map p
---   have h' : C' = C.map p := rfl
---   rw [← h']
---   -----
---   obtain ⟨D, hfg, hD⟩ := hC'.exists_fg_sup_lineal
---   rw [← hD]
---   rw [dual_sup_dual_inf_dual]
---   obtain ⟨E, hfg, hE⟩ := (isPolyhedral_of_dual_of_fg .id hfg).exists_fg_sup_lineal
---   rw [← hE]
---   simp only [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
---   rw [← sup_inf_assoc_of_le_submodule]
---   · rw [← PointedCone.coe_inf]
---     exact isPolyhedral_of_fg_sup_submodule hfg _
---   · rw [dual_span_lineal_dual] at hE
---     -- rw [right_eq_sup] at hE
---     ----
---     rw [← hD]
---     --rw [dual_sup_dual_eq_inf_dual]
---     rw [DualClosed.dual_lineal_span_dual]
---     ·
---       sorry
---     · sorry
---     -- exact left_eq_sup.mp hE.symm
 
 end Field
 
