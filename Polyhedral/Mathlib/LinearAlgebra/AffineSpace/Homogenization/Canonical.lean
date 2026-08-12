@@ -3,9 +3,10 @@ Copyright (c) 2026 Attila Gáspár. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Attila Gáspár
 -/
+module
 
-import Mathlib.LinearAlgebra.AffineSpace.AffineEquiv
-import Mathlib.RingTheory.Finiteness.Defs
+public import Mathlib.LinearAlgebra.AffineSpace.AffineEquiv
+public import Mathlib.RingTheory.Finiteness.Defs
 
 import Mathlib.Algebra.Module.Submodule.EqLocus
 import Mathlib.RingTheory.Finiteness.Basic
@@ -386,7 +387,6 @@ private theorem lift.aux_ofPoint {f : P →ᵃ[k] W} {p : P} : aux f (ofPoint p)
 `CanonicalHomogenization k P`.
 
 See also `CanonicalHomogenization.liftₗ` for a version that is linear over some ring. -/
-@[expose]
 def lift : (P →ᵃ[k] W) ≃+ (CanonicalHomogenization k P →ₗ[k] W) where
   toFun f :=
     { toFun := lift.aux f
@@ -446,7 +446,6 @@ theorem lift_symm_smul {f : CanonicalHomogenization k P →ₗ[k] W} {c : R} :
 
 variable (R) in
 /-- Linear version of `CanonicalHomogenization.lift`. -/
-@[expose]
 def liftₗ : (P →ᵃ[k] W) ≃ₗ[R] (CanonicalHomogenization k P →ₗ[k] W) :=
   lift.toLinearEquiv fun _ _ => lift_smul
 
@@ -491,7 +490,6 @@ theorem lift_const_apply {u : W} {x : CanonicalHomogenization k P} :
 
 /-- An affine map between two affine spaces extends to a linear map between their homogenizations.
 -/
-@[expose]
 def map (f : P1 →ᵃ[k] P2) : CanonicalHomogenization k P1 →ₗ[k] CanonicalHomogenization k P2 :=
   lift (ofPoint.comp f)
 
@@ -552,9 +550,8 @@ theorem map_surjective {f : P1 →ᵃ[k] P2} : Function.Surjective (map f) ↔ F
 
 /-- An affine isomorphism between two affine spaces extends to a linear isomorphism between their
 Canonicalhomogenizations. -/
-@[expose]
 def congr (f : P1 ≃ᵃ[k] P2) : CanonicalHomogenization k P1 ≃ₗ[k] CanonicalHomogenization k P2 :=
-  .ofLinear (map f) (map f.symm) (hom_ext <| by simp) (hom_ext <| by simp)
+  .ofLinearMap (map f) (map f.symm) (hom_ext <| by simp) (hom_ext <| by simp)
 
 @[simp]
 theorem coe_congr (f : P1 ≃ᵃ[k] P2) : ⇑(congr f) = map f.toAffineMap :=
@@ -578,7 +575,7 @@ theorem congr_trans (f : P1 ≃ᵃ[k] P2) (g : P2 ≃ᵃ[k] P3) :
 
 /-- The Canonicalhomogenization of a vector space `V` over `k` is canonically isomorphic to `V × k`
 -/
-@[expose, simps! -isSimp]
+@[simps! -isSimp]
 def toProd : CanonicalHomogenization k V ≃ₗ[k] V × k where
   __ := (lift (.id ..)).prod weight
   invFun x := ofVector x.1 + x.2 • ofPoint 0

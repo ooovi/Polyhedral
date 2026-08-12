@@ -99,6 +99,12 @@ variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
+-- TODO: this is the better version of `PointedCone.smul_mem_iff`.
+lemma smul_mem_iff' {𝕜 M : Type*} [DivisionRing 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜]
+    [AddCommMonoid M] [Module 𝕜 M] (C : PointedCone 𝕜 M)
+    {c : 𝕜} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C :=
+  ⟨fun h => inv_smul_smul₀ hc.ne' x ▸ C.smul_mem (inv_pos.2 hc).le h, C.smul_mem hc.le⟩
+
 open Submodule in
 /-- If a point `x` does not lie in a cone `C` but together with `C` spans a salient cone, then
   `x` spans a face of `hull R (C ∪ {x})`. -/
@@ -133,9 +139,8 @@ lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x 
     simp [h0'] at hyz
     simp [hyz] at hy
     use a
-  · sorry
-    -- rw [smul_mem_iff ht] at h
-    -- contradiction
+  · rw [smul_mem_iff' C ht] at h
+    contradiction
 
 open Finset Submodule in
 lemma exists_ray' {s : Finset M} (hs : ∃ x ∈ s, x ≠ 0) (hsal : (hull R (s : Set M)).Salient) :
