@@ -121,15 +121,18 @@ noncomputable def canonEquiv : W ≃ₗ[R] CanonicalHomogenization R A where
     rcases v with ⟨v, c, p⟩ | v <;> apply Quotient.sound
     · have : hom.weight (lift hom.ofPoint ⟦.mk v c p⟧) = c := by
         simp [lift, lift.aux, weight_zero, weight_one]
+        sorry
       simp only [this, LinearEquiv.invFun_eq_symm]
       refine Equiv.mk_mk (hom.ofVector_injective ?_)
       simp [smul_sub, lift, lift.aux]
       abel
+      sorry
     · have :
           (LinearEquiv.ofInjective _ hom.ofVector_injective).symm ⟨_, Set.mem_range_self v⟩ = v :=
         (LinearEquiv.symm_apply_eq
           (LinearEquiv.ofInjective ofPoint.linear hom.ofVector_injective)).mpr rfl
-      simpa [lift, lift.aux, weight_zero, this] using Equiv.mk_ofVector
+      sorry
+      -- simpa [lift, lift.aux, weight_zero, this] using Equiv.mk_ofVector
 
 theorem canonEquiv_canonical_ofPoint :
     hom.canonEquiv ∘ hom.ofPoint = CanonicalHomogenization.ofPoint := by

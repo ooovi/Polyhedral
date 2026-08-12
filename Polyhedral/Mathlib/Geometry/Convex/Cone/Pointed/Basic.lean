@@ -264,11 +264,11 @@ lemma restrict_eq_comap_subtype (S : Submodule R M) (T : PointedCone R M) :
 
 -- @[simp] lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := Submodule.restrict_self _
 
-lemma mem_restrict {S : Submodule R M} {T : PointedCone R M} {x : S} (h : x ∈ restrict S T) :
-    (x : M) ∈ T := by simpa only using h
+-- lemma mem_restrict {S : Submodule R M} {T : PointedCone R M} {x : S} (h : x ∈ restrict S T) :
+--     (x : M) ∈ T := h
 
 lemma mem_restrict_iff {S : Submodule R M} {T : PointedCone R M} {x : S} :
-    x ∈ restrict S T ↔ (x : M) ∈ T := ⟨mem_restrict, (by simpa using ·)⟩
+    x ∈ restrict S T ↔ (x : M) ∈ T := ⟨id, id⟩
 
 /-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
 @[coe] abbrev embed {S : Submodule R M} (C : PointedCone R S) : PointedCone R M := C.map S.subtype
@@ -356,7 +356,9 @@ lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
 
 @[simp]
 lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
-    (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by simp
+    (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by
+      simp only [Submodule.restrict_inf_self]
+      exact embed_inj.mp rfl
 
 -- lemma foo (S : Submodule R M) {T : Submodule R M} {C : PointedCone R M} (hCT : C ≤ T):
 --   restrict (.restrict T S) (restrict T C) = restrict T (restrict S C) := sorry
@@ -724,13 +726,13 @@ section DivisionRing
 variable {R M : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
 
--- TODO: golf this
-theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C := by
-  constructor <;> intro h
-  · have h := C.smul_mem (le_of_lt <| inv_pos.mpr hc) h
-    rw [inv_smul_smul₀ (ne_of_lt hc).symm] at h
-    exact h
-  · exact C.smul_mem (le_of_lt hc) h
+-- -- TODO: golf this
+-- theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C := by
+--   constructor <;> intro h
+--   · have h := C.smul_mem (le_of_lt <| inv_pos.mpr hc) h
+--     rw [inv_smul_smul₀ (ne_of_lt hc).symm] at h
+--     exact h
+--   · exact C.smul_mem (le_of_lt hc) h
 
 -- analogue of `Submodule.span_singleton_smul_eq`
 theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : R ∙₊ (r • x) = R ∙₊ x := by

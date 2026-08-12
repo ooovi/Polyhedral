@@ -54,7 +54,7 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     · have cF := F.isConvexSet.image hom.ofPoint.isAffineMap
       apply (mem_hull_iff_of_convex (hnf.image _) cF _).mpr
       by_cases hv0 : v = 0
-      · exact ⟨0, le_rfl, Set.mem_smul_set.mpr (by simpa [hv0] using hnf)⟩
+      · exact ⟨0, le_rfl, Set.mem_smul_set.mpr (by simp [hv0]; exact hnf)⟩
       · by_cases hw0 : w = 0
         · subst hw0
           obtain ⟨r, hr, r', ⟨w, hw, _⟩, hra⟩ :=

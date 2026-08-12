@@ -222,7 +222,7 @@ def dehomogenizeCompleteLatticeHom : CompleteLatticeHom (SubMulAction₀ R≥0 W
   map_sSup' := dehomogenize_sSup
 
 @[simp] lemma dehomogenize_bot : (⊥ : SubMulAction₀ R≥0 W).dehomogenize A = ∅ := by
-  ext x; simpa using ofPoint_ne_zero _
+  ext x; simp only [Set.mem_empty_iff_false, iff_false]; exact ofPoint_ne_zero _
 
 variable [IsOrderedRing R] in
 /-- Dehomogenizing the homogenization of a set yields the same set again. -/

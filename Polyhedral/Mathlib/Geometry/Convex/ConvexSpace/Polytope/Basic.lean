@@ -65,14 +65,14 @@ lemma convexHull_union (h₁ : IsPolytope R P₁) (h₂ : IsPolytope R P₂) :
   obtain ⟨v₁, rfl⟩ := h₁
   obtain ⟨v₂, rfl⟩ := h₂
   use v₁ ∪ v₂
-  simp [convexHull_union_convexHull_right, convexHull_convexHull_union]
+  simp [convexHull_union_convexHull, convexHull_convexHull_union]
 
 lemma convexHull_sUnion_finite {p : Set (Set X)} (hp : p.Finite)
     (h : ∀ P ∈ p, IsPolytope R P) : IsPolytope R (convexHull R (⋃₀ p)) := by
   induction p, hp using Set.Finite.induction_on with
   | empty => simp
   | insert _ _ h' =>
-    rw [Set.sUnion_insert, ← convexHull_union_convexHull_right]
+    rw [Set.sUnion_insert, ← convexHull_union_convexHull]
     simp only [Set.mem_insert_iff, forall_eq_or_imp] at h
     exact convexHull_union h.1 (h' h.2)
 

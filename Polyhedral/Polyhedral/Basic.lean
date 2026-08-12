@@ -720,7 +720,6 @@ lemma dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhed
   exact dual_dual_flip p <| (hC₁.dual p).sup (hC₂.dual p)
 
 variable (p) [Fact (Surjective p)] in
-@[deprecated dualfg_of_lineal_cofg (since := "...")]
 private lemma dualfg_of_lineal_cofg {C : PointedCone R N}
     (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) : DualFG p C := by
   obtain ⟨_, hfg, hD⟩ := hC.exists_fg_eq_sup_lineal

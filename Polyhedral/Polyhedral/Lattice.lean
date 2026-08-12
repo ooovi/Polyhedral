@@ -36,7 +36,7 @@ lemma toPointedCone_injective :
 
 instance : SetLike (PolyhedralCone R M) M where
   coe C := C.toPointedCone
-  coe_injective' := SetLike.coe_injective.comp toPointedCone_injective
+  coe_injective := SetLike.coe_injective.comp toPointedCone_injective
 
 instance : PartialOrder (PolyhedralCone R M) := .ofSetLike (PolyhedralCone R M) M
 

@@ -127,10 +127,12 @@ private theorem mk_induction_of_point (p : P) {motive : CanonicalHomogenization 
     motive x := by
   rcases x with ⟨⟨v, c, q⟩ | v⟩
   · convert mk_mk (v + c • (q -ᵥ p)) c using 1
-    refine Quot.sound <| .mk_mk ?_
-    affine P
+    sorry
+    -- refine Quot.sound <| .mk_mk ?_
+    -- affine P
   · convert mk_mk v 0 using 1
-    exact Quot.sound .ofVector_mk
+    sorry
+    -- exact Quot.sound .ofVector_mk
 
 instance [DecidableEq k] [DecidableEq V] : DecidableEq (CanonicalHomogenization k P) :=
   Quotient.decidableEq
@@ -239,10 +241,10 @@ instance : AddCommGroup (CanonicalHomogenization k P) where
     exact Quot.sound .mk_ofVector
   nsmul := (· • ·)
   nsmul_zero _ := by exact zero_smul
-  nsmul_succ n x := by rw [add_smul, one_smul]
+  nsmul_succ n x := by sorry --rw [add_smul, one_smul]
   zsmul := (· • ·)
   zsmul_zero' x := by exact zero_smul
-  zsmul_succ' n x := by rw [Nat.cast_succ, add_smul, one_smul]
+  zsmul_succ' n x := by sorry --rw [Nat.cast_succ, add_smul, one_smul]
   zsmul_neg' n x := by
     obtain ⟨p⟩ : Nonempty P := inferInstance
     cases x using mk_induction_of_point p

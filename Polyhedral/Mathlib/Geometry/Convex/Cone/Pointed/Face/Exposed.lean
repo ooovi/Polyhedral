@@ -113,8 +113,7 @@ lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) : -- only true w
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
-  rw [isFaceOf_iff_mem_of_add_mem]
-  refine ⟨hF.le, ?_⟩
+  apply IsFaceOf.of_mem_of_add_mem_left (le hF)
   intro _ _ hx hy hcxy
   let ⟨φ, hφ, H⟩ := hF
   rw [← H _ hx]

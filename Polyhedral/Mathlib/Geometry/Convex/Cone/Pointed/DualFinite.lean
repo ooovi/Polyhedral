@@ -40,7 +40,7 @@ lemma DualFG.comap {C : PointedCone R N} (hC : C.DualFG p) (f : L →ₗ[R] N) :
 /-- The restriction of a DualFG cone to a submodule is DualFG. -/
 lemma DualFG.restrict {C : PointedCone R N} (hC : C.DualFG p) (S : Submodule R N) :
     (C.restrict S).DualFG (S.dualRestrict.comp p) := by
-  simpa [PointedCone.restrict] using DualFG.comap hC S.subtype
+  simp only [PointedCone.restrict]; exact DualFG.comap hC S.subtype
 
 lemma DualFG.restrict_id {C : PointedCone R M} (hC : C.DualFG .id) (S : Submodule R M) :
     (C.restrict S).DualFG .id := (DualFG.restrict hC S).id

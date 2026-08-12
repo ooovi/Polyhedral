@@ -30,7 +30,7 @@ namespace Polyhedron
 
 instance : SetLike (Polyhedron R A) A where
   coe := Polyhedron.carrier
-  coe_injective' P₁ P₂ _ := by cases P₁; cases P₂; congr
+  coe_injective P₁ P₂ _ := by cases P₁; cases P₂; congr
 
 variable {P P₁ P₂ : Polyhedron R A}
 

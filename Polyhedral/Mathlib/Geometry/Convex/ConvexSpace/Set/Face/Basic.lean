@@ -55,7 +55,7 @@ variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
   coe F := F.toConvexSet.carrier
-  coe_injective' a b _ := sorry
+  coe_injective a b _ := sorry
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 

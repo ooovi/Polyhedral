@@ -39,7 +39,7 @@ lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank =
   convert
     finrank_eq_finrank_add_finrank_quot_linSpan (FG.span_fg (G.isFaceOf.fg hCfg)) hfg.le
     -- G/F has a ray
-  have FfG : (F : PointedCone R M).IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
+  have FfG : (F : PointedCone R M).IsFaceOf G := (F.isFaceOf.isFaceOf_iff_le G.isFaceOf).mpr hfg.le
   have : ¬(G : PointedCone R M) ≤ F.span := by
     simpa [Face.le_span_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
@@ -82,7 +82,7 @@ lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
   · exact fun H hH hah => h.2 (finrank_strictMono hCfg hH) (finrank_strictMono hCfg hah)
 
 /-- The face lattice of a finitely generated cone is graded by face dimension. -/
-noncomputable instance gradeOrder_finrank {C : PointedCone R M}
+noncomputable def gradeOrder_finrank {C : PointedCone R M}
     (hCfg : C.FG) : GradeOrder ℕ (Face C) where
   grade F := F.finrank
   grade_strictMono := finrank_strictMono hCfg

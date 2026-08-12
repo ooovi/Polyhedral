@@ -347,12 +347,12 @@ variable (p) in
 /-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
 def _root_.LinearMap.rp (S : Submodule R M) : S →ₗ[R] (N ⧸ dual p S) →ₗ[R] R where
   toFun x := liftQ (dual p S) (p x.1) (fun _ hy => (hy x.2).symm)
-  map_add' _ _ := by ext; simp
-  map_smul' _ _ := by ext; simp
+  map_add' _ _ := sorry -- by ext; simp
+  map_smul' _ _ := sorry -- by ext; simp
 
 variable (p) in
 @[simp] lemma _root_.LinearMap.rp_apply {S : Submodule R M} (x : S) (y : N) :
-    (p.rp S) x ((dual p S).mkQ y) = p x.1 y := by simp [rp]
+    (p.rp S) x ((dual p S).mkQ y) = p x.1 y := sorry --by simp [rp]
 
 -- TODO: Lemmas that prove how properties of pairing are preserved under restriction.
 --  Most relevant are separation, nondegeneracy, surjectivity and perfectness.

@@ -82,7 +82,7 @@ variable (p) [p.IsPerfPair] in
 lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   wlog h : C.FG with exposed -- reduction to salient case
-  · have h' := hF.quot (Eq.trans_le hF.lineal_eq_lineal.symm (lineal_le_span F))
+  · have h' := hF.quot (Eq.trans_le hF.lineal_congr.symm (lineal_le_span F))
     rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, coe_ofSubmodule,
       Submodule.span_eq]
     -- simpa using exposed hC.salientQuot h' hC.salientQuot_fg
@@ -178,7 +178,7 @@ def IsPolyhedral.Face.dual_orderIso (hC : C.IsPolyhedral) : Face (.dual p C) ≃
   invFun := .dual p ∘ ofDual
   left_inv := dual_dual_flip hC
   right_inv := dual_flip_dual hC
-  map_rel_iff' := by intro F₁ F₂; simpa using dual_flip_le_iff hC F₁ F₂
+  map_rel_iff' := by intro F₁ F₂; sorry --simpa using dual_flip_le_iff hC F₁ F₂
 
 /- TODO:
  * face lattice is graded

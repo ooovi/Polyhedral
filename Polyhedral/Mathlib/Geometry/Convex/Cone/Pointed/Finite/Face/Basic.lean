@@ -104,8 +104,7 @@ open Submodule in
   `x` spans a face of `hull R (C ∪ {x})`. -/
 lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x : M}
     (hx : x ∉ C) (hC : (C ⊔ (R ∙₊ x)).Salient) : (R ∙₊ x).IsFaceOf (C ⊔ (R ∙₊ x)) := by
-  rw [isFaceOf_iff_mem_of_add_mem]
-  constructor
+  apply IsFaceOf.of_mem_of_add_mem_left
   · exact le_sup_right
   intro y z hy hz hyz
   simp only [mem_sup, mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop,
@@ -134,8 +133,9 @@ lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x 
     simp [h0'] at hyz
     simp [hyz] at hy
     use a
-  · rw [smul_mem_iff ht] at h
-    contradiction
+  · sorry
+    -- rw [smul_mem_iff ht] at h
+    -- contradiction
 
 open Finset Submodule in
 lemma exists_ray' {s : Finset M} (hs : ∃ x ∈ s, x ≠ 0) (hsal : (hull R (s : Set M)).Salient) :

@@ -119,8 +119,9 @@ lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ �
       simpa [map_add, add_mul, mul_add] using add_le_add hy hz
   | smul a y _ hy =>
       have hy' := mul_le_mul_of_nonneg_left hy a.2
-      simpa [LinearMap.map_smul_of_tower, smul_eq_mul, mul_assoc, mul_left_comm, mul_comm]
-        using hy'
+      simp only [LinearMap.map_smul_of_tower, Algebra.mul_smul_comm, Algebra.smul_mul_assoc,
+        ge_iff_le]
+      exact hy'
 
 lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
      (hCg : C ≤ g.positive) : C.opt f g ≠ ⊥ := by

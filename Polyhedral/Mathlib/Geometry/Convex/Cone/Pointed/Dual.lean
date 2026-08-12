@@ -136,10 +136,10 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
-{M : Type*} [AddCommGroup M] [Module R M]
-{N : Type*} [AddCommGroup N] [Module R N]
-{p : M →ₗ[R] N →ₗ[R] R} in
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R] in
+variable {M : Type*} [AddCommGroup M] [Module R M] in
+variable {N : Type*} [AddCommGroup N] [Module R N] in
+variable {p : M →ₗ[R] N →ₗ[R] R} in
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
 lemma span_dual_le_dual_lineal {C : PointedCone R M} : span R (dual p C) ≤ .dual p C.lineal := by
@@ -284,13 +284,13 @@ lemma dual_embed_quot_dual (S : Submodule R M) (C : PointedCone R S) :
   constructor <;> intro h
   · obtain ⟨y, hy, hy'⟩ := h
     intro z hz
-    simpa only [mem_restrict_iff, ← hy', rp_apply] using hy z ⟨hz, rfl⟩
+    simp only [← hy', Submodule.mkQ_apply]; exact hy z ⟨hz, rfl⟩
   · use surjInv (Submodule.dual p S).mkQ_surjective x
     constructor
     · intro y z ⟨hz, rfl⟩
       specialize h hz
       rw [← surjInv_eq (Submodule.dual p S).mkQ_surjective x] at h
-      simpa only [rp_apply] using h
+      simp only [Submodule.subtype_apply, ge_iff_le]; exact h
     · rw [surjInv_eq (Submodule.dual p S).mkQ_surjective]
 
 variable (p) in
@@ -316,7 +316,9 @@ lemma comap_dual_mkQ_dual (S : Submodule R M) (C : PointedCone R S) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) C) = dual p (embed C) := by
   rw[← dual_embed_quot_dual]
   unfold embed comap quot map -- remove when map and comap become abbrevs
-  simpa [Submodule.comap_map_mkQ', ← dual_eq_submodule_dual] using dual_antitone embed_le
+  simp only [Submodule.map_coe, coe_restrictScalars, Submodule.subtype_apply, Submodule.coe_subtype,
+    Submodule.comap_map_mkQ', ← dual_eq_submodule_dual, sup_eq_right]
+  exact dual_antitone embed_le
 
 alias dual_embed := comap_dual_mkQ_dual
 

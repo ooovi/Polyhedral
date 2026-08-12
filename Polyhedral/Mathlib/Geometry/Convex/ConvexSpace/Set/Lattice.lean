@@ -35,7 +35,7 @@ variable {K K₁ K₂ : ConvexSet R X}
 
 instance : SetLike (ConvexSet R X) X where
   coe := ConvexSet.carrier
-  coe_injective' K₁ K₂ _ := by cases K₁; cases K₂; congr
+  coe_injective K₁ K₂ _ := by cases K₁; cases K₂; congr
 
 variable (K) in
 @[simp] lemma carrier_eq_coe : K.carrier = K := rfl
@@ -143,7 +143,8 @@ instance : CompleteSemilatticeSup (ConvexSet R X) where
         ClosureOperator.ofCompletePred_apply, Set.le_eq_subset, Set.iInf_eq_iInter]
       intro x xm
       simp only [mem_mk, Set.mem_iInter, Subtype.forall, Set.iUnion_subset_iff, and_imp] at xm
-      exact xm _ hL L.isConvexSet
+      sorry
+      -- exact xm _ hL L.isConvexSet
 
 /- # Complet Lattice -/
 

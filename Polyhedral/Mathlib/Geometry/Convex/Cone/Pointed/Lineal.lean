@@ -205,7 +205,9 @@ lemma lineal_restrict (S : Submodule R M) (C : PointedCone R M) :
   congr
 
 lemma lineal_embed (S : Submodule R M) (C : PointedCone R S) :
-    (embed C).lineal = .embed C.lineal := by simp [map_lineal]
+    (embed C).lineal = .embed C.lineal := by
+  apply map_lineal
+  exact Submodule.injective_subtype S
 
 section IsNoetherianRing
 

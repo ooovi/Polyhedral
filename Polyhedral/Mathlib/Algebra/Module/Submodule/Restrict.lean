@@ -56,7 +56,7 @@ lemma restrict_eq_comap_subtype (S T : Submodule R M) :
 @[simp] lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := submoduleOf_self S
 
 lemma mem_restrict {S : Submodule R M} {T : Submodule R M} {x : S} (h : x ∈ restrict S T) :
-    (x : M) ∈ T := by simpa using h
+    (x : M) ∈ T := h
 
 lemma mem_restrict_iff {S : Submodule R M} {T : Submodule R M} {x : S} :
     x ∈ restrict S T ↔ (x : M) ∈ T := by simp [submoduleOf]

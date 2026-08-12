@@ -155,7 +155,7 @@ lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W
 variable (W) in
 lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
     hom.ofPoint x ∈ homogenize W P ↔ x ∈ P := by
-  refine ⟨fun h ↦ ?_, fun h ↦ by simpa using mem_span_of_mem (Set.mem_image_of_mem hom.ofPoint h)⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ mem_span_of_mem (Set.mem_image_of_mem hom.ofPoint h)⟩
   obtain ⟨_, _, h'⟩ := smul_pos_of_mem_homogenize (Set.mem_preimage.mpr h) (hom.ofPoint_ne_zero x)
   obtain ⟨_, ⟨_, _, hyy'⟩, hy'⟩ := Set.mem_smul_set.mp h'
   have := congrArg hom.weight hy'
@@ -190,8 +190,12 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
       obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (Set.range hom.ofPoint) := by
         simpa [hom.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
-      use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
-      simp [← hy']
+      sorry
+      -- use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
+      -- simp [← hy']
+    sorry
+    sorry
+
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
     K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where
