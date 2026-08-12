@@ -38,7 +38,7 @@ theorem IsPolytope.homogenize_FG {C : ConvexSet R A} (hCfg : IsPolytope R (C : S
   simp only [Finset.coe_map, Function.Embedding.coeFn_mk, homogenize,
     PointedCone.hull, ConvexSet.mk_eq]
   rw [hom.ofPoint.isAffineMap.image_convexHull t]
-  exact (PointedCone.hull_convexHull_eq_hull (hom.ofPoint '' t)).symm
+  exact (PointedCone.hull_convexHull (hom.ofPoint '' t)).symm
 
 /-- A convex set is a polytope iff its homogenization is a finitely generated cone. -/
 theorem IsPolytope.iff_homogenize_FG {C : ConvexSet R A} :
