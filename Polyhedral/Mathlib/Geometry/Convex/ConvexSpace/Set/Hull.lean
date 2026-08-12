@@ -3,6 +3,7 @@ Copyright (c) 2026 Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yaël Dillies
 -/
+
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Order.Closure
 import Mathlib.Geometry.Convex.Hull
@@ -31,8 +32,6 @@ open Pointwise
 
 variable {R V A : Type*}
 
-section Semiring
-
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 
@@ -43,12 +42,6 @@ variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R 
   · exact neg_mem_neg.mp <| h (-t) (neg_subset.mp hst) hcvx.neg
   · exact mem_neg.mp <| h (-t) (neg_subset_neg.mpr hst) hcvx.neg
 
-end Semiring
-
-section Ring
-
-variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 variable [AddTorsor V A]
 
 noncomputable local instance : ConvexSpace R A := AddTorsor.toConvexSpace
@@ -56,8 +49,6 @@ noncomputable local instance : ConvexSpace R A := AddTorsor.toConvexSpace
 lemma convexHull_vadd (s₁ : Set V) (s₂ : Set A) :
     convexHull R (s₁ +ᵥ s₂) = convexHull R s₁ +ᵥ convexHull R s₂ := by
   sorry
-
-end Ring
 
 end Pointwise
 
