@@ -127,13 +127,11 @@ private theorem mk_induction_of_point (p : P) {motive : CanonicalHomogenization 
     (x : CanonicalHomogenization k P) (mk_mk : ∀ (v : V) (c : k), motive (.mk (.mk v c p))) :
     motive x := by
   rcases x with ⟨⟨v, c, q⟩ | v⟩
-  · convert mk_mk (v + c • (q -ᵥ p)) c using 1
-    sorry
-    -- refine Quot.sound <| .mk_mk ?_
-    -- affine P
-  · convert mk_mk v 0 using 1
-    sorry
-    -- exact Quot.sound .ofVector_mk
+  · convert (transparency := .default) mk_mk (v + c • (q -ᵥ p)) c using 1
+    refine Quot.sound <| .mk_mk ?_
+    affine P
+  · convert (transparency := .default) mk_mk v 0 using 1
+    exact Quot.sound .ofVector_mk
 
 instance [DecidableEq k] [DecidableEq V] : DecidableEq (CanonicalHomogenization k P) :=
   Quotient.decidableEq
