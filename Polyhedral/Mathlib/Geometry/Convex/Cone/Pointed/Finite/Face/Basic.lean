@@ -99,7 +99,7 @@ variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
--- TODO: this is the better version of `PointedCone.smul_mem_iff`.
+-- TODO: this is the better version of `PointedCone.smul_mem_iff` and should replace it.
 lemma smul_mem_iff' {𝕜 M : Type*} [DivisionRing 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜]
     [AddCommMonoid M] [Module 𝕜 M] (C : PointedCone 𝕜 M)
     {c : 𝕜} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C :=
