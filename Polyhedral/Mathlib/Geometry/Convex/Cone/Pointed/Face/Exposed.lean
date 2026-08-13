@@ -6,7 +6,10 @@ Authors: Martin Winter
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 
-/-! This file defines exposed faces of cones. -/
+/-! This file defines exposed faces of cones, namely ones that are the intersection of the cone with
+a supporting hyperplane. This notion differs from the more general definition using positive
+combinations, as given by `PointedCone.IsFaceOf`. The two agree on finitely generated cones, which
+is proven elsewhere as `IsFaceOf.FG.exposed`. -/
 
 open Module
 open Submodule
@@ -24,14 +27,6 @@ variable {C F F₁ F₂ : PointedCone R M}
 
 def IsExposedFaceOf (F C : PointedCone R M) :=
   ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
-  -- ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 ↔ x ∈ F)
-
--- variable (p) in
--- def IsExposedFaceOf' (F C : PointedCone R M) :=
---   ∃ φ : N, (∀ x ∈ C, p x φ ≥ 0) ∧ (∀ x ∈ C, p x φ = 0 ↔ x ∈ F)
-
--- lemma IsExposedFaceOf.def_iff :
---     F.IsExposedFaceOf C ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := by rfl
 
 @[refl] lemma IsExposedFaceOf.refl (C : PointedCone R M) : C.IsExposedFaceOf C := ⟨0, by simp⟩
 lemma IsExposedFaceOf.rfl {C : PointedCone R M} : C.IsExposedFaceOf C := refl C

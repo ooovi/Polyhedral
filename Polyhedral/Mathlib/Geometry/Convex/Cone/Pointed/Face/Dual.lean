@@ -50,15 +50,15 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
     (subdual p C F).IsFaceOf (dual p C) := by
   unfold subdual
   apply of_mem_of_add_mem_left ?_
-  intro x y xd
-  simp only [mem_dual, SetLike.mem_coe, Submodule.mem_inf, map_add, Submodule.restrictScalars_mem,
+  · intro x y xd
+    simp only [mem_dual, SetLike.mem_coe, Submodule.mem_inf, map_add, Submodule.restrictScalars_mem,
     Submodule.mem_dual, xd, true_and, and_imp]
-  intro yC _ n'on _ mF
-  apply eq_of_le_of_ge
-  · exact xd (hF.le mF)
-  · rw [n'on mF]
-    exact (le_add_iff_nonneg_right _).mpr <| yC (hF.le mF)
-  simp
+    intro yC _ n'on _ mF
+    apply eq_of_le_of_ge
+    · exact xd (hF.le mF)
+    · rw [n'on mF]
+      exact (le_add_iff_nonneg_right _).mpr <| yC (hF.le mF)
+  · simp
 
 -- ## RPIORITY
 @[simp] lemma subdual_lineal : subdual p C C.lineal = dual p C := sorry
