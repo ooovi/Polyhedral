@@ -31,7 +31,7 @@ noncomputable def spanCorank (S : Submodule R M) : Cardinal :=
 
 Over rings we obtain the following theorems:
 
-````
+```
 theorem corank_eq_rank_quotient :
     S.corank = Module.rank R (M ⧸ S)
 
