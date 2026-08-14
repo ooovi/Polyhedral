@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2020 ... . All rights reserved.
+Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: ...
+Authors: Martin Winter
 -/
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
@@ -9,8 +9,7 @@ import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 
 /-!
-# Affine spaces
-...
+This file adds features for affine spaces.
 -/
 
 noncomputable section
@@ -31,7 +30,7 @@ variable [AddTorsor V A]
 instance : Singleton A (AffineSubspace R A) where
   singleton x := {
     carrier := {x}
-    smul_vsub_vadd_mem _ _ _ _ := by simp +contextual }
+    smul_vsub_vadd_mem' _ _ _ _ := by simp +contextual }
 
 instance : IsConcreteSingleton (AffineSubspace R A) A := ⟨fun _ => rfl⟩
 
@@ -45,7 +44,7 @@ variable [AddCommGroup V] [Module R V]
 instance : Neg (AffineSubspace R V) where
   neg p := {
     carrier := -p
-    smul_vsub_vadd_mem := by
+    smul_vsub_vadd_mem' := by
       intro r x y z hx hy hz
       rw [mem_neg] at *
       rw [vsub_eq_sub, vadd_eq_add, neg_add_rev, SetLike.mem_coe, ← smul_neg, neg_sub']

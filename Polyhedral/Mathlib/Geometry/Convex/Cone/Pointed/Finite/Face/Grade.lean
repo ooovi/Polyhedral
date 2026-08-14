@@ -1,4 +1,13 @@
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+
+/-! This file contains results about the grading on the face lattice of a finitely
+generated cone.-/
 
 open Module
 
@@ -15,7 +24,7 @@ variable {C : PointedCone R M}
 open Submodule in
 lemma finrank_strictMono (hCfg : C.FG) : StrictMono (fun F : Face C => F.finrank) := by
   intro G F hFG
-  haveI := (Submodule.fg_iff_finiteDimensional _).mp (FG.span_fg <| F.isFaceOf.fg hCfg)
+  have := (Submodule.fg_iff_finiteDimensional _).mp (FG.span_fg <| F.isFaceOf.fg hCfg)
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
   · exact span_mono (R := R) hFG.le
   · intro h
@@ -30,7 +39,7 @@ lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank =
   convert
     finrank_eq_finrank_add_finrank_quot_linSpan (FG.span_fg (G.isFaceOf.fg hCfg)) hfg.le
     -- G/F has a ray
-  have FfG : (F : PointedCone R M).IsFaceOf G := (G.isFaceOf.isFaceOf_iff.mpr ⟨hfg.le, F.isFaceOf⟩)
+  have FfG : (F : PointedCone R M).IsFaceOf G := (F.isFaceOf.isFaceOf_iff_le G.isFaceOf).mpr hfg.le
   have : ¬(G : PointedCone R M) ≤ F.span := by
     simpa [Face.le_span_iff_le] using not_le_of_gt hfg
   obtain ⟨v, hv0, hvray⟩ :=
@@ -72,8 +81,12 @@ lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
   · exact lt_of_le_of_ne hfg <| fun a => ne_of_lt h.1 (congrArg finrank (by simpa))
   · exact fun H hH hah => h.2 (finrank_strictMono hCfg hH) (finrank_strictMono hCfg hah)
 
+-- this is a def not a class because of the `FG` hypothesis which cannot be inferred
+-- the option suppresses a linter warning about reducability which we don't care about since this
+-- won't ever be found by typeclass inference
+set_option warn.classDefReducibility false in
 /-- The face lattice of a finitely generated cone is graded by face dimension. -/
-noncomputable instance gradeOrder_finrank {C : PointedCone R M}
+noncomputable def gradeOrder_finrank {C : PointedCone R M}
     (hCfg : C.FG) : GradeOrder ℕ (Face C) where
   grade F := F.finrank
   grade_strictMono := finrank_strictMono hCfg

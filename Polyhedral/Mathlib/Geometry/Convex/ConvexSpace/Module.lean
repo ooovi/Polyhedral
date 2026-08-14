@@ -1,5 +1,13 @@
+/-
+Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter, Olivia Röhrig
+-/
+
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Geometry.Convex.ConvexSpace.Module
+
+/-! This file proves results about convex structures on modules. -/
 
 variable {R V A : Type*}
 

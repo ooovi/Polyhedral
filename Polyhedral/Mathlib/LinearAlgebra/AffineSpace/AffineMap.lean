@@ -26,7 +26,7 @@ variable [AffineSpace V P] [AffineSpace V₁ P₁] [AffineSpace V₂ P₂]
 /-- The range of an affine map is an affine subspace. -/
 def range (f : P₁ →ᵃ[k] P₂) : AffineSubspace k P₂ where
   carrier := Set.range f
-  smul_vsub_vadd_mem := by
+  smul_vsub_vadd_mem' := by
     simp only [Set.mem_range, forall_exists_index]
     intro c _ _ _ x₁ h₁ x₂ h₂ x₃ h₃
     exact ⟨c • (x₁ -ᵥ x₂) +ᵥ x₃, by simp [map_vadd, ← h₁, ← h₂, ← h₃]⟩
@@ -66,7 +66,12 @@ def rangeRestrict (f : P₁ →ᵃ[k] P₂) : P₁ →ᵃ[k] f.range where
 
 lemma rangeRestrict_injective_iff (f : P₁ →ᵃ[k] P₂) :
     (rangeRestrict f).toFun.Injective ↔ f.toFun.Injective := by
-  simp [Function.Injective, rangeRestrict]
+  simp only [Function.Injective, rangeRestrict, toFun_eq_coe, coe_mk]
+  constructor
+  · intro h p q hpq
+    exact h <| Subtype.ext hpq
+  · intro h p q hpq
+    exact h <| congrArg Subtype.val hpq
 
 end AffineMap
 

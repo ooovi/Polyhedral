@@ -6,6 +6,11 @@ Authors: Martin Winter
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 
+/-! This file defines exposed faces of cones, namely ones that are the intersection of the cone with
+a supporting hyperplane. This notion differs from the more general definition using positive
+combinations, as given by `PointedCone.IsFaceOf`. The two agree on finitely generated cones, which
+is proven elsewhere as `IsFaceOf.FG.exposed`. -/
+
 open Module
 open Submodule
 
@@ -22,14 +27,6 @@ variable {C F F₁ F₂ : PointedCone R M}
 
 def IsExposedFaceOf (F C : PointedCone R M) :=
   ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F)
-  -- ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 ↔ x ∈ F)
-
--- variable (p) in
--- def IsExposedFaceOf' (F C : PointedCone R M) :=
---   ∃ φ : N, (∀ x ∈ C, p x φ ≥ 0) ∧ (∀ x ∈ C, p x φ = 0 ↔ x ∈ F)
-
--- lemma IsExposedFaceOf.def_iff :
---     F.IsExposedFaceOf C ↔ ∃ φ : M →ₗ[R] R, (∀ x ∈ C, φ x ≥ 0) ∧ (∀ x ∈ C, φ x = 0 ↔ x ∈ F) := by rfl
 
 @[refl] lemma IsExposedFaceOf.refl (C : PointedCone R M) : C.IsExposedFaceOf C := ⟨0, by simp⟩
 lemma IsExposedFaceOf.rfl {C : PointedCone R M} : C.IsExposedFaceOf C := refl C
@@ -111,8 +108,7 @@ lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) : -- only true w
 
 /-- An exposed face is a face. -/
 lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
-  rw [isFaceOf_iff_mem_of_add_mem]
-  refine ⟨hF.le, ?_⟩
+  apply IsFaceOf.of_mem_of_add_mem_left (le hF)
   intro _ _ hx hy hcxy
   let ⟨φ, hφ, H⟩ := hF
   rw [← H _ hx]
@@ -184,7 +180,7 @@ lemma Face.isExpose_def (F : Face C) :
 --   exact IsDualClosed.inf hC (HyperplaneOrTop.isDualClosed p _)
 
 /-- The dual of a face is an exposed face. -/
-def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
+lemma Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
   sorry -- obvious by definition of dual face
 
 -- def foo''''' (F : Face C) :
@@ -199,7 +195,7 @@ def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
  * In particula, all top proper faces are exposed
 -/
 
-def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.IsDualClosed p) : Face C :=
+def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.DualClosed p) : Face C :=
   sorry -- ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
 
 -- theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry

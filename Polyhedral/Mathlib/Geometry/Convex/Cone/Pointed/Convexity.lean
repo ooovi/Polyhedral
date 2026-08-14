@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
@@ -28,18 +34,12 @@ lemma isConvexSet (P : PointedCone R M) :
   refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
   exact P.smul_mem (w.weights_nonneg c) <| hw (Finsupp.mem_support_iff.mpr hc)
 
-open PointedCone in
-@[simp]
-theorem hull_convexHull_eq_hull (t : Set M) :
+@[simp] theorem hull_convexHull (t : Set M) :
     hull R (Convexity.convexHull R t) = hull R t := by
-  ext x; constructor <;> intro h
-  · apply Submodule.mem_span.mp h
-    simp only [Convexity.convexHull, ClosureOperator.ofCompletePred_apply, Set.le_eq_subset,
-      Set.iInf_eq_iInter]
-    intro a am
-    simp only [Set.mem_iInter, Subtype.forall, and_imp, SetLike.mem_coe, Submodule.mem_span] at ⊢ am
-    exact fun p hp ↦ am _ hp <| isConvexSet p
-  · exact Submodule.span_mono (by simpa [Convexity.convexHull] using fun _ a _ ↦ a) h
+  apply le_antisymm
+  · apply hull_min
+    exact Convexity.convexHull_min le_hull (isConvexSet _)
+  · exact hull_mono Convexity.subset_convexHull_self
 
 end Ring
 
@@ -90,6 +90,7 @@ theorem mem_hull_iff_mem_pos_smul_of_convex_nonzero {x : M} {s} (hc : IsConvexSe
     · simp [mem_hull_iff_of_convex hs hc, Set.smul_subset_smul_right Ioi_subset_Ici_self h]
   · simp [Set.not_nonempty_iff_eq_empty.mp hs, hx]
 
+-- TODO: this should be proven directly, and the lemmas above can be removed.
 theorem hull_eq_smul (hs : s.Nonempty) (hc : IsConvexSet R s) :
     hull R s = Ici (0 : R) • s := by
   ext x; exact mem_hull_iff_of_convex hs hc x

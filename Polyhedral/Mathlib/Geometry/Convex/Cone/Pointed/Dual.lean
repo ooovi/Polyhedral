@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
 
 import Mathlib.LinearAlgebra.BilinearMap
 import Mathlib.LinearAlgebra.Dual.Defs
@@ -5,6 +10,8 @@ import Mathlib.Geometry.Convex.Cone.Dual
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+
+/-! This file proves results about `PointedCone.dual` intended to go into Pointed/Dual. -/
 
 namespace PointedCone
 
@@ -22,7 +29,6 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 alias dual_bot := dual_zero
 
 -- For the proof, see the analogous statement for submodules
-#check Submodule.dual_top_iff_le_ker
 lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
   -- constructor <;> intro h
   -- · intro x hx
@@ -120,7 +126,6 @@ example (S : Set (Set M)) : dual p (sSup S : Set M) = sInf (dual p '' S) := dual
 lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
     -- dual p (sSup S : PointedCone R M) = sInf (dual p '' (SetLike.coe '' S)) := by
     dual p (sSup S : PointedCone R M) = sInf ((dual p ∘ SetLike.coe) '' S) := by
-  simp
   rw [← dual_hull]
   simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
   --rw [Submodule.coe_sInf]
@@ -129,17 +134,17 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
-{M : Type*} [AddCommGroup M] [Module R M]
-{N : Type*} [AddCommGroup N] [Module R N]
-{p : M →ₗ[R] N →ₗ[R] R} in
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R] in
+variable {M : Type*} [AddCommGroup M] [Module R M] in
+variable {N : Type*} [AddCommGroup N] [Module R N] in
+variable {p : M →ₗ[R] N →ₗ[R] R} in
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
 lemma span_dual_le_dual_lineal {C : PointedCone R M} : span R (dual p C) ≤ .dual p C.lineal := by
   simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
   refine sInf_le_sInf ?_
   intro T
-  simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+  simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
   intro h
   obtain ⟨S, hSC, hS⟩ := h
   rw [← hS]
@@ -175,8 +180,7 @@ open Pointwise in
 @[simp]
 lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
   ext x -- TODO: make this proof an application of `map_dual`
-  simp only [Submodule.mem_neg, mem_dual, _root_.map_neg, Left.nonneg_neg_iff,
-    Set.involutiveNeg, Set.mem_neg]
+  simp only [Submodule.mem_neg, mem_dual, _root_.map_neg, Left.nonneg_neg_iff, Set.mem_neg]
   constructor
   · intro hy y hy'
     specialize hy hy'
@@ -277,20 +281,20 @@ lemma dual_embed_quot_dual (S : Submodule R M) (C : PointedCone R S) :
   constructor <;> intro h
   · obtain ⟨y, hy, hy'⟩ := h
     intro z hz
-    simpa only [mem_restrict_iff, ← hy', rp_apply] using hy z ⟨hz, rfl⟩
+    simp only [← hy', Submodule.mkQ_apply]; exact hy z ⟨hz, rfl⟩
   · use surjInv (Submodule.dual p S).mkQ_surjective x
     constructor
     · intro y z ⟨hz, rfl⟩
       specialize h hz
       rw [← surjInv_eq (Submodule.dual p S).mkQ_surjective x] at h
-      simpa only [rp_apply] using h
+      simp only [Submodule.subtype_apply, ge_iff_le]; exact h
     · rw [surjInv_eq (Submodule.dual p S).mkQ_surjective]
 
-set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma dual_quot_dual (S : Submodule R M) (C : PointedCone R M) :
     (dual p (S ∩ C)).quot (.dual p S) = dual (p.rp S) (restrict S C) := by
-  simp only [← coe_ofSubmodule S, ← Submodule.coe_inf, ← embed_restrict S C, ← dual_embed_quot_dual]
+  simpa only [embed_restrict, ← coe_ofSubmodule S, ← Submodule.coe_inf] using
+    dual_embed_quot_dual p S (restrict S C)
 
 alias dual_restrict := dual_quot_dual
 
@@ -304,13 +308,14 @@ alias dual_restrict_of_le := dual_quot_dual_of_le
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 
-set_option backward.isDefEq.respectTransparency false in
 variable (p) in
 lemma comap_dual_mkQ_dual (S : Submodule R M) (C : PointedCone R S) :
     comap (Submodule.dual p S).mkQ (dual (p.rp S) C) = dual p (embed C) := by
   rw[← dual_embed_quot_dual]
   unfold embed comap quot map -- remove when map and comap become abbrevs
-  simpa [Submodule.comap_map_mkQ', ← dual_eq_submodule_dual] using dual_antitone embed_le
+  simp only [Submodule.map_coe, coe_restrictScalars, Submodule.subtype_apply, Submodule.coe_subtype,
+    Submodule.comap_map_mkQ', ← dual_eq_submodule_dual, sup_eq_right]
+  exact dual_antitone embed_le
 
 alias dual_embed := comap_dual_mkQ_dual
 
@@ -329,7 +334,8 @@ lemma comap_dual_mkQ_dual_restrict_of_le {S : Submodule R M} {C : PointedCone R 
 
 -- variable (p) in
 -- /-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
--- def _root_.LinearMap.rp' (C : PointedCone R M) : C.linSpan →ₗ[R] (N ⧸ (dual p C).lineal) →ₗ[R] R where
+-- def _root_.LinearMap.rp' (C : PointedCone R M) :
+--     C.linSpan →ₗ[R] (N ⧸ (dual p C).lineal) →ₗ[R] R where
 --   toFun x := liftQ (dual p S) (p x.1) (fun _ hy => (hy x.2).symm)
 --   map_add' _ _ := by ext; simp
 --   map_smul' _ _ := by ext; simp
@@ -415,7 +421,7 @@ theorem DualClosed.eq_sInf {C : PointedCone R M} (hC : C.DualClosed p) :
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hC, by simp⟩
-  simp only [SetLike.le_def, Submodule.mem_sInf, Set.mem_setOf_eq, and_imp]
+  simp only [SetLike.le_def, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
   intro x hx D hD hsD
   rw [← hD]; rw [← hC] at hx
   exact (dual_dual_mono p hsD) hx
@@ -490,14 +496,14 @@ lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg {C : PointedCone R M} :
   · by_cases hφ : φ = 0
     · left; exact hφ
     · replace h := (h φ).mp.mt hφ
-      push_neg at h
+      push Not at h
       right; exact h
   · constructor
     · intro h'
       rcases h φ
       · assumption
       · absurd h'
-        push_neg
+        push Not
         assumption
     · simp +contextual
 
@@ -571,7 +577,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   --rw [submodule_span_dual]
 --   refine sInf_le_sInf ?_
 --   intro T
---   simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+--   simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
 --   intro ⟨hdc, h⟩
 --   use Submodule.dual p.flip T
 --   constructor
@@ -586,7 +592,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   simp only [lineal, Submodule.dual_sSup_sInf_dual]
 --   unfold Submodule.span
 --   congr; ext T
---   simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+--   simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
 --   constructor
 --   · intro h -- this direction needs neither Field nor dual closed
 --     obtain ⟨S, hSC, hS⟩ := h

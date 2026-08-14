@@ -1,8 +1,16 @@
+/-
+Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter, Olivia Röhrig
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
+
+/-! This file proces results about polytopes and faces. -/
 
 variable {R V W A : Type*}
 
@@ -18,17 +26,19 @@ variable {C : ConvexSet R A}
 /-- Faces of polytopes are polytopes. -/
 theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) :
     IsPolytope R (F : Set A) := by
-  letI hom : IsHomogenization R A (CanonicalHomogenization R A) := inferInstance
-  letI := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
+  let hom : IsHomogenization R A (CanonicalHomogenization R A) := inferInstance
+  let := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
   have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
   have homF := hom.homogenize_isFaceOf F.isFaceOf
   have := PointedCone.IsFaceOf.fg homC homF
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
   simp [dehomogenize_homogenize]
 
+-- we use the option to suppress a linter warning only relevant for classes accessible by instance
+-- search. this one is not, since the hypothesis of being a polytope is not
+set_option warn.classDefReducibility false
 /-- The face lattice of a polytope as a graded order with grading given by the dimensions of
 homogenization cones. -/
-@[reducible]
 private noncomputable def Polytope.faceHomogenizationGradeOrder
     (hCfg : IsPolytope R (C : Set A)) : GradeOrder ℕ C.Face := by
   letI hom : IsHomogenization R A (CanonicalHomogenization R A) := inferInstance

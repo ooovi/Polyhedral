@@ -1,10 +1,16 @@
-import Mathlib.Order.Grade
-import Mathlib.LinearAlgebra.Quotient.Basic
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
+
+/-! This file proves basic facts about faces of finitely generated cones, intended for mathlib's
+Pointed/Basic.lean. -/
 
 namespace PointedCone
 
@@ -91,14 +97,18 @@ variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {C : PointedCone R M}
 
-set_option backward.isDefEq.respectTransparency false in
+-- TODO: this is the better version of `PointedCone.smul_mem_iff` and should replace it.
+lemma smul_mem_iff' {𝕜 M : Type*} [DivisionRing 𝕜] [LinearOrder 𝕜] [IsOrderedRing 𝕜]
+    [AddCommMonoid M] [Module 𝕜 M] (C : PointedCone 𝕜 M)
+    {c : 𝕜} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C :=
+  ⟨fun h => inv_smul_smul₀ hc.ne' x ▸ C.smul_mem (inv_pos.2 hc).le h, C.smul_mem hc.le⟩
+
 open Submodule in
 /-- If a point `x` does not lie in a cone `C` but together with `C` spans a salient cone, then
   `x` spans a face of `hull R (C ∪ {x})`. -/
 lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x : M}
     (hx : x ∉ C) (hC : (C ⊔ (R ∙₊ x)).Salient) : (R ∙₊ x).IsFaceOf (C ⊔ (R ∙₊ x)) := by
-  rw [isFaceOf_iff_mem_of_add_mem]
-  constructor
+  apply IsFaceOf.of_mem_of_add_mem_left
   · exact le_sup_right
   intro y z hy hz hyz
   simp only [mem_sup, mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop,
@@ -127,7 +137,7 @@ lemma span_singleton_isFaceOf_sup_singleton_of_not_mem {C : PointedCone R M} {x 
     simp [h0'] at hyz
     simp [hyz] at hy
     use a
-  · rw [smul_mem_iff ht] at h
+  · rw [smul_mem_iff' C ht] at h
     contradiction
 
 open Finset Submodule in

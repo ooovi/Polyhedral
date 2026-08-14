@@ -1,4 +1,12 @@
+/-
+Copyright (c) 2026 ... All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: ...
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+
+/-! This file defines faces of convex sets. -/
 
 section Semiring
 
@@ -47,7 +55,7 @@ variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
   coe F := F.toConvexSet.carrier
-  coe_injective' a b _ := sorry
+  coe_injective a b _ := sorry
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 .... All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: ... -/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 
 /-!
@@ -28,7 +33,6 @@ abbrev FinRank (C : PointedCone R M) := (span R (C : Set M)).FG
 @[simp] lemma finRank_of_isNoetherian [IsNoetherian R M] (C : PointedCone R M) : C.FinRank :=
   IsNoetherian.noetherian (span R (C : Set M))
 
-set_option backward.isDefEq.respectTransparency false in
 lemma FG.finRank {C : PointedCone R M} (hC : C.FG) : C.FinRank := hC.span
 
 alias finRank_of_fg := FG.finRank

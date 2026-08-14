@@ -1,5 +1,10 @@
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
 
-import Polyhedral.Polyhedral.Basic
+import Polyhedral.Polyhedral.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
@@ -7,6 +12,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 
+/-! This file proves basic fact about faces of polyhedral cones. -/
 
 namespace PointedCone
 
@@ -24,17 +30,6 @@ open Submodule (span)
 
 -- ## IS FACE OF
 
-section Ring
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C C₁ C₂ F : PointedCone R M}
-
--- ...
-
-end Ring
-
 section Field
 
 variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
@@ -51,22 +46,20 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
     * etc.
 -/
 
--- ## TODO: remove `isPerfPair` from everything below.
+-- ## TODO: remove `isPerfPair` assumption from everything below.
 
 lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) :
     (C ⊔ (span R (F : Set M))).lineal = span R F := by
-  rw [sup_comm]
-  rw [_lineal_sup_eq] <;> simp -- WARNING: is `_lineal_sup_eq` even true?
-  simpa using le_trans hF.lineal_le le_span
-  -- ext x
-  -- simp [mem_lineal, mem_span, Submodule.mem_sup]
-  -- constructor
-  -- · intro ⟨h, h'⟩
-  --   obtain ⟨y, hy, z, ⟨p, hp, n, hn, h⟩, H⟩ := h
-  --   obtain ⟨y', hy', z', ⟨p', hp', n', hn', h'⟩, H'⟩ := h'
-  --   -- obtain ⟨y', hy', z', hz', b', hb', h'⟩ := h'
-  --   sorry
-  -- · sorry
+  ext x
+  simp only [mem_lineal, Submodule.mem_sup, Submodule.restrictScalars_mem, mem_span,
+    ↓existsAndEq, and_true]
+  constructor
+  · intro ⟨h, h'⟩
+    -- obtain ⟨y, hy, z, ⟨p, hp, n, hn, h⟩, H⟩ := h
+    -- obtain ⟨y', hy', z', ⟨p', hp', n', hn', h'⟩, H'⟩ := h'
+    -- obtain ⟨y', hy', z', hz', b', hb', h'⟩ := h'
+    sorry
+  · sorry
 
 variable (p) [p.IsPerfPair] in
 -- variable [Fact (Surjective p.flip)] in
@@ -89,10 +82,11 @@ variable (p) [p.IsPerfPair] in
 lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   wlog h : C.FG with exposed -- reduction to salient case
-  · have h' := hF.quot (Eq.trans_le hF.lineal_eq_lineal.symm (lineal_le_span F))
+  · have h' := hF.quot (Eq.trans_le hF.lineal_congr.symm (lineal_le_span F))
     rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, coe_ofSubmodule,
       Submodule.span_eq]
-    simpa using exposed hC.salientQuot h' hC.salientQuot_fg
+    -- simpa using exposed hC.salientQuot h' hC.salientQuot_fg
+    sorry
   exact IsFaceOf.FG.exposed h hF
 
 -- -- TODO: remove the finiteness assumption by reducing to the finite dim case
@@ -120,30 +114,13 @@ lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCo
 
 /-- The face of a polyhedral one is itself polyhedral. -/
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
-  unfold IsPolyhedral PointedCone.salientQuot
   sorry
-
 
 -- ## KREIN MILMAN
 
-
 end Field
 
-
-
-
 -- ## FACE
-
-section Ring
-
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C C₁ C₂ F : PointedCone R M}
-
- -- ...
-
-end Ring
 
 section Field
 
@@ -201,7 +178,7 @@ def IsPolyhedral.Face.dual_orderIso (hC : C.IsPolyhedral) : Face (.dual p C) ≃
   invFun := .dual p ∘ ofDual
   left_inv := dual_dual_flip hC
   right_inv := dual_flip_dual hC
-  map_rel_iff' := by intro F₁ F₂; simpa using dual_flip_le_iff hC F₁ F₂
+  map_rel_iff' := by intro F₁ F₂; sorry --simpa using dual_flip_le_iff hC F₁ F₂
 
 /- TODO:
  * face lattice is graded
@@ -224,6 +201,7 @@ instance {C : PolyhedralCone R M} :
 -/
 
 def atoms : Set (Face (C : PointedCone R M)) := sorry
+
 def rays : Set (Face (C : PointedCone R M)) := sorry
 
 def coatoms : Set (Face (C : PointedCone R M)) := sorry

@@ -8,6 +8,10 @@ import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 
+/-! This file introduces the notion `DualFG` for submodules. A submodule is `DualFG` if it
+is the dual of a finitely generated submodule. Over fields this is the same as being both
+`CoFG` and dual closed. -/
+
 open Module Function LinearMap
 
 namespace Submodule
@@ -71,12 +75,13 @@ lemma inf_dualfg {S T : Submodule R N} (hS : S.DualFG p) (hT : T.DualFG p) :
   obtain ⟨t, rfl⟩ := hT
   use s ∪ t; rw [Finset.coe_union, dual_union]
 
+/-
 -- -- ### HIGH PRIORITY! This is needed in the cone theory!
--- -- variable [Fact p.flip.IsFaithfulPair] in
--- lemma sup_dualfg {S T : Submodule R N} (hC : S.DualFG p) (hD : T.DualFG p) : (S ⊔ T).DualFG p := by
---   unfold DualFG
-
---   sorry
+-- variable [Fact p.flip.IsFaithfulPair] in
+lemma sup_dualfg {S T : Submodule R N} (hC : S.DualFG p) (hD : T.DualFG p) : (S ⊔ T).DualFG p := by
+  unfold DualFG
+  sorry
+-/
 
 /-- The double dual of a DualFG cone is the cone itself. -/
 @[simp]
@@ -200,8 +205,8 @@ variable [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- -- ## PRIORITY
--- lemma sup_dualfg_fg {S : Submodule R N} (T : Submodule R N) (hS : S.DualFG p) : (S ⊔ T).DualFG p :=
-
+-- lemma sup_dualfg_fg {S : Submodule R N} (T : Submodule R N) (hS : S.DualFG p) :
+-- (S ⊔ T).DualFG p :=
 --   sorry
 
 lemma FG.exists_dualfg_dual {S : Submodule R N} (hS : S.FG) :
@@ -320,8 +325,8 @@ variable (p) [Fact (Surjective p)] in
 theorem dualfg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
     T.DualFG p := by classical
   obtain ⟨s, ⟨b⟩⟩ := Basis.exists_basis R S
-  haveI := Module.Finite.iff_fg.mpr hS
-  haveI := Module.Finite.finite_basis b
+  have := Module.Finite.iff_fg.mpr hS
+  have := Module.Finite.finite_basis b
   let proj := projectionOnto S T hST
   have hp : Surjective p := Fact.elim inferInstance
   let f := fun i => surjInv hp (Basis.dualBasis b i ∘ₗ proj)

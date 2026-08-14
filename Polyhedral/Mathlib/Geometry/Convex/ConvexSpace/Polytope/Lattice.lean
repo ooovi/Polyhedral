@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2019 Martin Winter. All rights reserved.
+Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
@@ -36,7 +36,7 @@ variable [ConvexSpace R X]
 
 instance : SetLike (Polytope R X) X where
   coe := Polytope.carrier
-  coe_injective' P₁ P₂ _ := by cases P₁; cases P₂; congr
+  coe_injective P₁ P₂ _ := by cases P₁; cases P₂; congr
 
 variable {P P₁ P₂ : Polytope R X}
 

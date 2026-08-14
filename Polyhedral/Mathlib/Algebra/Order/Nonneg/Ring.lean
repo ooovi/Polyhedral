@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2021 Martin Winter. All rights reserved.
+Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
@@ -8,7 +8,7 @@ import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 import Mathlib.Algebra.Order.Ring.Defs
 
 /-!
-...
+This file contains auxiliary lemmas for working with `Nonneg R`, where `R` is a semiring.
 -/
 
 assert_not_exists abs_inv

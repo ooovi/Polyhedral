@@ -3,6 +3,7 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.Geometry.Convex.Cone.Pointed
@@ -11,9 +12,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 
 /-!
-# Halfspace
-
-...
+This file defines halfspaces in modules.
 -/
 
 open Function Module
@@ -67,7 +66,7 @@ lemma toPointedCone_injective :
 
 instance : SetLike (HalfspaceOrTop R M) M where
   coe C := C.toSubmodule
-  coe_injective' := SetLike.coe_injective.comp toPointedCone_injective
+  coe_injective := SetLike.coe_injective.comp toPointedCone_injective
 
 @[simp] lemma coe_toSubmodule (C : HalfspaceOrTop R M) : (C.toSubmodule : Set M) = C := rfl
 
@@ -223,7 +222,7 @@ lemma toSubmodule_injective :
 
 instance : SetLike (Halfspace R M) M where
   coe C := C.toSubmodule
-  coe_injective' := SetLike.coe_injective.comp toSubmodule_injective
+  coe_injective := SetLike.coe_injective.comp toSubmodule_injective
 
 @[simp] lemma coe_toSubmodule (C : Halfspace R M) : (C.toSubmodule : Set M) = C := rfl
 

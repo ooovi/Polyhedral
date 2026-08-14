@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter, Olivia Röhrig
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
@@ -70,17 +76,14 @@ theorem homogenize_FG_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG
   -- collect all said stuff and use as the new generators
   let g' := g.attach.biUnion (fun x => (Classical.choose (gsum x.2)).support)
   use g'
-
   have g'sub : (g' : Set W) ⊆ hom.ofPoint '' C := by
     simpa [g'] using fun _ b ↦ (Classical.choose_spec (gsum b)).1
-
   have gsubhull : (g : Set W) ⊆ hull R (g' : Set W) := by
     intro x hx
     obtain ⟨_, hnn, hsum⟩ := Classical.choose_spec (gsum hx)
     refine hsum ▸ mem_hull_set.mpr ⟨Classical.choose (gsum hx), ?_, hnn, rfl⟩
     simpa using Finset.subset_biUnion_of_mem
       (fun p ↦ (Classical.choose (gsum p.2)).support) (Finset.mem_attach g ⟨x, hx⟩)
-
   refine ⟨le_antisymm (hull_mono g'sub) ?_, g'sub.trans (by simp)⟩
   simpa [hg] using hull_mono (R := R) gsubhull
 
@@ -149,7 +152,7 @@ lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W
 variable (W) in
 lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
     hom.ofPoint x ∈ homogenize W P ↔ x ∈ P := by
-  refine ⟨fun h ↦ ?_, fun h ↦ by simpa using mem_span_of_mem (Set.mem_image_of_mem hom.ofPoint h)⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ mem_span_of_mem (Set.mem_image_of_mem hom.ofPoint h)⟩
   obtain ⟨_, _, h'⟩ := smul_pos_of_mem_homogenize (Set.mem_preimage.mpr h) (hom.ofPoint_ne_zero x)
   obtain ⟨_, ⟨_, _, hyy'⟩, hy'⟩ := Set.mem_smul_set.mp h'
   have := congrArg hom.weight hy'
@@ -179,13 +182,16 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
     unfold homogenize
     rw [eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot hC zero_lt_one hbot,
       ofPoint_dehomogenize_eq_inter_ofPoint, ← hom.ofPoint_range_eq_preimage_weight_one]
-    convert hull_eq_smul ?_ (C.isConvexSet.inter hom.ofPoint.range_isConvexSet)
+    apply hull_eq_smul
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
-      obtain ⟨_, hy'⟩ : (hom.weight y)⁻¹ • y ∈ (Set.range hom.ofPoint) := by
-        simpa [hom.ofPoint_range_eq_preimage_weight_one]
+      let y' := (hom.weight y)⁻¹ • y
+      have hy'C : y' ∈ C :=
+        C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
+      have hy' : y' ∈ Set.range hom.ofPoint := by
+        simpa [y', hom.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
-      use (hom.weight y)⁻¹ • y, C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
-      simp [← hy']
+      exact ⟨y', hy'C, hy'⟩
+    · exact C.isConvexSet.inter hom.ofPoint.range_isConvexSet
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
     K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where

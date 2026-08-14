@@ -67,14 +67,14 @@ end SetLike
 variable (ρ R α V)
 
 @[to_additive (attr := reducible)]
-def MulAction.ofSetLike [SetLike ρ R] [Monoid R] [Monoid ρ] [IsConcreteOne ρ R] [IsConcreteMul ρ R]
-    [SetLike α V] [MulAction R V] [SMul ρ α] [IsConcreteSMul ρ R α V] :
+def MulAction.ofSetLike [Monoid R] [Monoid ρ] [IsConcreteOne ρ R] [IsConcreteMul ρ R]
+    [MulAction R V] [SMul ρ α] [IsConcreteSMul ρ R α V] :
     MulAction ρ α where
   mul_smul := by simp [← SetLike.coe_set_eq, mul_smul]
   one_smul := by simp [← SetLike.coe_set_eq]
 
 @[to_additive (attr := reducible)]
-def MulAction.ofSetLike_set [Monoid R] [SetLike α V] [MulAction R V] [SMul R α]
+def MulAction.ofSetLike_set [Monoid R] [MulAction R V] [SMul R α]
     [IsConcreteSMulSet R α V] : MulAction R α where
   mul_smul := by simp [← SetLike.coe_set_eq, mul_smul]
   one_smul := by simp [← SetLike.coe_set_eq]
@@ -87,20 +87,20 @@ TODO:
 -/
 
 @[reducible]
-def SMulZeroClass.ofSetLike [SetLike α V] [Zero V] [Zero α] [IsConcreteZero α V]
+def SMulZeroClass.ofSetLike [Zero V] [Zero α] [IsConcreteZero α V]
     [SMulZeroClass R V] [SMul R α] [IsConcreteSMulSet R α V] :
     SMulZeroClass R α where
   smul_zero := by simp [← SetLike.coe_set_eq]
 
 @[reducible]
-def DistribSMul.ofSetLike [SetLike α V] [AddZeroClass V] [AddZeroClass α]
+def DistribSMul.ofSetLike [AddZeroClass V] [AddZeroClass α]
     [IsConcreteZero α V] [IsConcreteAdd α V] [DistribSMul R V] [SMul R α]
     [IsConcreteSMulSet R α V] : DistribSMul R α where
   __ := SMulZeroClass.ofSetLike ..
   smul_add := by simp [← SetLike.coe_set_eq, smul_add]
 
 @[reducible]
-def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoid α]
+def DistribMulAction.ofSetLike [Monoid R] [AddMonoid V] [AddMonoid α]
     [IsConcreteZero α V] [IsConcreteAdd α V] [DistribMulAction R V] [SMul R α]
     [IsConcreteSMulSet R α V] : DistribMulAction R α where
   __ := MulAction.ofSetLike_set ..
@@ -108,7 +108,7 @@ def DistribMulAction.ofSetLike [Monoid R] [SetLike α V] [AddMonoid V] [AddMonoi
   smul_zero :=  by simp [← SetLike.coe_set_eq]
 
 @[reducible]
-def MulDistribMulAction.ofSetLike [Monoid R] [SetLike α V] [Monoid V] [Monoid α]
+def MulDistribMulAction.ofSetLike [Monoid R] [Monoid V] [Monoid α]
     [IsConcreteOne α V] [IsConcreteMul α V] [MulDistribMulAction R V] [SMul R α]
     [IsConcreteSMulSet R α V] : MulDistribMulAction R α where
   __ := MulAction.ofSetLike_set ..

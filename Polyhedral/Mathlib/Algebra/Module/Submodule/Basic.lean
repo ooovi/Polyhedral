@@ -1,12 +1,11 @@
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm.Basic
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.Projection
-import Mathlib.LinearAlgebra.Basis.VectorSpace
-import Mathlib.Order.ModularLattice
-import Mathlib.RingTheory.Noetherian.Basic
-import Mathlib.LinearAlgebra.Quotient.Basic
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Algebra.Module.SpanRank
+import Mathlib.LinearAlgebra.Basis.VectorSpace
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 
@@ -30,29 +29,9 @@ protected alias span_gi := Submodule.gi
 
 alias le_span := subset_span
 
--- Q: should `Submodule.span_union` be a simp lemma? Yael says possibly
-example (S S' : Set M) : span R (S ∪ S') = (span R S) ⊔ (span R S')
-  := Submodule.span_union S S'
-
-example (S S' : Submodule R M) : span R (S ∪ S') = S ⊔ S'
-  := by simp
-
-example (s t : Set M) : span R (s ∩ t) ≤ span R s :=
-  span_mono inf_le_left
-
-example (s t : Set M) : span R (s ∩ t) ≤ span R t :=
-  span_mono inf_le_right
-
-@[deprecated "this simplifies to the above examples" (since := "...")]
-lemma span_inter_le (s t : Set M) : span R (s ∩ t) ≤ span R s ⊓ span R t :=
-    le_inf (span_mono inf_le_left) (span_mono inf_le_right)
-
-
-
 @[simp] lemma span_insert_span (s : Set M) (x : M) :
-    span R (insert x (span R s)) = span R (insert x s) := by simp [← Set.union_singleton]
-
-
+    span R (insert x (span R s)) = span R (insert x s) := by
+  simp [← Set.union_singleton]
 
 -- ## RESTRICT SCALARS
 
@@ -66,9 +45,6 @@ variable (S)
 
 lemma subtype_restrictScalars (p : Submodule R M) :
     p.subtype.restrictScalars S = (p.restrictScalars S).subtype := rfl
-
--- instance {p : Submodule R M} : CoeDep (Submodule R M) p (Submodule S M) := ⟨restrictScalars S p⟩
-
 
 -- ## QUOTIENT
 
@@ -161,84 +137,35 @@ lemma mkQ_orderIso_apply {p : Submodule R M} (s : Set.Ici (p.restrictScalars S))
 lemma mkQ_orderIso_symm_apply {p : Submodule R M} (s : Submodule S (M ⧸ p)) :
     p.mkQ_orderIso.symm s = s.comap (p.mkQ.restrictScalars S) := rfl
 
-lemma IsCompl.inf_eq_iff_sup_eq {p q : Submodule R M} {s t : Submodule S M} (hpq : IsCompl p q) :
-    s ⊓ q.restrictScalars S = t ⊓ q.restrictScalars S
-      ↔ s ⊔ p.restrictScalars S = t ⊔ p.restrictScalars S := by sorry
-
--- variable [HasRankNullity R] in
--- lemma exists_rank_le_codisjoint (S : Submodule R M) : ∃ T : Submodule R M,
---     Module.rank R T ≤ Module.rank R (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
---   obtain ⟨s, hcard, hs⟩ := exists_set_linearIndependent R (M ⧸ S)
---   let inv := surjInv S.mkQ_surjective
---   use span R (inv '' s)
---   constructor
---   · rw[← hcard]
---     exact le_trans (spanRank_span_le_card _) Cardinal.mk_image_le
---   rw [codisjoint_iff, ← map_mkQ_eq_top]
---   ext x
---   simp only [mem_map, mem_top, iff_true]
---   have hx : x ∈ span R s := by simp only [hs, mem_top]
---   obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
---   use ∑ i, f i • inv (g i)
---   constructor
---   · apply sum_mem
---     intro y _
---     refine smul_mem _ _ (mem_span_of_mem ?_)
---     simpa using ⟨g y, by simp⟩
---   · simp [inv, surjInv_eq S.mkQ_surjective]
-
 /-- Replacement for `exists_isCompl` if `R` is not a Field. We can still always find a
   codisjoint submodule whose spanRank is equal the quotient's spanRank. -/
-lemma exists_spanRank_codisjoint (S : Submodule R M) : ∃ T : Submodule R M,
-    spanRank T = spanRank (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
+lemma exists_spanRank_codisjoint (S : Submodule R M) :
+    ∃ T : Submodule R M, spanRank T = spanRank (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
   obtain ⟨s, hcard, hs⟩ := (⊤ : Submodule R (M ⧸ S)).exists_span_set_card_eq_spanRank
   let inv := surjInv S.mkQ_surjective
-  use span R (inv '' s)
-  constructor
-  · rw[← hcard]
-    rw [le_antisymm_iff]
+  let T := span R (inv '' s)
+  have hcod : Codisjoint S T := by
+    rw [codisjoint_iff, ← map_mkQ_eq_top]
+    ext x
+    simp only [mem_map, mem_top, iff_true]
+    have hx : x ∈ span R s := by simp [hs]
+    obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
+    use ∑ i, f i • inv (g i)
     constructor
-    · exact le_trans (spanRank_span_le_card _) Cardinal.mk_image_le
-    -- Function.injective_surjInv
-    -- Submodule.spanRank_span_of_linearIndepOn
-    -- Submodule.spanRank_span_le_card
-    sorry
-  rw [codisjoint_iff, ← map_mkQ_eq_top]
-  ext x
-  simp only [mem_map, mem_top, iff_true]
-  have hx : x ∈ span R s := by simp only [hs, mem_top]
-  obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
-  use ∑ i, f i • inv (g i)
-  constructor
-  · apply sum_mem
-    intro y _
-    refine smul_mem _ _ (mem_span_of_mem ?_)
-    simpa using ⟨g y, by simp⟩
-  · simp [inv, surjInv_eq S.mkQ_surjective]
-
-/-- Replacement for `exists_isCompl` if `R` is not a Field. We can still always find a
-  codisjoint submodule whose spanRank is at most the quotient's spanRank. -/
-lemma exists_spanRank_le_codisjoint (S : Submodule R M) : ∃ T : Submodule R M,
-    spanRank T ≤ spanRank (⊤ : Submodule R (M ⧸ S)) ∧ Codisjoint S T := by
-  obtain ⟨s, hcard, hs⟩ := (⊤ : Submodule R (M ⧸ S)).exists_span_set_card_eq_spanRank
-  let inv := surjInv S.mkQ_surjective
-  use span R (inv '' s)
-  constructor
-  · rw[← hcard]
+    · apply sum_mem
+      intro y _
+      refine smul_mem _ _ (mem_span_of_mem ?_)
+      simpa [T] using ⟨g y, by simp⟩
+    · simp [inv, surjInv_eq S.mkQ_surjective]
+  refine ⟨T, ?_, hcod⟩
+  apply le_antisymm
+  · rw [← hcard]
     exact le_trans (spanRank_span_le_card _) Cardinal.mk_image_le
-  rw [codisjoint_iff, ← map_mkQ_eq_top]
-  ext x
-  simp only [mem_map, mem_top, iff_true]
-  have hx : x ∈ span R s := by simp only [hs, mem_top]
-  obtain ⟨n, f, g, rfl⟩ := mem_span_set'.mp hx
-  use ∑ i, f i • inv (g i)
-  constructor
-  · apply sum_mem
-    intro y _
-    refine smul_mem _ _ (mem_span_of_mem ?_)
-    simpa using ⟨g y, by simp⟩
-  · simp [inv, surjInv_eq S.mkQ_surjective]
-
+  · have hmap : map S.mkQ T = ⊤ := by
+      rw [map_mkQ_eq_top]
+      exact codisjoint_iff.mp hcod
+    rw [← hmap]
+    exact spanRank_map_le S.mkQ T
 
 
 -- ## MODULAR
@@ -247,46 +174,23 @@ variable {R : Type*} [Ring R]
 variable {S : Type*} [Semiring S] [Module S R]
 variable {M : Type*} [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
 
--- TODO: quotientEquivOfIsCompl should not have explicit `p` and `q`
+-- TODO: mathlib's `quotientEquivOfIsCompl` should not have explicit `p` and `q`
 
 /-- Submodules over a ring are right modular in the lattice of submodules over a semiring.
   This is a version of `IsModularLattice.sup_inf_assoc_of_le` for the non-modular lattice
   of submodules over a semiring. -/
 lemma sup_inf_assoc_of_le_restrictScalars {s : Submodule S M} (t : Submodule S M)
     {p : Submodule R M} (hsp : s ≤ p.restrictScalars S) :
-    s ⊔ (t ⊓ p.restrictScalars S) = (s ⊔ t) ⊓ p.restrictScalars S := by
-  ext x
-  simp only [mem_sup, mem_inf, restrictScalars_mem]
-  constructor <;> intro h
-  · obtain ⟨y, hy, z, ⟨hz, hz'⟩, hyzx⟩ := h
-    refine ⟨⟨y, hy, z, hz, hyzx⟩, ?_⟩
-    simpa [← hyzx] using p.add_mem (hsp hy) hz'
-  · obtain ⟨⟨y, hy, z, hz, hyzx⟩, hx⟩ := h
-    refine ⟨y, hy, z, ⟨hz, ?_⟩, hyzx⟩
-    rw [← add_right_inj (-y), neg_add_cancel_left] at hyzx
-    rw [hyzx]
-    specialize hsp hy
-    rw [restrictScalars_mem, ← neg_mem_iff] at hsp
-    exact p.add_mem hsp hx
+    (s ⊔ t) ⊓ p.restrictScalars S = s ⊔ (t ⊓ p.restrictScalars S):=
+  sup_inf_assoc_of_le_of_neg_le _ hsp (by simp [hsp, Submodule.neg_le])
 
 /-- Submodules over a ring are left modular in the lattice of submodules over a semiring.
   This is a version of `IsModularLattice.inf_sup_assoc_of_le` for the non-modular lattice
   of submodules over a semiring. -/
 lemma inf_sup_assoc_of_restrictScalars_le {s : Submodule S M} (t : Submodule S M)
     {p : Submodule R M} (hsp : p.restrictScalars S ≤ s) :
-    s ⊓ (t ⊔ p.restrictScalars S) = (s ⊓ t) ⊔ p.restrictScalars S := by
-  ext x
-  simp only [mem_inf, mem_sup, restrictScalars_mem]
-  constructor <;> intro h
-  · obtain ⟨hxs, y, hyt, z, hzp, hyzx⟩ := h
-    use y
-    constructor
-    · refine ⟨?_, hyt⟩
-      rw [← add_left_inj (-z), add_neg_cancel_right] at hyzx
-      simpa [hyzx] using add_mem hxs <| hsp <| neg_mem (S := Submodule R M) hzp
-    · use z
-  · obtain ⟨y, ⟨hys, hyt⟩, z, hzp, hyzx⟩ := h
-    exact ⟨by simpa [← hyzx] using add_mem hys (hsp hzp), ⟨y, hyt, z, hzp, hyzx⟩⟩
+    (s ⊓ t) ⊔ p.restrictScalars S = s ⊓ (t ⊔ p.restrictScalars S) :=
+  inf_sup_assoc_of_le_of_neg_le _ hsp (by simp [hsp])
 
 /-- A version of `IsCompl.IicOrderIsoIci` for submodules with restricted scalars. -/
 def IsCompl.IicOrderIsoIci_restrictScalars {p q : Submodule R M} (hpq : IsCompl p q) :
@@ -294,10 +198,10 @@ def IsCompl.IicOrderIsoIci_restrictScalars {p q : Submodule R M} (hpq : IsCompl 
   toFun s := ⟨s ⊔ q.restrictScalars S, by simp⟩
   invFun s := ⟨s ⊓ p.restrictScalars S, by simp⟩
   left_inv s := by
-    simp [← sup_inf_assoc_of_le_restrictScalars _ s.2, ← restrictScalars_inf,
+    simp [sup_inf_assoc_of_le_restrictScalars _ s.2, ← restrictScalars_inf,
       disjoint_iff.mp hpq.symm.disjoint]
   right_inv s := by
-    simp [← inf_sup_assoc_of_restrictScalars_le _ s.2, ← restrictScalars_sup,
+    simp [inf_sup_assoc_of_restrictScalars_le _ s.2, ← restrictScalars_sup,
       codisjoint_iff.mp hpq.codisjoint]
   map_rel_iff' := by
     simp only [Equiv.coe_fn_mk, Subtype.mk_le_mk, sup_le_iff, le_sup_right, and_true,
@@ -305,13 +209,10 @@ def IsCompl.IicOrderIsoIci_restrictScalars {p q : Submodule R M} (hpq : IsCompl 
     intro s hs t ht
     constructor
     · intro h
-      simpa [inf_eq_left.mpr hs, ← sup_inf_assoc_of_le_restrictScalars _ ht,
+      simpa [inf_eq_left.mpr hs, sup_inf_assoc_of_le_restrictScalars _ ht,
         ← restrictScalars_inf, inf_comm, disjoint_iff.mp hpq.disjoint]
         using inf_le_inf_right (p.restrictScalars S) h
     · exact (le_trans · le_sup_left)
-
--- Submodule.mapIic
--- orderIsoMapComap
 
 noncomputable def IsCompl.foo {p q : Submodule R M} (hpq : IsCompl p q) :
     Submodule S (M ⧸ p) ≃o Submodule S q :=
@@ -335,15 +236,14 @@ def quot_orderIso_Ici_restrictScalars (p : Submodule R M) :
     · simpa using map_mono (f := p.mkQ.restrictScalars S) H
     · exact comap_mono H
 
-
 section Experiment
 
 variable {S R M N : Type*}
   [CommSemiring S] [CommRing R] [Algebra S R]
   [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
 
--- I think this is not the best lemma. There should be something more fundamental about
--- quotients and IsCompl that should make this easy.
+/- NOTE: I think this is not the best lemma. There should be something more fundamental about
+quotients and IsCompl that should make this easy. -/
 /-- The linear equivalence between `s / p` and `s ⊓ q`. -/
 noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl p q)
     {s : Submodule S M} (hps : p.restrictScalars S ≤ s) :
@@ -373,8 +273,6 @@ end Experiment
 
 end RestrictedScalar
 
-
-
 -- -- ## QUOTIENTS
 
 -- lemma mkQ_sup (S T : Submodule R M) :
@@ -400,7 +298,6 @@ end RestrictedScalar
 
 end Semiring
 
-
 section Ring
 
 variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
@@ -409,17 +306,12 @@ variable {M R : Type*} [Ring R] [AddCommGroup M] [Module R M]
     span R (insert (-x) s) = span R s :=
   Submodule.span_insert_eq_span <| neg_mem_iff.mpr <| subset_span hx
 
-example {x : M} : span R {-x, x} = R ∙ x := by simp
-  -- span_insert_eq_span_of_mem (Set.mem_singleton x)
-
 lemma IsCompl.projection_isProj {S T : Submodule R M} (hST : IsCompl S T) :
     IsProj S (Submodule.projection _ _ hST) where
   map_mem := Submodule.projection_apply_mem hST
   map_id x hx := Submodule.projection_apply_left hST ⟨x, hx⟩
 
 end Ring
-
-
 
 section DivisionRing
 
@@ -449,11 +341,6 @@ lemma exists_extend {T S : Submodule R M} (hST : S ≤ T) :
   rw [sup_comm, ← sup_assoc, hcod, inf_comm, ← inf_sup_assoc_of_le, hdis]
   · simp
   · exact hST
-
--- lemma exists_extend' (T : Submodule R M) (S : Submodule R T) :
---     ∃ S' : Submodule R M, S' ⊔ T = ⊤ ∧ S'.restrict T = S := by
---   use exists_extend (T:=T) (S:=(S : Submodule R M)) (by sorry)
---   sorry
 
 end DivisionRing
 

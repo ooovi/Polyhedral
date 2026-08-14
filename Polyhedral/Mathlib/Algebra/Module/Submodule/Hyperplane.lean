@@ -54,7 +54,7 @@ lemma toSubmodule_injective :
 
 instance : SetLike (HyperplaneOrTop R M) M where
   coe C := C.toSubmodule
-  coe_injective' := SetLike.coe_injective.comp toSubmodule_injective
+  coe_injective := SetLike.coe_injective.comp toSubmodule_injective
 
 @[simp] lemma coe_toSubmodule (C : HyperplaneOrTop R M) : (C.toSubmodule : Set M) = C := rfl
 
@@ -99,7 +99,7 @@ lemma toSubmodule_injective :
 
 instance : SetLike (Hyperplane R M) M where
   coe C := C.toSubmodule
-  coe_injective' := SetLike.coe_injective.comp toSubmodule_injective
+  coe_injective := SetLike.coe_injective.comp toSubmodule_injective
 
 @[simp] lemma coe_toSubmodule (C : Hyperplane R M) : (C.toSubmodule : Set M) = C := rfl
 

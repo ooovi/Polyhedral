@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
@@ -20,12 +25,12 @@ def opt (C : PointedCone R M) (f g : M →ₗ[R] R) : PointedCone R M where
   carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_setOf_eq, map_add] at *
+    simp only [Set.mem_ofPred_eq, map_add] at *
     refine ⟨C.add_mem ha.1 hb.1, ?_⟩
     intro y hy
     rw [add_mul, mul_add]
     exact add_le_add (ha.2 y hy) (hb.2 y hy)
-  zero_mem' := by simp only [Set.mem_setOf_eq, zero_mem, map_zero, zero_mul, mul_zero, le_refl,
+  zero_mem' := by simp only [Set.mem_ofPred_eq, zero_mem, map_zero, zero_mul, mul_zero, le_refl,
      implies_true, and_self]
   smul_mem' := by
     intro a x hx
@@ -110,8 +115,9 @@ lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ �
       simpa [map_add, add_mul, mul_add] using add_le_add hy hz
   | smul a y _ hy =>
       have hy' := mul_le_mul_of_nonneg_left hy a.2
-      simpa [LinearMap.map_smul_of_tower, smul_eq_mul, mul_assoc, mul_left_comm, mul_comm]
-        using hy'
+      simp only [LinearMap.map_smul_of_tower, Algebra.mul_smul_comm, Algebra.smul_mul_assoc,
+        ge_iff_le]
+      exact hy'
 
 lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
      (hCg : C ≤ g.positive) : C.opt f g ≠ ⊥ := by
@@ -198,7 +204,7 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   have hwF : w ∈ F := by
     rw [h]
     exact F.smul_mem (le_of_lt hc') hwF
-  simp only [opt, Submodule.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, Set.mem_setOf_eq,
+  simp only [opt, Submodule.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, Set.mem_ofPred_eq,
     F] at hwF
   have hgw : 0 < g w := by
     have hw0 : w ≠ 0 := by

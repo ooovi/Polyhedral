@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Geometry.Convex.Cone.Dual
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
@@ -24,7 +30,7 @@ def nonneg (f : M →ₗ[R] R) : PointedCone R M where
   carrier := {x : M | 0 ≤ f x}
   add_mem' hx hy := by simpa using add_nonneg hx hy
   zero_mem' := by simp
-  smul_mem' r x hx := by simpa using smul_nonneg r.2 hx
+  smul_mem' r x hx := by simp only [Set.mem_ofPred_eq, map_smul_of_tower]; exact smul_nonneg r.2 hx
 
 @[simp] lemma mem_nonneg {f : M →ₗ[R] R} {x : M} :
   x ∈ f.nonneg ↔ 0 ≤ f x := .rfl
@@ -59,7 +65,8 @@ def positive (f : M →ₗ[R] R) : PointedCone R M where
     · simp [hr]
     intro _
     have hr : r.1 ≠ 0 := by simp [hr]
-    simpa using smul_pos (lt_of_le_of_ne r.2 hr.symm) (hx hx0)
+    simp only [map_smul_of_tower, gt_iff_lt]
+    apply smul_pos (lt_of_le_of_ne r.2 hr.symm) (hx hx0)
 
 @[simp] lemma mem_positive {f : M →ₗ[R] R} {x : M} : x ∈ f.positive ↔ (x ≠ 0 → 0 < f x) := .rfl
 

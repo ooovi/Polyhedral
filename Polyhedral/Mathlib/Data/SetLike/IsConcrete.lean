@@ -162,7 +162,7 @@ theorem bot_ne_top [Nonempty B] : (⊥ : A) ≠ ⊤ := by
 end Bot
 
 theorem eq_top_iff_forall {a : A} : a = ⊤ ↔ ∀ x, x ∈ a := by
-  simpa [← coe_set_eq] using Set.eq_univ_iff_forall
+  simp only [← coe_set_eq, coe_top, Set.top_eq_univ]; exact Set.eq_univ_iff_forall
 
 theorem eq_top_of_forall {a : A} : (∀ x, x ∈ a) → a = ⊤ := eq_top_iff_forall.2
 
@@ -307,27 +307,29 @@ theorem insert_comm (x y : B) (a : A) : insert x (insert y a) = insert y (insert
 
 theorem insert_insert (x : B) (a : A) : insert x (insert x a) = insert x a := by simp
 
--- -- useful in proofs by induction
--- theorem forall_of_forall_insert {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ insert a s → P x)
---     (x) (h : x ∈ s) : P x := by grind
+/-
+-- useful in proofs by induction
+theorem forall_of_forall_insert {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ insert a s → P x)
+    (x) (h : x ∈ s) : P x := by grind
 
--- theorem forall_insert_of_forall {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ s → P x) (ha : P a)
---     (x) (h : x ∈ insert a s) : P x := by grind
+theorem forall_insert_of_forall {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ s → P x) (ha : P a)
+    (x) (h : x ∈ insert a s) : P x := by grind
 
--- theorem exists_mem_insert {P : α → Prop} {a : α} {s : Set α} :
---     (∃ x ∈ insert a s, P x) ↔ (P a ∨ ∃ x ∈ s, P x) := by grind
+theorem exists_mem_insert {P : α → Prop} {a : α} {s : Set α} :
+    (∃ x ∈ insert a s, P x) ↔ (P a ∨ ∃ x ∈ s, P x) := by grind
 
--- theorem forall_mem_insert {P : α → Prop} {a : α} {s : Set α} :
---     (∀ x ∈ insert a s, P x) ↔ P a ∧ ∀ x ∈ s, P x := by grind
+theorem forall_mem_insert {P : α → Prop} {a : α} {s : Set α} :
+    (∀ x ∈ insert a s, P x) ↔ P a ∧ ∀ x ∈ s, P x := by grind
 
--- /-- Inserting an element to a set is equivalent to the option type. -/
--- def subtypeInsertEquivOption
---     [DecidableEq α] {t : Set α} {x : α} (h : x ∉ t) :
---     { i // i ∈ insert x t } ≃ Option { i // i ∈ t } where
---   toFun y := if h : ↑y = x then none else some ⟨y, by grind⟩
---   invFun y := (y.elim ⟨x, mem_insert _ _⟩) fun z => ⟨z, by grind⟩
---   left_inv y := by grind
---   right_inv := by rintro (_ | y) <;> grind
+/-- Inserting an element to a set is equivalent to the option type. -/
+def subtypeInsertEquivOption
+    [DecidableEq α] {t : Set α} {x : α} (h : x ∉ t) :
+    { i // i ∈ insert x t } ≃ Option { i // i ∈ t } where
+  toFun y := if h : ↑y = x then none else some ⟨y, by grind⟩
+  invFun y := (y.elim ⟨x, mem_insert _ _⟩) fun z => ⟨z, by grind⟩
+  left_inv y := by grind
+  right_inv := by rintro (_ | y) <;> grind
+-/
 
 section LE
 
@@ -337,7 +339,7 @@ variable [LE A] [IsConcreteLE A B]
 theorem le_insert (x : B) (a : A) : a ≤ insert x a := by simp [← coe_subset_coe]
 
 theorem insert_le_iff {x : B} {a b : A} : insert x a ≤ b ↔ x ∈ b ∧ a ≤ b := by
-  simpa [← coe_subset_coe] using Set.insert_subset_iff
+  simp only [← coe_subset_coe, coe_insert]; exact Set.insert_subset_iff
 
 theorem insert_le {x : B} {a b : A} (hx : x ∈ b) (h : a ≤ b) : insert x a ≤ b := by
   rw [← coe_subset_coe] at ⊢ h
@@ -363,7 +365,7 @@ section PartialOrder
 variable [PartialOrder A] [IsConcreteLE A B]
 
 theorem lt_iff_insert : a < b ↔ ∃ x ∉ a, insert x a ≤ b := by
-  simpa [← coe_ssubset_coe, ← coe_subset_coe] using Set.ssubset_iff_insert
+  simp only [← coe_ssubset_coe, ← coe_subset_coe, coe_insert]; exact Set.ssubset_iff_insert
 
 theorem lt_insert (h : x ∉ a) : a < insert x a := by
   simpa [← coe_ssubset_coe] using Set.ssubset_insert h
@@ -515,7 +517,7 @@ variable (A B) in
   inf := min
   inf_le_left := by simp [← coe_subset_coe]
   inf_le_right := by simp [← coe_subset_coe]
-  le_inf a b c := by simpa only [← coe_subset_coe, coe_min] using le_inf
+  le_inf a b c := by simpa [← coe_subset_coe, coe_min] using le_inf
 
 end PartialOrder
 
@@ -591,7 +593,7 @@ variable (A B) in
   sup := max
   le_sup_left := by simp [← coe_subset_coe]
   le_sup_right := by simp [← coe_subset_coe]
-  sup_le a b c := by simpa only [← coe_subset_coe, coe_max] using sup_le
+  sup_le a b c := by simpa [← coe_subset_coe, coe_max] using sup_le
 
 end PartialOrder
 

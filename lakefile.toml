@@ -25,6 +25,3 @@ scope = "leanprover-community"
 
 [[lean_lib]]
 name = "Polyhedral"
-
-[[lean_lib]]
-name = "Experimental"

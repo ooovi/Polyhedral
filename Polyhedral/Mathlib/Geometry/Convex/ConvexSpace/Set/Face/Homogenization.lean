@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter, Olivia Röhrig
+-/
+
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
@@ -45,7 +51,7 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     · have cF := F.isConvexSet.image hom.ofPoint.isAffineMap
       apply (mem_hull_iff_of_convex (hnf.image _) cF _).mpr
       by_cases hv0 : v = 0
-      · exact ⟨0, le_rfl, Set.mem_smul_set.mpr (by simpa [hv0] using hnf)⟩
+      · exact ⟨0, le_rfl, mem_smul_set.mpr (by simpa [hv0] using nonempty_def.mp hnf)⟩
       · by_cases hw0 : w = 0
         · subst hw0
           obtain ⟨r, hr, r', ⟨w, hw, _⟩, hra⟩ :=

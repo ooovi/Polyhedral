@@ -6,7 +6,6 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Quotient
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
@@ -31,7 +30,6 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Pointwise
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
@@ -40,6 +38,8 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Face
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
@@ -64,8 +64,10 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Set
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+import Polyhedral.Mathlib.LinearAlgebra.Face.Basic
 import Polyhedral.Mathlib.Logic.Function.Const
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 import Polyhedral.Polyhedral.Basic
 import Polyhedral.Polyhedral.Faces
+import Polyhedral.Polyhedral.Lattice

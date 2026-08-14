@@ -1,10 +1,18 @@
+/-
+Copyright (c) 2025 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Geometry.Convex.Cone.DualFinite
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 
-variable {R M N : Type*}
+/-! This file proves results about duals of FG cones. -/
+
+variable {R M N L : Type*}
 
 namespace PointedCone
 
@@ -17,7 +25,25 @@ section PartialOrder
 variable [PartialOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
+variable [AddCommGroup L] [Module R L]
 variable {p : M →ₗ[R] N →ₗ[R] R}
+
+/-- The preimage of a DualFG cone under a linear map is DualFG. -/
+lemma DualFG.comap {C : PointedCone R N} (hC : C.DualFG p) (f : L →ₗ[R] N) :
+    (C.comap f).DualFG (f.dualMap.comp p) := by
+  obtain ⟨s, hs⟩ := hC
+  refine ⟨s, ?_⟩
+  rw [← hs]
+  ext x
+  simp
+
+/-- The restriction of a DualFG cone to a submodule is DualFG. -/
+lemma DualFG.restrict {C : PointedCone R N} (hC : C.DualFG p) (S : Submodule R N) :
+    (C.restrict S).DualFG (S.dualRestrict.comp p) := by
+  simp only [PointedCone.restrict]; exact DualFG.comap hC S.subtype
+
+lemma DualFG.restrict_id {C : PointedCone R M} (hC : C.DualFG .id) (S : Submodule R M) :
+    (C.restrict S).DualFG .id := (DualFG.restrict hC S).id
 
 lemma DualFG.dualClosed {C : PointedCone R M} (hC : C.DualFG p.flip) :
     C.DualClosed p := hC.dual_flip_dual
@@ -43,7 +69,7 @@ section LinearOrder
 variable [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable [Module.Finite R M] [Fact p.SeparatingRight] in
 lemma DualFG.bot : DualFG p ⊥ := by

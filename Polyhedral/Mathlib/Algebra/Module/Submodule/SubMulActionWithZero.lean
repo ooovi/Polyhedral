@@ -3,7 +3,7 @@ import Mathlib.Algebra.Module.Submodule.Defs
 
 import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 
-/-! This file conains results about `Submodule` and `SubMulAction₀`. -/
+/-! This file contains results about `Submodule` and `SubMulAction₀`. -/
 
 namespace Submodule
 
