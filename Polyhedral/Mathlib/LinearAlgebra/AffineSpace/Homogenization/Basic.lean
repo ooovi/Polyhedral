@@ -5,7 +5,21 @@ import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
 
-/-! This file defines affine homogenization. -/
+/-! This file defines affine homogenization axiomatically and proves every object fulfilling the
+axioms is linearly equivalent to the canonical homogenization.
+
+
+## Implementation notes
+* The axiomatization in the literature is redundant. The universal property can be proven solely
+from the subset of axioms used in `IsHomogenization`, as is done in lemma `extend`. It is
+convenient to use the linear equivalence between any homogenization and `CanonicalHomogenization`
+for the proof, so we import the canonical homogenization here.
+
+## References
+
+* [J. Gallier, *Geometric Methods and Applications for Computer Science and
+  Engineering*][Gallier2011GeometricMethods]
+ -/
 
 namespace Affine
 
@@ -21,7 +35,8 @@ variable {W : Type*} [AddCommGroup W] [Module R W]
 variable (R A W) in
 /-- An embedding of an affine space `A` into a vector space `W` s.t. the image of `A` is exactly the
 weight-1 hyperplane under a given linear weight map.
-Follows Definition 4.2 in https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
+Follows Definition 4.2 in [Gallier2011GeometricMethods]
+https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
 class IsHomogenization where
   ofPoint : A →ᵃ[R] W
   ofPoint_injective : Injective ofPoint
@@ -107,32 +122,31 @@ noncomputable def canonEquiv : W ≃ₗ[R] CanonicalHomogenization R A where
     exact .mk (.mk ((LinearEquiv.ofInjective _ hom.ofVector_injective).invFun ⟨_, v⟩)
       (hom.weight x) a₀)
   map_add' x y := by
-    simp [CanonicalHomogenization.mk_add_mk, add_smul, ← LinearEquiv.map_add]
+    simp [mk_add_mk, add_smul, ← LinearEquiv.map_add]
     abel_nf
   map_smul' c x := by
     simp only [map_smul, smul_assoc, LinearEquiv.invFun_eq_symm, RingHom.id_apply, smul_mk,
       ← LinearEquiv.map_smul, SetLike.mk_smul_mk]
     abel_nf
     simp
-  invFun v := CanonicalHomogenization.lift hom.ofPoint v
-  left_inv x := by simp [CanonicalHomogenization.lift]
+  invFun v := lift hom.ofPoint v
+  left_inv x := by simp [lift]
   right_inv v := by
     obtain ⟨v, rfl⟩ := Quotient.exists_rep v
     rcases v with ⟨v, c, p⟩ | v <;> apply Quotient.sound
     · have : hom.weight (lift hom.ofPoint ⟦.mk v c p⟧) = c := by
         simp [lift, lift.aux, weight_zero, weight_one]
-        sorry
       simp only [this, LinearEquiv.invFun_eq_symm]
       refine Equiv.mk_mk (hom.ofVector_injective ?_)
       simp [smul_sub, lift, lift.aux]
       abel
-      sorry
     · have :
           (LinearEquiv.ofInjective _ hom.ofVector_injective).symm ⟨_, Set.mem_range_self v⟩ = v :=
         (LinearEquiv.symm_apply_eq
           (LinearEquiv.ofInjective ofPoint.linear hom.ofVector_injective)).mpr rfl
-      sorry
-      -- simpa [lift, lift.aux, weight_zero, this] using Equiv.mk_ofVector
+      simp only [lift, lift.aux, AddEquiv.coe_mk, Equiv.coe_fn_mk, LinearMap.coe_mk, AddHom.coe_mk,
+        Quotient.lift_mk, weight_zero, zero_smul, sub_zero, LinearEquiv.invFun_eq_symm, this]
+      exact Equiv.mk_ofVector
 
 theorem canonEquiv_canonical_ofPoint :
     hom.canonEquiv ∘ hom.ofPoint = CanonicalHomogenization.ofPoint := by
@@ -143,7 +157,8 @@ theorem canonEquiv_canonical_ofPoint :
   exact ((Equiv.ofInjective _ hom.ofVector_injective).injective (by simp))
 
 theorem weight_canonEquiv : CanonicalHomogenization.weight ∘ hom.canonEquiv = hom.weight := by
-  sorry
+  ext
+  simp [canonEquiv, CanonicalHomogenization.weight, CanonicalHomogenization.lift]
 
 -- proving the universal property using the equiv
 /-- A homogenization `W` of `A` satisfies the universal property that every affine map from `A`

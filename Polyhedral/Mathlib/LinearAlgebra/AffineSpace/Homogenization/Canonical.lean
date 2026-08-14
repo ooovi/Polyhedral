@@ -113,7 +113,7 @@ variable (k P) in
 Values of type `CanonicalHomogenization k P` can be constructed as linear combinations of
 `CanonicalHomogenization.ofPoint` and `CanonicalHomogenization.ofVector`. To define a linear map on
 `CanonicalHomogenization k P`, use `CanonicalHomogenization.lift`. -/
-def CanonicalHomogenization := Quotient (HomogenizationExpr.setoid k P)
+@[reducible] def CanonicalHomogenization := Quotient (HomogenizationExpr.setoid k P)
 
 namespace CanonicalHomogenization
 
@@ -240,10 +240,10 @@ instance : AddCommGroup (CanonicalHomogenization k P) where
     exact Quot.sound .mk_ofVector
   nsmul := (· • ·)
   nsmul_zero _ := by exact zero_smul
-  nsmul_succ n x := by sorry --rw [add_smul, one_smul]
+  nsmul_succ n x := by rw [add_smul, one_smul]
   zsmul := (· • ·)
   zsmul_zero' x := by exact zero_smul
-  zsmul_succ' n x := by sorry --rw [Nat.cast_succ, add_smul, one_smul]
+  zsmul_succ' n x := by rw [Nat.cast_succ, add_smul, one_smul]
   zsmul_neg' n x := by
     obtain ⟨p⟩ : Nonempty P := inferInstance
     cases x using mk_induction_of_point p
