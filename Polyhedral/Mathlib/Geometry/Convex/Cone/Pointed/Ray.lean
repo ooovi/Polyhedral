@@ -53,8 +53,10 @@ lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = hull R 
     have hnegx : -x = (-a⁻¹) • (a • x) := by
       have ha' : a ≠ 0 := ne_of_lt ha
       simp [smul_smul, ha']
-    rw [hnegx]
-    exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy
+    apply hx0
+    exact hS x hxC (-x) (by
+      rw [hnegx]
+      exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy) (add_neg_cancel x)
   let f : Fin 2 → Submodule.span R C :=
     ![⟨x, Submodule.mem_span_of_mem hxC⟩, ⟨y, Submodule.mem_span_of_mem hy⟩]
   have hf0 : f 0 ≠ 0 := by
