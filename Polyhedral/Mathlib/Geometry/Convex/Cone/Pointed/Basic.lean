@@ -690,8 +690,7 @@ lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 /-- The linear span of a quotient cone is the image of the linear span under the quotient map. -/
 @[simp] lemma linSpan_quot (C : PointedCone R M) (S : Submodule R M) :
     span R (C.quot S) = Submodule.map S.mkQ (span R C) := by
-  simpa [PointedCone.quot] using
-    (Submodule.span_image (f := S.mkQ) (s := (C : Set M)))
+  simp [PointedCone.quot]
 
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
     (C ⊔ S).quot S = C.quot S := sorry
@@ -796,7 +795,7 @@ lemma eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot {C : PointedCone R M} {f 
     simp [mul_assoc, inv_mul_cancel₀ fxpos.ne.symm]
   · constructor <;> intro h
     · apply Set.smul_subset_smul_right Ioi_subset_Ici_self
-      exact eq_Ioi_zero_smul_inter_preimage_of_pos hf hr ▸ mem_diff_singleton.mpr ⟨h, hx⟩
+      exact eq_Ioi_zero_smul_inter_preimage_of_pos hf hr ▸ mem_sdiff_singleton.mpr ⟨h, hx⟩
     · obtain ⟨_, hr, _, hy, b⟩ := h
       simpa [← b] using C.smul_mem hr (mem_of_mem_inter_left hy)
 

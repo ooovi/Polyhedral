@@ -35,14 +35,14 @@ private lemma auxGenSet_finite (hs : s.Finite) :
 
 private lemma auxGenSet_subset_hull :
     (auxGenSet p s w : Set M) ⊆ hull 𝕜 (s : Set M) := by
-  simp only [Set.union_subset_iff, Set.image2_subset_iff, Set.mem_setOf_eq, and_imp]
+  simp only [Set.union_subset_iff, Set.image2_subset_iff, Set.mem_ofPred_eq, and_imp]
   refine ⟨subset_trans (fun x hx ↦ hx.1) subset_hull, fun x hxS hxw y hyS hyw ↦ ?_⟩
   simpa [sub_eq_add_neg, ← neg_smul] using add_mem (smul_mem (hull 𝕜 s) hxw (subset_hull hyS))
     (smul_mem _ (neg_nonneg.mpr hyw.le) (subset_hull hxS))
 
 private lemma hull_singleton_le_dual_auxGenSet :
     hull 𝕜 {w} ≤ dual p (auxGenSet p s w) := by
-  simp only [span_singleton_le_iff_mem, mem_dual, mem_union, mem_setOf_eq, mem_image2]
+  simp only [span_singleton_le_iff_mem, mem_dual, mem_union, mem_ofPred_eq, mem_image2]
   rintro z (hz | ⟨x, ⟨hxS, hxw⟩, y, ⟨hyS, hyw⟩, rfl⟩)
   · exact hz.2
   · simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply, smul_eq_mul,
@@ -64,7 +64,7 @@ private lemma dual_auxGenSet' {C : PointedCone 𝕜 M} (hC : C.FG) :
   rw [Submodule.mem_sup]
   replace hv2 {x y : M} (hx : x ∈ C ∧ 0 ≤ p x w) (hy : y ∈ C ∧ p y w < 0) :
       p y w * p x v ≤ p y v * p x w := by
-    simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_setOf_eq,
+    simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_ofPred_eq,
       forall_exists_index, and_imp] at hv2
     specialize hv2 x hx.1 hx.2 y hy.1 hy.2 rfl
     simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply, smul_eq_mul,
@@ -125,7 +125,7 @@ private lemma dual_auxGenSet (hs : s.Finite) :
   rw [Submodule.mem_sup]
   replace hv2 {x y : M} (hx : x ∈ s ∧ 0 ≤ p x w) (hy : y ∈ s ∧ p y w < 0) :
       p y w * p x v ≤ p y v * p x w := by
-    simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_setOf_eq,
+    simp only [SetLike.mem_coe, mem_dual, Set.mem_image2, Set.mem_ofPred_eq,
       forall_exists_index, and_imp] at hv2
     specialize hv2 x hx.1 hx.2 y hy.1 hy.2 rfl
     simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply, smul_eq_mul,
@@ -134,7 +134,7 @@ private lemma dual_auxGenSet (hs : s.Finite) :
     exact hv2
   obtain hSv | ⟨y, hy⟩ := {y ∈ s | p y w < 0 ∧ p y v < 0}.eq_empty_or_nonempty
   · simp +contextual only [Set.sep_and, Set.eq_empty_iff_forall_notMem, Set.mem_inter_iff,
-      Set.mem_setOf_eq, not_and, true_and, not_lt, and_imp] at hSv
+      Set.mem_ofPred_eq, not_and, true_and, not_lt, and_imp] at hSv
     refine ⟨0, zero_mem _, v, fun x hx => ?_, zero_add _⟩
     by_cases hxw : 0 ≤ p x w
     · exact hv1 ⟨hx, hxw⟩
@@ -511,26 +511,28 @@ lemma dual_dualfg_inf_submodule_dual_sup_dual {C : PointedCone 𝕜 M} {S : Subm
 
 
 -- ----------------- ^^^^^^^ everything up there is proven vvvvv down there is work
+/-
+lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) : (C.restrict S).FG := by
+  wlog hCS : C ≤ S with h
+  · let S' : Submodule 𝕜 M := .span 𝕜 C
+    have hCS : C ≤ S' := le_submodule_span_self C
+    specialize @h 𝕜 S' _ _ _ _ _ (.restrict S' S) (.restrict S' C)
+      (restrict_fg_of_fg_le hCS hC)
+    sorry -- restrict_mono
+  · exact restrict_fg_of_fg_le hCS hC
 
--- lemma FG.restrict_fg (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) : (C.restrict S).FG := by
---   wlog hCS : C ≤ S with h
---   · let S' : Submodule 𝕜 M := .span 𝕜 C
---     have hCS : C ≤ S' := le_submodule_span_self C
---     specialize @h 𝕜 S' _ _ _ _ _ (.restrict S' S) (.restrict S' C)
---       (restrict_fg_of_fg_le hCS hC)
---     sorry -- restrict_mono
---   · exact restrict_fg_of_fg_le hCS hC
-
--- lemma FG.restrict_fg2 (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) : (C.restrict S).FG := by
---   wlog _ : Module.Finite 𝕜 M with h
---   · let S' := Submodule.span 𝕜 (M := M) C
---     specialize @h 𝕜 S' _ _ _ _ _ (.restrict S' S) (restrict S' C) _ _
---     · exact restrict_fg_of_fg_le (le_submodule_span_self C) hC
---     · exact Finite.iff_fg.mpr (span_fg hC)
---     · have hfgS : (restrict S' S).FG := sorry
---       have hfgC : (restrict S' C).FG := sorry
---       sorry
---   · exact restrict_fg' S hC
+lemma FG.restrict_fg2 (S : Submodule 𝕜 M) {C : PointedCone 𝕜 M} (hC : C.FG) :
+    (C.restrict S).FG := by
+  wlog _ : Module.Finite 𝕜 M with h
+  · let S' := Submodule.span 𝕜 (M := M) C
+    specialize @h 𝕜 S' _ _ _ _ _ (.restrict S' S) (restrict S' C) _ _
+    · exact restrict_fg_of_fg_le (le_submodule_span_self C) hC
+    · exact Finite.iff_fg.mpr (span_fg hC)
+    · have hfgS : (restrict S' S).FG := sorry
+      have hfgC : (restrict S' C).FG := sorry
+      sorry
+  · exact restrict_fg' S hC
+-/
 
 lemma DualFG.exists_fg_sup_submodule {C : PointedCone 𝕜 N} (hC : C.DualFG p)
     {S : Submodule 𝕜 N} (hS : S.DualFG p) (hCS : S ≤ C) :

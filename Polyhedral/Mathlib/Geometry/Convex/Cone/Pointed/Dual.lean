@@ -127,7 +127,6 @@ example (S : Set (Set M)) : dual p (sSup S : Set M) = sInf (dual p '' S) := dual
 lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
     -- dual p (sSup S : PointedCone R M) = sInf (dual p '' (SetLike.coe '' S)) := by
     dual p (sSup S : PointedCone R M) = sInf ((dual p ∘ SetLike.coe) '' S) := by
-  simp
   rw [← dual_hull]
   simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
   --rw [Submodule.coe_sInf]
@@ -146,7 +145,7 @@ lemma span_dual_le_dual_lineal {C : PointedCone R M} : span R (dual p C) ≤ .du
   simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
   refine sInf_le_sInf ?_
   intro T
-  simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+  simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
   intro h
   obtain ⟨S, hSC, hS⟩ := h
   rw [← hS]
@@ -182,8 +181,7 @@ open Pointwise in
 @[simp]
 lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
   ext x -- TODO: make this proof an application of `map_dual`
-  simp only [Submodule.mem_neg, mem_dual, _root_.map_neg, Left.nonneg_neg_iff,
-    Set.involutiveNeg, Set.mem_neg]
+  simp only [Submodule.mem_neg, mem_dual, _root_.map_neg, Left.nonneg_neg_iff, Set.mem_neg]
   constructor
   · intro hy y hy'
     specialize hy hy'
@@ -423,7 +421,7 @@ theorem DualClosed.eq_sInf {C : PointedCone R M} (hC : C.DualClosed p) :
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hC, by simp⟩
-  simp only [SetLike.le_def, Submodule.mem_sInf, Set.mem_setOf_eq, and_imp]
+  simp only [SetLike.le_def, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
   intro x hx D hD hsD
   rw [← hD]; rw [← hC] at hx
   exact (dual_dual_mono p hsD) hx
@@ -498,14 +496,14 @@ lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg {C : PointedCone R M} :
   · by_cases hφ : φ = 0
     · left; exact hφ
     · replace h := (h φ).mp.mt hφ
-      push_neg at h
+      push Not at h
       right; exact h
   · constructor
     · intro h'
       rcases h φ
       · assumption
       · absurd h'
-        push_neg
+        push Not
         assumption
     · simp +contextual
 
@@ -579,7 +577,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   --rw [submodule_span_dual]
 --   refine sInf_le_sInf ?_
 --   intro T
---   simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+--   simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
 --   intro ⟨hdc, h⟩
 --   use Submodule.dual p.flip T
 --   constructor
@@ -594,7 +592,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   simp only [lineal, Submodule.dual_sSup_sInf_dual]
 --   unfold Submodule.span
 --   congr; ext T
---   simp only [Set.mem_image, Set.mem_setOf_eq, exists_exists_and_eq_and]
+--   simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
 --   constructor
 --   · intro h -- this direction needs neither Field nor dual closed
 --     obtain ⟨S, hSC, hS⟩ := h

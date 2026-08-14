@@ -106,8 +106,8 @@ lemma lineal_isExtreme_sum {C : PointedCone R M} {xs : Finset M} (hxs : (xs : Se
   induction xs using Finset.induction_on with
   | empty => simp
   | insert y xs hy H =>
-    simp only [Set.subset_def, Finset.mem_coe, SetLike.mem_coe, Finset.coe_insert,
-      Set.mem_insert_iff, forall_eq_or_imp, Finset.sum_insert hy] at *
+    simp only [Set.subset_def, SetLike.mem_coe, Finset.coe_insert, Set.mem_insert_iff,
+      forall_eq_or_imp, Finset.sum_insert hy] at *
     have h := lineal_isExtreme hxs.1 (C.sum_mem hxs.2) h
     exact ⟨h.1, H hxs.2 h.2⟩
 
