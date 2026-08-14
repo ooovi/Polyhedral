@@ -24,7 +24,7 @@ variable {C : PointedCone R M}
 open Submodule in
 lemma finrank_strictMono (hCfg : C.FG) : StrictMono (fun F : Face C => F.finrank) := by
   intro G F hFG
-  haveI := (Submodule.fg_iff_finiteDimensional _).mp (FG.span_fg <| F.isFaceOf.fg hCfg)
+  have := (Submodule.fg_iff_finiteDimensional _).mp (FG.span_fg <| F.isFaceOf.fg hCfg)
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
   · exact span_mono (R := R) hFG.le
   · intro h
@@ -81,6 +81,10 @@ lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
   · exact lt_of_le_of_ne hfg <| fun a => ne_of_lt h.1 (congrArg finrank (by simpa))
   · exact fun H hH hah => h.2 (finrank_strictMono hCfg hH) (finrank_strictMono hCfg hah)
 
+-- this is a def not a class because of the `FG` hypothesis which cannot be inferred
+-- the option suppresses a linter warning about reducability which we don't care about since this
+-- won't ever be found by typeclass inference
+set_option warn.classDefReducibility false in
 /-- The face lattice of a finitely generated cone is graded by face dimension. -/
 noncomputable def gradeOrder_finrank {C : PointedCone R M}
     (hCfg : C.FG) : GradeOrder ℕ (Face C) where

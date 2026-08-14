@@ -21,8 +21,9 @@ lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (hull R {x}).rank = 1 := by
   have hlin : LinearIndependent R (fun _ : Unit => x) :=
     LinearIndependent.of_subsingleton () hx
   have hr := rank_span (R := R) (M := M) hlin
-  have hspan : Submodule.span R (Set.range (fun _ : Unit => x)) = (hull R {x}).linSpan := by
-    simp [PointedCone.linSpan, Set.range_const]
+  have hspan :
+      Submodule.span R (Set.range (fun _ : Unit => x)) = (hull R {x}).linSpan := by
+    simp [linSpan, Set.range_const]
   rw [hspan] at hr
   rw [PointedCone.rank]
   simpa using hr
@@ -56,8 +57,8 @@ lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = hull R 
       simp [smul_smul, ha']
     rw [hnegx]
     exact smul_mem C (le_of_lt <| neg_pos.2 <| inv_lt_zero.mpr ha) hy
-  let f : Fin 2 → C.linSpan :=
-    ![(⟨x, Submodule.mem_span_of_mem hxC⟩ : C.linSpan), ⟨y, Submodule.mem_span_of_mem hy⟩]
+  let f : Fin 2 → Submodule.span R C :=
+    ![⟨x, Submodule.mem_span_of_mem hxC⟩, ⟨y, Submodule.mem_span_of_mem hy⟩]
   have hf0 : f 0 ≠ 0 := by
     intro hf0
     apply hx0

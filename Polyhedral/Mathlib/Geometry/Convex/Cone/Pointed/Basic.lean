@@ -137,7 +137,7 @@ lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : Po
 -- ## SPAN
 
 -- /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
--- lemma submodule_span_fg {C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
+-- lemma submodule_span_fg{C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
 --   obtain ⟨s, rfl⟩ := hC; use s; simp
 
 -- TODO: this is only needed because `Submodule.span_insert` is restricted to rings
@@ -197,7 +197,8 @@ lemma sup_eq_hull_union (C D : PointedCone R M) : C ⊔ D = hull R (C ∪ D) := 
   rw [← hull_eq (S := C), ← hull_eq (S := D), hull_union]
   simp
 
-lemma sSup_eq_hull_iUnion (S : Set (PointedCone R M)) : sSup S = hull R (sSup (SetLike.coe '' S)) := by
+lemma sSup_eq_hull_iUnion (S : Set (PointedCone R M)) :
+    sSup S = hull R (sSup (SetLike.coe '' S)) := by
   -- TODO
   sorry
 

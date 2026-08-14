@@ -38,10 +38,10 @@ lemma mem_of_neg_mem_lineal {C : PointedCone R M} {x : M} (hx : -x ∈ C.lineal)
   rw [Submodule.neg_mem_iff] at hx
   exact lineal_le C hx
 
-def lineal_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by
+lemma lineal_inf_neg (C : PointedCone R M) : C.lineal = C ⊓ -C := by
   ext x; simp
 
-def lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
+lemma lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := by
   ext x; simp
 
 @[simp]

@@ -180,7 +180,7 @@ lemma Face.isExpose_def (F : Face C) :
 --   exact IsDualClosed.inf hC (HyperplaneOrTop.isDualClosed p _)
 
 /-- The dual of a face is an exposed face. -/
-def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
+lemma Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
   sorry -- obvious by definition of dual face
 
 -- def foo''''' (F : Face C) :
@@ -195,7 +195,7 @@ def Face.dual_isExposed (F : Face C) : IsExposed (F.dual p) := by
  * In particula, all top proper faces are exposed
 -/
 
-def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.IsDualClosed p) : Face C :=
+def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.DualClosed p) : Face C :=
   sorry -- ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
 
 -- theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry

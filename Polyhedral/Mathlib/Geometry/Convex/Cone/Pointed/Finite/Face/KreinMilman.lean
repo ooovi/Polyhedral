@@ -25,12 +25,12 @@ def opt (C : PointedCone R M) (f g : M →ₗ[R] R) : PointedCone R M where
   carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_setOf_eq, map_add] at *
+    simp only [Set.mem_ofPred_eq, map_add] at *
     refine ⟨C.add_mem ha.1 hb.1, ?_⟩
     intro y hy
     rw [add_mul, mul_add]
     exact add_le_add (ha.2 y hy) (hb.2 y hy)
-  zero_mem' := by simp only [Set.mem_setOf_eq, zero_mem, map_zero, zero_mul, mul_zero, le_refl,
+  zero_mem' := by simp only [Set.mem_ofPred_eq, zero_mem, map_zero, zero_mul, mul_zero, le_refl,
      implies_true, and_self]
   smul_mem' := by
     intro a x hx
@@ -208,7 +208,7 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   have hwF : w ∈ F := by
     rw [h]
     exact F.smul_mem (le_of_lt hc') hwF
-  simp only [opt, Submodule.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, Set.mem_setOf_eq,
+  simp only [opt, Submodule.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, Set.mem_ofPred_eq,
     F] at hwF
   have hgw : 0 < g w := by
     have hw0 : w ≠ 0 := by
