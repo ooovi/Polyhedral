@@ -1,13 +1,11 @@
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm.Basic
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.Projection
-import Mathlib.LinearAlgebra.Basis.VectorSpace
-import Mathlib.Order.ModularLattice
-import Mathlib.RingTheory.Noetherian.Basic
-import Mathlib.LinearAlgebra.Quotient.Basic
+/-
+Copyright (c) 2026 Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Martin Winter
+-/
+
 import Mathlib.Algebra.Module.SpanRank
-import Mathlib.LinearAlgebra.Dimension.RankNullity
+import Mathlib.LinearAlgebra.Basis.VectorSpace
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 

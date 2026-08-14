@@ -4,14 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.SesquilinearForm.Basic
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.Projection
-import Mathlib.LinearAlgebra.Basis.VectorSpace
-import Mathlib.Order.ModularLattice
-import Mathlib.RingTheory.Noetherian.Basic
-import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.LinearAlgebra.Isomorphisms
 
 -- import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 
@@ -131,6 +124,18 @@ lemma of_mem_embed_mem {S : Submodule R M} {T : Submodule R S} {x : M} (hx : x �
   obtain ⟨_, h⟩ := hx
   exact h
 
+/- TODO: reorganize the file so as to maximize the use of this `GaloisConncetion` for
+proving lemmas. -/
+lemma gc_embed_restrict (S : Submodule R M) :
+    GaloisConnection (embed) (restrict S) := by
+  intro _ _
+  constructor
+  · intro h x hx
+    rw [mem_restrict_iff]
+    exact h (mem_embed_iff.mpr hx)
+  · rintro h x ⟨x, hxU, rfl⟩
+    exact mem_restrict (h hxU)
+
 @[simp] lemma embed_restrict (S T : Submodule R M) : embed (restrict S T) = S ⊓ T
   := map_comap_subtype _ _
 
@@ -142,7 +147,8 @@ lemma embed_restrict_of_le {S T : Submodule R M} (hST : T ≤ S) :
 @[simp] lemma restrict_embed {S : Submodule R M} (T : Submodule R S) : restrict S (embed T) = T
     := by ext x; simp [submoduleOf]
 
-def restrict_surjective (S : Submodule R M) : Surjective (restrict S) := (⟨_, restrict_embed ·⟩)
+lemma restrict_surjective (S : Submodule R M) : Surjective (restrict S) :=
+  (⟨_, restrict_embed ·⟩)
 
 lemma embed_injective {S : Submodule R M} : Injective (embed : Submodule R S → Submodule R M)
   := map_injective_of_injective S.subtype_injective
@@ -182,12 +188,8 @@ lemma embed_iSup {ι : Type*} {U : Submodule R M} (f : ι → Submodule R U) :
     embed (⨆ i, f i) = ⨆ i, embed (f i) := map_iSup _ _
 
 lemma embed_sSup {U : Submodule R M} (s : Set (Submodule R U)) :
-    embed (sSup s) = sSup (embed '' s) := by
-  -- rw [sSup_eq_iSup]
-  -- rw [sSup_eq_iSup]
-  -- rw [embed_iSup]
-  -- simp
-  sorry
+    embed (sSup s) = ⨆ S ∈ s, embed S :=
+  (gc_embed_restrict U).l_sSup
 
 lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
     embed (S ⊓ T) = embed S ⊓ embed T := map_inf _ (subtype_injective _)
@@ -198,7 +200,10 @@ lemma embed_inf {U : Submodule R M} (S T : Submodule R U) :
     S ⊓ embed T = embed T := inf_eq_right.mpr embed_le
 
 lemma embed_sInf {U : Submodule R M} (s : Set (Submodule R U)) :
-    embed (sInf s) = sInf (embed '' s) := by sorry
+    embed (sInf s) = U ⊓ sInf (embed '' s) := by
+  rw [← embed_restrict U]
+  congr; ext
+  simp [mem_restrict_iff]
 
 lemma embed_disjoint {U : Submodule R M} {S T : Submodule R U} (hST : Disjoint S T) :
     Disjoint (embed S) (embed T) := by
@@ -227,24 +232,31 @@ def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T wh
   left_inv x := by simp
   right_inv x := by simp
 
-def restrict_equiv (S T : Submodule R M) : (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T where
-  toFun x := sorry
-  invFun x := sorry
-  map_add' := sorry
-  map_smul' := sorry
-  left_inv := sorry
-  right_inv := sorry
+def restrict_equiv (S T : Submodule R M) :
+    (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T where
+  toFun x := ⟨⟨x.1, x.2.1⟩, x.2.2⟩
+  invFun x := ⟨x.1.1, ⟨x.1.2, mem_restrict x.2⟩⟩
+  map_add' _ _ := rfl
+  map_smul' _ _ := rfl
+  left_inv _ := rfl
+  right_inv _ := rfl
 
 def embed_orderEmbed (S : Submodule R M) : Submodule R S ↪o Submodule R M where
   toFun := embed
   inj' := embed_injective
   map_rel_iff' := embed_mono_iff
 
+def embed_restrict_orderIso (S : Submodule R M) :
+    Submodule R S ≃o Set.Iic S where
+  toFun T := ⟨embed T, embed_le⟩
+  invFun T := restrict S T
+  left_inv := restrict_embed
+  right_inv T := Subtype.ext (embed_restrict_of_le T.2)
+  map_rel_iff' := embed_mono_iff
+
 def embed_latticeHom (S : Submodule R M) :
-    CompleteLatticeHom (Submodule R S) (Submodule R M) where
-  toFun := embed
-  map_sInf' := embed_sInf
-  map_sSup' := embed_sSup
+    CompleteLatticeHom (Submodule R S) (Set.Iic S) :=
+  CompleteLatticeHom.OrderIso.toCompleteLatticeHom (embed_restrict_orderIso S)
 
 def embed_gi (S : Submodule R M) : GaloisCoinsertion (embed) (restrict S) where
   choice := fun T _ => restrict S T
@@ -289,17 +301,11 @@ lemma quot_restrict_linearMap_quot_range (S T : Submodule R M) :
     range (quot_restrict_linearMap_quot S T) = map T.mkQ S := by
   ext x
   constructor
-  · intro h
-    obtain ⟨y, rfl⟩ := h
-    obtain ⟨z, hy⟩ := T.mkQ_surjective <| (quot_restrict_linearMap_quot S T) y
-    use z
-    constructor
-    · sorry -- this does not hold, right?? We need a different proof.
-    exact hy
-  · intro h
-    obtain ⟨_, hyS, rfl⟩ := h
-    unfold quot_restrict_linearMap_quot
-    exact ⟨(S.restrict T).mkQ ⟨_, hyS⟩, by simp⟩
+  · rintro ⟨y, rfl⟩
+    obtain ⟨z, rfl⟩ := (S.restrict T).mkQ_surjective y
+    exact ⟨z, z.property, by simp [quot_restrict_linearMap_quot]⟩
+  · rintro ⟨_, hyS, rfl⟩
+    exact ⟨(S.restrict T).mkQ ⟨_, hyS⟩, by simp [quot_restrict_linearMap_quot]⟩
 
 -- noncomputable necessary? What if we also have T ≤ S?
 noncomputable def quot_restrict_equiv_map_mkQ (S : Submodule R M) (T : Submodule R M) :
@@ -312,7 +318,6 @@ noncomputable def quot_equiv_map_embed_mkQ (S : Submodule R M) (T : Submodule R 
     (S ⧸ T) ≃ₗ[R] map (embed T).mkQ S := by
   rw [← restrict_embed T, embed_restrict, embed_inf_right]
   simpa using quot_restrict_equiv_map_mkQ S (embed T)
-
 
 end Ring
 
