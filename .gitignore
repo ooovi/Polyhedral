@@ -21,3 +21,4 @@ print/
 *.synctex(busy)
 *.synctex.gz
 .DS_Store
+Experimental/
