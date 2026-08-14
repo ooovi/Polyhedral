@@ -10,12 +10,15 @@ Currently the project implements:
 * duality theory for `FG` pointed cones, in particular, a version of the Minkowski-Weyl theorem that also works in infinite dimensional modules.
 * polyhedral cones as cones that can be written as the sum of an `FG` cone and a submodule.
 * duality theory of polyhedral cones
+* the lineality space of a cone
 * faces and exposed faces of cones
 * the face lattice of a cone
 * Krein-Milman theorem for FG cones
 * a proof that face lattices of finitely generated cones are graded
 * convex sets, polytopes and polyhedra in `ConvexSpace`
 * faces of convex sets
+* affine homogenization
+* tools for translating between cones in modules and convex sets in affine spaces
 
 A detailed overview of the most relevant open and merged PRs is given in the Zulip thread ["PRs for polyhedral geometry and combinatorics"](https://leanprover.zulipchat.com/#narrow/channel/144837-PR-reviews/topic/PRs.20for.20polyhedral.20geometry.2Fcombinatorics/with/579565921).
 
