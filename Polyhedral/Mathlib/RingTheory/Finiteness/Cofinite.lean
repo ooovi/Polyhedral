@@ -5,14 +5,8 @@ Authors: Martin Winter
 -/
 
 import Mathlib.RingTheory.Finiteness.Cofinite
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.LinearAlgebra.Projection
-import Mathlib.LinearAlgebra.Dimension.RankNullity
-import Mathlib.LinearAlgebra.Quotient.Basic
-import Mathlib.Algebra.Exact
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 
 /-! This file proves results about cofinitely generated submodules that are intended to
@@ -33,13 +27,13 @@ theorem quot_finite_of_finite [Module.Finite R M] (S : Submodule R M) :
   rw [finite_def, ← Finite.iff_fg, ← LinearMap.range_eq_top_of_surjective _ S.mkQ_surjective]
   exact Module.Finite.range S.mkQ
 
--- lemma CoFG.finite_quot {S : Submodule R M} (hS : S.CoFG) : Module.Finite R (M ⧸ S) := hS
--- lemma CoFG.finite_quot_iff {S : Submodule R M} : S.CoFG = Module.Finite R (M ⧸ S) := rfl
+lemma CoFG.fg_quot_iff {S : Submodule R M} :
+    S.CoFG ↔ FG (⊤ : Submodule R (M ⧸ S)) := by
+  rw [← finite_def]
 
--- lemma CoFG.fg_quot_iff {S : Submodule R M} : S.CoFG ↔ FG (⊤ : Submodule R (M ⧸ S)) := by
---   rw [← finite_def]
--- lemma CoFG.fg_quot {S : Submodule R M} (hS : S.CoFG) :
---     FG (⊤ : Submodule R (M ⧸ S)) := fg_quot_iff.mp hS
+lemma CoFG.fg_quot {S : Submodule R M} (hS : S.CoFG) :
+    FG (⊤ : Submodule R (M ⧸ S)) :=
+  fg_quot_iff.mp hS
 
 /-- For a CoFG submodule there exists a codisjoint FG submodule. -/
 lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
@@ -120,6 +114,13 @@ variable [HasRankNullity R]
 
 end HasRankNullity
 
+/-- The embedding of a CoFG submodule of a CoFG submodule is CoFG. -/
+lemma CoFG.embed {S : Submodule R M} {T : Submodule R S} (hS : S.CoFG) (hT : T.CoFG) :
+    CoFG (embed T) := by
+  have := Finite.equiv (quotientQuotientEquivQuotient (Submodule.embed T) S embed_le).symm
+  have := Finite.equiv (quot_equiv_map_embed_mkQ S T)
+  exact Finite.of_submodule_quotient <| map (Submodule.embed T).mkQ S
+
 section IsNoetherianRing
 
 variable [IsNoetherianRing R]
@@ -127,7 +128,7 @@ variable [IsNoetherianRing R]
 /-- The restriction of a CoFG submodule is CoFG. -/
 lemma CoFG.restrict (S : Submodule R M) {T : Submodule R M} (hT : T.CoFG) :
     CoFG (restrict S T) := by
-  haveI := Module.Finite.of_injective _ (quot_restrict_linearMap_quot_injective (S ⊔ T) T)
+  have := Module.Finite.of_injective _ (quot_restrict_linearMap_quot_injective (S ⊔ T) T)
   exact Finite.equiv (quot_restrict_iso_sup_quot_restrict S T).symm
 
 -- theorem fg_of_linearEquiv' {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T)
@@ -136,16 +137,6 @@ lemma CoFG.restrict (S : Submodule R M) {T : Submodule R M} (hT : T.CoFG) :
 --   exact fg_of_linearEquiv e h
 
 -- TODO: direction of equiv in `Module.Finite.equiv` and `fg_of_linearEquiv` is opposite.
-
--- TODO: move out of Noetherian section once clear that Noetherian is not need
--- we keep it here because some results it depends on are not yet proven, such as
--- `quot_restrict_linearMap_quot_range`.
-/-- The embedding of a CoFG submodule of a CoFG submodule is CoFG. -/
-lemma CoFG.embed {S : Submodule R M} {T : Submodule R S} (hS : S.CoFG) (hT : T.CoFG) :
-    CoFG (embed T) := by
-  haveI := Finite.equiv (quotientQuotientEquivQuotient (Submodule.embed T) S embed_le).symm
-  haveI := Finite.equiv (quot_equiv_map_embed_mkQ S T)
-  exact Finite.of_submodule_quotient <| map (Submodule.embed T).mkQ S
 
 end IsNoetherianRing
 
