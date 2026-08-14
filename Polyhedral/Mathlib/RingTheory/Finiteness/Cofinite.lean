@@ -15,7 +15,8 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
 
-/-! This file proces results about cofinitely generated submodules. -/
+/-! This file proves results about cofinitely generated submodules that are intended to
+go into (or close to) `Mathlib.RingTheory.Finiteness.Cofinite`. -/
 
 open Module Function LinearMap
 
@@ -40,15 +41,13 @@ theorem quot_finite_of_finite [Module.Finite R M] (S : Submodule R M) :
 -- lemma CoFG.fg_quot {S : Submodule R M} (hS : S.CoFG) :
 --     FG (⊤ : Submodule R (M ⧸ S)) := fg_quot_iff.mp hS
 
-/-- For a CoFG submodule exists a disjoint FG submodule. -/
+/-- For a CoFG submodule there exists a codisjoint FG submodule. -/
 lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
     ∃ T : Submodule R M, T.FG ∧ Codisjoint S T := by classical
-  obtain ⟨T, hT, hST⟩ := exists_spanRank_le_codisjoint S
-  use T; constructor
-  · simp only [finite_def, ← Submodule.spanRank_finite_iff_fg] at ⊢ hS
-    --simpa only [hT] using hS
-    exact lt_of_le_of_lt hT hS
-  · exact hST
+  obtain ⟨T, hT, hST⟩ := exists_spanRank_codisjoint S
+  refine ⟨T, ?_, hST⟩
+  simp only [finite_def, ← Submodule.spanRank_finite_iff_fg] at ⊢ hS
+  exact lt_of_eq_of_lt hT hS
 
 -- lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
 --     ∃ T : Submodule R M, T.FG ∧ Codisjoint S T := by classical
@@ -70,32 +69,7 @@ lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
 --     simpa using ⟨y, by simp⟩
 --   · simp [inv, surjInv_eq S.mkQ_surjective]
 
--- This needs Field for th Codisjoint part.
--- (see : https://chatgpt.com/c/69300596-3280-832f-8916-3b4b07c432d8)
-lemma CoFG._exists_fg_compl {S : Submodule R M} (hS : S.CoFG) :
-    ∃ T : Submodule R M, T.FG ∧ IsCompl S T := by
-  obtain ⟨s, hs⟩ := hS
-  use span R (surjInv S.mkQ_surjective '' s)
-  constructor
-  · exact fg_span <| Set.Finite.image _ <| s.finite_toSet
-  constructor
-  · rw [disjoint_def]
-    intro x hxS hx
-    have x' := S.mkQ x
-
-    sorry
-  · rw [codisjoint_iff_exists_add_eq]
-    intro x
-    have x' := S.mkQ x
-    sorry
-  -- just take preimage of generators `s` to span the rest of ⊤, right?
-  -- Q: do we also have the converse: given FG, we find complementary CoFG?
-
-  -- use (Module.Finite.compl R S).some
-  -- exact ⟨Finite.iff_fg.mpr (Module.Finite.compl R S).some_spec.1,
-  --   (Module.Finite.compl R S).some_spec.2⟩
-
-@[deprecated]
+@[deprecated "" (since := "...")]
 lemma sSup_cofg {s : Set (Submodule R M)} (hs : ∃ S ∈ s, S.CoFG) :
     (sSup s).CoFG := by
   obtain ⟨_, hS, hcofg⟩ := hs
@@ -190,6 +164,18 @@ lemma CoFG.disjoint_fg {S T : Submodule R M}
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
   obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
   exact (hS.of_le hSU).cofg_of_isCompl hUT
+
+-- does not hold over a general ring
+example {S : Submodule R M} (hS : S.CoFG) :
+    ∃ T : Submodule R M, T.FG ∧ IsCompl S T := by
+  obtain ⟨T, hST⟩ := S.exists_isCompl
+  exact ⟨T, CoFG.disjoint_fg hST.1 hS, hST⟩
+
+-- does not hold over a general ring
+example {S : Submodule R M} (hS : S.FG) :
+    ∃ T : Submodule R M, T.CoFG ∧ IsCompl S T := by
+  obtain ⟨T, hST⟩ := S.exists_isCompl
+  exact ⟨T, FG.codisjoint_cofg hST.2 hS, hST⟩
 
 end DivisionRing
 
