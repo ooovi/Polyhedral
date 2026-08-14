@@ -29,7 +29,6 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 alias dual_bot := dual_zero
 
 -- For the proof, see the analogous statement for submodules
-#check Submodule.dual_top_iff_le_ker
 lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
   -- constructor <;> intro h
   -- · intro x hx

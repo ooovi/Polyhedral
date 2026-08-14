@@ -4,15 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
 
-import Mathlib.Order.Grade
-import Mathlib.LinearAlgebra.Quotient.Basic
-
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
-/-! This file proves basic facts intended for mathlib's Pointed/Basic.lean. -/
+/-! This file proves basic facts about faces of finitely generated cones, intended for mathlib's
+Pointed/Basic.lean. -/
 
 namespace PointedCone
 
