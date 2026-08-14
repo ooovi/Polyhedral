@@ -55,12 +55,8 @@ lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R) (hCg : C ≤ g
   by_cases! t_ne_0 : a • x + y = 0
   · exfalso
     have hC' := Salient.of_le_positive hCg
-    rw [salient_iff_convexCone_salient] at hC'
-    apply hC' (a • x)
-    · exact C.smul_mem (le_of_lt ha) hx
-    · exact smul_ne_zero (ne_of_gt ha) x_ne_0
-    rw [neg_eq_of_add_eq_zero_right t_ne_0]
-    exact hy
+    exact (smul_ne_zero (ne_of_gt ha) x_ne_0) <|
+      hC' (a • x) (C.smul_mem (le_of_lt ha) hx) y hy t_ne_0
   refine ⟨hx, fun z hz ↦ ?_⟩
   have : g x > 0 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
   have t1 := h x hx

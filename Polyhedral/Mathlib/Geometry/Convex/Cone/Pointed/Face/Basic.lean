@@ -98,14 +98,14 @@ lemma le_span_iff_le (hD : C₁ ≤ C) (hG : F.IsFaceOf C) : C₁ ≤ span R (F 
 -- ## Quotients
 
 /-- Quotient by the linear span of a face is salient. -/
-lemma quot_salient (hF : F.IsFaceOf C) : (C.quot (span R F)).Salient := by
-  rw [salient_iff_convexCone_salient] -- TODO: this line is a quick fix
-  intro z hzC hz0 hzNeg
+lemma quot_salient (hF : F.IsFaceOf C) :
+    (C.quot (span R F)).Salient := by
+  intro z hzC w hwC hzw
   rcases (PointedCone.mem_map).1 hzC with ⟨x, hxC, rfl⟩
-  rcases (PointedCone.mem_map).1 hzNeg with ⟨y, hyC, hy⟩
+  rcases (PointedCone.mem_map).1 hwC with ⟨y, hyC, rfl⟩
   have hxySpan : x + y ∈ span R F := by
     rw [← Submodule.ker_mkQ (span R (F : Set M))]
-    exact LinearMap.mem_ker.mpr (by simp [map_add, hy])
+    exact LinearMap.mem_ker.mpr (by simpa [map_add] using hzw)
   have hxyF : x + y ∈ F := by
     rw [← hF.inf_span]
     exact ⟨C.add_mem hxC hyC, hxySpan⟩
@@ -114,7 +114,7 @@ lemma quot_salient (hF : F.IsFaceOf C) : (C.quot (span R F)).Salient := by
     simpa [Submodule.mkQ_apply] using
       (Submodule.Quotient.mk_eq_zero (p := span R F) (x := x)).2
         (Submodule.subset_span hxF)
-  exact hz0 (by simp only [mkQ_apply]; exact hx0)
+  simpa only [mkQ_apply] using hx0
 
 lemma quot {S : Submodule R M} (hF : F.IsFaceOf C) (hS : S ≤ span R F) :
     (F.quot S).IsFaceOf (C.quot S) := by
