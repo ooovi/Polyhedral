@@ -115,14 +115,14 @@ variable (α V)
 /- # Semigroup -/
 
 @[to_additive (attr := reducible)]
-def Semigroup.ofSetLike [Semigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
+def Semigroup.ofSetLike [Semigroup V] [Mul α] [IsConcreteMul α V] :
     Semigroup α where
   mul_assoc := by simp [← SetLike.coe_set_eq, mul_assoc]
 
 /- # CommSemigroup -/
 
 @[to_additive (attr := reducible)]
-def CommSemigroup.ofSetLike [CommSemigroup V] [SetLike α V] [Mul α] [IsConcreteMul α V] :
+def CommSemigroup.ofSetLike [CommSemigroup V] [Mul α] [IsConcreteMul α V] :
     CommSemigroup α where
   __ := Semigroup.ofSetLike ..
   mul_comm := by simp [← SetLike.coe_set_eq, mul_comm]
@@ -130,7 +130,7 @@ def CommSemigroup.ofSetLike [CommSemigroup V] [SetLike α V] [Mul α] [IsConcret
 /- # MulOneClass -/
 
 @[to_additive (attr := reducible)]
-def MulOneClass.ofSetLike [MulOneClass V] [SetLike α V] [One α] [IsConcreteOne α V]
+def MulOneClass.ofSetLike [MulOneClass V] [One α] [IsConcreteOne α V]
     [Mul α] [IsConcreteMul α V] : MulOneClass α where
   one_mul := by simp [← SetLike.coe_set_eq]
   mul_one := by simp [← SetLike.coe_set_eq]
@@ -138,7 +138,7 @@ def MulOneClass.ofSetLike [MulOneClass V] [SetLike α V] [One α] [IsConcreteOne
 /- # Monoid -/
 
 @[to_additive (attr := reducible)]
-def Monoid.ofSetLike [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+def Monoid.ofSetLike [Monoid V] [One α] [IsConcreteOne α V]
     [Mul α] [IsConcreteMul α V] : Monoid α where
   __ := Semigroup.ofSetLike ..
   __ := MulOneClass.ofSetLike ..
@@ -147,7 +147,7 @@ def Monoid.ofSetLike [Monoid V] [SetLike α V] [One α] [IsConcreteOne α V]
 /- # CommMonoid -/
 
 @[to_additive (attr := reducible)]
-def CommMonoid.ofSetLike [CommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+def CommMonoid.ofSetLike [CommMonoid V] [One α] [IsConcreteOne α V]
     [Mul α] [IsConcreteMul α V] : CommMonoid α where
   __ := Monoid.ofSetLike ..
   __ := CommSemigroup.ofSetLike ..
@@ -155,7 +155,7 @@ def CommMonoid.ofSetLike [CommMonoid V] [SetLike α V] [One α] [IsConcreteOne �
 /- # DivisionMonoid -/
 
 @[to_additive (attr := reducible)]
-def DivisionMonoid.ofSetLike [DivisionMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+def DivisionMonoid.ofSetLike [DivisionMonoid V] [One α] [IsConcreteOne α V]
     [Inv α] [IsConcreteInv α V] [Mul α] [IsConcreteMul α V] [Div α] [IsConcreteDiv α V] :
     DivisionMonoid α where
   __ := Monoid.ofSetLike ..
@@ -171,7 +171,7 @@ def DivisionMonoid.ofSetLike [DivisionMonoid V] [SetLike α V] [One α] [IsConcr
 /- # DivisionCommMonoid -/
 
 @[to_additive (attr := reducible)]
-def DivisionCommMonoid.ofSetLike [DivisionCommMonoid V] [SetLike α V] [One α] [IsConcreteOne α V]
+def DivisionCommMonoid.ofSetLike [DivisionCommMonoid V] [One α] [IsConcreteOne α V]
     [Inv α] [IsConcreteInv α V] [Mul α] [IsConcreteMul α V] [Div α] [IsConcreteDiv α V] :
     DivisionCommMonoid α where
   __ := DivisionMonoid.ofSetLike ..
