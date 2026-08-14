@@ -43,27 +43,6 @@ lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
   simp only [finite_def, ← Submodule.spanRank_finite_iff_fg] at ⊢ hS
   exact lt_of_eq_of_lt hT hS
 
--- lemma CoFG.exists_fg_codisjoint {S : Submodule R M} (hS : S.CoFG) :
---     ∃ T : Submodule R M, T.FG ∧ Codisjoint S T := by classical
---   obtain ⟨s, hs⟩ := hS
---   let inv := surjInv S.mkQ_surjective
---   use span R (s.image inv)
---   constructor
---   · exact fg_span (Finset.finite_toSet _)
---   rw [codisjoint_iff, ← map_mkQ_eq_top]
---   ext x
---   simp only [mem_map, mem_top, iff_true, Finset.coe_image]
---   have hx : x ∈ span R s := by simp only [hs, mem_top]
---   obtain ⟨f, hxf, hf⟩ := mem_span_finset'.mp hx
---   use ∑ y, f y • inv y
---   constructor
---   · apply sum_mem
---     intro y _
---     refine smul_mem _ _ (mem_span_of_mem ?_)
---     simpa using ⟨y, by simp⟩
---   · simp [inv, surjInv_eq S.mkQ_surjective]
-
-@[deprecated "" (since := "...")]
 lemma sSup_cofg {s : Set (Submodule R M)} (hs : ∃ S ∈ s, S.CoFG) :
     (sSup s).CoFG := by
   obtain ⟨_, hS, hcofg⟩ := hs
@@ -91,23 +70,6 @@ lemma ker_cofg_of_range_fg {f : M →ₗ[R] N} (h : (range f).FG) : (ker f).CoFG
 lemma range_fg_of_ker_cofg {f : M →ₗ[R] N} (h : (ker f).CoFG) : (range f).FG
     := range_fg_iff_ker_cofg.mpr h
 
-lemma ker_fg_iff_range_cofg (f : M →ₗ[R] M) : (ker f).FG ↔ (range f).CoFG := by
-  sorry
-
-lemma CoFG.map_ker_fg {S : Submodule R M} {f : M →ₗ[R] M}
-    (hf : (ker f).FG) (hf' : (range f).CoFG) (hS : S.CoFG) :
-      (S.map f).CoFG := by
-  sorry
-
-lemma CoFG.map_surj {S : Submodule R M} {f : M →ₗ[R] M} (hf : Surjective f) (hS : S.CoFG) :
-    (S.map f).CoFG := by
-
-  sorry
-
--- lemma CoFG.map_equiv {S : Submodule R M} (e : M ≃ₗ[R] M) (hS : S.CoFG) : (S.map e).CoFG := by
-
---   sorry
-
 section HasRankNullity
 
 variable [HasRankNullity R]
@@ -130,13 +92,6 @@ lemma CoFG.restrict (S : Submodule R M) {T : Submodule R M} (hT : T.CoFG) :
     CoFG (restrict S T) := by
   have := Module.Finite.of_injective _ (quot_restrict_linearMap_quot_injective (S ⊔ T) T)
   exact Finite.equiv (quot_restrict_iso_sup_quot_restrict S T).symm
-
--- theorem fg_of_linearEquiv' {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T)
---     (h : T.FG) : S.FG := by
---   rw [← Finite.iff_fg, finite_def] at ⊢ h
---   exact fg_of_linearEquiv e h
-
--- TODO: direction of equiv in `Module.Finite.equiv` and `fg_of_linearEquiv` is opposite.
 
 end IsNoetherianRing
 
