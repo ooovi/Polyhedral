@@ -307,27 +307,29 @@ theorem insert_comm (x y : B) (a : A) : insert x (insert y a) = insert y (insert
 
 theorem insert_insert (x : B) (a : A) : insert x (insert x a) = insert x a := by simp
 
--- -- useful in proofs by induction
--- theorem forall_of_forall_insert {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ insert a s → P x)
---     (x) (h : x ∈ s) : P x := by grind
+/-
+-- useful in proofs by induction
+theorem forall_of_forall_insert {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ insert a s → P x)
+    (x) (h : x ∈ s) : P x := by grind
 
--- theorem forall_insert_of_forall {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ s → P x) (ha : P a)
---     (x) (h : x ∈ insert a s) : P x := by grind
+theorem forall_insert_of_forall {P : α → Prop} {a : α} {s : Set α} (H : ∀ x, x ∈ s → P x) (ha : P a)
+    (x) (h : x ∈ insert a s) : P x := by grind
 
--- theorem exists_mem_insert {P : α → Prop} {a : α} {s : Set α} :
---     (∃ x ∈ insert a s, P x) ↔ (P a ∨ ∃ x ∈ s, P x) := by grind
+theorem exists_mem_insert {P : α → Prop} {a : α} {s : Set α} :
+    (∃ x ∈ insert a s, P x) ↔ (P a ∨ ∃ x ∈ s, P x) := by grind
 
--- theorem forall_mem_insert {P : α → Prop} {a : α} {s : Set α} :
---     (∀ x ∈ insert a s, P x) ↔ P a ∧ ∀ x ∈ s, P x := by grind
+theorem forall_mem_insert {P : α → Prop} {a : α} {s : Set α} :
+    (∀ x ∈ insert a s, P x) ↔ P a ∧ ∀ x ∈ s, P x := by grind
 
--- /-- Inserting an element to a set is equivalent to the option type. -/
--- def subtypeInsertEquivOption
---     [DecidableEq α] {t : Set α} {x : α} (h : x ∉ t) :
---     { i // i ∈ insert x t } ≃ Option { i // i ∈ t } where
---   toFun y := if h : ↑y = x then none else some ⟨y, by grind⟩
---   invFun y := (y.elim ⟨x, mem_insert _ _⟩) fun z => ⟨z, by grind⟩
---   left_inv y := by grind
---   right_inv := by rintro (_ | y) <;> grind
+/-- Inserting an element to a set is equivalent to the option type. -/
+def subtypeInsertEquivOption
+    [DecidableEq α] {t : Set α} {x : α} (h : x ∉ t) :
+    { i // i ∈ insert x t } ≃ Option { i // i ∈ t } where
+  toFun y := if h : ↑y = x then none else some ⟨y, by grind⟩
+  invFun y := (y.elim ⟨x, mem_insert _ _⟩) fun z => ⟨z, by grind⟩
+  left_inv y := by grind
+  right_inv := by rintro (_ | y) <;> grind
+-/
 
 section LE
 

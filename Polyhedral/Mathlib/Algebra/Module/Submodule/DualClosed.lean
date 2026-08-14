@@ -94,7 +94,7 @@ variable {S T : Submodule R M}
 variable (p) [Fact p.SeparatingLeft] in
 @[simp] lemma FG.dual_flip_dual' (hS : S.FG) :
     dual p.flip (dual p S) = S := by
-  haveI := Module.Finite.iff_fg.mpr (hS.map p)
+  have := Module.Finite.iff_fg.mpr (hS.map p)
   rw [dual_dualCoannihilator' p S, dual_dualAnnihilator' p.flip,
     Subspace.dualCoannihilator_dualAnnihilator_eq]
   exact comap_map_eq_self (by simp)
@@ -352,7 +352,8 @@ def dual_linearMap_dual_quot (S : Submodule R M) :
   map_add' _ _ := by ext; simp
   map_smul' _ _ := by ext; simp
 
--- #check Subspace.quotDualEquivAnnihilator -- this is similar to the below, but restricted to finite dim
+-- #check Subspace.quotDualEquivAnnihilator
+-- this is similar to the below, but restricted to finite dim
 -- def dual_eval_linearEquiv_dual_quot (S : Submodule R M) :
 --     dual (Dual.eval R M) S ≃ₗ[R] Dual R (M ⧸ S)  where
 --   toFun f := S.liftQ f.1 (subset_ker_of_mem_dual f.2)

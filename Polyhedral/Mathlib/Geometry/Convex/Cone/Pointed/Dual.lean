@@ -335,7 +335,8 @@ lemma comap_dual_mkQ_dual_restrict_of_le {S : Submodule R M} {C : PointedCone R 
 
 -- variable (p) in
 -- /-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
--- def _root_.LinearMap.rp' (C : PointedCone R M) : C.linSpan →ₗ[R] (N ⧸ (dual p C).lineal) →ₗ[R] R where
+-- def _root_.LinearMap.rp' (C : PointedCone R M) :
+--     C.linSpan →ₗ[R] (N ⧸ (dual p C).lineal) →ₗ[R] R where
 --   toFun x := liftQ (dual p S) (p x.1) (fun _ hy => (hy x.2).symm)
 --   map_add' _ _ := by ext; simp
 --   map_smul' _ _ := by ext; simp
