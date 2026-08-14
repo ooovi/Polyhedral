@@ -4,11 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Mathlib.Algebra.AddTorsor.Defs
-
-import Polyhedral.Polyhedral.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+import Polyhedral.Polyhedral.Basic
 
 /-! This file defines polyhedra as the Minkowski sums polytopes and polyhedral cones. -/
 

@@ -335,7 +335,6 @@ variable {C C₁ C₂ F : PointedCone R M}
 lemma fg_inf_of_isCompl (hC : C.IsPolyhedral) {S : Submodule R M} (hS : IsCompl C.lineal S) :
     FG (C ⊓ S) := by
   obtain ⟨D, hD, T, rfl⟩ := hC
-  #check inf_sup_lineal
   sorry -- hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
 
 end CommRing
@@ -391,7 +390,7 @@ end CommRing
 --   simp only [map_hull, Finset.coe_image, Set.image_image, surjInv_eq, Set.image_id', hs]
 
 -- -- lemma IsPolyhedral.exists_finset_inter_hull_quot_lineal (hC : C.IsPolyhedral) :
--- --     ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (hull R s).quot C.lineal = C.salientQuot := by
+-- --   ∃ s : Finset M, (s : Set M) ∩ C.lineal = ∅ ∧ (hull R s).quot C.lineal = C.salientQuot := by
 -- --   classical
 -- --   obtain ⟨s, hs⟩ := exists_finset_hull_quot_lineal hC
 -- --   use {x ∈ s | x ∉ C.lineal}
