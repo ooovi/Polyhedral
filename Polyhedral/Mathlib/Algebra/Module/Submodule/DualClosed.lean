@@ -14,6 +14,8 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
 
 /-! This file proves results about duality for finite dimensional subspaces. -/
 
+-- TODO: rename this file to `Field.lean` or so
+
 open Function Module LinearMap
 open Submodule hiding span dual
 

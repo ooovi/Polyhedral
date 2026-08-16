@@ -342,7 +342,7 @@ lemma DualFG.dual_dualfg {C : PointedCone 𝕜 N} (hC : C.DualFG p) : (dual p.fl
 -- TODO: implement pairing lemmas that allow inference of `Module.Finite 𝕜 M`.
 --  We should preferably assume `Module.Finite 𝕜 N`
 omit [Module.Finite 𝕜 N] in
-variable (p) [Module.Finite 𝕜 M] [Fact p.IsFaithfulPair] in
+variable (p) [Module.Finite 𝕜 M] [Fact p.SeparatingRight] in
 lemma FG.exists_fg_dual {C : PointedCone 𝕜 N} (hC : C.FG) :
     ∃ D : PointedCone 𝕜 M, D.FG ∧ dual p D = C := by
   use dual p.flip C

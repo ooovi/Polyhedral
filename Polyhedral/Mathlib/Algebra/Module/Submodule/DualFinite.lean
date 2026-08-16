@@ -10,7 +10,7 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 
 /-! This file introduces the notion `DualFG` for submodules. A submodule is `DualFG` if it
 is the dual of a finitely generated submodule. Over fields this is the same as being both
-`CoFG` and dual closed. -/
+`CoFG` and closed under double duality. -/
 
 open Module Function LinearMap
 
@@ -75,14 +75,6 @@ lemma inf_dualfg {S T : Submodule R N} (hS : S.DualFG p) (hT : T.DualFG p) :
   obtain ⟨t, rfl⟩ := hT
   use s ∪ t; rw [Finset.coe_union, dual_union]
 
-/-
--- -- ### HIGH PRIORITY! This is needed in the cone theory!
--- variable [Fact p.flip.IsFaithfulPair] in
-lemma sup_dualfg {S T : Submodule R N} (hC : S.DualFG p) (hD : T.DualFG p) : (S ⊔ T).DualFG p := by
-  unfold DualFG
-  sorry
--/
-
 /-- The double dual of a DualFG cone is the cone itself. -/
 @[simp]
 lemma DualFG.dual_dual_flip {S : Submodule R N} (hS : S.DualFG p) :
@@ -105,21 +97,32 @@ lemma DualFG.dualClosed_flip {S : Submodule R N} (hS : S.DualFG p) :
   rw [← dual_dual_flip hS]
   exact ker_le_dual _
 
--- lemma DualFG.sup_ker {S : Submodule R N} (hS : S.DualFG p) : (S ⊔ ker p.flip).DualFG p := by
---   obtain ⟨s, rfl⟩ := hS
---   use s
---   simp [ker_le_dual]
-
------
+lemma DualFG.sup_ker {S : Submodule R N} (hS : S.DualFG p) : (S ⊔ ker p.flip).DualFG p := by
+  obtain ⟨s, rfl⟩ := hS
+  use s
+  simp [ker_le_dual]
 
 /-- The top submodule is DualFG. -/
 lemma dualfg_top : (⊤ : Submodule R N).DualFG p := ⟨⊥, by simp⟩
 
-/-- The bottom submodule is DualFG in finite dimensional space. -/
-lemma dualfg_bot [Module.Finite R N] : (⊥ : Submodule R N).DualFG p := by
-  -- obtain ⟨s, hs⟩ := fg_top ⊤
-  -- use
-  sorry
+-- This statement is AI generated and might need review
+/-- The bottom submodule is DualFG in a finite module over a Noetherian ring when the pairing
+separates points on the right. -/
+lemma dualfg_bot [IsNoetherianRing R] [Module.Finite R N] [Fact p.SeparatingRight] :
+    (⊥ : Submodule R N).DualFG p := by classical
+  let g : range p → M := fun f ↦ f.property.choose
+  have hg (f : range p) : p (g f) = f := f.property.choose_spec
+  obtain ⟨s, hs⟩ := (Module.Finite.fg_top : (⊤ : Submodule R (range p)).FG)
+  refine ⟨s.image g, eq_bot_iff.mpr fun x hx ↦ ?_⟩
+  apply (Fact.elim (inferInstance : Fact p.SeparatingRight)) x
+  intro y
+  rw [mem_dual] at hx
+  have hx' : x ∈ dual (range p).subtype (span R (s : Set (range p))) := by
+    rw [dual_span, mem_dual]
+    intro f hf
+    simpa [hg] using hx (Finset.mem_image.mpr ⟨f, hf, rfl⟩)
+  rw [mem_dual] at hx'
+  simpa using (hx' (x := ⟨p y, mem_range.mpr ⟨y, rfl⟩⟩) (hs ▸ mem_top)).symm
 
 end CommSemiring
 
@@ -131,22 +134,6 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p)
-
-variable [Fact p.IsFaithfulPair] in -- Separating should suffice, no?
-/-- For an FG submodule `S`, there exists an DualFG submodule `T` that is disjoint to `S`. -/
-lemma FG.exists_dualfg_inf_bot {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.DualFG p ∧ S ⊓ T = ⊥ := by classical
-  obtain ⟨g, hg⟩ : Fact p.IsFaithfulPair := inferInstance
-  use dual p (Submodule.map g S)
-  constructor
-  · exact dual_of_fg p (Submodule.FG.map g hS)
-  · rw [dual_bilin_dual_id_submodule, ← map_comp, ← dual_bilin_dual_id_submodule]
-    ext x
-    simp only [mem_inf, mem_dual, SetLike.mem_coe, mem_bot]
-    constructor
-    · intro hS
-      exact (hg x) (hS.2 hS.1).symm
-    · simp +contextual
 
 -- lemma dual_of_fg_sup_dualfg {C D : Submodule R N} (hC : C.FG) (hD : D.DualFG p) :
     -- (C ⊔ D).DualFG p := by
@@ -219,17 +206,6 @@ lemma FG.exists_dualfg_dual {S : Submodule R N} (hS : S.FG) :
 
 end IsNoetherianRing
 
-
-section Field
-
-variable {R M N : Type*}
-variable [Field R] [IsNoetherianRing R]
-variable [AddCommGroup M] [Module R M]
-variable [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-end Field
-
 end CommRing
 
 section Function
@@ -252,7 +228,6 @@ lemma map_dual (f : M →ₗ[R] M') (C : Submodule R M) :
 --   ext x; simp
 
 end Function
-
 
 -- ## COFG
 
@@ -305,19 +280,12 @@ theorem dualfg_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.
   have hS := FG.dual_dualfg p.flip hS
   simpa [Submodule.dual_dual_flip] using dual_of_fg p (fg_of_isCompl_dualfg hST hS)
 
-variable (p) [Fact (Surjective p)] [Fact p.flip.IsFaithfulPair] in
+variable (p) [Fact (Surjective p)] [Fact p.SeparatingLeft] in
 theorem dualfg_of_isCompl_fg'' {S T : Submodule R N} (hST : Codisjoint S T) (hS : S.FG) :
     T.DualFG p := by
   have hST := disjoint_dual_of_codisjoint p.flip hST
   have hS := FG.dual_dualfg p.flip hS
   simpa [Submodule.dual_dual_flip] using dual_of_fg p (fg_of_disjoint_dualfg hST hS)
-
--- example {S T : Submodule R (Dual R M)} (hST : Codisjoint S T) (hS : S.FG) :
---   T.DualFG .id := cofg_of_isCompl_fg'' _ hST hS
-
-example {ι : Type*} [DecidableEq ι] [Finite ι] (b : Basis ι R M) (s : Set ι) :
-  IsCompl (span R ((fun i => b i )'' s)) (dual .id ((fun i => b.dualBasis i) '' sᶜ))
-  := sorry
 
 -- The proof can maybe be much shorter, see above
 variable (p) [Fact (Surjective p)] in
@@ -357,15 +325,15 @@ variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not su
 theorem CoFG.dualfg {S : Submodule R N} (hS : S.CoFG) : S.DualFG p := by
   obtain ⟨s, hs⟩ := exists_finset_dual p hS; use s
 
--- variable (p) [Fact (Surjective p)] in
--- /-- For an FG submodule `S`, there exists a DualFG submodule `T` so that `S ⊓ T = ⊥`. -/
--- lemma FG.exists_dualfg_inf_bot' {S : Submodule R N} (hS : S.FG) :
---     ∃ T : Submodule R N, T.DualFG p ∧ S ⊓ T = ⊥ := by
---   obtain ⟨T, hT⟩ := exists_isCompl S
---   use T
---   constructor
---   · exact dualfg_of_isCompl_fg p hT hS
---   · exact hT.disjoint.eq_bot
+variable (p) [Fact (Surjective p)] in
+/-- For an FG submodule `S`, there exists a DualFG submodule `T` so that `S ⊓ T = ⊥`. -/
+lemma FG.exists_dualfg_inf_bot {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.DualFG p ∧ S ⊓ T = ⊥ := by
+  obtain ⟨T, hT⟩ := exists_isCompl S
+  use T
+  constructor
+  · exact dualfg_of_isCompl_fg p hT hS
+  · exact hT.disjoint.eq_bot
 
 end Field
 
