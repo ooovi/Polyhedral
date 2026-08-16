@@ -26,21 +26,26 @@ lemma SeparatingLeft.of_injective (hp : Injective p) : p.SeparatingLeft := by
   simpa [separatingLeft_iff_ker_eq_bot] using ker_eq_bot_of_injective hp
 
 instance [inst : Fact (Injective p)] : Fact p.SeparatingLeft :=
-    ⟨SeparatingLeft.of_injective inst.elim⟩
+  ⟨SeparatingLeft.of_injective inst.elim⟩
 
 variable [Module.Projective R N] in
 instance : Fact (SeparatingRight (M₁ := N →ₗ[R] R) .id) :=
-    ⟨fun x hx => by simpa using (forall_dual_apply_eq_zero_iff R x).mp hx⟩
+  ⟨fun x hx => by simpa using (forall_dual_apply_eq_zero_iff R x).mp hx⟩
 
 variable [Module.Projective R M] in
 instance : Fact (Dual.eval R M).SeparatingLeft :=
-    ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
+  ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
 
 instance : Fact (SeparatingLeft (M₁ := N →ₗ[R] R) .id) :=
-    ⟨fun x hx => by ext y; exact hx y⟩
+  ⟨fun x hx => by ext y; exact hx y⟩
 
 instance : Fact (Dual.eval R M).SeparatingRight :=
-    ⟨by simp [Dual.eval, separatingLeft_iff_linear_nontrivial]⟩
+  ⟨by simp [Dual.eval, separatingLeft_iff_linear_nontrivial]⟩
+
+instance instFactSurjectiveCoeIdId : Fact (Surjective (.id : M →ₗ[R] M)) :=
+  ⟨surjective_id⟩
+
+instance : Fact (Surjective (Dual.eval R M).flip) := instFactSurjectiveCoeIdId
 
 variable [Module.Projective R N] in
 lemma SeparatingRight.of_surjective (hp : Surjective p) : p.SeparatingRight := by
@@ -108,34 +113,16 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-instance [inst : p.IsPerfPair] : Fact p.flip.IsPerfPair := ⟨inst.flip⟩
-
 instance [inst : p.IsPerfPair] : Fact p.Nondegenerate :=
   ⟨SeparatingLeft.of_injective inst.bijective_left.injective,
     flip_separatingLeft.mp <| SeparatingLeft.of_injective inst.bijective_right.injective⟩
 
 instance [inst : p.IsPerfPair] : Fact (Injective p) := ⟨inst.bijective_left.injective⟩
+
 instance [inst : p.IsPerfPair] : Fact (Surjective p) := ⟨inst.bijective_left.surjective⟩
 
 end IsPerfPair
 
 end CommRing
-
-section Field
-
-variable {R : Type*} [Field R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-instance [inst : Fact (Surjective p.flip)] : Fact p.SeparatingLeft :=
-  ⟨SeparatingLeft.of_surjective_flip inst.elim⟩
-
-instance instFactSurjectiveCoeIdId : Fact (Surjective (LinearMap.id (R := R) (M := M)))
-  := ⟨surjective_id⟩
-instance : Fact (Surjective (Dual.eval R M).flip)
-  := instFactSurjectiveCoeIdId
-
-end Field
 
 end LinearMap
