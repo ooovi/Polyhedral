@@ -64,7 +64,6 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Set
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
-import Polyhedral.Mathlib.LinearAlgebra.Face.Basic
 import Polyhedral.Mathlib.Logic.Function.Const
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
