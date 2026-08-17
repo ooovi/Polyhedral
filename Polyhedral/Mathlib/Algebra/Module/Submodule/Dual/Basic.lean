@@ -436,8 +436,6 @@ lemma dual_inf_dual_sup_dual_of_dualClosed'' (S T : Submodule R M)
 
 end CommRing
 
----------------------
-
 variable (p) in
 lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
     dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
