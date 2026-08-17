@@ -97,15 +97,26 @@ end IsNoetherianRing
 
 end CommSemiring
 
-section DivisionRing
+section IsNoetherianRing
 
-variable {R : Type*} [DivisionRing R]
+variable {R : Type*} [Ring R] [IsNoetherianRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
 lemma CoFG.disjoint_fg {S T : Submodule R M}
     (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
-  obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
-  exact (hS.of_le hSU).fg_of_isCompl hUT
+  rw [← Module.Finite.iff_fg]
+  letI := hS
+  apply Module.Finite.of_injective (S.mkQ.domRestrict T)
+  rw [← LinearMap.ker_eq_bot, LinearMap.ker_domRestrict, Submodule.ker_mkQ,
+    ← disjoint_iff_comap_eq_bot]
+  exact hST.symm
+
+end IsNoetherianRing
+
+section DivisionRing
+
+variable {R : Type*} [DivisionRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
   obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl

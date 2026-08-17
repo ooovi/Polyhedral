@@ -821,6 +821,24 @@ theorem dual_fg_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := by
 
 end IsNoetherianRing
 
+section CommRing
+
+variable {R : Type*} [CommRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+variable (p) [Fact p.SeparatingLeft] in
+theorem disjoint_dual_of_codisjoint_dual {S : Submodule R M} {T : Submodule R N}
+    (hST : Codisjoint (dual p S) T) : Disjoint S (dual p.flip T) := by
+  rw [disjoint_iff]
+  have hST := congrArg (dual p.flip ∘ SetLike.coe) hST.eq_top
+  simp only [Function.comp_apply, top_coe, dual_univ, dual_sup, dual_union] at hST
+  rw [← le_bot_iff] at ⊢ hST
+  exact le_trans (inf_le_inf_right _ subset_dual_dual) hST
+
+end CommRing
+
 
 section Field
 
@@ -839,17 +857,6 @@ theorem disjoint_dual_of_codisjoint {S T : Submodule R M} (hST : Codisjoint S T)
   rw [← dual_sup_dual_inf_dual]
   rw [codisjoint_iff.mp hST]
   exact dual_univ
-
--- can we simplify the proof?
--- the dual statement (from Disjoint to Codisjoint) seems to be wrong.
-variable (p) [Fact p.SeparatingLeft] in
-theorem disjoint_dual_of_codisjoint_dual {S : Submodule R M} {T : Submodule R N}
-    (hST : Codisjoint (dual p S) T) : Disjoint S (dual p.flip T) := by
-  rw [disjoint_iff]
-  have hST := congrArg (dual p.flip ∘ SetLike.coe) hST.eq_top
-  simp only [Function.comp_apply, top_coe, dual_univ, dual_sup, dual_union] at hST
-  rw [← le_bot_iff] at ⊢ hST
-  exact le_trans (inf_le_inf_right _ subset_dual_dual) hST
 
 variable (p) [p.IsPerfPair] in -- likely `Surjective p.flip` suffices
 theorem codisjoint_dual_of_disjoint {S T : Submodule R M} (hST : Disjoint S T) :

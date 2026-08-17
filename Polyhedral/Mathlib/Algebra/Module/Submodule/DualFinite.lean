@@ -22,7 +22,8 @@ variable {R M N : Type*}
 variable [CommRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R} -- bilinear pairing
+
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) in
 /-- A cone is `DualFG` if it is the dual of a finite set.
@@ -110,8 +111,8 @@ lemma dualfg_top : (⊤ : Submodule R N).DualFG p := ⟨⊥, by simp⟩
 separates points on the right. -/
 lemma dualfg_bot [IsNoetherianRing R] [Module.Finite R N] [Fact p.SeparatingRight] :
     (⊥ : Submodule R N).DualFG p := by classical
-  let g : range p → M := fun f ↦ f.property.choose
-  have hg (f : range p) : p (g f) = f := f.property.choose_spec
+  let g : range p → M := (·.2.choose)
+  have hg (f : range p) : p (g f) = f := f.2.choose_spec
   obtain ⟨s, hs⟩ := (Module.Finite.fg_top : (⊤ : Submodule R (range p)).FG)
   refine ⟨s.image g, eq_bot_iff.mpr fun x hx ↦ ?_⟩
   apply (Fact.elim (inferInstance : Fact p.SeparatingRight)) x
@@ -126,106 +127,20 @@ lemma dualfg_bot [IsNoetherianRing R] [Module.Finite R N] [Fact p.SeparatingRigh
 
 end CommSemiring
 
-section CommRing
-
-variable {R : Type*} [CommRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-variable (p)
-
--- lemma dual_of_fg_sup_dualfg {C D : Submodule R N} (hC : C.FG) (hD : D.DualFG p) :
-    -- (C ⊔ D).DualFG p := by
-  -- classical
-  -- obtain ⟨_, b⟩ := Free.exists_basis R M
-  -- obtain ⟨s, rfl⟩ := hC
-  -- induction s using Finset.induction with
-  -- | empty => simp [hD]
-  -- | insert w s hws hs =>
-  --   obtain ⟨t, ht⟩ := hs
-  --   use insert (b.toDual w) t
-  --   simp [span_insert, sup_assoc, ← ht]
-  --   simp [dual_insert]
-  --   rw [← dual_union]
-  --   ext x
-  --   simp
-    -- sorry
--- omit [Free R M] [LinearOrder R] [IsStrictOrderedRing R] in
--- lemma DualFG.dualfg_id_of_dualfg_toDual {ι : Type*} [DecidableEq ι] {S : Submodule R M}
---      {b : Basis ι R M} (hS : S.DualFG b.toDual) : S.DualFG .id := by classical
---   obtain ⟨s, rfl⟩ := hS
---   use Finset.image b.toDual s
---   ext x; simp
-
--- Q: Is this true? If so, also implement with `IsCompl`.
-lemma exists_dualfg_sup_top {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.DualFG p ∧ S ⊔ T = ⊤ := by
-  -- classical
-  -- obtain ⟨_, b⟩ := Free.exists_basis R M
-  -- use dual b.toDual S
-  -- constructor
-  -- · exact Submodule.dual_of_fg _ hS
-  -- · ext x
-  --   simp only [mem_sup, mem_dual, SetLike.mem_coe, mem_top, iff_true]
-  sorry
-
-lemma FG.exists_dualfg_inf_of_le {S S' : Submodule R N} (hS : S.FG) (hS' : S'.FG) (hSS' : S ≤ S') :
-    ∃ T : Submodule R N, T.DualFG p ∧ S' ⊓ T = S := by sorry
-  -- classical
-  -- obtain ⟨s, rfl⟩ := hS
-  -- induction s using Finset.induction with
-  -- | empty => simp [exists_dualfg_inf_bot hS']
-  -- | insert w s hws hs =>
-  --   obtain ⟨t, ht⟩ := hs
-  --   use (auxGenSet .id t.toSet w).toFinset
-  --   simp [span_insert, sup_assoc, ← ht]
-  --   exact dual_auxGenSet t.finite_toSet
-  --   sorry
-
-section IsNoetherianRing
-
-variable {R M N : Type*}
-variable [CommRing R] [IsNoetherianRing R]
-variable [AddCommGroup M] [Module R M]
-variable [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
--- -- ## PRIORITY
--- lemma sup_dualfg_fg {S : Submodule R N} (T : Submodule R N) (hS : S.DualFG p) :
--- (S ⊔ T).DualFG p :=
---   sorry
-
-lemma FG.exists_dualfg_dual {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R M, T.DualFG p.flip ∧ dual p T = S := by
-  use dual p.flip S
-  -- constructor
-  -- · exact sup_fg_dualfg hfg <| dual_of_fg p.flip (ofSubmodule_fg_of_fg hS)
-  -- · simp [dual_sup_dual_inf_dual, Submodule.FG.dual_dual_flip hS]
-  sorry
-
-end IsNoetherianRing
-
-end CommRing
-
 section Function
 
 variable {R : Type*} [CommSemiring R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {M' : Type*} [AddCommGroup M'] [Module R M']
-variable {N' : Type*} [AddCommGroup N'] [Module R N']
-variable {p : M →ₗ[R] N →ₗ[R] R} {p' : M' →ₗ[R] N' →ₗ[R] R}
+variable {M₁ : Type*} [AddCommGroup M₁] [Module R M₁]
+variable {M₂ : Type*} [AddCommGroup M₂] [Module R M₂]
 
-/- TODO: generalize to arbitrary pairings. -/
+-- TODO: generalize to arbitrary pairings.
+-- variable {p : M →ₗ[R] N →ₗ[R] R}
+-- variable {N₁ : Type*} [AddCommGroup N₁] [Module R N₁]
+-- variable {N₂ : Type*} [AddCommGroup N₂] [Module R N₂]
 
-lemma map_dual (f : M →ₗ[R] M') (C : Submodule R M) :
-    dual (Dual.eval R M') (map f C) = comap f.dualMap (dual (Dual.eval R M) C) := by
+lemma map_dual (f : M₁ →ₗ[R] M₂) (C : Submodule R M₁) :
+    dual (Dual.eval R M₂) (map f C) = comap f.dualMap (dual (Dual.eval R M₁) C) := by
   ext x; simp
-
--- lemma map_dual' (f : (Dual R M) →ₗ[R] (Dual R E')) (C : Submodule R (Dual R M)) :
---     dual .id (map f C) = comap f.dualMap (dual .id C) := by
---   ext x; simp
 
 end Function
 
@@ -243,13 +158,33 @@ theorem DualFG.cofg {S : Submodule R N} (hS : S.DualFG p) : S.CoFG := by
   exact dual_finset_cofg p s
 
 variable (p) in
-theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG := (hS.dual_dualfg p).cofg
+theorem FG.dual_cofg {S : Submodule R M} (hS : S.FG) : (dual p S).CoFG :=
+  (hS.dual_dualfg p).cofg
 
 theorem fg_of_isCompl_dualfg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.DualFG p) :
     T.FG := CoFG.fg_of_isCompl hST (DualFG.cofg hS)
 
 end IsNoetherianRing
 
+section IsNoetherianRing
+
+variable {R : Type*} [CommRing R] [IsNoetherianRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+variable (p) [Fact p.SeparatingRight] in
+/-- For an FG submodule `S`, there exists a DualFG submodule disjoint from `S`. -/
+lemma FG.exists_dualfg_disjoint {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.DualFG p ∧ Disjoint S T := by
+  obtain ⟨V, hfg, hV⟩ := (hS.dual_cofg p.flip).exists_fg_codisjoint
+  exact ⟨dual p V, hfg.dual_dualfg _, disjoint_dual_of_codisjoint_dual _ hV⟩
+
+theorem fg_of_disjoint_dualfg {S T : Submodule R N} (hST : Disjoint S T)
+    (hS : S.DualFG p) : T.FG :=
+  CoFG.disjoint_fg hST (DualFG.cofg hS)
+
+end IsNoetherianRing
 
 section Field
 
@@ -258,30 +193,8 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-variable (p) [Fact p.SeparatingRight] in
-/-- For an FG submodule `S`, there exists an DualFG submodule `T` so that `S ⊓ T = ⊥`. -/
-lemma FG.exists_dualfg_disjoint {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.DualFG p ∧ Disjoint S T := by
-  obtain ⟨V, hfg, hV⟩ := (hS.dual_cofg p.flip).exists_fg_codisjoint
-  use dual p V
-  constructor
-  · exact hfg.dual_dualfg _
-  · exact disjoint_dual_of_codisjoint_dual _ hV
-
--- WARNING: CoFG.disjoint_fg is not yet proven
--- Does this need Field?
-theorem fg_of_disjoint_dualfg {S T : Submodule R N} (hST : Disjoint S T) (hS : S.DualFG p) :
-    T.FG := CoFG.disjoint_fg hST (DualFG.cofg hS)
-
-variable (p) [p.IsPerfPair] in
-theorem dualfg_of_isCompl_fg' {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
-    T.DualFG p := by
-  have hST := IsCompl.dual p.flip hST
-  have hS := FG.dual_dualfg p.flip hS
-  simpa [Submodule.dual_dual_flip] using dual_of_fg p (fg_of_isCompl_dualfg hST hS)
-
 variable (p) [Fact (Surjective p)] [Fact p.SeparatingLeft] in
-theorem dualfg_of_isCompl_fg'' {S T : Submodule R N} (hST : Codisjoint S T) (hS : S.FG) :
+theorem dualfg_of_codisjoint_fg {S T : Submodule R N} (hST : Codisjoint S T) (hS : S.FG) :
     T.DualFG p := by
   have hST := disjoint_dual_of_codisjoint p.flip hST
   have hS := FG.dual_dualfg p.flip hS
@@ -296,44 +209,35 @@ theorem dualfg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.F
   have := Module.Finite.iff_fg.mpr hS
   have := Module.Finite.finite_basis b
   let proj := projectionOnto S T hST
-  have hp : Surjective p := Fact.elim inferInstance
-  let f := fun i => surjInv hp (Basis.dualBasis b i ∘ₗ proj)
-  use (Set.finite_range f).toFinset
+  let f : N →ₗ[R] (s → R) := .pi fun i ↦ Basis.dualBasis b i ∘ₗ proj
+  obtain ⟨t, ht⟩ := exists_finset_dual_ker p f
+  refine ⟨t, ht.trans ?_⟩
+  rw [← ker_projectionOnto hST]
   ext x
-  simp only [Set.Finite.coe_toFinset, mem_dual, Set.mem_range, forall_exists_index]
-  constructor
-  · intro h
-    replace h := fun x => Eq.symm (h x rfl)
-    simp only [f, surjInv_eq hp] at h
-    simp only [coe_comp, Function.comp_apply, Basis.coe_dualBasis] at h
-    rw [← ker_projectionOnto hST, mem_ker]
-    exact b.forall_coord_eq_zero_iff.mp h
-  · intro hxT y z rfl
-    rw [surjInv_eq hp]
-    rw [coe_comp, Function.comp_apply]
-    rw [projectionOnto_apply_of_mem_right _ hxT]
-    rw [map_zero]
+  simp only [mem_ker]
+  constructor <;> intro hx
+  · rw [← b.forall_coord_eq_zero_iff]
+    exact fun i => by simpa [f, proj] using congrFun hx i
+  · funext i
+    rw [← b.forall_coord_eq_zero_iff] at hx
+    simpa [f, proj] using hx i
 
-variable (p) [Fact (Surjective p)] in -- [Fact p.IsFaithfulPair] in
+variable (p) [Fact (Surjective p)] in
+lemma FG.exists_dualfg_isCompl {S : Submodule R N} (hS : S.FG) :
+    ∃ T : Submodule R N, T.DualFG p ∧ IsCompl S T := by
+  obtain ⟨T, hST⟩ := exists_isCompl S
+  exact ⟨T, dualfg_of_isCompl_fg p hST hS, hST⟩
+
+variable (p) [Fact (Surjective p)] in
 theorem CoFG.exists_finset_dual {S : Submodule R N} (hS : S.CoFG) :
     ∃ s : Finset M, dual p s = S := by
   obtain ⟨T, hST⟩ := exists_isCompl S
   have h := disjoint_fg hST.disjoint hS
   exact dualfg_of_isCompl_fg p hST.symm h
 
-variable (p) [Fact (Surjective p)] in -- or maybe we need `Surjective p`, not sure yet
+variable (p) [Fact (Surjective p)] in
 theorem CoFG.dualfg {S : Submodule R N} (hS : S.CoFG) : S.DualFG p := by
   obtain ⟨s, hs⟩ := exists_finset_dual p hS; use s
-
-variable (p) [Fact (Surjective p)] in
-/-- For an FG submodule `S`, there exists a DualFG submodule `T` so that `S ⊓ T = ⊥`. -/
-lemma FG.exists_dualfg_inf_bot {S : Submodule R N} (hS : S.FG) :
-    ∃ T : Submodule R N, T.DualFG p ∧ S ⊓ T = ⊥ := by
-  obtain ⟨T, hT⟩ := exists_isCompl S
-  use T
-  constructor
-  · exact dualfg_of_isCompl_fg p hT hS
-  · exact hT.disjoint.eq_bot
 
 end Field
 
