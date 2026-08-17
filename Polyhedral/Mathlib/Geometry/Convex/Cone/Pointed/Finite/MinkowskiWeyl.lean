@@ -401,10 +401,10 @@ lemma exists_fg_sup_dual (s : Finset M) :
   obtain ⟨S, hS⟩ := Submodule.exists_isCompl (dual p s).lineal
   use (dual p s) ⊓ S
   constructor
-  · rw [dual_span_lineal_dual] at hS
+  · rw [dual_span_lineal_eq_submodule_dual] at hS
     have h := CoFG.fg_of_isCompl hS (dual_finset_cofg p s)
     exact inf_dualfg_fg (DualFG.dual_of_finset p s) (FG.coe_fg h) -- h instead if coe_fg h is workin
-  · rw [← dual_span_lineal_dual]
+  · rw [← dual_span_lineal_eq_submodule_dual]
     exact inf_sup_lineal hS.codisjoint
 
 variable (p) in
@@ -416,7 +416,7 @@ lemma FG.exists_fg_sup_dual {C : PointedCone 𝕜 M} (hC : C.FG) :
 lemma DualFG.exists_fg_sup_lineal {C : PointedCone 𝕜 N} (hC : C.DualFG p) :
     ∃ D : PointedCone 𝕜 N, D.FG ∧ D ⊔ C.lineal = C := by
   obtain ⟨s, rfl⟩ := hC
-  rw [dual_span_lineal_dual]
+  rw [dual_span_lineal_eq_submodule_dual]
   exact PointedCone.exists_fg_sup_dual p s
 
 /-- The sum of DualFG cones is DualFG. -/

@@ -93,13 +93,13 @@ instance {S : Submodule R N} : Coe (S.DualFG p) (DualFG p (S : PointedCone R N))
   constructor
   · rintro ⟨s, hs⟩
     use s
-    rw [← dual_span_lineal_dual, ← submodule_lineal S]
+    rw [← dual_span_lineal_eq_submodule_dual, ← submodule_lineal S]
     congr
   · exact coe_dualfg
 
 lemma DualFG.lineal_dualfg {C : PointedCone R N} (hC : C.DualFG p) : C.lineal.DualFG p := by
   obtain ⟨D, hfg, rfl⟩ := hC.exists_fg_dual
-  rw [dual_span_lineal_dual, ← Submodule.dual_span]
+  rw [dual_span_lineal_eq_submodule_dual, ← Submodule.dual_span]
   exact Submodule.dual_of_fg p (FG.span_fg hfg)
 
 end LinearOrder

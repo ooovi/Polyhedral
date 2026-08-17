@@ -67,7 +67,7 @@ variable (p) [p.IsPerfPair] in
     subdual p.flip (.dual p C) (subdual p C F) = F := by
   repeat rw [subdual_def]
   rw [dual_flip_dual p hC]
-  rw [← dual_span_lineal_dual]
+  rw [← dual_span_lineal_eq_submodule_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
   nth_rw 3 [← PointedCone.coe_ofSubmodule]
   rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]

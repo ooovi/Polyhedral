@@ -135,7 +135,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed p) :
     .dual p C.lineal = span R (dual p C) := by
-  rw [← hC, dual_span_lineal_dual]
+  rw [← hC, dual_span_lineal_eq_submodule_dual]
   nth_rw 1 [← flip_flip p]
   nth_rw 2 [← Submodule.dual_span]
   rw [(dual_dualClosed p C).submodule_span_dualClosed, dual_dual_flip_dual]
@@ -276,7 +276,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- variable [Fact (Surjective p)] in
 -- /-- For a dual closed cone, the dual of the submodule span is the lineality space of the dual. -/
--- lemma DualClosed.dual_span_lineal_dual {C : PointedCone R M} (hC : C.DualClosed p) :
+-- lemma DualClosed.dual_span_lineal_eq_submodule_dual {C : PointedCone R M} (hC : C.DualClosed p) :
 --     .dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
 
 --   have h := hC.dual_lineal_span_dual.symm

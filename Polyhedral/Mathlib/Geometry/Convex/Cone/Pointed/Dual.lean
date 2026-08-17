@@ -23,20 +23,25 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
--- `PointedCone.map` should be an abbrev
+-- TODO: `PointedCone.map` should be an abbrev
 
-@[deprecated dual_zero (since := "")]
-alias dual_bot := dual_zero
-
--- For the proof, see the analogous statement for submodules
-lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := sorry
-  -- constructor <;> intro h
-  -- · intro x hx
-  --   simp [Submodule.ext_iff] at h
-  --   simp only [Submodule.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_top, iff_true] at h
-  --   simpa using inst.elim x (fun y => (h y hx).symm)
-  -- · simp only [SeparatingLeft.ker_eq_bot, le_bot_iff] at h
-  --   simp [h]
+lemma dual_top_iff_le_ker {C : PointedCone R M} : dual p C = ⊤ ↔ C ≤ ker p := by
+  constructor
+  · intro h x hx
+    simp only [Submodule.restrictScalars_mem, mem_ker, LinearMap.ext_iff]
+    intro y
+    have hpos : 0 ≤ p x y := by
+      have : y ∈ dual p C := by rw [h]; simp
+      exact this hx
+    have hneg : 0 ≤ p x (-y) := by
+      have : -y ∈ dual p C := by rw [h]; simp
+      exact this hx
+    exact le_antisymm (by simpa using hneg) hpos
+  · intro h
+    ext y
+    refine ⟨by simp, fun _ _ hx => ?_⟩
+    rw [h hx]
+    simp
 
 lemma dual_univ_ker : dual p .univ = ker p.flip := by
   ext x
@@ -80,7 +85,7 @@ lemma dual_coe_coe_eq_dual_coe (S : Submodule R M) : dual p (S : PointedCone R M
 @[simp low + 1] lemma mem_dual'_singleton {x : M} {y : N} : y ∈ dual p {x} ↔ 0 ≤ p x y := by simp
 
 variable (p) in
-/-- Any cone is a subcone of its double dual cone. -/
+/-- Every cone is a subcone of its double dual cone. -/
 lemma dual_dual_mono {s t : Set M} (hSC : s ⊆ t) :
     dual p.flip (dual p s) ≤ dual p.flip (dual p t) := by
   exact dual_antitone <| dual_antitone hSC
@@ -93,14 +98,6 @@ lemma le_dual_of_le_dual {S : PointedCone R M} {T : PointedCone R N}
 lemma le_dual_iff_le_dual {S : PointedCone R M} {T : PointedCone R N} :
     S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
 
--- lemma span_sSup_sInf_span (S : Set (PointedCone R M)) :
---     span R (sSup S : PointedCone R M) = sInf {span R (E:=M) C | C ∈ S} := by
---   sorry
-
--- lemma dual_sSup' (S : Set (Set M)) :
---     dual p (sSup S) = dual p (⋃ C ∈ S, C) := by
---   rw [← dual_span, span, Submodule.span_sSup, dual_span]
-
 @[simp] lemma dual_submodule_span (s : Set M) :
     dual p (Submodule.span R s) = Submodule.dual p s := by
   ext x; simp
@@ -109,38 +106,29 @@ lemma le_dual_iff_le_dual {S : PointedCone R M} {T : PointedCone R N} :
     Submodule.dual p (hull R s) = Submodule.dual p s := by
   rw [← Submodule.dual_span]; simp
 
--- NOT TRUE
-example (s : Set M) : Submodule.span R (dual p s : Set N) = Submodule.dual p s := by sorry
-
 lemma dual_sSup (S : Set (PointedCone R M)) :
     dual p (⋃ C ∈ S, C) = dual p (sSup S : PointedCone R M) := by
   rw [← dual_hull, hull, Submodule.span_biUnion]
 
-lemma hull_sSup_coe (S : Set (PointedCone R M)) :
-    hull R (sSup S : PointedCone R M) = hull R (sSup (SetLike.coe '' S)) := by
-  simp
-  sorry
-
-example (S : Set (Set M)) : dual p (sSup S : Set M) = sInf (dual p '' S) := dual_sUnion S
-
 lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
-    -- dual p (sSup S : PointedCone R M) = sInf (dual p '' (SetLike.coe '' S)) := by
     dual p (sSup S : PointedCone R M) = sInf ((dual p ∘ SetLike.coe) '' S) := by
-  rw [← dual_hull]
-  simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self]
-  --rw [Submodule.coe_sInf]
-  sorry
+  rw [← dual_sSup (p := p) S]
+  simpa [Function.comp_def, Set.image_image] using dual_sUnion (p := p) (SetLike.coe '' S)
 
 example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
     := by simp
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R] in
-variable {M : Type*} [AddCommGroup M] [Module R M] in
-variable {N : Type*} [AddCommGroup N] [Module R N] in
-variable {p : M →ₗ[R] N →ₗ[R] R} in
+section
+
+variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
   For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
-lemma span_dual_le_dual_lineal {C : PointedCone R M} : span R (dual p C) ≤ .dual p C.lineal := by
+lemma span_dual_le_dual_lineal {C : PointedCone R M} :
+    span R (dual p C) ≤ .dual p C.lineal := by
   simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
   refine sInf_le_sInf ?_
   intro T
@@ -152,33 +140,44 @@ lemma span_dual_le_dual_lineal {C : PointedCone R M} : span R (dual p C) ≤ .du
   rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
   exact dual_le_dual hSC
 
+end
+
 section Map
 
 open Module
 
-variable {M' N' : Type*}
-  [AddCommGroup M'] [Module R M']
-  [AddCommGroup N'] [Module R N']
+variable {M₁ M₂ : Type*}
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂]
 
 -- TODO: generalize to arbitrary pairings
-lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
-    comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
+lemma dual_map (f : M₁ →ₗ[R] M₂) (s : Set M₁) :
+    comap f.dualMap (dual (Dual.eval R M₁) s) = dual (Dual.eval R M₂) (f '' s) := by
   ext; simp
 
-lemma dual_map' (f : M →ₗ[R] M') (C : PointedCone R M) :
-    comap f.dualMap (dual (Dual.eval R M) C) = dual (Dual.eval R M') (map f C) := by
+lemma dual_map' (f : M₁ →ₗ[R] M₂) (C : PointedCone R M₁) :
+    comap f.dualMap (dual (Dual.eval R M₁) C) = dual (Dual.eval R M₂) (map f C) := by
   ext; simp
-
--- TODO: generalize to arbitrary pairings
--- lemma dual_map' (f : M →ₗ[R] M') (hf : Function.Injective f) (s : Set M) :
---     map f.dualMap.inverse (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
---   ext x; simp
 
 end Map
 
-open Pointwise in
-@[simp]
-lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
+lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by simp
+
+lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by simp
+
+alias dual_sup_dual_union := dual_sup
+
+lemma dual_sup_dual_inf_dual (C D : PointedCone R M) :
+    dual p (C ⊔ D : PointedCone R M) = dual p C ⊓ dual p D := by rw [dual_sup, dual_union]
+
+lemma submodule_dual_le_dual {s : Set M} :
+    Submodule.dual p s ≤ dual p s := fun _ hy _ hx => by rw [← hy hx]
+
+section Neg
+
+open Pointwise
+
+@[simp] lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
   ext x -- TODO: make this proof an application of `map_dual`
   simp only [Submodule.mem_neg, mem_dual, _root_.map_neg, Left.nonneg_neg_iff, Set.mem_neg]
   constructor
@@ -190,43 +189,9 @@ lemma neg_dual {s : Set M} : -(dual p s) = dual p (-s) := by
     specialize hy hy'
     simp_all only [_root_.neg_neg, LinearMap.map_neg, LinearMap.neg_apply, Left.nonneg_neg_iff]
 
-variable {M' : Type*} [AddCommGroup M'] [Module R M']
-
-lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by simp
-
-lemma dual_id_map (C : PointedCone R M) : dual p C = dual .id (map p C) := by simp
-
-example /- dual_inf -/ (C D : PointedCone R M) :
-    dual p (C ⊓ D : PointedCone R M) = dual p (C ∩ D) := rfl
-example (C D : PointedCone R M) : dual p (C ⊔ D) = dual p (C ∪ D) := rfl
-
-alias dual_sup_dual_union := dual_sup
-
--- TODO: simp lemma?
-lemma dual_sup_dual_inf_dual (C D : PointedCone R M) :
-    dual p (C ⊔ D : PointedCone R M) = dual p C ⊓ dual p D := by rw [dual_sup, dual_union]
-
--- TODO: Does this even hold in general? Certainly if C and D are CoFG.
--- @[simp] lemma dual_flip_dual_union
-example {C D : PointedCone R M} : -- (hC : C.FG) (hC' : D.FG) :
-    dual p.flip (dual p (C ∪ D)) = C ⊔ D := by
-  sorry
-
---------------
-
-lemma submodule_dual_le_dual {s : Set M} : Submodule.dual p s ≤ dual p s := by
-  sorry --  rw [← submodule_span_dual]; exact Submodule.subset_span
-
-
-
--------------
-
--- ## Neg
-
-open Pointwise in
 lemma dual_neg_neg (s : Set M) : -dual p (-s) = dual p s := by ext x; rw [dual_neg, neg_neg]
 
------------
+end Neg
 
 section LinearOrder
 
@@ -235,7 +200,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma dual_span_lineal_dual (s : Set M) :
+lemma dual_span_lineal_eq_submodule_dual (s : Set M) :
     (dual p s).lineal = .dual p s := by
   rw [Eq.comm]
   rw [← ofSubmodule_inj]
@@ -247,15 +212,9 @@ lemma dual_span_lineal_dual (s : Set M) :
   rw [dual_neg, lineal_inf_neg]
   try rw [inf_comm]
 
--- lemma dual_span_lineal_dual' (C : PointedCone R M) :
---     Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
---   rw [← ofSubmodule_inj]
---   rw [← dual_eq_submodule_dual]
---   rw [← PointedCone.ofSubmodule_coe]
---   rw [← sup_neg_eq_submodule_span]
---   rw [dual_sup_dual_inf_dual]
---   rw [Submodule.coe_set_neg]
---   rw [← dual_neg, lineal_inf_neg]
+lemma submodule_dual_span_eq_dual_lineal (C : PointedCone R M) :
+    Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
+  rw [Submodule.dual_span, ← dual_span_lineal_eq_submodule_dual]
 
 end LinearOrder
 
