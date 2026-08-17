@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
 /-!

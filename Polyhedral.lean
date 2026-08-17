@@ -16,6 +16,7 @@ import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
