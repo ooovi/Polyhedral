@@ -11,7 +11,7 @@ import Mathlib.Geometry.Convex.Cone.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 
-/-! This file proves results about `PointedCone.dual` intended to go into Pointed/Dual. -/
+/-! This file proves results about `PointedCone.dual` intended to go into Pointed/Dual.lean. -/
 
 namespace PointedCone
 
@@ -58,10 +58,7 @@ lemma dual_flip_univ_ker : dual p.flip .univ = ker p := by
 variable [Fact p.SeparatingRight] in
 @[simp] lemma dual_univ' : dual p .univ = ⊥ := by simp [dual_univ_ker]
 
--- TODO: are there instances missing that should make the proof automatic?
--- TODO: 0 in `dual_univ` simplifies to ⊥, so maybe it is not the best statement?
-@[simp] lemma dual_top [p.IsPerfPair] : dual p .univ = ⊥
-  := dual_univ (IsPerfPair.bijective_right p).1
+alias dual_top := dual_univ'
 
 variable (p) in
 @[simp] lemma dual_eq_submodule_dual (S : Submodule R M) : dual p S = Submodule.dual p S := by
