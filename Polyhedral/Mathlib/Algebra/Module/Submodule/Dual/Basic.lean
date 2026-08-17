@@ -89,9 +89,6 @@ linear map `p x`. -/
 lemma dual_singleton (x : M) : dual p {x} = ker (p x) := by
   ext x; simp [Eq.comm]
 
--- lemma dual_singleton' (x : M) : dual p {x} = (⊥ : Submodule R R).comap (p x) := by
---   simp; sorry
-
 lemma dual_union (s t : Set M) : dual p (s ∪ t) = dual p s ⊓ dual p t := by aesop
 
 variable (p) in
@@ -142,10 +139,6 @@ lemma subset_dual_dual : s ⊆ dual p.flip (dual p s) := fun _x hx _y hy ↦ hy 
 
 alias le_dual_dual := subset_dual_dual
 
--- variable (p) in
--- /-- Any submodule is a subcone of its double dual submodule. -/
--- lemma le_dual_dual (S : Submodule R M) : S ≤ dual p.flip (dual p S) := subset_dual_dual
-
 lemma le_dual_of_le_dual {S : Submodule R M} {T : Submodule R N}
     (hST : T ≤ dual p S) : S ≤ dual p.flip T :=
   le_trans subset_dual_dual (dual_antitone hST)
@@ -174,10 +167,6 @@ lemma dual_span (s : Set M) : dual p (span R s) = dual p s := by
   | zero => simp
   | add y z _hy _hz hy hz => rw [map_add, add_apply, ← hy, ← hz, add_zero]
   | smul t y _hy hy => simp only [map_smul, smul_apply, smul_eq_mul, ← hy, mul_zero]
-
--- ----------------
-
--- TODO: add `dual_image`, see cone theory.
 
 /-- Conversion to the standard algebraic duality operator. -/
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp
@@ -217,12 +206,6 @@ variable (p) in
 lemma dual_dualCoannihilator' (S : Submodule R M) : dual p S = (map p S).dualCoannihilator := by
   ext x; simpa using ⟨fun h _ hw => (h hw).symm, fun h w hw => (h w hw).symm⟩
 
--- theorem mem_dualAnnihilator' {S : Submodule R M} (φ : Module.Dual R M) :
---     φ ∈ S.dualAnnihilator ↔ S ≤ ker φ := by
---   rw [le_ker]
---   -- mem_dualAnnihilator'
---   sorry
-
 lemma le_ker_of_mem_dualAnnihilator {S : Submodule R M} {φ : Dual R M}
     (hφ : φ ∈ S.dualAnnihilator) : S ≤ ker φ := by
   intro x hxS
@@ -241,65 +224,22 @@ lemma le_ker_of_mem_dual {S : Submodule R M} {φ : Dual R M} (hφ : φ ∈ dual 
   rw [S.dual_dualAnnihilator, mem_dualAnnihilator] at hφ
   exact hφ x hxS
 
--------------------
-
--- variable (p) in
--- abbrev dual' (S : Submodule R M) : Submodule R N := dual p S
-
--- -- variable (p) in
--- -- lemma dual_antimono' {S T : Submodule R M} (hST : S ≤ T) : dual p T ≤ dual p S := by
--- --   exact dual_antimono hST
-
--- lemma dual_gc' : GaloisConnection (toDual ∘ dual' p) (dual' p.flip ∘ ofDual) := by
---   intro S T
---   simp only [Function.comp_apply]
---   nth_rw 1 [← toDual_ofDual T]
---   rw [toDual_le_toDual]
---   constructor <;>
---     exact (le_trans subset_dual_dual <| dual_antitone ·)
-
--- def dual_gi : GaloisInsertion (dual' p ∘ ofDual) (toDual ∘ dual' p.flip) where
---   choice S _ := toDual (dual' p S)
---   gc := sorry -- dual_gc'
---   le_l_u := fun _ => le_dual_dual
---   choice_eq := by sorry
-
-------------------
-
-variable {M' N' : Type*}
-  [AddCommMonoid M'] [Module R M']
-  [AddCommMonoid N'] [Module R N']
-
 lemma dual_bilin_dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext x; simp
 
 lemma dual_bilin_dual_id_submodule (S : Submodule R M) : dual p S = dual .id (map p S) := by
   rw [map_coe, dual_bilin_dual_id]
 
--- variable {p : M →ₗ[R] N →ₗ[R] R} {p' : M' →ₗ[R] N' →ₗ[R] R}
+variable {M₁ M₂ N₁ N₂ : Type*}
+variable [AddCommMonoid M₁] [Module R M₁]
+variable [AddCommMonoid M₂] [Module R M₂]
 
--- lemma dual_map_foo {p : (Dual R M) →ₗ[R] N →ₗ[R] R}
---     (f : (Dual R M) →ₗ[R] (Dual R M)) (s : Set (Dual R M)) :
---     dual p (f '' s) --= dual .id ((p ∘ₗ f) '' s)
---                     = comap (p ∘ₗ f).dualMap (dual (Dual.eval R (Dual R M)) s)
---                     := by
---   ext x; simp
-
--- lemma dual_map_foo' (f : M →ₗ[R] M) (s : Set M) :
---     dual p (f '' s) = dual .id ((p ∘ f) '' s)
---                     --= comap (p ∘ₗ f).dualMap (dual .id s)
---                     := by
---   ext x; simp
-
--- TODO: generalize to arbitrary pairings (but what takes the place of `f.dualMap`?)
-lemma dual_map (f : M →ₗ[R] M') (s : Set M) :
-    comap f.dualMap (dual (Dual.eval R M) s) = dual (Dual.eval R M') (f '' s) := by
+lemma dual_map (f : M₁ →ₗ[R] M₂) (s : Set M₁) :
+    comap f.dualMap (dual (Dual.eval R M₁) s) = dual (Dual.eval R M₂) (f '' s) := by
   ext x; simp
 
-lemma dual_map' (f : M →ₗ[R] M') (s : Set (Dual R M')) :
+lemma dual_map' (f : M₁ →ₗ[R] M₂) (s : Set (Dual R M₂)) :
     comap f (dual .id s) = dual .id (f.dualMap '' s) := by
   ext x; simp
-
---------------
 
 lemma dual_sSup (s : Set (Submodule R M)) :
     dual p (sSup s : Submodule R M) = dual p (sUnion (SetLike.coe '' s)) := by
@@ -319,90 +259,6 @@ lemma dual_sup_dual_le_dual_inf (S T : Submodule R M) :
   obtain ⟨x', hx', y', hy', hxy⟩ := h
   rw [← hxy, ← zero_add 0]
   nth_rw 1 [hx' hyS, hy' hyT, map_add]
-
-
------------------------
-
--- ## BILIN
-
-section Ring
-
-variable {R M N : Type*}
-  [CommRing R]
-  [AddCommGroup M] [Module R M]
-  [AddCommGroup N] [Module R N]
-  {p : M →ₗ[R] N →ₗ[R] R}
-
-variable (p) in
-/-- Restricting a pairing to a submodule. The abbreviation `rp` stands for "restrict pair". -/
-def _root_.LinearMap.rp (S : Submodule R M) : S →ₗ[R] (N ⧸ dual p S) →ₗ[R] R where
-  toFun x := liftQ (dual p S) (p x.1) (fun _ hy => (hy x.2).symm)
-  map_add' _ _ := sorry -- by ext; simp
-  map_smul' _ _ := sorry -- by ext; simp
-
-variable (p) in
-@[simp] lemma _root_.LinearMap.rp_apply {S : Submodule R M} (x : S) (y : N) :
-    (p.rp S) x ((dual p S).mkQ y) = p x.1 y := sorry --by simp [rp]
-
--- TODO: Lemmas that prove how properties of pairing are preserved under restriction.
---  Most relevant are separation, nondegeneracy, surjectivity and perfectness.
-
-variable (p) in
-lemma dual_embed_quot_dual (S : Submodule R M) (T : Submodule R S) :
-    (dual p (embed T)).quot (dual p S) = dual (p.rp S) T := by
-  ext x
-  simp only [mem_dual, SetLike.mem_coe, map_coe, subtype_apply,
-    mem_map, mem_image, forall_exists_index]
-  constructor <;> intro h
-  · obtain ⟨y, hy, hy'⟩ := h
-    intro z hz
-    simpa only [mem_restrict_iff, ← hy', rp_apply] using hy z ⟨hz, rfl⟩
-  · use surjInv (dual p S).mkQ_surjective x
-    constructor
-    · intro y z ⟨hz, rfl⟩
-      specialize h hz
-      rw [← surjInv_eq (dual p S).mkQ_surjective x] at h
-      simpa only [rp_apply] using h
-    · rw [surjInv_eq (dual p S).mkQ_surjective]
-
-variable (p) in
-lemma dual_quot_dual (S T : Submodule R M) :
-    (dual p (S ∩ T)).quot (dual p S) = dual (p.rp S) (restrict S T) := by
-  simp only [← coe_inf, ← embed_restrict S T, dual_embed_quot_dual]
-
-alias dual_restrict := dual_quot_dual
-
-variable (p) in
-lemma dual_quot_dual_of_le {S T : Submodule R M} (hST : T ≤ S) :
-    (dual p T).quot (dual p S) = dual (p.rp S) (restrict S T) := by
-  rw [← inter_eq_right.mpr hST]
-  exact dual_quot_dual ..
-
-alias dual_restrict_of_le := dual_quot_dual_of_le
-
-variable (p) in
-lemma comap_dual_mkQ_dual (S : Submodule R M) (T : Submodule R S) :
-    comap (dual p S).mkQ (dual (p.rp S) T) = dual p (embed T) := by
-  simpa only [← dual_embed_quot_dual, comap_map_mkQ, sup_eq_right] using dual_antitone embed_le
-
-alias dual_embed := comap_dual_mkQ_dual
-
-lemma comap_dual_mkQ_dual_restrict (S T : Submodule R M) :
-    comap (dual p S).mkQ (dual (p.rp S) (restrict S T)) = dual p (S ∩ T) := by
-  simp only [← coe_inf, ← embed_restrict S T, dual_embed]
-
--- This is a crucial lemma. It helps restricting duality statement. We can use it to show that
--- properties that are preserved under duality in finite dim, and that are closed under adding
--- linear subspaces, are also closed under duality in arbitrary dim. An example is the property
--- of being polyhedral. So this will help lifting statements from FG to polyhedral.
-lemma comap_dual_mkQ_dual_restrict_of_le {S T : Submodule R M} (hST : T ≤ S) :
-    comap (dual p S).mkQ (dual (p.rp S) (restrict S T)) = dual p T := by
-  rw [← inter_eq_right.mpr hST]
-  exact comap_dual_mkQ_dual_restrict ..
-
-end Ring
-
-----------------------
 
 -- # DUAL CLOSED
 
