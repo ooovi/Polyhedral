@@ -5,7 +5,7 @@ Authors: Martin Winter
 -/
 
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 
 /-! This file introduces the notion `DualFG` for submodules. A submodule is `DualFG` if it
