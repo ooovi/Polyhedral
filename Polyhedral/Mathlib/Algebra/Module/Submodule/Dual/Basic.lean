@@ -757,12 +757,12 @@ lemma dual_flip_dual_singleton (x : M) : dual p.flip (dual p {x}) = span R {x} :
 -- **NOTE**: No need for Field so far!!
 
 lemma exists_fun_dual_ker {ι : Type*} (f : M →ₗ[R] ((ι → R) →ₗ[R] R)) :
-    ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id (LinearMap.range g) = ker f := by
+    ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id g.range = ker f := by
   simp only [dual_dualCoannihilator, dualCoannihilator_range_eq_ker_flip]
   use f.flip; simp
 
 lemma exists_fun_dual_ker' {ι : Type*} [Finite ι] (f : M →ₗ[R] (ι → R)) :
-    ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id (LinearMap.range g) = ker f := by
+    ∃ g : (ι → R) →ₗ[R] (Dual R M), dual .id g.range = ker f := by
   let h := (Pi.basisFun R ι).constr (M' := R) R
   obtain ⟨g, hg⟩ := exists_fun_dual_ker (h.comp f)
   rw [LinearEquiv.ker_comp] at hg

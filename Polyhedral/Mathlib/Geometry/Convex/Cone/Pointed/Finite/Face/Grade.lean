@@ -5,6 +5,7 @@ Authors: Olivia Röhrig, Martin Winter
 -/
 
 import Mathlib.Order.Grade
+
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 /-! This file contains results about the grading on the face lattice of a finitely

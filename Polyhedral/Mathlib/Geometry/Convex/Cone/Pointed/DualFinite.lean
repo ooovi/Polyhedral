@@ -6,7 +6,7 @@ Authors: Martin Winter
 
 import Mathlib.Geometry.Convex.Cone.DualFinite
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 

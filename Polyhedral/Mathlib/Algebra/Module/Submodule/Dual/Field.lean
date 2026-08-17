@@ -10,7 +10,7 @@ import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 import Mathlib.LinearAlgebra.Dual.Lemmas
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
 
 /-! This file proves results about duality for finite dimensional subspaces. -/
 

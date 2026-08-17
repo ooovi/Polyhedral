@@ -1,9 +1,9 @@
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
-import Polyhedral.Mathlib.Algebra.Module.Submodule.DualClosed
-import Polyhedral.Mathlib.Algebra.Module.Submodule.DualFinite
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict

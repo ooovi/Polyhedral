@@ -14,7 +14,7 @@ import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
 
 /-! This file contains results in the intersectin of cones and linear maps. -/
 

@@ -13,7 +13,7 @@ import Mathlib.SetTheory.Cardinal.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
 
 /-! This file proces basic facts about cones that are intended to go into
 Pointed/Basic. -/
