@@ -66,7 +66,7 @@ lemma IsFaceOf.subdual_dual (hF : F.IsFaceOf C) :
 
 lemma subdual_self : subdual p C C = (dual p C).lineal := sorry
 
-section IsDualClosed
+section DualClosed
 
 variable (hC : C.DualClosed p)
 
@@ -84,7 +84,7 @@ lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
   mpr := fun h => subdual_antitone p h
   mp := sorry
 
-end IsDualClosed
+end DualClosed
 
 end Field
 

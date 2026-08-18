@@ -7,7 +7,8 @@ Authors: Martin Winter
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
-/-! This file defines dual closed cones, that is, cones closed under taking the double dual. -/
+/-! This file defines dual closed cones, that is, cones that are identical to their
+double dual. -/
 
 namespace PointedCone
 
@@ -17,17 +18,12 @@ open Submodule (span)
 variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) in
+/-- A cone is dual closed if it is identical to its double dual. -/
 abbrev DualClosed (C : PointedCone R M) := dual p.flip (dual p C) = C
-
-@[deprecated DualClosed (since := "")]
-alias IsDualClosed := DualClosed
-
-/-- A cone is bipolar if it is equal to its double dual. -/
--- Potentially the more canonical name for `DualClosed`.
-alias Bipolar := DualClosed
 
 variable (p) in
 @[simp] lemma DualClosed.def {C : PointedCone R M} (hC : DualClosed p C) :

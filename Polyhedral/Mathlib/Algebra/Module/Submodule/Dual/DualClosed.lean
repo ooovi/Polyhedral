@@ -27,17 +27,15 @@ variable {R : Type*} [CommSemiring R]
 variable {M : Type*} [AddCommMonoid M] [Module R M]
 variable {N : Type*} [AddCommMonoid N] [Module R N]
 
-variable {p : M →ₗ[R] N →ₗ[R] R} {s t : Set M} {y : N}
+variable {p : M →ₗ[R] N →ₗ[R] R}
 
 /- NOTE: I consider redefining dual closed as `dual dual S = S ⊔ ker p`
 This gives `dual dual S = S` whenever `p.SeparatingLeft`.
-But now some statement become independent of being separating. -/
+But now some statements become independent of `p` being separating. -/
 
 variable (p) in
+/-- A submodule is dual closed if it is identical to its double dual. -/
 abbrev DualClosed (S : Submodule R M) := dual p.flip (dual p S) = S
-
-@[deprecated DualClosed (since := "")]
-alias IsDualClosed := DualClosed
 
 @[simp] lemma DualClosed.def {S : Submodule R M} (hS : DualClosed p S) :
      dual p.flip (dual p S) = S := hS
