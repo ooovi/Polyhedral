@@ -687,8 +687,8 @@ lemma quot_span : C.quot (.span R C) = ⊥ := quot_bot_of_le Submodule.le_span
 
 lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
 
-/-- The linear span of a quotient cone is the image of the linear span under the quotient map. -/
-@[simp] lemma linSpan_quot (C : PointedCone R M) (S : Submodule R M) :
+/-- The span of a quotient cone is the image of the span under the quotient map. -/
+@[simp] lemma span_quot (C : PointedCone R M) (S : Submodule R M) :
     span R (C.quot S) = Submodule.map S.mkQ (span R C) := by
   simp [PointedCone.quot]
 
