@@ -39,7 +39,7 @@ lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank =
   -- suffices to show quotient has rank 1
   have hgfg := quot_fg (G.isFaceOf.fg hCfg) F.span
   convert
-    finrank_eq_finrank_add_finrank_quot_linSpan (FG.span_fg (G.isFaceOf.fg hCfg)) hfg.le
+    finrank_eq_finrank_add_finrank_quot_span (FG.span_fg (G.isFaceOf.fg hCfg)) hfg.le
     -- G/F has a ray
   have FfG : (F : PointedCone R M).IsFaceOf G := (F.isFaceOf.isFaceOf_iff_le G.isFaceOf).mpr hfg.le
   have : ¬(G : PointedCone R M) ≤ F.span := by
