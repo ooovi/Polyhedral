@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Martin Winter
+-/
 
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
@@ -7,7 +12,6 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
 
 /-! This file defines affine homogenization axiomatically and proves every object fulfilling the
 axioms is linearly equivalent to the canonical homogenization.
-
 
 ## Implementation notes
 * The axiomatization in the literature is redundant. The universal property can be proven solely

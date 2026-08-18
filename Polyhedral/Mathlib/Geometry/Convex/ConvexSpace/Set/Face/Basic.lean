@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 ... All rights reserved.
+Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: ...
+Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
@@ -191,7 +191,8 @@ variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
   coe F := F.toConvexSet.carrier
-  coe_injective a b _ := sorry
+  coe_injective a b h := by
+    cases a; cases b; congr; exact SetLike.coe_injective h
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 

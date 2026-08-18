@@ -1,7 +1,8 @@
 /-
-Copyright (c) 2025 .... All rights reserved.
+Copyright (c) 2025 Olivia Röhig, Kilian Rueß, Mrtin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: ... -/
+Authors: Olivia Röhig, Kilian Rueß, Mrtin Winter
+-/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 

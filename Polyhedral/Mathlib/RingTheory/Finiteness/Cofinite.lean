@@ -105,7 +105,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 lemma CoFG.disjoint_fg {S T : Submodule R M}
     (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
   rw [← Module.Finite.iff_fg]
-  letI := hS
+  let := hS
   apply Module.Finite.of_injective (S.mkQ.domRestrict T)
   rw [← LinearMap.ker_eq_bot, LinearMap.ker_domRestrict, Submodule.ker_mkQ,
     ← disjoint_iff_comap_eq_bot]
