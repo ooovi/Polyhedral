@@ -76,19 +76,15 @@ lemma embed_mono_rev {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hC : emb
 @[simp] lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
     (C.restrict S).embed = (S ⊓ C : PointedCone R M) := by
   ext x
-  constructor
-  · rintro ⟨y, hy, rfl⟩
-    exact ⟨y.2, hy⟩
-  · rintro ⟨hxS, hxC⟩
-    exact ⟨⟨x, hxS⟩, hxC, rfl⟩
+  exact ⟨fun ⟨y, hy, h⟩ => h ▸ ⟨y.2, hy⟩,
+    fun ⟨hxS, hxC⟩ ↦ ⟨⟨x, hxS⟩, hxC, rfl⟩⟩
 
 @[simp]
 lemma restrict_embed (S : Submodule R M) (C : PointedCone R S) :
     restrict S (embed C) = C := by
   ext x
-  refine ⟨?_, fun hx => ⟨x, hx, rfl⟩⟩
-  rintro ⟨y, hy, hxy⟩
-  exact S.subtype_injective hxy ▸ hy
+  exact ⟨fun ⟨y, hy, hxy⟩ => S.subtype_injective hxy ▸ hy,
+    fun hx => ⟨x, hx, rfl⟩⟩
 
 lemma embed_fg_of_fg (S : Submodule R M) {C : PointedCone R S} (hC : C.FG) :
     C.embed.FG := Submodule.FG.map _ hC
@@ -138,7 +134,7 @@ lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
 @[simp]
 lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
     (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by
-      simp only [Submodule.restrict_inf_self]
-      exact embed_inj.mp rfl
+  simp only [Submodule.restrict_inf_self]
+  exact embed_inj.mp rfl
 
 end PointedCone
