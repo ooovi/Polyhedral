@@ -34,8 +34,8 @@ section Semiring
 open Module Function
 open Submodule (span)
 
-variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
-  [Module R M] {S : Set M}
+variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 -- allows us to use dot notation for lemmas in Submodule.FG or PointedCone.FG
 abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
@@ -223,6 +223,7 @@ open Submodule
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
 variable {E : Type*} [AddCommGroup E] [Module R E]
+
 variable {C : PointedCone R E} {x : E}
 
 /-- A cone that is closed under negation forms a submodule. -/
@@ -324,29 +325,9 @@ lemma map_hull (f : M →ₗ[R] M') (s : Set M) : map f (hull R s) = hull R (f '
 
 end Map
 
--- -- ## LINEAR EQUIV
-
--- variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
--- variable {M : Type*} [AddCommGroup M] [Module R M]
--- variable {N : Type*} [AddCommGroup N] [Module R N]
-
--- local notation "R≥0" => {c : R // 0 ≤ c}
-
--- noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
---     {C : PointedCone R M} (hSC : S ≤ C) : map S.mkQ C ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
---   Submodule.IsCompl.map_mkQ_equiv_inf hST hSC
-
--- structure LinearlyEquiv (s : Set M) (t : Set N) where
---   toFun : M →ₗ[R] N
---   toInv : N →ₗ[R] M
---   inv_fun : ∀ x ∈ s, toInv (toFun x) = x
---   fun_inv : ∀ x ∈ t, toFun (toInv x) = x
--- example (S : PointedCone R M) (T : PointedCone R N) : S ≃ₗ[R≥0] T := sorry
-
 end LinearOrder
 
 end Ring
-
 
 -- # QUOTIENTS
 
@@ -356,8 +337,8 @@ section Quotient
 
 open Submodule (span)
 
-variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M] {S : Set M}
+variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
 
 variable {C : PointedCone R M}
 
@@ -423,16 +404,8 @@ end Quotient
 
 section DivisionRing
 
-variable {R M : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M] {S : Set M}
-
--- -- TODO: golf this
--- theorem smul_mem_iff {C : PointedCone R M} {c : R} (hc : 0 < c) {x : M} : c • x ∈ C ↔ x ∈ C := by
---   constructor <;> intro h
---   · have h := C.smul_mem (le_of_lt <| inv_pos.mpr hc) h
---     rw [inv_smul_smul₀ (ne_of_lt hc).symm] at h
---     exact h
---   · exact C.smul_mem (le_of_lt hc) h
+variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 -- analogue of `Submodule.span_singleton_smul_eq`
 theorem hull_singleton_smul_eq {r : R} (hr : r > 0) (x : M) : R ∙₊ (r • x) = R ∙₊ x := by
@@ -452,8 +425,8 @@ end DivisionRing
 
 section Field
 
-variable {R M : Type*} [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
-  [Module R M] {S : Set M}
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommMonoid M] [Module R M]
 
 open Set
 
