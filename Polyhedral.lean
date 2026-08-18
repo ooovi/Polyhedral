@@ -34,6 +34,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace

@@ -4,12 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
 
-import Mathlib.Algebra.Module.Submodule.Pointwise
-import Mathlib.Algebra.Order.Nonneg.Module
-import Mathlib.Geometry.Convex.Cone.Basic
-
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 
 /-! This file proves facts about the lineality space of a cone. -/
 

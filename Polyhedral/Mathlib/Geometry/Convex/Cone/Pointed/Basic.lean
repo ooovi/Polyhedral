@@ -4,16 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Mathlib.Geometry.Convex.Cone.Dual
-import Mathlib.RingTheory.Finiteness.Basic
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
-import Mathlib.Algebra.Module.Submodule.Pointwise
-import Mathlib.LinearAlgebra.Quotient.Basic
-import Mathlib.SetTheory.Cardinal.Defs
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.Geometry.Convex.Cone.Pointed
+import Mathlib.RingTheory.LocalRing.Basic
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 
 /-! This file proces basic facts about cones that are intended to go into
 Pointed/Basic. -/
@@ -46,9 +40,27 @@ variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommM
 -- allows us to use dot notation for lemmas in Submodule.FG or PointedCone.FG
 abbrev FG (C : PointedCone R M) : Prop := Submodule.FG C
 
-----
+-- ## COE
 
--- ## SPAN
+lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
+    := Submodule.restrictScalars_inf _ _ _
+
+lemma sInf_coe (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
+  Submodule.restrictScalars_sInf _ _
+
+lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
+  rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf, iInf_image]
+
+lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
+    := Submodule.restrictScalars_sup _ _ _
+
+lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
+  Submodule.restrictScalars_sSup _ _
+
+lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : PointedCone R M) := by
+  rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
+
+-- ## HULL
 
 /- Note that the character `∙` U+2219 used below is different from the scalar multiplication
 character `•` U+2022. -/
@@ -84,43 +96,10 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   le_l_u _ := subset_hull
   choice_eq _ _ := rfl
 
--- ## LINSPAN (deprecated)
-
 @[simp] lemma span_hull_eq_submodule_span (s : Set M) :
     span R (hull R s) = span R s := Submodule.span_span_of_tower ..
 
--- ## COE
-
-lemma coe_inf (S T : Submodule R M) : S ⊓ T = (S ⊓ T : PointedCone R M)
-    := Submodule.restrictScalars_inf _ _ _
-
-lemma sInf_coe (s : Set (Submodule R M)) : sInf s = sInf (ofSubmodule '' s) :=
-  Submodule.restrictScalars_sInf _ _
-
-lemma iInf_coe (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
-  rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf, iInf_image]
-
--- lemma iInf_coe' (s : Set (Submodule R M)) : ⨅ S ∈ s, S = ⨅ S ∈ s, (S : PointedCone R M) := by
---   rw [← sInf_eq_iInf, sInf_coe, sInf_eq_iInf]
-
-lemma coe_sup (S T : Submodule R M) : S ⊔ T = (S ⊔ T : PointedCone R M)
-    := Submodule.restrictScalars_sup _ _ _
-
-lemma sSup_coe (s : Set (Submodule R M)) : sSup s = sSup (ofSubmodule '' s) :=
-  Submodule.restrictScalars_sSup _ _
-
-lemma iSup_coe (s : Set (Submodule R M)) : ⨆ S ∈ s, S = ⨆ S ∈ s, (S : PointedCone R M) := by
-  rw [← sSup_eq_iSup, sSup_coe, sSup_eq_iSup, iSup_image]
-
-
--- ## SPAN
-
--- /-- The submodule span of a finitely generated pointed cone is finitely generated. -/
--- lemma submodule_span_fg{C : PointedCone R M} (hC : C.FG) : (Submodule.span (M := M) R C).FG := by
---   obtain ⟨s, rfl⟩ := hC; use s; simp
-
 -- TODO: this is only needed because `Submodule.span_insert` is restricted to rings
---@[deprecated "Really needed?" (since := "today")]
 lemma hull_insert (x) (s : Set M) : hull R (insert x s) = hull R {x} ⊔ hull R s :=
   Submodule.span_insert x s
 
@@ -174,151 +153,6 @@ lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R 
 
 end Ring
 
-section Semiring
-
-open Module Function
-open Submodule (span)
-
-variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
-  [Module R M] {S : Set M}
-
---------------------------
-
--- ## RESTRICT / EMBED
-
--- TODO: move to a separate file Restrict.lean like we did for submodules
-
-/- TODO: generalize these restrict/embed lemmas to general case where we restrict a
-  restrictScalar subspace to a normal subspace. -/
-
--- TODO: generalize to restrict using restrictScalar, so we can need to write only one instead
---  of two for submodules and pointed cones.
-
--- Q: Do we maybe want notation for this? For example: `S ⊓ᵣ C`?
-/-- The intersection `C ⊓ S` considered as a cone in `S`. -/
-abbrev restrict (S : Submodule R M) (C : PointedCone R M) : PointedCone R S
-  := C.submoduleOf S -- C.comap S.subtype
-
--- alias pointedConeOf := restrict
-
--- @[simp]
-lemma coe_restrict (S T : Submodule R M) :
-    restrict S T = Submodule.restrict S T := by
-  unfold restrict Submodule.restrict Submodule.submoduleOf
-  sorry
-
-lemma restrict_eq_comap_subtype (S : Submodule R M) (T : PointedCone R M) :
-    restrict S T = comap S.subtype T := rfl
-
--- @[simp] lemma restrict_top (S : Submodule R M) : restrict S ⊤ = ⊤ := Submodule.restrict_top _
--- @[simp] lemma restrict_bot (S : Submodule R M) : restrict S ⊥ = ⊥ := Submodule.restrict_bot _
-
--- @[simp] lemma restrict_self (S : Submodule R M) : restrict S S = ⊤ := Submodule.restrict_self _
-
--- lemma mem_restrict {S : Submodule R M} {T : PointedCone R M} {x : S} (h : x ∈ restrict S T) :
---     (x : M) ∈ T := h
-
-lemma mem_restrict_iff {S : Submodule R M} {T : PointedCone R M} {x : S} :
-    x ∈ restrict S T ↔ (x : M) ∈ T := ⟨id, id⟩
-
-/-- A cone `C` in a submodule `S` of `M` intepreted as a cone in `M`. -/
-@[coe] abbrev embed {S : Submodule R M} (C : PointedCone R S) : PointedCone R M := C.map S.subtype
-
-lemma embed_injective {S : Submodule R M} : Injective (embed : PointedCone R S → PointedCone R M)
-  := Submodule.map_injective_of_injective S.subtype_injective
-
-@[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : PointedCone R S} :
-    embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
-
--- TODO: use `Monotone`
-lemma embed_mono {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hT : C₁ ≤ C₂) :
-    embed C₁ ≤ embed C₂ := Submodule.map_mono hT
-
-lemma embed_mono_rev {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hC : embed C₁ ≤ embed C₂) :
-    C₁ ≤ C₂ := (by simpa using @hC ·)
-
-@[simp] lemma embed_mono_iff {S : Submodule R M} {C₁ C₂ : PointedCone R S} :
-    embed C₁ ≤ embed C₂ ↔ C₁ ≤ C₂ where
-  mp := embed_mono_rev
-  mpr := embed_mono
-
--- this should have higher priority than `map_top`
-@[simp] lemma embed_top {S : Submodule R M} : embed (⊤ : PointedCone R S) = S := by sorry
-@[simp] lemma embed_bot {S : Submodule R M} : embed (⊥ : PointedCone R S) = ⊥ := by sorry
-
-@[simp] lemma embed_le {S : Submodule R M} {C : PointedCone R S} : embed C ≤ S := by sorry
-
-@[simp] lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
-    (C.restrict S).embed = (S ⊓ C : PointedCone R M) := by
-  -- unfold embed restrict map comap
-  -- -- rw [← Submodule.restrictScalars_]
-  -- --rw [Submodule.restrictScalars_s]
-  -- --rw [comap_restrictScalar]
-  -- rw [← Submodule.restrictScalars_map]
-  -- exact Submodule.map_comap_subtype
-  sorry -- map_comap_subtype _ _
-
-@[simp]
-lemma restrict_embed (S : Submodule R M) (C : PointedCone R S) : restrict S (embed C) = C
-  := by sorry -- simp [restrict, embed, pointedConeOf, submoduleOf, map, comap_map_eq]
-
-lemma embed_fg_of_fg (S : Submodule R M) {C : PointedCone R S} (hC : C.FG) :
-    C.embed.FG := Submodule.FG.map _ hC
-
-lemma fg_of_embed_fg {S : Submodule R M} {C : PointedCone R S} (hC : C.embed.FG) : C.FG
-    := Submodule.fg_of_fg_map_injective _ (Submodule.injective_subtype (S : PointedCone R M)) hC
-
-@[simp] lemma embed_fg_iff_fg {S : Submodule R M} {C : PointedCone R S} : C.embed.FG ↔ C.FG
-  := ⟨fg_of_embed_fg, embed_fg_of_fg S⟩
-
-lemma restrict_fg_of_fg_le {S : Submodule R M} {C : PointedCone R M} (hSC : C ≤ S) (hC : C.FG) :
-    (C.restrict S).FG := by
-  rw [← (inf_eq_left.mpr hSC), inf_comm, ← embed_restrict] at hC
-  exact fg_of_embed_fg hC
-
-lemma fg_of_restrict_le {S : Submodule R M} {C : PointedCone R M}
-    (hSC : C ≤ S) (hC : (C.restrict S).FG) : C.FG := by
-  rw [← (inf_eq_left.mpr hSC), inf_comm, ← embed_restrict]
-  exact embed_fg_of_fg S hC
-
-@[simp] lemma fg_iff_restrict_le {S : Submodule R M} {C : PointedCone R M} (hSC : C ≤ S) :
-    (C.restrict S).FG ↔ C.FG := ⟨fg_of_restrict_le hSC, restrict_fg_of_fg_le hSC⟩
-
-lemma restrict_fg_iff_inf_fg (S : Submodule R M) (C : PointedCone R M) :
-    (C.restrict S).FG ↔ (S ⊓ C : PointedCone R M).FG := by
-  rw [← embed_restrict, embed_fg_iff_fg]
-
-lemma restrict_mono (S : Submodule R M) {C D : PointedCone R M} (hCD : C ≤ D) :
-    C.restrict S ≤ D.restrict S := fun _ => (hCD ·)
-
-lemma restrict_inf (S : Submodule R M) {C D : PointedCone R M} :
-    (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S
-  := by
-  ext x
-  rw [mem_restrict_iff]
-  constructor <;> exact fun hx ↦ ⟨hx.1, hx.2⟩
-
-@[simp]
-lemma restrict_inf_submodule (S : Submodule R M) (C : PointedCone R M) :
-    (C ⊓ S).restrict S = C.restrict S := by
-  ext x
-  rw [mem_restrict_iff, mem_restrict_iff]
-  exact and_iff_left x.property
-
-@[simp]
-lemma restrict_submodule_inf (S : Submodule R M) (C : PointedCone R M) :
-    (S ⊓ C : PointedCone R M).restrict S = C.restrict S := by
-      simp only [Submodule.restrict_inf_self]
-      exact embed_inj.mp rfl
-
--- lemma foo (S : Submodule R M) {T : Submodule R M} {C : PointedCone R M} (hCT : C ≤ T):
---   restrict (.restrict T S) (restrict T C) = restrict T (restrict S C) := sorry
-
--- Submodule.submoduleOf_sup_of_le
-
-end Semiring
-
-
 section AddCommGroup
 
 variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
@@ -347,7 +181,6 @@ open Pointwise
 
 @[simp] lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
 
--- TODO: Does this not already exist?
 lemma map_id_eq_neg (C : PointedCone R M) : C.map (-.id) = -C := by
   ext x
   simp only [Submodule.mem_neg, mem_map, LinearMap.neg_apply, LinearMap.id_coe, id_eq]
@@ -391,6 +224,12 @@ end Pointwise
 end PartialOrder
 
 section DirectedOrder
+
+-- ## NEG INTERACTION
+
+/- NOTE: there is already a mathlib PR (#36605) with a cleaner implementation of what is found
+below. It will however take a while to be merged since it requires another PR (#42611).
+-/
 
 open Submodule (span)
 
