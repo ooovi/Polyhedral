@@ -8,24 +8,24 @@ import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.RingTheory.LocalRing.Basic
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 
-/-! This file proces basic facts about cones that are intended to go into
-Pointed/Basic. -/
+/-! This file proves basic facts about cones that are intended to go into Pointed/Basic. -/
 
 namespace PointedCone
+
+open Pointwise
 
 section CommSemiring
 
 variable {R : Type*} [CommSemiring R] [PartialOrder R] [IsOrderedRing R]
 
-local notation "R≥0" => {c : R // 0 ≤ c}
+local notation "R≥0" => Nonneg R
 
 instance : Algebra R≥0 R where
   algebraMap := Nonneg.coeRingHom
   commutes' r x := mul_comm ..
   smul_def' r x := by aesop
-
-example : CommSemiring R≥0 := inferInstance
 
 end CommSemiring
 
@@ -75,12 +75,6 @@ meta def hull.unexpander : Lean.PrettyPrinter.Unexpander
     | `(«term{_}»| {$a}) => `($R ∙₊ $a)
     | _ => throw ()
   | _ => throw ()
-
-lemma hull_singleton_le_iff_mem {C : PointedCone R M} {x : M} : R ∙₊ x ≤ C ↔ x ∈ C :=
-  Submodule.span_singleton_le_iff_mem x C
-
-lemma hull_singleton_le {C : PointedCone R M} {x : M} (hx : x ∈ C) : R ∙₊ x ≤ C :=
-  hull_singleton_le_iff_mem.mpr hx
 
 lemma le_hull {s : Set M} : s ≤ hull R s := Submodule.subset_span
 
@@ -175,11 +169,11 @@ section PartialOrder
 variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 
-section Pointwise
+@[simp] lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by
+  ext x; simp
 
-open Pointwise
-
-@[simp] lemma neg_coe (S : Submodule R M) : -(S : PointedCone R M) = S := by ext x; simp
+lemma hull_neg (s : Set M) : hull R (-s) = - hull R s := by
+  rw [hull, Submodule.span_neg_eq_neg]
 
 lemma map_id_eq_neg (C : PointedCone R M) : C.map (-.id) = -C := by
   ext x
@@ -219,159 +213,76 @@ lemma comap_neg (C : PointedCone R M) (f : N →ₗ[R] M) : comap (-f) C = comap
 lemma comap_neg_apply (C : PointedCone R M) (f : N →ₗ[R] M) : -comap f C = comap f (-C) := by
   ext x; simp
 
-end Pointwise
-
 end PartialOrder
 
-section DirectedOrder
+section DirectedOrderRing
 
--- ## NEG INTERACTION
+/- NOTE: This section is mathlib PR #36605. Delete it after PR is merged. -/
 
-/- NOTE: there is already a mathlib PR (#36605) with a cleaner implementation of what is found
-below. It will however take a while to be merged since it requires another PR (#42611).
--/
-
-open Submodule (span)
+open Submodule
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsDirectedOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {E : Type*} [AddCommGroup E] [Module R E]
+variable {C : PointedCone R E} {x : E}
 
--- lemma neg_self_iff_eq_span_submodule {C : PointedCone R M} (hC : -C = C) :
---     Submodule.span R (C : Set M) = C := by
---   suffices h : ∀ C, Submodule.span R (C : Set M) ≥ C from by
---     rw [le_antisymm_iff]
---     constructor
---     · rw [← Submodule.neg_le_neg]
---       sorry
---     · exact h C
---   intro C
---   exact Submodule.subset_span
+/-- A cone that is closed under negation forms a submodule. -/
+abbrev toSubmodule (hC : -C = C) : Submodule R E where
+  __ := C
+  smul_mem' a x hx := by
+    obtain ⟨b, hab, hb⟩ := exists_ge_ge a 0
+    suffices b • x + -(b - a) • x ∈ C by
+      rw [← add_smul] at this
+      abel_nf at this
+      exact this
+    have : -(b - a) • x ∈ C := by
+      rw [← hC]
+      simpa [← neg_smul] using smul_mem _ (sub_nonneg.mpr hab) hx
+    aesop
 
--- lemma foo {α : Type} [InvolutiveNeg α] [SupSet α] (s : Set α) :
---     ⨆ a ∈ s ⊔ -s, a = ⨆ a ∈ α × FinSet 2,  := by sorry
+@[simp] lemma ofSubmodule_toSubmodule (hC : -C = C) : C.toSubmodule hC = C := rfl
 
--- lemma foo (s : Set (PointedCone R M)) :
---     ⨆ C ∈ s ⊔ -s, C = ⨆ C ∈ s, (C ⊔ -C) := by
---   simp
---   rw [le_antisymm_iff]
---   constructor
---   · intro h
+lemma coe_toSubmodule (hC : -C = C) : (C.toSubmodule hC : Set E) = C := by simp
 
---     sorry
---   · sorry
+lemma mem_toSubmodule {hC : -C = C} : x ∈ C.toSubmodule hC ↔ x ∈ C := by simp
 
--- NOTE: I changed the statement of the lemma and added the `rw` to the first line that
---  transforms it into the previous statement. Maybe there is a shorter proof now?
--- TODO: simplify proof?
---
--- Mathematically, this lemma is equivalent to directedness of the order on `R`: for `M = R`
--- and `x = 1`, it says every element of `R` is a difference of two nonnegative elements.
-variable (R) in
-@[simp] lemma hull_neg_pair_eq_span_singleton (x : M) : hull R {-x, x} = R ∙ x := by
-  rw [← Submodule.span_insert_eq_span_of_mem (Set.mem_singleton x)]
-  ext y
-  simp only [Submodule.restrictScalars_mem, Submodule.mem_span_pair, smul_neg, Subtype.exists]
-  constructor
-  · rintro ⟨a, _, b, _, rfl⟩
-    exact ⟨a, b, rfl⟩
-  · rintro ⟨a, b, rfl⟩
-    obtain ⟨c, hac, hbc⟩ := exists_ge_ge a b
-    refine ⟨c - b, sub_nonneg.mpr hbc, c - a, sub_nonneg.mpr hac, ?_⟩
-    calc
-      -((c - b) • x) + (c - a) • x = (-(c - b) + (c - a)) • x := by
-        rw [← neg_smul, ← add_smul]
-      _ = (b - a) • x := by
-        congr 1
-        abel
-      _ = -(a • x) + b • x := by
-        rw [sub_smul]
-        abel
+instance : CanLift (PointedCone R E) (Submodule R E) ofSubmodule (fun C => -C = C) where
+  prf _ h := ⟨toSubmodule h, ofSubmodule_toSubmodule h⟩
 
-@[simp] lemma hull_sup_hull_neg_eq_submodule_span (s : Set M) :
-    hull R s ⊔ hull R (-s) = span R s := by
-  ext x
-  constructor <;> intro h
-  · obtain ⟨_, hy, _, hz, rfl⟩ := Submodule.mem_sup.mp h
-    exact add_mem
-      (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hy p hp)
-      (Submodule.mem_span.mpr fun p hp => Submodule.mem_span.mp hz p <| by
-        intro y hy
-        simpa using p.neg_mem (hp (Set.mem_neg.mp hy)))
-  · rw [Submodule.restrictScalars_mem, Submodule.mem_span_set'] at h
-    obtain ⟨n, f, g, rfl⟩ := h
-    have hx : ∑ i, f i • (g i : M) ∈ hull R (-s ∪ s) := by
-      refine sum_mem ?_
-      intro i _
-      have hpair : f i • (g i : M) ∈ hull R ({-(g i : M), (g i : M)} : Set M) := by
-        rw [hull_neg_pair_eq_span_singleton (R := R) (x := (g i : M))]
-        exact Submodule.mem_span_singleton.mpr ⟨f i, by simp⟩
-      exact Set.mem_of_subset_of_mem (Submodule.span_mono <| by
-        intro z hz
-        rcases Set.mem_insert_iff.mp hz with rfl | hz
-        · exact Set.mem_union_left _ (by simp [(g i).property])
-        · rcases Set.mem_singleton_iff.mp hz with rfl
-          exact Set.mem_union_right _ (g i).property) hpair
-    simpa [hull_union, sup_comm, Set.union_comm] using hx
+variable (R)
 
--- NOTE: if this is implemented, it is more general than what mathlib already provides
--- for converting submodules into pointed cones. Especially the proof that R≥0 is an FG
--- submodule of R should be easier with this.
-@[simp] lemma hull_union_neg_eq_submodule_span (s : Set M) :
-    hull R (-s ∪ s) = span R s := by
-  ext x
-  simp only [Submodule.mem_span, Set.union_subset_iff, and_imp,
-    Submodule.restrictScalars_mem]
-  constructor <;> intros h B sB
-  · refine h (B.restrictScalars _) ?_ sB
-    rw [Submodule.coe_restrictScalars]
-    exact fun _ tm => neg_mem_iff.mp (sB tm)
-  · intro nsB
-    have : x ∈ (Submodule.span R s : PointedCone R M) :=
-      h (Submodule.span R s) Submodule.subset_span
-    rw [← hull_sup_hull_neg_eq_submodule_span] at this
-    obtain ⟨_, h₁, _, h₂, h⟩ := Submodule.mem_sup.mp this
-    rw [← h]
-    apply add_mem
-    · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr nsB) h₁
-    · exact Set.mem_of_subset_of_mem (Submodule.span_le.mpr sB) h₂
+lemma span_eq_hull_neg_sup_hull (s : Set E) : span R s = hull R (-s) ⊔ hull R s := by
+  suffices span R s = (hull R (-s) ⊔ hull R s).toSubmodule
+    (by simp [← span_neg_eq_neg, sup_comm]) by simp [this]
+  refine span_eq_of_le _ (fun x hx ↦ ?_) ?_
+  · simpa using mem_sup_right (Submodule.subset_span hx)
+  · rw [← ofSubmodule_le_ofSubmodule]
+    simpa [hull_le_span] using hull_le_span R (-s)
 
-lemma hull_eq_submodule_span_of_neg_self {s : Set M} (hs : s = -s) :
-    hull R s = Submodule.span R s := by
-  nth_rw 1 [← Set.union_self s, hs]
-  exact hull_union_neg_eq_submodule_span s
+variable (x) in
+@[simp] lemma hull_neg_pair_eq_span_singleton : hull R {-x, x} = R ∙ x := by
+  change hull R ({-x} ∪ {x}) = (R ∙ x)
+  simp only [span_union, span_eq_hull_neg_sup_hull, Set.neg_singleton]
 
-section Pointwise
+lemma hull_eq_span_of_neg_eq {s : Set E} (hs : -s = s) :
+    hull R s = span R s := by
+  simp [span_eq_hull_neg_sup_hull, hs]
 
-open Pointwise
+variable {R}
 
-lemma sup_neg_eq_linSpan (C : PointedCone R M) : -C ⊔ C = span R (C : Set M) := by
-  nth_rw 1 2 [← Submodule.span_eq C]
-  rw [← Submodule.span_neg_eq_neg, ← Submodule.span_union]
-  exact hull_union_neg_eq_submodule_span (C : Set M)
+variable (C) in
+lemma span_eq_neg_sup : span R (C : Set E) = -C ⊔ C := by
+  simp [span_eq_hull_neg_sup_hull, span_neg_eq_neg]
 
--- NOTE: I think only one of `neg_eq_iff_eq_linSpan` and `neg_eq_iff_eq_linSpan` is needed.
---  I don't know which.
+lemma mem_span_iff_mem_neg_sup : x ∈ span R C ↔ x ∈ -C ⊔ C := by
+  rw [← span_eq_neg_sup, mem_ofSubmodule_iff]
 
-lemma neg_eq_iff_eq_linSpan {C : PointedCone R M} : -C = C ↔ span R (C : Set M) = C := by
-  rw [← sup_neg_eq_linSpan, sup_eq_right]
-  exact Submodule.neg_eq_self_iff_neg_le
+lemma mem_span : x ∈ span R C ↔ ∃ p ∈ C, ∃ n ∈ C, x = p - n := by
+  simp_rw [mem_span_iff_mem_neg_sup, mem_sup, mem_neg]
+  refine ⟨fun ⟨y, hy', z, hz, h⟩ ↦ ?_, fun ⟨p, hp, n, hn, h⟩ ↦ ?_⟩
+  · exact ⟨z, hz, -y, hy', by grind⟩
+  · exact ⟨-n, by simp [hn], x + n, by simp [h, hp], by simp⟩
 
-lemma neg_le_iff_eq_linSpan {C : PointedCone R M} : -C ≤ C ↔ span R (C : Set M) = C :=
-  Iff.trans Submodule.neg_eq_self_iff_neg_le.symm neg_eq_iff_eq_linSpan
-
-end Pointwise
-
-lemma mem_span {C : PointedCone R M} {x : M} :
-    x ∈ span R C ↔ ∃ p ∈ C, ∃ n ∈ C, p = x + n := by
-  rw [← mem_ofSubmodule_iff, ← sup_neg_eq_linSpan, Submodule.mem_sup]
-  simp only [Submodule.mem_neg]
-  constructor <;> intro h
-  · obtain ⟨y, hy', z, hz, rfl⟩ := h
-    exact ⟨z, hz, -y, hy', by simp⟩
-  · obtain ⟨p, hp, n, hn, rfl⟩ := h
-    exact ⟨-n, by simp [hn], x + n, hp, by simp⟩
-
-end DirectedOrder
+end DirectedOrderRing
 
 section PartialOrder
 
@@ -544,7 +455,7 @@ section Field
 variable {R M : Type*} [Field R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
 
-open Set Pointwise
+open Set
 
 /-- If there is a linear map that is positive on the entire cone except 0, the cone is the sMul-span
 of any positive level set of the map. -/

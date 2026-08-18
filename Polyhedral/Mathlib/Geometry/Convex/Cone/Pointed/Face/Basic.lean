@@ -77,8 +77,9 @@ variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
 
 lemma mem_span_iff_mem (hF : F.IsFaceOf C) {x : M} (hx : x ∈ C) : x ∈ span R F ↔ x ∈ F := by
   constructor <;> intro hxF
-  · obtain ⟨_, hyF, _, hzF, rfl⟩ := F.mem_span.1 hxF
-    exact hF.mem_of_add_mem_left hx (hF.le hzF) hyF
+  · obtain ⟨_, hyF, _, hzF, h⟩ := F.mem_span.mp hxF
+    rw [Eq.comm, sub_eq_iff_eq_add] at h
+    exact hF.mem_of_add_mem_left hx (hF.le hzF) (h ▸ hyF)
   · exact Submodule.subset_span hxF
 
 -- This fails for a merely partial order.

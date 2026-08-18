@@ -203,11 +203,12 @@ lemma dual_span_lineal_eq_submodule_dual (s : Set M) :
   rw [← ofSubmodule_inj]
   rw [← dual_submodule_span]
   rw [← PointedCone.coe_ofSubmodule]
-  rw [← hull_union_neg_eq_submodule_span]
+  rw [span_eq_hull_neg_sup_hull]
+  rw [← hull_union]
   rw [dual_hull]
   rw [dual_union]
   rw [dual_neg, lineal_inf_neg]
-  try rw [inf_comm]
+  rw [inf_comm]
 
 lemma submodule_dual_span_eq_dual_lineal (C : PointedCone R M) :
     Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
