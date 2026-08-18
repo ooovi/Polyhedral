@@ -72,7 +72,7 @@ lemma mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem :
     x ∈ C.relint ↔ x ∈ C ∧ ∀ t, ∃ c > 0, x + c • t ∈ C := by simp [relint]
 
 lemma mem_relint_iff_mem_hull_neg_eq_top :
-    x ∈ C.relint ↔ x ∈ C ∧ hull R (insert (-x) C) = C.linSpan := by
+    x ∈ C.relint ↔ x ∈ C ∧ hull R (insert (-x) C) = Submodule.span R (C : Set M) := by
     sorry
 
 lemma mem_relint_iff_mem_forall_isFaceOf_eq_top_of_mem :
@@ -105,7 +105,7 @@ lemma relint_nonempty (h : C.FinSalRank) : Nonempty C.relint := sorry
 -- Easier to prove than `relint_nonempty`, perhaps prove this first.
 lemma relint_nonempty' (h : C.FinRank) : Nonempty C.relint := by
   /-
-    * choose a basis of C.linSpan in C
+    * choose a basis of span R C in C
     * since C.FinRank, this basis is finite
     * use `finset_sum_mem_relint_of_subset_of_le_span`
   -/

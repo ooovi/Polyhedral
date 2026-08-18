@@ -86,29 +86,8 @@ def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
 
 -- ## LINSPAN (deprecated)
 
-/-- The linear span of the cone. -/
-@[deprecated Submodule.span (since := "")]
-abbrev linSpan (C : PointedCone R M) : Submodule R M := span R C
-
-@[deprecated Submodule.span_eq (since := "")]
-lemma ofSubmodule_linSpan (S : Submodule R M) :
-  (S : PointedCone R M).linSpan = S := Submodule.span_eq _
-
-@[simp] lemma linSpan_hull_eq_submodule_span (s : Set M) :
+@[simp] lemma span_hull_eq_submodule_span (s : Set M) :
     span R (hull R s) = span R s := Submodule.span_span_of_tower ..
-
-@[deprecated (since := "")]
-alias span_submodule_span := linSpan_hull_eq_submodule_span
-
--- section Ring
-
--- variable {R M : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
---   [Module R M] {S : Set M}
-
--- lemma exists_sub_of_mem_linSpan (C : PointedCone R M) {x : M} (h : x ∈ C.linSpan) :
---     ∃ xp ∈ C, ∃ xm ∈ C, xp - xm = x := sorry
-
--- end Ring
 
 -- ## COE
 
@@ -151,44 +130,13 @@ lemma coe_sup_submodule_span' {s t : Set M} :
 -- Has this anything to do with cones? See version above
 lemma coe_sup_submodule_span {C D : PointedCone R M} :
     Submodule.span R ((C : Set M) ∪ (D : Set M)) = Submodule.span R (C ⊔ D : PointedCone R M) := by
-  rw [← linSpan_hull_eq_submodule_span]
+  rw [← span_hull_eq_submodule_span]
   simp [Submodule.span_union]
 
 lemma hull_le_submodule_span (s : Set M) : hull R s ≤ Submodule.span R s :=
     Submodule.span_le_restrictScalars _ _ s
 
-@[deprecated "We don't need this, the proof is short" (since := "today")]
-lemma hull_le_submodule_span_of_le {s t : Set M} (hst : s ⊆ t) : hull R s ≤ Submodule.span R t
-  := le_trans (hull_le_submodule_span s) (Submodule.span_mono hst)
-
 lemma le_span {C : PointedCone R M} : C ≤ span R (C : Set M) := Submodule.subset_span
-
-@[deprecated le_span (since := "")]
-lemma le_linSpan (C : PointedCone R M) : C ≤ C.linSpan := le_span
-
-@[deprecated (since := "")]
-alias le_submodule_span_self := le_linSpan
-
-@[deprecated (since := "today")]
-alias le_submodule_span := le_linSpan
-
-@[deprecated "We don't need this, the proof is short" (since := "today")]
-lemma le_submodule_span_of_le {C D : PointedCone R M} (hCD : C ≤ D) : C ≤ span R (D : Set M) :=
-  le_trans hCD Submodule.subset_span
-
--- @[deprecated (since := "today")]
--- alias le_span := subset_span
-
--- should be in `Submodule.Basic`
-@[deprecated "Really needed?" (since := "today")]
-lemma submodule_span_of_hull {s : Set M} {S : Submodule R M} (hsS : hull R s = S) :
-    Submodule.span R s = S := by
-  simpa using congrArg (Submodule.span R ∘ SetLike.coe) hsS
-
--- lemma span_eq_submodule_span {s : Set M} (h : ∃ S : Submodule R M, span R s = S) :
---     span R s = Submodule.span R s := by
---   obtain ⟨S, hS⟩ := h; rw [hS]
---   simpa using (congrArg (Submodule.span R ∘ SetLike.coe) hS).symm
 
 lemma hull_union (s t : Set M) : hull R (s ∪ t) = hull R s ⊔ hull R t :=
   Submodule.span_union s t
@@ -199,11 +147,14 @@ lemma sup_eq_hull_union (C D : PointedCone R M) : C ⊔ D = hull R (C ∪ D) := 
 
 lemma sSup_eq_hull_iUnion (S : Set (PointedCone R M)) :
     sSup S = hull R (sSup (SetLike.coe '' S)) := by
-  -- TODO
-  sorry
-
--- delete?
-lemma hull_min {s : Set M} {C : PointedCone R M} (hsC : s ⊆ C) : hull R s ≤ C := sInf_le hsC
+  apply le_antisymm
+  · refine sSup_le fun C hC _ hx => ?_
+    have : (C : Set M) ∈ SetLike.coe '' S := ⟨C, hC, rfl⟩
+    exact le_hull <| (le_sSup this) hx
+  · refine Submodule.span_le.mpr fun x hx => ?_
+    rw [Set.sSup_eq_sUnion] at hx
+    obtain ⟨_, ⟨_, hC, rfl⟩, hx⟩ := hx
+    exact (le_sSup hC) hx
 
 end Semiring
 
@@ -222,7 +173,6 @@ lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R 
   · exact Submodule.subset_span
 
 end Ring
-
 
 section Semiring
 
@@ -693,8 +643,8 @@ lemma quot_fg (hC : C.FG) (S : Submodule R M) : (C.quot S).FG := hC.map _
   simp [PointedCone.quot]
 
 @[simp] lemma sup_quot_eq_quot (C : PointedCone R M) (S : Submodule R M) :
-    (C ⊔ S).quot S = C.quot S := sorry
-
+    (C ⊔ S).quot S = C.quot S :=
+  Submodule.map_mkQ_eq_iff_sup_eq.mpr (by simp)
 
 @[simp]
 lemma quot_eq_iff_sup_eq {S : Submodule R M} {C D : PointedCone R M} :

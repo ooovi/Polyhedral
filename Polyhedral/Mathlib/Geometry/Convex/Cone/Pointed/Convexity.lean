@@ -37,8 +37,7 @@ lemma isConvexSet (P : PointedCone R M) :
 @[simp] theorem hull_convexHull (t : Set M) :
     hull R (Convexity.convexHull R t) = hull R t := by
   apply le_antisymm
-  · apply hull_min
-    exact Convexity.convexHull_min le_hull (isConvexSet _)
+  · exact sInf_le <| Convexity.convexHull_min le_hull (isConvexSet _)
   · exact hull_mono Convexity.subset_convexHull_self
 
 end Ring
@@ -53,26 +52,29 @@ open Pointwise Set
 /-- The cone hull of a convex set is the union of the closed halflines through that set. -/
 lemma mem_hull_iff_of_convex (hs : s.Nonempty) (hc : IsConvexSet R s) (x : M) :
     x ∈ hull R s ↔ x ∈ Ici (0 : R) • s where
-  mp hx := hull_min (C := {
-              carrier := {y | ∃ r : R, 0 ≤ r ∧ y ∈ r • s}
-              smul_mem' := by
-                intro c x ⟨r, rpos, hr⟩
-                use c.val • r, mul_nonneg c.prop rpos
-                obtain ⟨m, hm, rfl⟩ := hr
-                exact ⟨m, hm, by simp [mul_smul]⟩
-              add_mem' := by
-                rintro y₁ y₂ ⟨r₁, hr₁, hy₁⟩ ⟨r₂, hr₂, hy₂⟩
-                refine ⟨r₁ + r₂, add_nonneg hr₁ hr₂, ?_⟩
-                by_cases h : r₁ + r₂ = 0
-                · have h₁ : r₁ = 0 := by linarith
-                  have h₂ : r₂ = 0 := by linarith
-                  simp only [h₁, h₂, hs, zero_smul_set, mem_zero] at hy₂ hy₁
-                  simp [hy₁, hy₂, h, zero_smul_set hs]
-                · rw [IsConvexSet.add_smul hc hr₁ hr₂ h]
-                  exact add_mem_add hy₁ hy₂
-              zero_mem' := by
-                use 0; simpa using ⟨hs.choose, hs.choose_spec, zero_smul R (Exists.choose hs)⟩
-            }) (fun y hy ↦ ⟨1, by simpa⟩) hx
+  mp hx := by
+    let C : PointedCone R M := {
+      carrier := {y | ∃ r : R, 0 ≤ r ∧ y ∈ r • s}
+      smul_mem' := by
+        intro c x ⟨r, rpos, hr⟩
+        use c.val • r, mul_nonneg c.prop rpos
+        obtain ⟨m, hm, rfl⟩ := hr
+        exact ⟨m, hm, by simp [mul_smul]⟩
+      add_mem' := by
+        rintro y₁ y₂ ⟨r₁, hr₁, hy₁⟩ ⟨r₂, hr₂, hy₂⟩
+        refine ⟨r₁ + r₂, add_nonneg hr₁ hr₂, ?_⟩
+        by_cases h : r₁ + r₂ = 0
+        · have h₁ : r₁ = 0 := by linarith
+          have h₂ : r₂ = 0 := by linarith
+          simp only [h₁, h₂, hs, zero_smul_set, mem_zero] at hy₂ hy₁
+          simp [hy₁, hy₂, h, zero_smul_set hs]
+        · rw [IsConvexSet.add_smul hc hr₁ hr₂ h]
+          exact add_mem_add hy₁ hy₂
+      zero_mem' := by
+        use 0; simpa using ⟨hs.choose, hs.choose_spec, zero_smul R (Exists.choose hs)⟩
+    }
+    refine sInf_le (a := C) ?_ hx
+    exact fun _ hy ↦ ⟨1, by simp [hy]⟩
   mpr h := by
     obtain ⟨r, hr, y, hy, rfl⟩ := h
     exact (hull R s).smul_mem (Set.mem_Ici.mp hr) <| subset_hull hy

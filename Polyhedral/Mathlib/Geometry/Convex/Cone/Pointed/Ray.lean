@@ -22,8 +22,8 @@ lemma rank_one_of_ray {x : M} (hx : x ≠ 0) : (hull R {x}).rank = 1 := by
     LinearIndependent.of_subsingleton () hx
   have hr := rank_span (R := R) (M := M) hlin
   have hspan :
-      Submodule.span R (Set.range (fun _ : Unit => x)) = (hull R {x}).linSpan := by
-    simp [linSpan, Set.range_const]
+      Submodule.span R (Set.range (fun _ : Unit => x)) = .span R (hull R {x}) := by
+    simp [Set.range_const]
   rw [hspan] at hr
   rw [PointedCone.rank]
   simpa using hr

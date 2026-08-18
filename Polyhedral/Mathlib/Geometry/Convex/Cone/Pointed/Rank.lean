@@ -111,7 +111,7 @@ lemma rank_eq_rank_add_rank_quot_span {F G : PointedCone R M} (hFG : F ≤ G) :
 /-- Finite rank descends to a contained cone's span. -/
 lemma finRank_of_le {F G : PointedCone R M} (hG : G.FinRank) (hFG : F ≤ G) :
     F.FinRank := by
-  letI : Module.Finite R (span R (G : Set M)) := Module.Finite.iff_fg.mpr hG
+  let : Module.Finite R (span R (G : Set M)) := Module.Finite.iff_fg.mpr hG
   exact Module.Finite.iff_fg.mp <|
     Module.Finite.of_injective (Submodule.inclusion (Submodule.span_mono hFG))
       (Submodule.inclusion_injective (Submodule.span_mono hFG))
@@ -134,10 +134,10 @@ lemma finRank_quot_submodule (G : PointedCone R M) (S : Submodule R M) (hG : G.F
 lemma finrank_eq_finrank_add_finrank_quot_span {F G : PointedCone R M}
     (hG : G.FinRank) (hFG : F ≤ G) :
     G.finrank = F.finrank + (G.quot (span R (F : Set M))).finrank := by
-  letI : Module.Finite R (span R (G : Set M)) := Module.Finite.iff_fg.mpr hG
-  letI : Module.Finite R (span R (F : Set M)) := Module.Finite.iff_fg.mpr <|
+  let : Module.Finite R (span R (G : Set M)) := Module.Finite.iff_fg.mpr hG
+  let : Module.Finite R (span R (F : Set M)) := Module.Finite.iff_fg.mpr <|
     PointedCone.finRank_of_le hG hFG
-  letI : Module.Finite R (span R (G.quot (span R (F : Set M)) :
+  let : Module.Finite R (span R (G.quot (span R (F : Set M)) :
       Set (M ⧸ span R (F : Set M)))) := Module.Finite.iff_fg.mpr <|
     PointedCone.finRank_quot_span hG
   let f : span R (G : Set M) →ₗ[R] (M ⧸ span R (F : Set M)) :=
@@ -189,11 +189,13 @@ noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
   the non-trivial structure of the cone only spans finitely many dimensions. -/
 abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
 
-lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank := sorry
+lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank :=
+  sorry
 
 lemma FG.finSalRank (h : C.FG) : C.FinSalRank := h.finRank.finSalRank
 
-lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) : C.FinRank := sorry
+lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) : C.FinRank :=
+  sorry
 
 end Definitions
 
@@ -236,7 +238,7 @@ lemma rank_eq_rank_lineal_add_salRank (C : PointedCone R M) :
 lemma finrank_eq_finrank_lineal_add_salFinrank (C : PointedCone R M)
     (hC : C.FinRank) :
     C.finrank = Module.finrank R C.lineal + C.salFinrank := by
-  letI : Module.Finite R (span R (C : Set M)) := Module.Finite.iff_fg.mpr hC
+  let : Module.Finite R (span R (C : Set M)) := Module.Finite.iff_fg.mpr hC
   have h := PointedCone.finrank_eq_finrank_add_finrank_quot_span
     (F := ((C.lineal : Submodule R M) : PointedCone R M)) hC C.lineal_le
   change C.finrank = Module.finrank R (span R (C.lineal : Set M)) +
@@ -262,7 +264,7 @@ lemma salFinrank_eq_finrank_of_lineal_eq_bot (C : PointedCone R M)
 /-- In finite-dimensional span, salient rank is the cardinal cast of salient finrank. -/
 lemma salRank_eq_natCast_salFinrank (C : PointedCone R M) (hC : C.FinSalRank) :
     C.salRank = (C.salFinrank : Cardinal) := by
-  letI : Module.Finite R (span R (C.salientQuot : Set (M ⧸ C.lineal))) :=
+  let : Module.Finite R (span R (C.salientQuot : Set (M ⧸ C.lineal))) :=
     Module.Finite.iff_fg.mpr hC
   rw [PointedCone.salRank, PointedCone.salFinrank, PointedCone.rank, PointedCone.finrank]
   exact (Module.finrank_eq_rank
