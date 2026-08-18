@@ -5,6 +5,7 @@ Authors: Martin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 
 /-! This file defines the algebraic relative interior. -/
 

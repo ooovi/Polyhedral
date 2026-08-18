@@ -5,7 +5,6 @@ Authors: Martin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
 /-!
 This file defines the subdual of a cone w.r.t. another cone.
@@ -23,10 +22,15 @@ variable [AddCommGroup N] [Module R N]
 
 variable (p : M →ₗ[R] N →ₗ[R] R) {C F : PointedCone R M}
 
-/-- If `F` is a face of the cone `C`, then the subdual of `F` w.r.t. `C` is a face of the dual
-of `C`, and is called the "dual face" to `F`. -/
+/-- If `F` is a face of the cone `C`, then the subdual of `F` w.r.t. `C` is a face of `dual p C`,
+and is called the "dual face" to `F`. -/
 def subdual (C F : PointedCone R M) : PointedCone R N :=
-  (dual p C) ⊓ (.dual p F : Submodule R N)
+  dual p C ⊓ (.dual p F : Submodule R N)
+
+/-- If `F` is a face of the cone `dual p C`, then the subdual of `F` w.r.t. `dual p C` is a
+face of `C`, and is called the "dual face" to `F`. -/
+def subdual_flip (C : PointedCone R M) (F : PointedCone R N) : PointedCone R M :=
+  C ⊓ (.dual p.flip F : Submodule R M)
 
 variable {p} in
 lemma subdual_def {C F : PointedCone R M} :
@@ -63,26 +67,6 @@ variable (p : M →ₗ[R] N →ₗ[R] R) {C F F₁ F₂ : PointedCone R M}
 lemma subdual_self : subdual p C C = (dual p C).lineal := by
   rw [subdual_def, ← dual_lineal_eq_submodule_dual]
   exact inf_eq_right.mpr (lineal_le (dual p C))
-
-section DualClosed
-
-variable (hC : C.DualClosed p)
-
-/-- The subdual is injective. -/
--- only for fg
-lemma subdual_inj : Function.Injective (subdual p C) := sorry
-
-/-- The subdual is involutive. -/
--- only for fg
-lemma subdual_subdual : subdual p.flip (dual p C) (subdual p C F) = F := sorry
-
-/-- The subdual is strictly antitone. -/
-lemma subdual_antitone_iff {F₁ F₂ : PointedCone R M} :
-    subdual p C F₁ ≤ subdual p C F₂ ↔ F₂ ≤ F₁ where
-  mpr := fun h => subdual_antitone p h
-  mp := sorry
-
-end DualClosed
 
 end Field
 

@@ -5,7 +5,8 @@ Authors: Olivia Röhrig, Martin Winter
 -/
 
 import Mathlib.Geometry.Convex.Cone.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
+
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 /-!
@@ -276,25 +277,8 @@ variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
 variable {C F : PointedCone R M}
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
-/-- The face of the dual cone that corresponds to this face. -/
-def dual (F : Face C) : Face (dual p C) := ⟨_, F.isFaceOf.subdual_dual p⟩
+-- # Map and comap
 
-def dual_flip (hC : DualClosed p C) (F : Face (.dual p C)) : Face C :=
-  ⟨subdual p.flip (.dual p C) F, by
-    nth_rw 2 [← LinearMap.flip_flip p]
-    rw [← dual_flip_dual_dual_flip]
-    simp only [LinearMap.flip_flip, dual_dual_flip_dual]
-    convert F.isFaceOf.subdual_dual (p.flip)
-    · rfl
-    · exact (DualClosed.def p hC).symm
-  ⟩
-
-lemma dual_antitone : Antitone (dual p : Face C → Face _) :=
-  fun _ _ hF _ xd => subdual_antitone p hF xd
-
-/-!
-#### Map and comap
--/
 /-- The face `map f F` of `map f C`. -/
 def map {f : M →ₗ[R] N} (hf : Function.Injective f) (F : Face C) : Face (map f C)
     := ⟨_, F.isFaceOf.map _ hf⟩

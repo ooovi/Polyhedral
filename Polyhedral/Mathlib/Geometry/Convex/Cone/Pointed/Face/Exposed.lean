@@ -5,6 +5,7 @@ Authors: Martin Winter
 -/
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
 
 /-! This file defines exposed faces of cones, namely ones that are the intersection of the cone with
 a supporting hyperplane. This notion differs from the more general definition using positive
