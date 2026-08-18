@@ -59,7 +59,7 @@ lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
     subdual p.flip (dual p C) (subdual p C F) = F := by
   repeat rw [subdual_def]
   rw [FG.dual_flip_dual p hC]
-  rw [← dual_span_lineal_eq_submodule_dual]
+  rw [← dual_lineal_eq_submodule_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
   nth_rw 3 [← PointedCone.coe_ofSubmodule]
   rw [DualFG.dual_inf_dual_sup_dual ?_ ?_]

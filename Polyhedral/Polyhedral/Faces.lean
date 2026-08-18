@@ -12,7 +12,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
 
-/-! This file proves basic fact about faces of polyhedral cones. -/
+/-! This file proves basic facts about faces of polyhedral cones. -/
 
 namespace PointedCone
 
@@ -48,18 +48,31 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- ## TODO: remove `isPerfPair` assumption from everything below.
 
+-- NOTE: This proof is AI generated
 lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) :
     (C ⊔ (span R (F : Set M))).lineal = span R F := by
   ext x
   simp only [mem_lineal, Submodule.mem_sup, Submodule.restrictScalars_mem, mem_span,
     ↓existsAndEq, and_true]
   constructor
-  · intro ⟨h, h'⟩
-    -- obtain ⟨y, hy, z, ⟨p, hp, n, hn, h⟩, H⟩ := h
-    -- obtain ⟨y', hy', z', ⟨p', hp', n', hn', h'⟩, H'⟩ := h'
-    -- obtain ⟨y', hy', z', hz', b', hb', h'⟩ := h'
-    sorry
-  · sorry
+  · rintro ⟨⟨y, hy, p, n, ⟨hp, hn⟩, h⟩, ⟨y', hy', p', n', ⟨hp', hn'⟩, h'⟩⟩
+    have hy'eq : y' = -x - (p' - n') := eq_sub_of_add_eq h'
+    have hyy' : y + y' ∈ span R (F : Set M) := by
+      rw [mem_span]
+      refine ⟨n + n', F.add_mem hn hn', p + p', F.add_mem hp hp', ?_⟩
+      rw [hy'eq, ← h]
+      abel
+    have hyy'F : y + y' ∈ F :=
+      (hF.mem_span_iff_mem (C.add_mem hy hy')).mp hyy'
+    have hyF : y ∈ F := hF.mem_of_add_mem_left hy hy' hyy'F
+    refine ⟨y + p, F.add_mem hyF hp, n, hn, ?_⟩
+    rw [← h]
+    abel
+  · intro h
+    obtain ⟨p, hp, n, hn, h⟩ := h
+    constructor
+    · exact ⟨0, C.zero_mem, p, n, ⟨hp, hn⟩, by simpa using h.symm⟩
+    · exact ⟨0, C.zero_mem, n, p, ⟨hn, hp⟩, by rw [h]; simp⟩
 
 variable (p) [p.IsPerfPair] in
 -- variable [Fact (Surjective p.flip)] in
@@ -67,7 +80,7 @@ variable (p) [p.IsPerfPair] in
     subdual p.flip (.dual p C) (subdual p C F) = F := by
   repeat rw [subdual_def]
   rw [dual_flip_dual p hC]
-  rw [← dual_span_lineal_eq_submodule_dual]
+  rw [← dual_lineal_eq_submodule_dual]
   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
   nth_rw 3 [← PointedCone.coe_ofSubmodule]
   rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]
@@ -75,7 +88,7 @@ variable (p) [p.IsPerfPair] in
   rw [dual_flip_dual p hC]
   nth_rw 2 [← Submodule.dual_span]
   rw [Submodule.dual_flip_dual p]
-  rw [hF.sup_linspan_lineal] -- not proven yet
+  rw [hF.sup_linspan_lineal]
   exact hF.inf_span
 
 /-- Every face of a polyhedral cone is exposed. -/

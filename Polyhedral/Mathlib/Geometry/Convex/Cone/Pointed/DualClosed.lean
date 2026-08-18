@@ -4,14 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Mathlib.LinearAlgebra.BilinearMap
-import Mathlib.LinearAlgebra.Dual.Defs
-
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 
-/-! This file introduces the concept of dual closed cones (closed under double duality)
-and proves basic facets. -/
+/-! This file defines dual closed cones, that is, cones closed under taking the double dual. -/
 
 namespace PointedCone
 
@@ -48,7 +44,10 @@ lemma DualClosed.def_flip_iff {C : PointedCone R N} :
     DualClosed p.flip C ↔ dual p (dual p.flip C) = C := by rfl
 
 lemma DualClosed.coe_iff {S : Submodule R M} :
-    DualClosed p S ↔ S.DualClosed p := sorry
+    DualClosed p S ↔ S.DualClosed p := by
+  change dual p.flip (dual p S) = S ↔ _
+  rw [dual_eq_submodule_dual p S, dual_coe_coe_eq_dual_coe, dual_eq_submodule_dual p.flip]
+  exact ofSubmodule_inj
 
 lemma dualClosed_coe {S : Submodule R M} (hS : S.DualClosed p) :
     DualClosed p S := DualClosed.coe_iff.mpr hS
@@ -130,12 +129,13 @@ section LinearOrder
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed p) :
     .dual p C.lineal = span R (dual p C) := by
-  rw [← hC, dual_span_lineal_eq_submodule_dual]
+  rw [← hC, dual_lineal_eq_submodule_dual]
   nth_rw 1 [← flip_flip p]
   nth_rw 2 [← Submodule.dual_span]
   rw [(dual_dualClosed p C).submodule_span_dualClosed, dual_dual_flip_dual]
@@ -276,7 +276,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- variable [Fact (Surjective p)] in
 -- /-- For a dual closed cone, the dual of the submodule span is the lineality space of the dual. -/
--- lemma DualClosed.dual_span_lineal_eq_submodule_dual {C : PointedCone R M} (hC : C.DualClosed p) :
+-- lemma DualClosed.dual_span_lineal_dual {C : PointedCone R M} (hC : C.DualClosed p) :
 --     .dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
 
 --   have h := hC.dual_lineal_span_dual.symm
@@ -310,7 +310,5 @@ lemma dualClosed (S : Submodule R M) : DualClosed p S :=
     dualClosed_coe <| S.dualClosed p
 
 end Field
-
-
 
 end PointedCone

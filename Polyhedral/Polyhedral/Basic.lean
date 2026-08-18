@@ -334,15 +334,16 @@ variable {C C₁ C₂ F : PointedCone R M}
   is `IsPolyhedral.fg_inf_of_disjoint_lineal`. -/
 lemma fg_inf_of_isCompl (hC : C.IsPolyhedral) {S : Submodule R M} (hS : IsCompl C.lineal S) :
     FG (C ⊓ S) := by
-  obtain ⟨D, hD, T, rfl⟩ := hC
-  sorry -- hC.linearEquiv <| IsCompl.map_mkQ_equiv_inf hS C.lineal_le
+  obtain ⟨D, hD, hCD⟩ := hC.exists_fg_eq_sup_lineal
+  refine FG.linearEquiv (IsCompl.map_mkQ_equiv_inf hS C.lineal_le) ?_
+  have hquot := congrArg (fun K : PointedCone R M ↦ K.quot C.lineal) hCD
+  simp only [sup_quot_eq_quot] at hquot
+  rw [hquot]
+  exact hD.map _
 
 end CommRing
 
-
--- ----
-
--- ## NOTE: this is legacy code, that remains here for transferring some of the proofs.
+-- # NOTE: The comment below is legacy code. It remains here for transferring some of the proofs.
 
 -- /-- A cone is polyhedral if its salient quotient is finitely generated. -/
 -- abbrev IsPolyhedral (C : PointedCone R M) := FG C.salientQuot
@@ -506,7 +507,6 @@ end CommRing
 
 -- open Pointwise in
 -- lemma IsPolyhedral.neg (hC : C.IsPolyhedral) : (-C).IsPolyhedral := by simpa using hC
-
 
 section DivisionRing
 

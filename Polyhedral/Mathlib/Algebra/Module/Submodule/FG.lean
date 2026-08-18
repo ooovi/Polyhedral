@@ -29,7 +29,6 @@ lemma FG.linearEquiv {S : Submodule R M} {T : Submodule R N} (e : S ≃ₗ[R] T)
   rw [← Submodule.fg_top] at *
   exact fg_of_linearEquiv e.symm hS
 
-
 -- ## RESTRICT / EMBED
 
 lemma embed_fg_of_fg {S : Submodule R M} {T : Submodule R S} (hC : T.FG) :

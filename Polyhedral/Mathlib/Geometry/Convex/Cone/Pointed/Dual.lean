@@ -197,7 +197,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma dual_span_lineal_eq_submodule_dual (s : Set M) :
+lemma dual_lineal_eq_submodule_dual (s : Set M) :
     (dual p s).lineal = .dual p s := by
   rw [Eq.comm]
   rw [← ofSubmodule_inj]
@@ -212,7 +212,7 @@ lemma dual_span_lineal_eq_submodule_dual (s : Set M) :
 
 lemma submodule_dual_span_eq_dual_lineal (C : PointedCone R M) :
     Submodule.dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
-  rw [Submodule.dual_span, ← dual_span_lineal_eq_submodule_dual]
+  rw [Submodule.dual_span, ← dual_lineal_eq_submodule_dual]
 
 end LinearOrder
 

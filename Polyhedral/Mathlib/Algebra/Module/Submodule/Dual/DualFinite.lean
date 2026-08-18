@@ -5,8 +5,9 @@ Authors: Martin Winter
 -/
 
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
 import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
+import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 
 /-! This file introduces the notion `DualFG` for submodules. A submodule is `DualFG` if it
 is the dual of a finitely generated submodule. Over fields this is the same as being both
@@ -127,23 +128,6 @@ lemma dualfg_bot [IsNoetherianRing R] [Module.Finite R N] [Fact p.SeparatingRigh
 
 end CommSemiring
 
-section Function
-
-variable {R : Type*} [CommSemiring R]
-variable {M₁ : Type*} [AddCommGroup M₁] [Module R M₁]
-variable {M₂ : Type*} [AddCommGroup M₂] [Module R M₂]
-
--- TODO: generalize to arbitrary pairings.
--- variable {p : M →ₗ[R] N →ₗ[R] R}
--- variable {N₁ : Type*} [AddCommGroup N₁] [Module R N₁]
--- variable {N₂ : Type*} [AddCommGroup N₂] [Module R N₂]
-
-lemma map_dual (f : M₁ →ₗ[R] M₂) (C : Submodule R M₁) :
-    dual (Dual.eval R M₂) (map f C) = comap f.dualMap (dual (Dual.eval R M₁) C) := by
-  ext x; simp
-
-end Function
-
 -- ## COFG
 
 section IsNoetherianRing
@@ -200,7 +184,7 @@ theorem dualfg_of_codisjoint_fg {S T : Submodule R N} (hST : Codisjoint S T) (hS
   have hS := FG.dual_dualfg p.flip hS
   simpa [Submodule.dual_dual_flip] using dual_of_fg p (fg_of_disjoint_dualfg hST hS)
 
--- The proof can maybe be much shorter, see above
+-- The proof can maybe be much shorter, see `dualfg_of_codisjoint_fg`
 variable (p) [Fact (Surjective p)] in
 /-- A complement of an FG submodule is DualFG. -/
 theorem dualfg_of_isCompl_fg {S T : Submodule R N} (hST : IsCompl S T) (hS : S.FG) :
