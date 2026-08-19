@@ -11,26 +11,31 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 
 namespace PointedCone
 
+variable {R M M₁ M₂ : Type*}
+
 open Module
 open Submodule (span)
-
--- ## LINEAL
 
 section LinearOrderedRing
 
 open Pointwise
 
-variable {R M : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R] [AddCommGroup M] [Module R M]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
+variable {C : PointedCone R M}
 
 /-- Every submodule contain in the cone is also contained in the lineality space. -/
-lemma le_lineal {C : PointedCone R M} {S : Submodule R M} (hS : S ≤ C) :
+lemma submodule_le_lineal {S : Submodule R M} (hS : S ≤ C) :
     S ≤ C.lineal := by simp only [lineal_eq_sSup]; exact le_sSup hS
 
-lemma neg_mem_of_mem_lineal {C : PointedCone R M} {x : M} (hx : x ∈ C.lineal) : -x ∈ C := by
+example (x : M) (hx : x ∈ C.lineal) : -x ∈ C.lineal := neg_mem hx
+
+lemma neg_mem_of_mem_lineal {x : M} (hx : x ∈ C.lineal) : -x ∈ C := by
   rw [← Submodule.neg_mem_iff] at hx
   exact lineal_le C hx
 
-lemma mem_of_neg_mem_lineal {C : PointedCone R M} {x : M} (hx : -x ∈ C.lineal) : x ∈ C := by
+lemma mem_of_neg_mem_lineal {x : M} (hx : -x ∈ C.lineal) : x ∈ C := by
   rw [Submodule.neg_mem_iff] at hx
   exact lineal_le C hx
 
@@ -44,7 +49,10 @@ lemma lineal_mem_neg (C : PointedCone R M) : C.lineal = {x ∈ C | -x ∈ C} := 
 lemma lineal_inf (C D : PointedCone R M) : (C ⊓ D).lineal = C.lineal ⊓ D.lineal := by
   ext x; simp [mem_lineal]; aesop
 
-@[simp] lemma submodule_lineal (S : Submodule R M) : (S : PointedCone R M).lineal = S := by
+/- TODO: this should be called `ofSubmodule_lineal`, but this name is currently taken by an
+incorrectly named mathlib lemma. -/
+@[simp] lemma submodule_lineal (S : Submodule R M) :
+    (S : PointedCone R M).lineal = S := by
   ext x; simp [mem_lineal]
 
 @[simp] lemma lineal_top : (⊤ : PointedCone R M).lineal = ⊤ := submodule_lineal ⊤
@@ -56,56 +64,51 @@ lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal 
   rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
 
-lemma lineal_le_ker_of_le_positive {C : PointedCone R M} {f : M →ₗ[R] R}
+lemma lineal_le_ker_of_le_nonneg {f : M →ₗ[R] R}
     (h : C ≤ f.nonneg) : C.lineal ≤ f.ker := by
   simpa using lineal_mono h
 
--- this is just a special case of s ⊆ C → hull R s ⊆ C
-example {s : Set M} {f : M →ₗ[R] R} (h : s ⊆ f.nonneg) : hull R s ≤ f.nonneg := by
-  rw [← Submodule.span_eq f.nonneg]
-  exact Submodule.span_mono h
+/- In this section we prove properties of lineal that also follow from lineal
+being a face. But we need this earlier than faces, so we need to prove that
+lineal is a face here. This can then be resused later.
 
-/- In this section we show properties of lineal that also follow from lineal
-  being a face. But we need this earlier than faces, so we need to prove that
-  lineal is a face here. This can then be resused later.
-
-  Alternatively, lineal can be defined in Faces.lean
+Alternatively, lineal can be defined in Faces.lean
 -/
 
-lemma lineal_isExtreme_left {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+lemma mem_lineal_of_add_mem_left {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     (hxy : x + y ∈ C.lineal) : x ∈ C.lineal := by
   have hxy' := neg_mem_of_mem_lineal hxy
   have hx' := C.add_mem hy hxy'
   simp only [neg_add_rev, add_neg_cancel_left] at hx'
   exact mem_lineal.mpr ⟨hx, hx'⟩
 
-lemma lineal_isExtreme_right {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+lemma mem_lineal_of_add_mem_right {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     (hxy : x + y ∈ C.lineal) : y ∈ C.lineal := by
-  rw [add_comm] at hxy; exact lineal_isExtreme_left hy hx hxy
+  rw [add_comm] at hxy; exact mem_lineal_of_add_mem_left hy hx hxy
 
-lemma lineal_isExtreme {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+lemma mem_lineal_of_add_mem {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     (hxy : x + y ∈ C.lineal) : x ∈ C.lineal ∧ y ∈ C.lineal :=
-  ⟨lineal_isExtreme_left hx hy hxy, lineal_isExtreme_right hx hy hxy⟩
+  ⟨mem_lineal_of_add_mem_left hx hy hxy, mem_lineal_of_add_mem_right hx hy hxy⟩
 
-lemma lineal_isExtreme_right_of_inv {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+lemma lineal_isExtreme_right_of_inv {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     {c : R} (hc : 0 < c) (hc' : Invertible c) (hxy : x + c • y ∈ C.lineal) : y ∈ C.lineal := by
-  have h := lineal_isExtreme_right hx (C.smul_mem (le_of_lt hc) hy) hxy
+  have h := mem_lineal_of_add_mem_right hx (C.smul_mem (le_of_lt hc) hy) hxy
   simpa using C.lineal.smul_mem (Invertible.invOf c) h
 
-lemma lineal_isExtreme_left_of_inv {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+lemma lineal_isExtreme_left_of_inv {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     {c : R} (hc : 0 < c) (hc' : Invertible c) (hxy : c • x + y ∈ C.lineal) : x ∈ C.lineal := by
-  have h := lineal_isExtreme_left (C.smul_mem (le_of_lt hc) hx) hy hxy
+  have h := mem_lineal_of_add_mem_left (C.smul_mem (le_of_lt hc) hx) hy hxy
   simpa using C.lineal.smul_mem (Invertible.invOf c) h
 
-lemma lineal_isExtreme_sum {C : PointedCone R M} {xs : Finset M} (hxs : (xs : Set M) ⊆ C)
-    (h : ∑ x ∈ xs, x ∈ C.lineal) : (xs : Set M) ⊆ C.lineal := by classical
-  induction xs using Finset.induction_on with
+lemma subset_lineal_of_sum_mem {s : Finset M} (hs : (s : Set M) ⊆ C)
+    (h : ∑ x ∈ s, x ∈ C.lineal) : (s : Set M) ⊆ C.lineal := by classical
+  induction s using Finset.induction_on with
   | empty => simp
-  | insert y xs hy H =>
+  | insert _ _ hy H =>
     simp only [Set.subset_def, SetLike.mem_coe, Finset.coe_insert, Set.mem_insert_iff,
       forall_eq_or_imp, Finset.sum_insert hy] at *
-    have h := lineal_isExtreme hxs.1 (C.sum_mem hxs.2) h
-    exact ⟨h.1, H hxs.2 h.2⟩
+    have h := mem_lineal_of_add_mem hs.1 (C.sum_mem hs.2) h
+    exact ⟨h.1, H hs.2 h.2⟩
 
 @[simp] lemma sup_lineal_eq (C : PointedCone R M) : C ⊔ C.lineal = C :=
     sup_of_le_left (lineal_le C)
@@ -118,11 +121,11 @@ lemma lineal_sup_le (C D : PointedCone R M) : C.lineal ⊔ D.lineal ≤ (C ⊔ D
   exact ⟨⟨y, hy, by use z⟩, -y, hy', -z, hz', by simp [add_comm]⟩
 
 -- !! only holds over fields or archimedean rings! Not in general.
-lemma mem_lineal_of_smul_mem_lineal' {C : PointedCone R M} :
+lemma mem_lineal_of_smul_mem_lineal' :
   (∀ c > 0, ∃ d > 0, d * c ≥ 1) ↔ (∀ x ∈ C, ∀ c > 0, c • x ∈ C.lineal → x ∈ C.lineal) := sorry
 
 -- !! only holds over fields or archimedean rings! Not in general.
-lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
+lemma mem_lineal_of_smul_mem_lineal {x : M} {c : R}
     (hx : x ∈ C) (hcx : c • x ∈ C.lineal) : x ∈ C.lineal := by
   wlog h0c : 0 ≤ c
   · sorry
@@ -137,16 +140,16 @@ lemma mem_lineal_of_smul_mem_lineal {C : PointedCone R M} {x : M} {c : R}
       have h' : 1 ≤ c ↔ 0 ≤ c - 1 := by simp
       rw [h'] at h1c
       replace h' := smul_mem C h1c hx
-      exact lineal_isExtreme_right h' hx sorry
+      exact mem_lineal_of_add_mem_right h' hx sorry
 
 -- TODO: maybe this result is not really necessary. See `inf_sup_eq_self_of_le_of_codisjoint` below.
 /-- If `C` is a cone and `S` is complementary to the cone's linealiry space, then `C` can
   be written as `(C ⊓ S) ⊔ C.lineal`. -/
-lemma inf_sup_lineal {C : PointedCone R M} {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
+lemma inf_sup_lineal {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
   sorry
 
-lemma inf_sup_eq_self_of_le_of_codisjoint {C : PointedCone R M} {S : PointedCone R M}
+lemma inf_sup_eq_self_of_le_of_codisjoint {S : PointedCone R M}
     {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint S T) : (C ⊓ S) ⊔ T = C := by
   simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
 
@@ -210,7 +213,7 @@ section IsNoetherianRing
 variable [IsNoetherianRing R]
 
 /-- The lineality space of an FG cone is FG. -/
-lemma lineal_fg {C : PointedCone R M} (hC : C.FG) : C.lineal.FG :=
+lemma lineal_fg (hC : C.FG) : C.lineal.FG :=
   Submodule.FG.of_le hC.span <| lineal_le_span C
 
 end IsNoetherianRing
@@ -220,29 +223,31 @@ end LinearOrderedRing
 
 section DivisionRing
 
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
-lemma lineal_isExtreme_left' {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+variable {C : PointedCone R M}
+
+lemma lineal_isExtreme_left' {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     {c : R} (hc : 0 < c) (hxy : c • x + y ∈ C.lineal) : x ∈ C.lineal := by
   exact lineal_isExtreme_left_of_inv hx hy hc (invertibleOfNonzero <| ne_of_gt hc) hxy
 
-lemma lineal_isExtreme_right' {C : PointedCone R M} {x y : M} (hx : x ∈ C) (hy : y ∈ C)
+lemma lineal_isExtreme_right' {x y : M} (hx : x ∈ C) (hy : y ∈ C)
     {c : R} (hc : 0 < c) (hxy : x + c • y ∈ C.lineal) : y ∈ C.lineal := by
   exact lineal_isExtreme_right_of_inv hx hy hc (invertibleOfNonzero <| ne_of_gt hc) hxy
 
-lemma lineal_isExtreme_sum' {C : PointedCone R M} {xs : Finset M} (hxs : (xs : Set M) ⊆ C)
-    (c : M → R) (hc : ∀ x ∈ xs, 0 < c x) (h : ∑ x ∈ xs, c x • x ∈ C.lineal) :
-    ∀ x ∈ xs, c x ≠ 0 → x ∈ C.lineal := by classical
-  induction xs using Finset.induction_on with
+lemma subset_lineal_of_sum_mem' {s : Finset M} (hs : (s : Set M) ⊆ C)
+    (c : M → R) (hc : ∀ x ∈ s, 0 < c x) (h : ∑ x ∈ s, c x • x ∈ C.lineal) :
+    ∀ x ∈ s, c x ≠ 0 → x ∈ C.lineal := by classical
+  induction s using Finset.induction_on with
   | empty => simp
-  | insert y xs hy H =>
+  | insert y s hy H =>
     simp only [Set.subset_def, SetLike.mem_coe, ne_eq, Finset.coe_insert,
       Set.mem_insert_iff, forall_eq_or_imp, Finset.mem_insert, Finset.sum_insert hy] at *
-    have hxsC := C.sum_mem (fun x hx => C.smul_mem (le_of_lt <| hc.2 x hx) (hxs.2 x hx))
+    have hsC := C.sum_mem (fun x hx => C.smul_mem (le_of_lt <| hc.2 x hx) (hs.2 x hx))
     constructor
-    · exact fun _ => lineal_isExtreme_left' hxs.1 hxsC hc.1 h
-    · exact H hxs.2 hc.2 <| lineal_isExtreme_right (C.smul_mem (le_of_lt hc.1) hxs.1) hxsC h
+    · exact fun _ => lineal_isExtreme_left' hs.1 hsC hc.1 h
+    · exact H hs.2 hc.2 <| mem_lineal_of_add_mem_right (C.smul_mem (le_of_lt hc.1) hs.1) hsC h
 
 variable (R) in
 lemma hull_inter_lineal_eq_lineal (s : Set M) :
@@ -300,8 +305,10 @@ end Semiring
 
 section IsStrictOrderedRing
 
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable {M : Type*} [AddCommMonoid M] [Module R M]
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommMonoid M] [Module R M]
+
+variable {C : PointedCone R M}
 
 -- TODO: generalize (to AddZeroClass) + move
 lemma _root_.eq_zero_iff_eq_zero_of_add_zero {x y : M} (h : x + y = 0) : x = 0 ↔ y = 0 := by
@@ -322,7 +329,7 @@ lemma _root_.LinearMap.positive_salient (f : M →ₗ[R] R) : f.positive.Salient
   simp at h
   simp [h] at h'
 
-lemma Salient.of_le_positive {C : PointedCone R M} {f : M →ₗ[R] R} (h : C ≤ f.positive) :
+lemma Salient.of_le_positive {f : M →ₗ[R] R} (h : C ≤ f.positive) :
     C.Salient := of_le_salient f.positive_salient h
 
 end IsStrictOrderedRing
@@ -401,10 +408,12 @@ end Ring
 
 section LinearOrder
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
-lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = ⊥ := by
+variable {C : PointedCone R M}
+
+lemma salient_iff_lineal_bot : C.Salient ↔ C.lineal = ⊥ := by
   rw [salient_iff_forall_mem_eq_zero_of_neg_mem]
   constructor <;> intro h
   · ext x
@@ -422,7 +431,7 @@ lemma salient_iff_lineal_bot {C : PointedCone R M} : C.Salient ↔ C.lineal = �
 
 /-- If `S` is a submodule disjoint to the lineality space of a cone `C`, then `C ⊓ S`
   is salient. -/
-lemma Salient.of_inf_disjoint_lineal {C : PointedCone R M} {S : Submodule R M}
+lemma Salient.of_inf_disjoint_lineal {S : Submodule R M}
     (hCS : Disjoint C.lineal S) : (C ⊓ S).Salient := by
   simp only [salient_iff_lineal_bot, lineal_inf, submodule_lineal, ← disjoint_iff, hCS]
 
@@ -435,38 +444,40 @@ end Salient
 
 section Map
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂]
+
+variable {C : PointedCone R M₁}
 
 open Function
 
 -- MOVE
 omit [LinearOrder R] [IsOrderedRing R] in
 -- TODO: generalize and move to the right place
-@[simp] lemma injective_neg {f : N →ₗ[R] M} : Injective (-f) ↔ Injective f := by
+@[simp] lemma injective_neg {f : M₂ →ₗ[R] M₁} : Injective (-f) ↔ Injective f := by
   simp [Injective]
 
 -- MOVE
 omit [LinearOrder R] [IsOrderedRing R] in
-@[simp] lemma surjective_neg {f : N →ₗ[R] M} : Surjective (-f) ↔ Surjective f := by
+@[simp] lemma surjective_neg {f : M₂ →ₗ[R] M₁} : Surjective (-f) ↔ Surjective f := by
   constructor
   · exact fun h x => by simpa using h (-x)
   · intro h x
     obtain ⟨y, hy⟩ := h (-x)
     exact ⟨y, by simp [hy]⟩
 
-lemma salient_map {C : PointedCone R M} {f : M →ₗ[R] N} (hC : C.Salient) (hf : Injective f) :
+lemma salient_map {f : M₁ →ₗ[R] M₂} (hC : C.Salient) (hf : Injective f) :
     (C.map f).Salient := by
   rw [salient_iff_lineal_bot] at *
   simp [map_lineal _ hf, hC]
 
-lemma salient_comap {C : PointedCone R M} {f : N →ₗ[R] M} (hC : C.Salient) (hf : Injective f) :
+lemma salient_comap {f : M₂ →ₗ[R] M₁} (hC : C.Salient) (hf : Injective f) :
     (C.comap f).Salient := by
   rw [salient_iff_lineal_bot] at *
   simpa [comap_lineal, hC] using LinearMap.ker_eq_bot_of_injective hf
 
-lemma salient_map_iff (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective f) :
+lemma salient_map_iff (C : PointedCone R M₁) {f : M₁ →ₗ[R] M₂} (hf : Injective f) :
     (C.map f).Salient ↔ C.Salient where
   mpr h := salient_map h hf
   mp h := by
@@ -476,7 +487,7 @@ lemma salient_map_iff (C : PointedCone R M) {f : M →ₗ[R] N} (hf : Injective 
     exact hf
 
 open Pointwise in
-lemma salient_neg {C : PointedCone R M} (hC : C.Salient) : (-C).Salient := by
+lemma salient_neg (hC : C.Salient) : (-C).Salient := by
   simpa [← map_id_eq_neg] using salient_map hC (injective_neg.mpr injective_id)
 
 end Map
@@ -486,9 +497,10 @@ section SalientQuot
 
 -- ## SALIENT QUOT
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂]
 
 variable {C : PointedCone R M}
 
@@ -537,13 +549,13 @@ lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
 
 open Function
 
-lemma salient_hull_surjInv {s : Set N} {f : M →ₗ[R] N} (hs : (hull R s).Salient)
+lemma salient_hull_surjInv {s : Set M₂} {f : M₁ →ₗ[R] M₂} (hs : (hull R s).Salient)
     (hf : Surjective f) : (hull R (surjInv hf '' s)).Salient := by
   intro x h hx
   -- possible but annoying (need to work with sums perhaps?)
   sorry
 
-lemma exists_salient_eq_map {C : PointedCone R N} {f : M →ₗ[R] N} (hC : C.Salient)
+lemma exists_salient_eq_map {C : PointedCone R M₂} {f : M →ₗ[R] M₂} (hC : C.Salient)
     (hf : Surjective f) : ∃ D : PointedCone R M, D.Salient ∧ C = D.map f := by
   use hull R (surjInv hf '' C)
   constructor
