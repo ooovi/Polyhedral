@@ -5,12 +5,7 @@ Authors: Martin Winter
 -/
 
 import Polyhedral.Polyhedral.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
 
 /-! This file proves basic facts about faces of polyhedral cones. -/
 

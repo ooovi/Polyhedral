@@ -6,6 +6,8 @@ Authors: Olivia Röhrig, Martin Winter
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 
 /-!
 This file defines the dual face of a face of `C` as a face of `dual p C`, and proves basic lemmas.

@@ -3,8 +3,10 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Halfspace
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
+
+import Mathlib.Geometry.Convex.Cone.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 
 /-! This file defines exposed faces of cones, namely ones that are the intersection of the cone with
 a supporting hyperplane. This notion differs from the more general definition using positive
@@ -70,15 +72,16 @@ lemma IsExposedFaceOf.isFaceOf (hF : F.IsExposedFaceOf C) : F.IsFaceOf C := by
   rw [map_add] at hxy
   exact eq_zero_of_add_nonpos_left (hφ hx) (hφ hy) (le_of_eq hxy)
 
+-- # QUOTIENT
 
--- # QUOTIENTS
-
--- probably the better formulation of the below
+-- probably the better formulation of `IsExposedFaceOf.quot_iff`.
 lemma IsExposedFaceOf.quot_iff' {S : Submodule R M} (hF : F.IsFaceOf C) (hF : S ≤ span R F) :
     F.IsExposedFaceOf C ↔ (F.quot S).IsExposedFaceOf (C.quot S) := sorry
 
 lemma IsExposedFaceOf.quot_iff (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C) (hF : F₂ ≤ F₁) :
     F₁.IsExposedFaceOf C ↔ (F₁.quot (span R F₂)).IsExposedFaceOf (C.quot (span R F₂)) := sorry
+
+-- # RESTRICT / EMBED
 
 variable {S : Submodule R M}
 
@@ -88,7 +91,6 @@ lemma IsExposedFaceOf.restrict (hF : F.IsExposedFaceOf C) :
 
 lemma IsExposedFaceOf.embed {C F : PointedCone R S} (hF : F.IsExposedFaceOf C) :
     (embed F).IsExposedFaceOf (embed C) := sorry
-
 
 -- # FACE
 

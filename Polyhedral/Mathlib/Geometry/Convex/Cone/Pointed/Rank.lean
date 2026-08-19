@@ -23,6 +23,10 @@ Ranks:
 Predicates:
 * `PointedCone.FinRank` states that the cone has a finite rank.
 * `PointedCone.FinSalRank` states that the cone has a finite salient rank.
+
+Eventually we aim to prove most results of finite dimensional cones by assuming `FinSalRank`.
+The reason is that this does not assume that the cone is embedded in finite dimensions, and
+this class is closed under duality.
 -/
 
 namespace PointedCone
@@ -227,11 +231,10 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 /-
 NOTE: The proof of `FinSalRank.dual_finSalRank` is AI generated and very messy. There is
-a cleaner approach.
+a cleaner approach:
 * prove that salRank is the rank of the quotient module span / lineal
-* prove that if A / B is FG, then B* / A* is also FG.
--/
-
+* prove that if A / B is FG, then B* / A* is also FG, where A and B are submodules (with the
+  correct inclusion relation) and * is submodule dual. -/
 variable (p) in
 /-- The dual of a cone with finite salient rank also has finite salient rank. -/
 lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := by

@@ -7,13 +7,9 @@ Authors: Martin Winter
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 
-/-! This file defines the algebraic relative interior. -/
+/-! This file defines the algebraic relative interior of a convex cone. -/
 
-open Function Module OrderDual LinearMap
-open Submodule hiding dual DualClosed
-open PointedCone
-
--- ## RELINT
+open Submodule
 
 /-
 The relative interior (relint for short) is a topological notion, and hence might depend on the
@@ -40,17 +36,19 @@ The core has moreover the property that the cone is the disjoint union of the co
 This is not true for the weak relint. One still has disjointness of the weak relints, but not that
 they cover all of the cone.
 
-Here we chose the core for defining the algebraic relint. Among its many equivalent deinitions,
-we chose the most elementary one: `hull R (C ∪ (-x)) = span R C`, because it does not depend on
-duality or the notions of faces.
+Here we chose the core for defining the algebraic relint. Among its many equivalent definitions,
+we chose the most elementary one: `∀ t : span R C, ∃ c > 0, x + c • t ∈ C`, because it does not
+depend on duality or the notions of faces or hulls.
 
 See also: https://en.wikipedia.org/wiki/Algebraic_interior
 
 -/
 
 /- TODO:
+  * proving that all these definitions are equivalent.
   * the relints of the faces of a cone partition the cone.
   * the relint is preserved under taking the double dual closure.
+  * defining the weak relint and proving its relation to the core.
 -/
 
 namespace PointedCone
