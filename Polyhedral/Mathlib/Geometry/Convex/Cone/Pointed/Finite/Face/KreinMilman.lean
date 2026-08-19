@@ -141,8 +141,8 @@ lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
   exact ⟨_, hys, a, lt_of_le_of_ne ha (fun h => hy0 (by simp [← h])), rfl⟩
 
 open Module in
-/- Krein-Milman theorem: Every finitely generated cone is spanned by its rays, that is,
-  by the finite set of its 1-dimensional faces. -/
+/-- Krein-Milman theorem: every finitely generated cone is spanned by its rays, that is,
+by the finite set of its 1-dimensional faces. -/
 lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     ∃ s : Finset M, hull R s = C ∧ ∀ x ∈ s, (R ∙₊ x).IsFaceOf C := by
   classical
@@ -165,20 +165,20 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     rw [← hs]
     exact subset_hull hxs
   obtain ⟨f, hf, hf'⟩ := FG.farkas (Dual.eval R M) hxt
-  rw [← hs] at hsal
-  -- TODO exists_dual_pos₀ is a hole
-  -- The proof would use the fact that the cone has nonempty relative interior. However, there is a
-  -- quick & dirty approach for FG cones. Pass to the dual cone, which is also FG (at least in
-  -- finite dimensions, which is the case of interest here), and let g be the sum of all generators
-  -- of the dual cone. Outside finite dimensions, first decompose the dual cone into an FG part and
-  -- its lineality space (there is a lemma for this somewhere), and then take the sum of the
-  -- generators of the FG part.
-  obtain ⟨g, hg⟩ := exists_dual_pos₀ (Dual.eval R M) hsal
-  rw [hs] at hsal
-  simp only [Dual.eval_apply, gt_iff_lt] at hf hf' hg
-  rw [hs] at hg
+  obtain ⟨g, hg, hgker⟩ := IsExposedFaceOf.lineal hfg
+  have hker : C ⊓ g.ker = ⊥ := by
+    rw [← hgker]
+    ext y
+    simp [salient_iff_lineal_bot.mp hsal]
+  have hgC : C ≤ g.positive := by
+    intro y hy
+    rw [LinearMap.mem_positive']
+    refine ⟨hg hy, fun hgy ↦ ?_⟩
+    have : y ∈ C ⊓ g.ker := ⟨hy, hgy⟩
+    rw [hker] at this
+    simpa using this
+  simp only [Dual.eval_apply] at hf hf'
   let F := C.opt f g
-  have hgC : C ≤ g.positive := fun x hx => g.mem_positive'.mpr (hg x hx) -- this is a quick fix
   have hF : F.IsFaceOf C := IsFaceOf.of_opt C f g hgC
   have hC0 : C ≠ ⊥ := by
     intro hC0
@@ -212,13 +212,13 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
       rw [h]
       exact smul_ne_zero hc0 hr0
     by_contra! h
-    have hgw := hg w hwF.1
+    have hgw := g.mem_positive'.mp (hgC hwF.1)
     have hgw' := le_antisymm hgw.1 h
     have := hgw.2 hgw'.symm
     absurd hxt
     contradiction
   have hwF := hwF.2 x hx
-  have : 0 ≤ f w * g x := mul_nonneg (hf' w hwt) (hg x hx).1
+  have : 0 ≤ f w * g x := mul_nonneg (hf' w hwt) (g.mem_positive'.mp (hgC hx)).1
   have : f x * g w < 0 := mul_neg_of_neg_of_pos hf hgw
   linarith
 
