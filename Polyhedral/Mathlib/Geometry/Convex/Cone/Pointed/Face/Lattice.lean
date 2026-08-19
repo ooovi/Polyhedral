@@ -73,6 +73,10 @@ abbrev quot (F : Face C) : PointedCone R (M ⧸ F.span) := .map F.quotMap C
 
 scoped notation:50 C " ⧸ " F => Face.quot (C := C) F
 
+-- TODO: replace `salientQuot` by `C ⧸ ⊥` throughout the repo.
+
+-- # FIBER
+
 /-- The face of `C` that corresponds to a given face of `C ⧸ F`. -/
 def fiberFace (G : Face (C ⧸ F)) : Face C := by
   refine ⟨C ⊓ PointedCone.comap F.quotMap G, ?_⟩
@@ -176,11 +180,11 @@ lemma quotFace_fiberFace (G : Face (C ⧸ F)) : F.quotFace (fiberFace G) = G := 
 
 /-- The isomorphism between the face lattice of the quotient cone and the interval in the
 face lattice of the cone above the face. -/
-def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Icc F ⊤ where
-  toFun G := ⟨fiberFace G, le_fiber G, le_top⟩
+def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Ici F where
+  toFun G := ⟨fiberFace G, le_fiber G⟩
   invFun G := F.quotFace G
   left_inv := quotFace_fiberFace
-  right_inv G := by simp only [fiberFace_quotFace_of_le G.2.1]
+  right_inv G := by simp only [fiberFace_quotFace_of_le G.2]
   map_rel_iff' := by
     intro G G'
     exact fiberFace_le_fiberFace_iff
@@ -188,6 +192,11 @@ def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Icc F ⊤ where
 /-- The embedding of the face lattice of the quotient into the face lattice of the cone. -/
 def quot_orderEmbed (F : Face C) : Face (C ⧸ F) ↪o Face C :=
   (quot_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
+
+/-- The isomorphism between the face lattice of the salient quotient and the face lattice of
+the cone itself. -/
+def salientQuot_orderIso : Face (C ⧸ ⊥) ≃o Face C :=
+  (quot_orderIso ⊥).trans OrderIso.IciBot
 
 end DirectedOrderRing
 
@@ -266,11 +275,11 @@ lemma embed_le {F₁ : Face C} (F₂ : Face (F₁ : PointedCone R M)) : F₂ ≤
 
 /-- The isomorphism between the face lattice of a face and the interval in the face
  lattice of the cone below the face. -/
-def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Icc ⊥ F where
-  toFun G := ⟨G, bot_le, Face.embed_le G⟩
+def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Iic F where
+  toFun G := ⟨G, Face.embed_le G⟩
   invFun G := F.restrict G
   left_inv := restrict_embed
-  right_inv G := by simp only [embed_restrict_of_le G.2.2]
+  right_inv G := by simp only [embed_restrict_of_le G.2]
   map_rel_iff' := by
     intro G G'
     rfl
