@@ -69,22 +69,22 @@ lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) :
     · exact ⟨0, C.zero_mem, p, n, ⟨hp, hn⟩, by simpa using h.symm⟩
     · exact ⟨0, C.zero_mem, n, p, ⟨hn, hp⟩, by rw [h]; simp⟩
 
-variable (p) [p.IsPerfPair] in
--- variable [Fact (Surjective p.flip)] in
-@[simp] lemma IsPolyhedral.subdual_subdual (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
-    subdual p.flip (.dual p C) (subdual p C F) = F := by
-  repeat rw [subdual_def]
-  rw [dual_flip_dual p hC]
-  rw [← dual_lineal_eq_submodule_dual]
-  rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
-  nth_rw 3 [← PointedCone.coe_ofSubmodule]
-  rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]
-  rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
-  rw [dual_flip_dual p hC]
-  nth_rw 2 [← Submodule.dual_span]
-  rw [Submodule.dual_flip_dual p]
-  rw [hF.sup_linspan_lineal]
-  exact hF.inf_span
+-- variable (p) [p.IsPerfPair] in
+-- -- variable [Fact (Surjective p.flip)] in
+-- @[simp] lemma IsPolyhedral.subdual_subdual (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+--     subdual p.flip (.dual p C) (subdual p C F) = F := by
+--   repeat rw [subdual_def]
+--   rw [dual_flip_dual p hC]
+--   rw [← dual_lineal_eq_submodule_dual]
+--   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
+--   nth_rw 3 [← PointedCone.coe_ofSubmodule]
+--   rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]
+--   rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
+--   rw [dual_flip_dual p hC]
+--   nth_rw 2 [← Submodule.dual_span]
+--   rw [Submodule.dual_flip_dual p]
+--   rw [hF.sup_linspan_lineal]
+--   exact hF.inf_span
 
 /-- Every face of a polyhedral cone is exposed. -/
 lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
@@ -95,7 +95,7 @@ lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
       Submodule.span_eq]
     -- simpa using exposed hC.salientQuot h' hC.salientQuot_fg
     sorry
-  exact IsFaceOf.FG.exposed h hF
+  exact IsFaceOf.FG.isExposedFaceOf h hF
 
 -- -- TODO: remove the finiteness assumption by reducing to the finite dim case
 -- variable [Module.Finite R M] in
@@ -106,19 +106,19 @@ lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
 --   rw [← hC.subdual_subdual (Dual.eval R M) hF]
 --   exact IsExposedFaceOf.subdual_dual _ <| IsFaceOf.subdual_dual _ hF
 
--- TODO: weaken p assumption
-variable [p.IsPerfPair] in
-lemma IsPolyhedral.subdual_inj (hC : C.IsPolyhedral) (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
-    (h : subdual p C F₁ = subdual p C F₂) : F₁ = F₂ := by
-  rw [← hC.subdual_subdual p hF₁]
-  rw [← hC.subdual_subdual p hF₂]
-  rw [h]
+-- -- TODO: weaken p assumption
+-- variable [p.IsPerfPair] in
+-- lemma IsPolyhedral.subdual_inj (hC : C.IsPolyhedral) (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
+--     (h : subdual p C F₁ = subdual p C F₂) : F₁ = F₂ := by
+--   rw [← hC.subdual_subdual p hF₁]
+--   rw [← hC.subdual_subdual p hF₂]
+--   rw [h]
 
--- TODO: weaken p assumption
-variable [p.IsPerfPair] in
-lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCone R N}
-    (hF : F.IsFaceOf (.dual p C)) : (subdual p.flip (.dual p C) F).IsFaceOf C := by
-  sorry
+-- -- TODO: weaken p assumption
+-- variable [p.IsPerfPair] in
+-- lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCone R N}
+--     (hF : F.IsFaceOf (.dual p C)) : (subdual p.flip (.dual p C) F).IsFaceOf C := by
+--   sorry
 
 /-- The face of a polyhedral one is itself polyhedral. -/
 lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
@@ -147,7 +147,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable [p.IsPerfPair] in
 def IsPolyhedral.Face.dual_flip (hC : C.IsPolyhedral) (F : Face (.dual p C)) : Face C :=
-    ⟨_, IsFaceOf.subdual_of_dual hC F.isFaceOf⟩
+    ⟨sorry , sorry⟩ -- IsFaceOf.subdual_of_dual hC F.isFaceOf⟩
 
 variable (p) [p.IsPerfPair] in
 lemma IsPolyhedral.Face.dual_flip_antitone (hC : C.IsPolyhedral) :
@@ -185,7 +185,7 @@ def IsPolyhedral.Face.dual_orderIso (hC : C.IsPolyhedral) : Face (.dual p C) ≃
   toFun := toDual ∘ dual_flip hC
   invFun := .dual p ∘ ofDual
   left_inv := dual_dual_flip hC
-  right_inv := dual_flip_dual hC
+  right_inv := sorry -- dual_flip_dual hC
   map_rel_iff' := by intro F₁ F₂; sorry --simpa using dual_flip_le_iff hC F₁ F₂
 
 /- TODO:
