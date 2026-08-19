@@ -6,7 +6,7 @@ Authors: Martin Winter
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
-import Polyhedral.Polyhedral.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Basic
 
 /-! This file defines polyhedra as the Minkowski sums polytopes and polyhedral cones. -/
 

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Polyhedral.Polyhedral.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 /-! This file proves basic facts about faces of polyhedral cones. -/

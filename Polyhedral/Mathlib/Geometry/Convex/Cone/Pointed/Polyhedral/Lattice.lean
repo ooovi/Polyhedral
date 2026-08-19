@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Polyhedral.Polyhedral.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Basic
 
 /-! This file defines `PolyhedralCone` as a bundled object. -/
 

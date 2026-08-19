@@ -72,6 +72,6 @@ import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
 import Polyhedral.Mathlib.Logic.Function.Const
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
-import Polyhedral.Polyhedral.Basic
-import Polyhedral.Polyhedral.Faces
-import Polyhedral.Polyhedral.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Faces
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Lattice
