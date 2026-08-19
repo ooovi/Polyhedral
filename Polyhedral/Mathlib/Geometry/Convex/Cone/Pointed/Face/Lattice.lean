@@ -230,7 +230,8 @@ end LinearOrderRing
 section DivisionRing
 
 variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 variable {C : PointedCone R M} {F : Face C}
 
@@ -293,8 +294,10 @@ end DivisionRing
 section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
-variable [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
-variable {C F : PointedCone R M}
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
+variable {C : PointedCone R M}
 variable (p : M →ₗ[R] N →ₗ[R] R)
 
 -- # Map and comap
@@ -318,15 +321,16 @@ lemma map_inj (f : M →ₗ[R] N) (hf : Function.Injective f) :
     simpa [← hf fy]
 
 /-- The face `map e F` of `map e C`. -/
-def map_equiv (e : M ≃ₗ[R] N) (F : Face C) : Face (PointedCone.map (e : M →ₗ[R] N) C)
-    := F.map e.injective
+def map_equiv (e : M ≃ₗ[R] N) (F : Face C) :
+  Face (PointedCone.map (e : M →ₗ[R] N) C) := F.map e.injective
 
 /-- The face `comap f F` of `comap f C`. -/
-def comap {f : N →ₗ[R] M} (F : Face C) : Face (comap f C) := ⟨_, F.isFaceOf.comap _⟩
+def comap {f : N →ₗ[R] M} (F : Face C) :
+  Face (comap f C) := ⟨_, F.isFaceOf.comap _⟩
 
--- /-- The face `comap e F` of `comap e C`. -/
-def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) : Face (PointedCone.comap (e : N →ₗ[R] M) C)
-    := F.comap
+/-- The face `comap e F` of `comap e C`. -/
+def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) :
+  Face (PointedCone.comap (e : N →ₗ[R] M) C) := F.comap
 
 end Field
 
