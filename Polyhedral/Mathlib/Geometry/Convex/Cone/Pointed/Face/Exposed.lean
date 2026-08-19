@@ -34,6 +34,9 @@ def IsExposedFaceOf (F C : PointedCone R M) :=
 
 lemma IsExposedFaceOf.rfl {C : PointedCone R M} : C.IsExposedFaceOf C := refl C
 
+alias IsExposedFaceOf.self := IsExposedFaceOf.rfl
+alias IsExposedFaceOf.top := IsExposedFaceOf.rfl
+
 lemma IsExposedFaceOf.le (hF : F.IsExposedFaceOf C) : F ≤ C := by
   obtain ⟨_, _, rfl⟩ := hF
   simp
@@ -87,11 +90,13 @@ lemma IsExposedFaceOf.embed {C F : PointedCone R S} (hF : F.IsExposedFaceOf C) :
     (embed F).IsExposedFaceOf (embed C) := sorry
 
 
--- # LATTICE
+-- # FACE
 
 def Face.IsExposed (F : Face C) := (F : PointedCone R M).IsExposedFaceOf C
 
-lemma Face.isExpose_def (F : Face C) :
+lemma Face.isExposed_def (F : Face C) :
    F.IsExposed ↔ (F : PointedCone R M).IsExposedFaceOf C := by rfl
+
+lemma Face.top_isExposed : (⊤ : Face C).IsExposed := IsExposedFaceOf.top
 
 end PointedCone

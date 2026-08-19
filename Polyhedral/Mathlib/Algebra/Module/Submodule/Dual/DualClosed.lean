@@ -48,7 +48,7 @@ variable (p) in
   simp [DualClosed, dual_dual_flip_dual]
 
 variable (p) in
-@[simp] lemma dual_flip_IsDualClosed (s : Set N) : (dual p.flip s).DualClosed p
+@[simp] lemma dual_flip_dualClosed (s : Set N) : (dual p.flip s).DualClosed p
     := by simp [DualClosed]
 
 lemma DualClosed.dual_inj {S T : Submodule R M} (hS : S.DualClosed p) (hT : T.DualClosed p)
@@ -98,7 +98,7 @@ variable (p) [Fact p.SeparatingLeft] in
 lemma dual_dual_bot : dual p.flip (dual p 0) = ⊥ := by simp
 
 @[simp] lemma dualClosed_ker : DualClosed p (ker p) := by
-  simpa [← dual_flip_univ_ker] using dual_flip_IsDualClosed p _
+  simpa [← dual_flip_univ_ker] using dual_flip_dualClosed p _
 
 lemma DualClosed.ker_le {S : Submodule R M} (hS : S.DualClosed p) : ker p ≤ S := by
   rw [← hS]; exact ker_le_dual_flip _

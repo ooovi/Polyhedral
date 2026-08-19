@@ -10,7 +10,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 /-! This file defines the algebraic relative interior. -/
 
 open Function Module OrderDual LinearMap
-open Submodule hiding span dual DualClosed
+open Submodule hiding dual DualClosed
 open PointedCone
 
 -- ## RELINT
@@ -27,7 +27,7 @@ The `core` is one possible notion with the following equivalent definitions: a p
 the core iff one of the following equivalent conditions holds:
   * x lies in no proper face of C
   * hull R (C ∪ (-x)) = span R C
-  * ∀ t : M, ∃ c > 0, x + c • t ∈ C
+  * ∀ t : span R C, ∃ c > 0, x + c • t ∈ C
   * ∀ φ : Dual R M, φ x = 0 → φ ∈ lineal (dual (Dual.eval R M) C)
 
 The `weak relint` is another notion that is not always equivalent to the core. It is the relative
@@ -63,16 +63,16 @@ variable {C D : PointedCone R M} {x : M}
 
 /-- Algebraic relative interior, also known as core. -/
 def relint (C : PointedCone R M) : ConvexCone R M where
-  carrier := {x ∈ C | ∀ t, ∃ c > 0, x + c • t ∈ C}
+  carrier := {x ∈ C | ∀ t ∈ span R C, ∃ c > 0, x + c • t ∈ C}
   smul_mem' c hc x hx := by
-    refine ⟨C.smul_mem hc.le hx.1, fun t ↦ ?_⟩
-    obtain ⟨d, hd, hxd⟩ := hx.2 (c⁻¹ • t)
+    refine ⟨C.smul_mem hc.le hx.1, fun t ht ↦ ?_⟩
+    obtain ⟨d, hd, hxd⟩ := hx.2 (c⁻¹ • t) (Submodule.smul_mem _ _ ht)
     refine ⟨d, hd, ?_⟩
     have := C.smul_mem hc.le hxd
     rwa [smul_add, smul_comm c d, smul_smul, mul_inv_cancel₀ hc.ne', one_smul] at this
   add_mem' x hx y hy := by
-    refine ⟨C.add_mem hx.1 hy.1, fun t ↦ ?_⟩
-    obtain ⟨c, hc, hxc⟩ := hx.2 t
+    refine ⟨C.add_mem hx.1 hy.1, fun t ht ↦ ?_⟩
+    obtain ⟨c, hc, hxc⟩ := hx.2 t ht
     refine ⟨c, hc, ?_⟩
     have := C.add_mem hxc hy.1
     rwa [add_assoc, add_comm (c • t) y, ← add_assoc] at this
@@ -80,7 +80,8 @@ def relint (C : PointedCone R M) : ConvexCone R M where
 lemma relint_le : C.relint ≤ C := fun _ hx => hx.1
 
 lemma mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem :
-    x ∈ C.relint ↔ x ∈ C ∧ ∀ t, ∃ c > 0, x + c • t ∈ C := by simp [relint]
+    x ∈ C.relint ↔ x ∈ C ∧ ∀ t ∈ span R C, ∃ c > 0, x + c • t ∈ C := by
+  simp [relint]
 
 lemma mem_relint_iff_mem_hull_neg_eq_top :
     x ∈ C.relint ↔ x ∈ C ∧ hull R (insert (-x) C) = Submodule.span R (C : Set M) := by
@@ -135,6 +136,9 @@ example {C : PointedCone R M} (hC : C.FinSalRank) :
   rw [mem_relint_dual] at hφ
   exact ⟨φ, fun _ h => ⟨by simpa using hφ.1 h, hφ.2 _ h⟩⟩
 
-lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := sorry
+lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := by
+  refine le_antisymm relint_le fun _ hx ↦ ⟨hx, fun _ ht ↦ ⟨1, zero_lt_one, ?_⟩⟩
+  rw [one_smul]
+  exact S.add_mem hx (by simpa using ht)
 
 end PointedCone

@@ -17,10 +17,13 @@ namespace PointedCone
 open Submodule (span)
 open Function
 
-section DivisionRing
+variable {R M N : Type*}
 
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+section Ring
+
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
 variable {C F : PointedCone R M}
 
 lemma exists_fg_hull_subset_face {s : Finset M} (hF : F.IsFaceOf (hull R s)) :
@@ -34,78 +37,43 @@ lemma IsFaceOf.fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
   obtain ⟨t, _, tt⟩ := exists_fg_hull_subset_face hF
   use t, tt
 
-end DivisionRing
+/-- A finitely generated cone has only finitely many faces. -/
+lemma FG.finite_face (hC : C.FG) : Finite (Face C) := by
+  obtain ⟨s, rfl⟩ := hC
+  let T := {t : {t : Finset M // t ∈ s.powerset} // (hull R (t.1 : Set M)).IsFaceOf (hull R s)}
+  let f : T → Face (hull R s) := fun t ↦ ⟨hull R (t.1.1 : Set M), t.2⟩
+  apply Finite.of_surjective f
+  intro F
+  obtain ⟨t, hts, ht⟩ := exists_fg_hull_subset_face F.isFaceOf
+  refine ⟨⟨⟨t, Finset.mem_powerset.mpr hts⟩, ?_⟩, ?_⟩
+  · simpa [ht] using F.isFaceOf
+  · exact Face.toPointedCone_eq_iff.mp ht
+
+end Ring
 
 section Field
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C F F₁ F₂ : PointedCone R M}
 
 variable (p) [Fact p.SeparatingLeft] in
-/-- Farkas lemma for finitely generated cones: for any point `x` not in the hull of a finite set `s`,
-  there exists a linear functional `φ` separating `x` from `hull R s`. -/
+/-- Farkas lemma for finitely generated cones: for any point `x` not in the hull of a finite set
+`s`, there exists a linear functional `φ` separating `x` from `hull R s`. -/
 lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ hull R s) :
     ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ s, 0 ≤ p y φ := by
   let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
   exact ⟨φ, hφ, fun y hy => h y (subset_hull hy)⟩
 
-variable {C F F₁ F₂ : PointedCone R M}
-
-/-- If a face has nonempty relint, then its dual face is exposed. -/
-lemma Face.dual_isExposed_of_nonempty_relint {F : Face C}
-    (hF : Nonempty (relint (F : PointedCone R M))) : IsExposed (F.dual p) := by
-  obtain ⟨x, hx⟩ := hF
-  refine ⟨p x, fun _ hy ↦ hy (F.isFaceOf.le (relint_le hx)), ?_⟩
-  ext y
-  rw [Submodule.mem_inf]
-  refine ⟨fun ⟨hyC, hyF⟩ ↦ ⟨hyC, (hyF (relint_le hx)).symm⟩,
-    fun ⟨hyC, hxy⟩ => ⟨hyC, fun z hz ↦ ?_⟩⟩
-  obtain ⟨c, hc, hxc⟩ :=
-    (mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem.mp hx).2 (-z)
-  have hpy := hyC (F.isFaceOf.le hxc)
-  simp at hpy
-  rw [gt_iff_lt, ← Nat.cast_pos (α := R)] at hc
-  nlinarith [hyC (F.isFaceOf.le hz), show p x y = 0 from hxy]
-
+variable (p) in
 /-- The dual of a face of an FG cone is an exposed face. -/
-lemma Face.dual_isExposed_of_fg (hC : C.FG) (F : Face C) : IsExposed (F.dual p) :=
-  F.dual_isExposed_of_nonempty_relint <| relint_nonempty_of_finRank (F.isFaceOf.fg hC).finRank
+lemma Face.dual_isExposed (hC : C.FG) (F : Face C) : IsExposed (F.dual p) :=
+  F.dual_isExposed_of_nonempty_relint p <| relint_nonempty_of_finRank (F.isFaceOf.fg hC).finRank
 
-section FG
-
-lemma isFaceOf_submodule_iff_lineal (S : Submodule R M) :
-    IsFaceOf S C ↔ S = C.lineal := by
-  sorry
-
-lemma sup_submodule_lineal (S : Submodule R M) :
-    (C ⊔ S).lineal = C.lineal ⊔ S := by
-  sorry
-
-lemma lineal_eq_of_quot_salient {S : Submodule R M} (hS : S ≤ C) (h : (C.quot S).Salient) :
-    S = C.lineal := by
-  apply le_antisymm
-  · intro x hx
-    exact ⟨hS hx, hS (S.neg_mem hx)⟩
-  · intro x hx
-    have hxq : S.mkQ x ∈ (C.quot S).lineal :=
-      PointedCone.map_lineal_le C S.mkQ ⟨x, hx, rfl⟩
-    have : S.mkQ x = 0 := by
-      rw [PointedCone.salient_iff_lineal_bot.mp h] at hxq
-      exact hxq
-    exact (Submodule.Quotient.mk_eq_zero S).mp this
-
-lemma IsFaceOf.sup_span_lineal_eq_span (hF : F.IsFaceOf C) :
-    (C ⊔ span R (F : Set M)).lineal = span R F :=
-  Eq.symm <| lineal_eq_of_quot_salient le_sup_right (by simpa using hF.quot_salient)
-
-/- The following lemma can be proven for any propert P of cones with the following:
-  * if P(C) then C** = C
-  * if P(C) and F is a face of C, then P(F)
-  * if P(C) and P(D) then (C* inf D*)* = C sup D
--/
-
+-- TODO: to what other types of cones does this theorem generalize?
 variable (p) [Fact p.SeparatingLeft] in
 /-- Face duality is involutive. -/
 lemma Face.dual_dual_flip (hC : C.FG) (F : Face C) : (F.dual p).dual_flip p = F := by
@@ -143,8 +111,7 @@ lemma Face.dual_antitone_iff (hC : C.FG) (F₁ F₂ : Face C) :
     rw [← F₂.dual_dual_flip p hC, ← F₁.dual_dual_flip p hC]
     exact dual_flip_antitone p h
 
-end FG
-
+-- This proof is AI generated
 open Module in
 /-- Every face of an FG cone is exposed. -/
 lemma IsFaceOf.FG.isExposedFaceOf (hC : C.FG) (hF : F.IsFaceOf C) :
@@ -155,54 +122,31 @@ lemma IsFaceOf.FG.isExposedFaceOf (hC : C.FG) (hF : F.IsFaceOf C) :
       (Finite.iff_fg.mpr <| FG.span_fg hC)
     have hC : C ≤ Submodule.span R (C : Set M) := Submodule.le_span
     simpa [S, hC, le_trans hF.le hC] using H.embed
-  rw [← FG.dual_flip_dual (Dual.eval R M) hC]
-  rw [← subdual_subdual (Dual.eval R M) hC hF]
-  sorry -- exact .subdual_dual _ <| .subdual_dual _ hF
+  let F' : Face C := ⟨F, hF⟩
+  have H := Face.dual_isExposed .id (FG.dual_fg (Dual.eval R M) hC) (F'.dual (Dual.eval R M))
+  change ((F'.dual (Dual.eval R M)).dual (Dual.eval R M).flip : PointedCone R M).IsExposedFaceOf
+    (dual (Dual.eval R M).flip (dual (Dual.eval R M) C)) at H
+  rw [Face.coe_dual] at H
+  rw [FG.dual_flip_dual (Dual.eval R M) hC] at H
+  have hFF : C ⊓
+      (.dual (Dual.eval R M).flip (F'.dual (Dual.eval R M)) : Submodule R M) = F := by
+    rw [← Face.coe_dual_flip]
+    exact congrArg (fun G : Face C ↦ (G : PointedCone R M))
+      (F'.dual_dual_flip (Dual.eval R M) hC)
+  rw [hFF] at H
+  exact H
 
-
-
--- TODO: can we reduce assumptions?
-variable (p) [Fact (Surjective p.flip)] in
-lemma IsFaceOf.FG.subdual_subdual (hC : C.FG) (hF : F.IsFaceOf C) :
-    subdual p.flip (dual p C) (subdual p C F) = F := by
-  repeat rw [subdual_def]
-  rw [FG.dual_flip_dual p hC]
-  rw [← dual_lineal_eq_submodule_dual]
-  rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
-  nth_rw 3 [← PointedCone.coe_ofSubmodule]
-  rw [DualFG.dual_inf_dual_sup_dual ?_ ?_]
-  · rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
-    rw [FG.dual_flip_dual p hC]
-    nth_rw 2 [← Submodule.dual_span]
-    rw [Submodule.dual_flip_dual p]
-    have H : (C ⊔ span R (F : Set M)).lineal = span R F := by
-      sorry
-    rw [H]
-    exact hF.inf_span
-  · simpa using FG.dual_dualfg _ hC
-  · rw [LinearMap.flip_flip, coe_dualfg_iff, ← Submodule.dual_span]
-    exact Submodule.FG.dual_dualfg _ (FG.span_fg <| IsFaceOf.fg hC hF)
-
-open Module in
-/-- Every face of an FG cone is exposed. -/
-lemma IsFaceOf.FG.exposed (hC : C.FG) (hF : F.IsFaceOf C) :
-    F.IsExposedFaceOf C := by
-  wlog _ : Module.Finite R M with exposed -- reduction to finite dimensional case
-  · let S : Submodule R M := .span R C
-    have H := exposed (FG.restrict_fg S hC) (IsFaceOf.restrict S hF)
-      (Finite.iff_fg.mpr <| FG.span_fg hC)
-    have hC : C ≤ Submodule.span R (C : Set M) := Submodule.le_span
-    simpa [S, hC, le_trans hF.le hC] using H.embed
-  rw [← FG.dual_flip_dual (Dual.eval R M) hC]
-  rw [← subdual_subdual (Dual.eval R M) hC hF]
-  sorry -- exact .subdual_dual _ <| .subdual_dual _ hF
+/-- The lineality space of a finitely generated cone is an exposed face. -/
+lemma IsExposedFaceOf.lineal (hC : C.FG) : IsExposedFaceOf C.lineal C := by
+  apply IsFaceOf.FG.isExposedFaceOf hC (IsFaceOf.lineal C)
 
 end Field
 
 section DivisionRing
 
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
 variable {C : PointedCone R M}
 
 -- TODO: this is the better version of `PointedCone.smul_mem_iff` and should replace it.
@@ -323,98 +267,6 @@ end Field
 
 section Exposed
 
--- NOTE: Consider the dual of positive orthant in the space of finitely supported sequences.
---  Here the lineality space is {0} and is exposed, but not using a linear form of
---  the form p x. There are too few linear forms with finite support.
--- TODO: add FinRank (or FinSalRank) as condition.
-variable (p) in
-lemma IsExposedFaceOf.subdual_dual (hF : F.IsFaceOf C) :
-    (subdual p C F).IsExposedFaceOf (dual p C) := by
-  obtain ⟨φ, hφ⟩ := F.relint_nonempty sorry -- currently requires FinRank (or FinSalRank later)
-  use p φ
-  constructor <;> intro x hx
-  · exact hx <| hF.le (F.relint_le hφ)
-  constructor <;> intro h
-  · rw [mem_subdual]
-    constructor
-    · exact hx
-    simp only [Submodule.mem_dual, SetLike.mem_coe]
-    intro ψ hψ
-    -- here we need to use that φ is in the relint. I think we need more relint lemmas first!
-    replace hφ := F.relint_le hφ
-    simp at hφ
-    sorry
-  · simpa using (h.2 <| F.relint_le hφ).symm
-
-alias subdual_exposed := IsExposedFaceOf.subdual_dual
-
-/-- The lineality space of a dual closed cone is an exposed face. -/
-lemma IsExposedFaceOf.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
-    IsExposedFaceOf C.lineal C := by classical
-  rw [← hC]
-  nth_rw 1 [← subdual_self]
-  apply subdual_dual
-  rfl
-
-
-
--- variable (p) [Fact (Surjective p.flip)] in
--- lemma HyperplaneOrTop.isDualClosed (H : HyperplaneOrTop R M) : IsDualClosed p H := sorry
-
--- variable [Fact (Surjective p.flip)] in
--- theorem IsExposed.isDualClosed (hC : C.IsDualClosed p) {F : Face C} (hF : F.IsExposed) :
---     IsDualClosed p F := by
---   obtain ⟨H, h, hH⟩ := hF
---   rw [← hH]
---   exact IsDualClosed.inf hC (HyperplaneOrTop.isDualClosed p _)
-
-/-
- * The double dual face of F gives a face F' that is exposed and contains F.
- * The dual of a proper face cannot be bot (true?)
- * The double dual F' is then not top.
- * The double dual is then a proper exposed face that contains F
- * In particula, all top proper faces are exposed
--/
-
-def IsDualClosed.face_dual_flip (F : Face (dual p C)) (hC : C.DualClosed p) : Face C :=
-  sorry -- ⟨C ⊓ Submodule.dual (M := N) p.flip F, sorry⟩
-
--- theorem Face.dual_dual (F : Face C) : F ≤ dual_flip p (dual p F) := sorry
-
-variable (p) in
-lemma Face.dual_neq_bot_of_neq_top {F : Face C} (hF : F ≠ ⊤) :
-    F.dual p ≠ ⊥ := sorry
-
-theorem Face.exists_proper_exposed_le (F : Face C) (hF : F ≠ ⊤) :
-    ∃ F' : Face C, F' ≠ ⊤ ∧ F'.IsExposed ∧ F ≤ F' := by
-  -- Since F not top, dual face is not bot (??, use Face.Nontrivial.dual)
-  -- choose a non-zero point from the dual face
-  -- this yield a supporting hyperplane to C
-  -- this defines a face F'
-  -- this face contains F
-  -- this face is exposed by def
-  -- this face is not top by def
-  sorry
-
-
-
--- theorem IsDualClosed.quot (hC : C.IsDualClosed p) (F : Face C) :
---     F.quot.IsDualClosed (Dual.eval R (M ⧸ F.span)) := sorry
-
-
-
-
--- lemma exists_dual_pos' {C : PointedCone R M} (hC : C.Salient) :
---     ∃ φ : M →ₗ[R] R, ∀ x ∈ C, φ x ≥ 0 ∧ (φ x = 0 → x = 0) := sorry
-
--- States that a pointed cone minus its origin is contained in the interior of a halfspace.
-variable (p) in
-lemma exists_dual_pos (C : PointedCone R M) : -- only true with FinSalRank
-    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) :=
-  -- Idea: choose φ from relint of dual cone.
-  --  (we need to show that relints of dual cones are nonempty)
-  sorry
-
 -- States that a pointed cone minus its origin is contained in the interior of a halfspace.
 variable (p) in
 lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) : -- only true with FinSalRank
@@ -424,33 +276,6 @@ lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) : -- only true w
     sorry
 
 end Exposed
-
-
-
-
-
-section FG
-
-variable (hC : C.FG)
-
-/-- Face duality is injective. -/
-lemma Face.dual_inj : Function.Injective (Face.dual p : Face C → _) := by
-  sorry
-
-/-- Face duality is involutive. -/
-lemma Face.dual_dual_flip (F : Face C) : (F.dual p).dual_flip p = F := by
-  sorry
-
-/-- Face duality is antitone. -/
-lemma Face.dual_antitone_iff (F₁ F₂ : Face C) :
-    F₁.dual p ≤ F₂.dual p ↔ F₂ ≤ F₁ where
-  mpr h := dual_antitone p h
-  mp := sorry
-
-end FG
-
-
-
 
 
 
