@@ -8,6 +8,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 
 /-!
 This file defines the subdual of a cone w.r.t. another cone.
+
+THIS FILE IS DEPRECATED
 -/
 
 namespace PointedCone
@@ -24,13 +26,9 @@ variable (p : M →ₗ[R] N →ₗ[R] R) {C F : PointedCone R M}
 
 /-- If `F` is a face of the cone `C`, then the subdual of `F` w.r.t. `C` is a face of `dual p C`,
 and is called the "dual face" to `F`. -/
+@[deprecated "" (since := "18-8-2026")]
 def subdual (C F : PointedCone R M) : PointedCone R N :=
   dual p C ⊓ (.dual p F : Submodule R N)
-
-/-- If `F` is a face of the cone `dual p C`, then the subdual of `F` w.r.t. `dual p C` is a
-face of `C`, and is called the "dual face" to `F`. -/
-def subdual_flip (C : PointedCone R M) (F : PointedCone R N) : PointedCone R M :=
-  C ⊓ (.dual p.flip F : Submodule R M)
 
 variable {p} in
 lemma subdual_def {C F : PointedCone R M} :

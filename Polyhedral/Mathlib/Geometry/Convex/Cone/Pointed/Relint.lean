@@ -64,8 +64,18 @@ variable {C D : PointedCone R M} {x : M}
 /-- Algebraic relative interior, also known as core. -/
 def relint (C : PointedCone R M) : ConvexCone R M where
   carrier := {x ∈ C | ∀ t, ∃ c > 0, x + c • t ∈ C}
-  smul_mem' c hc x hx := sorry
-  add_mem' x hx y hy := sorry
+  smul_mem' c hc x hx := by
+    refine ⟨C.smul_mem hc.le hx.1, fun t ↦ ?_⟩
+    obtain ⟨d, hd, hxd⟩ := hx.2 (c⁻¹ • t)
+    refine ⟨d, hd, ?_⟩
+    have := C.smul_mem hc.le hxd
+    rwa [smul_add, smul_comm c d, smul_smul, mul_inv_cancel₀ hc.ne', one_smul] at this
+  add_mem' x hx y hy := by
+    refine ⟨C.add_mem hx.1 hy.1, fun t ↦ ?_⟩
+    obtain ⟨c, hc, hxc⟩ := hx.2 t
+    refine ⟨c, hc, ?_⟩
+    have := C.add_mem hxc hy.1
+    rwa [add_assoc, add_comm (c • t) y, ← add_assoc] at this
 
 lemma relint_le : C.relint ≤ C := fun _ hx => hx.1
 
@@ -104,13 +114,18 @@ lemma finset_sum_mem_relint_hull {s : Finset M} : ∑ x ∈ s, x ∈ relint (hul
 lemma relint_nonempty (h : C.FinSalRank) : Nonempty C.relint := sorry
 
 -- Easier to prove than `relint_nonempty`, perhaps prove this first.
-lemma relint_nonempty' (h : C.FinRank) : Nonempty C.relint := by
+lemma relint_nonempty_of_finRank (h : C.FinRank) : Nonempty C.relint := by
   /-
     * choose a basis of span R C in C
     * since C.FinRank, this basis is finite
     * use `finset_sum_mem_relint_of_subset_of_le_span`
   -/
-  sorry
+  let := (Submodule.fg_iff_finiteDimensional _).mp h
+  obtain ⟨s, hsC, _, hs, _⟩ := exists_finset_span_eq_linearIndepOn R (C : Set M)
+  refine ⟨∑ x ∈ s, x, finset_sum_mem_relint_of_subset_of_le_span hsC ?_⟩
+  intro x hx
+  rw [hs]
+  exact Submodule.subset_span hx
 
  -- potential short proof of `IsExposedFace.exists_dual_pos`
 variable (p) [Fact p.SeparatingLeft] in

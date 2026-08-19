@@ -141,8 +141,8 @@ lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed 
 -- ## FARKAS
 
 /- Separation lemma for dual closed cones. -/
-lemma exists_pos_forall_nonneg_of_not_mem {C : PointedCone R M}
-    (hC : C.DualClosed p) {x : M} (hx : x ∉ C) : ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
+lemma exists_pos_forall_nonneg_of_not_mem {C : PointedCone R M} (hC : C.DualClosed p)
+    {x : M} (hx : x ∉ C) : ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
   rw [← hC] at hx
   simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at hx
   obtain ⟨φ, _, _⟩ := hx
