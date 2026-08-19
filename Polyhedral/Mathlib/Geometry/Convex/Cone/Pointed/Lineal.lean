@@ -537,26 +537,6 @@ lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
 @[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
   salientQuot_submodule_eq_bot ⊤
 
-lemma lineal_eq_of_quot_salient {S : Submodule R M} (hS : S ≤ C) (h : (C.quot S).Salient) :
-    S = C.lineal := by
-  apply le_antisymm
-  · intro x hx
-    exact ⟨hS hx, hS (S.neg_mem hx)⟩
-  · intro x hx
-    have hxq : S.mkQ x ∈ (C.quot S).lineal :=
-      PointedCone.map_lineal_le C S.mkQ ⟨x, hx, rfl⟩
-    have : S.mkQ x = 0 := by
-      rw [PointedCone.salient_iff_lineal_bot.mp h] at hxq
-      exact hxq
-    exact (Submodule.Quotient.mk_eq_zero S).mp this
-
-lemma quot_salient_iff_eq_lineal {S : Submodule R M} (hS : S ≤ C) :
-    (C.quot S).Salient ↔ S = C.lineal where
-  mp := lineal_eq_of_quot_salient hS
-  mpr := by
-    intro rfl
-    exact salientQuot_salient C
-
 end SalientQuot
 
 section NoZeroSMulDivisors
@@ -636,8 +616,7 @@ lemma exists_salient_eq_map {C : PointedCone R M₂} {f : M →ₗ[R] M₂} (hC 
   · exact salient_hull_surjInv (by simp [s]) (hs ▸ hC) hf
   · simp [map_hull, Set.image_image, surjInv_eq, hs]
 
-lemma exists_salient_eq_sup_lineal (C : PointedCone R M)
-    [NoZeroSMulDivisors R (M ⧸ C.lineal)] :
+lemma exists_salient_eq_sup_lineal (C : PointedCone R M) [NoZeroSMulDivisors R (M ⧸ C.lineal)] :
     ∃ D : PointedCone R M, D.Salient ∧ C = D ⊔ C.lineal := by
   obtain ⟨D, hD, hCD⟩ := exists_salient_eq_map (C := C.salientQuot)
     (f := C.lineal.mkQ) (salientQuot_salient C) (Submodule.mkQ_surjective C.lineal)
@@ -645,5 +624,54 @@ lemma exists_salient_eq_sup_lineal (C : PointedCone R M)
   exact (sup_eq_left.mpr (lineal_le C)).symm.trans (quot_eq_iff_sup_eq.mp hCD)
 
 end NoZeroSMulDivisors
+
+section DivisionRing
+
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
+-- NOTE: This proof is AI generated and should be cleaned up.
+/-- `s \ (hull R s.lineal)` spans a salient cone. -/
+lemma Salient.hull_sdiff_hull_lineal {s : Set M} :
+    Salient (hull R (s \ (hull R s).lineal)) := by
+  rw [salient_iff_forall_mem_eq_zero_of_neg_mem]
+  intro x hx hnx
+  -- Since the smaller hull is contained in `hull R s`,
+  -- `x` and `-x` both lie in `hull R s`, hence `x` is lineal there.
+  have hxlin : x ∈ (hull R s).lineal := by
+    rw [mem_lineal]
+    exact ⟨hull_mono Set.sdiff_subset hx, hull_mono Set.sdiff_subset hnx⟩
+  -- Write `x` as a nonnegative conic combination of generators outside
+  -- the lineality space.
+  obtain ⟨c, hc, hc₀, hcx⟩ := mem_hull_set.mp hx
+  have hsC : (c.support : Set M) ⊆ hull R s := by
+    intro y hy
+    exact subset_hull (hc hy).1
+  -- Coefficients on the support are nonzero, hence strictly positive.
+  have hcpos : ∀ y ∈ c.support, 0 < c y := by
+    intro y hy
+    exact lt_of_le_of_ne
+      (hc₀ y)
+      (Ne.symm (Finsupp.mem_support_iff.mp hy))
+  have hsum' :
+      c.sum (fun y r => r • y) ∈ (hull R s).lineal := by
+    rw [hcx]
+    exact hxlin
+  have hsum : (∑ y ∈ c.support, c y • y) ∈ (hull R s).lineal := by
+    simpa only [Finsupp.sum] using hsum'
+  -- Every support generator must therefore lie in the lineality space.
+  have hlin := subset_lineal_of_sum_mem'
+    (C := hull R s) hsC (c : M → R) hcpos hsum
+  -- But every support generator was chosen from `s \ lineal`.
+  -- Hence the support must be empty.
+  have hsupp : c.support = ∅ := by
+    rw [Finset.eq_empty_iff_forall_notMem]
+    intro y hy
+    exact (hc hy).2 (hlin y hy (Finsupp.mem_support_iff.mp hy))
+  -- Thus the conic combination is empty, so `x = 0`.
+  rw [← hcx]
+  simp [Finsupp.sum, hsupp]
+
+end DivisionRing
 
 end PointedCone
