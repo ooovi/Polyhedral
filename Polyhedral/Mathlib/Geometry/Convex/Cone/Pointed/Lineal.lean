@@ -510,29 +510,19 @@ abbrev salientQuot (C : PointedCone R M) := C.quot C.lineal
 lemma salientQuot_eq_quot_lineal (C : PointedCone R M) : C.salientQuot = C.quot C.lineal := rfl
 
 lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
-  rw [salient_iff_convexCone_salient, ConvexCone.salient_iff_not_flat]
-  intro h
-  rcases h with ⟨x, hx, x_ne_0, hx'⟩
-  rcases (Set.mem_image (⇑C.lineal.mkQ) (↑C) x).mp hx with ⟨y,yC, hy⟩
-  rcases (Set.mem_image (⇑C.lineal.mkQ) (↑C) (-x)).mp hx' with ⟨y',yC', hy'⟩
-  have : y ∉ C.lineal := by
-    intro h
-    apply x_ne_0
-    rw [← hy]
-    exact (Submodule.Quotient.mk_eq_zero C.lineal).mpr h
-  apply this
-  have : (C.lineal).mkQ (y+y') = 0 := by
-    rw [map_add, hy, hy', add_neg_cancel]
-  have sum_lineal : y+y' ∈ C.lineal := by
-    rw [← Submodule.ker_mkQ C.lineal]
-    exact LinearMap.mem_ker.mpr this
-  apply mem_lineal.mp at sum_lineal
-  have : -y ∈ C := by
-    have : y' + -(y + y') = -y := by
-      simp
-    rw [← this]
-    exact Submodule.add_mem C yC' (sum_lineal.2)
-  exact mem_lineal.mpr ⟨yC, this⟩
+  rw [salient_iff_lineal_bot]
+  refine le_antisymm ?_ bot_le
+  rintro x ⟨hx, hnx⟩
+  obtain ⟨y, hy, rfl⟩ := PointedCone.mem_map.mp hx
+  obtain ⟨z, hz, hzq⟩ := PointedCone.mem_map.mp hnx
+  rw [Submodule.mem_bot]
+  have hyz : y + z ∈ C.lineal := by
+    rw [← Submodule.ker_mkQ C.lineal, LinearMap.mem_ker]
+    rw [map_add, hzq]
+    simp
+  have hylineal := mem_lineal_of_add_mem_left hy hz hyz
+  simpa [Submodule.mkQ_apply] using
+    (Submodule.Quotient.mk_eq_zero C.lineal).mpr hylineal
 
 @[simp] lemma salientQuot_submodule_eq_bot (S : Submodule R M) :
     (S : PointedCone R M).salientQuot = ⊥ := by
@@ -546,6 +536,30 @@ lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
 
 @[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
   salientQuot_submodule_eq_bot ⊤
+
+lemma sup_submodule_lineal (S : Submodule R M) :
+    (C ⊔ S).lineal = C.lineal ⊔ S := by
+  sorry
+
+lemma lineal_eq_of_quot_salient {S : Submodule R M} (hS : S ≤ C) (h : (C.quot S).Salient) :
+    S = C.lineal := by
+  apply le_antisymm
+  · intro x hx
+    exact ⟨hS hx, hS (S.neg_mem hx)⟩
+  · intro x hx
+    have hxq : S.mkQ x ∈ (C.quot S).lineal :=
+      PointedCone.map_lineal_le C S.mkQ ⟨x, hx, rfl⟩
+    have : S.mkQ x = 0 := by
+      rw [PointedCone.salient_iff_lineal_bot.mp h] at hxq
+      exact hxq
+    exact (Submodule.Quotient.mk_eq_zero S).mp this
+
+lemma quot_salient_iff_eq_lineal {S : Submodule R M} (hS : S ≤ C) :
+    (C.quot S).Salient ↔ S = C.lineal where
+  mp := lineal_eq_of_quot_salient hS
+  mpr := by
+    intro rfl
+    exact salientQuot_salient C
 
 open Function
 
@@ -567,7 +581,6 @@ lemma exists_salient_eq_sup_lineal (C : PointedCone R M) :
   let f := C.lineal.mkQ
   let D := C.map f
   have : D.Salient := salientQuot_salient C
-
   sorry
 
 end SalientQuot

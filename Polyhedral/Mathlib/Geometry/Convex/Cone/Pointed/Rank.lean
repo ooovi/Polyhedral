@@ -5,11 +5,24 @@ Authors: Olivia Röhig, Kilian Rueß, Mrtin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
 
 /-!
 ## Rank of Pointed Cones
 
 This file collects rank constructions for pointed cones and the associated dimension formulas.
+
+Ranks:
+* `PointedCone.rank` is the rank of the span of the cone.
+* `PointedCone.finrank` is the finrank of the span of the cone.
+* `PointedCone.salRank` is the salient rank of the span of the cone, that is, the rank of the
+  span after factoring by the lineality space.
+* `PointedCone.salFinrank` is the salient finrank of the span of the cone.
+
+Predicates:
+* `PointedCone.FinRank` states that the cone has a finite rank.
+* `PointedCone.FinSalRank` states that the cone has a finite salient rank.
 -/
 
 namespace PointedCone
@@ -190,35 +203,82 @@ noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
   the non-trivial structure of the cone only spans finitely many dimensions. -/
 abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
 
-lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank :=
-  sorry
+lemma FinRank.finSalRank (h : C.FinRank) : C.FinSalRank := by
+  unfold FinSalRank FinRank
+  simpa only [span_quot] using Submodule.FG.map C.lineal.mkQ h
 
 lemma FG.finSalRank (h : C.FG) : C.FinSalRank := h.finRank.finSalRank
 
-lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) : C.FinRank :=
-  sorry
+lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) :
+    C.FinRank := by
+  apply Submodule.fg_of_fg_map_of_fg_inf_ker C.lineal.mkQ
+  · simpa only [← span_quot, salientQuot_eq_quot_lineal] using h
+  · simpa [Submodule.ker_mkQ, inf_eq_right.mpr (lineal_le_span C)] using hlin
 
 end Definitions
 
-section CommRing
+section Field
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-/- The dual of a cone with finite salient rank also has finite salient rank.-/
+/-
+NOTE: The proof of `FinSalRank.dual_finSalRank` is AI generated and very messy. There is
+a cleaner approach.
+* prove that salRank is the rank of the quotient module span / lineal
+* prove that if A / B is FG, then B* / A* is also FG.
+-/
+
 variable (p) in
+/-- The dual of a cone with finite salient rank also has finite salient rank. -/
 lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := by
-  sorry
+  classical
+  let T := span R (dual p C : Set N)
+  let L := (dual p C).lineal
+  obtain ⟨D, hDT, hDL, hsup⟩ := Submodule.exists_le_disjoint_sup_self T L
+  have hLT : L ≤ T := lineal_le_span (dual p C)
+  have hDLT : D ⊔ L = T := by simpa [sup_eq_left.mpr hLT] using hsup
+  let Q := span R (C.salientQuot : Set (M ⧸ C.lineal))
+  have hDdual : D ≤ Submodule.dual p C.lineal :=
+    hDT.trans span_dual_le_dual_lineal
+  let f : D →ₗ[R] Dual R Q :=
+    Q.subtype.dualMap.comp
+      ((Submodule.dual_linearMap_dual_quot (p := p) C.lineal).comp
+        (Submodule.inclusion hDdual))
+  have hf : Function.Injective f := by
+    rw [← LinearMap.ker_eq_bot]
+    ext y
+    simp only [Submodule.mem_bot, LinearMap.mem_ker]
+    constructor
+    · intro hy
+      apply Subtype.ext
+      have hyL : (y : N) ∈ L := by
+        change (y : N) ∈ (dual p C).lineal
+        rw [← submodule_dual_span_eq_dual_lineal]
+        rw [Submodule.dual_span, Submodule.mem_dual]
+        intro x hx
+        have hqx : C.lineal.mkQ x ∈ Q := Submodule.subset_span ⟨x, hx, rfl⟩
+        have he := LinearMap.congr_fun hy ⟨C.lineal.mkQ x, hqx⟩
+        change p x y = 0 at he
+        exact he.symm
+      exact (hDL.le_bot ⟨y.2, hyL⟩)
+    · rintro rfl
+      simp
+  have hQ : Q.FG := hC
+  have hD : D.FG := by
+    let _ : Module.Finite R (Dual R Q) :=
+      (Module.finite_dual_iff R).2 (Module.Finite.iff_fg.2 hQ)
+    exact Module.Finite.iff_fg.1 (Module.Finite.of_injective f hf)
+  change (span R ((dual p C).quot L : Set (N ⧸ L))).FG
+  rw [span_quot]
+  change (Submodule.map L.mkQ T).FG
+  rw [← hDLT, Submodule.map_sup]
+  simpa using hD.map L.mkQ
 
-variable (p) [Fact p.SeparatingLeft] in
-@[simp] -- enable simp, once proven (this is for safety in case it is false)
-lemma dual_finSalRank_iff_finSalRank : (dual p C).FinSalRank ↔ C.FinSalRank := by
-  sorry
-
-end CommRing
+end Field
 
 section Decomposition
 
