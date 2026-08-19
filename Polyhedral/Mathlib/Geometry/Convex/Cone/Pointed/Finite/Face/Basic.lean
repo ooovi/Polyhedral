@@ -140,14 +140,6 @@ lemma IsFaceOf.FG.isExposedFaceOf (hC : C.FG) (hF : F.IsFaceOf C) :
 lemma IsExposedFaceOf.lineal (hC : C.FG) : IsExposedFaceOf C.lineal C := by
   apply IsFaceOf.FG.isExposedFaceOf hC (IsFaceOf.lineal C)
 
--- States that a pointed cone minus its origin is contained in the interior of a halfspace.
-variable (p) in
-lemma exists_dual_pos₀ {C : PointedCone R M} (hC : C.Salient) : -- only true with FinSalRank
-    ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x = 0) :=
-  -- Idea: choose φ from relint of dual cone.
-  --  (we need to show that relints of dual cones are nonempty)
-    sorry
-
 end Field
 
 section DivisionRing
