@@ -379,7 +379,7 @@ end CommRing
 -- /- If the quotient by any contained submodule is FG, then the cone is polyhedral. -/
 -- lemma IsPolyhedral.of_quot_fg {S : Submodule R M} (hS : S ≤ C) (hC : FG (C.quot S)) :
 --     C.IsPolyhedral := by
---   simpa only [IsPolyhedral, map, ← factor_comp_mk <| le_lineal hS,
+--   simpa only [IsPolyhedral, map, ← factor_comp_mk <| submodule_le_lineal hS,
 --     restrictScalars_comp, map_comp] using FG.map _ hC
 
 -- /-- The salient quotient of a polyhedral `C` cone can be written as the quotient of an

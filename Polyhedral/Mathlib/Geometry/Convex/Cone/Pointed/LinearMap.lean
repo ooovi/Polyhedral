@@ -39,6 +39,10 @@ def nonneg (f : M →ₗ[R] R) : PointedCone R M where
 
 lemma ker_le_nonneg {f : M →ₗ[R] R} : f.ker ≤ f.nonneg := fun _ => by simp +contextual
 
+lemma le_nonneg_add {C : PointedCone R M} {f g : M →ₗ[R] R}
+    (hCf : C ≤ f.nonneg) (hCg : C ≤ g.nonneg) : C ≤ (f + g).nonneg :=
+  fun _ hx => add_nonneg (hCf hx) (hCg hx)
+
 end Semiring
 
 section IsStrictOrderedRing
