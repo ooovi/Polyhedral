@@ -8,16 +8,24 @@ import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 
 /-! This file defines dual closed cones, that is, cones that are identical to their
-double dual. -/
+double dual.
+
+Main definition:
+* `DualClosed p C` states that `dual p.flip (dual p C) = C`.
+ -/
 
 namespace PointedCone
 
-open Module LinearMap
+open Function Module LinearMap Pointwise
 open Submodule (span)
 
-variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {R M N : Type*}
+
+section CommRing
+
+variable [CommRing R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
@@ -39,7 +47,7 @@ lemma DualClosed.def_iff {C : PointedCone R M} :
 lemma DualClosed.def_flip_iff {C : PointedCone R N} :
     DualClosed p.flip C ↔ dual p (dual p.flip C) = C := by rfl
 
-lemma DualClosed.coe_iff {S : Submodule R M} :
+@[simp] lemma DualClosed.coe_iff {S : Submodule R M} :
     DualClosed p S ↔ S.DualClosed p := by
   change dual p.flip (dual p S) = S ↔ _
   rw [dual_eq_submodule_dual p S, dual_coe_coe_eq_dual_coe, dual_eq_submodule_dual p.flip]
@@ -98,8 +106,6 @@ lemma dual_le_iff_dual_le_of_dualClosed {C : PointedCone R M} {D : PointedCone R
       dual p C ≤ D ↔ dual p.flip D ≤ C
     := ⟨hC.dual_le_of_dual_le, hD.dual_le_of_dual_le⟩
 
----------------
-
 variable (p) in
 lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
     dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
@@ -111,34 +117,31 @@ lemma DualClosed.to_eval {S : PointedCone R M} (hS : S.DualClosed p)
   rw [hS] at h
   exact le_antisymm h subset_dual_dual
 
----------------
+lemma DualClosed.neg {C : PointedCone R M} (hC : C.DualClosed p) : (-C).DualClosed p := by
+  unfold DualClosed
+  repeat rw [Submodule.coe_set_neg, dual_neg]
+  rw [hC]
 
-lemma DualClosed.submodule_span_dualClosed {C : PointedCone R M} (hC : C.DualClosed p) :
-    (Submodule.span R C).DualClosed p := by
-  unfold Submodule.DualClosed
-  rw [← hC]
-  --simp only [submodule_span_dual, submodule_dual_flip_dual]
-  sorry
+end CommRing
 
 section LinearOrder
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-/-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
-lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed p) :
-    .dual p C.lineal = span R (dual p C) := by
-  rw [← hC, dual_lineal_eq_submodule_dual]
-  nth_rw 1 [← flip_flip p]
-  nth_rw 2 [← Submodule.dual_span]
-  rw [(dual_dualClosed p C).submodule_span_dualClosed, dual_dual_flip_dual]
+lemma DualClosed.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
+    C.lineal.DualClosed p := by
+  rw [← coe_iff, ofSubmodule_lineal]
+  exact DualClosed.inf hC hC.neg
 
----------------
+/- WARNING: `C` being dual closed does *not* imply that `span R C` is dual closed! Not even
+over ℝ or witha a separating pairing!
+-/
 
--- ## FARKAS
+-- # FARKAS
 
 /- Separation lemma for dual closed cones. -/
 lemma exists_pos_forall_nonneg_of_not_mem {C : PointedCone R M} (hC : C.DualClosed p)
@@ -215,20 +218,18 @@ lemma exists_ne_zero_forall_nonneg_of_dualClosed_ne_top {C : PointedCone R M}
   simp [← dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg, hC, h]
 
 
-
 end LinearOrder
 
 section Field
 
-open Function
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- Q: Do we need Field?
-/-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
+-- /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 -- lemma DualClosed.dual_lineal_span_dual {C : PointedCone R M} (hC : C.DualClosed p) :
 --     Submodule.dual p C.lineal = Submodule.span R (dual p C) := by
 --   rw [Eq.comm, le_antisymm_iff]
@@ -247,7 +248,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   · rw [← hC, ← dual_eq_submodule_dual]
 --     exact dual_antitone h  -- (le_trans dual_le_submodule_dual h)
 --   · exact hdc
-
+--
 -- variable [Fact (Surjective p)] in
 -- /-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual. -/
 -- lemma DualClosed.dual_lineal_span_dual'' {C : PointedCone R M} (hC : C.DualClosed p) :
@@ -269,20 +270,17 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --     · rw [← hC, ← dual_eq_submodule_dual]
 --       exact dual_antitone h
 --     · exact T.dualClosed p.flip
-
+--
 -- variable [Fact (Surjective p)] in
 -- /-- For a dual closed cone, the dual of the submodule span is the lineality space of the dual. -/
 -- lemma DualClosed.dual_span_lineal_dual {C : PointedCone R M} (hC : C.DualClosed p) :
 --     .dual p (Submodule.span R (C : Set M)) = (dual p C).lineal := by
-
 --   have h := hC.dual_lineal_span_dual.symm
 --   obtain ⟨D, hD, rfl⟩ := hC.exists_of_dual_flip
 --   --rw [DualClosed, flip_flip] at hD
 --   rw [hD.def_flip] at *
 --   simp at *
-
 --   sorry
-
 
 lemma DualClosed.dual_dual_span {C : PointedCone R M} (hC : C.DualClosed p) :
     span R (dual p.flip (dual p C)) = .dual p.flip (Submodule.dual p (span R (C : Set M))) := by
@@ -290,14 +288,6 @@ lemma DualClosed.dual_dual_span {C : PointedCone R M} (hC : C.DualClosed p) :
 
 lemma DualClosed.dual_dual_lineal {C : PointedCone R M} (hC : C.DualClosed p) :
     (dual p.flip (dual p C)).lineal = .dual p.flip (Submodule.dual p C.lineal) := by
-  sorry
-
-lemma DualClosed.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
-    C.lineal.DualClosed p := by
-  sorry
-
-lemma DualClosed.span {C : PointedCone R M} (hC : C.DualClosed p) :
-    (span R C).DualClosed p := by
   sorry
 
 variable (p) [Fact (Surjective p.flip)] in

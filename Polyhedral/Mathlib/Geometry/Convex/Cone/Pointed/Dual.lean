@@ -122,8 +122,12 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-/-- For a dual closed cone, the dual of the lineality space is the submodule span of the dual.
-  For the other direction, see `DualClosed.dual_lineal_span_dual`. -/
+/-- The span of the dual cone is contained in the dual of the lineality space.
+
+Equality does not hold in general, not even over fields, for dual closed cones or separating
+pairing. Instead, it holds `(C.lineal)** = (span C*)**`, so an additional dual closure after
+the span is necessary.
+-/
 lemma span_dual_le_dual_lineal {C : PointedCone R M} :
     span R (dual p C) ≤ .dual p C.lineal := by
   simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]

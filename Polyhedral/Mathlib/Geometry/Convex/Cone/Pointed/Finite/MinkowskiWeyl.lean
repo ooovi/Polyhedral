@@ -255,15 +255,15 @@ lemma FG.isDualClosed {C : PointedCone 𝕜 M} (hC : C.FG) : C.DualClosed p
 
 variable (p) [Fact p.SeparatingRight] in
 /-- The double dual of a finite set is its span. -/
-@[simp] lemma FG.dual_dual_flip_eq_span (s : Finset N) : dual p (dual p.flip s) = hull 𝕜 s := by
+@[simp] lemma FG.dual_dual_flip_eq_hull (s : Finset N) : dual p (dual p.flip s) = hull 𝕜 s := by
   nth_rw 2 [← dual_hull]
   exact dual_dual_flip p (fg_span s.finite_toSet)
 
 -- NOTE: we keep this flipped version because it is a simp lemma.
 variable (p) [Fact p.SeparatingLeft] in
 /-- The double dual of a finite set is its span. -/
-@[simp] lemma FG.dual_flip_dual_eq_span (s : Finset M) : dual p.flip (dual p s) = hull 𝕜 s :=
-    dual_dual_flip_eq_span p.flip s
+@[simp] lemma FG.dual_flip_dual_eq_hull (s : Finset M) : dual p.flip (dual p s) = hull 𝕜 s :=
+    dual_dual_flip_eq_hull p.flip s
 
 variable [Fact p.SeparatingLeft] in
 lemma FG.dual_inj {C D : PointedCone 𝕜 M} (hC : C.FG) (hD : D.FG)
@@ -282,6 +282,13 @@ variable [Fact p.SeparatingLeft] in
 -- variable [Fact p.IsFaithfulPair] in
 -- @[simp] lemma FG.dual_flip_inj_iff {C D : PointedCone 𝕜 N} (hC : C.FG) (hD : D.FG) :
 --     dual p.flip C = dual p.flip D ↔ C = D := dual_inj_iff hC hD
+
+/- NOTE: this is very likely true (a plausible argument was given by ChatGPT), but
+a proof requires more machinery than currently available. -/
+/-- The sup of an FG cone and a dual closed submodule is dual closed. -/
+lemma DualClosed.fg_sup_submodule_dualClosed {C : PointedCone 𝕜 M} (hD : C.FG)
+    {S : Submodule 𝕜 M} (hS : S.DualClosed p) : (C ⊔ S).DualClosed p :=
+  sorry
 
 variable [Fact p.SeparatingRight] in
 /-- The dual of a DualFG cone is FG. -/
