@@ -23,7 +23,7 @@ variable [AddCommGroup N] [Module R N]
 
 variable (p : M →ₗ[R] N →ₗ[R] R) {C F F₁ F₂ : PointedCone R M}
 
-/-- Intersecting a cone with the common kernel of a set of functionals in its dual produces a
+/-- Intersecting a cone with the common kernel of a set of functionals in the dual cone produces a
 face of the cone. -/
 lemma IsFaceOf.inf_submodule_dual_of_le_dual {s : Set N} (hS : s ⊆ dual p C) :
     IsFaceOf (C ⊓ (.dual p.flip s : Submodule R M)) C := by
@@ -35,16 +35,22 @@ lemma IsFaceOf.inf_submodule_dual_of_le_dual {s : Set N} (hS : s ⊆ dual p C) :
   rw [add_eq_zero_iff_of_nonneg (hS hf hx) (hS hf hy)] at h
   exact h.1.symm
 
-/-- The face of the dual cone that is dual to `F` in the face lattice of the cone. -/
+/-- The dual face of a face. This is a face of the dual cone. -/
 def Face.dual (F : Face C) : Face (dual p C) where
   __ := (.dual p C : PointedCone R N) ⊓ (.dual p F : Submodule R N)
   isFaceOf := by simpa only [LinearMap.flip_flip] using
     .inf_submodule_dual_of_le_dual (p := p.flip) (s := F) (F.isFaceOf.le.trans subset_dual_dual)
 
-/-- The face of the cone that is dual to `F` in the face lattice of the dual cone. -/
+/-- The dual face of a face of the dual cone. This is a face of the primal cone. -/
 def Face.dual_flip (F : Face (.dual p C)) : Face C where
   __ := C ⊓ (.dual p.flip F : Submodule R M)
   isFaceOf := .inf_submodule_dual_of_le_dual p F.isFaceOf.le
+
+lemma Face.coe_dual (F : Face C) :
+    F.dual p = (.dual p C : PointedCone R N) ⊓ (.dual p F : Submodule R N) := rfl
+
+lemma Face.coe_dual_flip (F : Face (.dual p C)) :
+    F.dual_flip p = C ⊓ (.dual p.flip F : Submodule R M) := rfl
 
 lemma Face.dual_flip_eq_dual_flip (F : Face (.dual p C)) (hC : C.DualClosed p) :
     (F.dual p.flip : PointedCone R M) = F.dual_flip p := by
