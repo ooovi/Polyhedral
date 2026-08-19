@@ -51,17 +51,6 @@ lemma DualFG.dualClosed {C : PointedCone R M} (hC : C.DualFG p.flip) :
 lemma DualFG.dualClosed_flip {C : PointedCone R N} (hC : C.DualFG p) :
     C.DualClosed p.flip := hC.dual_dual_flip
 
--- @[deprecated "Not proven"]
--- lemma DualFG.dual_inf_dual_sup_dual' {C D : PointedCone R N} (hC : C.DualFG p) (hD : D.DualFG p):
---     dual p.flip (C ⊓ D : PointedCone R N) = (dual p.flip C) ⊔ (dual p.flip D) := by
---   have ⟨C', hCfg, hC'⟩ := DualFG.exists_fg_dual hC
---   have ⟨D', hDfg, hD'⟩ := DualFG.exists_fg_dual hD
---   rw [← hC', ← hD', ← dual_sup_dual_inf_dual]
---   rw [dual_flip_dual (by sorry)] -- not true
---   rw [dual_flip_dual (by sorry)] -- not true
---   rw [dual_flip_dual (by sorry)] -- not true
---   -- Maybe we can prove this only with Field (need dual_dual for FG; need p.IsFaithfulPair?)
-
 end PartialOrder
 
 section LinearOrder
@@ -69,6 +58,7 @@ section LinearOrder
 variable [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable [Module.Finite R M] [Fact p.SeparatingRight] in
