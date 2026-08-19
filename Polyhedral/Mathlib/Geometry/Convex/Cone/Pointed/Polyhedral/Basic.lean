@@ -156,7 +156,7 @@ lemma _root_.Submodule.FG.exists_fg_comap_eq_sup_ker_of_surjective {f : N →ₗ
   exact ⟨T, hT, rfl⟩
 
 -- TODO: move
-lemma _root_.PointedCOne.FG.exists_fg_comap_eq_sup_ker_of_surjective {f : N →ₗ[R] M}
+lemma _root_.PointedCone.FG.exists_fg_comap_eq_sup_ker_of_surjective {f : N →ₗ[R] M}
     (hf : Surjective f) (hC : C.FG) : ∃ D : PointedCone R N, D.FG ∧ C.comap f = D ⊔ f.ker :=
   Submodule.FG.exists_fg_comap_eq_sup_ker_of_surjective (R := Nonneg R) hf hC
 
@@ -221,10 +221,37 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
+/- NOTE: The proof below is AI generated and likely one can extract some intermediate lemmas
+of independent interest -/
 /-- A cone is polyhedral if and only if it is the sum of a salient FG cone and a submodule. -/
-lemma iff_exists_fg_salient_submoduel_eq_sup (hC : C.IsPolyhedral) :
-    ∃ D : PointedCone R M, D.FG ∧ Salient D ∧ C = D ⊔ C.lineal := by
-  sorry
+lemma exists_fg_salient_submoduel_eq_sup
+    [NoZeroSMulDivisors R (M ⧸ (C.lineal : Submodule R M))]
+    (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R M, D.FG ∧ Salient D ∧ C = D ⊔ C.lineal := by classical
+  obtain ⟨D, hD, S, hCDS⟩ := hC
+  have hCD : C = D ⊔ C.lineal := by
+    have hS := submodule_le_lineal (hCDS ▸ le_sup_right)
+    apply le_antisymm
+    · exact hCDS.le.trans <| sup_le le_sup_left fun x hx ↦
+        (show (C.lineal : PointedCone R M) ≤ D ⊔ C.lineal from le_sup_right) (hS hx)
+    · exact sup_le (hCDS ▸ le_sup_left) (lineal_le C)
+  obtain ⟨s, hs⟩ := hD.map (C.lineal.mkQ.restrictScalars (Nonneg R))
+  let t : Finset (M ⧸ C.lineal) := s.erase 0
+  have ht : hull R (t : Set (M ⧸ C.lineal)) = hull R (s : Set (M ⧸ C.lineal)) := by
+    by_cases h₀ : 0 ∈ s
+    · rw [← Finset.insert_erase h₀]
+      simp [t]
+    · simp [t, h₀]
+  let T := hull R (surjInv (Submodule.mkQ_surjective C.lineal) '' (t : Set _))
+  refine ⟨T, ?_, ?_, ?_⟩
+  · exact fg_span (t.finite_toSet.image _)
+  · apply salient_hull_surjInv (by simp [t])
+    have hs : hull R (t : Set _) = D.quot C.lineal := ht.trans hs
+    rw [hs, ← sup_quot_eq_quot, ← hCD, ← salientQuot_eq_quot_lineal]
+    exact salientQuot_salient C
+  · refine hCD.trans <| quot_eq_iff_sup_eq.mp ?_
+    simp only [map_hull, mkQ_apply, Set.image_image, surjInv_eq, Set.image_id', T]
+    exact (ht.trans hs).symm
 
 /-- A polyhedral cone is the sum of an FG cone with its lineality space. -/
 lemma exists_fg_eq_sup_lineal (hC : C.IsPolyhedral) :
@@ -266,12 +293,21 @@ lemma iff_fg_of_salient (hC : C.Salient) : C.IsPolyhedral ↔ C.FG :=
 lemma quot (hC : C.IsPolyhedral) (S : Submodule R M) :
     (C.quot S).IsPolyhedral := hC.map _
 
--- TODO: prove `C.IsPolyhedral ↔ FG C.salientQuot`
+lemma salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := by
+  obtain ⟨D, hD, hCD⟩ := hC.exists_fg_eq_sup_lineal
+  have hq := congrArg (PointedCone.quot · C.lineal) hCD
+  rw [salientQuot_eq_quot_lineal, hq, sup_quot_eq_quot]
+  exact quot_fg hD C.lineal
 
--- lemma salientQuot_fg (hC : C.IsPolyhedral) : FG C.salientQuot := sorry
+lemma iff_salientQuot_fg : C.IsPolyhedral ↔ FG C.salientQuot where
+  mp := salientQuot_fg
+  mpr h := by
+    obtain ⟨D, hD, hCD⟩ := h.exists_fg_eq_map_of_surjective (mkQ_surjective C.lineal)
+    refine ⟨D, hD, C.lineal, ?_⟩
+    exact (sup_eq_left.mpr (lineal_le C)).symm.trans (quot_eq_iff_sup_eq.mp hCD)
 
--- lemma salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
---   hC.salientQuot_fg.isPolyhedral
+lemma salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
+  hC.salientQuot_fg.isPolyhedral
 
 open Pointwise
 

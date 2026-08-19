@@ -142,16 +142,19 @@ lemma mem_lineal_of_smul_mem_lineal {x : M} {c : R}
       replace h' := smul_mem C h1c hx
       exact mem_lineal_of_add_mem_right h' hx sorry
 
--- TODO: maybe this result is not really necessary. See `inf_sup_eq_self_of_le_of_codisjoint` below.
-/-- If `C` is a cone and `S` is complementary to the cone's linealiry space, then `C` can
+-- This seems to be a contradiction.
+lemma inf_sup_eq_self_of_le_of_codisjoint {D : PointedCone R M}
+    {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint D T) : (C ⊓ D) ⊔ T = C := by
+  simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
+
+-- NOTE: This is a specialized version of `inf_sup_eq_self_of_le_of_codisjoint`.
+/-- If `C` is a cone and `S` is complementary to the cone's lineality space, then `C` can
   be written as `(C ⊓ S) ⊔ C.lineal`. -/
 lemma inf_sup_lineal {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
     (C ⊓ S) ⊔ C.lineal = C := by
-  sorry
-
-lemma inf_sup_eq_self_of_le_of_codisjoint {S : PointedCone R M}
-    {T : Submodule R M} (hT : T ≤ C) (hST : Codisjoint S T) : (C ⊓ S) ⊔ T = C := by
-  simp [inf_sup_assoc_of_le_of_submodule_le _ hT, hST.eq_top]
+  rw [inf_sup_assoc_of_le_of_submodule_le _ (lineal_le C)]
+  rw [← coe_sup, hCS.symm.eq_top]
+  simp
 
 lemma lineal_le_span (C : PointedCone R M) : C.lineal ≤ span R C := by
   rw [← ofSubmodule_le_ofSubmodule]
@@ -494,9 +497,6 @@ end Map
 
 section SalientQuot
 
-
--- ## SALIENT QUOT
-
 variable [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup M₁] [Module R M₁]
@@ -537,10 +537,6 @@ lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
 @[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
   salientQuot_submodule_eq_bot ⊤
 
-lemma sup_submodule_lineal (S : Submodule R M) :
-    (C ⊔ S).lineal = C.lineal ⊔ S := by
-  sorry
-
 lemma lineal_eq_of_quot_salient {S : Submodule R M} (hS : S ≤ C) (h : (C.quot S).Salient) :
     S = C.lineal := by
   apply le_antisymm
@@ -561,28 +557,93 @@ lemma quot_salient_iff_eq_lineal {S : Submodule R M} (hS : S ≤ C) :
     intro rfl
     exact salientQuot_salient C
 
+end SalientQuot
+
+section NoZeroSMulDivisors
+
 open Function
 
-lemma salient_hull_surjInv {s : Set M₂} {f : M₁ →ₗ[R] M₂} (hs : (hull R s).Salient)
-    (hf : Surjective f) : (hull R (surjInv hf '' s)).Salient := by
-  intro x h hx
-  -- possible but annoying (need to work with sums perhaps?)
-  sorry
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂] [NoZeroSMulDivisors R M₂]
+
+/- NOTE: All proofs in this section are AI generated and rather messy. Maybe there is a better way,
+or maybe there results are not needed eventually. -/
+
+lemma salient_hull_surjInv {s : Set M₂} (h₀ : 0 ∉ s) {f : M₁ →ₗ[R] M₂}
+    (hs : (hull R s).Salient) (hf : Surjective f) : (hull R (surjInv hf '' s)).Salient := by
+  classical
+  intro x hx y hy hxy
+  have hmap : (hull R (surjInv hf '' s)).map f = hull R s := by
+    simp [map_hull, Set.image_image, surjInv_eq]
+  have hfxmem : f x ∈ hull R s := by
+    rw [← hmap]
+    exact PointedCone.mem_map.mpr ⟨x, hx, rfl⟩
+  have hfymem : f y ∈ hull R s := by
+    rw [← hmap]
+    exact PointedCone.mem_map.mpr ⟨y, hy, rfl⟩
+  have hfx : f x = 0 :=
+    hs (f x) hfxmem (f y) hfymem (by simpa using congrArg f hxy)
+  obtain ⟨c, hc, hc₀, hcx⟩ := mem_hull_set.mp hx
+  let g : M₁ → R → M₂ := fun m a ↦ a • f m
+  have hsum : c.sum g = 0 := by
+    calc
+      c.sum g = f (c.sum fun m a ↦ a • m) := by
+        simp only [Finsupp.sum]
+        rw [map_sum]
+        exact Finset.sum_congr rfl fun m _ ↦ by simp [g]
+      _ = f x := congrArg f hcx
+      _ = 0 := hfx
+  have hterm : ∀ m ∈ c.support, g m (c m) = 0 := by
+    intro m hm
+    have hmem : ∀ n ∈ c.support, g n (c n) ∈ hull R s := by
+      intro n hn
+      obtain ⟨w, hw, hnw⟩ := hc hn
+      have hfn : f n = w := (congrArg f hnw.symm).trans (surjInv_eq hf w)
+      change c n • f n ∈ hull R s
+      rw [hfn]
+      exact (hull R s).smul_mem (hc₀ _) (subset_hull hw)
+    have hrest : c.sum g - g m (c m) ∈ hull R s := by
+      rw [Finsupp.sum, ← Finset.sum_erase_add _ _ hm, add_sub_cancel_right]
+      exact Submodule.sum_mem _ fun n hn ↦ hmem n (Finset.mem_of_mem_erase hn)
+    apply hs _ (hmem m hm) _ hrest
+    rw [← add_sub_assoc, hsum]
+    abel
+  have hc_eq_zero : c = 0 := by
+    ext m
+    by_cases hm : m ∈ c.support
+    · obtain ⟨w, hw, hmw⟩ := hc hm
+      have hfw : f m = w := (congrArg f hmw.symm).trans (surjInv_eq hf w)
+      have hfm : f m ≠ 0 := hfw.symm ▸ fun hw₀ ↦ h₀ (hw₀ ▸ hw)
+      exact (eq_zero_or_eq_zero_of_smul_eq_zero (hterm m hm)).resolve_right hfm
+    · simpa [Finsupp.mem_support_iff] using hm
+  rw [← hcx, hc_eq_zero]
+  simp
 
 lemma exists_salient_eq_map {C : PointedCone R M₂} {f : M →ₗ[R] M₂} (hC : C.Salient)
     (hf : Surjective f) : ∃ D : PointedCone R M, D.Salient ∧ C = D.map f := by
-  use hull R (surjInv hf '' C)
+  let s : Set M₂ := C \ {0}
+  have hs : hull R s = C := by
+    apply le_antisymm
+    · exact Submodule.span_le.mpr fun _ hx ↦ hx.1
+    · intro x hx
+      by_cases hx₀ : x = 0
+      · simp [hx₀]
+      · exact subset_hull ⟨hx, hx₀⟩
+  use hull R (surjInv hf '' s)
   constructor
-  · sorry -- exact salient_hull_surjInv (s := C) (by sorry) hf
-  · simp [map_hull, Set.image_image, surjInv_eq]
+  · exact salient_hull_surjInv (by simp [s]) (hs ▸ hC) hf
+  · simp [map_hull, Set.image_image, surjInv_eq, hs]
 
-lemma exists_salient_eq_sup_lineal (C : PointedCone R M) :
+lemma exists_salient_eq_sup_lineal (C : PointedCone R M)
+    [NoZeroSMulDivisors R (M ⧸ C.lineal)] :
     ∃ D : PointedCone R M, D.Salient ∧ C = D ⊔ C.lineal := by
-  let f := C.lineal.mkQ
-  let D := C.map f
-  have : D.Salient := salientQuot_salient C
-  sorry
+  obtain ⟨D, hD, hCD⟩ := exists_salient_eq_map (C := C.salientQuot)
+    (f := C.lineal.mkQ) (salientQuot_salient C) (Submodule.mkQ_surjective C.lineal)
+  refine ⟨D, hD, ?_⟩
+  exact (sup_eq_left.mpr (lineal_le C)).symm.trans (quot_eq_iff_sup_eq.mp hCD)
 
-end SalientQuot
+end NoZeroSMulDivisors
 
 end PointedCone

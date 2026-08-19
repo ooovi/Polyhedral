@@ -17,7 +17,7 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 
 variable (R M) in
-/-- A cone is polyhedral if its salient quotient is finitely generated. -/
+/-- A cone is polyhedral if it is the sum of a finitly generated cone and a submodule. -/
 structure PolyhedralCone extends PointedCone R M where
   isPolyhedral : IsPolyhedral toSubmodule
 
