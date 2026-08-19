@@ -62,6 +62,10 @@ lemma Face.dual_flip_eq_dual_flip (F : Face (.dual p C)) (hC : C.DualClosed p) :
 lemma Face.dual_antitone : Antitone (dual p : Face C → Face _) :=
   fun _ _ hF _ xd ↦ ⟨xd.1, fun _ hx ↦ xd.2 (hF hx)⟩
 
+/-- Face duality is antitone. -/
+lemma Face.dual_flip_antitone : Antitone (dual_flip p : Face _ → Face C) :=
+  fun _ _ hF _ xd ↦ ⟨xd.1, fun _ hx ↦ xd.2 (hF hx)⟩
+
 end Field
 
 end PointedCone
