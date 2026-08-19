@@ -155,8 +155,6 @@ variable {C : PolyhedralCone R M}
 -- lemma dualClosed_iff (C : PolyhedralCone R M) :
 --   DualClosed p C ↔ (lineal C).DualClosed p := sorry
 
--- Duality flips the face lattice
-
 end CommRing
 
 section Field

@@ -24,12 +24,8 @@ open PointedCone
 
 /- TODO:
  * in finite dim, fg iff polyhedral
- * faces are polyhedral
  * quotients are polyhedral
  * halfspaces are polyhedral
- * lattice of polyhedral cones
- * finitely many faces / finite face lattice
- * dual closed
 -/
 
 namespace PointedCone
