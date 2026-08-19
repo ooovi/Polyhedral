@@ -537,6 +537,13 @@ lemma salientQuot_salient (C : PointedCone R M) : Salient C.salientQuot := by
 @[simp] lemma salientQuot_top : (⊤ : PointedCone R M).salientQuot = ⊥ :=
   salientQuot_submodule_eq_bot ⊤
 
+lemma lineal_eq_of_quot_salient {S : Submodule R M} (hS : S ≤ C)
+    (h : (C.quot S).Salient) : S = C.lineal := by
+  refine le_antisymm (submodule_le_lineal hS) fun x hx => ?_
+  have hxq := PointedCone.map_lineal_le C S.mkQ ⟨x, hx, rfl⟩
+  rw [salient_iff_lineal_bot.mp h] at hxq
+  exact (Submodule.Quotient.mk_eq_zero S).mp hxq
+
 end SalientQuot
 
 section NoZeroSMulDivisors
@@ -548,8 +555,11 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup M₁] [Module R M₁]
 variable [AddCommGroup M₂] [Module R M₂] [NoZeroSMulDivisors R M₂]
 
-/- NOTE: All proofs in this section are AI generated and rather messy. Maybe there is a better way,
-or maybe there results are not needed eventually. -/
+/- NOTE: All proofs in this section are AI generated and rather messy. Maybe there is a better
+way, or maybe there results are not needed eventually.
+
+These results are mainly used in Polyhedral/Basic.lean (e.g. `exists_fg_salient_submoduel_eq_sup`).
+-/
 
 lemma salient_hull_surjInv {s : Set M₂} (h₀ : 0 ∉ s) {f : M₁ →ₗ[R] M₂}
     (hs : (hull R s).Salient) (hf : Surjective f) : (hull R (surjInv hf '' s)).Salient := by
