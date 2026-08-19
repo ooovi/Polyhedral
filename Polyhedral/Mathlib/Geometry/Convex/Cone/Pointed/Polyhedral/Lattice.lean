@@ -8,22 +8,28 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Basic
 
 /-! This file defines `PolyhedralCone` as a bundled object. -/
 
-open Function Module OrderDual LinearMap
+open Function Module OrderDual LinearMap Pointwise
 open Submodule hiding dual DualClosed
 open PointedCone
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable {R M M₁ M₂ N : Type*}
 
-variable (R M) in
+variable (R) [Ring R] [PartialOrder R] [IsOrderedRing R] in
+variable (M) [AddCommMonoid M] [Module R M] in
 /-- A cone is polyhedral if it is the sum of a finitly generated cone and a submodule. -/
 structure PolyhedralCone extends PointedCone R M where
   isPolyhedral : IsPolyhedral toSubmodule
 
 namespace PolyhedralCone
 
--- ## BOILERPLATE
+section Ring
+
+-- TODO: generalize to `PartialOrder` where possible.
+
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
+variable {C : PolyhedralCone R M}
 
 @[coe] abbrev toPointedCone (C : PolyhedralCone R M) : PointedCone R M := C.toSubmodule
 
@@ -43,105 +49,39 @@ instance : PartialOrder (PolyhedralCone R M) := .ofSetLike (PolyhedralCone R M) 
 @[simp] lemma coe_toPointedCone (C : PolyhedralCone R M) :
     (C.toPointedCone : Set M) = C := rfl
 
-
--- ## FG
-
-variable {C C₁ C₂ : PolyhedralCone R M}
+-- # FG
 
 /-- A finitely generated cone is polyhedral. -/
-def of_FG {C : PointedCone R M} (hC : C.FG) : PolyhedralCone R M
+def of_FG (hC : C.FG) : PolyhedralCone R M
     := ⟨C, FG.isPolyhedral hC⟩
 
 variable (R) in
 /-- The hull of finitely many elements as a polyhedral cone. -/
-def finhull (s : Finset M) : PolyhedralCone R M := ⟨_, .of_hull_finset R s⟩
+def hull (s : Finset M) : PolyhedralCone R M := ⟨_, .of_hull_finset R s⟩
 
-@[simp] lemma finhull_eq_hull (s : Finset M) : finhull R s = hull (E := M) R s := rfl
+@[simp] lemma coe_hull (s : Finset M) : hull R s = PointedCone.hull R (s : Set M) := rfl
 
-def finhull_lineal (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
+def hull_sup_submodule (s : Finset M) (S : Submodule R M) : PolyhedralCone R M :=
   ⟨hull R s ⊔ S, IsPolyhedral.sup (.of_hull_finset R s) (by simp)⟩
 
 variable [IsNoetherian R M] in
 /-- A polyhedral cone is finitely generated. -/
-lemma FG {C : PolyhedralCone R M} : C.FG := C.isPolyhedral.fg
+protected lemma fg : C.FG := C.isPolyhedral.fg
 
-
--- ## ORDER
-
-def bot : PolyhedralCone R M := ⟨_, .of_submodule ⊥⟩
-def top : PolyhedralCone R M := ⟨_, .of_submodule ⊤⟩
-
--- alias lineal := bot
+-- # ORDER
 
 instance : OrderBot (PolyhedralCone R M) where
-  bot := bot
+  bot := ⟨_, .of_submodule ⊥⟩
   bot_le P := sorry
 
 instance : OrderTop (PolyhedralCone R M) where
-  top := top
+  top := ⟨_, .of_submodule ⊤⟩
   le_top := sorry
 
 instance : Max (PolyhedralCone R M) where
   max C D := ⟨_, C.isPolyhedral.sup D.isPolyhedral⟩
 
-section Field
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
-instance : Min (PolyhedralCone R M) where
-  min C D := ⟨_, C.isPolyhedral.inf D.isPolyhedral⟩
-
-end Field
-
-
--- ## DUAL
-
-section CommRing
-
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-variable {C C₁ C₂ F : PolyhedralCone R M}
-
-variable (p) [Fact (Surjective p.flip)] in
-lemma dualClosed (C : PolyhedralCone R M) : DualClosed p C :=
-  sorry -- C.isPolyhedral.dualClosed p
-
--- variable (p) in
--- lemma dualClosed_iff (C : PolyhedralCone R M) :
---   DualClosed p C ↔ (lineal C).DualClosed p := sorry
-
--- Duality flips the face lattice
-
-section Field
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-variable (p) in
-/-- The dual of a finite set interpreted as a polyhedral cone. -/
-def findual (s : Finset M) : PolyhedralCone R N := ⟨dual p s, .of_dual_of_finset p s⟩
-
-variable (p) in
-@[simp] lemma findual_eq_dual (s : Finset M) : findual p s = dual p s := rfl
-
-variable (p) in
-/-- The dual cone of a polyhedral cone. -/
-def dual (P : PolyhedralCone R M) : PolyhedralCone R N := ⟨_, P.isPolyhedral.dual p⟩
-
-variable (p) in
-@[simp] lemma coe_dual (P : PolyhedralCone R M) : P.dual p = PointedCone.dual p P := rfl
-
-end Field
-
-end CommRing
-
-
--- ## SUBMODULE
+-- # SUBMODULE
 
 instance : Coe (Submodule R M) (PolyhedralCone R M) where
   coe S := ⟨_, .of_submodule S⟩
@@ -154,43 +94,87 @@ instance : Coe (Submodule R M) (PolyhedralCone R M) where
 
 -- instance : Coe (Hyperplane R M) (PolyhedralCone R M) := sorry
 
+-- # MAP
 
--- ## MAP
+variable [AddCommMonoid M₁] [Module R M₁]
+variable [AddCommMonoid M₂] [Module R M₂]
 
-def map (f : M →ₗ[R] N) (C : PolyhedralCone R M) : PolyhedralCone R N :=
+def map (f : M₁ →ₗ[R] M₂) (C : PolyhedralCone R M₁) : PolyhedralCone R M₂ :=
   ⟨_, C.isPolyhedral.map f⟩
 
-section Field
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-def comap (f : M →ₗ[R] N) (C : PolyhedralCone R N) : PolyhedralCone R M :=
-  ⟨_, C.isPolyhedral.comap f⟩
-
-end Field
-
-
--- ## QUOT
+-- # QUOT
 
 def quot (S : Submodule R M) : PolyhedralCone R (M ⧸ S) := ⟨_, C.isPolyhedral.quot S⟩
 
 -- def salientQuot : PolyhedralCone R (M ⧸ (C : PointedCone R M).lineal) := sorry
 --     -- ⟨_, C.isPolyhedral.salientQuot⟩
 
+-- # NEG
 
--- ## NEG
-
-open Pointwise in
 instance : InvolutiveNeg (PolyhedralCone R M) where
   neg C := ⟨_, C.isPolyhedral.neg⟩
   neg_neg := by simp
 
-open Pointwise in
 @[simp] lemma neg_coe (C : PolyhedralCone R M) :
     (-C : PolyhedralCone R M) = -(C : PointedCone R M) := rfl
 
+end Ring
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+instance : Min (PolyhedralCone R M) where
+  min C D := ⟨_, C.isPolyhedral.inf D.isPolyhedral⟩
+
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂]
+
+def comap (f : M₁ →ₗ[R] M₂) (C : PolyhedralCone R M₂) : PolyhedralCone R M₁ :=
+  ⟨_, C.isPolyhedral.comap f⟩
+
+end Field
+
+-- # DUAL
+
+section CommRing
+
+variable [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
+variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C : PolyhedralCone R M}
+
+-- variable (p) [Fact (Surjective p.flip)] in
+-- lemma dualClosed (C : PolyhedralCone R M) : DualClosed p C :=
+--   C.isPolyhedral.dualClosed p
+
+-- variable (p) in
+-- lemma dualClosed_iff (C : PolyhedralCone R M) :
+--   DualClosed p C ↔ (lineal C).DualClosed p := sorry
+
+-- Duality flips the face lattice
+
+end CommRing
+
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
+variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {C : PolyhedralCone R M}
+
+variable (p) in
+/-- The dual cone of a polyhedral cone. -/
+def dual (P : PolyhedralCone R M) : PolyhedralCone R N := ⟨_, P.isPolyhedral.dual p⟩
+
+variable (p) in
+@[simp] lemma coe_dual (P : PolyhedralCone R M) : P.dual p = PointedCone.dual p P := rfl
+
+end Field
 
 end PolyhedralCone
