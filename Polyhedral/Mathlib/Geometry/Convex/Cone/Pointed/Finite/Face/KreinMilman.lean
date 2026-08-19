@@ -167,11 +167,12 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   obtain ⟨f, hf, hf'⟩ := FG.farkas (Dual.eval R M) hxt
   rw [← hs] at hsal
   -- TODO exists_dual_pos₀ is a hole
-  -- Der beweis würde benutzen dass die cone ein nicht-leeres relint hat. ABER: quick and dirty geht
-  -- es schneller für FG cones. Man geht zur dualen cone, die ist auch FG (zumindest in endlich dim,
-  -- was euch interessiert), und g ist dann die summe aller erzeuger der dual cone. Wenn du nicht in
-  -- endl dim bist musst du die duale cone erst zerlegen in FG + lineal (dafür gibts ein lemma
-  -- irgendwo) und dann die summe der erzeuger des FG anteils nehmen
+  -- The proof would use the fact that the cone has nonempty relative interior. However, there is a
+  -- quick & dirty approach for FG cones. Pass to the dual cone, which is also FG (at least in
+  -- finite dimensions, which is the case of interest here), and let g be the sum of all generators
+  -- of the dual cone. Outside finite dimensions, first decompose the dual cone into an FG part and
+  -- its lineality space (there is a lemma for this somewhere), and then take the sum of the
+  -- generators of the FG part.
   obtain ⟨g, hg⟩ := exists_dual_pos₀ (Dual.eval R M) hsal
   rw [hs] at hsal
   simp only [Dual.eval_apply, gt_iff_lt] at hf hf' hg
