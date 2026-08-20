@@ -26,9 +26,9 @@ This file proves results about the face lattice of a pointed cone.
   cone's face lattice below the face.
 -/
 
-open Submodule
+open Submodule Function
 
-variable {R M N : Type*}
+variable {R M M₁ M₂ N : Type*}
 
 @[expose] public section
 
@@ -291,23 +291,22 @@ def embed_orderEmbed (F : Face C) : Face (F : PointedCone R M) ↪o Face C :=
 
 end DivisionRing
 
-section Field
+section Semiring
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R]
-variable [AddCommGroup M] [Module R M]
-variable [AddCommGroup N] [Module R N]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂]
 
-variable {C : PointedCone R M}
-variable (p : M →ₗ[R] N →ₗ[R] R)
+variable {C : PointedCone R M₁}
 
 -- # Map and comap
 
-/-- The face `map f F` of `map f C`. -/
-def map {f : M →ₗ[R] N} (hf : Function.Injective f) (F : Face C) : Face (map f C) :=
+/-- The image of a face under a linear map as a face of the image of the cone. -/
+def map {f : M₁ →ₗ[R] M₂} (hf : Injective f) (F : Face C) : Face (map f C) :=
   ⟨_, F.isFaceOf.map _ hf⟩
 
-lemma map_inj (f : M →ₗ[R] N) (hf : Function.Injective f) :
-    Function.Injective (map hf : Face C → Face _) := by
+lemma map_inj (f : M₁ →ₗ[R] M₂) (hf : Injective f) :
+    Injective (map hf : Face C → Face _) := by
   intro F₁ F₂ h
   simp only [map, mk.injEq] at h
   ext x; constructor <;> intro hx
@@ -320,19 +319,48 @@ lemma map_inj (f : M →ₗ[R] N) (hf : Function.Injective f) :
     obtain ⟨y, yF₂, fy⟩ := Submodule.mem_map.mp this
     simpa [← hf fy]
 
-/-- The face `map e F` of `map e C`. -/
-def map_equiv (e : M ≃ₗ[R] N) (F : Face C) :
-  Face (PointedCone.map (e : M →ₗ[R] N) C) := F.map e.injective
+/-- The image of a face under a linear equivalence as a face of the image of the cone. -/
+def map_equiv (e : M₁ ≃ₗ[R] M₂) (F : Face C) : Face (.map (e : M₁ →ₗ[R] M₂) C) :=
+  F.map e.injective
 
-/-- The face `comap f F` of `comap f C`. -/
-def comap {f : N →ₗ[R] M} (F : Face C) :
-  Face (comap f C) := ⟨_, F.isFaceOf.comap _⟩
+def map_orderIso {f : M₁ →ₗ[R] M₂} (hf : Injective f) :
+    Face C ≃o Face (.map f C) where
+  toFun := map hf
+  invFun := sorry
+  left_inv := sorry
+  right_inv := sorry
+  map_rel_iff' := sorry
 
-/-- The face `comap e F` of `comap e C`. -/
-def comap_equiv (e : N ≃ₗ[R] M) (F : Face C) :
-  Face (PointedCone.comap (e : N →ₗ[R] M) C) := F.comap
+/-- The preimage of a face under a linear map as a face of the preimage of the cone. -/
+def comap {C : PointedCone R M₂} {f : M₁ →ₗ[R] M₂} (F : Face C) : Face (comap f C) :=
+  ⟨_, F.isFaceOf.comap _⟩
 
-end Field
+/-- The preimage of a face under a linear equivalence as a face of the preimage of the cone. -/
+def comap_equiv {C : PointedCone R M₂} (e : M₁ ≃ₗ[R] M₂) (F : Face C) :
+    Face (.comap (e : M₁ →ₗ[R] M₂) C) :=
+  F.comap
+
+def comap_orderIso {C : PointedCone R M₂} {f : M₁ →ₗ[R] M₂} (hf : Surjective f) :
+    Face C ≃o Face (.comap f C) where
+  toFun := comap
+  invFun := sorry
+  left_inv := sorry
+  right_inv := sorry
+  map_rel_iff' := sorry
+
+end Semiring
+
+section Ring
+
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
+variable {C : PointedCone R M}
+
+def inf_isCompl_lineal_orderIso {S : Submodule R M} (hS : IsCompl C.lineal S) :
+    Face (C ⊓ S) ≃o Face C := sorry
+
+end Ring
 
 end Face
 
