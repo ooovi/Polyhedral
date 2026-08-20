@@ -1,0 +1,110 @@
+import Mathlib.Data.Real.Basic
+import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
+
+variable {R X Y V A M N : Type*}
+
+open Convexity
+
+section Semiring
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R M] [ConvexSpace R N]
+variable [ConvexSpace R X]
+variable {P P₁ P₂ s : Set X}
+
+variable (R) in
+def IsPolytope (s : Set X) : Prop := ∃ t : Finset X, s = Convexity.convexHull R t
+
+/- Exercise 1: Given the definition of a polytope,
+show that the empty set is a polytope -/
+lemma empty_isPolytope : IsPolytope (R:=R) (X:=X) (∅ : Set X) := by
+  use ∅
+  simp
+
+/- Exercise 2: Define the unit square as the convex hull
+of its vertices in the convex space  and show that is a polytope -/
+def vertices : Finset (ℚ × ℚ) := {(0, 0), (1,0), (0,1), (1,1)}
+
+def unitSquare : Set (ℚ × ℚ) :=
+  Convexity.convexHull ℚ vertices
+
+theorem unitSquare_isPolytope : IsPolytope (R:=ℚ) (X:= ℚ × ℚ) unitSquare := by
+  unfold unitSquare
+  use vertices
+
+/- Exercise 3: Show that polytopes are convex sets -/
+lemma Polytope_isConvexSet (hP : IsPolytope R P) : IsConvexSet R P := by
+  unfold IsPolytope at hP
+  unfold IsConvexSet
+  intro w hw
+  obtain ⟨t, rfl⟩ := hP
+  exact IsConvexSet.convexHull hw
+/- I am not sure about this exercise because it uses the -obtain- tactic
+(idk how intuitive it is).
+We would also have to give a hint about the prop IsConvexSet.conveHull-/
+
+/- Constructor is a tactic that we use when we need to prove multiple goal.
+To prove that a conve set is a face of another we need to show two things:
+the first one is a subset relation and the second one is that is extreme. -/
+
+/- Exercise 4: Show that every convex set is a face of itself -/
+theorem refl_ConvexSet (S : ConvexSet R M) : S.IsFaceOf S := by
+  constructor
+  · simp
+  · intro x hx y hy z hz hhz
+    apply hx
+
+theorem refl_ConvexSet_condensed (S : ConvexSet R M) : S.IsFaceOf S :=
+  ⟨by simp , by intro x hx y hy z hz h; apply hx⟩
+
+/- Exercise 5: Show that the intersection of two convex sets is a convex set -/
+lemma intersection_isConvex (hP₁ : IsConvexSet R P₁) (hP₂ : IsConvexSet R P₂) :
+IsConvexSet R (P₁ ∩ P₂) := by
+  unfold IsConvexSet
+  unfold IsConvexSet at hP₁ hP₂
+  intro w hw
+  rw [Set.subset_inter_iff] at hw
+  constructor
+  · exact hP₁ hw.1
+  · exact hP₂ hw.2
+
+/-Specialize is a tactic used to apply hypotheses of the form \forall to an specific value  -/
+lemma intersection_isConvex_specialize (hP₁ : IsConvexSet R P₁) (hP₂ : IsConvexSet R P₂) :
+IsConvexSet R (P₁ ∩ P₂) := by
+  unfold IsConvexSet
+  unfold IsConvexSet at hP₁ hP₂
+  intro w hw
+  rw [Set.subset_inter_iff] at hw
+  specialize @hP₁ w hw.1
+  specialize @hP₂ w hw.2
+  exact ⟨hP₁, hP₂⟩
+
+lemma intersection_isConvex_condensed (hP₁ : IsConvexSet R P₁) (hP₂ : IsConvexSet R P₂) :
+IsConvexSet R (P₁ ∩ P₂) := by
+  intro w hw
+  rw [Set.subset_inter_iff] at hw
+  exact ⟨hP₁ hw.1, hP₂ hw.2⟩
+
+/- Exercise 6: Show that the convex hull of the union of finitely many polytopes is a polytope.
+For this we can start by showing that the convex hull of the union of two polytopes is a
+polytope and the use the iduction tactic -/
+lemma convexHull_union (h₁ : IsPolytope R P₁) (h₂ : IsPolytope R P₂) :
+    IsPolytope R (convexHull R (P₁ ∪ P₂)) := by classical
+  obtain ⟨v₁, rfl⟩ := h₁
+  obtain ⟨v₂, rfl⟩ := h₂
+  use v₁ ∪ v₂
+  simp [convexHull_union_convexHull_right, convexHull_convexHull_union]
+
+lemma convexHull_iUnion_finite {p : Set (Set X)} (hp : p.Finite)
+    (h : ∀ P ∈ p, IsPolytope R P) : IsPolytope R (convexHull R (⋃ P ∈ p, P)) := by
+  induction p, hp using Set.Finite.induction_on with
+  | empty => simp
+  | insert _ _ h' =>
+    simp only [Set.mem_insert_iff, Set.iUnion_iUnion_eq_or_left, forall_eq_or_imp] at ⊢ h
+    rw [← convexHull_union_convexHull_right]
+    exact convexHull_union h.1 (h' h.2)
+
+end Semiring
