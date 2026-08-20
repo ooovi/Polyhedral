@@ -104,9 +104,7 @@ lemma IsPolyhedral.face_dual_dual_flip_of_dualClosed (hC : C.IsPolyhedral) (hdc 
   have hFdc := F.isFaceOf.dualClosed_of_finSalRank p hdc hC.finSalRank
   have hsFdc := DualClosed.coe_iff.mpr <| DualClosed.span_dualClosed hFdc hFfsr
   rw [← Face.toPointedCone_eq_iff]
-  rw [Face.coe_dual_flip]
-  rw [← Face.coe_toPointedCone]
-  rw [Face.coe_dual]
+  rw [Face.coe_dual_flip, ← Face.coe_toPointedCone, Face.coe_dual]
   rw [← dual_lineal_eq_submodule_dual]
   rw [← dual_submodule_span]
   rw [Submodule.coe_inf]
@@ -165,7 +163,7 @@ lemma IsPolyhedral.face_dual_flip_antitone_iff (hC : C.IsPolyhedral) (hdc : C.Du
 
 /-- For a polyhedral cone, the face lattice of the dual cone is anti-isomorphic to the face
 lattice of the primal cone. -/
-def IsPolyhedral.dual_face_orderIso (hC : C.IsPolyhedral) (hdc : C.DualClosed p) :
+def IsPolyhedral.dual_face_orderIso_of_dualClosed (hC : C.IsPolyhedral) (hdc : C.DualClosed p) :
     Face (.dual p C) ≃o (Face C)ᵒᵈ where
   toFun := toDual ∘ .dual_flip p
   invFun := .dual p ∘ ofDual
@@ -173,4 +171,25 @@ def IsPolyhedral.dual_face_orderIso (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
   right_inv F := by simp [face_dual_dual_flip_of_dualClosed hC hdc]
   map_rel_iff' := by intro _ _; exact hC.face_dual_flip_antitone_iff hdc
 
+variable (p) [Fact (Surjective p.flip)] in
+/-- For a polyhedral cone, the face lattice of the dual cone is anti-isomorphic to the face
+lattice of the primal cone. -/
+def IsPolyhedral.dual_face_orderIso (hC : C.IsPolyhedral) :
+    Face (.dual p C) ≃o (Face C)ᵒᵈ :=
+  hC.dual_face_orderIso_of_dualClosed (hC.dualClosed p)
+
+/-- Every face of a polyhedral cone is exposed. -/
+lemma IsFaceOf.isExposed_of_polyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+    F.IsExposedFaceOf C := by
+  let F' : Face C := ⟨F, hF⟩
+  change F'.IsExposed
+  rw [← DualClosed.face_dual_dual_flip_iff_isExposed (Dual.eval R M) (hC.dualClosed _)]
+  exact IsPolyhedral.face_dual_dual_flip_of_dualClosed hC (hC.dualClosed _) _
+
+/-- Every face of a polyhedral cone is exposed. -/
+lemma Face.isExposed_of_polyhedral (hC : C.IsPolyhedral) (F : Face C) :
+    F.IsExposed := F.isFaceOf.isExposed_of_polyhedral hC
+
 end Field
+
+end PointedCone
