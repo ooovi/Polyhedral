@@ -110,7 +110,7 @@ lemma Face.dual_antitone_iff (hC : C.FG) (F₁ F₂ : Face C) :
     rw [← F₂.dual_dual_flip p hC, ← F₁.dual_dual_flip p hC]
     exact dual_flip_antitone p h
 
--- This proof is AI generated
+-- This proof is, to large parts, AI generated.
 open Module in
 /-- Every face of an FG cone is exposed. -/
 lemma IsFaceOf.FG.isExposedFaceOf (hC : C.FG) (hF : F.IsFaceOf C) :

@@ -30,6 +30,7 @@ lemma finrank_strictMono (hCfg : C.FG) : StrictMono (fun F : Face C => F.finrank
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
   · exact span_mono (R := R) hFG.le
   · intro h
+    rw [Face.coe_toPointedCone] at h
     have : G.toSubmodule < F.toSubmodule := gt_iff_lt.mp hFG
     rw [← IsFaceOf.inf_span F.isFaceOf, ← IsFaceOf.inf_span G.isFaceOf] at this
     simp [h] at this

@@ -42,14 +42,22 @@ lemma IsFaceOf.inf_submodule_dual_of_le_dual {s : Set N} (hS : s ⊆ dual p C) :
   exact h.1.symm
 
 variable [fact : Fact (Surjective p.flip)] in
-/-- An exposed face of a dual closed cone is itself exposed. -/
-theorem IsExposedFaceOf.isDualClosed (hC : C.DualClosed p) (hF : F.IsExposedFaceOf C) :
+/-- An exposed face of a dual closed cone is itself dual closed. -/
+theorem IsExposedFaceOf.dualClosed (hC : C.DualClosed p) (hF : F.IsExposedFaceOf C) :
     DualClosed p F := by
   obtain ⟨H, -, rfl⟩ := hF
   obtain ⟨y, hy⟩ := fact.out H
   refine DualClosed.inf hC <| dualClosed_coe ?_
   rw [← hy, ← Submodule.dual_singleton]
   exact Submodule.dual_flip_dualClosed p {y}
+
+/-- If a cone is dual closed and has finite salient rank, then its faces are also dual closed. -/
+lemma IsFaceOf.dualClosed_of_finSalRank (hC : C.DualClosed p) (hr : C.FinSalRank)
+    (hF : F.IsFaceOf C) : F.DualClosed p := by
+  rw [← hF.inf_span]
+  refine DualClosed.inf hC <| dualClosed_coe ?_
+  refine DualClosed.span_dualClosed_of_dualClosed_lineal ?_ (hF.finSalRank hr)
+  exact hF.lineal_congr ▸ hC.lineal
 
 -- # FACE
 
@@ -102,6 +110,7 @@ lemma Face.dual_flip_top (hC : C.DualClosed p) :
     (⊤ : Face (.dual p C)).dual_flip p = ⊥ := by
   rw [← Face.toPointedCone_eq_iff, dual_flip_eq_dual_flip _ hC, dual_top, hC]
 
+-- NOTE: this proof is AI generated and might be improved.
 lemma Face.dual_flip_bot : (⊥ : Face (.dual p C)).dual_flip p = ⊤ := by
   rw [← Face.toPointedCone_eq_iff]
   rw [Face.coe_dual_flip]
@@ -113,6 +122,33 @@ lemma Face.dual_flip_bot : (⊥ : Face (.dual p C)).dual_flip p = ⊤ := by
   have hn := hy.2 hx
   simp at hn
   simpa using le_antisymm (hy.1 hx) hn
+
+/-- A face is contained in its double dual. -/
+lemma Face.le_dual_dual_flip (F : Face C) : F ≤ (F.dual p).dual_flip p := by
+  rw [← toPointedCone_le_toPointedCone, coe_dual_flip]
+  rw [← coe_toPointedCone, coe_dual]
+  rw [← dual_lineal_eq_submodule_dual]
+  rw [← dual_submodule_span]
+  rw [Submodule.coe_inf]
+  rw [Face.toPointedCone, ← F.isFaceOf.inf_span]
+  rw [← F.isFaceOf.sup_span_lineal_eq_span]
+  apply inf_le_inf_left
+  rw [ofSubmodule_le_ofSubmodule]
+  apply lineal_mono
+  refine le_trans ?_ (dual_sup_dual_le_dual_inf ..)
+  exact sup_le_sup subset_dual_dual subset_dual_dual
+
+variable [Fact (Surjective p.flip)] in
+/-- An exposed face of a dual closed cone is equal to its double dual. -/
+lemma DualClosed.face_dual_dual_flip_of_isExposed (hdc : C.DualClosed p) {F : Face C}
+    (hF : F.IsExposed) : (F.dual p).dual_flip p = F := by
+  sorry
+
+variable [Fact (Surjective p.flip)] in
+/-- An exposed face of a dual closed cone is equal to its double dual. -/
+lemma DualClosed.face_dual_dual_flip_iff_isExposed (hdc : C.DualClosed p) {F : Face C} :
+    (F.dual p).dual_flip p = F ↔ F.IsExposed:= by
+  sorry
 
 /-- If a face has nonempty relint, then its dual face is exposed. -/
 lemma Face.dual_isExposed_of_nonempty_relint {F : Face C}

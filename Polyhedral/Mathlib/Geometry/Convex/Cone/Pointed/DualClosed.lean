@@ -6,6 +6,7 @@ Authors: Martin Winter
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 /-! This file defines dual closed cones, that is, cones that are identical to their
 double dual.
@@ -27,6 +28,7 @@ variable [CommRing R] [PartialOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 
+variable {C D : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 variable (p) in
@@ -34,15 +36,14 @@ variable (p) in
 abbrev DualClosed (C : PointedCone R M) := dual p.flip (dual p C) = C
 
 variable (p) in
-@[simp] lemma DualClosed.def {C : PointedCone R M} (hC : DualClosed p C) :
+@[simp] lemma DualClosed.def (hC : DualClosed p C) :
      dual p.flip (dual p C) = C := hC
 
 variable (p) in
 @[simp] lemma DualClosed.def_flip {C : PointedCone R N} (hC : DualClosed p.flip C) :
      dual p (dual p.flip C) = C := hC
 
-lemma DualClosed.def_iff {C : PointedCone R M} :
-    DualClosed p C ↔ dual p.flip (dual p C) = C := by rfl
+lemma DualClosed.def_iff : DualClosed p C ↔ dual p.flip (dual p C) = C := by rfl
 
 lemma DualClosed.def_flip_iff {C : PointedCone R N} :
     DualClosed p.flip C ↔ dual p (dual p.flip C) = C := by rfl
@@ -67,14 +68,14 @@ variable (p) in
 lemma dual_flip_DualClosed (C : PointedCone R N) : (dual p.flip C).DualClosed p
     := dual_dualClosed p.flip C
 
-lemma DualClosed.dual_inj {C D : PointedCone R M} (hC : C.DualClosed p) (hD : D.DualClosed p)
+lemma DualClosed.dual_inj (hC : C.DualClosed p) (hD : D.DualClosed p)
     (hCD : dual p C = dual p D) : C = D := by
   rw [← hC, ← hD, hCD]
 
-@[simp] lemma DualClosed.dual_inj_iff {C D : PointedCone R M} (hC : C.DualClosed p)
+@[simp] lemma DualClosed.dual_inj_iff (hC : C.DualClosed p)
     (hD : D.DualClosed p) : dual p C = dual p D ↔ C = D := ⟨dual_inj hC hD, by intro h; congr ⟩
 
-lemma DualClosed.exists_of_dual_flip {C : PointedCone R M} (hC : C.DualClosed p) :
+lemma DualClosed.exists_of_dual_flip (hC : C.DualClosed p) :
     ∃ D : PointedCone R N, D.DualClosed p.flip ∧ dual p.flip D = C
   := ⟨dual p C, by simp [DualClosed, hC.def]⟩
 
@@ -82,11 +83,11 @@ lemma DualClosed.exists_of_dual {C : PointedCone R N} (hC : C.DualClosed p.flip)
     ∃ D : PointedCone R M, D.DualClosed p ∧ dual p D = C
   := hC.exists_of_dual_flip
 
-lemma DualClosed.inf {S T : PointedCone R M} (hS : S.DualClosed p) (hT : T.DualClosed p) :
-    (S ⊓ T).DualClosed p := by
-  rw [← hS, ← hT, DualClosed, ← dual_sup_dual_inf_dual, dual_flip_dual_dual_flip]
+lemma DualClosed.inf (hS : C.DualClosed p) (hT : D.DualClosed p) :
+    (C ⊓ D).DualClosed p := by
+  rw [← hS, ← hT, ← dual_sup_dual_inf_dual, DualClosed, dual_flip_dual_dual_flip]
 
-theorem DualClosed.eq_sInf {C : PointedCone R M} (hC : C.DualClosed p) :
+theorem DualClosed.eq_sInf (hC : C.DualClosed p) :
     C = sInf { D : PointedCone R M | D.DualClosed p ∧ C ≤ D } := by
   rw [Eq.comm, le_antisymm_iff]
   constructor
@@ -96,23 +97,22 @@ theorem DualClosed.eq_sInf {C : PointedCone R M} (hC : C.DualClosed p) :
   rw [← hD]; rw [← hC] at hx
   exact (dual_dual_mono p hsD) hx
 
-lemma DualClosed.dual_le_of_dual_le {C : PointedCone R M} {D : PointedCone R N}
-    (hC : C.DualClosed p) (hCD : dual p C ≤ D) : dual p.flip D ≤ C := by
+lemma DualClosed.dual_le_of_dual_le {D : PointedCone R N} (hC : C.DualClosed p)
+    (hCD : dual p C ≤ D) : dual p.flip D ≤ C := by
   rw [← hC]; exact dual_antitone hCD
 
 -- NOTE: This is the characterizing property of an antitone GaloisConnection.
-lemma dual_le_iff_dual_le_of_dualClosed {C : PointedCone R M} {D : PointedCone R N}
-    (hC : C.DualClosed p) (hD : D.DualClosed p.flip) :
-      dual p C ≤ D ↔ dual p.flip D ≤ C
-    := ⟨hC.dual_le_of_dual_le, hD.dual_le_of_dual_le⟩
+lemma dual_le_iff_dual_le_of_dualClosed {D : PointedCone R N} (hC : C.DualClosed p)
+    (hD : D.DualClosed p.flip) : dual p C ≤ D ↔ dual p.flip D ≤ C :=
+  ⟨hC.dual_le_of_dual_le, hD.dual_le_of_dual_le⟩
 
 variable (p) in
 lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
-    dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s)
-  := fun _ hx y hy => @hx (p.flip y) hy
+    dual .id (dual (Dual.eval R M) s) ≤ dual p.flip (dual p s) :=
+  fun _ hx y hy => @hx (p.flip y) hy
 
-lemma DualClosed.to_eval {S : PointedCone R M} (hS : S.DualClosed p)
-    : S.DualClosed (Dual.eval R M) := by
+lemma DualClosed.to_eval {S : PointedCone R M} (hS : S.DualClosed p) :
+    S.DualClosed (Dual.eval R M) := by
   have h := dual_dual_eval_le_dual_dual_bilin p S
   rw [hS] at h
   exact le_antisymm h subset_dual_dual
@@ -122,6 +122,17 @@ lemma DualClosed.neg {C : PointedCone R M} (hC : C.DualClosed p) : (-C).DualClos
   repeat rw [Submodule.coe_set_neg, dual_neg]
   rw [hC]
 
+lemma dual_inf_dual_sup_dual_of_dualClosed (C D : PointedCone R M)
+    (hC : C.DualClosed p) (hD : D.DualClosed p) (hCD : (dual p C ⊔ dual p D).DualClosed p.flip) :
+      dual p (C ⊓ D) = dual p C ⊔ dual p D := by
+  change dual p (C ∩ D) = _ -- don't we have a theorem for this?
+  nth_rw 1 [← hC, ← hD, ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
+  exact hCD
+
+lemma dual_inf_eq_sup_dual_iff_dualClosed (hC : C.DualClosed p) (hD : D.DualClosed p) :
+    (dual p C ⊔ dual p D).DualClosed p.flip ↔ dual p (C ⊓ D) = dual p C ⊔ dual p D :=
+  ⟨dual_inf_dual_sup_dual_of_dualClosed C D hC hD, fun h => h ▸ dual_dualClosed p (C ⊓ D)⟩
+
 end CommRing
 
 section LinearOrder
@@ -130,21 +141,23 @@ variable [CommRing R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 
+variable {C D : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
-lemma DualClosed.lineal {C : PointedCone R M} (hC : C.DualClosed p) :
-    C.lineal.DualClosed p := by
+lemma DualClosed.lineal (hC : C.DualClosed p) : C.lineal.DualClosed p := by
   rw [← coe_iff, ofSubmodule_lineal]
   exact DualClosed.inf hC hC.neg
 
 /- WARNING: `C` being dual closed does *not* imply that `span R C` is dual closed! Not even
-over ℝ or witha a separating pairing!
+over ℝ or with a separating pairing!
+
+But see `DualClosed.span_dualClosed` which assumes `FinSalRank`.
 -/
 
 -- # FARKAS
 
 /- Separation lemma for dual closed cones. -/
-lemma exists_pos_forall_nonneg_of_not_mem {C : PointedCone R M} (hC : C.DualClosed p)
+lemma exists_pos_forall_nonneg_of_not_mem (hC : C.DualClosed p)
     {x : M} (hx : x ∉ C) : ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ C, 0 ≤ p y φ := by
   rw [← hC] at hx
   simp only [mem_dual, SetLike.mem_coe, flip_apply, not_forall, not_le] at hx
@@ -155,7 +168,7 @@ alias farkas := exists_pos_forall_nonneg_of_not_mem
 
 /-- The dual of a cone being ⊥ is equivalent to all non-zero linear forms
   attaining negative values on the cone. -/
-lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg {C : PointedCone R M} :
+lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg :
     dual p C = ⊥ ↔ ∀ φ : N, φ = 0 ∨ ∃ x ∈ C, p x φ < 0 := by
   simp only [SetLike.ext_iff, mem_dual, SetLike.mem_coe, Submodule.mem_bot]
   constructor <;> intro h φ
@@ -196,7 +209,7 @@ lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg {C : PointedCone R M} :
 /-- The double dual of a cone being ⊤ is equivalent to every non-zero linear
   form attaining a negative value on the cone. In infinite dimensional vector spaces
   there exists such cones other than ⊤ itself (e.g. the lexicographic cone). -/
-lemma dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg {C : PointedCone R M} :
+lemma dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg :
     dual p.flip (dual p C) ≠ ⊤ ↔ ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
   constructor <;> intro h
   · obtain ⟨x, hx⟩ := SetLike.exists_not_mem_of_ne_top _ h
@@ -213,7 +226,7 @@ lemma dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg {C : PointedCone R M} :
     have := h hφ
     contradiction
 
-lemma exists_ne_zero_forall_nonneg_of_dualClosed_ne_top {C : PointedCone R M}
+lemma exists_ne_zero_forall_nonneg_of_dualClosed_ne_top
     (hC : C.DualClosed p) (h : C ≠ ⊤) : ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
   simp [← dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg, hC, h]
 
@@ -226,6 +239,7 @@ variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 
+variable {C D : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- Q: Do we need Field?
@@ -282,11 +296,11 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 --   simp at *
 --   sorry
 
-lemma DualClosed.dual_dual_span {C : PointedCone R M} (hC : C.DualClosed p) :
+lemma DualClosed.dual_dual_span (hC : C.DualClosed p) :
     span R (dual p.flip (dual p C)) = .dual p.flip (Submodule.dual p (span R (C : Set M))) := by
   sorry
 
-lemma DualClosed.dual_dual_lineal {C : PointedCone R M} (hC : C.DualClosed p) :
+lemma DualClosed.dual_dual_lineal (hC : C.DualClosed p) :
     (dual p.flip (dual p C)).lineal = .dual p.flip (Submodule.dual p C.lineal) := by
   sorry
 
@@ -294,6 +308,20 @@ variable (p) [Fact (Surjective p.flip)] in
 /-- Every submodule of a vector space is dual closed. -/
 lemma dualClosed (S : Submodule R M) : DualClosed p S :=
     dualClosed_coe <| S.dualClosed p
+
+/-- If a cone has dual closed lineality and has finite salient rank, then its span is
+also dual closed. -/
+lemma DualClosed.span_dualClosed_of_dualClosed_lineal (hC : C.lineal.DualClosed p)
+    (h : C.FinSalRank) : (span R C).DualClosed p := by
+  obtain ⟨D, hD, hCD⟩ := h.exists_finRank_sup_lineal
+  rw [hCD, ← coe_sup_submodule_span, Submodule.span_union, coe_ofSubmodule,
+    Submodule.span_eq C.lineal]
+  simpa [sup_comm] using Submodule.DualClosed.sup_fg p hC hD
+
+/-- If a cone is dual closed and has finite salient rank, then its span is also dual closed. -/
+lemma DualClosed.span_dualClosed (hC : C.DualClosed p)
+    (h : C.FinSalRank) : (span R C).DualClosed p :=
+  span_dualClosed_of_dualClosed_lineal hC.lineal h
 
 end Field
 

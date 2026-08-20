@@ -258,12 +258,8 @@ lemma dual_sSup_sInf_dual (s : Set (Submodule R M)) :
   rw [dual_sSup, dual_sUnion]
 
 lemma dual_sup_dual_le_dual_inf (S T : Submodule R M) :
-    dual p S ⊔ dual p T ≤ dual p (S ⊓ T : Submodule R M) := by
-  intro x h y ⟨hyS, hyT⟩
-  simp only [mem_sup, mem_dual, SetLike.mem_coe] at h
-  obtain ⟨x', hx', y', hy', hxy⟩ := h
-  rw [← hxy, ← zero_add 0]
-  nth_rw 1 [hx' hyS, hy' hyT, map_add]
+    dual p S ⊔ dual p T ≤ dual p (S ⊓ T : Submodule R M) :=
+  sup_le (dual_le_dual inf_le_left) (dual_le_dual inf_le_right)
 
 variable (p) [Fact p.SeparatingLeft] in
 theorem disjoint_dual_of_codisjoint_dual {S : Submodule R M} {T : Submodule R N}

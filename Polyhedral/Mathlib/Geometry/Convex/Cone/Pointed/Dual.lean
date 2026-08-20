@@ -10,17 +10,23 @@ import Mathlib.Geometry.Convex.Cone.Dual
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 /-! This file proves results about `PointedCone.dual` intended to go into Pointed/Dual.lean. -/
 
 namespace PointedCone
 
+variable {R M M₁ M₂ N : Type*}
+
 open Module LinearMap
 open Submodule (span)
 
-variable {R : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+section CommRing
+
+variable [CommRing R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- TODO: `PointedCone.map` should be an abbrev
@@ -54,7 +60,7 @@ lemma dual_univ_ker : dual p .univ = ker p.flip := by
 lemma dual_flip_univ_ker : dual p.flip .univ = ker p := by
   nth_rw 2 [← flip_flip p]; exact dual_univ_ker
 
--- Better version of dual.univ
+-- NOTE: this is maybe a better version of of `dual.univ`.
 variable [Fact p.SeparatingRight] in
 @[simp] lemma dual_univ' : dual p .univ = ⊥ := by simp [dual_univ_ker]
 
@@ -75,11 +81,6 @@ alias coe_dual := dual_eq_submodule_dual
 @[simp]
 lemma dual_coe_coe_eq_dual_coe (S : Submodule R M) : dual p (S : PointedCone R M) = dual p S := by
   rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
-
--- TODO: Replace `dual_span` in Cone/Dual.lean
-@[simp] lemma dual_hull' (s : Set M) : dual p (hull R s) = dual p s := dual_hull ..
-
-@[simp low + 1] lemma mem_dual'_singleton {x : M} {y : N} : y ∈ dual p {x} ↔ 0 ≤ p x y := by simp
 
 variable (p) in
 /-- Every cone is a subcone of its double dual cone. -/
@@ -112,55 +113,9 @@ lemma dual_sSup_sInf_dual (S : Set (PointedCone R M)) :
   rw [← dual_sSup (p := p) S]
   simpa [Function.comp_def, Set.image_image] using dual_sUnion (p := p) (SetLike.coe '' S)
 
-example (S : Submodule R M) : ((S : PointedCone R M) : Set M) = (S : Set M)
-    := by simp
-
-section
-
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-/-- The span of the dual cone is contained in the dual of the lineality space.
-
-Equality does not hold in general, not even over fields, for dual closed cones or separating
-pairing. Instead, it holds `(C.lineal)** = (span C*)**`, so an additional dual closure after
-the span is necessary.
--/
-lemma span_dual_le_dual_lineal {C : PointedCone R M} :
-    span R (dual p C) ≤ .dual p C.lineal := by
-  simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
-  refine sInf_le_sInf ?_
-  intro T
-  simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
-  intro h
-  obtain ⟨S, hSC, hS⟩ := h
-  rw [← hS]
-  nth_rw 3 [← coe_ofSubmodule]
-  rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
-  exact dual_le_dual hSC
-
-end
-
-section Map
-
-open Module
-
-variable {M₁ M₂ : Type*}
-variable [AddCommGroup M₁] [Module R M₁]
-variable [AddCommGroup M₂] [Module R M₂]
-
--- TODO: generalize to arbitrary pairings
-lemma dual_map (f : M₁ →ₗ[R] M₂) (s : Set M₁) :
-    comap f.dualMap (dual (Dual.eval R M₁) s) = dual (Dual.eval R M₂) (f '' s) := by
-  ext; simp
-
-lemma dual_map' (f : M₁ →ₗ[R] M₂) (C : PointedCone R M₁) :
-    comap f.dualMap (dual (Dual.eval R M₁) C) = dual (Dual.eval R M₂) (map f C) := by
-  ext; simp
-
-end Map
+lemma dual_sup_dual_le_dual_inf (C D : PointedCone R M) :
+    dual p C ⊔ dual p D ≤ dual p (C ⊓ D) :=
+  sup_le (dual_le_dual inf_le_left) (dual_le_dual inf_le_right)
 
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by simp
 
@@ -194,12 +149,50 @@ lemma dual_neg_neg (s : Set M) : -dual p (-s) = dual p s := by ext x; rw [dual_n
 
 end Neg
 
+section Map
+
+variable [AddCommGroup M₁] [Module R M₁]
+variable [AddCommGroup M₂] [Module R M₂]
+
+-- TODO: generalize to arbitrary pairings
+lemma dual_map (f : M₁ →ₗ[R] M₂) (s : Set M₁) :
+    comap f.dualMap (dual (Dual.eval R M₁) s) = dual (Dual.eval R M₂) (f '' s) := by
+  ext; simp
+
+lemma dual_map' (f : M₁ →ₗ[R] M₂) (C : PointedCone R M₁) :
+    comap f.dualMap (dual (Dual.eval R M₁) C) = dual (Dual.eval R M₂) (map f C) := by
+  ext; simp
+
+end Map
+
+end CommRing
+
 section LinearOrder
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [CommRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
 variable {p : M →ₗ[R] N →ₗ[R] R}
+
+/-- The span of the dual cone is contained in the dual of the lineality space.
+
+Equality does not hold in general, not even over fields, for dual closed cones or separating
+pairing. Instead, it holds `(C.lineal)** = (span C*)**`, so an additional dual closure after
+the span is necessary.
+-/
+lemma span_dual_le_dual_lineal {C : PointedCone R M} :
+    span R (dual p C) ≤ .dual p C.lineal := by
+  simp only [lineal_eq_sSup, Submodule.dual_sSup_sInf_dual]
+  refine sInf_le_sInf ?_
+  intro T
+  simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and]
+  intro h
+  obtain ⟨S, hSC, hS⟩ := h
+  rw [← hS]
+  nth_rw 3 [← coe_ofSubmodule]
+  rw [SetLike.coe_subset_coe, ← dual_eq_submodule_dual]
+  exact dual_le_dual hSC
 
 lemma dual_lineal_eq_submodule_dual (s : Set M) :
     (dual p s).lineal = .dual p s := by
@@ -219,5 +212,68 @@ lemma submodule_dual_span_eq_dual_lineal (C : PointedCone R M) :
   rw [Submodule.dual_span, ← dual_lineal_eq_submodule_dual]
 
 end LinearOrder
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+variable {N : Type*} [AddCommGroup N] [Module R N]
+
+variable {C : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+/-
+NOTE: The proof of `FinSalRank.dual_finSalRank` is AI generated and very messy. There is
+a cleaner approach:
+* prove that salRank is the rank of the quotient module span / lineal
+* prove that if A / B is FG, then B* / A* is also FG, where A and B are submodules (with the
+  correct inclusion relation) and * is submodule dual. -/
+variable (p) in
+/-- The dual of a cone with finite salient rank also has finite salient rank. -/
+lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := by
+  classical
+  let T := span R (dual p C : Set N)
+  let L := (dual p C).lineal
+  obtain ⟨D, hDT, hDL, hsup⟩ := Submodule.exists_le_disjoint_sup_self T L
+  have hLT : L ≤ T := lineal_le_span (dual p C)
+  have hDLT : D ⊔ L = T := by simpa [sup_eq_left.mpr hLT] using hsup
+  let Q := span R (C.salientQuot : Set (M ⧸ C.lineal))
+  have hDdual : D ≤ Submodule.dual p C.lineal :=
+    hDT.trans span_dual_le_dual_lineal
+  let f : D →ₗ[R] Dual R Q :=
+    Q.subtype.dualMap.comp
+      ((Submodule.dual_linearMap_dual_quot (p := p) C.lineal).comp
+        (Submodule.inclusion hDdual))
+  have hf : Function.Injective f := by
+    rw [← LinearMap.ker_eq_bot]
+    ext y
+    simp only [Submodule.mem_bot, LinearMap.mem_ker]
+    constructor
+    · intro hy
+      apply Subtype.ext
+      have hyL : (y : N) ∈ L := by
+        change (y : N) ∈ (dual p C).lineal
+        rw [← submodule_dual_span_eq_dual_lineal]
+        rw [Submodule.dual_span, Submodule.mem_dual]
+        intro x hx
+        have hqx : C.lineal.mkQ x ∈ Q := Submodule.subset_span ⟨x, hx, rfl⟩
+        have he := LinearMap.congr_fun hy ⟨C.lineal.mkQ x, hqx⟩
+        change p x y = 0 at he
+        exact he.symm
+      exact (hDL.le_bot ⟨y.2, hyL⟩)
+    · rintro rfl
+      simp
+  have hQ : Q.FG := hC
+  have hD : D.FG := by
+    let _ : Module.Finite R (Dual R Q) :=
+      (Module.finite_dual_iff R).2 (Module.Finite.iff_fg.2 hQ)
+    exact Module.Finite.iff_fg.1 (Module.Finite.of_injective f hf)
+  change (span R ((dual p C).quot L : Set (N ⧸ L))).FG
+  rw [span_quot]
+  change (Submodule.map L.mkQ T).FG
+  rw [← hDLT, Submodule.map_sup]
+  simpa using hD.map L.mkQ
+
+end Field
 
 end PointedCone

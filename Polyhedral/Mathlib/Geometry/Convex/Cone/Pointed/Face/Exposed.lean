@@ -26,6 +26,18 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 variable {C F F₁ F₂ : PointedCone R M}
 
+/- NOTE: the current implementation of `IsExposedFaceOf` might benefit from including a pairing
+`p` that restrict the possible functionals available for exposing a face. This might be useful
+since exposed faces are particularly interesting in the context of duality and separation where the
+current code basis works intensively with general pairings. The definition would change to:
+
+  `∃ y : N, C ≤ (p.flip y).nonneg ∧ F = C ⊓ (p.flip y).ker`
+
+Currently lemmas such as `IsExposedFaceOf.dualClosed` mix notions of duality and exposedness, and
+need to assume `Surjective p.flip` in order to work properly. This is a very strong assumption not
+satisfies by many pairing in infinite dimensional spaces.
+-/
+
 /-- A face of a cone is exposed if it is the intersection of the cone with the zero set of a
 linear functional that is nonnegative on the cone. -/
 def IsExposedFaceOf (F C : PointedCone R M) :=

@@ -156,6 +156,15 @@ lemma inf_sup_lineal {S : Submodule R M} (hCS : Codisjoint C.lineal S) :
   rw [← coe_sup, hCS.symm.eq_top]
   simp
 
+/-- Intersecting a cone with a complement of its lineality space commutes with taking its
+linear span. -/
+lemma span_inf_of_isCompl_lineal {S : Submodule R M} (hS : IsCompl C.lineal S) :
+    span R (C ⊓ S : PointedCone R M) = span R C ⊓ S := by
+  nth_rw 2 [← C.inf_sup_lineal hS.codisjoint]
+  rw [← coe_sup_submodule_span, Submodule.span_union, coe_ofSubmodule,
+    Submodule.span_eq C.lineal, sup_inf_assoc_of_le C.lineal
+      (Submodule.span_le.mpr fun _ hx ↦ hx.2), hS.disjoint.eq_bot, sup_bot_eq]
+
 lemma lineal_le_span (C : PointedCone R M) : C.lineal ≤ span R C := by
   rw [← ofSubmodule_le_ofSubmodule]
   exact le_trans (lineal_le C) Submodule.subset_span
@@ -504,6 +513,10 @@ variable [AddCommGroup M₂] [Module R M₂]
 
 variable {C : PointedCone R M}
 
+/- NOTE: we may rename this to `salience` as in "the salience of the cone" or
+"the salient part of the cone". -/
+/- NOTE: if we introduce faces early, we may denote this simply by `C ⧸ ⊥` as we already do
+in the files that introduce quotents by faces. -/
 /-- The quotient of a cone by its lineality space. -/
 abbrev salientQuot (C : PointedCone R M) := C.quot C.lineal
 

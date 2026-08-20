@@ -5,7 +5,6 @@ Authors: Olivia Röhig, Kilian Rueß, Mrtin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
 
 /-!
@@ -31,6 +30,8 @@ this class is closed under duality.
 
 namespace PointedCone
 
+variable {R M : Type*}
+
 open Module Cardinal
 open Submodule (span)
 
@@ -38,8 +39,8 @@ open Submodule (span)
 
 section Semiring
 
-variable {R M : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R] [AddCommMonoid M]
-  [Module R M]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommMonoid M] [Module R M]
 
 noncomputable abbrev rank (C : PointedCone R M) := Module.rank R (span R (C : Set M))
 
@@ -64,8 +65,9 @@ end Semiring
 
 section Ring
 
-variable {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
-variable {M : Type*} [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
+variable [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
+variable [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
+
 variable {C : PointedCone R M}
 
 lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
@@ -82,10 +84,10 @@ end Ring
 
 /-! ### Rank formulas for quotients -/
 
-section Quotients
+section DivisionRing
 
-variable {R : Type*} [DivisionRing R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
 private lemma ker_domRestrict_mkQ_span (F G : PointedCone R M) :
     (((span R (F : Set M)).mkQ).domRestrict (span R (G : Set M))).ker =
@@ -182,19 +184,15 @@ lemma finrank_eq_finrank_add_finrank_quot_span {F G : PointedCone R M}
     _ = (G.quot (span R (F : Set M))).finrank + F.finrank := rfl
     _ = F.finrank + (G.quot (span R (F : Set M))).finrank := by simp [add_comm]
 
-end Quotients
+end DivisionRing
 
 /-! ### Salient rank -/
 
-section Salient
-
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-
-section Definitions
+section Ring
 
 variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+
 variable {C : PointedCone R M}
 
 /-- Salient rank of a cone. -/
@@ -203,6 +201,9 @@ noncomputable def salRank (C : PointedCone R M) := C.salientQuot.rank
 /-- Salient finrank of a cone. -/
 noncomputable def salFinrank (C : PointedCone R M) := C.salientQuot.finrank
 
+/- NOTE: there is a way to define `FinSalRank` on `Semiring` by avoiding quotients: define it as
+the cones that are the sum of a FinRank cone and a submodule. This reduces to the current
+definition over a `Ring`. -/
 /-- A cone is of finite salient rank if its salient quotient is of finite rank. It means that
   the non-trivial structure of the cone only spans finitely many dimensions. -/
 abbrev FinSalRank (C : PointedCone R M) := FinRank C.salientQuot
@@ -219,74 +220,30 @@ lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) :
   · simpa only [← span_quot, salientQuot_eq_quot_lineal] using h
   · simpa [Submodule.ker_mkQ, inf_eq_right.mpr (lineal_le_span C)] using hlin
 
-end Definitions
+lemma FinSalRank.inf_finRank_of_isCompl (hC : C.FinSalRank) {S : Submodule R M}
+    (hS : IsCompl C.lineal S) : (C ⊓ S).FinRank := by
+  rw [FinRank, span_inf_of_isCompl_lineal hS]
+  refine Submodule.FG.linearEquiv (Submodule.IsCompl.map_mkQ_equiv_inf hS (lineal_le_span C)) ?_
+  simpa only [LinearMap.restrictScalars_self, ← span_quot, salientQuot_eq_quot_lineal] using hC
 
-section Field
+end Ring
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C : PointedCone R M}
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-/-
-NOTE: The proof of `FinSalRank.dual_finSalRank` is AI generated and very messy. There is
-a cleaner approach:
-* prove that salRank is the rank of the quotient module span / lineal
-* prove that if A / B is FG, then B* / A* is also FG, where A and B are submodules (with the
-  correct inclusion relation) and * is submodule dual. -/
-variable (p) in
-/-- The dual of a cone with finite salient rank also has finite salient rank. -/
-lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := by
-  classical
-  let T := span R (dual p C : Set N)
-  let L := (dual p C).lineal
-  obtain ⟨D, hDT, hDL, hsup⟩ := Submodule.exists_le_disjoint_sup_self T L
-  have hLT : L ≤ T := lineal_le_span (dual p C)
-  have hDLT : D ⊔ L = T := by simpa [sup_eq_left.mpr hLT] using hsup
-  let Q := span R (C.salientQuot : Set (M ⧸ C.lineal))
-  have hDdual : D ≤ Submodule.dual p C.lineal :=
-    hDT.trans span_dual_le_dual_lineal
-  let f : D →ₗ[R] Dual R Q :=
-    Q.subtype.dualMap.comp
-      ((Submodule.dual_linearMap_dual_quot (p := p) C.lineal).comp
-        (Submodule.inclusion hDdual))
-  have hf : Function.Injective f := by
-    rw [← LinearMap.ker_eq_bot]
-    ext y
-    simp only [Submodule.mem_bot, LinearMap.mem_ker]
-    constructor
-    · intro hy
-      apply Subtype.ext
-      have hyL : (y : N) ∈ L := by
-        change (y : N) ∈ (dual p C).lineal
-        rw [← submodule_dual_span_eq_dual_lineal]
-        rw [Submodule.dual_span, Submodule.mem_dual]
-        intro x hx
-        have hqx : C.lineal.mkQ x ∈ Q := Submodule.subset_span ⟨x, hx, rfl⟩
-        have he := LinearMap.congr_fun hy ⟨C.lineal.mkQ x, hqx⟩
-        change p x y = 0 at he
-        exact he.symm
-      exact (hDL.le_bot ⟨y.2, hyL⟩)
-    · rintro rfl
-      simp
-  have hQ : Q.FG := hC
-  have hD : D.FG := by
-    let _ : Module.Finite R (Dual R Q) :=
-      (Module.finite_dual_iff R).2 (Module.Finite.iff_fg.2 hQ)
-    exact Module.Finite.iff_fg.1 (Module.Finite.of_injective f hf)
-  change (span R ((dual p C).quot L : Set (N ⧸ L))).FG
-  rw [span_quot]
-  change (Submodule.map L.mkQ T).FG
-  rw [← hDLT, Submodule.map_sup]
-  simpa using hD.map L.mkQ
-
-end Field
-
-section Decomposition
+section DivisionRing
 
 variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
 variable {M : Type*} [AddCommGroup M] [Module R M]
+
+variable {C : PointedCone R M}
+
+lemma FinSalRank.exists_finRank_sup_lineal (hC : C.FinSalRank) :
+    ∃ D : PointedCone R M, D.FinRank ∧ C = D ⊔ C.lineal := by
+  let ⟨S, hS⟩ := exists_isCompl C.lineal
+  refine ⟨C ⊓ S, hC.inf_finRank_of_isCompl hS, ?_⟩
+  rw [inf_sup_assoc_of_le_of_submodule_le _ (lineal_le C)]
+  rw [← coe_sup, hS.codisjoint.symm.eq_top]
+  simp
+
+-- # DECOMPOSITIONS
 
 /-- Dimension-addition for rank, split into lineality and salient quotient. -/
 lemma rank_eq_rank_lineal_add_salRank (C : PointedCone R M) :
@@ -334,8 +291,6 @@ lemma salRank_eq_natCast_salFinrank (C : PointedCone R M) (hC : C.FinSalRank) :
   exact (Module.finrank_eq_rank
     (R := R) (M := span R (C.salientQuot : Set (M ⧸ C.lineal)))).symm
 
-end Decomposition
-
-end Salient
+end DivisionRing
 
 end PointedCone

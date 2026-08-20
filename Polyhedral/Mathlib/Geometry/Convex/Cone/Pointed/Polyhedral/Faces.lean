@@ -9,12 +9,14 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 /-! This file proves basic facts about faces of polyhedral cones. -/
 
+variable {R M M₁ M₂ N : Type*}
+
 namespace PointedCone
 
-open Module Function
+open Module Function Pointwise OrderDual
 open Submodule (span)
 
-/- Wishlist:
+/- TODO:
  * all faces are polyhedral
  * all faces are exposed
  * there are only finitely many faces
@@ -23,199 +25,152 @@ open Submodule (span)
  * face lattice is an abstract polytope
 -/
 
--- ## IS FACE OF
-
-section Field
-
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {C C₁ C₂ F F₁ F₂ : PointedCone R M}
-variable {p : M →ₗ[R] N →ₗ[R] R}
-
-/- TODO: Many things proven in this section might be true much more generally. Maybe for
-  facially semi-exposed cones or something like this:
+/- NOTE: Many things proven in this file might be true more generally, e.g. for
+  facially semi-exposed cones or so. This might include
     * all faces are exposed
     * face lattice of C and C* are anti-isomorphic
     * all faces are duals of faces
-    * etc.
 -/
 
--- ## TODO: remove `isPerfPair` assumption from everything below.
+-- # IS FACE OF
 
--- NOTE: This proof is AI generated
-lemma IsFaceOf.sup_linspan_lineal (hF : F.IsFaceOf C) :
-    (C ⊔ (span R (F : Set M))).lineal = span R F := by
-  ext x
-  simp only [mem_lineal, Submodule.mem_sup, Submodule.restrictScalars_mem, mem_span,
-    ↓existsAndEq, and_true]
-  constructor
-  · rintro ⟨⟨y, hy, p, n, ⟨hp, hn⟩, h⟩, ⟨y', hy', p', n', ⟨hp', hn'⟩, h'⟩⟩
-    have hy'eq : y' = -x - (p' - n') := eq_sub_of_add_eq h'
-    have hyy' : y + y' ∈ span R (F : Set M) := by
-      rw [mem_span]
-      refine ⟨n + n', F.add_mem hn hn', p + p', F.add_mem hp hp', ?_⟩
-      rw [hy'eq, ← h]
-      abel
-    have hyy'F : y + y' ∈ F :=
-      (hF.mem_span_iff_mem (C.add_mem hy hy')).mp hyy'
-    have hyF : y ∈ F := hF.mem_of_add_mem_left hy hy' hyy'F
-    refine ⟨y + p, F.add_mem hyF hp, n, hn, ?_⟩
-    rw [← h]
-    abel
-  · intro h
-    obtain ⟨p, hp, n, hn, h⟩ := h
-    constructor
-    · exact ⟨0, C.zero_mem, p, n, ⟨hp, hn⟩, by simpa using h.symm⟩
-    · exact ⟨0, C.zero_mem, n, p, ⟨hn, hp⟩, by rw [h]; simp⟩
+section Ring
 
--- variable (p) [p.IsPerfPair] in
--- -- variable [Fact (Surjective p.flip)] in
--- @[simp] lemma IsPolyhedral.subdual_subdual (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
---     subdual p.flip (.dual p C) (subdual p C F) = F := by
---   repeat rw [subdual_def]
---   rw [dual_flip_dual p hC]
---   rw [← dual_lineal_eq_submodule_dual]
---   rw [Submodule.coe_inf, Submodule.coe_restrictScalars]
---   nth_rw 3 [← PointedCone.coe_ofSubmodule]
---   rw [dual_inf_dual_sup_dual p.flip (hC.dual p) (IsPolyhedral.of_submodule _)]
---   rw [Submodule.coe_restrictScalars, dual_eq_submodule_dual]
---   rw [dual_flip_dual p hC]
---   nth_rw 2 [← Submodule.dual_span]
---   rw [Submodule.dual_flip_dual p]
---   rw [hF.sup_linspan_lineal]
---   exact hF.inf_span
+variable [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
-/-- Every face of a polyhedral cone is exposed. -/
-lemma IsFaceOf.IsPolyhedral.exposed (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
-    F.IsExposedFaceOf C := by
-  wlog h : C.FG with exposed -- reduction to salient case
-  · have h' := hF.quot (Eq.trans_le hF.lineal_congr.symm (lineal_le_span F))
-    rw [IsExposedFaceOf.quot_iff hF (IsFaceOf.lineal C) hF.lineal_le, coe_ofSubmodule,
-      Submodule.span_eq]
-    -- simpa using exposed hC.salientQuot h' hC.salientQuot_fg
-    sorry
-  exact IsFaceOf.FG.isExposedFaceOf h hF
+variable {C F : PointedCone R M}
 
--- -- TODO: remove the finiteness assumption by reducing to the finite dim case
--- variable [Module.Finite R M] in
--- /-- Every face of a polyhedral cone is exposed. -/
--- lemma IsPolyhedral.face_exposed' (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
---     F.IsExposedFaceOf C := by
---   rw [← hC.dual_flip_dual (Dual.eval R M)]
---   rw [← hC.subdual_subdual (Dual.eval R M) hF]
---   exact IsExposedFaceOf.subdual_dual _ <| IsFaceOf.subdual_dual _ hF
-
--- -- TODO: weaken p assumption
--- variable [p.IsPerfPair] in
--- lemma IsPolyhedral.subdual_inj (hC : C.IsPolyhedral) (hF₁ : F₁.IsFaceOf C) (hF₂ : F₂.IsFaceOf C)
---     (h : subdual p C F₁ = subdual p C F₂) : F₁ = F₂ := by
---   rw [← hC.subdual_subdual p hF₁]
---   rw [← hC.subdual_subdual p hF₂]
---   rw [h]
-
--- -- TODO: weaken p assumption
--- variable [p.IsPerfPair] in
--- lemma IsPolyhedral.IsFaceOf.subdual_of_dual (hC : C.IsPolyhedral) {F : PointedCone R N}
---     (hF : F.IsFaceOf (.dual p C)) : (subdual p.flip (.dual p C) F).IsFaceOf C := by
---   sorry
-
-/-- The face of a polyhedral one is itself polyhedral. -/
-lemma IsPolyhedral.face (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
+/-- Faces of FG cones are FG. -/
+lemma IsFaceOf.isPolyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
   sorry
 
--- ## KREIN MILMAN
+@[coe] def Face.toPolyhedralCone {C : PolyhedralCone R M} (F : Face (C : PointedCone R M)) :
+    PolyhedralCone R M :=
+  ⟨F.toPointedCone, F.isFaceOf.isPolyhedral C.isPolyhedral⟩
 
-end Field
+instance {C : PolyhedralCone R M} :
+  CoeOut (Face (C : PointedCone R M)) (PolyhedralCone R M) := ⟨Face.toPolyhedralCone⟩
 
--- ## FACE
+end Ring
 
 section Field
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {S : Submodule R M}
-variable {C C₁ C₂ F : PointedCone R M}
-variable {p : M →ₗ[R] N →ₗ[R] R}
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
--- lemma IsPolyhedral.exists_fg_combEquiv (hC : C.IsPolyhedral) : ∃ D, D.FG ∧ D ≃c C := by
---   obtain ⟨S, hS⟩ := Submodule.exists_isCompl C.lineal
---   exact ⟨_, hC.fg_inf_of_isCompl hS, ⟨inf_combEquiv_of_isCompl_lineal hS.symm⟩⟩
+variable {C F : PointedCone R M}
 
--- -- ## TODO: remove `isPerfPair` from everything below.
+/-- The face lattice of a polyhedral cone is isomorphic to the face lattice of an FG cone
+in the same module. -/
+lemma IsPolyhedral.exists_fg_face_orderIso (hC : C.IsPolyhedral) :
+    ∃ D : PointedCone R M, D.FG ∧ Nonempty (Face C ≃o Face D) := by
+  let ⟨S, hS⟩ := exists_isCompl C.lineal
+  exact ⟨C ⊓ S, hC.fg_inf_of_isCompl hS, ⟨(Face.inf_isCompl_lineal_orderIso hS).symm⟩⟩
 
-variable [p.IsPerfPair] in
-def IsPolyhedral.Face.dual_flip (hC : C.IsPolyhedral) (F : Face (.dual p C)) : Face C :=
-    ⟨sorry , sorry⟩ -- IsFaceOf.subdual_of_dual hC F.isFaceOf⟩
+/-- A polyhedral cone has finitely many faces -/
+lemma IsPolyhedral.finite_face (hC : C.IsPolyhedral) : Finite (Face C) := by
+  let ⟨D, hfg, ⟨e⟩⟩ := hC.exists_fg_face_orderIso
+  rw [Equiv.finite_iff e.toEquiv]
+  exact FG.finite_face hfg
 
-variable (p) [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_flip_antitone (hC : C.IsPolyhedral) :
-    Antitone (dual_flip hC : Face (.dual p C) → Face C) := sorry
-
-variable (p) [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_flip_strictAnti (hC : C.IsPolyhedral) :
-    StrictAnti (dual_flip hC : Face (.dual p C) → Face C) := sorry
-
-variable (p) [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_strictAnti (hC : C.IsPolyhedral) :
-    StrictAnti (.dual p : Face C → Face (.dual p C)) := sorry
-
-variable (p) [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_le_iff (hC : C.IsPolyhedral) (F₁ F₂ : Face C) :
-    F₁.dual p ≤ F₂.dual p ↔ F₁ ≤ F₂ := sorry
-
-variable [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_flip_le_iff (hC : C.IsPolyhedral) (F₁ F₂ : Face (.dual p C)) :
-    dual_flip hC F₂ ≤ dual_flip hC F₁ ↔ F₁ ≤ F₂ := sorry
-
-variable [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_flip_dual (hC : C.IsPolyhedral) (F : Face C) :
-    dual_flip hC (F.dual p) = F := sorry
-
-variable [p.IsPerfPair] in
-lemma IsPolyhedral.Face.dual_dual_flip (hC : C.IsPolyhedral) (F : Face (.dual p C)) :
-    (dual_flip hC F).dual p = F := sorry
-
-open OrderDual
-
-variable [p.IsPerfPair] in
-/-- The face lattice of the dual cone is anti-isomorphic to the face lattice of the cone. -/
-def IsPolyhedral.Face.dual_orderIso (hC : C.IsPolyhedral) : Face (.dual p C) ≃o (Face C)ᵒᵈ where
-  toFun := toDual ∘ dual_flip hC
-  invFun := .dual p ∘ ofDual
-  left_inv := dual_dual_flip hC
-  right_inv := sorry -- dual_flip_dual hC
-  map_rel_iff' := by intro F₁ F₂; sorry --simpa using dual_flip_le_iff hC F₁ F₂
-
-/- TODO:
- * face lattice is graded
--/
-instance {C : PolyhedralCone R M} :
-    CoeOut (Face (C : PointedCone R M)) (PolyhedralCone R M) where
-  coe F := ⟨F, C.isPolyhedral.face F.isFaceOf⟩
-
--- instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) := by
---   obtain ⟨_, hfg, ⟨e⟩⟩ := C.isPolyhedral.exists_fg_combEquiv
---   rw [Function.Bijective.finite_iff]
---   · exact FG.finite_face hfg
---   · exact e.symm.bijective
-
-/-- Ideas:
-  * `atoms` gives the lowest dimensional non-trivial faces
-  * `rays` gives the rays and might be empty
-  * a version of Krein-Milman with atoms
-  * a version of Krein-Milman for rays if the cone is salient
--/
-
-def atoms : Set (Face (C : PointedCone R M)) := sorry
-
-def rays : Set (Face (C : PointedCone R M)) := sorry
-
-def coatoms : Set (Face (C : PointedCone R M)) := sorry
-
--- lemma face_exposed (F : Face C) : F.IsExposed := sorry
+instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) :=
+  C.isPolyhedral.finite_face
 
 end Field
 
-end PointedCone
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
+
+variable {C F : PointedCone R M}
+variable {p : M →ₗ[R] N →ₗ[R] R}
+
+-- # DUAL
+
+lemma IsFaceOf.dualClosed_of_dualClosed_of_isPolyhedral (hC : C.IsPolyhedral)
+    (hdc : C.DualClosed p) (hF : F.IsFaceOf C) : F.DualClosed p := by
+  rw [hC.dualClosed_iff_lineal] at hdc
+  rw [(hF.isPolyhedral hC).dualClosed_iff_lineal]
+  rw [PointedCone.IsFaceOf.lineal_congr hF]
+  exact hdc
+
+/-- Face duality on a dual closed polyhedral cone is involutive. -/
+lemma IsPolyhedral.face_dual_dual_flip_of_dualClosed (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+    (F : Face C) : (F.dual p).dual_flip p = F := by
+  have hFfsr := F.isFaceOf.finSalRank hC.finSalRank
+  have hFdc := F.isFaceOf.dualClosed_of_finSalRank p hdc hC.finSalRank
+  have hsFdc := DualClosed.coe_iff.mpr <| DualClosed.span_dualClosed hFdc hFfsr
+  rw [← Face.toPointedCone_eq_iff]
+  rw [Face.coe_dual_flip]
+  rw [← Face.coe_toPointedCone]
+  rw [Face.coe_dual]
+  rw [← dual_lineal_eq_submodule_dual]
+  rw [← dual_submodule_span]
+  rw [Submodule.coe_inf]
+  rw [dual_inf_dual_sup_dual_of_dualClosed (dual_dualClosed p C) ?_ ?_]
+  · rw [hdc, ← dual_coe_coe_eq_dual_coe]
+    iterate 2
+      rw [coe_ofSubmodule]
+      rw [dual_eq_submodule_dual]
+    rw [show F = ((F : PointedCone R M) : Set M) from rfl]
+    rw [DualClosed.span_dualClosed hFdc hFfsr]
+    rw [IsFaceOf.sup_span_lineal_eq_span F.isFaceOf]
+    exact F.isFaceOf.inf_span
+  · rw [← coe_ofSubmodule]
+    exact dual_dualClosed p _
+  · nth_rw 4 [← coe_ofSubmodule]
+    rw [hdc, ← Face.coe_toPointedCone, hsFdc]
+    rw [dualClosed_iff_lineal _ (sup_submodule hC _)]
+    rw [F.isFaceOf.sup_span_lineal_eq_span]
+    rw [← DualClosed.coe_iff]
+    exact hsFdc
+
+variable (p) [Fact (Surjective p.flip)] in
+/-- Face duality is on a polyhedral cone is involutive. -/
+lemma IsPolyhedral.face_dual_dual_flip (hC : C.IsPolyhedral) (F : Face C) :
+    (F.dual p).dual_flip p = F :=
+  hC.face_dual_dual_flip_of_dualClosed (hC.dualClosed p) F
+
+/-- Face duality on a dual closed polyhedral cone is involutive. -/
+lemma IsPolyhedral.face_dual_flip_dual_of_dualClosed (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+    (F : Face (.dual p C)) : (F.dual_flip p).dual p = F := by
+  have h := (hC.dual p).face_dual_dual_flip_of_dualClosed (dual_dualClosed p C) F
+  have hflip : (F.dual_flip p : Set M) = (F.dual p.flip : Set M) :=
+    congrArg SetLike.coe (F.dual_flip_eq_dual_flip hdc)
+  rw [← Face.toPointedCone_eq_iff] at h ⊢
+  rw [Face.coe_dual_flip] at h
+  rw [Face.coe_dual, hflip]
+  simpa only [LinearMap.flip_flip] using h
+
+/-- Face duality is antitone. -/
+lemma IsPolyhedral.face_dual_antitone_iff (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+    {F₁ F₂ : Face C} : F₁.dual p ≤ F₂.dual p ↔ F₂ ≤ F₁ where
+  mpr h := Face.dual_antitone p h
+  mp h := by
+    rw [← hC.face_dual_dual_flip_of_dualClosed hdc F₁]
+    rw [← hC.face_dual_dual_flip_of_dualClosed hdc F₂]
+    exact Face.dual_flip_antitone p h
+
+/-- Face duality is antitone. -/
+lemma IsPolyhedral.face_dual_flip_antitone_iff (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+    {F₁ F₂ : Face (.dual p C)} : F₁.dual_flip p ≤ F₂.dual_flip p ↔ F₂ ≤ F₁ where
+  mp h := by
+    rw [← hC.face_dual_flip_dual_of_dualClosed hdc F₂]
+    rw [← hC.face_dual_flip_dual_of_dualClosed hdc F₁]
+    exact Face.dual_antitone p h
+  mpr h := Face.dual_flip_antitone p h
+
+/-- For a polyhedral cone, the face lattice of the dual cone is anti-isomorphic to the face
+lattice of the primal cone. -/
+def IsPolyhedral.dual_face_orderIso (hC : C.IsPolyhedral) (hdc : C.DualClosed p) :
+    Face (.dual p C) ≃o (Face C)ᵒᵈ where
+  toFun := toDual ∘ .dual_flip p
+  invFun := .dual p ∘ ofDual
+  left_inv F := by simp [face_dual_flip_dual_of_dualClosed hC hdc]
+  right_inv F := by simp [face_dual_dual_flip_of_dualClosed hC hdc]
+  map_rel_iff' := by intro _ _; exact hC.face_dual_flip_antitone_iff hdc
+
+end Field

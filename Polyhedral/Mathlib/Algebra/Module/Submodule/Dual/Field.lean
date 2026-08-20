@@ -544,13 +544,4 @@ lemma FG.dual_inf_dual_sup_dual' (hS : S.FG) (hT : T.DualClosed p) :
   rw [← dual_union, ← dual_sup, DualFG.dual_dual_flip]
   exact (hS.dual_dualfg p).sup _
 
--- lemma dual_inf_dual_sup_dual_of_dualClosed'' {S T : Submodule R M}
---     (hS : S.DualClosed p) (hT : T.WeakDualClosed p)
---     (hST : (dual p S ⊔ dual p T).WeakDualClosed p.flip) :
---       dual p (S ∩ T) = dual p S ⊔ dual p T := by
---   rw [← dual_union_ker, ← coe_inf, ← dual_sup, inf_sup_assoc_of_le]
---   · nth_rw 1 [← hS, ← hT, ← flip_flip p]
---     simp only [← dual_union, ← dual_sup, hST, sup_assoc, ker_le_dual, sup_of_le_left]
---   exact hS.ker_le
-
 end Submodule

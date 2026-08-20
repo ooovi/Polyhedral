@@ -239,8 +239,10 @@ def quot_orderIso_Ici_restrictScalars (p : Submodule R M) :
 section Experiment
 
 variable {S R M N : Type*}
-  [CommSemiring S] [CommRing R] [Algebra S R]
-  [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
+
+variable [Semiring S]
+variable [Ring R] [SMul S R]
+variable [AddCommGroup M] [Module R M] [Module S M] [IsScalarTower S R M]
 
 /- NOTE: I think this is not the best lemma. There should be something more fundamental about
 quotients and IsCompl that should make this easy. -/
@@ -258,7 +260,13 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
   ⟩
   invFun x := ⟨p.mkQ x, x, by simpa using x.2.1⟩
   map_add' x y := by simp
-  map_smul' r x := by simp [← algebraMap_smul R, map_smul]
+  map_smul' r x := by -- this part is AI generated; check for improvement.
+    have h : quotientEquivOfIsCompl p q hpq (r • (x : M ⧸ p)) =
+        r • quotientEquivOfIsCompl p q hpq (x : M ⧸ p) := by
+      apply (quotientEquivOfIsCompl p q hpq).symm.injective
+      simp
+    ext
+    exact congrArg (fun y : q ↦ (y : M)) h
   left_inv x := by simp
   right_inv x := by
     have H : (x : M) = (⟨x.1, x.2.2⟩ : q) := rfl

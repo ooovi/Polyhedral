@@ -48,6 +48,10 @@ theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
   constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
 
+@[simp]
+theorem coe_toPointedCone {F : Face C} :
+    ((F : PointedCone R M) : Set M) = F := rfl
+
 abbrev span (F : Face C) : Submodule R M := .span R F.toPointedCone
 
 noncomputable abbrev rank (F : Face C) : Cardinal := F.toPointedCone.rank

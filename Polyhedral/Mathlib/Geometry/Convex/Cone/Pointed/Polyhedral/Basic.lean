@@ -313,6 +313,9 @@ lemma iff_salientQuot_fg : FG C.salientQuot ↔ C.IsPolyhedral where
 lemma salientQuot (hC : C.IsPolyhedral) : IsPolyhedral C.salientQuot :=
   hC.salientQuot_fg.isPolyhedral
 
+lemma finSalRank (hC : C.IsPolyhedral) : C.FinSalRank :=
+  hC.salientQuot_fg.finRank
+
 open Pointwise
 
 @[simp] protected lemma neg_iff : (-C).IsPolyhedral ↔ C.IsPolyhedral where
@@ -578,14 +581,20 @@ variable (p) [Fact (Surjective p)] in
 lemma dual_dual_flip {C : PointedCone R N} (hC : C.IsPolyhedral) :
     PointedCone.dual p (PointedCone.dual p.flip C) = C := hC.dualClosed_flip p
 
+lemma dual_inf_dual_sup_dual_of_dualClosed
+    (hC₁ : C₁.DualClosed p) (hC₂ : C₂.DualClosed p)
+    (hdual : (PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂).DualClosed p.flip) :
+    PointedCone.dual p (C₁ ∩ C₂) = PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂ := by
+  nth_rw 1 [← hC₁, ← hC₂, ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
+  exact hdual
+
 /- NOTE: some restriction like `IsPerfPair` is necessary. Consider two subspaces S, T that are not
   dual closed and with S ⊓ T = ⊥. The left side is ⊤. But the right side is ⊥ ⊔ ⊥ = ⊥.
   Alterantively, we can assume that C₁ and C₂ are dual closed. But this version must stay
   because type inference makes its assumptions automatic in finite dimensions. Maybe a weaker
   assumoption suffices though (it seems to be the case for FG and DualFG). -/
 -- variable (p) [p.IsPerfPair] in
-variable (p) [Fact (Surjective p)] in
-variable [Fact (Surjective p.flip)] in
+variable (p) [Fact (Surjective p)] [Fact (Surjective p.flip)] in
 lemma dual_inf_dual_sup_dual (hC₁ : C₁.IsPolyhedral) (hC₂ : C₂.IsPolyhedral) :
     PointedCone.dual p (C₁ ∩ C₂) = PointedCone.dual p C₁ ⊔ PointedCone.dual p C₂ := by
   nth_rw 1 [← hC₁.dual_flip_dual p, ← hC₂.dual_flip_dual p,
