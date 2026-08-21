@@ -221,7 +221,6 @@ variable {N : Type*} [AddCommGroup N] [Module R N]
 
 variable {C : PointedCone R M}
 variable {p : M →ₗ[R] N →ₗ[R] R}
-
 /-
 NOTE: The proof of `FinSalRank.dual_finSalRank` is AI generated and very messy. There is
 a cleaner approach:

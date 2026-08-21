@@ -64,7 +64,7 @@ variable (p) [Fact p.SeparatingLeft] in
 `s`, there exists a linear functional `φ` separating `x` from `hull R s`. -/
 lemma FG.farkas {s : Finset M} {x : M} (h : x ∉ hull R s) :
     ∃ φ : N, p x φ < 0 ∧ ∀ y ∈ s, 0 ≤ p y φ := by
-  let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.isDualClosed p ⟨s, rfl⟩) h
+  let ⟨φ, hφ, h⟩ := PointedCone.farkas (FG.dualClosed p ⟨s, rfl⟩) h
   exact ⟨φ, hφ, fun y hy => h y (subset_hull hy)⟩
 
 variable (p) in
