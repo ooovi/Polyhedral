@@ -316,7 +316,7 @@ lemma DualClosed.span_dualClosed_of_dualClosed_lineal (hC : C.lineal.DualClosed 
   obtain ⟨D, hD, hCD⟩ := h.exists_finRank_sup_lineal
   rw [hCD, ← coe_sup_submodule_span, Submodule.span_union, coe_ofSubmodule,
     Submodule.span_eq C.lineal]
-  simpa [sup_comm] using Submodule.DualClosed.sup_fg p hC hD
+  simpa [sup_comm] using Submodule.DualClosed.sup_fg hC hD
 
 /-- If a cone is dual closed and has finite salient rank, then its span is also dual closed. -/
 lemma DualClosed.span_dualClosed (hC : C.DualClosed p)
