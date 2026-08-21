@@ -196,7 +196,7 @@ lemma Face.isExposed_of_polyhedral (hC : C.IsPolyhedral) (F : Face C) :
   unfold Face.IsExposed IsExposedFaceOf at *
   simpa only [h] using hdual
 
-/- NOTE: this proof currently relies on an unproven `DualClosed.face_dual_dual_flip_iff_isExposed`,
+/- NOTE: this proof currently relies on the unproven `DualClosed.face_dual_dual_flip_iff_isExposed`,
 but could also be proven using `Face.isExposed_of_polyhedral` if necessary. -/
 /-- Every face of a polyhedral cone is exposed. -/
 lemma IsFaceOf.isExposed_of_polyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
