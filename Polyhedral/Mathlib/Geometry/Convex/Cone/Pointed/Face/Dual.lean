@@ -140,14 +140,14 @@ lemma Face.le_dual_dual_flip (F : Face C) : F ≤ (F.dual p).dual_flip p := by
 
 variable [Fact (Surjective p.flip)] in
 /-- An exposed face of a dual closed cone is equal to its double dual. -/
-lemma DualClosed.face_dual_dual_flip_of_isExposed (hdc : C.DualClosed p) {F : Face C}
+lemma Face.dual_dual_flip_of_dualClosed_of_isExposed (hdc : C.DualClosed p) {F : Face C}
     (hF : F.IsExposed) : (F.dual p).dual_flip p = F := by
   sorry
 
 variable [Fact (Surjective p.flip)] in
 /-- An exposed face of a dual closed cone is equal to its double dual. -/
-lemma DualClosed.face_dual_dual_flip_iff_isExposed (hdc : C.DualClosed p) (hC : C.FinSalRank)
-    {F : Face C} : (F.dual p).dual_flip p = F ↔ F.IsExposed := by
+lemma Face.dual_dual_flip_iff_isExposed_of_dualClosed_of_finSalRank (hdc : C.DualClosed p)
+    (hC : C.FinSalRank) {F : Face C} : (F.dual p).dual_flip p = F ↔ F.IsExposed := by
   sorry
 
 /-- If a face has nonempty relint, then its dual face is exposed. -/

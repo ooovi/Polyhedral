@@ -222,7 +222,7 @@ lemma FinSalRank.finRank_of_fg_lineal (h : C.FinSalRank) (hlin : C.lineal.FG) :
 
 lemma FinSalRank.inf_finRank_of_isCompl (hC : C.FinSalRank) {S : Submodule R M}
     (hS : IsCompl C.lineal S) : (C ⊓ S).FinRank := by
-  rw [FinRank, span_inf_of_isCompl_lineal hS]
+  rw [FinRank, span_inf_of_codisjoint_lineal hS.codisjoint]
   refine Submodule.FG.linearEquiv (Submodule.IsCompl.map_mkQ_equiv_inf hS (lineal_le_span C)) ?_
   simpa only [LinearMap.restrictScalars_self, ← span_quot, salientQuot_eq_quot_lineal] using hC
 

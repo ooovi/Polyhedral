@@ -203,7 +203,7 @@ lemma IsFaceOf.isExposed_of_polyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C)
     F.IsExposedFaceOf C := by
   let F' : Face C := ⟨F, hF⟩
   change F'.IsExposed
-  rw [← DualClosed.face_dual_dual_flip_iff_isExposed (Dual.eval R M)
+  rw [← Face.dual_dual_flip_iff_isExposed_of_dualClosed_of_finSalRank (Dual.eval R M)
     (hC.dualClosed _) hC.finSalRank]
   exact IsPolyhedral.face_dual_dual_flip_of_dualClosed hC (hC.dualClosed _) _
 
