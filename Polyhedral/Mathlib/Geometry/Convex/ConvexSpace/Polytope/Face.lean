@@ -10,7 +10,7 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 
-/-! This file proces results about polytopes and faces. -/
+/-! This file proves results about polytopes and faces. -/
 
 variable {R V W A : Type*}
 
