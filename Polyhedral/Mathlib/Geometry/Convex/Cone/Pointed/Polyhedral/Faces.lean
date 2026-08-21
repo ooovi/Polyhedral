@@ -178,17 +178,34 @@ def IsPolyhedral.dual_face_orderIso (hC : C.IsPolyhedral) :
     Face (.dual p C) ≃o (Face C)ᵒᵈ :=
   hC.dual_face_orderIso_of_dualClosed (hC.dualClosed p)
 
+variable (p) in
+/-- The dual of a face of an FG cone is an exposed face. -/
+lemma Face.dual_isExposed_of_isPolyhedral (hC : C.IsPolyhedral) (F : Face C) :
+    (F.dual p).IsExposed :=
+  F.dual_isExposed_of_nonempty_relint p <|
+    relint_nonempty_of_finSalRank (F.isFaceOf.isPolyhedral hC).finSalRank
+
+/-- Every face of a polyhedral cone is exposed. -/
+lemma Face.isExposed_of_polyhedral (hC : C.IsPolyhedral) (F : Face C) :
+    F.IsExposed := by
+  have h := hC.dualClosed (Dual.eval R M)
+  rw [← hC.face_dual_dual_flip_of_dualClosed h F]
+  rw [IsExposed, dual_flip_eq_dual_flip _ h]
+  have hdual := Face.dual_isExposed_of_isPolyhedral (Dual.eval R M).flip
+    (hC.dual (Dual.eval R M)) (F.dual (Dual.eval R M))
+  unfold Face.IsExposed IsExposedFaceOf at *
+  simpa only [h] using hdual
+
+/- NOTE: this proof currently relies on an unproven `DualClosed.face_dual_dual_flip_iff_isExposed`,
+but could also be proven using `Face.isExposed_of_polyhedral` if necessary. -/
 /-- Every face of a polyhedral cone is exposed. -/
 lemma IsFaceOf.isExposed_of_polyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   let F' : Face C := ⟨F, hF⟩
   change F'.IsExposed
-  rw [← DualClosed.face_dual_dual_flip_iff_isExposed (Dual.eval R M) (hC.dualClosed _)]
+  rw [← DualClosed.face_dual_dual_flip_iff_isExposed (Dual.eval R M)
+    (hC.dualClosed _) hC.finSalRank]
   exact IsPolyhedral.face_dual_dual_flip_of_dualClosed hC (hC.dualClosed _) _
-
-/-- Every face of a polyhedral cone is exposed. -/
-lemma Face.isExposed_of_polyhedral (hC : C.IsPolyhedral) (F : Face C) :
-    F.IsExposed := F.isFaceOf.isExposed_of_polyhedral hC
 
 end Field
 

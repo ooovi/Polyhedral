@@ -110,7 +110,7 @@ lemma finset_sum_mem_relint_of_subset_of_le_span {s : Finset M} (hs : (s : Set M
 lemma finset_sum_mem_relint_hull {s : Finset M} : ∑ x ∈ s, x ∈ relint (hull R (s : Set M)) := by
   sorry
 
-lemma relint_nonempty (h : C.FinSalRank) : Nonempty C.relint := sorry
+lemma relint_nonempty_of_finSalRank (h : C.FinSalRank) : Nonempty C.relint := sorry
 
 -- Easier to prove than `relint_nonempty`, perhaps prove this first.
 lemma relint_nonempty_of_finRank (h : C.FinRank) : Nonempty C.relint := by
@@ -130,7 +130,7 @@ lemma relint_nonempty_of_finRank (h : C.FinRank) : Nonempty C.relint := by
 variable (p) [Fact p.SeparatingLeft] in
 example {C : PointedCone R M} (hC : C.FinSalRank) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
-  obtain ⟨φ, hφ⟩ := relint_nonempty (hC.dual_finSalRank p)
+  obtain ⟨φ, hφ⟩ := relint_nonempty_of_finSalRank (hC.dual_finSalRank p)
   rw [mem_relint_dual] at hφ
   exact ⟨φ, fun _ h => ⟨by simpa using hφ.1 h, hφ.2 _ h⟩⟩
 
