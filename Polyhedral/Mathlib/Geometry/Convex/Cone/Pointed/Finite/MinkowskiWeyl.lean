@@ -334,7 +334,7 @@ lemma fg_iff_dualfg {C : PointedCone 𝕜 N} : C.FG ↔ C.DualFG p := ⟨FG.dual
 -- variable [Module.Finite 𝕜 N] in
 -- variable [Fact p.IsFaithfulPair] in
 -- /-- A finite dimensional cone is FG if and only if it is DualFG. -/
--- lemma fg_iff_dualfg {C : PointedCone 𝕜 N} : C.DualFG p ↔ C.FG := ⟨FGDual.fg, FG.dualfg p⟩
+-- lemma fg_iff_dualfg {C : PointedCone 𝕜 N} : C.DualFG p ↔ C.FG := ⟨DualFG.fg, FG.dualfg p⟩
 
 variable (p) in
 /-- In finite dimensional space, the dual of and FG cone is itself FG. -/

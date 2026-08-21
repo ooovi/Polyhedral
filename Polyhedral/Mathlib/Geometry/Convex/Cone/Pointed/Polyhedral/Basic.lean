@@ -30,9 +30,10 @@ open PointedCone
 
 namespace PointedCone
 
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommMonoid M] [Module R M]
+variable {R M N : Type*}
 
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R] in
+variable [AddCommMonoid M] [Module R M] in
 /-- We implement polyhedral cones as sums of FG cones with submodules. This agrees with FG cones
 in finite dimensional modules and behaves well with respect to duality in infinite dimensions.
 
@@ -44,8 +45,8 @@ namespace IsPolyhedral
 
 section Semiring
 
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommMonoid M] [Module R M]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommMonoid M] [Module R M]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
@@ -119,21 +120,9 @@ protected lemma map (f : M →ₗ[R] N) (hC : C.IsPolyhedral) : (C.map f).IsPoly
   mpr := .map e.toLinearMap
   mp h := by simpa [map_map] using h.map e.symm.toLinearMap
 
--- TODO: move this and the below
--- NOTE: over a (Semi)Field the surjectivity assumption is not necessary because we can intersect
---   `C` with `f.range`, which is still FG.
-omit [PartialOrder R] [IsOrderedRing R] in
-lemma _root_.Submodule.FG.exists_fg_eq_map_of_surjective {f : N →ₗ[R] M}
-    (hf : Surjective f) {S : Submodule R M} (hS : S.FG) :
-      ∃ T : Submodule R N, T.FG ∧ S = T.map f := by classical
-  obtain ⟨s, rfl⟩ := hS
-  use span R (Finset.image (surjInv hf) s)
-  constructor
-  · use Finset.image (surjInv hf) s
-  simp [Submodule.map_span, Set.image_image, surjInv_eq]
-
 -- NOTE: over a Field the surjectivity assumption is not necessary because we can intersect
 --   `C` with `f.range`, which is still FG.
+-- TODO: move
 lemma _root_.PointedCone.FG.exists_fg_eq_map_of_surjective {f : N →ₗ[R] M} (hf : Surjective f)
     (hC : C.FG) : ∃ D : PointedCone R N, D.FG ∧ C = D.map f :=
   Submodule.FG.exists_fg_eq_map_of_surjective (R := Nonneg R) hf hC
@@ -142,14 +131,14 @@ end Semiring
 
 section AddCommGroup
 
-variable {R : Type*} [Semiring R] [PartialOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
 -- TODO: move
-/- TODO: does this need AddCommGroup?? Can I do it more directly without going via
+/- TODO: does this need AddCommGroup? Can I do it more directly without going via
   `exists_fg_eq_map_of_surjective`? -/
 omit [PartialOrder R] [IsOrderedRing R] in
 lemma _root_.Submodule.FG.exists_fg_comap_eq_sup_ker_of_surjective {f : N →ₗ[R] M}
@@ -219,9 +208,9 @@ end AddCommGroup
 
 section Ring
 
-variable {R : Type*} [Ring R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
@@ -367,8 +356,8 @@ end Ring
 
 section CommRing
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsOrderedRing R] -- do I need Comm?
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [CommRing R] [LinearOrder R] [IsOrderedRing R] -- Q: do I need Comm?
+variable [AddCommGroup M] [Module R M]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
@@ -388,8 +377,8 @@ end CommRing
 
 section DivisionRing
 
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
 variable {C C₁ C₂ F : PointedCone R M}
 
@@ -401,9 +390,9 @@ end DivisionRing
 
 section Field
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [AddCommGroup N] [Module R N]
 
 variable {p : M →ₗ[R] N →ₗ[R] R}
 

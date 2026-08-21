@@ -5,6 +5,8 @@ Authors: Martin Winter
 -/
 
 import Mathlib.RingTheory.Finiteness.Cofinite
+import Mathlib.LinearAlgebra.Dual.Defs
+import Mathlib.LinearAlgebra.Dual.Lemmas
 
 import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
@@ -16,10 +18,12 @@ open Module Function LinearMap
 
 namespace Submodule
 
+variable {R M : Type*}
+
 section CommSemiring
 
-variable {R : Type*} [Ring R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [Ring R]
+variable [AddCommGroup M] [Module R M]
 
 -- this should be somewhere in mathlib
 theorem quot_finite_of_finite [Module.Finite R M] (S : Submodule R M) :
@@ -99,8 +103,8 @@ end CommSemiring
 
 section IsNoetherianRing
 
-variable {R : Type*} [Ring R] [IsNoetherianRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [Ring R] [IsNoetherianRing R]
+variable [AddCommGroup M] [Module R M]
 
 lemma CoFG.disjoint_fg {S T : Submodule R M}
     (hST : Disjoint S T) (hS : S.CoFG) : T.FG := by
@@ -115,8 +119,8 @@ end IsNoetherianRing
 
 section DivisionRing
 
-variable {R : Type*} [DivisionRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [DivisionRing R]
+variable [AddCommGroup M] [Module R M]
 
 lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG) : T.CoFG := by
   obtain ⟨U, hSU, hUT⟩ := hST.exists_isCompl
@@ -135,5 +139,17 @@ example {S : Submodule R M} (hS : S.FG) :
   exact ⟨T, FG.codisjoint_cofg hST.2 hS, hST⟩
 
 end DivisionRing
+
+section Field
+
+variable [Field R]
+variable [AddCommGroup M] [Module R M]
+
+lemma CoFG.dualAnnihilator_fg {S : Submodule R M} (hS : S.CoFG) : FG S.dualAnnihilator := by
+  rw [← Submodule.fg_top]
+  refine fg_of_linearEquiv S.dualQuotEquivDualAnnihilator.symm ?_
+  simpa [← finite_def, Module.finite_dual_iff] using hS
+
+end Field
 
 end Submodule

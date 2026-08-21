@@ -39,12 +39,14 @@ lemma DualFG.exists_finset_dual {S : Submodule R N} (hS : S.DualFG p) :
 /-- A DualFG cone is the dual of a finite set. -/
 lemma DualFG.exists_finite_dual {S : Submodule R N} (hS : S.DualFG p) :
     ∃ s : Set M, s.Finite ∧ dual p s = S := by
-  obtain ⟨s, hs⟩ := hS; exact ⟨s, s.finite_toSet, hs⟩
+  obtain ⟨s, hs⟩ := hS
+  exact ⟨s, s.finite_toSet, hs⟩
 
 /-- A DualFG cone is the dual of an FG cone. -/
 lemma DualFG.exists_fg_dual {S : Submodule R N} (hS : S.DualFG p) :
     ∃ T : Submodule R M, T.FG ∧ dual p T = S := by
-  obtain ⟨s, hs⟩ := hS; exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
+  obtain ⟨s, hs⟩ := hS
+  exact ⟨_, Submodule.fg_span s.finite_toSet, by simp [hs]⟩
 
 /-- A DualFG cone is DualFG w.r.t. the standard pairing. -/
 lemma DualFG.to_id {S : Submodule R N} (hS : S.DualFG p) : S.DualFG .id

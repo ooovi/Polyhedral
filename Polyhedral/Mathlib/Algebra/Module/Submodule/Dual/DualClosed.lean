@@ -144,21 +144,20 @@ The following statement are not true in general: if S and T are dual closed, the
 But the latter two are equivalent.
 -/
 
-/-- This states `(S ⊓ T)* = S* ⊔ T*` for `S`, `T` and `S* ⊔ T*` being dual closed. -/
-lemma dual_inf_dual_sup_dual_of_dualClosed (S T : Submodule R M)
+/-- This states `(S ⊓ T)* = S* ⊔ T*` for when all of `S`, `T` and `S* ⊔ T*` are dual closed. -/
+lemma dual_inf_dual_sup_dual_of_dualClosed {S T : Submodule R M}
     (hS : S.DualClosed p) (hT : T.DualClosed p) (hST : (dual p S ⊔ dual p T).DualClosed p.flip) :
       dual p (S ⊓ T) = dual p S ⊔ dual p T := by
   nth_rw 1 [← hS, ← hT]
   simp only [inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
-  nth_rw 1 [← flip_flip p]
-  rw [hST]
+  exact hST
 
 /-- For `S` and `T` being dual closed submodules, the statement `(S ⊓ T)* = S* ⊔ T*`
 is equivalent to `S* ⊔ T*` being dual closed. -/
-lemma dual_inf_eq_sup_dual_iff_dualClosed (S T : Submodule R M)
+lemma dual_inf_eq_sup_dual_iff_dualClosed {S T : Submodule R M}
     (hS : S.DualClosed p) (hT : T.DualClosed p) :
     (dual p S ⊔ dual p T).DualClosed p.flip ↔ dual p (S ⊓ T) = dual p S ⊔ dual p T :=
-  ⟨dual_inf_dual_sup_dual_of_dualClosed S T hS hT, fun h => h ▸ dual_dualClosed p (S ⊓ T)⟩
+  ⟨dual_inf_dual_sup_dual_of_dualClosed hS hT, fun h => h ▸ dual_dualClosed p (S ⊓ T)⟩
 
 variable (p) in
 lemma dual_dual_eval_le_dual_dual_bilin (s : Set M) :
