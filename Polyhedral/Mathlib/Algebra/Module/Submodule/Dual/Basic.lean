@@ -332,6 +332,14 @@ variable {M : Type*} [AddCommGroup M] [Module R M]
 variable {N : Type*} [AddCommGroup N] [Module R N]
 variable {p : M →ₗ[R] N →ₗ[R] R}
 
+-- NOTE: This is an equivalence when p is surjective.
+def dual_linearMap_dual_quot (S : Submodule R M) :
+    dual p S →ₗ[R] Dual R (M ⧸ S)  where
+  toFun f := S.liftQ (p.flip f.1) <| le_ker_of_mem_dualAnnihilator (by
+    simpa using fun _ hx => (f.2 hx).symm )
+  map_add' _ _ := by ext; simp
+  map_smul' _ _ := by ext; simp
+
 variable [IsNoetherianRing R]
 
 -- ## COFG

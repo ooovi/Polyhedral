@@ -192,87 +192,6 @@ lemma DualFG.dual_fg_sup_ker {S : Submodule R N} (hS : S.DualFG p) :
   use T
   simpa [hfg, Eq.comm] using hfg.dual_flip_dual_sup_ker p
 
------ vvvvvv experimental
--- TODO: move to correct file
-
-lemma mkQ_eq_zero_of_mem {S : Submodule R M} {x : M} (hx : x ∈ S) : S.mkQ x = 0 := by
-  simpa only [← S.ker_mkQ, mem_ker] using hx
-
-def dualAnnihilator_linearEquiv_dual_quot (S : Submodule R M) :
-    S.dualAnnihilator ≃ₗ[R] Dual R (M ⧸ S) where
-  toFun f := S.liftQ f.1 (le_ker_of_mem_dualAnnihilator f.2)
-  invFun f := ⟨f ∘ₗ S.mkQ, by
-    simp only [mem_dualAnnihilator, coe_comp, Function.comp_apply]
-    exact fun _ h => by simp [mkQ_eq_zero_of_mem h]⟩
-  map_add' _ _ := by ext; simp
-  map_smul' _ _ := by ext; simp
-  left_inv _ := by ext; simp
-  right_inv _ := by ext; simp
-
--- TODO: this is an equivalence when p is surjective, I think; see
---  `dualAnnihilator_linearEquiv_dual_quot` above.
-def dual_linearMap_dual_quot (S : Submodule R M) :
-    dual p S →ₗ[R] Dual R (M ⧸ S)  where
-  toFun f := S.liftQ (p.flip f.1) <| le_ker_of_mem_dualAnnihilator (by
-    simpa using fun _ hx => (f.2 hx).symm )
-  map_add' _ _ := by ext; simp
-  map_smul' _ _ := by ext; simp
-
--- #check Subspace.quotDualEquivAnnihilator
--- this is similar to the below, but restricted to finite dim
--- def dual_eval_linearEquiv_dual_quot (S : Submodule R M) :
---     dual (Dual.eval R M) S ≃ₗ[R] Dual R (M ⧸ S)  where
---   toFun f := S.liftQ f.1 (subset_ker_of_mem_dual f.2)
---   invFun f := ⟨f ∘ₗ S.mkQ, by
---     simp only [mem_dual, SetLike.mem_coe, Dual.eval_apply, coe_comp, Function.comp_apply]
---     exact fun _ h => by simp [mkQ_eq_zero_of_mem h]⟩
---   map_add' _ _ := by ext; simp
---   map_smul' _ _ := by ext; simp
---   left_inv _ := by ext; simp
---   right_inv _ := by ext; simp
-
--- lemma CoFG.dual_fg' {S : Submodule R M} (hS : S.CoFG) : (dual (Dual.eval R M) S).FG := by
---   rw [← fg_top]
---   refine fg_of_linearEquiv S.dual_eval_linearEquiv_dual_quot ?_
---   simpa [← finite_def, Module.finite_dual_iff] using hS
-
-lemma CoFG.dualAnnihilator_fg {S : Submodule R M} (hS : S.CoFG) : FG S.dualAnnihilator := by
-  rw [← Submodule.fg_top]
-  refine fg_of_linearEquiv S.dualAnnihilator_linearEquiv_dual_quot ?_
-  simpa [← finite_def, Module.finite_dual_iff] using hS
-
-variable (p) [Fact p.SeparatingRight] in
-lemma CoFG.dual_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := by
-  apply fg_of_fg_map_injective p.flip SeparatingRight.injective
-  rw [S.dual_dualAnnihilator', map_comap_eq]
-  exact FG.of_le hS.dualAnnihilator_fg inf_le_right
-
-/- Not true!! Consider M = N the space finitely supported sequences. Let S be the subspace of
-    sequences with sum x_i = 0. Then S^* = bot and S^** = top. -/
-example {S : Submodule R M} (hS : S.CoFG) : (S ⊔ ker p).DualClosed p := sorry
-
--- ChatGPT says this is true and gives a proof.
--- https://chatgpt.com/c/6934b9d9-d210-832c-b723-a0d0adeb0749
-variable (p) in
-lemma CoFG._exists_fg_sup_ker_eq_dual {S : Submodule R M} (hS : S.CoFG) :
-    ∃ T : Submodule R N, T.FG ∧ T ⊔ ker p.flip = dual p S := by
-  have h := hS.dualfg .id
-  sorry
-
-theorem CoFG._fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
-    S.DualFG p := by
-  obtain ⟨T, hfg, hT⟩ := hS._exists_fg_sup_ker_eq_dual p.flip -- unproven!
-  rw [← hS', ← hT, dual_sup, dual_union_ker]
-  exact hfg.dual_dualfg _
-
-variable [Fact p.SeparatingLeft] in -- TODO: remove assumption, see above
-theorem CoFG.fgDual_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
-    S.DualFG p := by
-  rw [← hS', LinearMap.flip_flip]
-  exact FG.dual_dualfg _ (hS.dual_fg _)
-
------------ ^^^^^^ experimental
-
 /- There is a shorter proof of the theorem below that assumes `p.SeparatingRight`:
 ```
   obtain ⟨s, rfl⟩ := hT
@@ -304,10 +223,9 @@ lemma dual_fg_inf_dualfg_dual_sup_dual (hS : S.FG) (hT : T.DualFG p.flip) :
     rw [dual_sup, dual_union_ker]
   exact hT.ker_le
 
-/-- The sub of a DualFG submodule and an FG submodule is DualFG.
+/-- The sup of a DualFG submodule and an FG submodule is DualFG.
 
-This is private because it is superseded by `DualFG.sup`.
--/
+This is private because it is superseded by `DualFG.sup`. -/
 private lemma sup_dualfg_fg {S T : Submodule R N} (hS : S.DualFG p) (hT : T.FG) :
     (S ⊔ T).DualFG p := by
   rw [← sup_eq_left.mpr (hS.ker_le),sup_assoc, sup_comm]
@@ -342,36 +260,32 @@ lemma dualfg_sup (S : Submodule R N) {T : Submodule R N} (hT : T.DualFG p) :
   rw [sup_comm]
   exact sup_dualfg hT S
 
-/- NOTE: Proving this first (before sup_dualfg) might shorten total proof length. -/
+/- NOTE: Proving this first (before `sup_dualfg`) might shorten total proof length. -/
 /-- A submodule that contains an DualFG submodule is itself DualFG. -/
 lemma DualFG.of_dualfg_le {S T : Submodule R N} (hS : S.DualFG p) (hST : S ≤ T) :
     T.DualFG p := by
   rw [← sup_eq_right.mpr hST]
   exact hS.sup T
 
-/- NOTE: The assumption `SeparatingLeft` cannot be dropped. Consider submodules with
-  S ⊓ T = ⊥, but where S ⊔ ker p = T ⊔ ker p = ⊤. -/
+/- NOTE: The assumption `SeparatingLeft` cannot be dropped. Consider submodules with `S ⊓ T = ⊥`,
+but where `S ⊔ ker p = T ⊔ ker p = ⊤`. -/
 variable [Fact p.SeparatingLeft] in
 /-- This states `(S ⊓ T)* = S* ⊔ T*` for `S` and `T` being FG. -/
 lemma FG.dual_inf_dual_sup_dual (hS : S.FG) (hT : T.FG) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
-  rw [← coe_inf]
-  nth_rw 1 [← FG.dualClosed p hS, ← FG.dualClosed p hT]
-  rw [← dual_union, ← dual_sup, DualFG.dual_dual_flip]
-  exact (hS.dual_dualfg p).sup _
+  simp only [← Set.inf_eq_inter]
+  rw [← dual_inf_eq_sup_dual_iff_dualClosed (hS.dualClosed p) (hT.dualClosed p)]
+  refine DualFG.dualClosed <| DualFG.sup (hS.dual_dualfg p) _
 
 /-- This states `(S ⊓ T)* = S* ⊔ T*` for `S` being FG and `T` being dual closed. -/
 lemma FG.dual_inf_dual_dualClosed_sup_dual (hS : S.FG) (hT : T.DualClosed p) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
   rw [← coe_inf, ← dual_union_ker, ← dual_sup]
   rw [sup_comm, ← sup_inf_assoc_of_le S hT.ker_le, sup_comm]
-  have hclosed :
-      (dual p (S ⊔ ker p : Submodule R M) ⊔ dual p T).DualClosed p.flip := by
-    simpa only [dual_sup, dual_union_ker] using
-      ((hS.dual_dualfg p).sup (dual p T)).dualClosed_flip
+  have hclosed : (dual p (S ⊔ ker p : Submodule R M) ⊔ dual p T).DualClosed p.flip := by
+    simpa only [dual_sup, dual_union_ker] using ((hS.dual_dualfg p).sup (dual p T)).dualClosed_flip
   simpa only [coe_inf, Set.inf_eq_inter, dual_sup, dual_union_ker] using
-    dual_inf_dual_sup_dual_of_dualClosed
-    (S ⊔ ker p) T (hS.sup_ker_dualClosed p) hT hclosed
+    dual_inf_dual_sup_dual_of_dualClosed (hS.sup_ker_dualClosed p) hT hclosed
 
 alias DualClosed.dual_f_inf_dual_sup_dual := FG.dual_inf_dual_dualClosed_sup_dual
 
@@ -382,5 +296,35 @@ lemma FG.dual_dualClosed_inf_dual_sup_dual (hS : S.DualClosed p) (hT : T.FG) :
   exact hT.dual_inf_dual_dualClosed_sup_dual hS
 
 alias DualClosed.dual_inf_dual_fg_sup_dual := FG.dual_dualClosed_inf_dual_sup_dual
+
+-- # COFG
+
+variable (p) [Fact p.SeparatingRight] in
+lemma CoFG.dual_fg {S : Submodule R M} (hS : S.CoFG) : (dual p S).FG := by
+  apply fg_of_fg_map_injective p.flip SeparatingRight.injective
+  rw [S.dual_dualAnnihilator', map_comap_eq]
+  exact FG.of_le hS.dualAnnihilator_fg inf_le_right
+
+/- NOTE: from `CoFG S` does *not* follow `(S ⊔ ker p).DualClosed p `!
+Consider `M = N` the space finitely supported sequences. Let S be the subspace of sequences
+with `sum x_i = 0`. Then `S* = ⊥` and `S** = ⊤`. -/
+
+variable (p) in
+/-- The dual of a CoFG submodule can be written as the sum of an FG submodule with the kernel
+of the flipped pairing. -/
+lemma CoFG.exists_fg_sup_ker_eq_dual {S : Submodule R M} (hS : S.CoFG) :
+    ∃ T : Submodule R N, T.FG ∧ T ⊔ ker p.flip = dual p S := by
+  rw [dual_dualAnnihilator' p S]
+  obtain ⟨T, hT, h⟩ :=
+    FG.exists_fg_comap_eq_sup_ker (f := p.flip) hS.dualAnnihilator_fg
+  exact ⟨T, hT, h.symm⟩
+
+/-- A submodule is DualFG if and only if it is CoFG and dual closed. The forward direction
+is provided by separate lemmas. This lemma provides the backwards direction. -/
+theorem CoFG.dualfg_of_dualClosed {S : Submodule R N} (hS : S.CoFG) (hS' : S.DualClosed p.flip) :
+    S.DualFG p := by
+  obtain ⟨T, hfg, hT⟩ := hS.exists_fg_sup_ker_eq_dual p.flip
+  rw [← hS', ← hT, dual_sup, dual_union_ker]
+  exact hfg.dual_dualfg _
 
 end Submodule
