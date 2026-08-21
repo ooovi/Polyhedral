@@ -613,18 +613,6 @@ lemma exists_isPolyhedral_dual (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R N, D.IsPolyhedral ∧ PointedCone.dual p.flip D = C := by
   exact ⟨PointedCone.dual p C, hC.dual p, hC.dual_flip_dual p⟩
 
-/- Wishlist:
-  * polyhedra are dual closed
-  * dual (C ⊓ D) = dual C ⊔ dual D
--/
-
--- variable [Fact p.SeparatingRight] in
--- private lemma IsPolyhedral.dual_fg_of_lineal_cofg {C : PointedCone R M}
---     (hC : C.IsPolyhedral) (hlin : CoFG C.lineal) : FG (.dual p C) := by
---   obtain ⟨_, hfg, _, hD⟩ := hC.exists_fg_salient_submoduel_eq_sup
---   rw [hD]
---   exact DualFG.dual_fg (sup_fg_dualfg hfg <| CoFG.cofg p.flip hlin)
-
 end Field
 
 end IsPolyhedral

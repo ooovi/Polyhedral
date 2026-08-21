@@ -99,10 +99,10 @@ variable (p) [Fact p.SeparatingLeft] in
     Subspace.dualCoannihilator_dualAnnihilator_eq]
   exact comap_map_eq_self (by simp)
 
-/- The main trick: `T` is the generating set that will
-  appear on both sides on the identity as shown in h₁ and h₂:
-    * dual p T = dual p S ⊔ span R {w}
-    * span R T = S ⊓ dual p.flip {w}
+/- The main trick: `T := { p s w • t - p t w • s | (s ∈ S) (t ∈ S) }` is the generating
+set in which both sides of the identity can be expressed in:
+  * dual p T = dual p S ⊔ span R {w}
+  * span R T = S ⊓ dual p.flip {w}
 -/
 private lemma dual_inf_dual_singleton_dual_sup_singleton (hS : S.DualClosed p) (w : N) :
     dual p (S ∩ dual p.flip {w}) = dual p S ⊔ span R {w} := by
@@ -120,21 +120,15 @@ private lemma dual_inf_dual_singleton_dual_sup_singleton (hS : S.DualClosed p) (
     let c := (p s₀ w)⁻¹ * p s₀ x
     refine ⟨x - c • w, ?_, c, sub_add_cancel _ _⟩
     intro s hs
-    have h := hx (sub_mem
-        (S.smul_mem (p s w) hs₀)
-        (S.smul_mem (p s₀ w) hs))
-      (by simp [mul_comm])
+    have h := hx (sub_mem (S.smul_mem (p s w) hs₀) (S.smul_mem (p s₀ w) hs)) (by simp [mul_comm])
     simp only [map_sub, map_smul, smul_eq_mul] at h ⊢
     rw [eq_comm, sub_eq_zero]
     have h' : p s₀ w * p s x = p s w * p s₀ x :=
       (sub_eq_zero.mp h.symm).symm
-    calc
-      p s x = (p s₀ w)⁻¹ * (p s₀ w * p s x) := by
-        rw [← mul_assoc, inv_mul_cancel₀ hw₀.symm, one_mul]
-      _ = (p s₀ w)⁻¹ * (p s w * p s₀ x) := by rw [h']
-      _ = c * p s w := by
-        dsimp [c]
-        ring
+    calc p s x = (p s₀ w)⁻¹ * (p s₀ w * p s x) := by
+                rw [← mul_assoc, inv_mul_cancel₀ hw₀.symm, one_mul]
+             _ = (p s₀ w)⁻¹ * (p s w * p s₀ x) := by rw [h']
+             _ = c * p s w := by dsimp [c]; ring
   · rintro ⟨y, hy, c, rfl⟩ s hs hsw
     simp [← hy hs, ← hsw]
 
@@ -282,7 +276,7 @@ variable [Fact p.SeparatingRight] in
     dual_flip_dual_finite _
 
 variable (p) [Fact p.SeparatingLeft] in
-/-- FG cones are dual closed. -/
+/-- FG submodules are dual closed. -/
 lemma FG.dualClosed (hS : S.FG) : S.DualClosed p := by
   simpa using DualClosed.sup_fg p dualClosed_bot hS
 
