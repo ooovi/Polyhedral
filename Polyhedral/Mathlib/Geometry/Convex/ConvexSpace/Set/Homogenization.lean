@@ -16,17 +16,20 @@ open Convexity Pointwise Set PointedCone Submodule
 
 namespace Convexity.ConvexSet
 
+variable {R V A W : Type*}
+
 section Ring
 
 open Convexity
 
-variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable {V : Type*} [AddCommGroup V] [Module R V]
-variable {A : Type*} [AddTorsor V A]
-variable {W : Type*} [AddCommGroup W] [Module R W]
-variable [hom : Affine.IsHomogenization R A W]
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V]
+variable [AddCommGroup W] [Module R W]
+variable [AddTorsor V A]
 
 attribute [local instance] AddTorsor.toConvexSpace
+
+variable [hom : Affine.IsHomogenization R A W]
 
 variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
@@ -90,6 +93,7 @@ theorem homogenize_FG_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG
 section Module
 
 attribute [local instance] AddTorsor.toConvexSpace
+
 variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
 
 variable (A) in
@@ -133,14 +137,15 @@ end Ring
 
 section Field
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {V : Type*} [AddCommGroup V] [Module R V]
-variable {A : Type*} [AddTorsor V A]
-variable {W : Type*} [AddCommGroup W] [Module R W]
-variable [hom : Affine.IsHomogenization R A W]
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup V] [Module R V]
+variable [AddCommGroup W] [Module R W]
+variable [AddTorsor V A]
 
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
+
+variable [hom : Affine.IsHomogenization R A W]
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=

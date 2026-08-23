@@ -18,12 +18,14 @@ open Convexity ConvexSet Affine IsHomogenization
 section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+variable [AddCommGroup V] [Module R V]
 variable [AddCommGroup W] [Module R W]
-variable [hom : IsHomogenization R A W]
+variable [AddTorsor V A]
 
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
+
+variable [hom : IsHomogenization R A W]
 
 open PointedCone
 
@@ -68,13 +70,15 @@ end Ring
 
 section Field
 
-variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+variable [Field R][LinearOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V]
 variable [AddCommGroup W] [Module R W]
-variable [hom : IsHomogenization R A W]
+variable [AddTorsor V A]
 
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
+
+variable [hom : IsHomogenization R A W]
 
 open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated positive cone yields a polytope. -/

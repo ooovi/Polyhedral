@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
+import Mathlib.Geometry.Convex.Cone.Face.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
 /-! This files proves results about faces of convex sets / cones and homogenization. -/
 

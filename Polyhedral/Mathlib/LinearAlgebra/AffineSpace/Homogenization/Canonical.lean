@@ -40,6 +40,10 @@ the vector space associated to `P`. However, this isomorphism is not canonical u
 * [J. Gallier, *Geometric Methods and Applications for Computer Science and
   Engineering*][Gallier2011GeometricMethods]
 * [X. Gràcia, R. Martín, *Vector Hulls of Affine Spaces and Affine Bundles*][Gracia2008]
+
+## NOTE
+
+* This is an active PR #39431
 -/
 
 @[expose] public section
