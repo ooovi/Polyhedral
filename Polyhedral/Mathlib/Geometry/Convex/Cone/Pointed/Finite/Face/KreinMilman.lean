@@ -4,17 +4,24 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
-/-! In this file we prove the Krein-Milman theorem for FG cones. -/
+/-! In this file we prove the Krein-Milman theorem for FG cones: every finitely generated
+cone is spanned by its rays, that is, by the finite set of its 1-dimensional faces.
+
+TODO: aspects of the proof are rather cumbersome since the atoms of the face lattice are rays
+rather than points. We therefore intend to perform the proof on the polytope side and
+transfer it here using homogenization.
+-/
 
 namespace PointedCone
 
-variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
-variable {N : Type*} [AddCommGroup N] [Module R N]
-variable {p : M →ₗ[R] N →ₗ[R] R}
+variable {R M : Type*}
+
+section Field
+
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
 variable {C F F₁ F₂ : PointedCone R M}
 
@@ -136,7 +143,8 @@ lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
     push Not at H
     simp only [← Set.mem_singleton_iff] at H
     simpa [h] using Submodule.span_mono (R := {c : R // 0 ≤ c}) H
-  simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton, Subtype.exists] at hy
+  simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton,
+    Subtype.exists] at hy
   obtain ⟨hys, a, ha, rfl⟩ := hy
   exact ⟨_, hys, a, lt_of_le_of_ne ha (fun h => hy0 (by simp [← h])), rfl⟩
 
@@ -221,5 +229,7 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   have : 0 ≤ f w * g x := mul_nonneg (hf' w hwt) (g.mem_positive'.mp (hgC hx)).1
   have : f x * g w < 0 := mul_neg_of_neg_of_pos hf hgw
   linarith
+
+end Field
 
 end PointedCone

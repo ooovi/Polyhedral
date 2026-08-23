@@ -9,7 +9,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
-/-! This file proves results about faces of finitely generated cones -/
+/-! This file proves results about faces of finitely generated cones. -/
 
 namespace PointedCone
 
