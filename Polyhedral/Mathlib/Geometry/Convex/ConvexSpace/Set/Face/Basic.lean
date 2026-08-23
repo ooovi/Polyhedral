@@ -8,16 +8,22 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 import Mathlib.Analysis.Convex.Segment
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
+/-! This file defines faces of convex sets.
 
-/-! This file defines faces of convex sets. -/
+NOTE: Currently this file is still aligned with the old convexity API of mathlib, defining
+`openSegment` and `IsExtreme`. This will later be refactored. Please only use `IsFaceOf` and
+avoid using the legacy API.
+-/
+
+variable {R M N : Type*}
 
 section Semiring
 
 -- Eventually, most of the below will become global names
 namespace Convexity
 
-variable {R : Type*} {M N : Type*} [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
-  [ConvexSpace R M] [ConvexSpace R N]
+variable [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
+variable [ConvexSpace R M] [ConvexSpace R N]
 
 -- the following is copied from the mathlib convexity def and adapted to ours
 
@@ -35,6 +41,9 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   all_goals (intro h; rcases h with ⟨m, n, hm , hn , hmn , hz⟩; use n, m, hn, hm)
   all_goals (rw [convexCombPair_symm] at hz; rw [add_comm] at hmn; use hmn)
 
+/- NOTE: This is *legacy API* -/
+/- TODO: This is a temporary construction to align faces with the current mathlib implementation
+of `IsExtreme`. This will be removed soon. -/
 variable (R) in
 /-- A set `B` is an extreme subset of `A` if `B ⊆ A` and all points of `B` only belong to open
 segments whose ends are in `B`.
@@ -53,6 +62,7 @@ theorem isExtreme_empty {C : Set M} : IsExtreme R C ∅ where
 
 namespace ConvexSet
 
+/- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
 /-- A subset `F` of a convex set `C` is a face of `C` iff it is an extreme subset. -/
 def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C (F : Set M)
 
@@ -181,6 +191,7 @@ theorem isFaceOf_map_iff {f : M → N} {F C : ConvexSet R M} (hhf : IsAffineMap 
 
 end IsFaceOf
 
+/- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
 /-- A face of a convex set `P`. Represents the face lattice of `P`. -/
 structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
   isFaceOf : IsFaceOf toConvexSet P

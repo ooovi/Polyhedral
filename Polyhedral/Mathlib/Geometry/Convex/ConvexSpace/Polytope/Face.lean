@@ -19,17 +19,20 @@ open Convexity ConvexSet Affine
 section Field
 
 variable [LinearOrder R] [Field R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [AddTorsor V A]
+variable [AddCommGroup V] [Module R V]
+variable [AddTorsor V A]
+
 attribute [local instance] AddTorsor.toConvexSpace
-variable {C : ConvexSet R A}
+
+variable {C F : ConvexSet R A}
 
 /-- Faces of polytopes are polytopes. -/
-theorem face_isPolytope (hCfg : IsPolytope R (C : Set A)) (F : C.Face) :
+theorem face_isPolytope (hC : IsPolytope R (C : Set A)) (hF : IsFaceOf F C) :
     IsPolytope R (F : Set A) := by
-  let hom : IsHomogenization R A (CanonicalHomogenization R A) := inferInstance
+  let hom := IsHomogenization.canonical R A
   let := IsModuleConvexSpace.ofAddTorsor (R := R) (V := (CanonicalHomogenization R A))
-  have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hCfg
-  have homF := hom.homogenize_isFaceOf F.isFaceOf
+  have homC := IsPolytope.homogenize_FG (W := (CanonicalHomogenization R A)) hC
+  have homF := hom.homogenize_isFaceOf hF
   have := PointedCone.IsFaceOf.fg homC homF
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
   simp [dehomogenize_homogenize]

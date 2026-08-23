@@ -1,9 +1,3 @@
-import Mathlib.Data.Real.Basic
-import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
-import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 
 variable {R X Y : Type*}

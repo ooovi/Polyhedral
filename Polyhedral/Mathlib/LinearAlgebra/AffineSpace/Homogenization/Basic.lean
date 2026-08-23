@@ -47,13 +47,14 @@ class IsHomogenization where
   weight : W →ₗ[R] R
   ofPoint_range_eq_preimage_weight_one : Set.range ofPoint = weight ⁻¹' {1}
 
-open CanonicalHomogenization in
+variable (R A) in
 /-- The canonical homogenization is a homogenization. -/
-instance : IsHomogenization R A (CanonicalHomogenization R A) where
-  ofPoint := ofPoint
-  ofPoint_injective := ofPoint_injective
-  weight := weight
-  ofPoint_range_eq_preimage_weight_one := ofPoint_range_eq_preimage_weight_one
+instance IsHomogenization.canonical : IsHomogenization R A (CanonicalHomogenization R A) where
+  ofPoint := CanonicalHomogenization.ofPoint
+  ofPoint_injective := CanonicalHomogenization.ofPoint_injective
+  weight := CanonicalHomogenization.weight
+  ofPoint_range_eq_preimage_weight_one :=
+    CanonicalHomogenization.ofPoint_range_eq_preimage_weight_one
 
 namespace IsHomogenization
 
