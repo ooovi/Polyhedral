@@ -70,7 +70,7 @@ end Ring
 
 section Field
 
-variable [Field R][LinearOrder R] [IsStrictOrderedRing R]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V]
 variable [AddCommGroup W] [Module R W]
 variable [AddTorsor V A]
