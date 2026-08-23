@@ -4,34 +4,36 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
 
 /-! This files proves results about faces of convex sets / cones and homogenization. -/
 
+namespace Affine.IsHomogenization
+
+open Set Convexity ConvexSet Submodule
+
+variable {R V A W : Type*}
+
 section Field
 
-open Pointwise Set Convexity ConvexSet PointedCone Submodule Affine.IsHomogenization
-
-variable {R : Type*} [Field R]
-variable [LinearOrder R] [IsOrderedRing R]
-variable {V : Type*} [AddCommGroup V] [Module R V]
-variable {A : Type*} [AddTorsor V A]
-variable {W : Type*} [AddCommGroup W] [Module R W]
-variable [hom : Affine.IsHomogenization R A W]
+variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup V] [Module R V]
+variable [AddCommGroup W] [Module R W]
+variable [AddTorsor V A]
 
 attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
-namespace Affine.IsHomogenization
+variable [hom : Affine.IsHomogenization R A W]
 
-/-- If homogenizing a point `q` yields a positive combination of the IsHomogenizations of two other
-points, then `q` lies in the open segment between them. -/
+/-- If the homogenization of a point `q` is a positive combination of the homogenization
+of two other points, then `q` lies in the open segment between them. -/
 theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
     (h₁ : 0 < r₁) (h₂ : 0 < r₂) (hₜ : 0 < t)
     (h : r₁ • hom.ofPoint p₁ + r₂ • hom.ofPoint p₂ = t • hom.ofPoint q) :
-    q ∈ Convexity.openSegment R p₁ p₂ := by
+      q ∈ Convexity.openSegment R p₁ p₂ := by
   have : r₁ + r₂ = t := by simpa [hom.weight_one, map_add, map_smul] using congr_arg hom.weight h
   have : t⁻¹ • r₁ + t⁻¹ • r₂ = 1 := by
       simp_rw [← smul_add, smul_eq_mul, this, mul_comm, Field.mul_inv_cancel _ hₜ.ne.symm]
@@ -41,15 +43,17 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
     rw [h, smul_smul, inv_mul_cancel₀ (ne_of_gt hₜ), one_smul]
   simp [hom.ofPoint.isAffineMap.map_convexCombPair, convexCombPair_eq_sum, ← this, smul_smul]
 
+/-- If `F` is a face of `P`, then the homogenization of `F` is a face of the homogenization
+of `P`. -/
 theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
     (F.homogenize W).IsFaceOf (P.homogenize W) where
-  le := homogenizeOrderHom.monotone' he.subset
+  le := homogenizeOrderHom.monotone' he.le
   mem_of_smul_add_mem := by
     intro v w a hv hw ha hvw
     have hhom : (P.homogenize W).Salient := homogenize_salient
     by_cases hnf : (F : Set A).Nonempty
     · have cF := F.isConvexSet.image hom.ofPoint.isAffineMap
-      apply (mem_hull_iff_of_convex (hnf.image _) cF _).mpr
+      apply (PointedCone.mem_hull_iff_of_convex (hnf.image _) cF _).mpr
       by_cases hv0 : v = 0
       · exact ⟨0, le_rfl, mem_smul_set.mpr (by simpa [hv0] using nonempty_def.mp hnf)⟩
       · by_cases hw0 : w = 0
@@ -84,16 +88,25 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
         exact PointedCone.smul_mem _ (by positivity) hw) (add_neg_cancel v)
 
 variable (A) in
+/-- If `F` is a face of `C`, then the dehomogenization of `F` is a face of the dehomogenization
+of `C`. -/
 theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     (ConvexSet.dehomogenize A F).IsFaceOf (ConvexSet.dehomogenize A C) where
-  subset := preimage_mono (fun _ x ↦ hf.le x)
+  le := preimage_mono (fun _ x ↦ hf.le x)
   left_mem_of_mem_openSegment  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
     rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,
       ← hom.ofPoint.isAffineMap.map_convexCombPair, hzo]
 
-def Face.homogenizeIso {P : ConvexSet R A} : P.Face ≃o (P.homogenize W).Face where
+/-- The isomorphism between the face lattice of a convex set `P` and the face lattice of
+its homogenization cone.
+
+This isomorphism is used to translate results between face lattices of cones and face lattices
+of convex sets.
+-/
+def Face.homogenizeIso {P : ConvexSet R A} :
+    Face P ≃o PointedCone.Face (P.homogenize W) where
   toFun F := ⟨_, hom.homogenize_isFaceOf F.isFaceOf⟩
   invFun F := ⟨_, by simpa [dehomogenize_homogenize] using dehomogenize_isFaceOf A F.isFaceOf⟩
   map_rel_iff' := by
@@ -107,4 +120,6 @@ def Face.homogenizeIso {P : ConvexSet R A} : P.Face ≃o (P.homogenize W).Face w
       (fun _ h n ↦ weight_pos_of_mem_homogenize (F.isFaceOf.le h) n)
     simp [this]
 
-end Field.Affine.IsHomogenization
+end Field
+
+end Affine.IsHomogenization

@@ -5,28 +5,24 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Mathlib.Analysis.Convex.Segment
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 /-! This file defines faces of convex sets.
 
-NOTE: Currently this file is still aligned with the old convexity API of mathlib, defining
-`openSegment` and `IsExtreme`. This will later be refactored. Please only use `IsFaceOf` and
-avoid using the legacy API.
+TODO: align this API with `IsFaceOf` for cones.
 -/
 
-variable {R M N : Type*}
+namespace Convexity
+
+open Function
+
+variable {R M M₁ M₂ : Type*}
 
 section Semiring
 
--- Eventually, most of the below will become global names
-namespace Convexity
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R M]
 
-variable [PartialOrder R] [Semiring R] [IsStrictOrderedRing R]
-variable [ConvexSpace R M] [ConvexSpace R N]
-
--- the following is copied from the mathlib convexity def and adapted to ours
-
+/- NOTE: this is a copy of mathlib convexity API adapted to `ConvexSpace`. -/
 variable (R) in
 /-- Open segment in a convex space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
 the base semiring has some element between `0` and `1`. -/
@@ -41,32 +37,20 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   all_goals (intro h; rcases h with ⟨m, n, hm , hn , hmn , hz⟩; use n, m, hn, hm)
   all_goals (rw [convexCombPair_symm] at hz; rw [add_comm] at hmn; use hmn)
 
-/- NOTE: This is *legacy API* -/
-/- TODO: This is a temporary construction to align faces with the current mathlib implementation
-of `IsExtreme`. This will be removed soon. -/
-variable (R) in
-/-- A set `B` is an extreme subset of `A` if `B ⊆ A` and all points of `B` only belong to open
-segments whose ends are in `B`.
-
-Our definition only requires that the left endpoint of the segment lies in `B`,
-but by symmetry of open segments, the right endpoint must also lie in `B`. -/
-@[mk_iff]
-structure IsExtreme (A B : Set M) : Prop where
-  subset : B ⊆ A
-  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ A → ∀ ⦃y⦄, y ∈ A →
-    ∀ ⦃z⦄, z ∈ B → z ∈ openSegment R x y → x ∈ B
-
-theorem isExtreme_empty {C : Set M} : IsExtreme R C ∅ where
-  subset := C.empty_subset
-  left_mem_of_mem_openSegment := by simp
-
 namespace ConvexSet
 
 /- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
 /-- A subset `F` of a convex set `C` is a face of `C` iff it is an extreme subset. -/
-def IsFaceOf (F C : ConvexSet R M) := IsExtreme R C (F : Set M)
+structure IsFaceOf (F C : ConvexSet R M) where
+  le : F ≤ C
+  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
+    ∀ ⦃z⦄, z ∈ F → z ∈ openSegment R x y → x ∈ F
 
 namespace IsFaceOf
+
+theorem empty {C : ConvexSet R M} : IsFaceOf ∅ C where
+  le := SetLike.empty_le _
+  left_mem_of_mem_openSegment := by simp
 
 /- A convex set is a face of itself. -/
 theorem refl (C : ConvexSet R M) : C.IsFaceOf C :=
@@ -110,8 +94,8 @@ sets. -/
 theorem inf {S₁ S₂ F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf S₁) (h₂ : F₂.IsFaceOf S₂) :
     (F₁ ⊓ F₂).IsFaceOf (S₁ ⊓ S₂) := by
   constructor
-  · rw [@Set.subset_def]
-    exact fun x hx => ⟨Set.mem_of_mem_of_subset hx.1 h₁.1, Set.mem_of_mem_of_subset hx.2 h₂.1⟩
+  · intro x hx
+    exact ⟨Set.mem_of_mem_of_subset hx.1 h₁.1, Set.mem_of_mem_of_subset hx.2 h₂.1⟩
   · intro a ha b hb z hz hhz
     exact ⟨@h₁.2 a ha.1 b hb.1 z hz.1 hhz, @h₂.2 a ha.2 b hb.2 z hz.2 hhz⟩
 
@@ -119,7 +103,7 @@ theorem inf {S₁ S₂ F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf S₁) (h
 theorem inf_left {C F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     (F₁ ⊓ F₂).IsFaceOf C := by
   constructor
-  · simpa [Set.inter_self] using Set.inter_subset_inter h₁.1 h₂.1
+  · exact le_trans inf_le_left h₁.le
   · intro x hx y hy z hz hhz
     exact ⟨@h₁.2 x hx y hy z hz.1 hhz, @h₂.2 x hx y hy z hz.2 hhz⟩
 
@@ -128,8 +112,11 @@ theorem inf_right {S₁ S₂ F : ConvexSet R M} (h₁ : F.IsFaceOf S₁) (h₂ :
     F.IsFaceOf (S₁ ⊓ S₂) :=
   ⟨Set.subset_inter h₁.1 h₂.1, by intro x hx y hy z hz hhz; exact @h₁.2 x hx.1 y hy.1 z hz hhz⟩
 
+variable [ConvexSpace R M₁]
+variable [ConvexSpace R M₂]
+
 /- The image of a face under an injective affine map is a face of the image. -/
-theorem map {f : M → N} {F C : ConvexSet R M} (hhf : IsAffineMap R f) (hf : Function.Injective f)
+theorem map {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f) (hf : Injective f)
     (hF : F.IsFaceOf C) : (F.map hhf).IsFaceOf (C.map hhf) := by
   constructor
   · intro x hx
@@ -149,7 +136,7 @@ theorem map {f : M → N} {F C : ConvexSet R M} (hhf : IsAffineMap R f) (hf : Fu
     exact Set.mem_image_of_mem _ (@hF.2 m hmC n hnC l hlF hl)
 
 /- The preimage of a face is a face of the preimage. -/
-theorem comap_face {f : M → N} {F C : ConvexSet R N} (hf : IsAffineMap R f) (hF : F.IsFaceOf C) :
+theorem comap_face {f : M₁ → M₂} {F C : ConvexSet R M₂} (hf : IsAffineMap R f) (hF : F.IsFaceOf C) :
    (F.comap hf).IsFaceOf (C.comap hf) := by
   constructor
   · apply Set.preimage_mono hF.1
@@ -167,13 +154,12 @@ theorem comap_face {f : M → N} {F C : ConvexSet R N} (hf : IsAffineMap R f) (h
 
 /- `F` is a face of `C` iff the image of `F` is a face of the image of `C` under an injective affine
 map -/
-theorem isFaceOf_map_iff {f : M → N} {F C : ConvexSet R M} (hhf : IsAffineMap R f)
-    (hf : Function.Injective f) :
-    (F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
+theorem isFaceOf_map_iff {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f)
+    (hf : Injective f) : (F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
   constructor
   · intro h
     have hh := comap_face hhf h
-    have h (A : ConvexSet R M) : (A.map hhf).comap hhf = A := by
+    have h (A : ConvexSet R M₁) : (A.map hhf).comap hhf = A := by
       ext z
       constructor
       · intro hz
@@ -191,41 +177,8 @@ theorem isFaceOf_map_iff {f : M → N} {F C : ConvexSet R M} (hhf : IsAffineMap 
 
 end IsFaceOf
 
-/- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
-/-- A face of a convex set `P`. Represents the face lattice of `P`. -/
-structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
-  isFaceOf : IsFaceOf toConvexSet P
-
-namespace Face
-
-variable {P : ConvexSet R M}
-
-instance : SetLike (Face P) M where
-  coe F := F.toConvexSet.carrier
-  coe_injective a b h := by
-    cases a; cases b; congr; exact SetLike.coe_injective h
-
-@[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
-
-@[simp] theorem mem_coe {F : Face P} (x : M) : x ∈ F.carrier ↔ x ∈ F := .rfl
-
-@[ext] theorem ext {F₁ F₂ : Face P} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
-
-@[simp] theorem coe_eq_toConvexSet_coe {F : Face P} : (F : Set M) = F.toConvexSet :=
-  SetLike.ext'_iff.mp rfl
-
-instance : PartialOrder (Face P) := .ofSetLike ..
-
-instance : Bot (Face P) :=
-  ⟨⟨∅, .empty⟩, by simp [IsFaceOf, ← ConvexSet.carrier_eq_coe, isExtreme_empty]⟩
-
-lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := by
-  rw [Set.nonempty_iff_ne_empty]
-  intro heq
-  apply h
-  ext
-  simp [← SetLike.mem_coe, heq, Bot.bot]
-
-end Convexity.ConvexSet.Face
+end ConvexSet
 
 end Semiring
+
+end Convexity

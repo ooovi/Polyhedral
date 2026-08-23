@@ -61,6 +61,13 @@ instance : IsConcreteBot (ConvexSet R X) X := ⟨rfl⟩
 
 instance : OrderBot (ConvexSet R X) := .ofSetLike ..
 
+/- # Bot -/
+
+instance : EmptyCollection (ConvexSet R X) where
+  emptyCollection := ⊥
+
+instance : IsConcreteEmpty (ConvexSet R X) X := ⟨rfl⟩
+
 /- # Top -/
 
 instance : Top (ConvexSet R X) where

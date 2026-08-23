@@ -9,7 +9,7 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X]
 
-variable {S P P₁ P₂ s : Set X}
+variable {S P P₁ P₂ : Set X}
 
 variable (R) in
 def IsPolytope (s : Set X) : Prop := ∃ t : Finset X, s = Convexity.convexHull R t
