@@ -69,7 +69,7 @@ lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ hom
 lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
   Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
 
-theorem homogenize_FG_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG) :
+theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG) :
     ∃ g : Finset W, PointedCone.hull R g = homogenize W C ∧
       (g : Set W) ⊆ Set.range hom.ofPoint := by
   obtain ⟨g, hg⟩ := h

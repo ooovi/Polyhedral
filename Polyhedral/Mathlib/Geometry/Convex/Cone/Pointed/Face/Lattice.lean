@@ -197,6 +197,7 @@ def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Ici F where
 def quot_orderEmbed (F : Face C) : Face (C ⧸ F) ↪o Face C :=
   (quot_orderIso F).toOrderEmbedding.trans <| OrderEmbedding.subtype _
 
+variable (C) in
 /-- The isomorphism between the face lattice of the salient quotient and the face lattice of
 the cone itself. -/
 def salientQuot_orderIso : Face (C ⧸ ⊥) ≃o Face C :=

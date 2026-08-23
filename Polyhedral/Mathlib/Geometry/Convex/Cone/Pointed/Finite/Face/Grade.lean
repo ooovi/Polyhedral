@@ -7,24 +7,33 @@ Authors: Olivia Röhrig, Martin Winter
 import Mathlib.Order.Grade
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Lattice
 
-/-! This file contains results about the grading on the face lattice of a finitely
-generated cone.-/
+/-! This file proves that the face lattice of an FG cone is graded.
 
-open Module
+Main declaration:
+* `GradeOrder ℕ (Face C)`
 
-namespace PointedCone
+TODO: either provide a version of the grading, or define the grading canonically, using
+`finsalrank` instead of `finrank`. Maybe this is easier if we already proved that submodules
+form a graded lattice (is this already done?).
+-/
 
-namespace FG
+open Module Submodule
+
+namespace PointedCone.FG
+
+variable {R M : Type*}
 
 section DivisionRing
 
-variable {R : Type*} [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
-variable {M : Type*} [AddCommGroup M] [Module R M]
+variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+
 variable {C : PointedCone R M}
 
-open Submodule in
-lemma finrank_strictMono (hCfg : C.FG) : StrictMono (fun F : Face C => F.finrank) := by
+/-- The finite rank of a face is a strictly monotone map. -/
+lemma finrank_strictMono (hCfg : C.FG) : StrictMono (Face.finrank : Face C → _) := by
   intro G F hFG
   have := (Submodule.fg_iff_finiteDimensional _).mp (FG.span_fg <| F.isFaceOf.fg hCfg)
   apply finrank_lt_finrank_of_lt (lt_of_le_of_ne ?_ ?_)
@@ -35,7 +44,9 @@ lemma finrank_strictMono (hCfg : C.FG) : StrictMono (fun F : Face C => F.finrank
     rw [← IsFaceOf.inf_span F.isFaceOf, ← IsFaceOf.inf_span G.isFaceOf] at this
     simp [h] at this
 
-lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank = F.finrank + 1 := by
+/-- Two faces that cover each other in the face lattice have a rank difference of one. -/
+lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) :
+    G.finrank = F.finrank + 1 := by
   obtain ⟨hfg, hc⟩ := hFG
   -- suffices to show quotient has rank 1
   have hgfg := quot_fg (G.isFaceOf.fg hCfg) F.span
@@ -67,53 +78,51 @@ lemma finrank_add_one (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) : G.finrank =
   · rintro ⟨_, ⟨_, hhx'⟩, rfl⟩
     exact mem_toConvexCone.mp hhx'
 
-lemma finrank_covBy (hCfg : C.FG)
-    {F G : Face C} (hFG : F ⋖ G) :
+lemma finrank_covBy (hCfg : C.FG) {F G : Face C} (hFG : F ⋖ G) :
     F.finrank ⋖ G.finrank := by
   obtain ⟨hfg, hc⟩ := hFG
   refine ⟨finrank_strictMono hCfg hfg, ?_⟩
   suffices G.finrank = F.finrank + 1 by omega
   exact (FG.finrank_add_one hCfg ⟨hfg, hc⟩)
 
-lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG)
-    {F G : Face C} (hfg : F ≤ G) : F ⋖ G ↔
-    F.finrank ⋖ G.finrank := by
-  refine ⟨finrank_covBy hCfg, ?_⟩
-  intro h
-  constructor
+lemma covBy_iff_finrank_covBy_of_le (hCfg : C.FG) {F G : Face C} (hfg : F ≤ G) :
+    F ⋖ G ↔ F.finrank ⋖ G.finrank := by
+  refine ⟨finrank_covBy hCfg, fun h ↦ ⟨?_, ?_⟩⟩
   · exact lt_of_le_of_ne hfg <| fun a => ne_of_lt h.1 (congrArg finrank (by simpa))
   · exact fun H hH hah => h.2 (finrank_strictMono hCfg hH) (finrank_strictMono hCfg hah)
 
--- this is a def not a class because of the `FG` hypothesis which cannot be inferred
--- the option suppresses a linter warning about reducability which we don't care about since this
--- won't ever be found by typeclass inference
-set_option warn.classDefReducibility false in
+-- TODO: make this use `salfinrank`.
 /-- The face lattice of a finitely generated cone is graded by face dimension. -/
-noncomputable def gradeOrder_finrank {C : PointedCone R M}
-    (hCfg : C.FG) : GradeOrder ℕ (Face C) where
+@[reducible] noncomputable def gradeOrder_finrank {C : PointedCone R M} (hCfg : C.FG) :
+    GradeOrder ℕ (Face C) where
   grade F := F.finrank
   grade_strictMono := finrank_strictMono hCfg
   covBy_grade := fun {_ _} hFG => finrank_covBy hCfg hFG
 
+/- NOTE: the proof below is AI generated. It can likely be much improved once sufficient API is
+available for transporting face lattices along quotients. Currently there is a proof of
+`Face (C ⧸ ⊥) ≃o Face C`, but the rest of the repository works with `C.salientQuot` instead of
+`C ⧸ ⊥`, and translating between them needs work. -/
+/-- The face lattice of a polyhedral cone is graded by the dimensions of the corresponding faces
+of its salient quotient. -/
+noncomputable instance _root_.PolyhedralCone.gradeOrder_finrank {C : PolyhedralCone R M} :
+    GradeOrder ℕ (Face (C : PointedCone R M)) := by
+  let e := Face.salientQuot_orderIso (C : PointedCone R M)
+  have hspan : (⊥ : Face (C : PointedCone R M)).span =
+      PointedCone.lineal (C : PointedCone R M) := by
+    change Submodule.span R (((⊥ : Face (C : PointedCone R M)) : PointedCone R M) : Set M) = _
+    rw [Face.lineal_eq_bot]
+    exact PointedCone.span_inf_neg_eq_lineal _
+  have hfg : (Face.quot (C := (C : PointedCone R M)) ⊥).FG := by
+    change (PointedCone.quot (C : PointedCone R M) (⊥ : Face (C : PointedCone R M)).span).FG
+    rw [hspan]
+    exact C.isPolyhedral.salientQuot_fg
+  letI := PointedCone.FG.gradeOrder_finrank hfg
+  exact GradeOrder.liftRight e.symm e.symm.strictMono fun _ _ ↦
+    (apply_covBy_apply_iff e.symm).mpr
+
 end DivisionRing
 
 end FG
-
--- My impression is someone should first implement the grading for the lattice of submodules.
--- (if not already done). This here is then a simple derivate thereof.
-
--- lemma salFinrank_strictMono (C : PointedCone R M) : -- (hC : C.IsPolyhedral) :
---     StrictMono fun F : Face C => salFinrank (F : PointedCone R M) := by
---   sorry
-
--- lemma salFinrank_covBy {C : PointedCone R M} (hC : C.IsPolyhedral) (F G : Face C) (hFG : F ⋖ G) :
---     salFinrank (F : PointedCone R M) ⋖ salFinrank (G : PointedCone R M) := by
---   sorry
-
--- noncomputable instance {C : PointedCone R M} (hC : C.IsPolyhedral) : GradeOrder ℕ (Face C) where
---   grade F := salFinrank (F : PointedCone R M)
---   grade_strictMono := salFinrank_strictMono C
---   covBy_grade := salFinrank_covBy hC
-
 
 end PointedCone
