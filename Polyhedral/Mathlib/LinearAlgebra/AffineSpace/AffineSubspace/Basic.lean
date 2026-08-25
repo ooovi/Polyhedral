@@ -27,6 +27,13 @@ variable [Ring R]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V A]
 
+instance : EmptyCollection (AffineSubspace R A) where
+  emptyCollection := {
+    carrier := ∅
+    smul_vsub_vadd_mem' _ _ _ _ := by simp }
+
+instance : IsConcreteEmpty (AffineSubspace R A) A := ⟨rfl⟩
+
 instance : Singleton A (AffineSubspace R A) where
   singleton x := {
     carrier := {x}
