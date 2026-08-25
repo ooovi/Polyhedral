@@ -136,6 +136,18 @@ theorem le_eq_empty {a b : A} (h : b ≤ a) (e : a = ∅) : b = ∅ := by
 
 end LE
 
+section Bot
+
+variable [Bot A] [IsConcreteBot A B]
+
+include setLike in
+@[simp]
+lemma bot_eq_empty : (⊥ : A) = ∅ := by
+  rw [← SetLike.coe_set_eq, SetLike.coe_bot, SetLike.coe_empty]
+  rfl
+
+end Bot
+
 -- TODO: theorems about SetLike.nonempty once implemented
 
 end SetLike
