@@ -78,16 +78,13 @@ lemma smul_ofPoint_mem_homogenize {r : R} (hr : 0 ≤ r) (h : x ∈ s) :
     r • hom.ofPoint x ∈ homogenize R W s :=
   smul_mem _ ⟨r, hr⟩ (ofPoint_mem_homogenize h)
 
-lemma homogenize_mono {s t : Set A} (h : s ⊆ t) : homogenize R W s ≤ homogenize R W t :=
-  smulSet_mono <| Set.image_mono h
-
-lemma homogenize_monotone : Monotone (homogenize R W : Set A → SubMulAction₀ R≥0 W) :=
-  fun _ _ => homogenize_mono
+lemma homogenize_mono : Monotone (homogenize R W : Set A → SubMulAction₀ R≥0 W) :=
+  fun _ _ h => smulSet_mono <| Set.image_mono h
 
 /-- Homogenization from sets to `SubMulAction₀` as an order homomorphism. -/
 def homogenizeOrderHom : Set A →o SubMulAction₀ R≥0 W where
   toFun := homogenize R W
-  monotone' := homogenize_monotone
+  monotone' := homogenize_mono
 
 lemma homogenize_union (s t : Set A) :
     homogenize R W (s ∪ t) = homogenize R W s ⊔ homogenize R W t := by
@@ -144,7 +141,7 @@ lemma homogenize_injective :
   homogenize_injective.eq_iff
 
 lemma homogenize_strictMono : StrictMono (homogenize R W : Set A → SubMulAction₀ R≥0 W) :=
-  homogenize_monotone.strictMono_of_injective homogenize_injective
+  homogenize_mono.strictMono_of_injective homogenize_injective
 
 lemma homogenize_mono_iff {s t : Set A} :
     homogenize R W s ≤ homogenize R W t ↔ s ⊆ t where
@@ -152,7 +149,7 @@ lemma homogenize_mono_iff {s t : Set A} :
     intro h x hx
     rw [← ofPoint_mem_homogenize_iff (R := R) (W := W)] at ⊢ hx
     exact h hx
-  mpr := homogenize_mono
+  mpr h := homogenize_mono h
 
 lemma homogenize_singleton_eq {x y : A} :
     homogenize R W {x} = homogenize R W {y} ↔ x = y := by simp
@@ -176,17 +173,13 @@ variable (A) in
 def _root_.SubMulAction₀.dehomogenize (S : SubMulAction₀ R≥0 W) : Set A :=
   hom.ofPoint ⁻¹' S
 
-lemma dehomogenize_mono {S T : SubMulAction₀ R≥0 W} (h : S ≤ T) :
-    dehomogenize A S ≤ dehomogenize A T :=
-  Set.preimage_mono h
-
-lemma dehomogenize_monotone : Monotone (dehomogenize A : SubMulAction₀ R≥0 W → Set A) :=
-  fun _ _ => dehomogenize_mono
+lemma dehomogenize_mono : Monotone (dehomogenize A : SubMulAction₀ R≥0 W → Set A) :=
+  fun _ _ h => Set.preimage_mono h
 
 /-- Homogenization from sets to `SubMulAction₀` as an order homomorphism. -/
 def dehomogenizeOrderHom : SubMulAction₀ R≥0 W →o Set A where
   toFun := dehomogenize A
-  monotone' := dehomogenize_monotone
+  monotone' := dehomogenize_mono
 
 lemma dehomogenize_top : dehomogenize A (⊤ : SubMulAction₀ R≥0 W) = Set.univ := by
   ext x; simp [dehomogenize]

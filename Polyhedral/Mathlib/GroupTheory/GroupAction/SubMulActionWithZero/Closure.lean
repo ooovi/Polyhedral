@@ -68,18 +68,15 @@ theorem closure_le {p : SubMulAction₀ R M} : closure R s ≤ p ↔ s ⊆ p := 
     exact mem_closure.1 hx p h
 
 @[gcongr]
-theorem closure_mono (h : s ⊆ t) : closure R s ≤ closure R t := by
+theorem closure_mono : Monotone (closure R : Set M → SubMulAction₀ R M) := by
+  intro s t h
   rw [closure_le]
   exact h.trans subset_closure
-
-@[gcongr]
-theorem closure_monotone : Monotone (closure R : Set M → SubMulAction₀ R M) :=
-  fun _ _ => closure_mono
 
 variable (R) in
 def closureOrderHom : Set M →o SubMulAction₀ R M where
   toFun := closure R
-  monotone' := closure_monotone
+  monotone' := closure_mono
 
 lemma closure_sInf (s : Set (Set M)) : closure R (sInf s) ≤ sInf (closure R '' s) := by
   intro _ ht
@@ -201,18 +198,15 @@ theorem smulSet_le {p : SubMulAction₀ R M} : R ∙ s ≤ p ↔ s ⊆ p := by
     · exact p.smul_mem r (h hy)
 
 @[gcongr]
-theorem smulSet_mono (h : s ⊆ t) : R ∙ s ≤ R ∙ t := by
+theorem smulSet_mono : Monotone (smulSet R : Set M → SubMulAction₀ R M) := by
+  intro s t h
   rw [smulSet_le]
   exact h.trans subset_smulSet
-
-@[gcongr]
-theorem smulSet_monotone : Monotone (smulSet R : Set M → SubMulAction₀ R M) :=
-  fun _ _ => smulSet_mono
 
 variable (R) in
 def smulSetOrderHom : Set M →o SubMulAction₀ R M where
   toFun := smulSet R
-  monotone' := smulSet_monotone
+  monotone' := smulSet_mono
 
 lemma smulSet_gc : GaloisConnection (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
   fun _ _=> ⟨le_trans subset_smulSet, by

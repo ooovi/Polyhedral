@@ -54,9 +54,8 @@ lemma mem_restrict {S : Submodule R M} {T : Submodule R M} {x : S} (h : x ∈ re
 lemma mem_restrict_iff {S : Submodule R M} {T : Submodule R M} {x : S} :
     x ∈ restrict S T ↔ (x : M) ∈ T := by simp [submoduleOf]
 
--- TODO: use `Monotone`
-lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hCD : T₁ ≤ T₂) :
-    restrict S T₁ ≤ restrict S T₂ := fun _ => (hCD ·)
+lemma restrict_mono (S : Submodule R M) : Monotone (restrict S) :=
+  fun _ _ hT _ => (hT ·)
 
 lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
     restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
@@ -92,7 +91,7 @@ example (S : Submodule R M) : Submodule R S ≃o Set.Iic S := Submodule.mapIic S
 
 def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S where
   toFun := restrict S
-  monotone' _ _ := restrict_mono S
+  monotone' := restrict_mono S
 
 /- ## EMBED -/
 
@@ -156,9 +155,8 @@ lemma embed_injective {S : Submodule R M} : Injective (embed : Submodule R S →
 @[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : Submodule R S} :
     embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
 
--- TODO: use `Monotone`
-lemma embed_mono {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : T₁ ≤ T₂) :
-    embed T₁ ≤ embed T₂ := Submodule.map_mono hT
+lemma embed_mono {S : Submodule R M} : Monotone (embed : Submodule R S → Submodule R M) :=
+  fun _ _ => Submodule.map_mono
 
 lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed T₁ ≤ embed T₂) :
     T₁ ≤ T₂ := (by simpa using @hT ·)
@@ -166,7 +164,7 @@ lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed
 @[simp] lemma embed_mono_iff {S : Submodule R M} {T₁ T₂ : Submodule R S} :
     embed T₁ ≤ embed T₂ ↔ T₁ ≤ T₂ where
   mp := embed_mono_rev
-  mpr := embed_mono
+  mpr h := embed_mono h
 
 -- this should have higher priority than `map_top`
 @[simp] lemma embed_top {S : Submodule R M} : embed (⊤ : Submodule R S) = S := by simp

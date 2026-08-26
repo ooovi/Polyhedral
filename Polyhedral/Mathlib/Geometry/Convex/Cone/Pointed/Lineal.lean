@@ -57,8 +57,8 @@ incorrectly named mathlib lemma. -/
 
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := submodule_lineal ⊥
 
-lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal := by
-  intro x hx
+lemma lineal_mono : Monotone fun C : PointedCone R M => C.lineal := by
+  intro C D h x hx
   rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
 
