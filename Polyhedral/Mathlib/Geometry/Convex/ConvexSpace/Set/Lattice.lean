@@ -115,6 +115,15 @@ variable (R) in
 /-- The convex hull of a set `s`, bundled as a `ConvexSet`. -/
 def convexHull (s : Set X) : ConvexSet R X := ⟨Convexity.convexHull R s, .convexHull⟩
 
+@[simp]
+lemma coe_convexHull (s : Set X) : convexHull R s = Convexity.convexHull R s := rfl
+
+@[simp]
+lemma coe_eq_convexHull_iff {K : ConvexSet R X} {s : Set X} :
+    K = Convexity.convexHull R s ↔ K = convexHull R s := by
+  nth_rw 2 [← SetLike.coe_set_eq]
+  rfl
+
 instance : Max (ConvexSet R X) where
   max K₁ K₂ := convexHull R (K₁ ∪ K₂)
 
