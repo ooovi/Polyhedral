@@ -336,7 +336,7 @@ lemma exists_le_disjoint_sup_self (S T : Submodule R M) :
     ∃ S' : Submodule R M, S' ≤ S ∧ Disjoint S' T ∧ S' ⊔ T = S ⊔ T := by
   obtain ⟨S', hSS', hST'⟩ := (codisjoint_restrict_sup S T).exists_isCompl
   exact ⟨embed S',
-    by simpa [embed_restrict_of_le (toAddSubmonoid_le.mp hSS')] using embed_mono hSS',
+    by simpa [embed_restrict_of_le (toAddSubmonoid_le.mp hSS')] using embed_monotone hSS',
     by simpa using embed_disjoint hST'.disjoint,
     by simpa using embed_codisjoint hST'.codisjoint⟩
 

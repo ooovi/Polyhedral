@@ -54,7 +54,7 @@ lemma mem_restrict {S : Submodule R M} {T : Submodule R M} {x : S} (h : x ∈ re
 lemma mem_restrict_iff {S : Submodule R M} {T : Submodule R M} {x : S} :
     x ∈ restrict S T ↔ (x : M) ∈ T := by simp [submoduleOf]
 
-lemma restrict_mono (S : Submodule R M) : Monotone (restrict S) :=
+lemma restrict_monotone (S : Submodule R M) : Monotone (restrict S) :=
   fun _ _ hT _ => (hT ·)
 
 lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
@@ -91,7 +91,7 @@ example (S : Submodule R M) : Submodule R S ≃o Set.Iic S := Submodule.mapIic S
 
 def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S where
   toFun := restrict S
-  monotone' := restrict_mono S
+  monotone' := restrict_monotone S
 
 /- ## EMBED -/
 
@@ -155,7 +155,7 @@ lemma embed_injective {S : Submodule R M} : Injective (embed : Submodule R S →
 @[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : Submodule R S} :
     embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
 
-lemma embed_mono {S : Submodule R M} : Monotone (embed : Submodule R S → Submodule R M) :=
+lemma embed_monotone {S : Submodule R M} : Monotone (embed : Submodule R S → Submodule R M) :=
   fun _ _ => Submodule.map_mono
 
 lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed T₁ ≤ embed T₂) :
@@ -164,14 +164,14 @@ lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed
 @[simp] lemma embed_mono_iff {S : Submodule R M} {T₁ T₂ : Submodule R S} :
     embed T₁ ≤ embed T₂ ↔ T₁ ≤ T₂ where
   mp := embed_mono_rev
-  mpr h := embed_mono h
+  mpr h := embed_monotone h
 
 -- this should have higher priority than `map_top`
 @[simp] lemma embed_top {S : Submodule R M} : embed (⊤ : Submodule R S) = S := by simp
 @[simp] lemma embed_bot {S : Submodule R M} : embed (⊥ : Submodule R S) = ⊥ := map_bot _
 
 @[simp] lemma embed_le {S : Submodule R M} {T : Submodule R S} : embed T ≤ S := by
-  simpa using embed_mono le_top
+  simpa using embed_monotone le_top
 
 -- TODO: given this higher priority than `map_sup`
 @[simp] lemma embed_sup {U : Submodule R M} (S T : Submodule R U) :

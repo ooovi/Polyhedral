@@ -149,7 +149,7 @@ lemma dual_le_iff_dual_le {S : Submodule R M} {T : Submodule R N} :
 
 variable (p) in
 /-- Taking the double dual is monotone. -/
-lemma dual_dual_mono : Monotone fun s : Set M => dual p.flip (dual p s) :=
+lemma dual_dual_monotone : Monotone fun s : Set M => dual p.flip (dual p s) :=
   fun _ _ hST => dual_antitone <| dual_antitone hST
 
 variable (s) in

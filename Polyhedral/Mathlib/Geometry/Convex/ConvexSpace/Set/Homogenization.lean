@@ -35,13 +35,13 @@ variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
 def homogenize (P : ConvexSet R A) : PointedCone R W := hull R (hom.ofPoint '' P)
 
-lemma homogenize_mono : Monotone (homogenize W : ConvexSet R A → PointedCone R W) :=
+lemma homogenize_monotone : Monotone (homogenize W : ConvexSet R A → PointedCone R W) :=
   fun _ _ h => Submodule.span_mono <| Set.image_mono h
 
 /-- Homogenization from convex set to convex cones as an order homomorphism. -/
 def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
   toFun := homogenize W
-  monotone' := homogenize_mono
+  monotone' := homogenize_monotone
 
 lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
@@ -87,8 +87,8 @@ theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG
     refine hsum ▸ mem_hull_set.mpr ⟨Classical.choose (gsum hx), ?_, hnn, rfl⟩
     simpa using Finset.subset_biUnion_of_mem
       (fun p ↦ (Classical.choose (gsum p.2)).support) (Finset.mem_attach g ⟨x, hx⟩)
-  refine ⟨le_antisymm (hull_mono g'sub) ?_, g'sub.trans (by simp)⟩
-  simpa [hg] using hull_mono (R := R) gsubhull
+  refine ⟨le_antisymm (hull_monotone g'sub) ?_, g'sub.trans (by simp)⟩
+  simpa [hg] using hull_monotone (R := R) gsubhull
 
 section Module
 
@@ -109,7 +109,7 @@ lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := sorry
 lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ := sorry
 
 variable (A) in
-lemma dehomogenize_mono : Monotone (dehomogenize A : PointedCone R W → ConvexSet R A) :=
+lemma dehomogenize_monotone : Monotone (dehomogenize A : PointedCone R W → ConvexSet R A) :=
   fun _ _ h => Set.preimage_mono <| Set.preimage_mono h
   -- Q: why Set.preimage_mono twice?
 
@@ -200,8 +200,8 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
     K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where
-  mp h := by simpa using dehomogenize_mono A h
-  mpr h := homogenize_mono h
+  mp h := by simpa using dehomogenize_monotone A h
+  mpr h := homogenize_monotone h
 
 -- Issue #66
 /-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the

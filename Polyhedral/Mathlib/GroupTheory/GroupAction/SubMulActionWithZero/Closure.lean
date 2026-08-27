@@ -68,7 +68,7 @@ theorem closure_le {p : SubMulAction₀ R M} : closure R s ≤ p ↔ s ⊆ p := 
     exact mem_closure.1 hx p h
 
 @[gcongr]
-theorem closure_mono : Monotone (closure R : Set M → SubMulAction₀ R M) := by
+theorem closure_monotone : Monotone (closure R : Set M → SubMulAction₀ R M) := by
   intro s t h
   rw [closure_le]
   exact h.trans subset_closure
@@ -76,14 +76,14 @@ theorem closure_mono : Monotone (closure R : Set M → SubMulAction₀ R M) := b
 variable (R) in
 def closureOrderHom : Set M →o SubMulAction₀ R M where
   toFun := closure R
-  monotone' := closure_mono
+  monotone' := closure_monotone
 
 lemma closure_sInf (s : Set (Set M)) : closure R (sInf s) ≤ sInf (closure R '' s) := by
   intro _ ht
-  simpa using fun _ hx => closure_mono (sInf_le hx) ht
+  simpa using fun _ hx => closure_monotone (sInf_le hx) ht
 
 lemma closure_inter_le (s t : Set M) : closure R (s ∩ t) ≤ closure R s ⊓ closure R t :=
-  fun _ ha => ⟨closure_mono inf_le_left ha, closure_mono inf_le_right ha⟩
+  fun _ ha => ⟨closure_monotone inf_le_left ha, closure_monotone inf_le_right ha⟩
 
 /-- A `SubMulAction₀` is finitely generated if it is the closure of a finite set. -/
 def FG (p : SubMulAction₀ R M) : Prop :=
@@ -198,7 +198,7 @@ theorem smulSet_le {p : SubMulAction₀ R M} : R ∙ s ≤ p ↔ s ⊆ p := by
     · exact p.smul_mem r (h hy)
 
 @[gcongr]
-theorem smulSet_mono : Monotone (smulSet R : Set M → SubMulAction₀ R M) := by
+theorem smulSet_monotone : Monotone (smulSet R : Set M → SubMulAction₀ R M) := by
   intro s t h
   rw [smulSet_le]
   exact h.trans subset_smulSet
@@ -206,7 +206,7 @@ theorem smulSet_mono : Monotone (smulSet R : Set M → SubMulAction₀ R M) := b
 variable (R) in
 def smulSetOrderHom : Set M →o SubMulAction₀ R M where
   toFun := smulSet R
-  monotone' := smulSet_mono
+  monotone' := smulSet_monotone
 
 lemma smulSet_gc : GaloisConnection (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
   fun _ _=> ⟨le_trans subset_smulSet, by
@@ -268,7 +268,7 @@ lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup (smulSet R '' S) :=
 variable (R) in
 theorem closure_eq_smulSet (s : Set M) : closure R s = R ∙ s := by
   ext x; constructor
-  · have := closure_mono (R := R) <| subset_smulSet (R := R) (s := s)
+  · have := closure_monotone (R := R) <| subset_smulSet (R := R) (s := s)
     rw [closure_eq] at this
     exact fun hx => this hx
   · rintro (rfl | ⟨y, hy, r, rfl⟩)

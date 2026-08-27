@@ -84,7 +84,7 @@ lemma dual_coe_coe_eq_dual_coe (S : Submodule R M) : dual p (S : PointedCone R M
 
 variable (p) in
 /-- Taking the double dual is monotone. -/
-lemma dual_dual_mono : Monotone fun s : Set M => dual p.flip (dual p s) :=
+lemma dual_dual_monotone : Monotone fun s : Set M => dual p.flip (dual p s) :=
   fun _ _ hSC => dual_antitone <| dual_antitone hSC
 
 lemma le_dual_of_le_dual {S : PointedCone R M} {T : PointedCone R N}

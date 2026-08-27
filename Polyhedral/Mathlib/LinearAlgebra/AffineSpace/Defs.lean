@@ -20,7 +20,7 @@ variable {A : Type*} [AddTorsor V A]
 lemma spanPoints_empty : spanPoints R (∅ : Set A) = ∅ := by simp [spanPoints]
 
 @[gcongr]
-lemma spanPoints_mono : Monotone (spanPoints R : Set A → Set A) :=
+lemma spanPoints_monotone : Monotone (spanPoints R : Set A → Set A) :=
     fun _G _F hFG _p ⟨p₁, hp₁, v, hv, hp⟩ =>
       ⟨p₁, hFG hp₁, v, Submodule.span_mono (Set.vsub_subset_vsub hFG hFG) hv, hp⟩
 

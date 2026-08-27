@@ -38,7 +38,7 @@ lemma isConvexSet (P : PointedCone R M) :
     hull R (Convexity.convexHull R t) = hull R t := by
   apply le_antisymm
   · exact sInf_le <| Convexity.convexHull_min le_hull (isConvexSet _)
-  · exact hull_mono Convexity.subset_convexHull_self
+  · exact hull_monotone Convexity.subset_convexHull_self
 
 end Ring
 

@@ -65,7 +65,7 @@ theorem toSubMulAction₀_strictMono :
   exact hpq
 
 @[gcongr, mono]
-theorem toSubMulAction₀_mono :
+theorem toSubMulAction₀_monotone :
     Monotone
       (Submodule.toSubMulAction₀ (R := R) (M := M)) :=
   toSubMulAction₀_strictMono.monotone

@@ -134,7 +134,7 @@ lemma Face.le_dual_dual_flip (F : Face C) : F ≤ (F.dual p).dual_flip p := by
   rw [← F.isFaceOf.sup_span_lineal_eq_span]
   apply inf_le_inf_left
   rw [ofSubmodule_le_ofSubmodule]
-  apply lineal_mono
+  apply lineal_monotone
   refine le_trans ?_ (dual_sup_dual_le_dual_inf ..)
   exact sup_le_sup subset_dual_dual subset_dual_dual
 

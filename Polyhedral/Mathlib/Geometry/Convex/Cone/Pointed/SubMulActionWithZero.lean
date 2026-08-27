@@ -75,7 +75,7 @@ theorem toSubMulAction₀_strictMono :
   exact hpq
 
 @[gcongr, mono]
-theorem toSubMulAction₀_mono :
+theorem toSubMulAction₀_monotone :
     Monotone (PointedCone.toSubMulAction₀ (R := R) (M := M)) :=
   toSubMulAction₀_strictMono.monotone
 
@@ -94,9 +94,9 @@ lemma mulAction_closure_le_hull (s : Set M) : closure R≥0 s ≤ hull R s := by
 
 @[simp] theorem hull_mulAction_closure_eq_hull (s : Set M) :
     hull R (closure R≥0 s) = hull R s := by
-  refine le_antisymm ?_ <| hull_mono subset_closure
+  refine le_antisymm ?_ <| hull_monotone subset_closure
   nth_rw 2 [← hull_hull]
-  exact hull_mono (mulAction_closure_le_hull _)
+  exact hull_monotone (mulAction_closure_le_hull _)
 
 lemma smulSet_le_hull (s : Set M) : R≥0 ∙ s ≤ hull R s := by
   rw [← closure_eq_smulSet]

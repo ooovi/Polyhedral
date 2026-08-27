@@ -251,7 +251,7 @@ lemma exists_fg_eq_sup_lineal (hC : C.IsPolyhedral) :
     ∃ D : PointedCone R M, D.FG ∧ C = D ⊔ C.lineal := by
   obtain ⟨D, hD, S, h⟩ := hC
   refine ⟨D, hD, le_antisymm ?_ (by simp [h])⟩
-  have : lineal S ≤ C.lineal := lineal_mono (by simp [h])
+  have : lineal S ≤ C.lineal := lineal_monotone (by simp [h])
   rw [submodule_lineal] at this
   nth_rw 1 [h]
   apply sup_le_sup_left

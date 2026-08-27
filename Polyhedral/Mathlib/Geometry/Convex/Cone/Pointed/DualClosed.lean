@@ -95,7 +95,7 @@ theorem DualClosed.eq_sInf (hC : C.DualClosed p) :
   simp only [SetLike.le_def, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
   intro x hx D hD hsD
   rw [← hD]; rw [← hC] at hx
-  exact (dual_dual_mono p hsD) hx
+  exact (dual_dual_monotone p hsD) hx
 
 lemma DualClosed.dual_le_of_dual_le {D : PointedCone R N} (hC : C.DualClosed p)
     (hCD : dual p C ≤ D) : dual p.flip D ≤ C := by
