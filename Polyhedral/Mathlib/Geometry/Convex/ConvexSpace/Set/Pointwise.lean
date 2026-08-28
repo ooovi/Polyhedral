@@ -64,6 +64,9 @@ lemma IsConvexSet.translate (t : V) {K : Set A} (hK : IsConvexSet R K) :
   -- this likely requires a compatbility class between affine and linear convexity
   sorry
 
+/- TODO: there should also be a version `(K : ConvexSet R V) +ᵥ (p : A)`, but there is not even
+a version for sets yet. -/
+
 /- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
     (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) :=
