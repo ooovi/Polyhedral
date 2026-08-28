@@ -78,8 +78,11 @@ lemma smul_ofPoint_mem_homogenize {r : R} (hr : 0 ≤ r) (h : x ∈ s) :
     r • hom.ofPoint x ∈ homogenize R W s :=
   smul_mem _ ⟨r, hr⟩ (ofPoint_mem_homogenize h)
 
+lemma homogenize_mono {s t : Set A} (h : s ⊆ t) : homogenize R W s ≤ homogenize R W t :=
+  smulSet_mono <| Set.image_mono h
+
 lemma homogenize_monotone : Monotone (homogenize R W : Set A → SubMulAction₀ R≥0 W) :=
-  fun _ _ h => smulSet_monotone <| Set.image_mono h
+  fun _ _ => homogenize_mono
 
 /-- Homogenization from sets to `SubMulAction₀` as an order homomorphism. -/
 def homogenizeOrderHom : Set A →o SubMulAction₀ R≥0 W where
@@ -108,7 +111,7 @@ def homogenizeSSupHom : sSupHom (Set A) (SubMulAction₀ R≥0 W) where
 lemma homogenize_sInf_le (S : Set (Set A)) :
     homogenize R W (sInf S) ≤ sInf (homogenize R W '' S) := by
   unfold homogenize
-  apply le_trans <| smulSet_monotone (Set.image_sInter_subset_sInf_image _ _)
+  apply le_trans <| smulSet_mono (Set.image_sInter_subset_sInf_image _ _)
   apply le_trans (smulSet_sInf_le _)
   rw [Set.image_image]
 
@@ -149,7 +152,7 @@ lemma homogenize_mono_iff {s t : Set A} :
     intro h x hx
     rw [← ofPoint_mem_homogenize_iff (R := R) (W := W)] at ⊢ hx
     exact h hx
-  mpr h := homogenize_monotone h
+  mpr := homogenize_mono
 
 lemma homogenize_singleton_eq {x y : A} :
     homogenize R W {x} = homogenize R W {y} ↔ x = y := by simp
@@ -173,8 +176,12 @@ variable (A) in
 def _root_.SubMulAction₀.dehomogenize (S : SubMulAction₀ R≥0 W) : Set A :=
   hom.ofPoint ⁻¹' S
 
+lemma dehomogenize_mono {S T : SubMulAction₀ R≥0 W} (h : S ≤ T) :
+    dehomogenize A S ≤ dehomogenize A T :=
+  Set.preimage_mono h
+
 lemma dehomogenize_monotone : Monotone (dehomogenize A : SubMulAction₀ R≥0 W → Set A) :=
-  fun _ _ h => Set.preimage_mono h
+  fun _ _ => dehomogenize_mono
 
 /-- Homogenization from sets to `SubMulAction₀` as an order homomorphism. -/
 def dehomogenizeOrderHom : SubMulAction₀ R≥0 W →o Set A where
@@ -255,7 +262,7 @@ lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
 
 lemma homogenize_le_weight_positive (s : Set A) :
     homogenize R W s ≤ hom.weight.positive :=
-  le_trans (homogenize_monotone (Set.subset_univ _)) homogenize_univ_le_weight_positive
+  le_trans (homogenize_mono (Set.subset_univ _)) homogenize_univ_le_weight_positive
 
 @[simp] theorem homogenize_dehomogenize_le_weight_positive {S : SubMulAction₀ R≥0 W} :
     homogenize R W (S.dehomogenize A) ≤ S ⊓ hom.weight.positive := by

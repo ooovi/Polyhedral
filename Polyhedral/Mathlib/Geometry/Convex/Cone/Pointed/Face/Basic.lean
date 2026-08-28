@@ -49,7 +49,7 @@ lemma hull_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} {s : Set M} (h
 -- ## Restrict / Embed
 
 lemma restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
-    (restrict S F).IsFaceOf (restrict S C) := ⟨restrict_monotone S hF.1, hF.2⟩
+    (restrict S F).IsFaceOf (restrict S C) := ⟨restrict_mono S hF.1, hF.2⟩
 
 lemma embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
     (embed F).IsFaceOf (embed C) := hF.map _ (S.subtype_injective)

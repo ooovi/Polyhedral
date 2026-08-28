@@ -148,9 +148,14 @@ lemma dual_le_iff_dual_le {S : Submodule R M} {T : Submodule R N} :
     S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
 
 variable (p) in
+lemma dual_dual_mono {s t : Set M} (hST : s ⊆ t) :
+    dual p.flip (dual p s) ≤ dual p.flip (dual p t) :=
+  dual_antitone <| dual_antitone hST
+
+variable (p) in
 /-- Taking the double dual is monotone. -/
 lemma dual_dual_monotone : Monotone fun s : Set M => dual p.flip (dual p s) :=
-  fun _ _ hST => dual_antitone <| dual_antitone hST
+  fun _ _ => dual_dual_mono p
 
 variable (s) in
 @[simp] lemma dual_dual_flip_dual : dual p (dual p.flip (dual p s)) = dual p s :=

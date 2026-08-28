@@ -63,9 +63,13 @@ theorem corank_le (p : Submodule R M) :
     p.corank ≤ Module.rank R M := by
   simpa [corank] using rank_quotient_le p
 
-theorem corank_antitone :
-    Antitone (corank : Submodule R M → Cardinal) := fun _ _ h => by
+theorem corank_anti {p q : Submodule R M} (h : p ≤ q) :
+    q.corank ≤ p.corank := by
   simpa [corank] using (factor h).rank_le_of_surjective (factor_surjective h)
+
+theorem corank_antitone :
+    Antitone (corank : Submodule R M → Cardinal) :=
+  fun _ _ => corank_anti
 
 @[simp]
 theorem corank_bot : (⊥ : Submodule R M).corank = Module.rank R M := by

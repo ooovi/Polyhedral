@@ -35,8 +35,11 @@ variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
 def homogenize (P : ConvexSet R A) : PointedCone R W := hull R (hom.ofPoint '' P)
 
+lemma homogenize_mono {K₁ K₂ : ConvexSet R A} (h : K₁ ≤ K₂) :
+    K₁.homogenize W ≤ K₂.homogenize W := Submodule.span_mono <| Set.image_mono h
+
 lemma homogenize_monotone : Monotone (homogenize W : ConvexSet R A → PointedCone R W) :=
-  fun _ _ h => Submodule.span_mono <| Set.image_mono h
+  fun _ _ => homogenize_mono
 
 /-- Homogenization from convex set to convex cones as an order homomorphism. -/
 def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
@@ -87,8 +90,8 @@ theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG
     refine hsum ▸ mem_hull_set.mpr ⟨Classical.choose (gsum hx), ?_, hnn, rfl⟩
     simpa using Finset.subset_biUnion_of_mem
       (fun p ↦ (Classical.choose (gsum p.2)).support) (Finset.mem_attach g ⟨x, hx⟩)
-  refine ⟨le_antisymm (hull_monotone g'sub) ?_, g'sub.trans (by simp)⟩
-  simpa [hg] using hull_monotone (R := R) gsubhull
+  refine ⟨le_antisymm (hull_mono g'sub) ?_, g'sub.trans (by simp)⟩
+  simpa [hg] using hull_mono (R := R) gsubhull
 
 section Module
 
@@ -109,9 +112,13 @@ lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := sorry
 lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ := sorry
 
 variable (A) in
+lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :
+    dehomogenize A C₁ ≤ dehomogenize A C₂ := Set.preimage_mono <| Set.preimage_mono h
+    -- Q: why Set.preimage_mono twice?
+
+variable (A) in
 lemma dehomogenize_monotone : Monotone (dehomogenize A : PointedCone R W → ConvexSet R A) :=
-  fun _ _ h => Set.preimage_mono <| Set.preimage_mono h
-  -- Q: why Set.preimage_mono twice?
+  fun _ _ => dehomogenize_mono A
 
 -- This lemma is just `Set.image_preimage_eq_inter_range` in disguise. It is likely not needed.
 lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
@@ -200,8 +207,8 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
     K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where
-  mp h := by simpa using dehomogenize_monotone A h
-  mpr h := homogenize_monotone h
+  mp h := by simpa using dehomogenize_mono A h
+  mpr := homogenize_mono
 
 -- Issue #66
 /-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the

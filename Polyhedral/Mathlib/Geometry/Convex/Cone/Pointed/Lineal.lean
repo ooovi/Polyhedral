@@ -57,14 +57,17 @@ incorrectly named mathlib lemma. -/
 
 @[simp] lemma lineal_bot : (⊥ : PointedCone R M).lineal = ⊥ := submodule_lineal ⊥
 
-lemma lineal_monotone : Monotone fun C : PointedCone R M => C.lineal := by
-  intro C D h x hx
+lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal := by
+  intro x hx
   rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
 
+lemma lineal_monotone : Monotone fun C : PointedCone R M => C.lineal :=
+  fun _ _ => lineal_mono
+
 lemma lineal_le_ker_of_le_nonneg {f : M →ₗ[R] R}
     (h : C ≤ f.nonneg) : C.lineal ≤ f.ker := by
-  simpa using lineal_monotone h
+  simpa using lineal_mono h
 
 /- In this section we prove properties of lineal that also follow from lineal
 being a face. But we need this earlier than faces, so we need to prove that
@@ -595,7 +598,7 @@ lemma Salient.hull_sdiff_hull_lineal {s : Set M} :
   -- `x` and `-x` both lie in `hull R s`, hence `x` is lineal there.
   have hxlin : x ∈ (hull R s).lineal := by
     rw [mem_lineal]
-    exact ⟨hull_monotone Set.sdiff_subset hx, hull_monotone Set.sdiff_subset hnx⟩
+    exact ⟨hull_mono Set.sdiff_subset hx, hull_mono Set.sdiff_subset hnx⟩
   -- Write `x` as a nonnegative conic combination of generators outside
   -- the lineality space.
   obtain ⟨c, hc, hc₀, hcx⟩ := mem_hull_set.mp hx

@@ -134,7 +134,7 @@ theorem DualClosed.eq_sInf {S : Submodule R M} (hS : S.DualClosed p) :
   simp only [SetLike.le_def, mem_sInf, mem_ofPred_eq, and_imp]
   intro x hx T hT hsT
   rw [← hT]; rw [← hS] at hx
-  exact (dual_dual_monotone p hsT) hx
+  exact (dual_dual_mono p hsT) hx
 
 /-
 The following statement are not true in general: if S and T are dual closed, then
