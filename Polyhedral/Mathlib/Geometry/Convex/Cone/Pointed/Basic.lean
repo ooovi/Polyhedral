@@ -84,6 +84,9 @@ lemma hull_eq {S : PointedCone R M} : hull R S = S := Submodule.span_eq S
 
 lemma hull_mono {s t : Set M} (h : s ⊆ t) : hull R s ≤ hull R t := Submodule.span_mono h
 
+lemma hull_monotone : Monotone (hull R : Set M → PointedCone R M) :=
+  fun _ _ => hull_mono
+
 def hull_gi : GaloisInsertion (hull R : Set M → PointedCone R M) (↑) where
   choice s _ := hull R s
   gc _ _ := Submodule.span_le

@@ -51,8 +51,11 @@ lemma embed_injective {S : Submodule R M} : Injective (embed : PointedCone R S �
 @[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : PointedCone R S} :
     embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
 
-lemma embed_mono {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hT : C₁ ≤ C₂) :
-    embed C₁ ≤ embed C₂ := Submodule.map_mono hT
+lemma embed_mono {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hC : C₁ ≤ C₂) :
+    embed C₁ ≤ embed C₂ := Submodule.map_mono hC
+
+lemma embed_monotone {S : Submodule R M} : Monotone (embed : PointedCone R S → PointedCone R M) :=
+  fun _ _ => embed_mono
 
 lemma embed_mono_rev {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hC : embed C₁ ≤ embed C₂) :
     C₁ ≤ C₂ := (by simpa using @hC ·)
@@ -117,6 +120,9 @@ lemma restrict_fg_iff_inf_fg (S : Submodule R M) (C : PointedCone R M) :
 lemma restrict_mono (S : Submodule R M) {C D : PointedCone R M} (hCD : C ≤ D) :
     C.restrict S ≤ D.restrict S :=
   fun _ => (hCD ·)
+
+lemma restrict_monotone (S : Submodule R M) : Monotone (restrict S) :=
+  fun _ _ => restrict_mono S
 
 lemma restrict_inf (S : Submodule R M) {C D : PointedCone R M} :
     (C ⊓ D).restrict S = C.restrict S ⊓ D.restrict S := by

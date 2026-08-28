@@ -62,6 +62,9 @@ lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal 
   rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
 
+lemma lineal_monotone : Monotone fun C : PointedCone R M => C.lineal :=
+  fun _ _ => lineal_mono
+
 lemma lineal_le_ker_of_le_nonneg {f : M →ₗ[R] R}
     (h : C ≤ f.nonneg) : C.lineal ≤ f.ker := by
   simpa using lineal_mono h

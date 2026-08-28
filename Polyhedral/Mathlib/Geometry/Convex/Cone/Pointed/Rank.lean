@@ -61,6 +61,9 @@ lemma zero_le_rank (C : PointedCone R M) : 0 ≤ C.rank := bot_le
 lemma rank_mono {C F : PointedCone R M} (hF : F ≤ C) : F.rank ≤ C.rank :=
   Submodule.rank_mono <| Submodule.span_mono <| IsConcreteLE.coe_subset_coe'.mpr hF
 
+lemma rank_monotone : Monotone (rank : PointedCone R M → Cardinal) :=
+  fun _ _ => rank_mono
+
 end Semiring
 
 section Ring

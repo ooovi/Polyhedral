@@ -124,7 +124,7 @@ lemma fiberFace_le_fiberFace_iff {G₁ G₂ : Face (C ⧸ F)} :
     rcases (mem_fiberFace G₁ x).mp hx with ⟨hxC, hxG⟩
     exact (mem_fiberFace G₂ x).mpr ⟨hxC, h hxG⟩
 
-lemma fiberFace_mono : Monotone (fiberFace : Face (C ⧸ F) → Face C) :=
+lemma fiberFace_monotone : Monotone (fiberFace : Face (C ⧸ F) → Face C) :=
   fun _ _ h => fiberFace_le_fiberFace_iff.mpr h
 
 end Ring
