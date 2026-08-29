@@ -75,6 +75,12 @@ protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
   sorry
 
 /- Minkowski addition preserves convexity. -/
+protected lemma IsConvexSet.vsub {K₁ K₂ : Set A}
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ -ᵥ K₂) := by
+  -- TODO: use `AddTorsor.sConvexComb_eq_affineCombination`
+  sorry
+
+/- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.sub {K₁ : Set V} {K₂ : Set V}
     (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ - K₂) :=
   -- TODO: use `IsConvexSet.vadd` and `IsConvexSet.neg`

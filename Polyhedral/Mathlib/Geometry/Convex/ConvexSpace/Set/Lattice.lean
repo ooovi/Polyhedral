@@ -251,6 +251,9 @@ instance : VAdd (ConvexSet R X) (ConvexSet R Y) where
 
 instance : IsConcreteVAdd (ConvexSet R X) X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
 
+instance : VSub (ConvexSet R X) (ConvexSet R Y) where
+  vsub K₁ K₂ := ⟨_, K₁.isConvexSet.vsub K₂.isConvexSet⟩
+
 end AddTorsor
 
 end Ring
