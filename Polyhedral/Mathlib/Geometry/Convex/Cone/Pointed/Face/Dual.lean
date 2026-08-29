@@ -164,7 +164,6 @@ lemma Face.dual_isExposed_of_nonempty_relint {F : Face C}
       (Submodule.neg_mem _ (Submodule.subset_span hz))
   have hpy := hyC (F.isFaceOf.le hxc)
   simp at hpy
-  rw [gt_iff_lt, ← Nat.cast_pos (α := R)] at hc
   nlinarith [hyC (F.isFaceOf.le hz), show p x y = 0 from hxy]
 
 end Field

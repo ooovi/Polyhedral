@@ -61,13 +61,13 @@ variable {C D : PointedCone R M} {x : M}
 
 /-- Algebraic relative interior, also known as core. -/
 def relint (C : PointedCone R M) : ConvexCone R M where
-  carrier := {x ∈ C | ∀ t ∈ span R C, ∃ c > 0, x + c • t ∈ C}
+  carrier := {x ∈ C | ∀ t ∈ span R C, ∃ c > (0 : R), x + c • t ∈ C}
   smul_mem' c hc x hx := by
     refine ⟨C.smul_mem hc.le hx.1, fun t ht ↦ ?_⟩
     obtain ⟨d, hd, hxd⟩ := hx.2 (c⁻¹ • t) (Submodule.smul_mem _ _ ht)
     refine ⟨d, hd, ?_⟩
     have := C.smul_mem hc.le hxd
-    rwa [smul_add, smul_comm c d, smul_smul, mul_inv_cancel₀ hc.ne', one_smul] at this
+    rwa [smul_add, smul_comm c d, smul_inv_smul₀ hc.ne'] at this
   add_mem' x hx y hy := by
     refine ⟨C.add_mem hx.1 hy.1, fun t ht ↦ ?_⟩
     obtain ⟨c, hc, hxc⟩ := hx.2 t ht
@@ -78,7 +78,7 @@ def relint (C : PointedCone R M) : ConvexCone R M where
 lemma relint_le : C.relint ≤ C := fun _ hx => hx.1
 
 lemma mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem :
-    x ∈ C.relint ↔ x ∈ C ∧ ∀ t ∈ span R C, ∃ c > 0, x + c • t ∈ C := by
+    x ∈ C.relint ↔ x ∈ C ∧ ∀ t ∈ span R C, ∃ c > (0 : R), x + c • t ∈ C := by
   simp [relint]
 
 lemma mem_relint_iff_mem_hull_neg_eq_top :
