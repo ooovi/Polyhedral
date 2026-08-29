@@ -16,7 +16,7 @@ variable {R M M₁ M₂ N : Type*}
 
 variable (R) [Ring R] [PartialOrder R] [IsOrderedRing R] in
 variable (M) [AddCommMonoid M] [Module R M] in
-/-- A cone is polyhedral if it is the sum of a finitly generated cone and a submodule. -/
+/-- A cone is V-polyhedral if it is the sum of a finitly generated cone and a submodule. -/
 structure VPolyhedralCone extends toPointedCone : PointedCone R M where
   isVPolyhedral : IsVPolyhedral toPointedCone
 

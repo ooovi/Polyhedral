@@ -8,7 +8,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
-/-! This file defines polyhedral cones as cones that can be written as the sum of an FG cone
+/-! This file defines V-polyhedral cones as cones that can be written as the sum of an FG cone
 and a submodule. This agrees with FG cones in finite dimensional modules but has the additional
 advantage that it is closed under duality in infinite dimensions.
 
@@ -34,7 +34,7 @@ variable {R M N : Type*}
 
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R] in
 variable [AddCommMonoid M] [Module R M] in
-/-- We implement polyhedral cones as sums of FG cones with submodules. This agrees with FG cones
+/-- We implement V-polyhedral cones as sums of FG cones with submodules. This agrees with FG cones
 in finite dimensional modules and behaves well with respect to duality in infinite dimensions.
 
 If `R` is a linearly ordered ring, an equivalent defintion is `FG C.salientQuot`. -/
