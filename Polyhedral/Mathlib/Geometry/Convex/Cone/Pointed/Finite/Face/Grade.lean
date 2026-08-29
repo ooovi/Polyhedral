@@ -7,7 +7,7 @@ Authors: Olivia Röhrig, Martin Winter
 import Mathlib.Order.Grade
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
 
 /-! This file proves that the face lattice of an FG cone is graded.
 
