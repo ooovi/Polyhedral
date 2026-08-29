@@ -49,16 +49,15 @@ def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
 lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
 
-lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
-  rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight 1 one_ne_zero,
-    ← hom.ofPoint_range_eq_preimage_weight_one]
-  congr
-  ext x
-  simp
+/- NOTE: `homogenize_top`, stating `homogenize W (⊤ : ConvexSet R A) = hom.weight.positive`,
+only holds over linearly ordered fields and is proven in the `Field` section below. Over a
+general ordered ring it fails: for `R = ℤ[ε]` with `ε` a positive infinitesimal, the point
+`(1, ε)` lies in `weight.positive` but not in the cone hull of the weight-one hyperplane, since
+all nonnegative coefficients bounded by `ε` lie in the ideal `(ε)`. -/
 
 lemma homogenize_le_weight_positive (K : ConvexSet R A) :
     homogenize W K ≤ hom.weight.positive := by
-  exact LinearMap.hull_le_positive_of_subset_preimage_singleton one_ne_zero fun _ ↦ by
+  exact LinearMap.hull_le_positive_of_subset_preimage_singleton one_pos fun _ ↦ by
     rintro ⟨x, -, rfl⟩
     simp [hom.weight_one]
 
@@ -153,6 +152,15 @@ attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 variable [hom : Affine.IsHomogenization R A W]
+
+omit [IsModuleConvexSpace R W] in
+/-- The homogenization of the full affine space is the positive cone of the weight functional. -/
+lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
+  rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight one_pos,
+    ← hom.ofPoint_range_eq_preimage_weight_one]
+  congr
+  ext x
+  simp
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=

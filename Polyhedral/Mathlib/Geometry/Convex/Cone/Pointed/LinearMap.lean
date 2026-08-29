@@ -102,17 +102,39 @@ lemma positive_inf_ker {f : M →ₗ[R] R} : f.positive ⊓ f.ker = ⊥ := by
 
 @[simp] lemma positive_zero : positive (0 : M →ₗ[R] R) = ⊥ := by ext x; simp
 
-lemma positive_eq_hull_preimage_singleton (f : M →ₗ[R] R) (c : R) (hc : c ≠ 0) :
-    f.positive = PointedCone.hull R (f ⁻¹' {c}) := by
-  sorry
-
+/-- The cone hull of a subset of a positive level set of `f` is contained in the positive cone
+of `f`. The assumption `0 < c` cannot be weakened to `c ≠ 0`: for `c < 0` the hull lies in the
+nonpositive cone of `f`. See `positive_eq_hull_preimage_singleton` for an equality version over
+linearly ordered fields. -/
 lemma hull_le_positive_of_subset_preimage_singleton {f : M →ₗ[R] R} {s : Set M} {c : R}
-    (hc : c ≠ 0) (hs : s ⊆ f ⁻¹' {c}) :
-    PointedCone.hull R s ≤ f.positive := by
-  rw [positive_eq_hull_preimage_singleton f c hc]
-  exact Submodule.span_mono hs
+    (hc : 0 < c) (hs : s ⊆ f ⁻¹' {c}) :
+    PointedCone.hull R s ≤ f.positive :=
+  Submodule.span_le.mpr fun x hx => mem_positive.mpr fun _ => (hs hx : f x = c) ▸ hc
 
 end IsStrictOrderedRing
+
+section Field
+
+variable {R : Type*} [Field R] [LinearOrder R] [IsOrderedRing R]
+variable {M : Type*} [AddCommGroup M] [Module R M]
+
+/-- Over a linearly ordered field, the positive cone of a linear form `f` is the cone hull of
+any of its positive level sets. This can fail in the absence of scalar inverses: over `ℕ` with
+`f = id` and `c = 2` the cone hull of the level set is `2 • ℕ`, while the positive cone is all
+of `ℕ`. -/
+lemma positive_eq_hull_preimage_singleton (f : M →ₗ[R] R) {c : R} (hc : 0 < c) :
+    f.positive = PointedCone.hull R (f ⁻¹' {c}) := by
+  refine le_antisymm (fun x hx => ?_) (hull_le_positive_of_subset_preimage_singleton hc subset_rfl)
+  by_cases hx0 : x = 0
+  · simp [hx0]
+  have hfx : 0 < f x := hx hx0
+  have hy : (c / f x) • x ∈ f ⁻¹' {c} := by
+    simp [div_mul_cancel₀ c hfx.ne']
+  have hmem := (PointedCone.hull R (f ⁻¹' {c})).smul_mem
+    (div_nonneg hfx.le hc.le) (Submodule.subset_span hy)
+  rwa [smul_smul, div_mul_div_comm, mul_comm c (f x), div_self (by positivity), one_smul] at hmem
+
+end Field
 
 section Ring
 
