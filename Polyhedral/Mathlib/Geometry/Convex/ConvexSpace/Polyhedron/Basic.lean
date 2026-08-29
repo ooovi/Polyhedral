@@ -24,16 +24,16 @@ variable {s : Set V} {t : Set A}
 
 variable (R) in
 def IsPolyhedron (P : Set A) : Prop :=
-  ∃ C : PointedCone R V, C.IsPolyhedral
+  ∃ C : PointedCone R V, C.IsVPolyhedral
     ∧ ∃ Q : Set A, IsPolytope R Q
     ∧ P = (C : Set V) +ᵥ Q
 
 variable {P P₁ P₂ : Set A}
 
 lemma IsPolytope.isPolyhedron (hP : IsPolytope R P) : IsPolyhedron R P :=
-  ⟨⊥, PointedCone.IsPolyhedral.bot, P, hP, by simp⟩
+  ⟨⊥, PointedCone.IsVPolyhedral.bot, P, hP, by simp⟩
 
-lemma IsPolyhedral.isPolyhedron (C : PointedCone R V) (hC : C.IsPolyhedral) :
+lemma IsVPolyhedral.isPolyhedron (C : PointedCone R V) (hC : C.IsVPolyhedral) :
     IsPolyhedron R (C : Set V) :=
   ⟨C, hC, {0}, by simp⟩
 
