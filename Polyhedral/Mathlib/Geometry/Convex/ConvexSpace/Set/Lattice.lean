@@ -223,6 +223,8 @@ instance : SubtractionCommMonoid (ConvexSet R X) := .ofSetLike ..
 
 /-! ### Scalar multiplication -/
 
+variable [SMulCommClass R R X]
+
 instance : SMul R (ConvexSet R X) where
   smul r K := ⟨_, K.isConvexSet.smul r⟩
 

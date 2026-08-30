@@ -46,7 +46,26 @@ variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 lemma convexHull_vadd (s₁ : Set V) (s₂ : Set A) :
     convexHull R (s₁ +ᵥ s₂) = convexHull R s₁ +ᵥ convexHull R s₂ := by
-  sorry
+  refine Set.Subset.antisymm
+    (convexHull_min (Set.vadd_subset_vadd subset_convexHull_self subset_convexHull_self)
+      (IsConvexSet.convexHull.vadd IsConvexSet.convexHull)) ?_
+  rintro x ⟨v, hv, a, ha, rfl⟩
+  have step : ∀ b ∈ s₂, v +ᵥ b ∈ convexHull R (s₁ +ᵥ s₂) := by
+    intro b hb
+    have himg : (· +ᵥ b) '' convexHull R s₁ = convexHull R ((· +ᵥ b) '' s₁) :=
+      (AffineEquiv.vaddConst R b).toAffineMap.isAffineMap.image_convexHull s₁
+    have hmem : v +ᵥ b ∈ (· +ᵥ b) '' convexHull R s₁ := Set.mem_image_of_mem _ hv
+    rw [himg] at hmem
+    refine convexHull_min ?_ IsConvexSet.convexHull hmem
+    rintro y ⟨w, hw, rfl⟩
+    exact subset_convexHull_self (Set.vadd_mem_vadd hw hb)
+  have himg : (v +ᵥ ·) '' convexHull R s₂ = convexHull R ((v +ᵥ ·) '' s₂) :=
+    (AffineEquiv.constVAdd R A v).toAffineMap.isAffineMap.image_convexHull s₂
+  have hmem : v +ᵥ a ∈ (v +ᵥ ·) '' convexHull R s₂ := Set.mem_image_of_mem _ ha
+  rw [himg] at hmem
+  refine convexHull_min ?_ IsConvexSet.convexHull hmem
+  rintro y ⟨b, hb, rfl⟩
+  exact step b hb
 
 end Pointwise
 
