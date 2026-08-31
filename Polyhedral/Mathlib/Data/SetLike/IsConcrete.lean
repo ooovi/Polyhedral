@@ -142,7 +142,7 @@ include setLike in
 @[simp]
 lemma bot_eq_empty : (⊥ : A) = ∅ := by
   rw [← SetLike.coe_set_eq, SetLike.coe_bot, SetLike.coe_empty]
-  rfl
+  exact Set.bot_eq_empty
 
 end Bot
 
