@@ -7,7 +7,7 @@ Authors: Olivia Röhrig, Martin Winter
 import Mathlib.Order.Grade
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
 
 /-! This file proves that the face lattice of an FG cone is graded.
 
@@ -105,7 +105,7 @@ available for transporting face lattices along quotients. Currently there is a p
 `C ⧸ ⊥`, and translating between them needs work. -/
 /-- The face lattice of a polyhedral cone is graded by the dimensions of the corresponding faces
 of its salient quotient. -/
-noncomputable instance _root_.PolyhedralCone.gradeOrder_finrank {C : PolyhedralCone R M} :
+noncomputable instance _root_.VPolyhedralCone.gradeOrder_finrank {C : VPolyhedralCone R M} :
     GradeOrder ℕ (Face (C : PointedCone R M)) := by
   let e := Face.salientQuot_orderIso (C : PointedCone R M)
   have hspan : (⊥ : Face (C : PointedCone R M)).span =
@@ -116,7 +116,7 @@ noncomputable instance _root_.PolyhedralCone.gradeOrder_finrank {C : PolyhedralC
   have hfg : (Face.quot (C := (C : PointedCone R M)) ⊥).FG := by
     change (PointedCone.quot (C : PointedCone R M) (⊥ : Face (C : PointedCone R M)).span).FG
     rw [hspan]
-    exact C.isPolyhedral.salientQuot_fg
+    exact C.isVPolyhedral.salientQuot_fg
   letI := PointedCone.FG.gradeOrder_finrank hfg
   exact GradeOrder.liftRight e.symm e.symm.strictMono fun _ _ ↦
     (apply_covBy_apply_iff e.symm).mpr

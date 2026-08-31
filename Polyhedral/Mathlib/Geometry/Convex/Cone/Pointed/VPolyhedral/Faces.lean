@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Polyhedral.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 /-! This file proves basic facts about faces of polyhedral cones. -/
@@ -42,15 +42,15 @@ variable [AddCommGroup M] [Module R M]
 variable {C F : PointedCone R M}
 
 /-- Faces of FG cones are FG. -/
-lemma IsFaceOf.isPolyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) : F.IsPolyhedral := by
+lemma IsFaceOf.isVPolyhedral (hC : C.IsVPolyhedral) (hF : F.IsFaceOf C) : F.IsVPolyhedral := by
   sorry
 
-@[coe] def Face.toPolyhedralCone {C : PolyhedralCone R M} (F : Face (C : PointedCone R M)) :
-    PolyhedralCone R M :=
-  ⟨F.toPointedCone, F.isFaceOf.isPolyhedral C.isPolyhedral⟩
+@[coe] def Face.toVPolyhedralCone {C : VPolyhedralCone R M} (F : Face (C : PointedCone R M)) :
+    VPolyhedralCone R M :=
+  ⟨F.toPointedCone, F.isFaceOf.isVPolyhedral C.isVPolyhedral⟩
 
-instance {C : PolyhedralCone R M} :
-  CoeOut (Face (C : PointedCone R M)) (PolyhedralCone R M) := ⟨Face.toPolyhedralCone⟩
+instance {C : VPolyhedralCone R M} :
+  CoeOut (Face (C : PointedCone R M)) (VPolyhedralCone R M) := ⟨Face.toVPolyhedralCone⟩
 
 end Ring
 
@@ -63,19 +63,19 @@ variable {C F : PointedCone R M}
 
 /-- The face lattice of a polyhedral cone is isomorphic to the face lattice of an FG cone
 in the same module. -/
-lemma IsPolyhedral.exists_fg_face_orderIso (hC : C.IsPolyhedral) :
+lemma IsVPolyhedral.exists_fg_face_orderIso (hC : C.IsVPolyhedral) :
     ∃ D : PointedCone R M, D.FG ∧ Nonempty (Face C ≃o Face D) := by
   let ⟨S, hS⟩ := exists_isCompl C.lineal
   exact ⟨C ⊓ S, hC.fg_inf_of_isCompl hS, ⟨(Face.inf_isCompl_lineal_orderIso hS).symm⟩⟩
 
 /-- A polyhedral cone has finitely many faces -/
-lemma IsPolyhedral.finite_face (hC : C.IsPolyhedral) : Finite (Face C) := by
+lemma IsVPolyhedral.finite_face (hC : C.IsVPolyhedral) : Finite (Face C) := by
   let ⟨D, hfg, ⟨e⟩⟩ := hC.exists_fg_face_orderIso
   rw [Equiv.finite_iff e.toEquiv]
   exact FG.finite_face hfg
 
-instance {C : PolyhedralCone R M} : Finite (Face (C : PointedCone R M)) :=
-  C.isPolyhedral.finite_face
+instance {C : VPolyhedralCone R M} : Finite (Face (C : PointedCone R M)) :=
+  C.isVPolyhedral.finite_face
 
 end Field
 
@@ -90,15 +90,15 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 -- # DUAL
 
-lemma IsFaceOf.dualClosed_of_dualClosed_of_isPolyhedral (hC : C.IsPolyhedral)
+lemma IsFaceOf.dualClosed_of_dualClosed_of_isVPolyhedral (hC : C.IsVPolyhedral)
     (hdc : C.DualClosed p) (hF : F.IsFaceOf C) : F.DualClosed p := by
   rw [hC.dualClosed_iff_lineal] at hdc
-  rw [(hF.isPolyhedral hC).dualClosed_iff_lineal]
+  rw [(hF.isVPolyhedral hC).dualClosed_iff_lineal]
   rw [PointedCone.IsFaceOf.lineal_congr hF]
   exact hdc
 
 /-- Face duality on a dual closed polyhedral cone is involutive. -/
-lemma IsPolyhedral.face_dual_dual_flip_of_dualClosed (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+lemma IsVPolyhedral.face_dual_dual_flip_of_dualClosed (hC : C.IsVPolyhedral) (hdc : C.DualClosed p)
     (F : Face C) : (F.dual p).dual_flip p = F := by
   have hFfsr := F.isFaceOf.finSalRank hC.finSalRank
   have hFdc := F.isFaceOf.dualClosed_of_finSalRank p hdc hC.finSalRank
@@ -128,12 +128,12 @@ lemma IsPolyhedral.face_dual_dual_flip_of_dualClosed (hC : C.IsPolyhedral) (hdc 
 
 variable (p) [Fact (Surjective p.flip)] in
 /-- Face duality is on a polyhedral cone is involutive. -/
-lemma IsPolyhedral.face_dual_dual_flip (hC : C.IsPolyhedral) (F : Face C) :
+lemma IsVPolyhedral.face_dual_dual_flip (hC : C.IsVPolyhedral) (F : Face C) :
     (F.dual p).dual_flip p = F :=
   hC.face_dual_dual_flip_of_dualClosed (hC.dualClosed p) F
 
 /-- Face duality on a dual closed polyhedral cone is involutive. -/
-lemma IsPolyhedral.face_dual_flip_dual_of_dualClosed (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+lemma IsVPolyhedral.face_dual_flip_dual_of_dualClosed (hC : C.IsVPolyhedral) (hdc : C.DualClosed p)
     (F : Face (.dual p C)) : (F.dual_flip p).dual p = F := by
   have h := (hC.dual p).face_dual_dual_flip_of_dualClosed (dual_dualClosed p C) F
   have hflip : (F.dual_flip p : Set M) = (F.dual p.flip : Set M) :=
@@ -144,7 +144,7 @@ lemma IsPolyhedral.face_dual_flip_dual_of_dualClosed (hC : C.IsPolyhedral) (hdc 
   simpa only [LinearMap.flip_flip] using h
 
 /-- Face duality is antitone. -/
-lemma IsPolyhedral.face_dual_antitone_iff (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+lemma IsVPolyhedral.face_dual_antitone_iff (hC : C.IsVPolyhedral) (hdc : C.DualClosed p)
     {F₁ F₂ : Face C} : F₁.dual p ≤ F₂.dual p ↔ F₂ ≤ F₁ where
   mpr h := Face.dual_antitone p h
   mp h := by
@@ -153,7 +153,7 @@ lemma IsPolyhedral.face_dual_antitone_iff (hC : C.IsPolyhedral) (hdc : C.DualClo
     exact Face.dual_flip_antitone p h
 
 /-- Face duality is antitone. -/
-lemma IsPolyhedral.face_dual_flip_antitone_iff (hC : C.IsPolyhedral) (hdc : C.DualClosed p)
+lemma IsVPolyhedral.face_dual_flip_antitone_iff (hC : C.IsVPolyhedral) (hdc : C.DualClosed p)
     {F₁ F₂ : Face (.dual p C)} : F₁.dual_flip p ≤ F₂.dual_flip p ↔ F₂ ≤ F₁ where
   mp h := by
     rw [← hC.face_dual_flip_dual_of_dualClosed hdc F₂]
@@ -163,7 +163,7 @@ lemma IsPolyhedral.face_dual_flip_antitone_iff (hC : C.IsPolyhedral) (hdc : C.Du
 
 /-- For a polyhedral cone, the face lattice of the dual cone is anti-isomorphic to the face
 lattice of the primal cone. -/
-def IsPolyhedral.dual_face_orderIso_of_dualClosed (hC : C.IsPolyhedral) (hdc : C.DualClosed p) :
+def IsVPolyhedral.dual_face_orderIso_of_dualClosed (hC : C.IsVPolyhedral) (hdc : C.DualClosed p) :
     Face (.dual p C) ≃o (Face C)ᵒᵈ where
   toFun := toDual ∘ .dual_flip p
   invFun := .dual p ∘ ofDual
@@ -174,24 +174,24 @@ def IsPolyhedral.dual_face_orderIso_of_dualClosed (hC : C.IsPolyhedral) (hdc : C
 variable (p) [Fact (Surjective p.flip)] in
 /-- For a polyhedral cone, the face lattice of the dual cone is anti-isomorphic to the face
 lattice of the primal cone. -/
-def IsPolyhedral.dual_face_orderIso (hC : C.IsPolyhedral) :
+def IsVPolyhedral.dual_face_orderIso (hC : C.IsVPolyhedral) :
     Face (.dual p C) ≃o (Face C)ᵒᵈ :=
   hC.dual_face_orderIso_of_dualClosed (hC.dualClosed p)
 
 variable (p) in
 /-- The dual of a face of an FG cone is an exposed face. -/
-lemma Face.dual_isExposed_of_isPolyhedral (hC : C.IsPolyhedral) (F : Face C) :
+lemma Face.dual_isExposed_of_isVPolyhedral (hC : C.IsVPolyhedral) (F : Face C) :
     (F.dual p).IsExposed :=
   F.dual_isExposed_of_nonempty_relint p <|
-    relint_nonempty_of_finSalRank (F.isFaceOf.isPolyhedral hC).finSalRank
+    relint_nonempty_of_finSalRank (F.isFaceOf.isVPolyhedral hC).finSalRank
 
 /-- Every face of a polyhedral cone is exposed. -/
-lemma Face.isExposed_of_polyhedral (hC : C.IsPolyhedral) (F : Face C) :
+lemma Face.isExposed_of_polyhedral (hC : C.IsVPolyhedral) (F : Face C) :
     F.IsExposed := by
   have h := hC.dualClosed (Dual.eval R M)
   rw [← hC.face_dual_dual_flip_of_dualClosed h F]
   rw [IsExposed, dual_flip_eq_dual_flip _ h]
-  have hdual := Face.dual_isExposed_of_isPolyhedral (Dual.eval R M).flip
+  have hdual := Face.dual_isExposed_of_isVPolyhedral (Dual.eval R M).flip
     (hC.dual (Dual.eval R M)) (F.dual (Dual.eval R M))
   unfold Face.IsExposed IsExposedFaceOf at *
   simpa only [h] using hdual
@@ -199,13 +199,13 @@ lemma Face.isExposed_of_polyhedral (hC : C.IsPolyhedral) (F : Face C) :
 /- NOTE: this proof currently relies on the unproven `DualClosed.face_dual_dual_flip_iff_isExposed`,
 but could also be proven using `Face.isExposed_of_polyhedral` if necessary. -/
 /-- Every face of a polyhedral cone is exposed. -/
-lemma IsFaceOf.isExposed_of_polyhedral (hC : C.IsPolyhedral) (hF : F.IsFaceOf C) :
+lemma IsFaceOf.isExposed_of_polyhedral (hC : C.IsVPolyhedral) (hF : F.IsFaceOf C) :
     F.IsExposedFaceOf C := by
   let F' : Face C := ⟨F, hF⟩
   change F'.IsExposed
   rw [← Face.dual_dual_flip_iff_isExposed_of_dualClosed_of_finSalRank (Dual.eval R M)
     (hC.dualClosed _) hC.finSalRank]
-  exact IsPolyhedral.face_dual_dual_flip_of_dualClosed hC (hC.dualClosed _) _
+  exact IsVPolyhedral.face_dual_dual_flip_of_dualClosed hC (hC.dualClosed _) _
 
 end Field
 
