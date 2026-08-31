@@ -46,10 +46,7 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
-variable [AddTorsor V A]
-
-local instance : ConvexSpace R A := AddTorsor.toConvexSpace
--- TODO: add class expressing compatibility between the convex structures on A and V
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 /- The Minkowski sum of two polytopes is a polytope. -/
 protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :

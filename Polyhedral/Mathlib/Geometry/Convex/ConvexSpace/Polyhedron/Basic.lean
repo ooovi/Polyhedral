@@ -16,9 +16,7 @@ open ConvexSpace Pointwise
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
-variable {A : Type*} [AddTorsor V A]
-
-noncomputable local instance : ConvexSpace R A := AddTorsor.toConvexSpace
+variable {A : Type*} [AddTorsor V A] [ConvexSpace R A]
 
 variable {s : Set V} {t : Set A}
 
@@ -33,7 +31,8 @@ variable {P P₁ P₂ : Set A}
 lemma IsPolytope.isPolyhedron (hP : IsPolytope R P) : IsPolyhedron R P :=
   ⟨⊥, PointedCone.IsVPolyhedral.bot, P, hP, by simp⟩
 
-lemma IsVPolyhedral.isPolyhedron (C : PointedCone R V) (hC : C.IsVPolyhedral) :
+lemma IsVPolyhedral.isPolyhedron [ConvexSpace R V] (C : PointedCone R V)
+    (hC : C.IsVPolyhedral) :
     IsPolyhedron R (C : Set V) :=
   ⟨C, hC, {0}, by simp⟩
 
@@ -58,7 +57,7 @@ protected lemma univ : IsPolyhedron R (⊤ : Set A) := by
 
 section Pointwise
 
-variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [ConvexSpace R V] [IsModuleConvexSpace R V] [IsAffineConvexSpace R V A]
 
 open Pointwise
 
@@ -72,12 +71,7 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolyhedron R P₁)
   · sorry -- TODO: missing lemma for polyhedral cones
   use Q₁ +ᵥ Q₂
   constructor
-  · apply IsPolytope.vadd
-    · sorry -- exact hQ₁ -- ERROR
-    /- TODO: error with convex space diamond. The convex space structure on a module must be the
-      the same as the one inferred via `AddTorsor.toConvexSpace` (if the module is considered as
-      an affine space). Though I don't understand why this comes up here. -/
-    · exact hQ₂
+  · exact hQ₁.vadd hQ₂
   congr
   -- TODO: prove this once we have `coe_add` for cones.
   sorry
@@ -89,7 +83,7 @@ end Pointwise
 
 section IsModuleConvexSpace
 
-variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [ConvexSpace R V] [IsModuleConvexSpace R V] [IsAffineConvexSpace R V A]
 
 lemma isConvexSet (hP : IsPolyhedron R P) : IsConvexSet R P := by
   obtain ⟨C, hC, K, hK, rfl⟩ := hP

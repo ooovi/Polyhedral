@@ -7,7 +7,7 @@ Authors: Martin Winter
 import Mathlib.Data.SetLike.Basic
 import Mathlib.Data.Set.Basic
 import Mathlib.Data.Set.Insert
-import Mathlib.Data.Set.Lattice
+import Mathlib.Data.Set.Lattice.Image
 import Mathlib.Order.SetNotation
 import Mathlib.Order.CompleteLattice.Defs
 
@@ -179,7 +179,7 @@ theorem eq_top_of_forall {a : A} : (∀ x, x ∈ a) → a = ⊤ := eq_top_iff_fo
 variable (B) in
 theorem exists_mem_top_of_nonempty : ∀ [Nonempty B], ∃ x : B, x ∈ (⊤ : A) := by
   simp_rw [← mem_coe, coe_top]
-  exact Set.exists_mem_of_nonempty B
+  exact Set.exists_mem_univ_of_nonempty B
 
 theorem ne_top_iff_exists_notMem (a : A) : a ≠ ⊤ ↔ ∃ x, x ∉ a := by
   rw [← not_forall, ← eq_top_iff_forall]
@@ -229,7 +229,7 @@ theorem eq_univ_of_forall {a : A} : (∀ x, x ∈ a) → a = univ := eq_univ_iff
 variable (B) in
 theorem exists_mem_of_nonempty : ∀ [Nonempty B], ∃ x : B, x ∈ (univ : A) := by
   simp_rw [← mem_coe, coe_univ]
-  exact Set.exists_mem_of_nonempty B
+  exact Set.exists_mem_univ_of_nonempty B
 
 theorem ne_univ_iff_exists_notMem (a : A) : a ≠ univ ↔ ∃ x, x ∉ a := by
   rw [← not_forall, ← eq_univ_iff_forall]

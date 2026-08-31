@@ -5,7 +5,7 @@ Authors: Martin Winter
 -/
 
 import Mathlib.Data.Set.Finite.Basic
-import Mathlib.Data.Set.Lattice
+import Mathlib.Data.Set.Lattice.Image
 import Mathlib.Order.Hom.CompleteLattice
 import Mathlib.Order.Monotone.Defs
 

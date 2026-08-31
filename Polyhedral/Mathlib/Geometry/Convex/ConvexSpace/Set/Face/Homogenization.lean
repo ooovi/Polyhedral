@@ -20,10 +20,9 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup V] [Module R V]
-variable [AddCommGroup W] [Module R W]
-variable [AddTorsor V A]
+variable [AddCommGroup W] [Module R W] [ConvexSpace R W]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 variable [hom : Affine.IsHomogenization R A W]

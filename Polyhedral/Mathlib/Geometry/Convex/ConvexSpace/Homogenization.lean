@@ -18,11 +18,9 @@ section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
-variable {A : Type*} [AddTorsor V A]
-variable {W : Type*} [AddCommGroup W] [Module R W]
+variable {A : Type*} [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
+variable {W : Type*} [AddCommGroup W] [Module R W] [ConvexSpace R W]
 variable [hom : Affine.IsHomogenization R A W]
-
-attribute [local instance] AddTorsor.toConvexSpace
 
 section Module
 
