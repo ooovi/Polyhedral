@@ -235,9 +235,7 @@ instance : DistribMulAction R (ConvexSet R X) := .ofSetLike ..
 
 noncomputable section AddTorsor
 
-variable [AddTorsor X Y]
-
-local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+variable [AddTorsor X Y] [ConvexSpace R Y] [IsAffineConvexSpace R X Y]
 
 instance : VAdd X (ConvexSet R Y) where
   vadd v K := ⟨_, K.isConvexSet.translate v⟩
@@ -268,9 +266,7 @@ namespace ConvexSet
 variable {R A : Type*}
 variable [PartialOrder R] [Ring R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
-variable [AddTorsor V A]
-
-attribute [local instance] AddTorsor.toConvexSpace
+variable [AddTorsor V A] [ConvexSpace R A]
 
 variable {C : ConvexSet R A}
 

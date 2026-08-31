@@ -9,7 +9,6 @@ import Mathlib.Geometry.Convex.Set
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 /-! This file proves results about affine maps and convexity. -/
 
@@ -25,12 +24,9 @@ open Convexity
 
 namespace AffineMap
 
-attribute [local instance] AddTorsor.toConvexSpace
-
--- TODO: eventually replace local instance by:
--- variable [ConvexSpace R P] [IsAffineConvexSpace R V P]
--- variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
--- variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
+variable [ConvexSpace R P] [IsAffineConvexSpace R V P]
+variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
+variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
 
 variable (f : P₁ →ᵃ[R] P₂)
 
@@ -76,7 +72,7 @@ variable [ConvexSpace R V₂] [IsModuleConvexSpace R V₂]
 variable (f : V₁ →ₗ[R] V₂)
 
 -- TODO: This must hold. But currently the obvious proof fails due to some instance diamonds
-lemma isAffineMap (f : V₁ →ₗ[R] V₂) : IsAffineMap R f := sorry -- f.toAffineMap.isAffineMap
+lemma isAffineMap (f : V₁ →ₗ[R] V₂) : IsAffineMap R f := f.toAffineMap.isAffineMap
 
 @[simp] lemma map_sConvexComb (w : StdSimplex R V₁) :
     f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w

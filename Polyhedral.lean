@@ -42,9 +42,7 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Lattice
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
@@ -67,11 +65,9 @@ import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Canonical
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Set
 import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
 import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
-import Polyhedral.Mathlib.Logic.Function.Const
 import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 import Polyhedral.Mathlib.RingTheory.Finiteness.Corank

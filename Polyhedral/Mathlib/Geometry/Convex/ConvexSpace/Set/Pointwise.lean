@@ -45,10 +45,7 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
-variable [AddTorsor V A]
-
-local instance : ConvexSpace R A := AddTorsor.toConvexSpace
--- TODO: add class expressing compatibility between the convex structures on A and V
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 /- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set A}

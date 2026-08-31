@@ -111,7 +111,6 @@ variable [ConvexSpace R X]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V X]
 
-attribute [local instance] AddTorsor.toConvexSpace
 
 /- # Min -/
 
@@ -187,9 +186,7 @@ instance : DistribMulAction R (Polytope R X) := .ofSetLike ..
 
 noncomputable section VAdd
 
-variable [AddTorsor X Y]
-
-noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+variable [AddTorsor X Y] [ConvexSpace R Y] [IsAffineConvexSpace R X Y]
 
 instance : VAdd X (Polytope R Y) where
   vadd v P := ⟨_, P.isPolytope.translate v⟩
