@@ -3,15 +3,18 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
+public import Mathlib.Geometry.Convex.Cone.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 
 /-! This file defines exposed faces of cones, namely ones that are the intersection of the cone with
 a supporting hyperplane. This notion differs from the more general definition using positive
 combinations, as given by `PointedCone.IsFaceOf`. The two agree on finitely generated cones, which
 is proven elsewhere as `IsFaceOf.FG.exposed`. -/
+
+@[expose] public section
 
 open Module
 open Submodule

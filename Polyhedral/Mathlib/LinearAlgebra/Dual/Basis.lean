@@ -3,13 +3,17 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.Dual.Basis
-import Mathlib.LinearAlgebra.FreeModule.Basic
-import Mathlib.Algebra.Ring.SumsOfSquares
+public import Mathlib.LinearAlgebra.Dual.Basis
+public import Mathlib.LinearAlgebra.FreeModule.Basic
+public import Mathlib.Algebra.Ring.SumsOfSquares
+
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
 /-! This file proves results about dual modules. -/
+
+public section
 
 open Module Function
 

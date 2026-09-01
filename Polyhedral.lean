@@ -1,73 +1,75 @@
-import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
-import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
-import Polyhedral.Mathlib.Algebra.Module.LinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
-import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
-import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
-import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
-import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
-import Polyhedral.Mathlib.Data.Set.Lattice.Image
-import Polyhedral.Mathlib.Data.SetLike.IsConcrete
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.KreinMilman
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Faces
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Face
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Set
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
-import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
-import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
-import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
-import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
+module  -- shake: keep-all --deprecated_module: ignore
+
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+public import Polyhedral.Mathlib.Algebra.Module.LinearMap
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
+public import Polyhedral.Mathlib.Data.Set.Lattice.Image
+public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.KreinMilman
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Faces
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Face
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Set
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
+public import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
+public import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+public import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
+public import Polyhedral.Mathlib.RingTheory.Finiteness.Corank

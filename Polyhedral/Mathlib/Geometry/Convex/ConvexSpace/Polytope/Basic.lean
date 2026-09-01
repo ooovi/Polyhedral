@@ -3,14 +3,17 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-
 /-! This file introduces `IsPolytope` and proves basic properties about convex polytopes. -/
+
+@[expose] public section
 
 noncomputable section
 

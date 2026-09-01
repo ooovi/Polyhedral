@@ -3,13 +3,16 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines faces of convex sets.
 
 TODO: align this API with `IsFaceOf` for cones.
 -/
+
+@[expose] public section
 
 namespace Convexity
 

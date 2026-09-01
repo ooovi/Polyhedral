@@ -3,11 +3,12 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.GroupTheory.GroupAction.SubMulAction
+public import Mathlib.GroupTheory.GroupAction.SubMulAction
+public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
+
 import Mathlib.Algebra.GroupWithZero.Action.Defs
-
-import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 
 /-!
 
@@ -34,6 +35,8 @@ instances apply.
 
 submodule, multiplicative action, zero
 -/
+
+@[expose] public section
 
 @[expose] public section
 

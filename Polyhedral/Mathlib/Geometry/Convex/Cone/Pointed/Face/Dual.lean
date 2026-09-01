@@ -3,15 +3,18 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Exposed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Relint
 
 /-!
 This file defines the dual face of a face of `C` as a face of `dual p C`, and proves basic lemmas.
 -/
+
+@[expose] public section
 
 namespace PointedCone
 

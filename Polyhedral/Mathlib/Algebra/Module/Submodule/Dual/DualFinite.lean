@@ -3,15 +3,18 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
+public import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
+public import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 
 /-! This file introduces the notion `DualFG` for submodules. A submodule is `DualFG` if it
 is the dual of a finitely generated submodule. Over fields this is the same as being both
 `CoFG` and closed under double duality. -/
+
+@[expose] public section
 
 open Module Function LinearMap
 

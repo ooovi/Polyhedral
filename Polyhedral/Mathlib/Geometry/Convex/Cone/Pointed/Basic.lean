@@ -3,14 +3,17 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.Pointed
+public import Mathlib.Geometry.Convex.Cone.Pointed
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
+
 import Mathlib.RingTheory.LocalRing.Basic
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
-
 /-! This file proves basic facts about cones that are intended to go into Pointed/Basic. -/
+
+@[expose] public section
 
 namespace PointedCone
 

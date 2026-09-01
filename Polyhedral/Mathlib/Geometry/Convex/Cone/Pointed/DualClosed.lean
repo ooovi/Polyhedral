@@ -3,10 +3,11 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualClosed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Dual
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 /-! This file defines dual closed cones, that is, cones that are identical to their
 double dual.
@@ -14,6 +15,8 @@ double dual.
 Main definition:
 * `DualClosed p C` states that `dual p.flip (dual p C) = C`.
  -/
+
+public section
 
 namespace PointedCone
 

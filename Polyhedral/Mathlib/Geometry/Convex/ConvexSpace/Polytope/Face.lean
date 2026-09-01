@@ -3,14 +3,18 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
 
 /-! This file proves results about faces of polytopes by transporting results from FG
 cones along a homogenization. -/
+
+public section
 
 variable {R V A : Type*}
 

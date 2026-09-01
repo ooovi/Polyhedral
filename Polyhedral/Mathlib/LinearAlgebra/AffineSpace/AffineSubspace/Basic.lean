@@ -3,14 +3,16 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
-
-import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 
 /-!
 This file adds features for affine spaces.
 -/
+
+public section
 
 noncomputable section
 
