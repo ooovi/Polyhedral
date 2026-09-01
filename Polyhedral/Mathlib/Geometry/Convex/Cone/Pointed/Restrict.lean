@@ -3,11 +3,14 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 
 /-! This file defines restrictions of convex cones to submodules and proves basic lemmas. -/
+
+public section
 
 namespace PointedCone
 

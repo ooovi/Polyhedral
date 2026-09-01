@@ -3,6 +3,10 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Mathlib.Algebra.GroupWithZero.Action.Pointwise.Set
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 
 import Mathlib.Algebra.Opposites
 import Mathlib.Algebra.Notation.Pi.Defs
@@ -11,12 +15,11 @@ import Mathlib.Tactic.Monotonicity.Attr
 import Mathlib.Algebra.Group.Action.Pointwise.Set.Basic
 import Mathlib.Algebra.Group.Pointwise.Set.Scalar
 import Mathlib.Algebra.Module.Defs
-import Mathlib.Algebra.GroupWithZero.Action.Pointwise.Set
-
-import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 
 /-! This files defines the pointwise operations on `SetLike` that are inherited from `Set` and
   are introduced in Set/Scalar.lean -/
+
+@[expose] public section
 
 variable {ρ R α V : Type*}
 

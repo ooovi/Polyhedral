@@ -3,12 +3,13 @@ Copyright (c) 2026 Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yaël Dillies
 -/
+module
+
+public import Mathlib.Geometry.Convex.Hull
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Order.Closure
-import Mathlib.Geometry.Convex.Hull
-
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 /-!
 # IsConvexSet hull
@@ -16,6 +17,8 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 This file defines the convex hull of a set in a convex space. `convexHull R s` is the smallest
 convex set containing `s`. In order theory speak, this is a closure operator.
 -/
+
+public section
 
 public section
 

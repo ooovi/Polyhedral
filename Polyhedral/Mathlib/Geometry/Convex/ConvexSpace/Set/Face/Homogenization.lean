@@ -3,12 +3,15 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
+public import Mathlib.Geometry.Convex.Cone.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
 /-! This files proves results about faces of convex sets / cones and homogenization. -/
+
+@[expose] public section
 
 namespace Affine.IsHomogenization
 
@@ -107,7 +110,8 @@ of convex sets.
 def Face.homogenizeIso {P : ConvexSet R A} :
     Face P ≃o PointedCone.Face (P.homogenize W) where
   toFun F := ⟨_, hom.homogenize_isFaceOf F.isFaceOf⟩
-  invFun F := ⟨_, by simpa [dehomogenize_homogenize] using dehomogenize_isFaceOf A F.isFaceOf⟩
+  invFun F := ⟨dehomogenize A F.toSubmodule,
+    by simpa [dehomogenize_homogenize] using dehomogenize_isFaceOf A F.isFaceOf⟩
   map_rel_iff' := by
     intro a b
     refine ⟨fun h x xm ↦ ?_, fun h _ xm ↦ span_mono (image_mono h) xm⟩

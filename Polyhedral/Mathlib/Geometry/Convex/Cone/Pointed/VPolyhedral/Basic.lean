@@ -3,10 +3,11 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
 
 /-! This file defines V-polyhedral cones as cones that can be written as the sum of an FG cone
 and a submodule. This agrees with FG cones in finite dimensional modules but has the additional
@@ -17,6 +18,8 @@ Combinatorially they are equivalent to FG cones.
 Main definitions:
 * `PointedCone.IsVPolyhedral`.
 -/
+
+@[expose] public section
 
 open Function Module OrderDual LinearMap
 open Submodule hiding dual DualClosed

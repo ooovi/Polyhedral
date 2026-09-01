@@ -3,11 +3,15 @@ Copyright (c) 2026 Martin Winter, Olivia Röhrig. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
 
-import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+
 import Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 /-! The content of this file should go into `AffineSpace/AffineMap.lean`. -/
+
+@[expose] public section
 
 open Affine Module
 

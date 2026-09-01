@@ -3,18 +3,21 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
+
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
-
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
--- import Polyhedral.Line
 
 /-!
 # Polyhedral cones
 
 ...
 -/
+
+@[expose] public section
 
 open Function Module
 

@@ -3,12 +3,13 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
+
+public import Mathlib.LinearAlgebra.AffineSpace.Homogenization
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
-import Mathlib.LinearAlgebra.AffineSpace.Homogenization
-
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 /-! This file defines affine homogenization axiomatically and proves every object fulfilling the
 axioms is linearly equivalent to `Homogenization`, the canonical homogenization from Mathlib.
@@ -24,6 +25,8 @@ for the proof.
 * [J. Gallier, *Geometric Methods and Applications for Computer Science and
   Engineering*][Gallier2011GeometricMethods]
  -/
+
+@[expose] public section
 
 namespace Affine
 

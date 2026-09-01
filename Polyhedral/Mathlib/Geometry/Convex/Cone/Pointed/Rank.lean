@@ -3,9 +3,10 @@ Copyright (c) 2025 Olivia Röhig, Kilian Rueß, Mrtin Winter. All rights reserve
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhig, Kilian Rueß, Mrtin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
 
 /-!
 ## Rank of Pointed Cones
@@ -27,6 +28,8 @@ Eventually we aim to prove most results of finite dimensional cones by assuming 
 The reason is that this does not assume that the cone is embedded in finite dimensions, and
 this class is closed under duality.
 -/
+
+@[expose] public section
 
 namespace PointedCone
 

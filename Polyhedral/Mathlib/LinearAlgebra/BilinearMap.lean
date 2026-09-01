@@ -3,12 +3,15 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.PerfectPairing.Basic
+public import Mathlib.LinearAlgebra.PerfectPairing.Basic
 
 /-! This file provides instances for expressing that bilinear pairings are separating and
 nondegenarate. This is needed in duality theory since many lemmas depend on these properties
 of the pairing. -/
+
+public section
 
 open Module Function
 

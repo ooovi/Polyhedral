@@ -3,11 +3,14 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
 
 /-! This file defines the algebraic relative interior of a convex cone. -/
+
+@[expose] public section
 
 open Submodule
 
