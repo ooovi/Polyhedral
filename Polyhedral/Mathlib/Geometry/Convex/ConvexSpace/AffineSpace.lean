@@ -10,13 +10,16 @@ public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Mathlib.Geometry.Convex.ConvexSpace.Module
 public import Mathlib.Geometry.Convex.ConvexSpace.Prod
 
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
+
 /-!
 # Convex combinations in affine convex spaces
 
 This file proves that indexed convex combinations in an affine convex space commute with
 pointwise translation (`iConvexComb_vadd`) and pointwise difference (`iConvexComb_vsub`),
 and deduces that translation (`isAffineMap_vadd`) and point subtraction (`isAffineMap_vsub`)
-are affine maps on the product convex space.
+are affine maps on the product convex space, together with the compositional forms
+`IsAffineMap.vadd` and `IsAffineMap.vsub` for use by `fun_prop`.
 
 -/
 
@@ -61,5 +64,21 @@ lemma isAffineMap_vadd : IsAffineMap R (fun x : V × P => x.1 +ᵥ x.2) where
 lemma isAffineMap_vsub : IsAffineMap R (fun x : P × P => x.1 -ᵥ x.2) where
   map_sConvexComb w := by
     simp only [sConvexComb_map, iConvexComb_vsub, Prod.fst_sConvexComb, Prod.snd_sConvexComb]
+
+/-- The pointwise translation of an affine map by an affine map is affine.
+
+This is the compositional form of `isAffineMap_vadd` for use by `fun_prop`. -/
+@[fun_prop]
+lemma IsAffineMap.vadd {X : Type*} [ConvexSpace R X] {f : X → V} {g : X → P}
+    (hf : IsAffineMap R f) (hg : IsAffineMap R g) : IsAffineMap R fun x => f x +ᵥ g x :=
+  isAffineMap_vadd.comp (hf.prodMk hg)
+
+/-- The pointwise difference of two affine maps is affine.
+
+This is the compositional form of `isAffineMap_vsub` for use by `fun_prop`. -/
+@[fun_prop]
+lemma IsAffineMap.vsub {X : Type*} [ConvexSpace R X] {f g : X → P}
+    (hf : IsAffineMap R f) (hg : IsAffineMap R g) : IsAffineMap R fun x => f x -ᵥ g x :=
+  isAffineMap_vsub.comp (hf.prodMk hg)
 
 end Convexity
