@@ -58,7 +58,7 @@ lemma homogenize_eq_bot_iff (P : ConvexSet R A) : homogenize W P = ⊥ ↔ P = �
   ext x
   simp only [homogenize, span_eq_bot, mem_image, SetLike.mem_coe, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂] at h
-  simpa using fun hx ↦ Affine.IsHomogenization.ofPoint_ne_zero _ (h x hx)
+  simpa using fun hx ↦ hom.ofPoint_ne_zero _ (h x hx)
 
 lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight 1 one_ne_zero,
