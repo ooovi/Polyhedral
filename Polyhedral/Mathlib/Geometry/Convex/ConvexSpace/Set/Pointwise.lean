@@ -76,7 +76,7 @@ protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set A}
 lemma IsConvexSet.translate (t : V) {K : Set A} (hK : IsConvexSet R K) :
     IsConvexSet R (t +ᵥ K) := by
   rw [← Set.singleton_vadd]
-  exact IsConvexSet.vadd .singleton hK
+  exact .vadd .singleton hK
 
 /- TODO: there should also be a version `(K : ConvexSet R V) +ᵥ (p : A)`, but there is not even
 a version for sets yet. -/
