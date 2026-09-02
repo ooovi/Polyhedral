@@ -70,7 +70,7 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolyhedron R P₁)
   obtain ⟨C₁, hC₁, Q₁, hQ₁, rfl⟩ := hP₁
   obtain ⟨C₂, hC₂, Q₂, hQ₂, rfl⟩ := hP₂
   rw [vadd_eq_add, ← add_vadd, add_comm, ← add_assoc, add_vadd]
-  refine ⟨C₂ + C₁, ?_, Q₁ +ᵥ Q₂, IsPolytope.vadd hQ₁ hQ₂, ?_⟩
+  refine ⟨C₂ + C₁, ?_, Q₁ +ᵥ Q₂, hQ₁.vadd hQ₂, ?_⟩
   · rw [Submodule.add_eq_sup]
     exact hC₂.sup hC₁
   · rw [Submodule.add_eq_sup, Submodule.coe_sup]
