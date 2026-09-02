@@ -70,9 +70,7 @@ a version for sets yet. -/
 
 /-- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
-    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) := by
-  have h := IsConvexSet.vadd (A := V) hK₁ hK₂
-  rwa [show K₁ +ᵥ K₂ = K₁ + K₂ from Set.image2_congr fun a _ b _ => vadd_eq_add a b] at h
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) := hK₁.vadd hK₂
 
 /-- Pointwise subtraction of two convex sets of an affine space is convex, since point
 subtraction is an affine map on the product convex space (`isAffineMap_vsub`). -/
