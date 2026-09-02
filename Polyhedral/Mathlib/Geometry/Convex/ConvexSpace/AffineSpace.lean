@@ -17,6 +17,8 @@ pointwise translation (`iConvexComb_vadd`) and pointwise difference (`iConvexCom
 
 -/
 
+@[expose] public section
+
 namespace Convexity
 
 open AddTorsor
