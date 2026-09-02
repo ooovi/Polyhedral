@@ -11,6 +11,7 @@ import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Algebra.Group.Pointwise.Finset.Basic
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
 /-! This file defines the pointwise operations on convex polytopes. -/
@@ -51,13 +52,12 @@ variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-/-- The Minkowski sum of two polytopes is a polytope. -/
+/-- The Minkowski sum of two polytopes is a polytope, since translation is an affine map
+on the product convex space (`isAffineMap_vadd`). -/
 protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
-    IsPolytope R (P₁ +ᵥ P₂) := by classical
-  obtain ⟨s₁, rfl⟩ := hP₁
-  obtain ⟨s₂, rfl⟩ := hP₂
-  use s₁ +ᵥ s₂
-  rw [Finset.coe_vadd, convexHull_vadd]
+    IsPolytope R (P₁ +ᵥ P₂) := by
+  rw [← Set.vadd_image_prod]
+  exact (hP₁.prod hP₂).image isAffineMap_vadd
 
 /-- Translation preserves polytopes. -/
 lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ K) := by

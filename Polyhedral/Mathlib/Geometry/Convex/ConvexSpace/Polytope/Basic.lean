@@ -87,6 +87,14 @@ protected lemma image (hf : IsAffineMap R f) (hP : IsPolytope R P) :
   use v.image f
   simpa using hf.image_convexHull v
 
+/-- The product of two polytopes is a polytope. -/
+protected lemma prod {P₂ : Set Y} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
+    IsPolytope R (P₁ ×ˢ P₂) := by classical
+  obtain ⟨v₁, rfl⟩ := hP₁
+  obtain ⟨v₂, rfl⟩ := hP₂
+  use v₁ ×ˢ v₂
+  rw [Finset.coe_product, convexHull_prod]
+
 end Semiring
 
 section Field
