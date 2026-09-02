@@ -3,16 +3,19 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Algebra.Group.Pointwise.Finset.Basic
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
-
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 
 /-! This file defines the pointwise operations on convex polytopes. -/
+
+public section
 
 noncomputable section
 

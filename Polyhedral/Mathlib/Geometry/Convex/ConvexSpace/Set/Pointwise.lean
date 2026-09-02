@@ -3,17 +3,21 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 
 import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.LinearAlgebra.AffineSpace.AffineMap
-
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 /-! This file proves basic pointwise properties of convex sets. -/
+
+public section
 
 noncomputable section
 

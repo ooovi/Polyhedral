@@ -3,12 +3,14 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Algebra.Module.Submodule.Defs
-
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
+public import Mathlib.Algebra.Module.Submodule.Defs
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 
 /-! This file contains results about `Submodule` and `SubMulAction₀`. -/
+
+@[expose] public section
 
 namespace Submodule
 

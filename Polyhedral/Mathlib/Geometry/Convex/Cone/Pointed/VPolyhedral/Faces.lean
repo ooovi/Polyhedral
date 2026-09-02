@@ -3,11 +3,14 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 /-! This file proves basic facts about faces of polyhedral cones. -/
+
+@[expose] public section
 
 variable {R M M₁ M₂ N : Type*}
 

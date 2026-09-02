@@ -3,10 +3,9 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.Isomorphisms
-
--- import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Mathlib.LinearAlgebra.Isomorphisms
 
 /-! This file suggest the alternative name `restrict` for `submoduleOf` for the following reason:
 we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
@@ -16,6 +15,8 @@ opposite order. This is in order to be consistent with `embed` for which the oth
 is not possible. This also allows us to view `restrict S` as the restriction operator.
 Finally, the "restrict" terminology is also used for e.g. `LinearMap.restrict`.
 -/
+
+@[expose] public section
 
 namespace Submodule
 

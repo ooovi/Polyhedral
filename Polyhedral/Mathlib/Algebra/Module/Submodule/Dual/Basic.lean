@@ -3,19 +3,21 @@ Copyright (c) 2025 Martin Winter, Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Yaël Dillies
 -/
+module
 
-import Mathlib.RingTheory.Finiteness.Cofinite
-
-import Polyhedral.Mathlib.Algebra.Module.LinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
-import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
+public import Mathlib.RingTheory.Finiteness.Cofinite
+public import Polyhedral.Mathlib.Algebra.Module.LinearMap
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
+public import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 
 /-!
 This file implements a dual for submodules in analogy to `PointedCone.dual`.
 Mathlib will likely not use this terminology, but will use `orthogonal` or `orthogonalBilin`.
 See also the PR #40746.
 -/
+
+@[expose] public section
 
 assert_not_exists TopologicalSpace Real -- Cardinal (comes with BilinearMap for some reason)
 

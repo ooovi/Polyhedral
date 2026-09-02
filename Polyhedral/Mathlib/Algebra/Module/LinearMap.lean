@@ -3,13 +3,17 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Mathlib.RingTheory.LocalRing.Basic
 
 import Mathlib.Algebra.Algebra.Basic
-import Mathlib.RingTheory.LocalRing.Basic
 
 /-!
 This file contains results about linear maps.
 -/
+
+public section
 
 namespace LinearMap
 

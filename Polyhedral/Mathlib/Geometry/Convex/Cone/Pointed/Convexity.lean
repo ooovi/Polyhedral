@@ -3,11 +3,13 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 /-!
@@ -16,6 +18,8 @@ import Mathlib.Geometry.Convex.ConvexSpace.Module
 This file shows a pointed cone is a convex set, as well as proves results about the conic hull of
 convex sets.
 -/
+
+@[expose] public section
 
 section Convexity
 
@@ -30,7 +34,7 @@ variable {R M : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCom
 
 lemma isConvexSet (P : PointedCone R M) :
     IsConvexSet R (P : Set M) := by
-  intro w hw
+  refine .of_sConvexComb_mem fun w hw ↦ ?_
   rw [sConvexComb_eq_sum w]
   refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
   exact P.smul_mem (w.weights_nonneg c) <| hw (Finsupp.mem_support_iff.mpr hc)

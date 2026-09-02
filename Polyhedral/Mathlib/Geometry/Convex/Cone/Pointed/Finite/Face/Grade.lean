@@ -3,11 +3,11 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Mathlib.Order.Grade
-
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
+public import Mathlib.Order.Grade
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
 
 /-! This file proves that the face lattice of an FG cone is graded.
 
@@ -18,6 +18,8 @@ TODO: either provide a version of the grading, or define the grading canonically
 `finsalrank` instead of `finrank`. Maybe this is easier if we already proved that submodules
 form a graded lattice (is this already done?).
 -/
+
+@[expose] public section
 
 open Module Submodule
 

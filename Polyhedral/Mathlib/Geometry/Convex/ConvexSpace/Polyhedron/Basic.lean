@@ -3,12 +3,16 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
 
 /-! This file defines polyhedra as the Minkowski sums polytopes and polyhedral cones. -/
+
+@[expose] public section
 
 namespace Convexity
 

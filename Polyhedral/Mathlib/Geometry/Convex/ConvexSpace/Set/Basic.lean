@@ -3,12 +3,16 @@ Copyright (c) 2026 Martin Winter, Olivia Röhrig. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 /-! This file proves basic properties of convex sets. -/
+
+public section
 
 noncomputable section
 
@@ -21,8 +25,9 @@ namespace Semiring
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
 
 protected lemma IsConvexSet.biInter {S : Set (Set X)} (hS : ∀ s ∈ S, IsConvexSet R s) :
-    IsConvexSet R (⋂ s ∈ S, s) := by
-  simp +contextual [IsConvexSet, (hS _ _).sConvexComb_mem]
+    IsConvexSet R (⋂ s ∈ S, s) :=
+  .of_sConvexComb_mem fun _ hw ↦ Set.mem_biInter fun s hs ↦
+    (hS s hs).sConvexComb_mem (hw.trans (Set.biInter_subset_of_mem hs))
 
 end Semiring
 

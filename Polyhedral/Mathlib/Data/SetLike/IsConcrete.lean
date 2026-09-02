@@ -3,18 +3,22 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Data.SetLike.Basic
+public import Mathlib.Data.SetLike.Basic
+public import Mathlib.Order.CompleteLattice.Defs
+
 import Mathlib.Data.Set.Basic
 import Mathlib.Data.Set.Insert
 import Mathlib.Data.Set.Lattice.Image
 import Mathlib.Order.SetNotation
-import Mathlib.Order.CompleteLattice.Defs
 
 /-! This file defines properties of `SetLike` structures that are inherited from sets.
 
   Zulip: https://leanprover.zulipchat.com/#narrow/channel/287929-mathlib4/topic/More.20.60IsConcrete.60.20classes.20for.20.60SetLike.60
 -/
+
+@[expose] public section
 
 /- ## Concrete ## -/
 

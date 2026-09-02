@@ -3,19 +3,22 @@ Copyright (c) 2025 Martin Winter, Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Yaël Dillies
 -/
+module
+
+public import Polyhedral.Mathlib.Algebra.Module.LinearMap
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
+public import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
 
 import Mathlib.RingTheory.Finiteness.Cofinite
-
-import Polyhedral.Mathlib.Algebra.Module.LinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
-import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
 
 /-!
 This file defines dual closed submodules, that is, submodules that are closed under
 taking the double dual.
 -/
+
+public section
 
 open Module Function LinearMap Pointwise Set OrderDual
 

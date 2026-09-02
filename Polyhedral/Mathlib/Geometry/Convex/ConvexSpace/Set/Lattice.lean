@@ -3,16 +3,18 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
-
-import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
-
 /-! This file defines bundled convex sets. -/
+
+@[expose] public section
 
 variable {ι R X Y : Type*}
 
@@ -97,7 +99,7 @@ instance : SemilatticeInf (ConvexSet R X) := .ofSetLike ..
 /- # InfSet -/
 
 instance : InfSet (ConvexSet R X) where
-  sInf S := ⟨⋂₀ (_ '' S), .sInter (by simpa using fun K _ => K.2)⟩
+  sInf S := ⟨⋂₀ (SetLike.coe '' S), .sInter (by simpa using fun K _ => K.2)⟩
 
 instance : IsConcreteInfSet (ConvexSet R X) X := ⟨fun _ => rfl⟩
 

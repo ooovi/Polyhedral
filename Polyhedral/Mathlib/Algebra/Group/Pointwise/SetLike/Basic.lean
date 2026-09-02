@@ -3,18 +3,21 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Mathlib.Algebra.Group.Pointwise.Set.Basic
+public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 
 import Mathlib.Algebra.Group.Equiv.Basic
 import Mathlib.Algebra.Group.Prod
 import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
 import Mathlib.Data.Set.NAry
 import Mathlib.Data.SetLike.Basic
-import Mathlib.Algebra.Group.Pointwise.Set.Basic
 import Mathlib.Algebra.Group.Defs
 
-import Polyhedral.Mathlib.Data.SetLike.IsConcrete
-
 /-! This files defines the pointwise operations on `SetLike` that are inherited from `Set`-/
+
+@[expose] public section
 
 variable {α V : Type*}
 

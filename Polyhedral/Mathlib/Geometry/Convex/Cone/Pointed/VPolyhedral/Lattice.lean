@@ -3,10 +3,13 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
 
 /-! This file defines `VPolyhedralCone` as a bundled object. -/
+
+@[expose] public section
 
 open Function Module OrderDual LinearMap Pointwise
 open Submodule hiding dual DualClosed
