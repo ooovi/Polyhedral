@@ -9,6 +9,7 @@ public import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Order
 
+import Mathlib.Geometry.Convex.Set
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Algebra.Module.BigOperators
@@ -36,6 +37,24 @@ variable [AddCommMonoid M] [Module R M] [AddCommMonoid N] [Module R N]
 lemma IsAffineMap.linearMap (h : M →ₗ[R] N) : IsAffineMap R h where
   map_sConvexComb w := by
     simp [sConvexComb_eq_sum, map_finsuppSum, Finsupp.sum_mapDomain_index, add_smul]
+
+alias _root_.LinearMap.isAffineMap := IsAffineMap.linearMap
+
+namespace LinearMap
+
+variable (f : M →ₗ[R] N)
+
+@[simp] lemma map_sConvexComb (w : StdSimplex R M) :
+    f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
+
+lemma image_isConvexSet {s : Set M} (hs : IsConvexSet R s) : IsConvexSet R (f '' s) :=
+  hs.image f.isAffineMap
+
+lemma range_isConvexSet : IsConvexSet R (Set.range f) := by
+  rw [← Set.image_univ]
+  exact image_isConvexSet f .univ
+
+end LinearMap
 
 end IsModuleConvexSpace
 

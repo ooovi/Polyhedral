@@ -19,7 +19,7 @@ If the ambient space is finite dimensional, then
 * a cones is DualFG if and only if it is FG.
 * duals of FG cones are FG if the ambient space is finite dim.
 
-We also derive that intersections of FG cones are FG. This should however change in future.
+We also derive that intersections of FG cones are FG. This should however change in the future.
 
 TODO: First prove that intersections of FG cones are FG, and use this fact to improve the
 duality theory developed here. Some reasons:
