@@ -32,7 +32,7 @@ variable [ConvexSpace R V] [IsModuleConvexSpace R V]
 /-- A convex combination of pointwise translates splits as the convex combination of the
 translations acting on the convex combination of the base points. -/
 theorem iConvexComb_vadd (w : StdSimplex R I) (g : I → V) (q : I → P) :
-    (w.iConvexComb fun i => g i +ᵥ q i) = w.iConvexComb g +ᵥ w.iConvexComb q := by
+    w.iConvexComb (fun i => g i +ᵥ q i) = w.iConvexComb g +ᵥ w.iConvexComb q := by
   obtain ⟨b⟩ : Nonempty P := inferInstance
   rw [iConvexComb_eq_affineCombination (f := fun i => g i +ᵥ q i),
     iConvexComb_eq_affineCombination (f := q), iConvexComb_eq_sum,
