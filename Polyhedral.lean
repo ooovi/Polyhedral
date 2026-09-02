@@ -16,6 +16,8 @@ public import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
 public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 public import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
 public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
+public import Polyhedral.Mathlib.Data.Finsupp.Basic
+public import Polyhedral.Mathlib.Data.Finsupp.Option
 public import Polyhedral.Mathlib.Data.Set.Lattice.Image
 public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
@@ -45,7 +47,10 @@ public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Faces
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Defs
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Order
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
@@ -62,6 +67,9 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.WithTop
+public import Polyhedral.Mathlib.Geometry.Convex.Fun.Defs
+public import Polyhedral.Mathlib.Geometry.Convex.Fun.Dual
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
