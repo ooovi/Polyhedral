@@ -46,7 +46,7 @@ lemma convexHull_prod (s : Set X) (t : Set Y) :
     exact hcvx.convexHull_subset_iff.mpr
       (fun x hx => subset_convexHull_self (mk_mem_prod hx hy)) hx
   have hcvx : IsConvexSet R ((fun y => (x, y)) ⁻¹' convexHull R (s ×ˢ t)) :=
-    IsConvexSet.preimage ((IsAffineMap.const x).prodMk .id) IsConvexSet.convexHull
+      .preimage (by fun_prop) .convexHull
   exact hcvx.convexHull_subset_iff.mpr step hy
 
 section Pointwise
