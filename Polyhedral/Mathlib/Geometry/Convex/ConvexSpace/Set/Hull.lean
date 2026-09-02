@@ -37,7 +37,7 @@ lemma convexHull_prod (s : Set X) (t : Set Y) :
     convexHull R (s ×ˢ t) = convexHull R s ×ˢ convexHull R t := by
   refine Subset.antisymm (convexHull_min
     (prod_mono subset_convexHull_self subset_convexHull_self)
-    (IsConvexSet.convexHull.prod IsConvexSet.convexHull)) ?_
+    (.prod .convexHull .convexHull)) ?_
   rintro ⟨x, y⟩ ⟨hx, hy⟩
   have step : ∀ y ∈ t, (x, y) ∈ convexHull R (s ×ˢ t) := by
     intro y hy
