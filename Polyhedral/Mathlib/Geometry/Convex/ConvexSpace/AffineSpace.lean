@@ -44,7 +44,7 @@ theorem iConvexComb_vadd (w : StdSimplex R I) (g : I → V) (q : I → P) :
 /-- A convex combination of pointwise differences is the difference of the convex
 combinations. -/
 theorem iConvexComb_vsub (w : StdSimplex R I) (p q : I → P) :
-    (w.iConvexComb fun i => p i -ᵥ q i) = w.iConvexComb p -ᵥ w.iConvexComb q := by
+    w.iConvexComb (fun i => p i -ᵥ q i) = w.iConvexComb p -ᵥ w.iConvexComb q := by
   rw [iConvexComb_eq_sum, iConvexComb_eq_affineCombination (f := p),
     iConvexComb_eq_affineCombination (f := q), Finsupp.sum,
     ← Finset.sum_smul_vsub_eq_affineCombination_vsub]
