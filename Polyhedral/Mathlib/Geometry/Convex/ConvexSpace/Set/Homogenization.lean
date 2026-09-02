@@ -48,8 +48,17 @@ def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
   toFun := homogenize W
   monotone' := homogenize_monotone
 
+@[simp]
 lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
-  simp [homogenize, Bot.bot]
+  simp [homogenize]
+
+@[simp]
+lemma homogenize_eq_bot_iff (P : ConvexSet R A) : homogenize W P = ⊥ ↔ P = ⊥ := by
+  refine ⟨fun h ↦ ?_, by simp +contextual [-SetLike.bot_eq_empty]⟩
+  ext x
+  simp only [homogenize, span_eq_bot, mem_image, SetLike.mem_coe, forall_exists_index, and_imp,
+    forall_apply_eq_imp_iff₂] at h
+  simpa using fun hx ↦ Affine.IsHomogenization.ofPoint_ne_zero _ (h x hx)
 
 lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight 1 one_ne_zero,
@@ -105,9 +114,15 @@ def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
 
 alias _root_.PointedCone.dehomogenize := dehomogenize
 
-lemma dehomogenize_bot : dehomogenize A (⊥ : PointedCone R W) = ⊥ := sorry
+@[simp]
+lemma dehomogenize_bot : dehomogenize A (⊥ : PointedCone R W) = ⊥ := by
+  ext
+  simp [dehomogenize, Affine.IsHomogenization.ofPoint_ne_zero]
 
-lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := sorry
+@[simp]
+lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := by
+  ext
+  simp [dehomogenize, SetLike.mem_coe.mp]
 
 lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ := sorry
 
