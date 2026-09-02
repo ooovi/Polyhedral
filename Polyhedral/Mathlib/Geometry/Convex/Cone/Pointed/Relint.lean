@@ -152,7 +152,8 @@ lemma relint_nonempty_of_finRank (h : C.FinRank) : Nonempty C.relint := by
  -- potential short proof of `IsExposedFace.exists_dual_pos`
 /- NOTE: `hdc : C.DualClosed p` is necessary here as well: the cone
 `{(a, b) | b > 0} ∪ {(a, 0) | a ≥ 0}` in `R²` has finite salient rank, but no functional that is
-nonnegative on it vanishes only on its lineality space `⊥`. -/
+nonnegative on it vanishes only on its lineality space `⊥`. Given `hdc`, the assumption
+`C.FinSalRank` is equivalent to `(dual p C).FinSalRank` by `DualClosed.dual_finSalRank_iff`. -/
 variable (p) [Fact p.SeparatingLeft] in
 example {C : PointedCone R M} (hC : C.FinSalRank) (hdc : C.DualClosed p) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
