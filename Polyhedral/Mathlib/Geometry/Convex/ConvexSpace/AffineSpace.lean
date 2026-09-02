@@ -3,9 +3,11 @@ Copyright (c) 2026 Moritz Firsching. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Moritz Firsching
 -/
+module
 
-import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Mathlib.Geometry.Convex.ConvexSpace.Module
+
+public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+public import Mathlib.Geometry.Convex.ConvexSpace.Module
 
 /-!
 # Convex combinations in affine convex spaces
