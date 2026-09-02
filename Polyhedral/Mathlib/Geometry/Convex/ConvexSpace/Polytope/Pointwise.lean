@@ -66,8 +66,7 @@ lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ
 /-- The Minkowski sum of two polytopes is a polytope. -/
 protected lemma add {P₁ : Set V} {P₂ : Set V}
     (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ + P₂) := by
-  have h := IsPolytope.vadd (A := V) hP₁ hP₂
-  rwa [show P₁ +ᵥ P₂ = P₁ + P₂ from Set.image2_congr fun a _ b _ => vadd_eq_add a b] at h
+  exact hP₁.vadd hP₂
 
 /-- The Minkowski difference of two polytopes is a polytope. -/
 protected lemma sub {P₁ : Set V} {P₂ : Set V}
