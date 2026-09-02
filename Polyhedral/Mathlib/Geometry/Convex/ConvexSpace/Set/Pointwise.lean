@@ -115,7 +115,7 @@ protected lemma IsConvexSet.sub {K₁ : Set V} {K₂ : Set V}
 
 /-- Scalar multiplication is an affine map. -/
 lemma isAffineMap_smul [SMulCommClass R R V] (r : R) :
-    IsAffineMap R (fun x : V => r • x) := by
+    IsAffineMap R fun x : V => r • x := by
   refine ⟨fun w => ?_⟩
   rw [sConvexComb_eq_sum, sConvexComb_eq_sum, StdSimplex.weights_map,
     Finsupp.sum_mapDomain_index (by simp) (fun _ b₁ b₂ => add_smul b₁ b₂ _), Finsupp.smul_sum]
