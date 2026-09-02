@@ -22,8 +22,9 @@ variable {R X Y Z : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X] [ConvexSpace R Y] [ConvexSpace R Z]
 
 /-- The pairing of two affine maps is affine. -/
+@[fun_prop]
 lemma IsAffineMap.prodMk {f : X → Y} {g : X → Z} (hf : IsAffineMap R f) (hg : IsAffineMap R g) :
-    IsAffineMap R (fun x => (f x, g x)) where
+    IsAffineMap R fun x => (f x, g x) where
   map_sConvexComb w := by
     ext
     · simp [hf.map_sConvexComb, sConvexComb_map]
