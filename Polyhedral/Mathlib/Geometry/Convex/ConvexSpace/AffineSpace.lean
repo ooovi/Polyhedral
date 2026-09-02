@@ -8,12 +8,15 @@ module
 
 public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Mathlib.Geometry.Convex.ConvexSpace.Module
+public import Mathlib.Geometry.Convex.ConvexSpace.Prod
 
 /-!
 # Convex combinations in affine convex spaces
 
 This file proves that indexed convex combinations in an affine convex space commute with
-pointwise translation (`iConvexComb_vadd`) and pointwise difference (`iConvexComb_vsub`).
+pointwise translation (`iConvexComb_vadd`) and pointwise difference (`iConvexComb_vsub`),
+and deduces that translation (`isAffineMap_vadd`) and point subtraction (`isAffineMap_vsub`)
+are affine maps on the product convex space.
 
 -/
 
@@ -48,5 +51,15 @@ theorem iConvexComb_vsub (w : StdSimplex R I) (p q : I → P) :
   rw [iConvexComb_eq_sum, iConvexComb_eq_affineCombination (f := p),
     iConvexComb_eq_affineCombination (f := q), Finsupp.sum,
     ← Finset.sum_smul_vsub_eq_affineCombination_vsub]
+
+/-- Translation `(v, p) ↦ v +ᵥ p` is an affine map on the product convex space. -/
+lemma isAffineMap_vadd : IsAffineMap R (fun x : V × P => x.1 +ᵥ x.2) where
+  map_sConvexComb w := by
+    simp only [sConvexComb_map, iConvexComb_vadd, Prod.fst_sConvexComb, Prod.snd_sConvexComb]
+
+/-- Point subtraction `(p, q) ↦ p -ᵥ q` is an affine map on the product convex space. -/
+lemma isAffineMap_vsub : IsAffineMap R (fun x : P × P => x.1 -ᵥ x.2) where
+  map_sConvexComb w := by
+    simp only [sConvexComb_map, iConvexComb_vsub, Prod.fst_sConvexComb, Prod.snd_sConvexComb]
 
 end Convexity
