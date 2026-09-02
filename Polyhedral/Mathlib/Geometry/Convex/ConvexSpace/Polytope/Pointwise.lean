@@ -61,8 +61,7 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (
 
 /-- Translation preserves polytopes. -/
 lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ K) := by
-  rw [← Set.singleton_vadd]
-  exact .vadd (.singleton R t) hK
+  exact hK.image (by fun_prop)
 
 /-- The Minkowski sum of two polytopes is a polytope. -/
 protected lemma add {P₁ : Set V} {P₂ : Set V}
