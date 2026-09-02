@@ -70,15 +70,10 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolyhedron R P₁)
   obtain ⟨C₁, hC₁, Q₁, hQ₁, rfl⟩ := hP₁
   obtain ⟨C₂, hC₂, Q₂, hQ₂, rfl⟩ := hP₂
   rw [vadd_eq_add, ← add_vadd, add_comm, ← add_assoc, add_vadd]
-  use C₂ + C₁
-  constructor
-  · sorry -- TODO: missing lemma for polyhedral cones
-  use Q₁ +ᵥ Q₂
-  constructor
-  · exact hQ₁.vadd hQ₂
-  congr
-  -- TODO: prove this once we have `coe_add` for cones.
-  sorry
+  refine ⟨C₂ + C₁, ?_, Q₁ +ᵥ Q₂, hQ₁.vadd hQ₂, ?_⟩
+  · rw [Submodule.add_eq_sup]
+    exact hC₂.sup hC₁
+  · rw [Submodule.add_eq_sup, Submodule.coe_sup]
 
 protected lemma add {P₁ P₂ : Set V} (hP₁ : IsPolyhedron R P₁) (hP₂ : IsPolyhedron R P₂) :
   IsPolyhedron R (P₁ + P₂) := .vadd hP₁ hP₂
