@@ -37,8 +37,7 @@ variable (f : P₁ →ᵃ[R] P₂)
 open Finset AddTorsor in
 lemma isAffineMap : IsAffineMap R f where
   map_sConvexComb s:= by classical
-    simp_rw [sConvexComb_eq_convexComb, AddTorsor.convexCombination, StdSimplex.weights_map,
-      Finsupp.mapDomain,
+    simp_rw [sConvexComb_eq_affineCombination, StdSimplex.weights_map, Finsupp.mapDomain,
       map_affineCombination _ _ _ s.total, Finsupp.sum, Finsupp.coe_finsetSum]
     simp only [affineCombination_apply, weightedVSubOfPoint_apply, map_sum]
     congr
