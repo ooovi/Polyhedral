@@ -6,10 +6,13 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Geometry.Convex.Hull
+public import Mathlib.Geometry.Convex.ConvexSpace.Prod
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Order.Closure
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 
 /-!
 # IsConvexSet hull
@@ -29,6 +32,23 @@ namespace Convexity
 variable {R X Y : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
   [ConvexSpace R Y] {C s t : Set X} {x y : X}
 
+/-- The convex hull of a product is the product of the convex hulls. -/
+lemma convexHull_prod (s : Set X) (t : Set Y) :
+    convexHull R (s ×ˢ t) = convexHull R s ×ˢ convexHull R t := by
+  refine Subset.antisymm (convexHull_min
+    (prod_mono subset_convexHull_self subset_convexHull_self)
+    (IsConvexSet.convexHull.prod IsConvexSet.convexHull)) ?_
+  rintro ⟨x, y⟩ ⟨hx, hy⟩
+  have step : ∀ y ∈ t, (x, y) ∈ convexHull R (s ×ˢ t) := by
+    intro y hy
+    have hcvx : IsConvexSet R ((fun x => (x, y)) ⁻¹' convexHull R (s ×ˢ t)) :=
+      IsConvexSet.preimage (IsAffineMap.id.prodMk (.const y)) IsConvexSet.convexHull
+    exact hcvx.convexHull_subset_iff.mpr
+      (fun x hx => subset_convexHull_self (mk_mem_prod hx hy)) hx
+  have hcvx : IsConvexSet R ((fun y => (x, y)) ⁻¹' convexHull R (s ×ˢ t)) :=
+    IsConvexSet.preimage ((IsAffineMap.const x).prodMk .id) IsConvexSet.convexHull
+  exact hcvx.convexHull_subset_iff.mpr step hy
+
 section Pointwise
 
 open Pointwise
@@ -47,28 +67,12 @@ variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R 
 
 variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
+/-- The convex hull of a Minkowski sum is the Minkowski sum of the convex hulls, since
+translation is an affine map on the product convex space (`isAffineMap_vadd`). -/
 lemma convexHull_vadd (s₁ : Set V) (s₂ : Set A) :
     convexHull R (s₁ +ᵥ s₂) = convexHull R s₁ +ᵥ convexHull R s₂ := by
-  refine Set.Subset.antisymm
-    (convexHull_min (Set.vadd_subset_vadd subset_convexHull_self subset_convexHull_self)
-      (IsConvexSet.convexHull.vadd IsConvexSet.convexHull)) ?_
-  rintro x ⟨v, hv, a, ha, rfl⟩
-  have step : ∀ b ∈ s₂, v +ᵥ b ∈ convexHull R (s₁ +ᵥ s₂) := by
-    intro b hb
-    have himg : (· +ᵥ b) '' convexHull R s₁ = convexHull R ((· +ᵥ b) '' s₁) :=
-      (AffineEquiv.vaddConst R b).toAffineMap.isAffineMap.image_convexHull s₁
-    have hmem : v +ᵥ b ∈ (· +ᵥ b) '' convexHull R s₁ := Set.mem_image_of_mem _ hv
-    rw [himg] at hmem
-    refine convexHull_min ?_ IsConvexSet.convexHull hmem
-    rintro y ⟨w, hw, rfl⟩
-    exact subset_convexHull_self (Set.vadd_mem_vadd hw hb)
-  have himg : (v +ᵥ ·) '' convexHull R s₂ = convexHull R ((v +ᵥ ·) '' s₂) :=
-    (AffineEquiv.constVAdd R A v).toAffineMap.isAffineMap.image_convexHull s₂
-  have hmem : v +ᵥ a ∈ (v +ᵥ ·) '' convexHull R s₂ := Set.mem_image_of_mem _ ha
-  rw [himg] at hmem
-  refine convexHull_min ?_ IsConvexSet.convexHull hmem
-  rintro y ⟨b, hb, rfl⟩
-  exact step b hb
+  rw [← Set.vadd_image_prod, ← Set.vadd_image_prod, ← convexHull_prod]
+  exact (isAffineMap_vadd.image_convexHull _).symm
 
 end Pointwise
 
