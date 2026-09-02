@@ -44,6 +44,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Faces
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.VPolyhedral.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Lattice
@@ -52,6 +53,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Face
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
