@@ -2,6 +2,7 @@ module  -- shake: keep-all --deprecated_module: ignore
 
 public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
 public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+public import Polyhedral.Mathlib.Algebra.Module.Lattice.Basic
 public import Polyhedral.Mathlib.Algebra.Module.LinearMap
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
@@ -35,6 +36,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.KreinMilman
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Gordan
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
