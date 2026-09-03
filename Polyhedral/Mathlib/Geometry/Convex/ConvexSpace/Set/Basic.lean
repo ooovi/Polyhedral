@@ -20,7 +20,7 @@ variable {ι R K X Y V A W B : Type*}
 
 namespace Convexity
 
-namespace Semiring
+section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
 
