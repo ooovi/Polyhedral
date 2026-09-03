@@ -293,6 +293,14 @@ def coeFnAddMonoidHom : ConvexSpace.AffineMap R X N →+ (X → N) where
   map_zero' := coe_zero
   map_add' := coe_add
 
+@[simp, norm_cast]
+lemma coe_sum {ι : Type*} (s : Finset ι) (f : ι → ConvexSpace.AffineMap R X N) :
+    ⇑(∑ i ∈ s, f i) = ∑ i ∈ s, ⇑(f i) := map_sum (coeFnAddMonoidHom R X N) ..
+
+@[simp]
+lemma sum_apply {ι : Type*} (s : Finset ι) (f : ι → ConvexSpace.AffineMap R X N) (x : X) :
+    (∑ i ∈ s, f i) x = ∑ i ∈ s, f i x := by rw [coe_sum, Finset.sum_apply]
+
 instance [Monoid S] [DistribMulAction S N] [SMulCommClass R S N] :
     DistribMulAction S (ConvexSpace.AffineMap R X N) :=
   DFunLike.coe_injective.distribMulAction (coeFnAddMonoidHom R X N) fun _ _ ↦ rfl
