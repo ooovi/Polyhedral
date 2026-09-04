@@ -6,11 +6,9 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Geometry.Convex.Hull
-public import Mathlib.Geometry.Convex.ConvexSpace.Prod
+public import Polyhedral.Mathlib.Geometry.Convex.Set
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
-import Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Order.Closure
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 
@@ -29,8 +27,9 @@ open Set
 
 namespace Convexity
 
-variable {R X Y : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
-  [ConvexSpace R Y] {C s t : Set X} {x y : X}
+variable {R X Y ι : Type*}
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [ConvexSpace R Y]
 
 /-- The convex hull of a product is the product of the convex hulls. -/
 lemma convexHull_prod (s : Set X) (t : Set Y) :
@@ -48,6 +47,20 @@ lemma convexHull_prod (s : Set X) (t : Set Y) :
   have hcvx : IsConvexSet R ((fun y => (x, y)) ⁻¹' convexHull R (s ×ˢ t)) :=
       .preimage (by fun_prop) .convexHull
   exact hcvx.convexHull_subset_iff.mpr step hy
+
+/-- The convex hull of the range of `f` is the image of the standard simplex `StdSimplex R ι`
+under the affine map sending weights to the corresponding convex combination of `f`. -/
+lemma convexHull_range (f : ι → X) :
+    convexHull R (.range f) = .range (fun w : StdSimplex R ι ↦ iConvexComb w f) := by
+  apply Set.Subset.antisymm
+  · apply convexHull_min
+    · rintro _ ⟨i, rfl⟩
+      exact ⟨.single i, by simp⟩
+    · exact IsAffineMap.iConvexComb.isConvexSet_range
+  · rintro _ ⟨w, rfl⟩
+    apply IsConvexSet.convexHull.iConvexComb_mem
+    intro i _
+    exact subset_convexHull_self ⟨i, rfl⟩
 
 section Pointwise
 
