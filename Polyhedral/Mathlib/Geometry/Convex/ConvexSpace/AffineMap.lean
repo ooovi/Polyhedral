@@ -22,16 +22,18 @@ variable {R V V₁ V₂ P P₁ P₂ I : Type*}
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
-variable [AddCommGroup V₁] [Module R V₁] [AddTorsor V₁ P₁]
-variable [AddCommGroup V₂] [Module R V₂] [AddTorsor V₂ P₂]
-
 variable [ConvexSpace R P] [IsAffineConvexSpace R V P]
-variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
-variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
 
 open Convexity Finset AddTorsor
 
 namespace AffineMap
+
+section
+
+variable [AddCommGroup V₁] [Module R V₁] [AddTorsor V₁ P₁]
+variable [AddCommGroup V₂] [Module R V₂] [AddTorsor V₂ P₂]
+variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
+variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
 
 variable (f : P₁ →ᵃ[R] P₂)
 
@@ -51,5 +53,7 @@ lemma image_isConvexSet {s : Set P₁} (hs : IsConvexSet R s) : IsConvexSet R (f
 lemma range_isConvexSet : IsConvexSet R (Set.range f) := by
   rw [← Set.image_univ]
   exact f.image_isConvexSet .univ
+
+end
 
 end AffineMap
