@@ -303,6 +303,13 @@ lemma DualClosed.dual_dual_lineal (hC : C.DualClosed p) :
     (dual p.flip (dual p C)).lineal = .dual p.flip (Submodule.dual p C.lineal) := by
   sorry
 
+/-- For a dual closed cone, finite salient rank of the dual cone is equivalent to finite salient
+rank of the cone itself. The reverse direction is `FinSalRank.dual_finSalRank`, which holds
+without dual closedness. -/
+lemma DualClosed.dual_finSalRank_iff (hC : C.DualClosed p) :
+    (dual p C).FinSalRank ↔ C.FinSalRank :=
+  ⟨fun h => by simpa [hC] using h.dual_finSalRank p.flip, fun h => h.dual_finSalRank p⟩
+
 variable (p) [Fact (Surjective p.flip)] in
 /-- Every submodule of a vector space is dual closed. -/
 lemma dualClosed (S : Submodule R M) : DualClosed p S :=
