@@ -43,6 +43,13 @@ lemma le_nonneg_add {C : PointedCone R M} {f g : M →ₗ[R] R}
     (hCf : C ≤ f.nonneg) (hCg : C ≤ g.nonneg) : C ≤ (f + g).nonneg :=
   fun _ hx => add_nonneg (hCf hx) (hCg hx)
 
+/-- The cone hull of a subset of a nonnegative level set of `f` is contained in the nonnegative
+cone of `f`. See `hull_le_positive_of_subset_preimage_singleton` for the strict version. -/
+lemma hull_le_nonneg_of_subset_preimage_singleton {f : M →ₗ[R] R} {s : Set M} {c : R}
+    (hc : 0 ≤ c) (hs : s ⊆ f ⁻¹' {c}) :
+    PointedCone.hull R s ≤ f.nonneg :=
+  Submodule.span_le.mpr fun x hx => mem_nonneg.mpr <| (hs hx : f x = c) ▸ hc
+
 end Semiring
 
 section IsStrictOrderedRing
@@ -104,8 +111,9 @@ lemma positive_inf_ker {f : M →ₗ[R] R} : f.positive ⊓ f.ker = ⊥ := by
 
 /-- The cone hull of a subset of a positive level set of `f` is contained in the positive cone
 of `f`. The assumption `0 < c` cannot be weakened to `c ≠ 0`: for `c < 0` the hull lies in the
-nonpositive cone of `f`. See `positive_eq_hull_preimage_singleton` for an equality version over
-linearly ordered fields. -/
+nonpositive cone of `f`. See `hull_le_nonneg_of_subset_preimage_singleton` for the version with
+`0 ≤ c` and `positive_eq_hull_preimage_singleton` for an equality version over linearly ordered
+fields. -/
 lemma hull_le_positive_of_subset_preimage_singleton {f : M →ₗ[R] R} {s : Set M} {c : R}
     (hc : 0 < c) (hs : s ⊆ f ⁻¹' {c}) :
     PointedCone.hull R s ≤ f.positive :=
