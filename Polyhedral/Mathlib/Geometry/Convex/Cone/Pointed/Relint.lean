@@ -122,7 +122,7 @@ variable [Fact p.SeparatingLeft] in
 of the dual ray annihilates `(1, 0) ∈ C`, which is not in `C.lineal = ⊥`. The finite rank
 assumption is needed for the same reason as in
 `mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero`. -/
-lemma mem_relint_dual (hC : C.DualClosed p) (hfin : (dual p C).FinSalRank) {y : N} :
+lemma mem_relint_dual (hC : C.DualClosed p) (hfin : C.FinSalRank) {y : N} :
     y ∈ (dual p C).relint ↔ y ∈ dual p C ∧ ∀ x ∈ C, p x y = 0 → x ∈ C.lineal := by
   sorry
 
@@ -158,7 +158,7 @@ variable (p) [Fact p.SeparatingLeft] in
 example {C : PointedCone R M} (hC : C.FinSalRank) (hdc : C.DualClosed p) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
   obtain ⟨φ, hφ⟩ := relint_nonempty_of_finSalRank (hC.dual_finSalRank p)
-  rw [mem_relint_dual hdc (hC.dual_finSalRank p)] at hφ
+  rw [mem_relint_dual hdc hC] at hφ
   exact ⟨φ, fun _ h => ⟨by simpa using hφ.1 h, hφ.2 _ h⟩⟩
 
 lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := by
