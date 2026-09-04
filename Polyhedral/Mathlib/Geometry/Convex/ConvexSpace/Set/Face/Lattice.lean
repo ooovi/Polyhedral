@@ -90,6 +90,10 @@ theorem toConvexSet_lt_toConvexSet {F₁ F₂ : Face P} :
 @[simp]
 theorem mem_toConvexSet {F : Face P} (x : M) : x ∈ F.toConvexSet ↔ x ∈ F := .rfl
 
+@[simp] theorem carrier_bot : ((⊥ : Face P) : ConvexSet R M) = ∅ := rfl
+
+@[simp] theorem carrier_top : ((⊤ : Face P) : ConvexSet R M) = P := rfl
+
 /-! ### Infimum, supremum and lattice -/
 
 /-- The infimum of two faces `F₁`, `F₂` of `C` is the intersection of the cones `F₁` and `F₂`. -/
