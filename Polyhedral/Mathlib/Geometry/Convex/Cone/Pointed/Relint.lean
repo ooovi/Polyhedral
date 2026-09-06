@@ -106,6 +106,38 @@ lemma mem_lineal_dual_of_mem_relint (hx : x ∈ C.relint) {y : N}
   rw [(p z).map_neg, neg_nonneg]
   nlinarith [hxy]
 
+/-- For a relint point `x` of `C`, the dual vectors vanishing on `x` are exactly the lineality
+space of the dual cone. This is the membership-free form of `mem_lineal_dual_of_mem_relint`. -/
+lemma dual_inf_dual_singleton_of_mem_relint (hx : x ∈ C.relint) :
+    dual p C ⊓ ofSubmodule (Submodule.dual p {x}) = (dual p C).lineal := by
+  ext y
+  simp only [Submodule.mem_inf, mem_ofSubmodule_iff, Submodule.mem_dual,
+    Set.mem_singleton_iff, forall_eq]
+  constructor
+  · rintro ⟨hy, hxy⟩
+    exact mem_lineal_dual_of_mem_relint hx hy hxy.symm
+  · intro hy
+    refine ⟨lineal_le _ hy, ?_⟩
+    rw [← submodule_dual_span_eq_dual_lineal, Submodule.mem_dual] at hy
+    exact hy (Submodule.subset_span (relint_le hx))
+
+/-- If `C` has nonempty relint, the dual vectors vanishing on the relint are exactly the
+lineality space of the dual cone. The nonemptiness assumption cannot be dropped: for empty
+relint the left hand side is `dual p C` by `Submodule.dual_empty`, which need not be a
+submodule. -/
+lemma dual_inf_dual_relint (h : (C.relint : Set M).Nonempty) :
+    dual p C ⊓ ofSubmodule (Submodule.dual p (C.relint : Set M)) = (dual p C).lineal := by
+  obtain ⟨x, hx⟩ := h
+  refine le_antisymm ?_ ?_
+  · rw [← dual_inf_dual_singleton_of_mem_relint hx]
+    exact inf_le_inf_left _ (by
+      rw [ofSubmodule_le_ofSubmodule]
+      exact Submodule.dual_antitone (Set.singleton_subset_iff.mpr hx))
+  · intro y hy
+    refine ⟨lineal_le _ hy, ?_⟩
+    rw [mem_ofSubmodule_iff, ← submodule_dual_span_eq_dual_lineal, Submodule.mem_dual] at hy
+    exact Submodule.mem_dual.mpr fun z hz => hy (Submodule.subset_span (relint_le hz))
+
 variable [Fact p.SeparatingLeft] in
 /-- A point of a cone of finite rank lies in the relint iff every dual vector vanishing on it
 vanishes on all of the cone. The forward direction holds without the finite rank assumption; see
