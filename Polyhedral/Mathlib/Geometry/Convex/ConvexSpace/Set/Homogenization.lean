@@ -123,7 +123,9 @@ lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := by
   ext
   simp [dehomogenize, SetLike.mem_coe.mp]
 
-lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ := sorry
+@[simp]
+lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ :=
+  SetLike.eq_top_of_forall fun _ ↦ LinearMap.mem_positive'.mpr (by simp [hom.weight_one])
 
 variable (A) in
 lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :

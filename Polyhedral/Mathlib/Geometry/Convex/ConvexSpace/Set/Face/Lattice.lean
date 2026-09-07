@@ -90,9 +90,9 @@ theorem toConvexSet_lt_toConvexSet {F₁ F₂ : Face P} :
 @[simp]
 theorem mem_toConvexSet {F : Face P} (x : M) : x ∈ F.toConvexSet ↔ x ∈ F := .rfl
 
-@[simp] theorem carrier_bot : ((⊥ : Face P) : ConvexSet R M) = ∅ := rfl
+@[simp] theorem toConvexSet_bot : ((⊥ : Face P) : ConvexSet R M) = ∅ := rfl
 
-@[simp] theorem carrier_top : ((⊤ : Face P) : ConvexSet R M) = P := rfl
+@[simp] theorem toConvexSet_top : ((⊤ : Face P) : ConvexSet R M) = P := rfl
 
 /-! ### Infimum, supremum and lattice -/
 
