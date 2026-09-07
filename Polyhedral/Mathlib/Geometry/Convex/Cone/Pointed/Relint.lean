@@ -109,7 +109,7 @@ lemma mem_lineal_dual_of_mem_relint (hx : x ∈ C.relint) {y : N}
 /-- For a relint point `x` of `C`, the dual vectors vanishing on `x` are exactly the lineality
 space of the dual cone. This is the membership-free form of `mem_lineal_dual_of_mem_relint`. -/
 lemma dual_inf_dual_singleton_of_mem_relint (hx : x ∈ C.relint) :
-    dual p C ⊓ ofSubmodule (Submodule.dual p {x}) = (dual p C).lineal := by
+    dual p C ⊓ (Submodule.dual p {x} : Submodule R N) = (dual p C).lineal := by
   ext y
   simp only [Submodule.mem_inf, mem_ofSubmodule_iff, Submodule.mem_dual,
     Set.mem_singleton_iff, forall_eq]
@@ -126,7 +126,7 @@ lineality space of the dual cone. The nonemptiness assumption cannot be dropped:
 relint the left hand side is `dual p C` by `Submodule.dual_empty`, which need not be a
 submodule. -/
 lemma dual_inf_dual_relint (h : (C.relint : Set M).Nonempty) :
-    dual p C ⊓ ofSubmodule (Submodule.dual p (C.relint : Set M)) = (dual p C).lineal := by
+    dual p C ⊓ (Submodule.dual p (C.relint : Set M) : Submodule R N) = (dual p C).lineal := by
   obtain ⟨x, hx⟩ := h
   refine le_antisymm ?_ ?_
   · rw [← dual_inf_dual_singleton_of_mem_relint hx]
