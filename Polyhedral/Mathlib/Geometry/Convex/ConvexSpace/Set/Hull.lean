@@ -49,7 +49,10 @@ lemma convexHull_prod (s : Set X) (t : Set Y) :
   exact hcvx.convexHull_subset_iff.mpr step hy
 
 /-- The convex hull of the range of `f` is the image of the standard simplex `StdSimplex R ι`
-under the affine map sending weights to the corresponding convex combination of `f`. -/
+under the affine map sending weights to the corresponding convex combination of `f`.
+
+For finite `ι`, this can be interpreted as saying that a polytope is the image of some
+simplex under some affine map. -/
 lemma convexHull_range (f : ι → X) :
     convexHull R (.range f) = .range (fun w : StdSimplex R ι ↦ iConvexComb w f) := by
   apply Set.Subset.antisymm
