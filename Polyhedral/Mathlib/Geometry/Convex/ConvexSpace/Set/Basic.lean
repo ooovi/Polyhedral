@@ -48,6 +48,20 @@ lemma _root_.Submodule.isConvexSet (S : Submodule R M) : IsConvexSet R (S : Set 
 
 end Semiring
 
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
+
+lemma _root_.AffineSubspace.isConvexSet (S : AffineSubspace R A) : IsConvexSet R (S : Set A) := by
+  refine IsConvexSet.of_sConvexComb_mem (fun w hw ↦ ?_)
+  rw [IsAffineConvexSpace.sConvexComb_eq_convexComb (V := V), AddTorsor.convexCombination,
+    ← AffineSubspace.affineSpan_coe S, ← Set.image_id (S : Set A)]
+  refine affineCombination_mem_affineSpan_image ?_ (fun _ _ _ ↦ by grind) _
+  simpa [Finsupp.sum] using w.total
+
+end Ring
+
 section Field
 
 variable [Field K] [LinearOrder K] [IsStrictOrderedRing K] [ConvexSpace K X] {w : StdSimplex K X}

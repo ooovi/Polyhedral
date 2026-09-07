@@ -72,7 +72,28 @@ open Pointwise
 variable {R V A : Type*}
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [AddCommGroup V] [Module R V]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
+
+@[simp]
+theorem affineSpan_convexHull (s : Set A) :
+    affineSpan R (convexHull R s : Set A) = affineSpan R s := by
+  refine le_antisymm ?_ (affineSpan_mono R subset_convexHull_self)
+  grw [affineSpan_mono, affineSpan_le_of_subset_coe le_rfl]
+  exact convexHull_min (subset_affineSpan R s) (AffineSubspace.isConvexSet _)
+
+@[simp]
+theorem vectorSpan_convexHull (s : Set A) :
+    vectorSpan R (convexHull R s : Set A) = vectorSpan R s := by
+  rw [← direction_affineSpan, affineSpan_convexHull, direction_affineSpan]
+
+variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+@[simp]
+theorem span_convexHull (s : Set V) :
+    Submodule.span R (convexHull R s : Set V) = Submodule.span R s := by
+  ext x
+  grind [Submodule.mem_span, mem_convexHull_iff, isConvexSet_coe]
 
 @[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by
   ext x
@@ -80,8 +101,6 @@ variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R 
   constructor <;> intro h t hst hcvx
   · exact neg_mem_neg.mp <| h (-t) (neg_subset.mp hst) hcvx.neg
   · exact mem_neg.mp <| h (-t) (neg_subset_neg.mpr hst) hcvx.neg
-
-variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 /-- The convex hull of a Minkowski sum is the Minkowski sum of the convex hulls, since
 translation is an affine map on the product convex space (`isAffineMap_vadd`). -/
