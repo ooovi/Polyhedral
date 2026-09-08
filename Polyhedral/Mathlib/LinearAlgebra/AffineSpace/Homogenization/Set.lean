@@ -10,7 +10,7 @@ public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 import Polyhedral.Mathlib.Data.Set.Lattice.Image
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
-import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
+import Mathlib.Algebra.Order.Nonneg.Field
 
 /-! This file defines homogenization of general sets. The homogenization is of type
 `SubMulAction₀ R≥0 W`, which is closed under multiplication and always contains zero.

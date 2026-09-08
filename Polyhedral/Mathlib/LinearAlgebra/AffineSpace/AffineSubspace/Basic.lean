@@ -40,16 +40,7 @@ instance : IsConcreteEmpty (AffineSubspace R A) A := ⟨rfl⟩
 
 lemma AffineSubspace.affineSpan_empty : affineSpan R (∅ : Set A) = ∅ := by simp
 
-instance : Singleton A (AffineSubspace R A) where
-  singleton x := {
-    carrier := {x}
-    smul_vsub_vadd_mem' _ _ _ _ := by simp +contextual }
-
 instance : IsConcreteSingleton (AffineSubspace R A) A := ⟨fun _ => rfl⟩
-
-@[simp]
-lemma AffineSubspace.affineSpan_singleton (x : A) : affineSpan R ({x} : Set A) = {x} := by
-  ext; simp
 
 instance : IsConcreteTop (AffineSubspace R A) A := ⟨rfl⟩
 
