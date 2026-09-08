@@ -22,16 +22,6 @@ variable {A : Type*} [AddTorsor V A]
 
 lemma spanPoints_empty : spanPoints R (∅ : Set A) = ∅ := by simp [spanPoints]
 
-theorem _root_.affineSpan_insert_congr {s t : Set A} (x : A)
-    (h : affineSpan R s = affineSpan R t) :
-    affineSpan R (insert x s) = affineSpan R (insert x t) := by
-  rw [← affineSpan_insert_affineSpan, h, affineSpan_insert_affineSpan]
-
-theorem _root_.vectorSpan_insert_congr {s t : Set A} (x : A)
-    (h : affineSpan R s = affineSpan R t) :
-    vectorSpan R (insert x s) = vectorSpan R (insert x t) := by
-  rw [← direction_affineSpan, affineSpan_insert_congr R x h, direction_affineSpan]
-
 @[gcongr]
 lemma spanPoints_mono {F G : Set A} (hFG : G ⊆ F) : spanPoints R G ⊆ spanPoints R F :=
   fun _p ⟨p₁, hp₁, v, hv, hp⟩ =>
