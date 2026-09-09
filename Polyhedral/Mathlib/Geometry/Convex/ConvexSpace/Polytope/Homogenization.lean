@@ -28,46 +28,46 @@ variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 variable [IsModuleConvexSpace R W]
 
-variable (hom : IsHomogenization R A W)
+variable (ℋ : IsHomogenization R A W)
 
 open PointedCone
 
 /-- The homogenization of a polytope is a finitely generated cone. -/
 theorem IsPolytope.homogenize_fg {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
-    (homogenize hom C).FG := by
+    (homogenize ℋ C).FG := by
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
-  have := congrArg (ConvexSet.homogenize hom) this
+  have := congrArg (ConvexSet.homogenize ℋ) this
   rw [this]
-  use t.map ⟨_, hom.ofPoint_injective⟩
+  use t.map ⟨_, ℋ.ofPoint_injective⟩
   simp only [Finset.coe_map, Function.Embedding.coeFn_mk, homogenize,
     PointedCone.hull, ConvexSet.mk_eq]
-  rw [hom.ofPoint.isAffineMap.image_convexHull t]
-  exact (PointedCone.hull_convexHull (hom.ofPoint '' t)).symm
+  rw [ℋ.ofPoint.isAffineMap.image_convexHull t]
+  exact (PointedCone.hull_convexHull (ℋ.ofPoint '' t)).symm
 
 /-- A convex set is a polytope iff its homogenization is a finitely generated cone. -/
 theorem IsPolytope.iff_homogenize_fg {C : ConvexSet R A} :
-    IsPolytope R (C : Set A) ↔ (homogenize hom C).FG := by classical
+    IsPolytope R (C : Set A) ↔ (homogenize ℋ C).FG := by classical
   refine ⟨homogenize_fg _, fun hfg ↦ ?_⟩
   -- get cone generators that lie in the embedding of A
   obtain ⟨g, hg, hs⟩ := homogenize_fg_ofPoint_range hfg
   -- un-embed them
-  use g.preimage hom.ofPoint hom.ofPoint_injective.injOn
+  use g.preimage ℋ.ofPoint ℋ.ofPoint_injective.injOn
   -- show they generate C
   simp only [Finset.coe_preimage]
   apply le_antisymm
   · intro x hx
     rw [← preimage_hull_eq_convexHull_preimage hs]
     simp only [hg, homogenize]
-    exact Submodule.mem_span_of_mem <| Set.mem_image_of_mem hom.ofPoint hx
+    exact Submodule.mem_span_of_mem <| Set.mem_image_of_mem ℋ.ofPoint hx
   · apply C.isConvexSet.convexHull_subset_iff.mpr
     intro x hx
     simp only [Set.mem_preimage, SetLike.mem_coe] at hx
     have := Set.mem_preimage.mpr <| Submodule.mem_span_of_mem (R := {c : R // 0 ≤ c}) hx
     simp_rw [hg, homogenize] at this
-    rw [preimage_hull_eq_convexHull_preimage (Set.image_subset_range hom.ofPoint C)] at this
+    rw [preimage_hull_eq_convexHull_preimage (Set.image_subset_range ℋ.ofPoint C)] at this
     rw [← C.isConvexSet.convexHull_eq_self]
-    simpa [← C.isConvexSet.convexHull_eq_self, Set.preimage_image_eq _ hom.ofPoint_injective]
+    simpa [← C.isConvexSet.convexHull_eq_self, Set.preimage_image_eq _ ℋ.ofPoint_injective]
 
 end Ring
 
@@ -80,13 +80,13 @@ variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 variable [IsModuleConvexSpace R W]
 
-variable {hom : IsHomogenization R A W}
+variable {ℋ : IsHomogenization R A W}
 
 open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated positive cone yields a polytope. -/
 theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
-    (hc : C ≤ hom.weight.positive) : IsPolytope R (dehomogenize hom C : Set A) := by
-  rw [IsPolytope.iff_homogenize_fg hom]
+    (hc : C ≤ ℋ.weight.positive) : IsPolytope R (dehomogenize ℋ C : Set A) := by
+  rw [IsPolytope.iff_homogenize_fg ℋ]
   simpa [homogenize_dehomogenize_of_le_positive hc]
 
 end Field
