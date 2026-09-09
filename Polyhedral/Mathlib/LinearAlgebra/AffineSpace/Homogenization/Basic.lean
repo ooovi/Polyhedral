@@ -64,6 +64,25 @@ noncomputable instance IsHomogenization.canonical :
       simp
     · exact fun hx ↦ (Homogenization.weight_eq_one_iff.mp hx).imp fun _ hp ↦ hp.symm
 
+section weightOneHyperplane
+
+/-- The weight-one affine hyperplane of a linear functional. -/
+def _root_.LinearMap.weightOneHyperplane (g : W →ₗ[R] R) : AffineSubspace R W :=
+  AffineSubspace.comap g.toAffineMap (affineSpan R {(1 : R)})
+
+/-- A module is a homogenization of the weight-one hyperplane of any linear functional,
+provided that hyperplane is nonempty. -/
+instance IsHomogenization.ofWeight (g : W →ₗ[R] R) [Nonempty (g.weightOneHyperplane)] :
+    IsHomogenization R (g.weightOneHyperplane) W where
+  ofPoint := g.weightOneHyperplane.subtype
+  ofPoint_injective := g.weightOneHyperplane.subtype_injective
+  weight := g
+  ofPoint_range_eq_preimage_weight_one := by
+    rw [AffineSubspace.coe_subtype, Subtype.range_coe]
+    simp [LinearMap.weightOneHyperplane]
+
+end weightOneHyperplane
+
 namespace IsHomogenization
 
 variable [hom : IsHomogenization R A W]

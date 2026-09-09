@@ -152,7 +152,13 @@ variable [IsModuleConvexSpace R W]
 
 variable [hom : Affine.IsHomogenization R A W]
 
-omit [IsModuleConvexSpace R W] in
+omit [IsModuleConvexSpace R W] [ConvexSpace R W] [IsAffineConvexSpace R V A] in
+@[simp] lemma homogenize_singleton (p : A) :
+    homogenize W ({p} : ConvexSet R A) = R ∙₊ hom.ofPoint p := by
+  have h : (({p} : ConvexSet R A) : Set A) = {p} := rfl
+  rw [homogenize, h, Set.image_singleton]
+
+omit [IsModuleConvexSpace R W] [ConvexSpace R W] [IsAffineConvexSpace R V A] in
 /-- The homogenization of the full affine space is the positive cone of the weight functional. -/
 lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight one_pos,
@@ -164,6 +170,21 @@ lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W
     x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=
   (mem_hull_iff_mem_pos_smul_of_convex_nonzero
     (P.isConvexSet.image hom.ofPoint.isAffineMap) hx).mp h
+
+@[simp] lemma dehomogenize_hull_singleton_ofPoint (p : A) :
+    dehomogenize A (R ∙₊ hom.ofPoint p) = ({p} : ConvexSet R A) := by
+  ext q
+  constructor
+  · intro hq
+    have hq' : hom.ofPoint q ∈ R ∙₊ hom.ofPoint p := hq
+    simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop] at hq'
+    obtain ⟨c, -, hc⟩ := hq'
+    have hw := congrArg hom.weight hc
+    simp only [map_smul, hom.weight_one, smul_eq_mul, mul_one] at hw
+    rw [hw, one_smul] at hc
+    exact hom.ofPoint_injective hc ▸ rfl
+  · rintro rfl
+    exact subset_hull rfl
 
 -- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction) and then
 --  applied here as a special case.
