@@ -96,13 +96,68 @@ lemma mem_relint_iff_mem_forall_face_eq_top_of_mem :
     x ∈ C.relint ↔ x ∈ C ∧ ∀ F : Face C, x ∈ F → F = ⊤ := by
   sorry
 
+/-- A dual vector that vanishes on a relint point of `C` vanishes on all of `C`. This is the
+(unconditional) forward direction of `mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero`. -/
+lemma mem_lineal_dual_of_mem_relint (hx : x ∈ C.relint) {y : N}
+    (hy : y ∈ dual p C) (hxy : p x y = 0) : y ∈ (dual p C).lineal := by
+  rw [mem_lineal]
+  refine ⟨hy, fun z hz => ?_⟩
+  obtain ⟨-, hrel⟩ := mem_relint_iff_forall_exists_gt_zero_forall_le_add_smul_mem.mp hx
+  obtain ⟨c, hc, hmem⟩ := hrel (-z) (Submodule.neg_mem _ (Submodule.subset_span hz))
+  have h0 := hy hmem
+  simp at h0
+  rw [(p z).map_neg, neg_nonneg]
+  nlinarith [hxy]
+
+/-- For a relint point `x` of `C`, the dual vectors vanishing on `x` are exactly the lineality
+space of the dual cone. This is the membership-free form of `mem_lineal_dual_of_mem_relint`. -/
+lemma dual_inf_dual_singleton_of_mem_relint (hx : x ∈ C.relint) :
+    dual p C ⊓ (Submodule.dual p {x} : Submodule R N) = (dual p C).lineal := by
+  ext y
+  simp only [Submodule.mem_inf, mem_ofSubmodule_iff, Submodule.mem_dual,
+    Set.mem_singleton_iff, forall_eq]
+  constructor
+  · rintro ⟨hy, hxy⟩
+    exact mem_lineal_dual_of_mem_relint hx hy hxy.symm
+  · intro hy
+    refine ⟨lineal_le _ hy, ?_⟩
+    rw [← submodule_dual_span_eq_dual_lineal, Submodule.mem_dual] at hy
+    exact hy (Submodule.subset_span (relint_le hx))
+
+/-- If `C` has nonempty relint, the dual vectors vanishing on the relint are exactly the
+lineality space of the dual cone. The nonemptiness assumption cannot be dropped: for empty
+relint the left hand side is `dual p C` by `Submodule.dual_empty`, which need not be a
+submodule. -/
+lemma dual_inf_dual_relint (h : (C.relint : Set M).Nonempty) :
+    dual p C ⊓ (Submodule.dual p (C.relint : Set M) : Submodule R N) = (dual p C).lineal := by
+  obtain ⟨x, hx⟩ := h
+  refine le_antisymm ?_ ?_
+  · rw [← dual_inf_dual_singleton_of_mem_relint hx]
+    exact inf_le_inf_left _ (by
+      rw [ofSubmodule_le_ofSubmodule]
+      exact Submodule.dual_antitone (Set.singleton_subset_iff.mpr hx))
+  · intro y hy
+    refine ⟨lineal_le _ hy, ?_⟩
+    rw [mem_ofSubmodule_iff, ← submodule_dual_span_eq_dual_lineal, Submodule.mem_dual] at hy
+    exact Submodule.mem_dual.mpr fun z hz => hy (Submodule.subset_span (relint_le hz))
+
 variable [Fact p.SeparatingLeft] in
-lemma mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero :
+/-- A point of a cone of finite rank lies in the relint iff every dual vector vanishing on it
+vanishes on all of the cone. The forward direction holds without the finite rank assumption; see
+`mem_lineal_dual_of_mem_relint`. The reverse direction does not: for the lexicographic cone
+`{0} ∪ {x | the nonzero coordinate of x with largest index is positive}` on `⊕ℕ R` the dual cone
+is trivial for any pairing, so the right hand side holds vacuously while the relint is empty. -/
+lemma mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero (hC : C.FinRank) :
     x ∈ C.relint ↔ x ∈ C ∧ ∀ y ∈ dual p C, p x y = 0 → y ∈ (dual p C).lineal := by
   sorry
 
 variable [Fact p.SeparatingLeft] in
-lemma mem_relint_dual {y : N} :
+/-- Membership in the relint of the dual cone, in terms of the primal cone. Dual closedness of
+`C` cannot be dropped: for `C = {(a, b) | 0 < b} ∪ {(a, 0) | 0 ≤ a}` in `R²` every relint point
+of the dual ray annihilates `(1, 0) ∈ C`, which is not in `C.lineal = ⊥`. The finite rank
+assumption is needed for the same reason as in
+`mem_relint_iff_forall_dual_zero_le_mem_lineal_of_eq_zero`. -/
+lemma mem_relint_dual (hC : C.DualClosed p) (hfin : C.FinSalRank) {y : N} :
     y ∈ (dual p C).relint ↔ y ∈ dual p C ∧ ∀ x ∈ C, p x y = 0 → x ∈ C.lineal := by
   sorry
 
@@ -130,11 +185,15 @@ lemma relint_nonempty_of_finRank (h : C.FinRank) : Nonempty C.relint := by
   exact Submodule.subset_span hx
 
  -- potential short proof of `IsExposedFace.exists_dual_pos`
+/- NOTE: `hdc : C.DualClosed p` is necessary here as well: the cone
+`{(a, b) | b > 0} ∪ {(a, 0) | a ≥ 0}` in `R²` has finite salient rank, but no functional that is
+nonnegative on it vanishes only on its lineality space `⊥`. Given `hdc`, the assumption
+`C.FinSalRank` is equivalent to `(dual p C).FinSalRank` by `DualClosed.dual_finSalRank_iff`. -/
 variable (p) [Fact p.SeparatingLeft] in
-example {C : PointedCone R M} (hC : C.FinSalRank) :
+example {C : PointedCone R M} (hC : C.FinSalRank) (hdc : C.DualClosed p) :
     ∃ φ : N, ∀ x ∈ C, 0 ≤ p x φ ∧ (p x φ = 0 → x ∈ C.lineal) := by
   obtain ⟨φ, hφ⟩ := relint_nonempty_of_finSalRank (hC.dual_finSalRank p)
-  rw [mem_relint_dual] at hφ
+  rw [mem_relint_dual hdc hC] at hφ
   exact ⟨φ, fun _ h => ⟨by simpa using hφ.1 h, hφ.2 _ h⟩⟩
 
 lemma ofSubmodule_relint (S : Submodule R M) : (S : PointedCone R M).relint = S := by

@@ -5,7 +5,7 @@ Authors: Martin Winter
 -/
 module
 
-public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
+public import Mathlib.Algebra.Order.Nonneg.Basic
 public import Mathlib.Algebra.Order.Ring.Defs
 
 /-!

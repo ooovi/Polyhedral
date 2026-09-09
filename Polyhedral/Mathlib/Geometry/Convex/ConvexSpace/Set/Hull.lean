@@ -6,11 +6,9 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Geometry.Convex.Hull
-public import Mathlib.Geometry.Convex.ConvexSpace.Prod
+public import Polyhedral.Mathlib.Geometry.Convex.Set
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
-import Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Order.Closure
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 
@@ -29,8 +27,9 @@ open Set
 
 namespace Convexity
 
-variable {R X Y : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
-  [ConvexSpace R Y] {C s t : Set X} {x y : X}
+variable {R X Y ι : Type*}
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [ConvexSpace R Y]
 
 /-- The convex hull of a product is the product of the convex hulls. -/
 lemma convexHull_prod (s : Set X) (t : Set Y) :
@@ -49,6 +48,23 @@ lemma convexHull_prod (s : Set X) (t : Set Y) :
       .preimage (by fun_prop) .convexHull
   exact hcvx.convexHull_subset_iff.mpr step hy
 
+/-- The convex hull of the range of `f` is the image of the standard simplex `StdSimplex R ι`
+under the affine map sending weights to the corresponding convex combination of `f`.
+
+For finite `ι`, this can be interpreted as saying that a polytope is the image of some
+simplex under some affine map. -/
+lemma convexHull_range (f : ι → X) :
+    convexHull R (.range f) = .range (fun w : StdSimplex R ι ↦ iConvexComb w f) := by
+  apply Set.Subset.antisymm
+  · apply convexHull_min
+    · rintro _ ⟨i, rfl⟩
+      exact ⟨.single i, by simp⟩
+    · exact IsAffineMap.iConvexComb.isConvexSet_range
+  · rintro _ ⟨w, rfl⟩
+    apply IsConvexSet.convexHull.iConvexComb_mem
+    intro i _
+    exact subset_convexHull_self ⟨i, rfl⟩
+
 section Pointwise
 
 open Pointwise
@@ -56,7 +72,28 @@ open Pointwise
 variable {R V A : Type*}
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [AddCommGroup V] [Module R V]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
+
+@[simp]
+theorem affineSpan_convexHull (s : Set A) :
+    affineSpan R (convexHull R s : Set A) = affineSpan R s := by
+  refine le_antisymm ?_ (affineSpan_mono R subset_convexHull_self)
+  grw [affineSpan_mono, affineSpan_le_of_subset_coe le_rfl]
+  exact convexHull_min (subset_affineSpan R s) (AffineSubspace.isConvexSet _)
+
+@[simp]
+theorem vectorSpan_convexHull (s : Set A) :
+    vectorSpan R (convexHull R s : Set A) = vectorSpan R s := by
+  rw [← direction_affineSpan, affineSpan_convexHull, direction_affineSpan]
+
+variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+@[simp]
+theorem span_convexHull (s : Set V) :
+    Submodule.span R (convexHull R s : Set V) = Submodule.span R s := by
+  ext x
+  grind [Submodule.mem_span, mem_convexHull_iff, isConvexSet_coe]
 
 @[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by
   ext x
@@ -64,8 +101,6 @@ variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R 
   constructor <;> intro h t hst hcvx
   · exact neg_mem_neg.mp <| h (-t) (neg_subset.mp hst) hcvx.neg
   · exact mem_neg.mp <| h (-t) (neg_subset_neg.mpr hst) hcvx.neg
-
-variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 /-- The convex hull of a Minkowski sum is the Minkowski sum of the convex hulls, since
 translation is an affine map on the product convex space (`isAffineMap_vadd`). -/
