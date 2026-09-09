@@ -24,7 +24,7 @@ variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 variable {W : Type*} [AddCommGroup W] [Module R W] [ConvexSpace R W]
-variable [hom : Affine.IsHomogenization R A W]
+variable {hom : Affine.IsHomogenization R A W}
 
 section Module
 
@@ -75,9 +75,10 @@ theorem preimage_hull_eq_convexHull_preimage {s : Set W} (hs : s ⊆ Set.range h
     rw [hom.ofPoint.isAffineMap.image_convexHull, Set.image_preimage_eq_iff.mpr hs]
     exact (hull R s).isConvexSet.convexHull_subset_iff.mpr subset_hull
 
+variable (hom) in
 /-- The homogenization embedding of the convex hull of a set is contained in the hull of the
 embedding of the set. -/
-theorem preimage_hull_eq_convexHull_preimagke {s : Set A} :
+theorem image_hull_eq_convexHull_image {s : Set A} :
     hom.ofPoint '' Convexity.convexHull R s ⊆ hull R (hom.ofPoint '' s) := by
   apply Set.image_subset_iff.mp
   rw [hom.ofPoint.isAffineMap.image_convexHull]

@@ -28,16 +28,16 @@ variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 variable [IsModuleConvexSpace R W]
 
-variable [hom : IsHomogenization R A W]
+variable (hom : IsHomogenization R A W)
 
 open PointedCone
 
 /-- The homogenization of a polytope is a finitely generated cone. -/
 theorem IsPolytope.homogenize_fg {C : ConvexSet R A} (hCfg : IsPolytope R (C : Set A)) :
-    (homogenize W C).FG := by
+    (homogenize hom C).FG := by
   obtain ⟨t, ht⟩ := hCfg
   have : C = ⟨convexHull R t, IsConvexSet.convexHull⟩ := SetLike.ext' ht
-  have := congrArg (ConvexSet.homogenize W) this
+  have := congrArg (ConvexSet.homogenize hom) this
   rw [this]
   use t.map ⟨_, hom.ofPoint_injective⟩
   simp only [Finset.coe_map, Function.Embedding.coeFn_mk, homogenize,
@@ -47,8 +47,8 @@ theorem IsPolytope.homogenize_fg {C : ConvexSet R A} (hCfg : IsPolytope R (C : S
 
 /-- A convex set is a polytope iff its homogenization is a finitely generated cone. -/
 theorem IsPolytope.iff_homogenize_fg {C : ConvexSet R A} :
-    IsPolytope R (C : Set A) ↔ (homogenize W C).FG := by classical
-  refine ⟨homogenize_fg, fun hfg ↦ ?_⟩
+    IsPolytope R (C : Set A) ↔ (homogenize hom C).FG := by classical
+  refine ⟨homogenize_fg _, fun hfg ↦ ?_⟩
   -- get cone generators that lie in the embedding of A
   obtain ⟨g, hg, hs⟩ := homogenize_fg_ofPoint_range hfg
   -- un-embed them
@@ -80,13 +80,13 @@ variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 variable [IsModuleConvexSpace R W]
 
-variable [hom : IsHomogenization R A W]
+variable {hom : IsHomogenization R A W}
 
 open Pointwise Submodule in
 /-- Dehomogenizing a finitely generated positive cone yields a polytope. -/
 theorem FG.dehomogenize_isPolytope {C : PointedCone R W} (h : C.FG)
-    (hc : C ≤ hom.weight.positive) : IsPolytope R (dehomogenize A C : Set A) := by
-  rw [IsPolytope.iff_homogenize_fg (W := W)]
+    (hc : C ≤ hom.weight.positive) : IsPolytope R (dehomogenize hom C : Set A) := by
+  rw [IsPolytope.iff_homogenize_fg hom]
   simpa [homogenize_dehomogenize_of_le_positive hc]
 
 end Field

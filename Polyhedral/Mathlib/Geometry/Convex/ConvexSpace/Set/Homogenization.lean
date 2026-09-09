@@ -31,50 +31,52 @@ variable [AddCommGroup V] [Module R V]
 variable [AddCommGroup W] [Module R W]
 variable [AddTorsor V A] [ConvexSpace R A]
 
-variable [hom : Affine.IsHomogenization R A W]
+variable (hom : Affine.IsHomogenization R A W)
 
-variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
 def homogenize (P : ConvexSet R A) : PointedCone R W := hull R (hom.ofPoint '' P)
 
 lemma homogenize_mono {K₁ K₂ : ConvexSet R A} (h : K₁ ≤ K₂) :
-    K₁.homogenize W ≤ K₂.homogenize W := Submodule.span_mono <| Set.image_mono h
+    K₁.homogenize hom ≤ K₂.homogenize hom := Submodule.span_mono <| Set.image_mono h
 
-lemma homogenize_monotone : Monotone (homogenize W : ConvexSet R A → PointedCone R W) :=
-  fun _ _ => homogenize_mono
+lemma homogenize_monotone : Monotone (homogenize hom : ConvexSet R A → PointedCone R W) :=
+  fun _ _ => homogenize_mono _
 
 /-- Homogenization from convex set to convex cones as an order homomorphism. -/
 def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
-  toFun := homogenize W
-  monotone' := homogenize_monotone
+  toFun := homogenize hom
+  monotone' := homogenize_monotone _
 
-lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
+lemma homogenize_bot : homogenize hom (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
 
-/- NOTE: `homogenize_top`, stating `homogenize W (⊤ : ConvexSet R A) = hom.weight.positive`,
+/- NOTE: `homogenize_top`, stating `homogenize hom (⊤ : ConvexSet R A) = hom.weight.positive`,
 only holds over linearly ordered fields and is proven in the `Field` section below. Over a
 general ordered ring it fails: for `R = ℤ[ε]` with `ε` a positive infinitesimal, the point
 `(1, ε)` lies in `weight.positive` but not in the cone hull of the weight-one hyperplane, since
 all nonnegative coefficients bounded by `ε` lie in the ideal `(ε)`. -/
 
 lemma homogenize_le_weight_positive (K : ConvexSet R A) :
-    homogenize W K ≤ hom.weight.positive := by
+    homogenize hom K ≤ hom.weight.positive := by
   exact LinearMap.hull_le_positive_of_subset_preimage_singleton one_pos fun _ ↦ by
     rintro ⟨x, -, rfl⟩
     simp [hom.weight_one]
 
-lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
-    0 < hom.weight x := homogenize_le_weight_positive P h hx
+variable {hom} in
+lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize hom P) (hx : x ≠ 0) :
+    0 < hom.weight x := homogenize_le_weight_positive _ P h hx
 
-lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize W P) :
+variable {hom} in
+lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize hom P) :
     0 ≤ hom.weight x :=
-  (LinearMap.mem_positive'.mp (homogenize_le_weight_positive (W := W) P h)).1
+  (LinearMap.mem_positive'.mp (homogenize_le_weight_positive _ P h)).1
 
-lemma homogenize_salient {K : ConvexSet R A} : PointedCone.Salient (homogenize W K) :=
-  Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive K)
+lemma homogenize_salient (K : ConvexSet R A) : PointedCone.Salient (homogenize hom K) :=
+  Salient.of_le_salient hom.weight.positive_salient (homogenize_le_weight_positive _ K)
 
-theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG) :
-    ∃ g : Finset W, PointedCone.hull R g = homogenize W C ∧
+variable {hom} in
+theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize hom C).FG) :
+    ∃ g : Finset W, PointedCone.hull R g = homogenize hom C ∧
       (g : Set W) ⊆ Set.range hom.ofPoint := by
   obtain ⟨g, hg⟩ := h
   -- express each generator as a positive combo of stuff in the embedding of C
@@ -98,30 +100,27 @@ section Module
 
 variable [ConvexSpace R W] [IsModuleConvexSpace R W] [IsAffineConvexSpace R V A]
 
-variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
   ⟨_, C.isConvexSet.preimage hom.ofPoint.isAffineMap⟩
 
 alias _root_.PointedCone.dehomogenize := dehomogenize
 
-lemma dehomogenize_bot : dehomogenize A (⊥ : PointedCone R W) = ⊥ := sorry
+lemma dehomogenize_bot : dehomogenize hom (⊥ : PointedCone R W) = ⊥ := sorry
 
-lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := sorry
+lemma dehomogenize_top : dehomogenize hom (⊤ : PointedCone R W) = ⊤ := sorry
 
-lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ := sorry
+lemma dehomogenize_weight_positive : dehomogenize hom hom.weight.positive = ⊤ := sorry
 
-variable (A) in
 lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :
-    dehomogenize A C₁ ≤ dehomogenize A C₂ := Set.preimage_mono <| Set.preimage_mono h
+    dehomogenize hom C₁ ≤ dehomogenize hom C₂ := Set.preimage_mono <| Set.preimage_mono h
     -- Q: why Set.preimage_mono twice?
 
-variable (A) in
-lemma dehomogenize_monotone : Monotone (dehomogenize A : PointedCone R W → ConvexSet R A) :=
-  fun _ _ => dehomogenize_mono A
+lemma dehomogenize_monotone : Monotone (dehomogenize hom : PointedCone R W → ConvexSet R A) :=
+  fun _ _ => dehomogenize_mono _
 
 -- This lemma is just `Set.image_preimage_eq_inter_range` in disguise. It is likely not needed.
 lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
-    hom.ofPoint '' dehomogenize A C = (C : Set W) ∩ hom.ofPoint.range := by
+    hom.ofPoint '' dehomogenize hom C = (C : Set W) ∩ hom.ofPoint.range := by
   ext x
   simp only [Set.mem_image, SetLike.mem_coe, Set.mem_inter_iff, AffineMap.mem_range]
   constructor
@@ -134,7 +133,7 @@ lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
 /-- The preimage of the conic hull of a set in the homogenization plane is the convex hull of the
 preimage of the set. -/
 theorem hull_image_ofPoint_eq_homogenize_convexHull {s : Set A} :
-    hull R (hom.ofPoint '' s) = homogenize W (ConvexSet.convexHull R s) := by
+    hull R (hom.ofPoint '' s) = homogenize hom (ConvexSet.convexHull R s) := by
   simp [homogenize, ConvexSet.convexHull, hom.ofPoint.isAffineMap.image_convexHull]
 
 end Module
@@ -145,31 +144,30 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup V] [Module R V]
-variable [AddCommGroup W] [Module R W] [ConvexSpace R W]
-variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
+variable [AddCommGroup W] [Module R W]
+variable [AddTorsor V A] [ConvexSpace R A]
 
-variable [IsModuleConvexSpace R W]
+variable (hom : Affine.IsHomogenization R A W)
 
-variable [hom : Affine.IsHomogenization R A W]
-
-omit [IsModuleConvexSpace R W] in
 /-- The homogenization of the full affine space is the positive cone of the weight functional. -/
-lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
+lemma homogenize_top : homogenize hom (⊤ : ConvexSet R A) = hom.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight one_pos,
     ← hom.ofPoint_range_eq_preimage_weight_one]
   congr! with x
   simp
 
-lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
+variable [ConvexSpace R W] [IsModuleConvexSpace R W] [IsAffineConvexSpace R V A]
+
+variable {hom} in
+lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize hom P) (hx : x ≠ 0) :
     x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=
   (mem_hull_iff_mem_pos_smul_of_convex_nonzero
     (P.isConvexSet.image hom.ofPoint.isAffineMap) hx).mp h
 
 -- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction) and then
 --  applied here as a special case.
-variable (W) in
 lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
-    hom.ofPoint x ∈ homogenize W P ↔ x ∈ P := by
+    hom.ofPoint x ∈ homogenize hom P ↔ x ∈ P := by
   refine ⟨fun h ↦ ?_, fun h ↦ mem_span_of_mem (Set.mem_image_of_mem hom.ofPoint h)⟩
   obtain ⟨_, _, h'⟩ := smul_pos_of_mem_homogenize (Set.mem_preimage.mpr h) (hom.ofPoint_ne_zero x)
   obtain ⟨_, ⟨_, _, hyy'⟩, hy'⟩ := Set.mem_smul_set.mp h'
@@ -181,19 +179,20 @@ lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
 
 /-- Dehomogenizing the homogenization of a convex set yields the same set again. -/
 @[simp] theorem dehomogenize_homogenize (P : ConvexSet R A) :
-    dehomogenize A (homogenize W P) = P := by
+    dehomogenize hom (homogenize hom P) = P := by
   ext x; exact ofPoint_mem_homogenize_iff_mem _ _ _
 
-lemma homogenize_injective : Function.Injective (homogenize (hom := hom) W) := by
+lemma homogenize_injective : Function.Injective (homogenize hom) := by
   intro P Q h
-  have hh := congr_arg (ConvexSet.dehomogenize A) h
+  have hh := congr_arg (ConvexSet.dehomogenize hom) h
   simp [dehomogenize_homogenize] at hh
   assumption
 
+variable {hom} in
 /-- If the entire cone save the origin are at positive weight, homogenizing the dehomogenization
 of the homogenize yields the cone again. -/
 theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
-    (hC : C ≤ hom.weight.positive) : homogenize W (dehomogenize A C) = C := by
+    (hC : C ≤ hom.weight.positive) : homogenize hom (dehomogenize hom C) = C := by
   by_cases hbot : C = ⊥
   · simp [hbot, homogenize, dehomogenize]
   · apply SetLike.ext'
@@ -212,19 +211,19 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
     · exact C.isConvexSet.inter hom.ofPoint.range_isConvexSet
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
-    K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where
-  mp h := by simpa using dehomogenize_mono A h
-  mpr := homogenize_mono
+    K₁.homogenize hom ≤ K₂.homogenize hom ↔ K₁ ≤ K₂ where
+  mp h := by simpa using dehomogenize_mono hom h
+  mpr := homogenize_mono _
 
 -- Issue #66
 /-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the
 positive cone. -/
 def homogenizeOrderEquiv : ConvexSet R A ≃o Set.Iic hom.weight.positive where
-  toFun K := ⟨_, K.homogenize_le_weight_positive⟩
-  invFun C := dehomogenize A C.1
-  left_inv K := dehomogenize_homogenize K
+  toFun K := ⟨_, K.homogenize_le_weight_positive _⟩
+  invFun C := dehomogenize hom C.1
+  left_inv K := dehomogenize_homogenize _ K
   right_inv C := by dsimp; congr; exact homogenize_dehomogenize_of_le_positive C.2
-  map_rel_iff' := homogenize_mono_iff
+  map_rel_iff' := homogenize_mono_iff _
 
 end Field
 

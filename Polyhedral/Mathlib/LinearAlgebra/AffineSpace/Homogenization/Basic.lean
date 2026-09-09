@@ -44,7 +44,7 @@ variable (R A W) in
 weight-1 hyperplane under a given linear weight map.
 Follows Definition 4.2 in [Gallier2011GeometricMethods]
 https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
-class IsHomogenization where
+structure IsHomogenization where
   ofPoint : A →ᵃ[R] W
   ofPoint_injective : Injective ofPoint
   weight : W →ₗ[R] R
@@ -52,7 +52,7 @@ class IsHomogenization where
 
 variable (R A) in
 /-- The canonical homogenization is a homogenization. -/
-noncomputable instance IsHomogenization.canonical :
+noncomputable def IsHomogenization.canonical :
     IsHomogenization R A (Homogenization R A) where
   ofPoint := Homogenization.ofPoint
   ofPoint_injective := Homogenization.ofPoint_injective
@@ -66,7 +66,7 @@ noncomputable instance IsHomogenization.canonical :
 
 namespace IsHomogenization
 
-variable [hom : IsHomogenization R A W]
+variable (hom : IsHomogenization R A W)
 
 abbrev ofVector := hom.ofPoint.linear
 
@@ -85,7 +85,7 @@ theorem ofVector_range_eq_weight_ker : hom.ofVector.range = hom.weight.ker := by
   constructor
   · rintro ⟨a, b, hab⟩
     simp only [Set.mem_preimage, Set.mem_singleton_iff] at hh
-    simp [← hab, map_sub, (hh (ofPoint b)).mp ⟨b, rfl⟩, (hh (ofPoint a)).mp ⟨a, rfl⟩]
+    simp [← hab, map_sub, (hh (hom.ofPoint b)).mp ⟨b, rfl⟩, (hh (hom.ofPoint a)).mp ⟨a, rfl⟩]
   · intro h
     have ha := Set.mem_preimage.mp <| (hh (hom.ofPoint a₀)).mp (by simp)
     obtain ⟨b, hb⟩ : x + hom.ofPoint a₀ ∈ (Set.range hom.ofPoint) := by
@@ -101,7 +101,7 @@ variable [Nontrivial R] in
 theorem ofPoint_ne_zero (x : A) : hom.ofPoint x ≠ (0 : W) := by
   intro hn
   have := congrArg hom.weight hn
-  simp [weight_one x] at this
+  simp [hom.weight_one x] at this
 
 /-- The homogenization of a point in `V` has weight 0. -/
 lemma weight_zero (v : V) : hom.weight (hom.ofVector v) = 0 := by
@@ -113,7 +113,7 @@ theorem span_range_ofPoint : span R (Set.range hom.ofPoint) = ⊤ := by
   -- projecting x to weight 0 along a₀ gives sth in the span of image of ofPoint
   have hlin : x - hom.weight x • hom.ofPoint a₀ ∈ Submodule.span R hom.ofPoint.range := by
     obtain ⟨v, hv⟩ : x - hom.weight x • hom.ofPoint a₀ ∈ hom.ofVector.range := by
-      simp [ofVector_range_eq_weight_ker, weight_one a₀]
+      simp [ofVector_range_eq_weight_ker, hom.weight_one a₀]
     have : hom.ofVector v = hom.ofPoint (v +ᵥ a₀) - hom.ofPoint a₀ := by simp
     rw [← hv, this]
     apply Submodule.sub_mem <;> apply Submodule.subset_span
@@ -122,7 +122,6 @@ theorem span_range_ofPoint : span R (Set.range hom.ofPoint) = ⊤ := by
   simpa using
     Submodule.add_mem _ hlin <| smul_mem _ (hom.weight x) (subset_span ⟨a₀, rfl⟩)
 
-variable (hom) in
 /-- The canonical linear map from `Homogenization R A` to any homogenization `W` of `A`. -/
 noncomputable def ofCanonical : Homogenization R A →ₗ[R] W := Homogenization.lift hom.ofPoint
 
@@ -147,7 +146,7 @@ theorem ofCanonical_bijective : Bijective hom.ofCanonical := by
   · rw [injective_iff_map_eq_zero]
     intro x hx
     have hw : Homogenization.weight x = 0 := by
-      rw [← weight_ofCanonical (W := W) x, hx, map_zero]
+      rw [← hom.weight_ofCanonical x, hx, map_zero]
     obtain ⟨v, rfl⟩ := Homogenization.weight_eq_zero_iff.mp hw
     rw [ofCanonical_ofVector, map_eq_zero_iff _ hom.ofVector_injective] at hx
     simp [hx]
@@ -176,7 +175,7 @@ theorem canonEquiv_canonical_ofPoint :
 
 theorem weight_canonEquiv : Homogenization.weight ∘ hom.canonEquiv = hom.weight := by
   ext x
-  rw [Function.comp_apply, ← weight_ofCanonical (W := W) (hom.canonEquiv x),
+  rw [Function.comp_apply, ← hom.weight_ofCanonical (hom.canonEquiv x),
     ofCanonical_canonEquiv]
 
 -- proving the universal property using the equiv
@@ -199,9 +198,9 @@ noncomputable def ofVectorRangeEquiv : V ≃ₗ[R] hom.ofVector.range := {
   map_add' v w := by simp
   map_smul' r v := by simp
   invFun :=
-    (ofInjective hom.ofVector (linear_injective_iff _ |>.mpr ofPoint_injective)).invFun
+    (ofInjective hom.ofVector (linear_injective_iff _ |>.mpr hom.ofPoint_injective)).invFun
   left_inv :=
-    (ofInjective hom.ofVector (linear_injective_iff _ |>.mpr ofPoint_injective)).left_inv
+    (ofInjective hom.ofVector (linear_injective_iff _ |>.mpr hom.ofPoint_injective)).left_inv
   right_inv v' := by simp
 }
 
@@ -211,9 +210,9 @@ public noncomputable def ofPointRangeEquiv : A ≃ᵃ[R] hom.ofPoint.range :=
     ⟨hom.ofPoint.rangeRestrict_injective_iff.mpr hom.ofPoint_injective, fun ⟨_, a, rfl⟩ => ⟨a, rfl⟩⟩
 
 lemma apply_ofPointRangeEquiv_symm (x : hom.ofPoint.range) :
-    hom.ofPoint (ofPointRangeEquiv.symm x) = x := by
-  rw [← ofPointRangeEquiv.right_inv x]
-  congr; exact ofPointRangeEquiv.symm_apply_apply _
+    hom.ofPoint (hom.ofPointRangeEquiv.symm x) = x := by
+  rw [← hom.ofPointRangeEquiv.right_inv x]
+  congr; exact hom.ofPointRangeEquiv.symm_apply_apply _
 
 end IsHomogenization
 

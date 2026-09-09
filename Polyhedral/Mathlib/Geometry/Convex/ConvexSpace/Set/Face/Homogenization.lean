@@ -28,8 +28,9 @@ variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
 variable [IsModuleConvexSpace R W]
 
-variable [hom : Affine.IsHomogenization R A W]
+variable (hom : Affine.IsHomogenization R A W)
 
+variable {hom} in
 /-- If the homogenization of a point `q` is a positive combination of the homogenization
 of two other points, then `q` lies in the open segment between them. -/
 theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
@@ -48,11 +49,11 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
 /-- If `F` is a face of `P`, then the homogenization of `F` is a face of the homogenization
 of `P`. -/
 theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
-    (F.homogenize W).IsFaceOf (P.homogenize W) where
-  le := homogenizeOrderHom.monotone' he.le
+    (F.homogenize hom).IsFaceOf (P.homogenize hom) where
+  le := (homogenizeOrderHom hom).monotone' he.le
   mem_of_smul_add_mem := by
     intro v w a hv hw ha hvw
-    have hhom : (P.homogenize W).Salient := homogenize_salient
+    have hhom := homogenize_salient hom P
     by_cases hnf : (F : Set A).Nonempty
     · have cF := F.isConvexSet.image hom.ofPoint.isAffineMap
       apply (Set.ext_iff.mp (PointedCone.hull_eq_smul (hnf.image _) cF) _).mpr
@@ -72,11 +73,11 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
           obtain ⟨rv, rv0, _, ⟨p', pp, rfl⟩, _, _⟩ := smul_pos_of_mem_homogenize hv hv0
           have : a • (rv • hom.ofPoint p') + (rw • hom.ofPoint q') ≠ 0 := by
             intro hc
-            exact (smul_ne_zero rw0.ne.symm (ofPoint_ne_zero q')) <|
+            exact (smul_ne_zero rw0.ne.symm (hom.ofPoint_ne_zero q')) <|
               hhom _ hw _ (PointedCone.smul_mem _ ha.le hv) (by simpa [add_comm] using hc)
           obtain ⟨_, rvw0, _, ⟨_, qqp, rfl⟩, pdp⟩ := smul_pos_of_mem_homogenize hvw this
           have := he.left_mem_of_mem_openSegment pp qq qqp ?_
-          · refine ⟨rv, rv0.le, smul_mem_smul_set <| mem_image_of_mem ofPoint this⟩
+          · refine ⟨rv, rv0.le, smul_mem_smul_set <| mem_image_of_mem hom.ofPoint this⟩
           rw [← smul_assoc _ rv] at pdp
           exact pos_combo_openSegment (smul_pos ha rv0) rw0 rvw0 pdp.symm
     · have := not_nonempty_iff_eq_empty.mp hnf
@@ -89,11 +90,10 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
         rw [this]
         exact PointedCone.smul_mem _ (by positivity) hw) (add_neg_cancel v)
 
-variable (A) in
 /-- If `F` is a face of `C`, then the dehomogenization of `F` is a face of the dehomogenization
 of `C`. -/
 theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
-    (ConvexSet.dehomogenize A F).IsFaceOf (ConvexSet.dehomogenize A C) where
+    (ConvexSet.dehomogenize hom F).IsFaceOf (ConvexSet.dehomogenize hom C) where
   le := preimage_mono (fun _ x ↦ hf.le x)
   left_mem_of_mem_openSegment  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
@@ -107,16 +107,16 @@ its homogenization cone.
 This isomorphism is used to translate results between face lattices of cones and face lattices
 of convex sets.
 -/
-def Face.homogenizeIso {P : ConvexSet R A} :
-    Face P ≃o PointedCone.Face (P.homogenize W) where
+def Face.homogenizeIso (P : ConvexSet R A) :
+    Face P ≃o PointedCone.Face (P.homogenize hom) where
   toFun F := ⟨_, hom.homogenize_isFaceOf F.isFaceOf⟩
-  invFun F := ⟨dehomogenize A F.toSubmodule,
-    by simpa [dehomogenize_homogenize] using dehomogenize_isFaceOf A F.isFaceOf⟩
+  invFun F := ⟨dehomogenize hom F.toSubmodule,
+    by simpa [dehomogenize_homogenize hom] using dehomogenize_isFaceOf hom F.isFaceOf⟩
   map_rel_iff' := by
     intro a b
     refine ⟨fun h x xm ↦ ?_, fun h _ xm ↦ span_mono (image_mono h) xm⟩
-    refine (ofPoint_mem_homogenize_iff_mem W x b.toConvexSet).mp (h ?_)
-    exact (ofPoint_mem_homogenize_iff_mem W x a.toConvexSet).mpr xm
+    refine (ofPoint_mem_homogenize_iff_mem _ x b.toConvexSet).mp (h ?_)
+    exact (ofPoint_mem_homogenize_iff_mem _ x a.toConvexSet).mpr xm
   left_inv _ := by simp [dehomogenize_homogenize]
   right_inv F := by
     have := homogenize_dehomogenize_of_le_positive
