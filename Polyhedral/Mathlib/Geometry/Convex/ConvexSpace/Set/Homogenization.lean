@@ -71,11 +71,11 @@ lemma homogenize_le_weight_positive (K : ConvexSet R A) :
     rintro ⟨x, -, rfl⟩
     simp [ℋ.weight_one]
 
-variable {hom} in
+variable {ℋ} in
 lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize ℋ P) (hx : x ≠ 0) :
     0 < ℋ.weight x := homogenize_le_weight_positive _ P h hx
 
-variable {hom} in
+variable {ℋ} in
 lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ homogenize ℋ P) :
     0 ≤ ℋ.weight x :=
   (LinearMap.mem_positive'.mp (homogenize_le_weight_positive _ P h)).1
@@ -83,7 +83,7 @@ lemma weight_nonneg_of_mem_homogenize {x : W} {P : ConvexSet R A} (h : x ∈ hom
 lemma homogenize_salient (K : ConvexSet R A) : PointedCone.Salient (homogenize ℋ K) :=
   Salient.of_le_salient ℋ.weight.positive_salient (homogenize_le_weight_positive _ K)
 
-variable {hom} in
+variable {ℋ} in
 theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize ℋ C).FG) :
     ∃ g : Finset W, PointedCone.hull R g = homogenize ℋ C ∧
       (g : Set W) ⊆ Set.range ℋ.ofPoint := by
