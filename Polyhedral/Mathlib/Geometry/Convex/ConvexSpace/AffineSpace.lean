@@ -10,8 +10,6 @@ public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Mathlib.Geometry.Convex.ConvexSpace.Module
 public import Mathlib.Geometry.Convex.ConvexSpace.Prod
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
-
 /-!
 # Convex combinations in affine convex spaces
 
@@ -23,16 +21,50 @@ are affine maps on the product convex space, together with the compositional for
 
 -/
 
-@[expose] public section
+public section
+
+open Convexity Finset AddTorsor
+open scoped Pointwise
+
+namespace AffineMap
+variable {R V₁ V₂ P₁ P₂ : Type*}
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V₁] [Module R V₁] [AddTorsor V₁ P₁]
+variable [AddCommGroup V₂] [Module R V₂] [AddTorsor V₂ P₂]
+variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
+variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
+variable (f : P₁ →ᵃ[R] P₂)
+
+-- PR #39437
+lemma isAffineMap : IsAffineMap R f where
+  map_sConvexComb s := by
+    rw [sConvexComb_eq_affineCombination, sConvexComb_map, iConvexComb_eq_affineCombination]
+    simpa only [Function.comp_id] using
+      map_affineCombination (s := s.weights.support) _root_.id s.weights s.total f
+
+@[simp] lemma map_sConvexComb (w : StdSimplex R P₁) :
+    f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
+
+lemma isConvexSet_image {s : Set P₁} (hs : IsConvexSet R s) : IsConvexSet R (f '' s) :=
+  hs.image f.isAffineMap
+
+lemma isConvexSet_range : IsConvexSet R (Set.range f) := by
+  simpa using f.isConvexSet_image .univ
+
+end AffineMap
 
 namespace Convexity
-
-open AddTorsor
-
 variable {R V P I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [AddTorsor V P]
 variable [ConvexSpace R P] [IsAffineConvexSpace R V P]
+
+lemma _root_.AffineSubspace.isConvexSet (S : AffineSubspace R P) : IsConvexSet R (S : Set P) := by
+  refine .of_sConvexComb_mem fun w hw ↦ ?_
+  rw [sConvexComb_eq_convexComb (V := V), AddTorsor.convexCombination, ← S.affineSpan_coe,
+    ← (S : Set P).image_id]
+  exact affineCombination_mem_affineSpan_image (by simpa [Finsupp.sum] using w.total) (by grind) _
+
 variable [ConvexSpace R V] [IsModuleConvexSpace R V]
 
 /-- A convex combination of pointwise translates splits as the convex combination of the
@@ -80,5 +112,19 @@ This is the compositional form of `isAffineMap_vsub` for use by `fun_prop`. -/
 lemma IsAffineMap.vsub {X : Type*} [ConvexSpace R X] {f g : X → P}
     (hf : IsAffineMap R f) (hg : IsAffineMap R g) : IsAffineMap R fun x => f x -ᵥ g x :=
   isAffineMap_vsub.comp (hf.prodMk hg)
+
+protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set P} (hK₁ : IsConvexSet R K₁)
+    (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ +ᵥ K₂) := by
+  rw [← Set.vadd_image_prod]; exact (hK₁.prod hK₂).image isAffineMap_vadd
+
+lemma IsConvexSet.vadd_set (v : V) {K : Set P} (hK : IsConvexSet R K) : IsConvexSet R (v +ᵥ K) := by
+  rw [← Set.singleton_vadd]; exact .vadd .singleton hK
+
+/- TODO: there should also be a version `(K : ConvexSet R V) +ᵥ (p : A)`, but there is not even
+a version for sets yet. -/
+
+protected lemma IsConvexSet.vsub {K₁ K₂ : Set P} (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) :
+    IsConvexSet R (K₁ -ᵥ K₂) := by
+  rw [← Set.image_vsub_prod]; exact (hK₁.prod hK₂).image isAffineMap_vsub
 
 end Convexity

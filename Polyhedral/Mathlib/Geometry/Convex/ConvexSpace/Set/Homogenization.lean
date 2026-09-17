@@ -9,7 +9,6 @@ public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines homogenization of convex sets in affine spaces. -/
@@ -162,20 +161,19 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup V] [Module R V]
-variable [AddCommGroup W] [Module R W] [ConvexSpace R W]
-variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
-
-variable [IsModuleConvexSpace R W]
+variable [AddCommGroup W] [Module R W]
+variable [AddTorsor V A] [ConvexSpace R A]
 
 variable [hom : Affine.IsHomogenization R A W]
 
-omit [IsModuleConvexSpace R W] in
 /-- The homogenization of the full affine space is the positive cone of the weight functional. -/
 lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight one_pos,
     ← hom.ofPoint_range_eq_preimage_weight_one]
   congr! with x
   simp
+
+variable [ConvexSpace R W] [IsAffineConvexSpace R V A] [IsModuleConvexSpace R W]
 
 lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize W P) (hx : x ≠ 0) :
     x ∈ Set.Ioi (0 : R) • hom.ofPoint '' (P : Set A) :=
@@ -226,7 +224,7 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
         simpa [y', hom.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       exact ⟨y', hy'C, hy'⟩
-    · exact C.isConvexSet.inter hom.ofPoint.range_isConvexSet
+    · exact C.isConvexSet.inter hom.ofPoint.isConvexSet_range
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
     K₁.homogenize W ≤ K₂.homogenize W ↔ K₁ ≤ K₂ where

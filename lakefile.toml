@@ -9,6 +9,7 @@ autoImplicit = false
 relaxedAutoImplicit = false
 warn.sorry = false
 weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false
 maxSynthPendingDepth = 3
 
 [[require]]
@@ -23,6 +24,7 @@ rev = "main"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
+rev = "v4.34.0"
 
 [[lean_lib]]
 name = "Polyhedral"
