@@ -54,10 +54,10 @@ theorem exists_sConvexComb_preimage_of_mem_hull {x} {s : Set W} (hs : s ⊆ Set.
     have hsum : c.sum (fun a b => b * ℋ.weight a) = c.sum (fun a b => b) := by
         refine Finsupp.sum_congr (fun a h => ?_)
         obtain ⟨_, _, rfl⟩ := (ha.trans hs) h
-        simp [ℋ.weight_one]
+        simp [ℋ.weight_ofPoint]
     -- apply weights map to both sides
     have := congrArg ℋ.weight hc
-    simp only [map_finsuppSum, map_smul, smul_eq_mul, hsum, ℋ.weight_one] at this
+    simp only [map_finsuppSum, map_smul, smul_eq_mul, hsum, ℋ.weight_ofPoint] at this
     rw [← this]
     simp only [Finsupp.sum, Finsupp.comapDomain_support, Finsupp.comapDomain_apply]
     rw [Finset.sum_preimage ℋ.ofPoint _ (ℋ.ofPoint_injective.injOn)]

@@ -127,7 +127,7 @@ variable [Nontrivial R]
     rintro (h | ⟨x, ⟨y, hy, rfl⟩, r, h⟩)
     · exfalso; exact ofPoint_ne_zero _ _ h
     · have := congrArg ℋ.weight h
-      simp only [weight_one, ← Nonneg.coe_smul, map_smul, smul_eq_mul, mul_one,
+      simp only [weight_ofPoint, ← Nonneg.coe_smul, map_smul, smul_eq_mul, mul_one,
         Eq.comm, Nonneg.coe_eq_one] at this
       rw [this, one_smul] at h
       rwa [ℋ.ofPoint_injective h]
@@ -250,11 +250,11 @@ variable (ℋ : IsHomogenization R A W)
 
 @[simp] lemma dehomogenize_weight_positive :
     dehomogenize ℋ (ℋ.weight.positive : SubMulAction₀ R≥0 W) = Set.univ := by
-  ext x; simp [dehomogenize, weight_one]
+  ext x; simp [dehomogenize, weight_ofPoint]
 
 lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
     R≥0 ∙ (Set.range ℋ.ofPoint) ≤ ℋ.weight.positive := by
-  rw [ofPoint_range_eq_preimage_weight_one]
+  rw [ofPoint_range_eq_preimage_weight_ofPoint]
   exact nonneg_smulSet_preimage_one_le_positive _
 
 @[simp] lemma homogenize_univ_le_weight_positive :
@@ -292,7 +292,7 @@ variable (ℋ : IsHomogenization R A W)
     · exfalso
       exact smul_ne_zero hr.ne.symm (ofPoint_ne_zero _ x) h
     · have := congrArg ℋ.weight h
-      simp only [map_smul, weight_one, smul_eq_mul, mul_one, Nonneg.mk_smul] at this
+      simp only [map_smul, weight_ofPoint, smul_eq_mul, mul_one, Nonneg.mk_smul] at this
       rw [this] at hr h
       rw [Nonneg.mk_smul, smul_right_inj hr.ne.symm, ℋ.ofPoint_injective.eq_iff] at h
       rwa [h]
@@ -339,7 +339,7 @@ variable (ℋ : IsHomogenization R A W)
 
 lemma nonneg_smulSet_ofPoint_range :
     R≥0 ∙ (Set.range ℋ.ofPoint) = ℋ.weight.positive := by
-  rw [ofPoint_range_eq_preimage_weight_one]
+  rw [ofPoint_range_eq_preimage_weight_ofPoint]
   exact nonneg_smulSet_preimage_one_eq_positive _
 
 @[simp] lemma homogenize_univ : homogenize ℋ (Set.univ : Set A) = ℋ.weight.positive := by

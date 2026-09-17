@@ -69,7 +69,7 @@ lemma homogenize_le_weight_positive (K : ConvexSet R A) :
     homogenize ℋ K ≤ ℋ.weight.positive := by
   exact LinearMap.hull_le_positive_of_subset_preimage_singleton one_pos fun _ ↦ by
     rintro ⟨x, -, rfl⟩
-    simp [ℋ.weight_one]
+    simp [ℋ.weight_ofPoint]
 
 variable {ℋ} in
 lemma weight_pos_of_mem_homogenize {x} {P : ConvexSet R A} (h : x ∈ homogenize ℋ P) (hx : x ≠ 0) :
@@ -126,7 +126,7 @@ lemma dehomogenize_top : dehomogenize ℋ (⊤ : PointedCone R W) = ⊤ := by
 
 @[simp]
 lemma dehomogenize_weight_positive : dehomogenize ℋ ℋ.weight.positive = ⊤ :=
-  SetLike.eq_top_of_forall fun _ ↦ LinearMap.mem_positive'.mpr (by simp [ℋ.weight_one])
+  SetLike.eq_top_of_forall fun _ ↦ LinearMap.mem_positive'.mpr (by simp [ℋ.weight_ofPoint])
 
 lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :
     dehomogenize ℋ C₁ ≤ dehomogenize ℋ C₂ := Set.preimage_mono <| Set.preimage_mono h
@@ -169,7 +169,7 @@ variable (ℋ : Affine.IsHomogenization R A W)
 /-- The homogenization of the full affine space is the positive cone of the weight functional. -/
 lemma homogenize_top : homogenize ℋ (⊤ : ConvexSet R A) = ℋ.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton ℋ.weight one_pos,
-    ← ℋ.ofPoint_range_eq_preimage_weight_one]
+    ← ℋ.ofPoint_range_eq_preimage_weight_ofPoint]
   congr! with x
   simp
 
@@ -189,7 +189,7 @@ lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
   obtain ⟨_, _, h'⟩ := smul_pos_of_mem_homogenize (Set.mem_preimage.mpr h) (ℋ.ofPoint_ne_zero x)
   obtain ⟨_, ⟨_, _, hyy'⟩, hy'⟩ := Set.mem_smul_set.mp h'
   have := congrArg ℋ.weight hy'
-  simp [← hyy', ℋ.weight_one] at this
+  simp [← hyy', ℋ.weight_ofPoint] at this
   simp only [this, Set.mem_image, one_smul, exists_eq_right] at h'
   obtain ⟨_, _, hxx'⟩ := h'
   simpa [← ℋ.ofPoint_injective hxx']
@@ -215,14 +215,14 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
   · apply SetLike.ext'
     unfold homogenize
     rw [eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot hC zero_lt_one hbot,
-      ofPoint_dehomogenize_eq_inter_ofPoint, ← ℋ.ofPoint_range_eq_preimage_weight_one]
+      ofPoint_dehomogenize_eq_inter_ofPoint, ← ℋ.ofPoint_range_eq_preimage_weight_ofPoint]
     apply hull_eq_smul
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
       let y' := (ℋ.weight y)⁻¹ • y
       have hy'C : y' ∈ C :=
         C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
       have hy' : y' ∈ Set.range ℋ.ofPoint := by
-        simpa [y', ℋ.ofPoint_range_eq_preimage_weight_one]
+        simpa [y', ℋ.ofPoint_range_eq_preimage_weight_ofPoint]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       exact ⟨y', hy'C, hy'⟩
     · exact C.isConvexSet.inter ℋ.ofPoint.range_isConvexSet

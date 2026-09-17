@@ -37,7 +37,7 @@ theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
     (h₁ : 0 < r₁) (h₂ : 0 < r₂) (hₜ : 0 < t)
     (h : r₁ • ℋ.ofPoint p₁ + r₂ • ℋ.ofPoint p₂ = t • ℋ.ofPoint q) :
       q ∈ Convexity.openSegment R p₁ p₂ := by
-  have : r₁ + r₂ = t := by simpa [ℋ.weight_one, map_add, map_smul] using congr_arg ℋ.weight h
+  have : r₁ + r₂ = t := by simpa [ℋ.weight_ofPoint, map_add, map_smul] using congr_arg ℋ.weight h
   have : t⁻¹ • r₁ + t⁻¹ • r₂ = 1 := by
       simp_rw [← smul_add, smul_eq_mul, this, mul_comm, Field.mul_inv_cancel _ hₜ.ne.symm]
   use (t⁻¹ • r₁), (t⁻¹ • r₂), (smul_pos (by positivity) h₁), (smul_pos (by positivity) h₂), this
