@@ -6,11 +6,10 @@ Authors: Olivia Röhrig, Martin Winter
 module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
-import Mathlib.Geometry.Convex.ConvexSpace.Module
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 
 /-!
 # Pointed cones in `ConvexSpace`s
@@ -32,8 +31,7 @@ section Ring
 variable {R M : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
     [Module R M] [ConvexSpace R M] [IsModuleConvexSpace R M] {s : Set M}
 
-lemma isConvexSet (P : PointedCone R M) :
-    IsConvexSet R (P : Set M) := by
+lemma isConvexSet (P : PointedCone R M) : IsConvexSet R (P : Set M) := by
   refine .of_sConvexComb_mem fun w hw ↦ ?_
   rw [sConvexComb_eq_sum w]
   refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
