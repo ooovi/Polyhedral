@@ -169,7 +169,7 @@ variable [IsModuleConvexSpace R W]
 
 variable [hom : Affine.IsHomogenization R A W]
 
-omit [IsModuleConvexSpace R W] in
+omit [ConvexSpace R W] [IsAffineConvexSpace R V A] [IsModuleConvexSpace R W] in
 /-- The homogenization of the full affine space is the positive cone of the weight functional. -/
 lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton hom.weight one_pos,

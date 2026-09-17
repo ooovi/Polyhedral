@@ -10,8 +10,6 @@ public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Mathlib.Geometry.Convex.ConvexSpace.Module
 public import Mathlib.Geometry.Convex.ConvexSpace.Prod
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
-
 /-!
 # Convex combinations in affine convex spaces
 

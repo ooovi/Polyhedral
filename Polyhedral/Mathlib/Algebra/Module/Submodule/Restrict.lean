@@ -290,7 +290,7 @@ noncomputable def quot_restrict_iso_sup_quot_restrict (S T : Submodule R M) :
   See `quot_restrict_quot_linearMap_injective` for the proof of injectivity. -/
 def quot_restrict_linearMap_quot (S T : Submodule R M) : S ⧸ restrict S T →ₗ[R] M ⧸ T :=
     liftQ _ (T.mkQ ∘ₗ S.subtype) (by
-      simp only [restrict_eq_comap_subtype, SetLike.le_def, mem_comap, subtype_apply, mem_ker,
+      simp only [restrict_eq_comap_subtype, IsConcreteLE.le_iff, mem_comap, subtype_apply, mem_ker,
         coe_comp, coe_subtype, Function.comp_apply, mkQ_apply, Subtype.forall]
       exact fun _ _ => (Quotient.mk_eq_zero T).mpr)
 
@@ -298,7 +298,7 @@ lemma quot_restrict_linearMap_quot_injective (S T : Submodule R M) :
     Injective (quot_restrict_linearMap_quot S T) := by
   rw [← ker_eq_bot]
   apply ker_liftQ_eq_bot
-  simp only [restrict_eq_comap_subtype, SetLike.le_def, mem_ker, coe_comp, coe_subtype,
+  simp only [restrict_eq_comap_subtype, IsConcreteLE.le_iff, mem_ker, coe_comp, coe_subtype,
     Function.comp_apply, mkQ_apply, mem_comap, subtype_apply, Subtype.forall]
   exact fun _ _ => (Quotient.mk_eq_zero _).mp
 

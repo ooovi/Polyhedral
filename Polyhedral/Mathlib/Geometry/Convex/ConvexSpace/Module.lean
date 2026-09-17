@@ -7,9 +7,9 @@ module
 
 public import Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 public import Mathlib.Geometry.Convex.ConvexSpace.Module
+public import Mathlib.Geometry.Convex.ConvexSpace.Prod
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Order
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 
 import Mathlib.Geometry.Convex.Set
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
@@ -35,11 +35,6 @@ variable {R M N : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 section IsModuleConvexSpace
 variable [AddCommMonoid M] [Module R M] [AddCommMonoid N] [Module R N]
   [ConvexSpace R M] [IsModuleConvexSpace R M] [ConvexSpace R N] [IsModuleConvexSpace R N]
-
-@[fun_prop]
-lemma IsAffineMap.linearMap (h : M →ₗ[R] N) : IsAffineMap R h where
-  map_sConvexComb w := by
-    simp [sConvexComb_eq_sum, map_finsuppSum, Finsupp.sum_mapDomain_index, add_smul]
 
 alias _root_.LinearMap.isAffineMap := IsAffineMap.linearMap
 
@@ -178,11 +173,6 @@ variable {R S X N : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 section AddCommMonoid
 variable [AddCommMonoid N] [Module R N] [ConvexSpace R N] [IsModuleConvexSpace R N] {f g : X → N}
 
-/-- Addition on a module is affine as a map from the product convex space. -/
-@[fun_prop]
-lemma isAffineMap_add : IsAffineMap R fun p : N × N ↦ p.1 + p.2 :=
-  .linearMap (LinearMap.fst R N N + LinearMap.snd R N N)
-
 /-- The pointwise sum of two affine maps into a module is affine.
 
 This generalises `Convexity.IsAffineMap.add`, which assumes the domain to be a module rather than
@@ -191,31 +181,10 @@ merely a convex space. -/
 lemma IsAffineMap.add' (hf : IsAffineMap R f) (hg : IsAffineMap R g) : IsAffineMap R (f + g) :=
   isAffineMap_add.comp (hf.prodMk hg)
 
-section SMul
-variable [Monoid S] [DistribMulAction S N] [SMulCommClass R S N]
-
-/-- Scaling by a fixed scalar is affine. -/
-@[fun_prop]
-lemma isAffineMap_const_smul (s : S) : IsAffineMap R fun x : N ↦ s • x where
-  map_sConvexComb w := by
-    rw [sConvexComb_eq_sum, sConvexComb_eq_sum, StdSimplex.weights_map,
-      Finsupp.sum_mapDomain_index (by simp) fun _ b₁ b₂ ↦ add_smul b₁ b₂ _, Finsupp.smul_sum]
-    exact Finsupp.sum_congr fun i _ ↦ (smul_comm _ s i).symm
-
-/-- The pointwise scaling of an affine map into a module is affine. -/
-@[fun_prop]
-lemma IsAffineMap.const_smul (hf : IsAffineMap R f) (s : S) : IsAffineMap R (s • f) :=
-  (isAffineMap_const_smul s).comp hf
-
-end SMul
 end AddCommMonoid
 
 section AddCommGroup
 variable [AddCommGroup N] [Module R N] [ConvexSpace R N] [IsModuleConvexSpace R N] {f g : X → N}
-
-/-- Negation on a module is affine. -/
-@[fun_prop]
-lemma isAffineMap_neg : IsAffineMap R fun x : N ↦ -x := .linearMap (-LinearMap.id)
 
 /-- The pointwise negation of an affine map into a module is affine.
 
@@ -267,10 +236,10 @@ lemma coe_add (f g : ConvexSpace.AffineMap R X N) : ⇑(f + g) = ⇑f + ⇑g := 
 lemma add_apply (f g : ConvexSpace.AffineMap R X N) (x : X) : (f + g) x = f x + g x := rfl
 
 section SMul
-variable [Monoid S] [DistribMulAction S N] [SMulCommClass R S N]
+variable [Monoid S] [DistribMulAction S N] [SMulCommClass S R N]
 
 instance : SMul S (ConvexSpace.AffineMap R X N) where
-  smul s f := ⟨s • f, f.isAffineMap.const_smul s⟩
+  smul s f := ⟨s • f, f.isAffineMap.const_smul⟩
 
 @[simp, norm_cast]
 lemma coe_smul (s : S) (f : ConvexSpace.AffineMap R X N) : ⇑(s • f) = s • ⇑f := rfl
@@ -301,12 +270,12 @@ lemma coe_sum {ι : Type*} (s : Finset ι) (f : ι → ConvexSpace.AffineMap R X
 lemma sum_apply {ι : Type*} (s : Finset ι) (f : ι → ConvexSpace.AffineMap R X N) (x : X) :
     (∑ i ∈ s, f i) x = ∑ i ∈ s, f i x := by rw [coe_sum, Finset.sum_apply]
 
-instance [Monoid S] [DistribMulAction S N] [SMulCommClass R S N] :
+instance [Monoid S] [DistribMulAction S N] [SMulCommClass S R N] :
     DistribMulAction S (ConvexSpace.AffineMap R X N) :=
   DFunLike.coe_injective.distribMulAction (coeFnAddMonoidHom R X N) fun _ _ ↦ rfl
 
 /-- The affine maps from a convex space to an `S`-module form an `S`-module. -/
-instance instModule [Semiring S] [Module S N] [SMulCommClass R S N] :
+instance instModule [Semiring S] [Module S N] [SMulCommClass S R N] :
     Module S (ConvexSpace.AffineMap R X N) :=
   DFunLike.coe_injective.module S (coeFnAddMonoidHom R X N) fun _ _ ↦ rfl
 

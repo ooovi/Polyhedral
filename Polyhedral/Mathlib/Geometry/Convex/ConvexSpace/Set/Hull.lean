@@ -9,8 +9,8 @@ public import Mathlib.Geometry.Convex.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.Set
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
+import Mathlib.Geometry.Convex.ConvexSpace.Prod
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 
 /-!
 # IsConvexSet hull
@@ -18,8 +18,6 @@ import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
 This file defines the convex hull of a set in a convex space. `convexHull R s` is the smallest
 convex set containing `s`. In order theory speak, this is a closure operator.
 -/
-
-public section
 
 public section
 
