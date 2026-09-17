@@ -192,6 +192,11 @@ def ofWeight (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineM
     IsHomogenization R ((affineSpan R {1}).comap g.toAffineMap) W :=
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
+@[simp]
+lemma ofWeight_weight (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
+    (ofWeight g).weight = g := by
+  simp [ofWeight, ofEmbed_weight]
+
 end Instances
 
 end IsHomogenization

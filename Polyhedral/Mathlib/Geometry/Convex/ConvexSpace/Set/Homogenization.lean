@@ -48,6 +48,11 @@ def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
   monotone' := homogenize_monotone _
 
 @[simp]
+lemma homogenize_singleton (p : A) : homogenize ℋ ({p} : ConvexSet R A) = R ∙₊ ℋ.ofPoint p := by
+  have h : (({p} : ConvexSet R A) : Set A) = {p} := rfl
+  rw [homogenize, h, Set.image_singleton]
+
+@[simp]
 lemma homogenize_bot : homogenize ℋ (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
 
