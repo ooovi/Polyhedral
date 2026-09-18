@@ -34,10 +34,9 @@ noncomputable def rank (s : Set A) := Module.rank R (affineSpan R s).direction
 
 noncomputable def finrank (s : Set A) := Module.finrank R (affineSpan R s).direction
 
-lemma finrank_empty : finrank R (A := A) ∅ = 0 := by
-  simp [finrank, affineSpan, AffineSubspace.direction]
-  have : vectorSpan R (spanPoints R ∅ : Set V) = ⊥ := sorry
-  sorry
+lemma finrank_empty [Nontrivial R] : finrank R (∅ : Set A) = 0 := by
+  rw [finrank, AffineSubspace.span_empty, AffineSubspace.direction_bot]
+  exact Module.finrank_eq_of_rank_eq (rank_bot R V)
 
 end Ring
 
