@@ -174,7 +174,7 @@ variable (ℋ : Affine.IsHomogenization R A W)
 /-- The homogenization of the full affine space is the positive cone of the weight functional. -/
 lemma homogenize_top : homogenize ℋ (⊤ : ConvexSet R A) = ℋ.weight.positive := by
   rw [homogenize, LinearMap.positive_eq_hull_preimage_singleton ℋ.weight one_pos,
-    ← ℋ.ofPoint_range_eq_preimage_weight_ofPoint]
+    ← ℋ.ofPoint_range_eq_preimage_weight_one]
   congr! with x
   simp
 
@@ -220,14 +220,14 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
   · apply SetLike.ext'
     unfold homogenize
     rw [eq_Ici_zero_smul_inter_preimage_of_pos_of_ne_bot hC zero_lt_one hbot,
-      ofPoint_dehomogenize_eq_inter_ofPoint, ← ℋ.ofPoint_range_eq_preimage_weight_ofPoint]
+      ofPoint_dehomogenize_eq_inter_ofPoint, ← ℋ.ofPoint_range_eq_preimage_weight_one]
     apply hull_eq_smul
     · obtain ⟨y, hyC, hy0⟩ := exists_mem_ne_zero_of_ne_bot hbot
       let y' := (ℋ.weight y)⁻¹ • y
       have hy'C : y' ∈ C :=
         C.smul_mem (inv_nonneg.mpr (@hC y hyC hy0).le) hyC
       have hy' : y' ∈ Set.range ℋ.ofPoint := by
-        simpa [y', ℋ.ofPoint_range_eq_preimage_weight_ofPoint]
+        simpa [y', ℋ.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       exact ⟨y', hy'C, hy'⟩
     · exact C.isConvexSet.inter ℋ.ofPoint.range_isConvexSet

@@ -57,36 +57,6 @@ def ofVector : V →ₗ[R] W := ℋ.repr.symm.toLinearMap ∘ₗ Homogenization.
 /-- The linear map that is constantly `1` when restricted to `A`. -/
 def weight : W →ₗ[R] R := Homogenization.weight ∘ₗ ℋ.repr.toLinearMap
 
-/-- Construct `IsHomogenization R A W` from an embedding of the affine space `A` into the vector
-space `W` and a weight map that is the constant 1-map on the embedded `A`. This follows the
-axiomatization in Definition 4.2 of [Gallier2011GeometricMethods]
-https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
-def ofEmbed {embed : A →ᵃ[R] W} (embed_inj : Injective embed) {weight : W →ₗ[R] R}
-    (embed_range : Set.range embed = weight ⁻¹' {1}) :
-  IsHomogenization R A W where
-  repr := (LinearEquiv.ofBijective (Homogenization.lift embed)
-    (Homogenization.lift_bijective_of_injective_of_range_preimage embed_inj embed_range)).symm
-
-/-- The embedding used in the construction becomes the embedding in the homogenization. -/
-theorem ofEmbed_ofPoint {embed : A →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
-    (ofEmbed embed_inj embed_range).ofPoint = embed := by
-  ext p
-  exact Homogenization.lift_apply_ofPoint ..
-
-/-- The weight used in the construction becomes the weight in the homogenization. -/
-theorem ofEmbed_weight {embed : A →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
-    (ofEmbed embed_inj embed_range).weight = weight := by
-  ext w
-  unfold IsHomogenization.weight
-  have : Homogenization.lift embed ((ofEmbed embed_inj embed_range).repr w) = w := by
-    rw [← LinearEquiv.ofBijective_apply]
-    exact LinearEquiv.apply_symm_apply _ w
-  rw [LinearMap.coe_comp, ← this, ← LinearMap.comp_apply]
-  congr
-  exact (Homogenization.comp_lift_eq_weight_of_range_preimage embed_range).symm
-
 lemma ofPoint_injective : Injective ℋ.ofPoint := by
   simpa [ofPoint] using Homogenization.ofPoint_injective
 
@@ -99,15 +69,26 @@ theorem weight_eq_zero_iff {x : W} : ℋ.weight x = 0 ↔ ∃ v, x = ℋ.ofVecto
 theorem weight_eq_one_iff {x : W} : ℋ.weight x = 1 ↔ ∃ p, x = ℋ.ofPoint p := by
   simpa [← LinearEquiv.symm_apply_eq, weight, ofPoint] using Homogenization.weight_eq_one_iff
 
-lemma ofPoint_range_eq_preimage_weight_ofPoint : Set.range ℋ.ofPoint = ℋ.weight ⁻¹' {1} := by
-  ext
-  simp [weight_eq_one_iff]
-  simp [eq_comm]
+lemma ofPoint_range_eq_preimage_weight_one : Set.range ℋ.ofPoint = ℋ.weight ⁻¹' {1} := by
+  ext; simp [↓weight_eq_one_iff, eq_comm]
 
 lemma ofVector_range_eq_preimage_weight_zero : Set.range ℋ.ofVector = ℋ.weight ⁻¹' {0} := by
-  ext
-  simp [weight_eq_zero_iff]
-  simp [eq_comm]
+  ext; simp [↓weight_eq_zero_iff, eq_comm]
+
+/-- The homogenization of a point in `A` has weight 1. -/
+@[simp]
+lemma weight_ofPoint (a₀ : A) : ℋ.weight (ℋ.ofPoint a₀) = 1 := by simp [weight, ofPoint]
+
+/-- The homogenization of a point in `V` has weight 0. -/
+@[simp]
+lemma weight_ofVector (v : V) : ℋ.weight (ℋ.ofVector v) = 0 := by simp [weight, ofVector]
+
+-- the following two are in canonical hom in #43448
+theorem ofPoint_ne_ofVector [Nontrivial R] (x : A) (v : V) : ℋ.ofPoint x ≠ ℋ.ofVector v :=
+  ne_of_apply_ne ℋ.weight <| by simp
+
+theorem ofPoint_ne_zero [Nontrivial R] (x : A) : ℋ.ofPoint x ≠ 0 := by
+  simpa using ℋ.ofPoint_ne_ofVector x 0
 
 /-- Embedding the underlying vector space is exactly the weight-0 hyperplane. -/
 theorem ofVector_range_eq_weight_ker : ℋ.ofVector.range = ℋ.weight.ker := by
@@ -116,43 +97,16 @@ theorem ofVector_range_eq_weight_ker : ℋ.ofVector.range = ℋ.weight.ker := by
   ext x
   simp
 
-variable [Nontrivial R] in
-theorem ofPoint_ne_zero (x : A) : ℋ.ofPoint x ≠ (0 : W) := by
-  intro hn
-  have := congrArg ℋ.weight hn
-  simp [weight, ofPoint] at this
-
-/-- The homogenization of a point in `A` has weight 1. -/
-lemma weight_ofPoint (a₀ : A) : ℋ.weight (ℋ.ofPoint a₀) = 1 := by simp [weight, ofPoint]
-
-/-- The homogenization of a point in `V` has weight 0. -/
-lemma weight_ofVector (v : V) : ℋ.weight (ℋ.ofVector v) = 0 := by simp [weight, ofVector]
-
 theorem span_range_ofPoint : span R (Set.range ℋ.ofPoint) = ⊤ := by
   simpa [Set.range_comp, ofPoint] using Homogenization.span_range_ofPoint
 
 lemma weight_comp_repr :
-    ℋ.weight ∘ₗ ℋ.repr.symm = (Homogenization.weight : Homogenization R A →ₗ[R] R) :=
-  Homogenization.hom_ext fun a ↦ by simp [weight]
+    ℋ.weight ∘ₗ ℋ.repr.symm = Homogenization.weight (P := A) := by
+  simp [weight, LinearMap.comp_assoc]
 
-@[simp] lemma weight_repr (x : Homogenization R A) :
-    ℋ.weight (ℋ.repr.symm x) = Homogenization.weight x :=
-  congr($(weight_comp_repr _) x)
-
-theorem repr_bijective : Bijective ℋ.repr := by
-  constructor
-  · simp [injective_iff_map_eq_zero]
-  · intro x
-    use ℋ.repr.symm x
-    simp
-
-@[simp] lemma repr_ofPoint (a : A) :
-    ℋ.repr (ℋ.ofPoint a) = Homogenization.ofPoint a :=
-  by simp [ofPoint]
-
-theorem repr_canonical_ofPoint :
+theorem repr_comp_ofPoint :
     ℋ.repr ∘ ℋ.ofPoint = Homogenization.ofPoint := by
-  ext a; simp
+  ext a; simp [ofPoint]
 
 variable {U : Type*} [AddCommGroup U] [Module R U] in
 /-- An affine map on `A` taking values in a vector space extends uniquely to a linear map on `W`.
@@ -186,16 +140,46 @@ variable (R A) in
 /-- The canonical homogenization is a homogenization. -/
 def canonical : IsHomogenization R A (Homogenization R A) := ofRepr <| LinearEquiv.refl ..
 
+/-- Construct `IsHomogenization R A W` from an embedding of the affine space `A` into the vector
+space `W` and a weight map that is the constant 1-map on the embedded `A`. This follows the
+axiomatization in Definition 4.2 of [Gallier2011GeometricMethods]
+https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
+def ofEmbed {embed : A →ᵃ[R] W} (embed_inj : Injective embed) {weight : W →ₗ[R] R}
+    (embed_range : Set.range embed = weight ⁻¹' {1}) :
+  IsHomogenization R A W where
+  repr := (LinearEquiv.ofBijective (Homogenization.lift embed)
+    (Homogenization.lift_bijective_of_injective_of_range_preimage embed_inj embed_range)).symm
+
+/-- The embedding used in the construction becomes the embedding in the homogenization. -/
+theorem ofEmbed_ofPoint {embed : A →ᵃ[R] W} (embed_inj : Injective embed)
+    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
+    (ofEmbed embed_inj embed_range).ofPoint = embed := by
+  ext p
+  exact Homogenization.lift_apply_ofPoint ..
+
+/-- The weight used in the construction becomes the weight in the homogenization. -/
+theorem ofEmbed_weight {embed : A →ᵃ[R] W} (embed_inj : Injective embed)
+    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
+    (ofEmbed embed_inj embed_range).weight = weight := by
+  ext w
+  unfold IsHomogenization.weight
+  have : Homogenization.lift embed ((ofEmbed embed_inj embed_range).repr w) = w := by
+    rw [← LinearEquiv.ofBijective_apply]
+    exact LinearEquiv.apply_symm_apply _ w
+  rw [LinearMap.coe_comp, ← this, ← LinearMap.comp_apply]
+  congr
+  exact (Homogenization.comp_lift_eq_weight_of_range_preimage embed_range).symm
+
 /-- A module is a homogenization of the weight-one hyperplane of any linear functional,
 provided that hyperplane is nonempty. -/
-def ofWeight (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
+def ofWeightOne (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
     IsHomogenization R ((affineSpan R {1}).comap g.toAffineMap) W :=
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
 @[simp]
-lemma ofWeight_weight (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
-    (ofWeight g).weight = g := by
-  simp [ofWeight, ofEmbed_weight]
+lemma ofWeightOne_weight (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
+    (ofWeightOne g).weight = g := by
+  simp [ofWeightOne, ofEmbed_weight]
 
 end Instances
 
