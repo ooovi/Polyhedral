@@ -435,7 +435,6 @@ lemma salient_map_iff (C : PointedCone R M₁) {f : M₁ →ₗ[R] M₂} (hf : I
     have h := salient_comap h hf
     unfold comap map at h
     rwa [Submodule.comap_map_eq_of_injective] at h
-    exact hf
 
 lemma salient_neg (hC : C.Salient) : (-C).Salient := by
   simpa [← map_id_eq_neg] using salient_map hC (injective_neg_iff.mpr injective_id)
