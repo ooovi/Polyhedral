@@ -97,19 +97,15 @@ lemma weight_one (a₀ : A) : hom.weight (hom.ofPoint a₀) = 1 := by
   convert Set.ext_iff.mp hom.ofPoint_range_eq_preimage_weight_one (hom.ofPoint a₀)
   simp [exists_apply_eq_apply, Set.mem_preimage, Set.mem_singleton_iff, true_iff]
 
-@[simp]
-theorem coe_affineSpan_range_ofPoint :
-    affineSpan R (Set.range hom.ofPoint) = Set.range hom.ofPoint := by
-  simp [← Set.image_univ, ← AffineSubspace.map_span]
-
 theorem mem_range_ofPoint_iff (x : W) :
-    x ∈ Set.range hom.ofPoint ↔ hom.weight x = 1 := by
-  grind [ofPoint_range_eq_preimage_weight_one]
+    x ∈ hom.ofPoint.range ↔ hom.weight x = 1 := by
+  refine ⟨?_, fun h ↦ Eq.mpr (congrFun hom.ofPoint_range_eq_preimage_weight_one x) h⟩
+  rintro ⟨y, hy⟩
+  rw [← hy, weight_one]
 
-theorem zero_notMem_affineSpan [Nontrivial R] {s : Set W} (hs : s ⊆ Set.range hom.ofPoint) :
+theorem zero_notMem_affineSpan [Nontrivial R] {s : Set W} (hs : s ⊆ hom.ofPoint.range) :
     0 ∉ affineSpan R s := fun hh ↦ by
-  have := SetLike.mem_coe.mpr <| affineSpan_mono R hs hh
-  have := mem_range_ofPoint_iff (0 : W) |>.mp (by simpa)
+  have := mem_range_ofPoint_iff (0 : W) |>.mp (by simpa using affineSpan_mono R hs hh)
   simp at this
 
 variable [Nontrivial R] in
