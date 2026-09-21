@@ -134,7 +134,7 @@ theorem DualClosed.eq_sInf {S : Submodule R M} (hS : S.DualClosed p) :
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hS, by simp⟩
-  simp only [SetLike.le_def, mem_sInf, mem_ofPred_eq, and_imp]
+  simp only [IsConcreteLE.le_iff, mem_sInf, mem_ofPred_eq, and_imp]
   intro x hx T hT hsT
   rw [← hT]; rw [← hS] at hx
   exact (dual_dual_mono p hsT) hx
@@ -181,7 +181,8 @@ lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
   rw [le_antisymm_iff, and_comm]
   constructor
   · exact dual_dual_eval_le_dual_dual_bilin p s
-  simp only [SetLike.le_def, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe, id_eq]
+  simp only [IsConcreteLE.le_iff, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe,
+    id_eq]
   intro x hx y hy
   obtain ⟨x', hx'⟩ := (Fact.elim inferInstance : Surjective p.flip) y
   simp only [← hx', flip_apply] at hy
@@ -219,7 +220,7 @@ lemma dualClosed (S : Submodule R M) : S.DualClosed p := by
 
 variable [Fact (Surjective p)] in
 /-- Every submodule of a vector space is dual closed. -/
-@[deprecated dualClosed (since := "")]
+@[deprecated dualClosed +typeChanged (since := "")]
 lemma dualClosed_flip (S : Submodule R N) : S.DualClosed p.flip := dualClosed _ S
 
 -- -- TODO: do we need a `[Field R]`, or is `Surjective p` enough?

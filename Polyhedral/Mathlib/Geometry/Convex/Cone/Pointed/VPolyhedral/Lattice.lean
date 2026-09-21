@@ -53,7 +53,7 @@ variable (C) in
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : VPolyhedralCone R M) = s := by ext; simp
 
-instance : PartialOrder (VPolyhedralCone R M) := .ofSetLike (VPolyhedralCone R M) M
+instance : PartialOrder (VPolyhedralCone R M) := .ofSetLike (VPolyhedralCone R M)
 
 @[simp] lemma coe_toPointedCone (C : VPolyhedralCone R M) :
     (C.toPointedCone : Set M) = C := rfl
