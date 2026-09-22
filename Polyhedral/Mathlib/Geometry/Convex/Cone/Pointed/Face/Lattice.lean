@@ -232,6 +232,51 @@ lemma le_span_iff_le {G : Face C} : (F : PointedCone R M) ≤ G.span ↔ F ≤ G
 
 end LinearOrderRing
 
+section IsCancelMulZeroRing
+
+variable [Ring R] [LinearOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
+variable [Module.IsTorsionFree R M] [IsCancelMulZero R]
+variable {C : PointedCone R M} {F : Face C}
+
+lemma bot_isFaceOf_of_salient (hC : Salient C) : IsFaceOf (⊥ : PointedCone R M) C where
+  le := bot_le
+  mem_of_smul_add_mem := by
+    intro x y a hx hy ha haxy
+    rw [← zero_eq_bot] at haxy ⊢
+    have hy_neg : y = -(a • x) := eq_neg_of_add_eq_zero_right haxy
+    have hy_in_lineal : y ∈ C.lineal := by
+      constructor
+      · exact hy
+      · have h := C.smul_mem (le_of_lt ha) hx
+        rw [hy_neg, AddSubmonoid.coe_neg, coe_toAddSubmonoid, Set.mem_neg, neg_neg, SetLike.mem_coe]
+        exact h
+    rw [salient_iff_lineal_bot.mp hC, ← zero_eq_bot] at hy_in_lineal
+    rw [hy_in_lineal, add_zero] at haxy
+    simp_all only [zero_eq_bot, mem_bot, smul_eq_zero, neg_mem_iff]
+    subst hy_neg
+    cases haxy with
+    | inl h =>
+      subst h
+      simp_all only [zero_smul, neg_zero, zero_mem, lt_self_iff_false]
+    | inr h_1 =>
+      subst h_1
+      simp_all only [zero_mem, smul_zero, neg_zero]
+
+lemma toPointedCone_bot_eq_bot_of_salient (hC : Salient C) : (⊥ : Face C).toPointedCone = ⊥ := by
+  apply bot_unique
+  have h : (IsFaceOf ⊥ C) := bot_isFaceOf_of_salient hC
+  have hh : C.Face := ⟨(⊥ : PointedCone R M), bot_isFaceOf_of_salient hC⟩
+  exact bot_le (α := Face C) (a := ⟨(⊥ : PointedCone R M), h⟩)
+
+lemma bot_face_of_salient (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥ := by
+  refine ⟨fun h => Face.ext (fun x => ?_),
+    fun h => by simp [h, toPointedCone_bot_eq_bot_of_salient hC]⟩
+  change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
+  simp [h, toPointedCone_bot_eq_bot_of_salient hC]
+
+end IsCancelMulZeroRing
+
 section DivisionRing
 
 variable [DivisionRing R] [LinearOrder R] [IsOrderedRing R]
@@ -239,15 +284,6 @@ variable [AddCommGroup M] [Module R M]
 variable [AddCommGroup N] [Module R N]
 
 variable {C : PointedCone R M} {F : Face C}
-
-lemma toPointedCone_bot_eq_bot_of_salient (hC : Salient C) : (⊥ : Face C).toPointedCone = ⊥ := by
-  simp [Face.lineal_eq_bot, Face.toPointedCone, salient_iff_lineal_bot.mp hC]
-
-lemma bot_face_of_salient (hC : C.Salient) : F.toPointedCone = ⊥ ↔ F = ⊥ := by
-  refine ⟨fun h => Face.ext (fun x => ?_),
-    fun h => by simp [h, toPointedCone_bot_eq_bot_of_salient hC]⟩
-  change x ∈ F.toPointedCone ↔ x ∈ (⊥ : Face C).toPointedCone
-  simp [h, toPointedCone_bot_eq_bot_of_salient hC]
 
 /-!
 ### Embed and restrict
