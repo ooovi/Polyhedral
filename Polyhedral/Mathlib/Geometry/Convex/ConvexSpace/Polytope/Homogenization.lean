@@ -3,13 +3,17 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Homogenization
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
 /-! This file proves results about the relation between polytopes and FG cones via
 homogenization. -/
+
+public section
 
 variable {R V W A : Type*}
 
@@ -19,10 +23,9 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V]
-variable [AddCommGroup W] [Module R W]
-variable [AddTorsor V A]
+variable [AddCommGroup W] [Module R W] [ConvexSpace R W]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 variable [hom : IsHomogenization R A W]
@@ -72,10 +75,9 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V]
-variable [AddCommGroup W] [Module R W]
-variable [AddTorsor V A]
+variable [AddCommGroup W] [Module R W] [ConvexSpace R W]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 variable [hom : IsHomogenization R A W]

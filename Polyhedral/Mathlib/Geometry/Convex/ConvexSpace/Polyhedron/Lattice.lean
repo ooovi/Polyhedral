@@ -3,11 +3,14 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
 
 /-! This file defines polyhedra as bundled objects. -/
+
+@[expose] public section
 
 namespace Convexity
 
@@ -15,9 +18,7 @@ open Convexity
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V] -- [ConvexSpace R V] [IsModuleConvexSpace R V]
-variable {A : Type*} [AddTorsor V A]
-
-noncomputable local instance : ConvexSpace R A := AddTorsor.toConvexSpace
+variable {A : Type*} [AddTorsor V A] [ConvexSpace R A]
 
 variable (R A) in
 structure Polyhedron where
@@ -47,7 +48,7 @@ instance : Coe (Polytope R A) (Polyhedron R A) := ⟨toPolytope⟩
 
 section IsModuleConvexSpace
 
-variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable [ConvexSpace R V] [IsModuleConvexSpace R V] [IsAffineConvexSpace R V A]
 
 @[coe] def toConvexSet (P : Polyhedron R A) : ConvexSet R A :=
   ⟨P, P.isPolyhedron.isConvexSet⟩

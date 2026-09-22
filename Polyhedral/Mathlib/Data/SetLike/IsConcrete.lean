@@ -3,18 +3,22 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Data.SetLike.Basic
+public import Mathlib.Data.SetLike.Basic
+public import Mathlib.Order.CompleteLattice.Defs
+
 import Mathlib.Data.Set.Basic
 import Mathlib.Data.Set.Insert
-import Mathlib.Data.Set.Lattice
+import Mathlib.Data.Set.Lattice.Image
 import Mathlib.Order.SetNotation
-import Mathlib.Order.CompleteLattice.Defs
 
 /-! This file defines properties of `SetLike` structures that are inherited from sets.
 
   Zulip: https://leanprover.zulipchat.com/#narrow/channel/287929-mathlib4/topic/More.20.60IsConcrete.60.20classes.20for.20.60SetLike.60
 -/
+
+@[expose] public section
 
 /- ## Concrete ## -/
 
@@ -142,7 +146,7 @@ include setLike in
 @[simp]
 lemma bot_eq_empty : (⊥ : A) = ∅ := by
   rw [← SetLike.coe_set_eq, SetLike.coe_bot, SetLike.coe_empty]
-  rfl
+  exact Set.bot_eq_empty
 
 end Bot
 
@@ -179,7 +183,7 @@ theorem eq_top_of_forall {a : A} : (∀ x, x ∈ a) → a = ⊤ := eq_top_iff_fo
 variable (B) in
 theorem exists_mem_top_of_nonempty : ∀ [Nonempty B], ∃ x : B, x ∈ (⊤ : A) := by
   simp_rw [← mem_coe, coe_top]
-  exact Set.exists_mem_of_nonempty B
+  exact Set.exists_mem_univ_of_nonempty B
 
 theorem ne_top_iff_exists_notMem (a : A) : a ≠ ⊤ ↔ ∃ x, x ∉ a := by
   rw [← not_forall, ← eq_top_iff_forall]
@@ -229,7 +233,7 @@ theorem eq_univ_of_forall {a : A} : (∀ x, x ∈ a) → a = univ := eq_univ_iff
 variable (B) in
 theorem exists_mem_of_nonempty : ∀ [Nonempty B], ∃ x : B, x ∈ (univ : A) := by
   simp_rw [← mem_coe, coe_univ]
-  exact Set.exists_mem_of_nonempty B
+  exact Set.exists_mem_univ_of_nonempty B
 
 theorem ne_univ_iff_exists_notMem (a : A) : a ≠ univ ↔ ∃ x, x ∉ a := by
   rw [← not_forall, ← eq_univ_iff_forall]

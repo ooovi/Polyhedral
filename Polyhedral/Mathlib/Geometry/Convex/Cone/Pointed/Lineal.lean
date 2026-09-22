@@ -3,11 +3,14 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Restrict
 
 /-! This file proves facts about the lineality space of a cone. -/
+
+@[expose] public section
 
 namespace PointedCone
 
@@ -61,6 +64,9 @@ lemma lineal_mono {C D : PointedCone R M} (h : C ≤ D) : C.lineal ≤ D.lineal 
   intro x hx
   rw [mem_lineal] at *
   exact ⟨h hx.1, h hx.2⟩
+
+lemma lineal_monotone : Monotone fun C : PointedCone R M => C.lineal :=
+  fun _ _ => lineal_mono
 
 lemma lineal_le_ker_of_le_nonneg {f : M →ₗ[R] R}
     (h : C ≤ f.nonneg) : C.lineal ≤ f.ker := by

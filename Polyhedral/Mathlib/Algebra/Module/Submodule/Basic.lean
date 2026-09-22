@@ -3,13 +3,16 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Algebra.Module.SpanRank
+public import Mathlib.Algebra.Module.SpanRank
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
+
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
-
 /-! This file proves basic properties about Submodule that should go into Submodule/Basic.lean -/
+
+@[expose] public section
 
 namespace Submodule
 

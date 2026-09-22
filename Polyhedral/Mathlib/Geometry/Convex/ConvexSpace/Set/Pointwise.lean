@@ -3,16 +3,21 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 
 import Mathlib.Geometry.Convex.Cone.Pointed
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.LinearAlgebra.AffineSpace.AffineMap
-
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Basic
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
 /-! This file proves basic pointwise properties of convex sets. -/
+
+public section
 
 noncomputable section
 
@@ -45,41 +50,54 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
-variable [AddTorsor V A]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-local instance : ConvexSpace R A := AddTorsor.toConvexSpace
--- TODO: add class expressing compatibility between the convex structures on A and V
-
-/- Minkowski addition preserves convexity. -/
+/-- Minkowski addition preserves convexity, since translation is an affine map on the
+product convex space (`isAffineMap_vadd`). -/
 protected lemma IsConvexSet.vadd {K₁ : Set V} {K₂ : Set A}
     (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ +ᵥ K₂) := by
-  -- TODO: use `AddTorsor.sConvexComb_eq_affineCombination`
-  sorry
+  rw [← Set.vadd_image_prod]
+  exact (hK₁.prod hK₂).image isAffineMap_vadd
 
-/- Minkowski addition preserves convexity. -/
+/-- Translation preserves convexity. -/
 lemma IsConvexSet.translate (t : V) {K : Set A} (hK : IsConvexSet R K) :
     IsConvexSet R (t +ᵥ K) := by
-  -- TODO: use `IsConvexSet.vadd hK₁ hK₂` by setting `K₁ := {t}` and
-  --  some missing vadd lemmas
-  -- this likely requires a compatbility class between affine and linear convexity
-  sorry
+  rw [← Set.singleton_vadd]
+  exact .vadd .singleton hK
 
-/- Minkowski addition preserves convexity. -/
+/- TODO: there should also be a version `(K : ConvexSet R V) +ᵥ (p : A)`, but there is not even
+a version for sets yet. -/
+
+/-- Minkowski addition preserves convexity. -/
 protected lemma IsConvexSet.add {K₁ : Set V} {K₂ : Set V}
-    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) :=
-  -- TODO: use `IsConvexSet.vadd hK₁ hK₂`
-  -- this likely requires a compatbility class between affine and linear convexity
-  sorry
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ + K₂) := hK₁.vadd hK₂
 
-/- Minkowski addition preserves convexity. -/
+/-- Pointwise subtraction of two convex sets of an affine space is convex, since point
+subtraction is an affine map on the product convex space (`isAffineMap_vsub`). -/
+protected lemma IsConvexSet.vsub {K₁ K₂ : Set A}
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ -ᵥ K₂) := by
+  rw [← Set.image_vsub_prod]
+  exact (hK₁.prod hK₂).image isAffineMap_vsub
+
+/-- Minkowski difference preserves convexity. -/
 protected lemma IsConvexSet.sub {K₁ : Set V} {K₂ : Set V}
-    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ - K₂) :=
-  -- TODO: use `IsConvexSet.vadd` and `IsConvexSet.neg`
-  sorry
+    (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) : IsConvexSet R (K₁ - K₂) := by
+  rw [sub_eq_add_neg]
+  exact hK₁.add hK₂.neg
 
-protected lemma IsConvexSet.smul (r : R) {K : Set V} (hK : IsConvexSet R K) :
-    IsConvexSet R (r • K) := by
-  sorry
+/-- Scalar multiplication is an affine map. -/
+lemma isAffineMap_smul [SMulCommClass R R V] (r : R) :
+    IsAffineMap R fun x : V => r • x := by
+  refine ⟨fun w => ?_⟩
+  rw [sConvexComb_eq_sum, sConvexComb_eq_sum, StdSimplex.weights_map,
+    Finsupp.sum_mapDomain_index (by simp) (fun _ b₁ b₂ => add_smul b₁ b₂ _), Finsupp.smul_sum]
+  exact Finsupp.sum_congr fun i _ => smul_comm r _ _
+
+/-- Scaling preserves convexity. -/
+protected lemma IsConvexSet.smul [SMulCommClass R R V] (r : R) {K : Set V}
+    (hK : IsConvexSet R K) : IsConvexSet R (r • K) := by
+  rw [← Set.image_smul]
+  exact hK.image (isAffineMap_smul r)
 
 end Ring
 

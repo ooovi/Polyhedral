@@ -3,14 +3,17 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-
 /-! This file introduces `IsPolytope` and proves basic properties about convex polytopes. -/
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,6 +86,14 @@ protected lemma image (hf : IsAffineMap R f) (hP : IsPolytope R P) :
   obtain ⟨v, rfl⟩ := hP
   use v.image f
   simpa using hf.image_convexHull v
+
+/-- The product of two polytopes is a polytope. -/
+protected lemma prod {P₂ : Set Y} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
+    IsPolytope R (P₁ ×ˢ P₂) := by classical
+  obtain ⟨v₁, rfl⟩ := hP₁
+  obtain ⟨v₂, rfl⟩ := hP₂
+  use v₁ ×ˢ v₂
+  rw [Finset.coe_product, convexHull_prod]
 
 end Semiring
 

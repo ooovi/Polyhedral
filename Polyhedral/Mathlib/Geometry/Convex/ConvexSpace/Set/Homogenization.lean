@@ -3,14 +3,18 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
+
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 /-! This file defines homogenization of convex sets in affine spaces. -/
+
+@[expose] public section
 
 open Convexity Pointwise Set PointedCone Submodule
 
@@ -25,9 +29,7 @@ open Convexity
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V]
 variable [AddCommGroup W] [Module R W]
-variable [AddTorsor V A]
-
-attribute [local instance] AddTorsor.toConvexSpace
+variable [AddTorsor V A] [ConvexSpace R A]
 
 variable [hom : Affine.IsHomogenization R A W]
 
@@ -35,10 +37,16 @@ variable (W) in
 /-- The homogenization cone of a convex set in an affine space. -/
 def homogenize (P : ConvexSet R A) : PointedCone R W := hull R (hom.ofPoint '' P)
 
+lemma homogenize_mono {K₁ K₂ : ConvexSet R A} (h : K₁ ≤ K₂) :
+    K₁.homogenize W ≤ K₂.homogenize W := Submodule.span_mono <| Set.image_mono h
+
+lemma homogenize_monotone : Monotone (homogenize W : ConvexSet R A → PointedCone R W) :=
+  fun _ _ => homogenize_mono
+
 /-- Homogenization from convex set to convex cones as an order homomorphism. -/
 def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
   toFun := homogenize W
-  monotone' _ _ PlQ := Submodule.span_mono <| Set.image_mono PlQ
+  monotone' := homogenize_monotone
 
 lemma homogenize_bot : homogenize W (⊥ : ConvexSet R A) = ⊥ := by
   simp [homogenize, Bot.bot]
@@ -49,9 +57,6 @@ lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive 
   congr
   ext x
   simp
-
-lemma homogenize_mono {K₁ K₂ : ConvexSet R A} (h : K₁ ≤ K₂) :
-    K₁.homogenize W ≤ K₂.homogenize W := span_mono <| Set.image_mono h
 
 lemma homogenize_le_weight_positive (K : ConvexSet R A) :
     homogenize W K ≤ hom.weight.positive := by
@@ -92,9 +97,7 @@ theorem homogenize_fg_ofPoint_range {C : ConvexSet R A} (h : (homogenize W C).FG
 
 section Module
 
-attribute [local instance] AddTorsor.toConvexSpace
-
-variable [IsModuleConvexSpace R W] -- WARNING: this is currently inferred! This is dangerous
+variable [ConvexSpace R W] [IsModuleConvexSpace R W] [IsAffineConvexSpace R V A]
 
 variable (A) in
 def dehomogenize (C : PointedCone R W) : ConvexSet R A :=
@@ -112,6 +115,10 @@ variable (A) in
 lemma dehomogenize_mono {C₁ C₂ : PointedCone R W} (h : C₁ ≤ C₂) :
     dehomogenize A C₁ ≤ dehomogenize A C₂ := Set.preimage_mono <| Set.preimage_mono h
     -- Q: why Set.preimage_mono twice?
+
+variable (A) in
+lemma dehomogenize_monotone : Monotone (dehomogenize A : PointedCone R W → ConvexSet R A) :=
+  fun _ _ => dehomogenize_mono A
 
 -- This lemma is just `Set.image_preimage_eq_inter_range` in disguise. It is likely not needed.
 lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
@@ -139,10 +146,9 @@ section Field
 
 variable [Field R] [LinearOrder R] [IsOrderedRing R]
 variable [AddCommGroup V] [Module R V]
-variable [AddCommGroup W] [Module R W]
-variable [AddTorsor V A]
+variable [AddCommGroup W] [Module R W] [ConvexSpace R W]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-attribute [local instance] AddTorsor.toConvexSpace
 variable [IsModuleConvexSpace R W]
 
 variable [hom : Affine.IsHomogenization R A W]

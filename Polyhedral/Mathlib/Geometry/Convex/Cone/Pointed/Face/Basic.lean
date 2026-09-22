@@ -3,11 +3,11 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.Face.Basic
-
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Mathlib.Geometry.Convex.Cone.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 /-!
 # Faces of pointed cones
@@ -16,6 +16,8 @@ This file proves additional lemmas for faces of pointed cones, mostly related to
 to prove the order iso between a face's face lattice and the cone's lattice below the face.
 
 -/
+
+public section
 
 open Submodule
 

@@ -3,13 +3,16 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
+
 import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 
-import Polyhedral.Mathlib.Data.SetLike.IsConcrete
-
 /-! This file proves results about the lattice structure on affine subspaces. -/
+
+public section
 
 namespace Affine
 

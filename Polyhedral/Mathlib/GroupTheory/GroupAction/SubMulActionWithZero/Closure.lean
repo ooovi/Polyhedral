@@ -3,13 +3,14 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Data.Set.Finite.Basic
-import Mathlib.Data.Set.Lattice
+public import Mathlib.Data.Set.Finite.Basic
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
+
+import Mathlib.Data.Set.Lattice.Image
 import Mathlib.Order.Hom.CompleteLattice
 import Mathlib.Order.Monotone.Defs
-
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 
 /-!
 # Closure and finiteness of `SubMulAction₀`
@@ -17,6 +18,8 @@ import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 In this file we define the closure of a set as a `SubMulAction₀`, and define
 finite generation for `SubMulAction₀`.
 -/
+
+@[expose] public section
 
 @[expose] public section
 

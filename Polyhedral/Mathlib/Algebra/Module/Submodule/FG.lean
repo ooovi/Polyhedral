@@ -3,13 +3,16 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.RingTheory.Noetherian.Basic
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-
 /-! This file contains useful results about FG submodules. -/
+
+public section
 
 open Module
 open Function

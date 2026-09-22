@@ -5,11 +5,12 @@ Authors: Floris van Doorn
 -/
 module
 
-public import Mathlib.Algebra.Field.Basic
-public import Mathlib.Algebra.Order.Field.Canonical
 public import Mathlib.Algebra.Order.Nonneg.Field
-public import Mathlib.Algebra.Order.Positive.Ring
-public import Mathlib.Data.Nat.Cast.Order.Ring
+
+import Mathlib.Algebra.Field.Basic
+import Mathlib.Algebra.Order.Field.Canonical
+import Mathlib.Algebra.Order.Positive.Ring
+import Mathlib.Data.Nat.Cast.Order.Ring
 
 /-!
 This file generalizes lemmas/defs previously written for Field with a dashed name,

@@ -3,10 +3,9 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.Isomorphisms
-
--- import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Mathlib.LinearAlgebra.Isomorphisms
 
 /-! This file suggest the alternative name `restrict` for `submoduleOf` for the following reason:
 we want to have the same functionality on `PointedCone`, but there the name `submoduleOf`
@@ -16,6 +15,8 @@ opposite order. This is in order to be consistent with `embed` for which the oth
 is not possible. This also allows us to view `restrict S` as the restriction operator.
 Finally, the "restrict" terminology is also used for e.g. `LinearMap.restrict`.
 -/
+
+@[expose] public section
 
 namespace Submodule
 
@@ -54,9 +55,11 @@ lemma mem_restrict {S : Submodule R M} {T : Submodule R M} {x : S} (h : x ∈ re
 lemma mem_restrict_iff {S : Submodule R M} {T : Submodule R M} {x : S} :
     x ∈ restrict S T ↔ (x : M) ∈ T := by simp [submoduleOf]
 
--- TODO: use `Monotone`
-lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hCD : T₁ ≤ T₂) :
-    restrict S T₁ ≤ restrict S T₂ := fun _ => (hCD ·)
+lemma restrict_mono (S : Submodule R M) {T₁ T₂ : Submodule R M} (hT : T₁ ≤ T₂) :
+    restrict S T₁ ≤ restrict S T₂ := fun _ => (hT ·)
+
+lemma restrict_monotone (S : Submodule R M) : Monotone (restrict S) :=
+  fun _ _ => restrict_mono S
 
 lemma restrict_inf (S : Submodule R M) {T₁ T₂ : Submodule R M} :
     restrict S (T₁ ⊓ T₂) = (restrict S T₁) ⊓ (restrict S T₂)
@@ -92,7 +95,7 @@ example (S : Submodule R M) : Submodule R S ≃o Set.Iic S := Submodule.mapIic S
 
 def restrict_orderHom (S : Submodule R M) : Submodule R M →o Submodule R S where
   toFun := restrict S
-  monotone' _ _ := restrict_mono S
+  monotone' := restrict_monotone S
 
 /- ## EMBED -/
 
@@ -156,9 +159,11 @@ lemma embed_injective {S : Submodule R M} : Injective (embed : Submodule R S →
 @[simp] lemma embed_inj {S : Submodule R M} {T₁ T₂ : Submodule R S} :
     embed T₁ = embed T₂ ↔ T₁ = T₂ := Injective.eq_iff embed_injective
 
--- TODO: use `Monotone`
 lemma embed_mono {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : T₁ ≤ T₂) :
     embed T₁ ≤ embed T₂ := Submodule.map_mono hT
+
+lemma embed_monotone {S : Submodule R M} : Monotone (embed : Submodule R S → Submodule R M) :=
+  fun _ _ => embed_mono
 
 lemma embed_mono_rev {S : Submodule R M} {T₁ T₂ : Submodule R S} (hT : embed T₁ ≤ embed T₂) :
     T₁ ≤ T₂ := (by simpa using @hT ·)

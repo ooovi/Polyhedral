@@ -3,11 +3,14 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
 
 /-! This file defines polytopes as bundles objects. -/
+
+@[expose] public section
 
 namespace Convexity
 
@@ -111,7 +114,6 @@ variable [ConvexSpace R X]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V X]
 
-attribute [local instance] AddTorsor.toConvexSpace
 
 /- # Min -/
 
@@ -178,6 +180,8 @@ instance : SubtractionMonoid (Polytope R X) := .ofSetLike ..
 
 /-! ### Scalar multiplication -/
 
+variable [SMulCommClass R R X]
+
 instance : SMul R (Polytope R X) where
   smul r P := ⟨_, P.isPolytope.smul r⟩
 
@@ -187,9 +191,7 @@ instance : DistribMulAction R (Polytope R X) := .ofSetLike ..
 
 noncomputable section VAdd
 
-variable [AddTorsor X Y]
-
-noncomputable local instance : ConvexSpace R Y := AddTorsor.toConvexSpace
+variable [AddTorsor X Y] [ConvexSpace R Y] [IsAffineConvexSpace R X Y]
 
 instance : VAdd X (Polytope R Y) where
   vadd v P := ⟨_, P.isPolytope.translate v⟩

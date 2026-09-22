@@ -3,8 +3,9 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 
 /-! In this file we prove the Krein-Milman theorem for FG cones: every finitely generated
 cone is spanned by its rays, that is, by the finite set of its 1-dimensional faces.
@@ -13,6 +14,8 @@ TODO: aspects of the proof are rather cumbersome since the atoms of the face lat
 rather than points. We therefore intend to perform the proof on the polytope side and
 transfer it here using homogenization.
 -/
+
+@[expose] public section
 
 namespace PointedCone
 

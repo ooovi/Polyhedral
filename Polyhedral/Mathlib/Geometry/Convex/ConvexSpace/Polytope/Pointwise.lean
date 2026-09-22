@@ -3,16 +3,20 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Algebra.Group.Pointwise.Finset.Basic
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
-
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 
 /-! This file defines the pointwise operations on convex polytopes. -/
+
+public section
 
 noncomputable section
 
@@ -46,40 +50,35 @@ section Ring
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
-variable [AddTorsor V A]
+variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-local instance : ConvexSpace R A := AddTorsor.toConvexSpace
--- TODO: add class expressing compatibility between the convex structures on A and V
-
-/- The Minkowski sum of two polytopes is a polytope. -/
+/-- The Minkowski sum of two polytopes is a polytope, since translation is an affine map
+on the product convex space (`isAffineMap_vadd`). -/
 protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) :
-    IsPolytope R (P₁ +ᵥ P₂) := by classical
-  obtain ⟨s₁, rfl⟩ := hP₁
-  obtain ⟨s₂, rfl⟩ := hP₂
-  use s₁ +ᵥ s₂
-  rw [Finset.coe_vadd, convexHull_vadd]
+    IsPolytope R (P₁ +ᵥ P₂) := by
+  rw [← Set.vadd_image_prod]
+  exact (hP₁.prod hP₂).image isAffineMap_vadd
 
-/- Minkowski addition preserves convexity. -/
+/-- Translation preserves polytopes. -/
 lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ K) := by
-  -- TODO: use `IsPolytope.vadd`
-  -- this likely requires a lemma `{t} + K = t + K`.
-  sorry
+  exact hK.image (by fun_prop)
 
-/- The Minkowski addition of two polytopes is a polytope. -/
+/-- The Minkowski sum of two polytopes is a polytope. -/
 protected lemma add {P₁ : Set V} {P₂ : Set V}
-    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ + P₂) :=
-  -- TODO: use `IsPolytope.vadd hP₁ hP₂`
-  -- this likely requires a compatbility class between affine and linear convexity
-  sorry
+    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ + P₂) := by
+  exact hP₁.vadd hP₂
 
-/- The Minkowski addition of two polytopes is a polytope. -/
+/-- The Minkowski difference of two polytopes is a polytope. -/
 protected lemma sub {P₁ : Set V} {P₂ : Set V}
-    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ - P₂) :=
-  sorry
+    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ - P₂) := by
+  rw [sub_eq_add_neg]
+  exact hP₁.add hP₂.neg
 
-protected lemma smul (r : R) {K : Set V} (hK : IsPolytope R K) :
+/-- Scaling preserves polytopes. -/
+protected lemma smul [SMulCommClass R R V] (r : R) {K : Set V} (hK : IsPolytope R K) :
     IsPolytope R (r • K) := by
-  sorry
+  rw [← Set.image_smul]
+  exact hK.image (isAffineMap_smul r)
 
 end Ring
 

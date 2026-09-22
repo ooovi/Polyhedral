@@ -3,9 +3,10 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 
 /-!
 ## Rank of Faces
@@ -13,6 +14,8 @@ import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Lattice
 This file collects rank constructions for faces and the dimension formulas attached to face
 inclusions.
 -/
+
+public section
 
 open Submodule (span)
 

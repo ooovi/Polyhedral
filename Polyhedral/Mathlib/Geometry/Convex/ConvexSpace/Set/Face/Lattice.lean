@@ -3,14 +3,18 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 
 /-! This file defines faces of convex sets.
 
 TODO: align this API with `Face` for cones.
 -/
+
+public section
 
 variable {R M : Type*}
 
@@ -118,7 +122,7 @@ instance : CompleteSemilatticeInf (Face P) where
     · rw [← toConvexSet_le_toConvexSet]
       refine inf_le_of_right_le ?_
       simpa [LE.le] using fun _ xs ↦ xs f fS
-    · simp only [sInf, ConvexSet.carrier_eq_coe, Set.sInter_image, Set.mem_ofPred_eq,
+    · simp only [sInf, Set.sInter_image, Set.mem_ofPred_eq,
         Set.iInter_exists, Set.biInter_and', Set.iInter_iInter_eq_right]
       simpa [LE.le] using fun x a ↦ ⟨f.2.1 a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
 

@@ -3,14 +3,16 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.DualFinite
-
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
+public import Mathlib.Geometry.Convex.Cone.DualFinite
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualClosed
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Basic
 
 /-! This file proves results about duals of FG cones. -/
+
+public section
 
 variable {R M N L : Type*}
 

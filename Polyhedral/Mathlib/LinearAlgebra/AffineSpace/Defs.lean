@@ -3,11 +3,14 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
-import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 
 /-! This file proves results about affine spans. -/
+
+@[expose] public section
 
 namespace Affine
 
@@ -20,9 +23,12 @@ variable {A : Type*} [AddTorsor V A]
 lemma spanPoints_empty : spanPoints R (∅ : Set A) = ∅ := by simp [spanPoints]
 
 @[gcongr]
-lemma spanPoints_mono (F G : Set A) (hFG : G < F) : spanPoints R G ⊆ spanPoints R F := by
-    exact fun p ⟨p₁, hp₁, v, hv, hp⟩ =>
-      ⟨p₁, hFG.le hp₁, v, Submodule.span_mono (Set.vsub_subset_vsub hFG.le hFG.le) hv, hp⟩
+lemma spanPoints_mono {F G : Set A} (hFG : G ⊆ F) : spanPoints R G ⊆ spanPoints R F :=
+  fun _p ⟨p₁, hp₁, v, hv, hp⟩ =>
+    ⟨p₁, hFG hp₁, v, Submodule.span_mono (Set.vsub_subset_vsub hFG hFG) hv, hp⟩
+
+lemma spanPoints_monotone : Monotone (spanPoints R : Set A → Set A) :=
+  fun _ _ => spanPoints_mono R
 
 noncomputable def rank (s : Set A) := Module.rank R (affineSpan R s).direction
 

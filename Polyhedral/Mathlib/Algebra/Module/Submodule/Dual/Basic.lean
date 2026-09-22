@@ -3,19 +3,21 @@ Copyright (c) 2025 Martin Winter, Yaël Dillies. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Yaël Dillies
 -/
+module
 
-import Mathlib.RingTheory.Finiteness.Cofinite
-
-import Polyhedral.Mathlib.Algebra.Module.LinearMap
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
-import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
+public import Mathlib.RingTheory.Finiteness.Cofinite
+public import Polyhedral.Mathlib.Algebra.Module.LinearMap
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
+public import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 
 /-!
 This file implements a dual for submodules in analogy to `PointedCone.dual`.
 Mathlib will likely not use this terminology, but will use `orthogonal` or `orthogonalBilin`.
 See also the PR #40746.
 -/
+
+@[expose] public section
 
 assert_not_exists TopologicalSpace Real -- Cardinal (comes with BilinearMap for some reason)
 
@@ -77,12 +79,13 @@ alias dual_top := dual_univ
 
 @[gcongr] lemma dual_le_dual (h : t ⊆ s) : dual p s ≤ dual p t := fun _y hy _x hx ↦ hy (h hx)
 
-alias dual_antitone := dual_le_dual
+lemma dual_antitone : Antitone (dual p : Set M → Submodule R N) :=
+  fun _ _ => dual_le_dual
 
 lemma ker_le_dual (s : Set M) : ker p.flip ≤ dual p s := by
-  simp [← dual_flip_univ_ker, dual_antitone]
+  simp [← dual_flip_univ_ker, dual_le_dual]
 lemma ker_le_dual_flip (s : Set N) : ker p ≤ dual p.flip s := by
-  simp [← dual_flip_univ_ker, dual_antitone]
+  simp [← dual_flip_univ_ker, dual_le_dual]
 
 /-- The inner dual submodule of a singleton is given by the preimage of zero under the
 linear map `p x`. -/
@@ -147,10 +150,14 @@ lemma dual_le_iff_dual_le {S : Submodule R M} {T : Submodule R N} :
     S ≤ dual p.flip T ↔ T ≤ dual p S := ⟨le_dual_of_le_dual, le_dual_of_le_dual⟩
 
 variable (p) in
-/-- Any submodule is a subcone of its double dual submodule. -/
 lemma dual_dual_mono {s t : Set M} (hST : s ⊆ t) :
-    dual p.flip (dual p s) ≤ dual p.flip (dual p t) := by
-  exact dual_antitone <| dual_antitone hST
+    dual p.flip (dual p s) ≤ dual p.flip (dual p t) :=
+  dual_antitone <| dual_antitone hST
+
+variable (p) in
+/-- Taking the double dual is monotone. -/
+lemma dual_dual_monotone : Monotone fun s : Set M => dual p.flip (dual p s) :=
+  fun _ _ => dual_dual_mono p
 
 variable (s) in
 @[simp] lemma dual_dual_flip_dual : dual p (dual p.flip (dual p s)) = dual p s :=

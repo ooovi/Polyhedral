@@ -3,14 +3,15 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
 
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.SesquilinearForm.Basic
 import Mathlib.LinearAlgebra.Dual.Lemmas
-
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.DualFinite
 
 /-! This file proves results about duality for finite dimensional subspaces.
 
@@ -27,6 +28,8 @@ This file also proves `(S ⊓ T)* = S* ⊔ T*` for when
 * `S` and `T` are FG (`FG.dual_inf_dual_sup_dual`) assuming `p.SeparatingLeft`
 * `S` is dual closed and `T` is FG (`FG.dual_inf_dual_sup_dual`)
 -/
+
+public section
 
 open Function Module LinearMap
 open Submodule hiding span dual

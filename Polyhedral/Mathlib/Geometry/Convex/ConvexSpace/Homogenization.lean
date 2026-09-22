@@ -3,12 +3,16 @@ Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter, Olivia Röhrig
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
+
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 /-! This file proves results about the interaction of homogenization and convexity. -/
+
+public section
 
 open Convexity Pointwise Set PointedCone Submodule
 
@@ -18,11 +22,9 @@ section Ring
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
-variable {A : Type*} [AddTorsor V A]
-variable {W : Type*} [AddCommGroup W] [Module R W]
+variable {A : Type*} [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
+variable {W : Type*} [AddCommGroup W] [Module R W] [ConvexSpace R W]
 variable [hom : Affine.IsHomogenization R A W]
-
-attribute [local instance] AddTorsor.toConvexSpace
 
 section Module
 

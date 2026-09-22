@@ -3,13 +3,16 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Dual
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Rank
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.MinkowskiWeyl
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Ray
 
 /-! This file proves results about faces of finitely generated cones. -/
+
+public section
 
 namespace PointedCone
 

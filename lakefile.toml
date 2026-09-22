@@ -7,6 +7,7 @@ defaultTargets = ["Polyhedral"]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 autoImplicit = false
 relaxedAutoImplicit = false
+warn.sorry = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
 

@@ -3,9 +3,10 @@ Copyright (c) 2025 Justus Springer, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Justus Springer, Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.DualFinite
 
 /-! This file proves facts about the duals of finitely generated cones. In particular, it
 establishes the *Minkowski-Weyl theorem* for cones. It states that duals of polyhedral cones are
@@ -18,7 +19,7 @@ If the ambient space is finite dimensional, then
 * a cones is DualFG if and only if it is FG.
 * duals of FG cones are FG if the ambient space is finite dim.
 
-We also derive that intersections of FG cones are FG. This should however change in future.
+We also derive that intersections of FG cones are FG. This should however change in the future.
 
 TODO: First prove that intersections of FG cones are FG, and use this fact to improve the
 duality theory developed here. Some reasons:
@@ -27,6 +28,8 @@ duality theory developed here. Some reasons:
 * this fact also holds over rings like ℤ or certain modules over the tropical semifield. Perhaps
   a more unified theory can be provided.
 -/
+
+public section
 
 open Function Module LinearMap
 open Submodule hiding dual

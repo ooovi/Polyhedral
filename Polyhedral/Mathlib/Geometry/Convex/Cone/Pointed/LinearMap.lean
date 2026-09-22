@@ -3,8 +3,13 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.Dual
+public import Mathlib.Geometry.Convex.Cone.Dual
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
+
 import Mathlib.RingTheory.Finiteness.Basic
 import Mathlib.LinearAlgebra.PerfectPairing.Basic
 import Mathlib.Algebra.Module.Submodule.Pointwise
@@ -12,11 +17,9 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.SetTheory.Cardinal.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
-import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
-import Polyhedral.Mathlib.Algebra.Module.Submodule.FG
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Basic
-
 /-! This file contains results in the intersectin of cones and linear maps. -/
+
+@[expose] public section
 
 namespace LinearMap
 

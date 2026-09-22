@@ -3,19 +3,21 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 import Polyhedral.Mathlib.Data.Set.Lattice.Image
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.DivisionRing
 
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
-
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
-
 /-! This file defines homogenization of general sets. The homogenization is of type
 `SubMulAction₀ R≥0 W`, which is closed under multiplication and always contains zero.
 In particular, the homogenization is never empty. This enables to prove suitable order
 isomorphisms. -/
+
+@[expose] public section
 
 namespace Affine.Set
 

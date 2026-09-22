@@ -3,12 +3,15 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.SubMulActionWithZero
 
 /-!
 This file proves results about sets closed under multiplication by non-negative scalars.
 -/
+
+public section
 
 @[expose] public section
 

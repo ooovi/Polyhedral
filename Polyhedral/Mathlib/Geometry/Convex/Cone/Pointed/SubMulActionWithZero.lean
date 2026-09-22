@@ -3,14 +3,17 @@ Copyright (c) 2026 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
+public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
 
 import Mathlib.Geometry.Convex.ConvexSpace.Module
 
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.LinearMap
-import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
-
 /-! This file contains results involving both `PointedCone` and `SubMulAction₀`. -/
+
+@[expose] public section
 
 variable {R M : Type*}
 
@@ -75,7 +78,7 @@ theorem toSubMulAction₀_strictMono :
   exact hpq
 
 @[gcongr, mono]
-theorem toSubMulAction₀_mono :
+theorem toSubMulAction₀_monotone :
     Monotone (PointedCone.toSubMulAction₀ (R := R) (M := M)) :=
   toSubMulAction₀_strictMono.monotone
 

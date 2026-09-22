@@ -3,11 +3,11 @@ Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Olivia Röhrig, Martin Winter
 -/
+module
 
-import Mathlib.Geometry.Convex.Cone.Face.Lattice
-
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
-import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Mathlib.Geometry.Convex.Cone.Face.Lattice
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
 
 /-!
 ## Face
@@ -25,6 +25,8 @@ This file proves results about the face lattice of a pointed cone.
 * `Face.embed_orderIso`: The isomorphism between a face's face lattice and the interval in the
   cone's face lattice below the face.
 -/
+
+@[expose] public section
 
 open Submodule Function
 
@@ -124,7 +126,7 @@ lemma fiberFace_le_fiberFace_iff {G₁ G₂ : Face (C ⧸ F)} :
     rcases (mem_fiberFace G₁ x).mp hx with ⟨hxC, hxG⟩
     exact (mem_fiberFace G₂ x).mpr ⟨hxC, h hxG⟩
 
-lemma fiberFace_mono : Monotone (fiberFace : Face (C ⧸ F) → Face C) :=
+lemma fiberFace_monotone : Monotone (fiberFace : Face (C ⧸ F) → Face C) :=
   fun _ _ h => fiberFace_le_fiberFace_iff.mpr h
 
 end Ring

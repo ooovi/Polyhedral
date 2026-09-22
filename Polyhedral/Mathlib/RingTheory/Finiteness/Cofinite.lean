@@ -3,16 +3,19 @@ Copyright (c) 2025 Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Martin Winter
 -/
+module
 
-import Mathlib.RingTheory.Finiteness.Cofinite
+public import Mathlib.RingTheory.Finiteness.Cofinite
+public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
+public import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
+
 import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Dual.Lemmas
 
-import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-import Polyhedral.Mathlib.RingTheory.Finiteness.Corank
-
 /-! This file proves results about cofinitely generated submodules that are intended to
 go into (or close to) `Mathlib.RingTheory.Finiteness.Cofinite`. -/
+
+public section
 
 open Module Function LinearMap
 
@@ -58,11 +61,12 @@ open Cardinal
 
 variable [StrongRankCondition R]
 
-lemma CoFG.corank_lt_aleph0 {S : Submodule R M} (hS : S.CoFG) : corank S < ℵ₀
-  := Module.rank_lt_aleph0 R _
+lemma CoFG.corank_lt_aleph0 {S : Submodule R M} (hS : S.CoFG) : corank S < ℵ₀ := by
+  rw [corank_def]; exact Module.rank_lt_aleph0 R _
 
 lemma CoFG.corank_lt_aleph0_iff {S : Submodule R M} [Free R (M ⧸ S)] :
-    corank S < ℵ₀ ↔ CoFG S := Module.rank_lt_aleph0_iff
+    corank S < ℵ₀ ↔ CoFG S := by
+  rw [corank_def]; exact Module.rank_lt_aleph0_iff
 
 end StrongRankCondition
 
