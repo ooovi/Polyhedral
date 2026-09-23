@@ -97,11 +97,19 @@ lemma weight_one (a₀ : A) : hom.weight (hom.ofPoint a₀) = 1 := by
   convert Set.ext_iff.mp hom.ofPoint_range_eq_preimage_weight_one (hom.ofPoint a₀)
   simp [exists_apply_eq_apply, Set.mem_preimage, Set.mem_singleton_iff, true_iff]
 
+theorem mem_range_ofPoint_iff (x : W) :
+    x ∈ hom.ofPoint.range ↔ hom.weight x = 1 := by
+  refine ⟨?_, fun h ↦ Eq.mpr (congrFun hom.ofPoint_range_eq_preimage_weight_one x) h⟩
+  rintro ⟨y, hy⟩
+  rw [← hy, weight_one]
+
+theorem zero_notMem_affineSpan [Nontrivial R] :
+    0 ∉ hom.ofPoint.range := fun hh ↦ by
+  simpa using mem_range_ofPoint_iff (0 : W) |>.mp hh
+
 variable [Nontrivial R] in
 theorem ofPoint_ne_zero (x : A) : hom.ofPoint x ≠ (0 : W) := by
-  intro hn
-  have := congrArg hom.weight hn
-  simp [weight_one x] at this
+  grind [zero_notMem_affineSpan, AffineMap.mem_range]
 
 /-- The homogenization of a point in `V` has weight 0. -/
 lemma weight_zero (v : V) : hom.weight (hom.ofVector v) = 0 := by

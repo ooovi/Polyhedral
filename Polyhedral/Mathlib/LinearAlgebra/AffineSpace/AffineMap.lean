@@ -13,7 +13,7 @@ import Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 @[expose] public section
 
-open Affine Module
+open Affine Module AffineSubspace
 
 section
 
@@ -44,6 +44,51 @@ theorem mem_range (f : P₁ →ᵃ[k] P₂) (x : P₂) : x ∈ f.range ↔ ∃ (
 
 @[simp]
 theorem coe_range (f : P₁ →ᵃ[k] P₂) : f.range = Set.range f := rfl
+
+theorem range_eq_map (f : P₁ →ᵃ[k] P₂) : range f = map f ⊤ := by
+  ext
+  simp
+
+theorem mem_range_self (f : P₁ →ᵃ[k] P₂) (x : P₁) : f x ∈ range f :=
+  ⟨x, rfl⟩
+
+@[simp]
+theorem range_id : range (AffineMap.id k P₁) = ⊤ :=
+  SetLike.coe_injective Set.range_id
+
+theorem range_comp (f : P₁ →ᵃ[k] P₂) (g : P₂ →ᵃ[k] P) : range (g.comp f) = map g (range f) :=
+  SetLike.coe_injective (Set.range_comp g f)
+
+theorem range_comp_le_range (f : P₁ →ᵃ[k] P₂) (g : P₂ →ᵃ[k] P) : range (g.comp f) ≤ range g :=
+  SetLike.coe_mono (Set.range_comp_subset_range f g)
+
+theorem range_eq_top {f : P₁ →ᵃ[k] P₂} : range f = ⊤ ↔ Function.Surjective f := by
+  rw [SetLike.ext'_iff, coe_range, top_coe, Set.range_eq_univ]
+
+theorem range_eq_top_of_surjective (f : P₁ →ᵃ[k] P₂) (hf : Function.Surjective f) :
+    range f = ⊤ := range_eq_top.mpr hf
+
+theorem range_le_iff_comap {f : P₁ →ᵃ[k] P₂} {p : AffineSubspace k P₂} :
+    range f ≤ p ↔ comap f p = ⊤ := by rw [range_eq_map, map_le_iff_le_comap, eq_top_iff]
+
+theorem map_le_range {f : P₁ →ᵃ[k] P₂} {p : AffineSubspace k P₁} : map f p ≤ range f :=
+  SetLike.coe_mono (Set.image_subset_range f p)
+
+theorem comap_le_comap_iff {f : P₁ →ᵃ[k] P₂} (hf : range f = ⊤) {p p'} :
+    comap f p ≤ comap f p' ↔ p ≤ p' :=
+  ⟨fun H ↦ by rwa [SetLike.le_def, (range_eq_top.mp hf).forall], comap_mono⟩
+
+theorem comap_injective {f : P₁ →ᵃ[k] P₂} (hf : range f = ⊤) : Function.Injective (comap f) :=
+  fun _ _ h ↦ le_antisymm ((comap_le_comap_iff hf).mp (le_of_eq h))
+    ((comap_le_comap_iff hf).mp (ge_of_eq h))
+
+@[simp]
+theorem map_top (f : P₁ →ᵃ[k] P₂) : map f ⊤ = range f :=
+  (range_eq_map f).symm
+
+@[simp]
+theorem affineSpan_range_eq_range (f : P₁ →ᵃ[k] P₂) : affineSpan k (Set.range f) = f.range := by
+  simp [← Set.image_univ, ← AffineSubspace.map_span]
 
 lemma range_direction (f : P₁ →ᵃ[k] P₂) : f.range.direction = f.linear.range := by
   apply le_antisymm

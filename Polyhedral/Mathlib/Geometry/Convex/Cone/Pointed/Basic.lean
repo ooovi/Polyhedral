@@ -10,6 +10,7 @@ public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 public import Mathlib.Algebra.Order.Nonneg.Basic
 
 import Mathlib.RingTheory.LocalRing.Basic
+import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 
 /-! This file proves basic facts about cones that are intended to go into Pointed/Basic. -/
 
@@ -136,6 +137,16 @@ lemma sup_inf_submodule_span_of_disjoint {C : PointedCone R M} {S : Submodule R 
   rw [sup_inf_assoc_of_le_submodule]
   · rw [inf_comm, ← coe_inf, disjoint_iff.mp hS]; simp
   · exact Submodule.subset_span
+
+@[simp]
+theorem affineSpan_eq_span (C : PointedCone R M) :
+    affineSpan R (C : Set M) = span R (C : Set M) :=
+  affineSpan_eq_span_iff_zero_mem.mpr <| subset_affineSpan R _ C.zero_mem
+
+@[simp]
+theorem affineSpan_hull (K : Set M) :
+    affineSpan R (hull R K : Set M) = span R K := by
+  rw [affineSpan_eq_span, span_hull_eq_submodule_span]
 
 end Ring
 

@@ -7,6 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Dimension
 
 /-!
 ## Rank of Pointed Cones
@@ -71,10 +72,22 @@ end Semiring
 
 section Ring
 
-variable [Ring R] [PartialOrder R] [IsOrderedRing R] [IsDomain R]
-variable [AddCommGroup M] [Module R M] [Module.IsTorsionFree R M]
+variable [Ring R] [PartialOrder R] [IsOrderedRing R]
+variable [AddCommGroup M] [Module R M]
 
-variable {C : PointedCone R M}
+@[simp]
+theorem affineSpan_ne_bot (C : PointedCone R M) : affineSpan R (C : Set M) ≠ ⊥ :=
+  fun hh ↦ (Set.nonempty_of_mem C.zero_mem).ne_empty (affineSpan_eq_bot _ |>.mp hh)
+
+theorem dim_affineSpan_eq_rank (C : PointedCone R M) :
+    (affineSpan R (C : Set M)).dim = C.rank := by
+  simp [affineSpan_eq_span]
+
+theorem finDim_affineSpan_eq_finrank (C : PointedCone R M) :
+    (affineSpan R (C : Set M)).finDim = C.finrank := by
+  simp [affineSpan_eq_span]
+
+variable [IsDomain R] [Module.IsTorsionFree R M] {C : PointedCone R M}
 
 lemma bot_of_rank_zero (h : C.rank = 0) : C = ⊥ := by
   have hlin : span R C = (⊥ : Submodule R M) :=
