@@ -103,16 +103,13 @@ theorem mem_range_ofPoint_iff (x : W) :
   rintro ⟨y, hy⟩
   rw [← hy, weight_one]
 
-theorem zero_notMem_affineSpan [Nontrivial R] {s : Set W} (hs : s ⊆ hom.ofPoint.range) :
-    0 ∉ affineSpan R s := fun hh ↦ by
-  have := mem_range_ofPoint_iff (0 : W) |>.mp (by simpa using affineSpan_mono R hs hh)
-  simp at this
+theorem zero_notMem_affineSpan [Nontrivial R] :
+    0 ∉ hom.ofPoint.range := fun hh ↦ by
+  simpa using mem_range_ofPoint_iff (0 : W) |>.mp hh
 
 variable [Nontrivial R] in
 theorem ofPoint_ne_zero (x : A) : hom.ofPoint x ≠ (0 : W) := by
-  intro hn
-  have := congrArg hom.weight hn
-  simp [weight_one x] at this
+  grind [zero_notMem_affineSpan, AffineMap.mem_range]
 
 /-- The homogenization of a point in `V` has weight 0. -/
 lemma weight_zero (v : V) : hom.weight (hom.ofVector v) = 0 := by
