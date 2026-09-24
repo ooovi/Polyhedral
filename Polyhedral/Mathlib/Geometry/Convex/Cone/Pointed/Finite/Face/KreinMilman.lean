@@ -1,19 +1,22 @@
 /-
-Copyright (c) 2025 Olivia Röhrig, Martin Winter. All rights reserved.
+Copyright (c) 2026 Moritz Firsching. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig, Martin Winter
+Authors: Moritz Firsching
 -/
 module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.KreinMilman
 
 /-! In this file we prove the Krein-Milman theorem for FG cones: every finitely generated
 cone is spanned by its rays, that is, by the finite set of its 1-dimensional faces.
 
-TODO: aspects of the proof are rather cumbersome since the atoms of the face lattice are rays
-rather than points. We therefore intend to perform the proof on the polytope side and
-transfer it here using homogenization.
--/
+The theorem is derived from the Krein-Milman theorem for polytopes
+(`IsPolytope.krein_milman`): a salient FG cone admits a linear functional that is positive on
+all of its nonzero elements, the slice of the cone at weight one is a polytope, and the cone
+is the homogenization of that slice, so its rays are the homogenizations of the vertices of
+the slice. -/
 
 @[expose] public section
 
@@ -23,159 +26,21 @@ variable {R M : Type*}
 
 section Field
 
-variable [Field R] [LinearOrder R] [IsOrderedRing R]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup M] [Module R M]
 
-variable {C F F₁ F₂ : PointedCone R M}
+variable {C : PointedCone R M}
 
-section opt
+open Convexity ConvexSet Affine Affine.IsHomogenization
 
-/- The minimum of `f/g` on a cone. -/
-def opt (C : PointedCone R M) (f g : M →ₗ[R] R) : PointedCone R M where
-  carrier := {x ∈ C | ∀ y ∈ C, f x * g y ≤ f y * g x}
-  add_mem' := by
-    intro a b ha hb
-    simp only [Set.mem_ofPred_eq, map_add] at *
-    refine ⟨C.add_mem ha.1 hb.1, ?_⟩
-    intro y hy
-    rw [add_mul, mul_add]
-    exact add_le_add (ha.2 y hy) (hb.2 y hy)
-  zero_mem' := by simp only [Set.mem_ofPred_eq, zero_mem, map_zero, zero_mul, mul_zero, le_refl,
-     implies_true, and_self]
-  smul_mem' := by
-    intro a x hx
-    refine ⟨C.smul_mem a.2 hx.1, ?_⟩
-    intro y hy
-    by_cases! h : a ≤ 0
-    · simp [nonpos_iff_eq_zero.mp h]
-    simp only [LinearMap.map_smul_of_tower, Algebra.smul_mul_assoc, Algebra.mul_smul_comm]
-    exact (smul_le_smul_iff_of_pos_left h).mpr <| hx.2 y hy
-
--- TODO: the proof was modified after features changed and needs golfing:
---  * `Salient.of_le_positive` was hacked in.
---  * `mem_positive'` was hacked in to recover the previous form of `hg`.
-lemma IsFaceOf.of_opt (C : PointedCone R M) (f g : M →ₗ[R] R) (hCg : C ≤ g.positive) :
-    (C.opt f g).IsFaceOf C := by
-  have hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0) := -- hacked in to recover `hg`
-    fun _ hx => g.mem_positive'.mp (hCg hx)
-  refine ⟨fun _ hx ↦ hx.1, ?_⟩
-  intro x y a hx hy ha ⟨h2, h⟩
-  by_cases! x_ne_0 : x = 0
-  · rw [x_ne_0]; exact zero_mem (C.opt f g)
-  by_cases! t_ne_0 : a • x + y = 0
-  · exfalso
-    have hC' := Salient.of_le_positive hCg
-    exact (smul_ne_zero (ne_of_gt ha) x_ne_0) <|
-      hC' (a • x) (C.smul_mem (le_of_lt ha) hx) y hy t_ne_0
-  refine ⟨hx, fun z hz ↦ ?_⟩
-  have : g x > 0 := lt_of_le_of_ne (hg _ hx).1 (fun h ↦ x_ne_0 <| (hg _ hx).2 (Eq.symm h))
-  have t1 := h x hx
-  have t2 := h y hy
-  have t4 := (mul_le_mul_iff_of_pos_left this).mpr <| (h z hz)
-  simp only [map_add, map_smul, smul_eq_mul] at t1 t2 t4
-  have local_lemma : ∀ {a b c d e : R}, e > 0 → a ≤ b → c ≤ d → e * a + c = e * b + d → a = b :=
-    fun _ _ _ _ ↦ by nlinarith
-  have t3 : (a * f x + f y) * g x = f x * (a * g x + g y) := local_lemma ha t1 t2 (by ring)
-  have : a * g x + g y > 0 := by
-    simpa only [gt_iff_lt, map_add, map_smul, smul_eq_mul] using
-      lt_of_le_of_ne (hg _ h2).1 (fun h ↦ t_ne_0 <| (hg _ h2).2 (Eq.symm h))
-  apply (mul_le_mul_iff_of_pos_left this).mp
-  nth_rw 3 [mul_comm] at t3
-  rw [← mul_assoc, ← t3]
-  linarith
-
-lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
-    (hCg : C ≤ g.positive) : ∃ x, x ≠ 0 ∧ x ∈ C.opt f g := by classical
-  have hg : ∀ x ∈ C, 0 ≤ g x ∧ (g x = 0 → x = 0) := -- hacked in to recover `hg`
-    fun _ hx => g.mem_positive'.mp (hCg hx)
-  obtain ⟨s, hs⟩ := hC
-  have hs0 : ∃ z ∈ s, z ≠ 0 := by
-    by_contra hs0
-    push Not at hs0
-    exact hC0 <| by rw [← hs]; exact Submodule.span_eq_bot.mpr hs0
-  have hg_pos : ∀ {z : M}, z ∈ C → z ≠ 0 → 0 < g z := by
-    intro z hz hz0
-    exact lt_of_le_of_ne (hg _ hz).1 (fun h ↦ hz0 <| (hg _ hz).2 (Eq.symm h))
-  let s0 : Finset M := s.filter fun z => z ≠ 0
-  have hs0_ne : s0.Nonempty := by
-    rcases hs0 with ⟨z, hzs, hz0⟩
-    exact ⟨z, by simp [s0, hzs, hz0]⟩
-  obtain ⟨x, hx0, hxmin⟩ := Finset.exists_min_image s0 (fun z => f z / g z) hs0_ne
-  have hxs : x ∈ s := (Finset.mem_filter.mp hx0).1
-  have hx_ne_0 : x ≠ 0 := (Finset.mem_filter.mp hx0).2
-  have hxC : x ∈ C := by rw [← hs]; exact subset_hull hxs
-  have hgx : 0 < g x := hg_pos hxC hx_ne_0
-  have hgen : ∀ z ∈ s, f x * g z ≤ f z * g x := by
-    intro z hzs
-    by_cases hz0 : z = 0
-    · simp [hz0]
-    have hzC : z ∈ C := by rw [← hs]; exact subset_hull hzs
-    have hgz : 0 < g z := hg_pos hzC hz0
-    have hz0' : z ∈ s0 := by simp [s0, hzs, hz0]
-    exact (div_le_div_iff₀ hgx hgz).1 (hxmin _ hz0')
-  refine ⟨x, hx_ne_0, ?_⟩
-  refine ⟨hxC, ?_⟩
-  intro y hy
-  rw [← hs] at hy
-  induction hy using Submodule.span_induction with
-  | mem z hz => exact hgen z hz
-  | zero =>
-      simp
-  | add y z _ _ hy hz =>
-      simpa [map_add, add_mul, mul_add] using add_le_add hy hz
-  | smul a y _ hy =>
-      have hy' := mul_le_mul_of_nonneg_left hy a.2
-      simp only [LinearMap.map_smul_of_tower, Algebra.mul_smul_comm, Algebra.smul_mul_assoc,
-        ge_iff_le]
-      exact hy'
-
-lemma FG.opt_neq_bot (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ ⊥) (f g : M →ₗ[R] R)
-     (hCg : C ≤ g.positive) : C.opt f g ≠ ⊥ := by
-  rcases FG.exists_ne_zero_mem_opt C hC hC0 f g hCg with ⟨x, hx0, hxopt⟩
-  exact fun hbot => hx0 <| by simpa [hbot] using hxopt
-
-end opt
-
-/- For every ray `x` of the span of a set `s`, there is a member of `s` that also spans the ray. -/
-lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
-    (hspan : (R ∙₊ x).IsFaceOf (hull R s)) : ∃ y ∈ s, ∃ c : R, 0 < c ∧ y = c • x := by
-  have h := hspan.hull_inter_face_hull_inf_face
-  have ⟨y, hy, hy0⟩ : ∃ w ∈ s ∩ (R ∙₊ x), w ≠ 0 := by
-    by_contra H
-    absurd hx
-    push Not at H
-    simp only [← Set.mem_singleton_iff] at H
-    simpa [h] using Submodule.span_mono (R := {c : R // 0 ≤ c}) H
-  simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton,
-    Subtype.exists] at hy
-  obtain ⟨hys, a, ha, rfl⟩ := hy
-  exact ⟨_, hys, a, lt_of_le_of_ne ha (fun h => hy0 (by simp [← h])), rfl⟩
-
-open Module in
 /-- Krein-Milman theorem: every finitely generated cone is spanned by its rays, that is,
 by the finite set of its 1-dimensional faces. -/
 lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     ∃ s : Finset M, hull R s = C ∧ ∀ x ∈ s, (R ∙₊ x).IsFaceOf C := by
   classical
-  let ⟨s, hs⟩ := hfg
-  by_cases hs' : s = ∅
-  · exact ⟨∅, by simp [← hs, hs']⟩
-  by_contra! h
-  let t := s.filter fun x => (R ∙₊ x).IsFaceOf C
-  specialize h t
-  have hts : t ⊆ s := by simp [t]
-  have hst : ¬(s : Set M) ⊆ hull R (t : Set M) := by
-    by_contra h'
-    have h' := Submodule.span_mono (R := {c : R // 0 ≤ c}) h'
-    have h'' := Submodule.span_mono (R := {c : R // 0 ≤ c}) hts
-    simp only [Submodule.span_coe_eq_restrictScalars, Submodule.restrictScalars_self] at h'
-    rw [← le_antisymm h' h'', hs] at h
-    simp [t, and_assoc] at h
-  obtain ⟨x, hxs, hxt⟩ := Set.not_subset.mp hst
-  have hx : x ∈ C := by
-    rw [← hs]
-    exact subset_hull hxs
-  obtain ⟨f, hf, hf'⟩ := FG.farkas (Dual.eval R M) hxt
+  by_cases hbot : C = ⊥
+  · exact ⟨∅, by simp [hbot]⟩
+  -- a linear functional that is positive on all nonzero elements of `C`
   obtain ⟨g, hg, hgker⟩ := IsExposedFaceOf.lineal hfg
   have hker : C ⊓ g.ker = ⊥ := by
     rw [← hgker]
@@ -188,50 +53,32 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     have : y ∈ C ⊓ g.ker := ⟨hy, hgy⟩
     rw [hker] at this
     simpa using this
-  simp only [Dual.eval_apply] at hf hf'
-  let F := C.opt f g
-  have hF : F.IsFaceOf C := IsFaceOf.of_opt C f g hgC
-  have hC0 : C ≠ ⊥ := by
-    intro hC0
-    have : x = 0 := by simpa [hC0] using hx
-    exact hxt (by simp [this])
-  have hF' := opt_neq_bot C hfg hC0 f g hgC
-  have hFsal := Salient.of_le_salient hsal hF.le
-  obtain ⟨r, hr0, hrF⟩ := exists_ray (hF.fg hfg) hF' hFsal
-  have hr := IsFaceOf.trans hrF hF
-  rw [← hs] at hr
-  obtain ⟨w, hws, c, hc', h⟩ := hr.hull_ray hr0
-  simp only [SetLike.mem_coe] at hws
-  have hc0 := (ne_of_lt hc').symm
-  have hrw : r = c⁻¹ • w := by
-    subst h hs
-    simp [smul_smul, hc0]
-  rw [hrw] at hr
-  rw [hull_singleton_smul_eq (inv_pos.mpr hc')] at hr
-  have hwt : w ∈ t := by
-    simpa [Finset.mem_filter, t] using ⟨hws, hs ▸ hr⟩
-  have hwF : r ∈ F := by
-    have : r ∈ hull R {r} := by simp
-    exact hrF.le this
-  have hwF : w ∈ F := by
-    rw [h]
-    exact F.smul_mem (le_of_lt hc') hwF
-  simp only [opt, Submodule.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, Set.mem_ofPred_eq,
-    F] at hwF
-  have hgw : 0 < g w := by
-    have hw0 : w ≠ 0 := by
-      rw [h]
-      exact smul_ne_zero hc0 hr0
-    by_contra! h
-    have hgw := g.mem_positive'.mp (hgC hwF.1)
-    have hgw' := le_antisymm hgw.1 h
-    have := hgw.2 hgw'.symm
-    absurd hxt
-    contradiction
-  have hwF := hwF.2 x hx
-  have : 0 ≤ f w * g x := mul_nonneg (hf' w hwt) (g.mem_positive'.mp (hgC hx)).1
-  have : f x * g w < 0 := mul_neg_of_neg_of_pos hf hgw
-  linarith
+  -- the weight-one slice of `C` is nonempty
+  obtain ⟨y, hyC, hy0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hbot
+  have hgy : 0 < g y := by
+    obtain ⟨h1, h2⟩ := LinearMap.mem_positive'.mp (hgC hyC)
+    exact lt_of_le_of_ne h1 fun h => hy0 (h2 h.symm)
+  -- choose the homogenization whose affine space is the weight-one plane
+  let weightOnePlane := (affineSpan R {1}).comap g.toAffineMap
+  have : Nonempty weightOnePlane :=
+    ⟨⟨(g y)⁻¹ • y, by simp [inv_mul_cancel₀ hgy.ne', weightOnePlane]⟩⟩
+  let ℋ : IsHomogenization R weightOnePlane M := ofWeightOne g
+  -- view `C` as the homogenization of its weight-one slice
+  let : ConvexSpace R M := ConvexSpace.ofModule
+  let := ConvexSpace.ofAddTorsor (R := R) (P := (affineSpan R {1}).comap g.toAffineMap)
+  have hCP : homogenize ℋ (dehomogenize ℋ C) = C :=
+    homogenize_dehomogenize_of_le_positive ((ofWeightOne_weight g).symm ▸ hgC)
+  -- the slice is a polytope; apply the Krein-Milman theorem for polytopes
+  have hP : IsPolytope R (dehomogenize ℋ C : Set weightOnePlane) := by
+    rw [IsPolytope.iff_homogenize_fg (W := M), hCP]
+    exact hfg
+  obtain ⟨s, hs, hface⟩ := IsPolytope.krein_milman hP
+  refine ⟨s.image ℋ.ofPoint, ?_, ?_⟩
+  · rw [Finset.coe_image, hull_image_ofPoint_eq_homogenize_convexHull, hs, hCP]
+  · intro x hx
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hx
+    have h := homogenize_isFaceOf ℋ (hface q hq)
+    rwa [homogenize_singleton, hCP] at h
 
 end Field
 

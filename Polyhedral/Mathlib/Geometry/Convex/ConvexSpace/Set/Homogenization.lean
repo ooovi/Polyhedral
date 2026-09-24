@@ -186,6 +186,21 @@ lemma smul_pos_of_mem_homogenize {P : ConvexSet R A} {x} (h : x ∈ homogenize �
   (mem_hull_iff_mem_pos_smul_of_convex_nonzero
     (P.isConvexSet.image ℋ.ofPoint.isAffineMap) hx).mp h
 
+@[simp] lemma dehomogenize_hull_singleton_ofPoint (p : A) :
+    dehomogenize ℋ (R ∙₊ ℋ.ofPoint p) = ({p} : ConvexSet R A) := by
+  ext q
+  constructor
+  · intro hq
+    have hq' : ℋ.ofPoint q ∈ R ∙₊ ℋ.ofPoint p := hq
+    simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop] at hq'
+    obtain ⟨c, -, hc⟩ := hq'
+    have hw := congrArg ℋ.weight hc
+    simp only [map_smul, ℋ.weight_ofPoint, smul_eq_mul, mul_one] at hw
+    rw [hw, one_smul] at hc
+    exact ℋ.ofPoint_injective hc ▸ rfl
+  · rintro rfl
+    exact subset_hull rfl
+
 -- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction) and then
 --  applied here as a special case.
 lemma ofPoint_mem_homogenize_iff_mem (x : A) (P : ConvexSet R A) :
