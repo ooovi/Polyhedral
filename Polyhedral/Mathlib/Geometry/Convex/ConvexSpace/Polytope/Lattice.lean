@@ -107,6 +107,17 @@ instance : SemilatticeSup (Polytope R X) where
 
 end Semiring
 
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X]
+variable [AddCommGroup V] [Module R V] [AddTorsor V X] [IsAffineConvexSpace R V X]
+
+instance finite_vectorSpan (P : Polytope R X) : Module.Finite R (vectorSpan R (P : Set X)) :=
+  IsPolytope.finite_vectorSpan P.isPolytope
+
+end Ring
+
 section Field
 
 variable [Field R] [PartialOrder R] [IsStrictOrderedRing R]
