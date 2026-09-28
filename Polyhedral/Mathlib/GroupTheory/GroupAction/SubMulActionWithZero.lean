@@ -70,7 +70,7 @@ instance : SetLike (SubMulAction₀ R M) M :=
   ⟨SubMulAction₀.carrier, fun p q h => by cases p; cases q; congr⟩
 
 instance : PartialOrder (SubMulAction₀ R M) :=
-  .ofSetLike (SubMulAction₀ R M) M
+  .ofSetLike (SubMulAction₀ R M)
 
 instance : ZeroMemClass (SubMulAction₀ R M) M where
   zero_mem p := p.zero_mem'

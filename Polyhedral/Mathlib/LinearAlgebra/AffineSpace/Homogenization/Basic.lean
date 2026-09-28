@@ -116,6 +116,16 @@ theorem ofVector_range_eq_weight_ker : ℋ.ofVector.range = ℋ.weight.ker := by
   ext x
   simp
 
+theorem mem_range_ofPoint_iff (x : W) :
+    x ∈ hom.ofPoint.range ↔ hom.weight x = 1 := by
+  refine ⟨?_, fun h ↦ Eq.mpr (congrFun hom.ofPoint_range_eq_preimage_weight_one x) h⟩
+  rintro ⟨y, hy⟩
+  rw [← hy, weight_one]
+
+theorem zero_notMem_affineSpan [Nontrivial R] :
+    0 ∉ hom.ofPoint.range := fun hh ↦ by
+  simpa using mem_range_ofPoint_iff (0 : W) |>.mp hh
+
 variable [Nontrivial R] in
 theorem ofPoint_ne_zero (x : A) : ℋ.ofPoint x ≠ (0 : W) := by
   intro hn

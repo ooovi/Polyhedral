@@ -9,7 +9,6 @@ public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines homogenization of convex sets in affine spaces. -/

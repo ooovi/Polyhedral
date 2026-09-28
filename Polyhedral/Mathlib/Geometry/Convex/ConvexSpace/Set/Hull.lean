@@ -1,74 +1,15 @@
-/-
-Copyright (c) 2026 Yaël Dillies. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yaël Dillies
--/
 module
 
-public import Mathlib.Geometry.Convex.Hull
-public import Polyhedral.Mathlib.Geometry.Convex.Set
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
-
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Prod
-
-/-!
-# IsConvexSet hull
-
-This file defines the convex hull of a set in a convex space. `convexHull R s` is the smallest
-convex set containing `s`. In order theory speak, this is a closure operator.
--/
-
-public section
+public import Polyhedral.Mathlib.Geometry.Convex.AffineMap.Module
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
+public import Polyhedral.Mathlib.Geometry.Convex.Hull
 
 public section
 
 open Set
+open scoped Pointwise
 
 namespace Convexity
-
-variable {R X Y ι : Type*}
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [ConvexSpace R X] [ConvexSpace R Y]
-
-/-- The convex hull of a product is the product of the convex hulls. -/
-lemma convexHull_prod (s : Set X) (t : Set Y) :
-    convexHull R (s ×ˢ t) = convexHull R s ×ˢ convexHull R t := by
-  refine Subset.antisymm (convexHull_min
-    (prod_mono subset_convexHull_self subset_convexHull_self)
-    (.prod .convexHull .convexHull)) ?_
-  rintro ⟨x, y⟩ ⟨hx, hy⟩
-  have step : ∀ y ∈ t, (x, y) ∈ convexHull R (s ×ˢ t) := by
-    intro y hy
-    have hcvx : IsConvexSet R ((fun x => (x, y)) ⁻¹' convexHull R (s ×ˢ t)) :=
-      .preimage (by fun_prop) .convexHull
-    exact hcvx.convexHull_subset_iff.mpr
-      (fun x hx => subset_convexHull_self (mk_mem_prod hx hy)) hx
-  have hcvx : IsConvexSet R ((fun y => (x, y)) ⁻¹' convexHull R (s ×ˢ t)) :=
-      .preimage (by fun_prop) .convexHull
-  exact hcvx.convexHull_subset_iff.mpr step hy
-
-/-- The convex hull of the range of `f` is the image of the standard simplex `StdSimplex R ι`
-under the affine map sending weights to the corresponding convex combination of `f`.
-
-For finite `ι`, this can be interpreted as saying that a polytope is the image of some
-simplex under some affine map. -/
-lemma convexHull_range (f : ι → X) :
-    convexHull R (.range f) = .range (fun w : StdSimplex R ι ↦ iConvexComb w f) := by
-  apply Set.Subset.antisymm
-  · apply convexHull_min
-    · rintro _ ⟨i, rfl⟩
-      exact ⟨.single i, by simp⟩
-    · exact IsAffineMap.iConvexComb.isConvexSet_range
-  · rintro _ ⟨w, rfl⟩
-    apply IsConvexSet.convexHull.iConvexComb_mem
-    intro i _
-    exact subset_convexHull_self ⟨i, rfl⟩
-
-section Pointwise
-
-open Pointwise
-
 variable {R V A : Type*}
 
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
@@ -109,8 +50,4 @@ lemma convexHull_vadd (s₁ : Set V) (s₂ : Set A) :
   rw [← Set.vadd_image_prod, ← Set.vadd_image_prod, ← convexHull_prod]
   exact (isAffineMap_vadd.image_convexHull _).symm
 
-end Pointwise
-
 end Convexity
-
-end

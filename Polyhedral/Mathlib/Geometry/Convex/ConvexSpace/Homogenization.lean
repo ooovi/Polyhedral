@@ -8,7 +8,6 @@ module
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
 
 /-! This file proves results about the interaction of homogenization and convexity. -/
 
