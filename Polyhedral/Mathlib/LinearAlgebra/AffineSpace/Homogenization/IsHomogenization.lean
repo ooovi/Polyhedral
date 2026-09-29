@@ -35,7 +35,7 @@ namespace Affine
 
 section Ring
 
-open Function Submodule
+open Function Submodule AffineSubspace
 
 variable {R : Type*} [Ring R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
@@ -244,22 +244,22 @@ theorem weight_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
 
 /-- A module is a homogenization of the weight-one hyperplane of any linear functional,
 provided that hyperplane is nonempty. -/
-def ofWeightOne (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
-    IsHomogenization R ((affineSpan R {1}).comap g.toAffineMap) W :=
+def ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
+    IsHomogenization R (comap g.toAffineMap {1}) W :=
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
 @[simp]
-theorem ofPoint_ofWeightOne (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
-    (ofWeightOne g).ofPoint = ((affineSpan R {1}).comap g.toAffineMap).subtype := by
+theorem ofPoint_ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
+    (ofWeightOne g).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightOne]
 
 @[simp]
-theorem ofVector_ofWeightOne (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
-    (ofWeightOne g).ofVector = ((affineSpan R {1}).comap g.toAffineMap).direction.subtype := by
+theorem ofVector_ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
+    (ofWeightOne g).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
   simp [ofWeightOne]
 
 @[simp]
-theorem weight_ofWeightOne (g : W →ₗ[R] R) [Nonempty ((affineSpan R {1}).comap g.toAffineMap)] :
+theorem weight_ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
     (ofWeightOne g).weight = g := by
   simp [ofWeightOne]
 
