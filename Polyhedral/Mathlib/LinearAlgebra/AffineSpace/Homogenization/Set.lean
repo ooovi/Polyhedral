@@ -254,7 +254,7 @@ variable (ℋ : IsHomogenization R A W)
 
 lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
     R≥0 ∙ (Set.range ℋ.ofPoint) ≤ ℋ.weight.positive := by
-  rw [ofPoint_range_eq_preimage_weight_ofPoint]
+  rw [ofPoint_range_eq_preimage_weight_one]
   exact nonneg_smulSet_preimage_one_le_positive _
 
 @[simp] lemma homogenize_univ_le_weight_positive :
@@ -339,7 +339,7 @@ variable (ℋ : IsHomogenization R A W)
 
 lemma nonneg_smulSet_ofPoint_range :
     R≥0 ∙ (Set.range ℋ.ofPoint) = ℋ.weight.positive := by
-  rw [ofPoint_range_eq_preimage_weight_ofPoint]
+  rw [ofPoint_range_eq_preimage_weight_one]
   exact nonneg_smulSet_preimage_one_eq_positive _
 
 @[simp] lemma homogenize_univ : homogenize ℋ (Set.univ : Set A) = ℋ.weight.positive := by
