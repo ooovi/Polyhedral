@@ -6,7 +6,7 @@ Authors: Martin Winter, Olivia Röhrig
 module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomogenization
 
 
 /-! This file proves results about the interaction of homogenization and convexity. -/
