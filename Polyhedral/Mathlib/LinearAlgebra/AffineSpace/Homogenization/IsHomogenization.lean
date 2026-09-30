@@ -269,4 +269,44 @@ end IsHomogenization
 
 end Ring
 
+section Field
+
+namespace IsHomogenization
+
+open Function Submodule AffineSubspace
+
+variable {R : Type*} [DivisionRing R]
+variable {V : Type*} [AddCommGroup V] [Module R V]
+variable {P : Type*} [AddTorsor V P]
+variable {W : Type*} [AddCommGroup W] [Module R W]
+
+instance {g : W →ₗ[R] R} [h : Fact (g ≠ 0)] : Nonempty (comap g.toAffineMap {1}) := by
+  obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h.out
+  use (g y)⁻¹ • y
+  simp [hy]
+
+/-- A module is a homogenization of the weight-one hyperplane of any nonzero linear functional. -/
+def ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
+    IsHomogenization R (comap g.toAffineMap {1}) W :=
+  ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
+
+@[simp]
+theorem ofPoint_ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
+    (ofWeightNeZero g).ofPoint = (comap g.toAffineMap {1}).subtype := by
+  simp [ofWeightNeZero]
+
+@[simp]
+theorem ofVector_ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
+    (ofWeightNeZero g).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
+  simp [ofWeightNeZero]
+
+@[simp]
+theorem weight_ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
+    (ofWeightNeZero g).weight = g := by
+  simp [ofWeightNeZero]
+
+end IsHomogenization
+
+end Field
+
 end Affine
