@@ -54,7 +54,7 @@ private noncomputable instance Polytope.faceHomogenizationGradeOrder (P : Polyto
   let ℋ := IsHomogenization.ofHomogenization R A
   have : (homogenize _ (P : ConvexSet R A)).FG := IsPolytope.homogenize_fg ℋ P.isPolytope
   let := PointedCone.FG.gradeOrder_finrank this
-  refine GradeOrder.liftRight _ (IsHomogenization.Face.homogenizeIso ℋ _).strictMono ?_
+  refine GradeOrder.liftRight _ (face_homogenizeIso ℋ P).strictMono ?_
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 end Field
