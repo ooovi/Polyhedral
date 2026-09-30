@@ -204,7 +204,6 @@ lemma comap_iff_of_surjective {f : N →ₗ[R] M} (hf : Surjective f) :
     have h := h.map f
     unfold map comap at h
     rwa [map_comap_eq_of_surjective] at h
-    exact hf
   mpr := comap_of_surjective hf
 
 end AddCommGroup

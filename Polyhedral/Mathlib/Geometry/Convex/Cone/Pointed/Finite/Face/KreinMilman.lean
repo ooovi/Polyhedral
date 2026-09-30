@@ -59,15 +59,14 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     obtain ⟨h1, h2⟩ := LinearMap.mem_positive'.mp (hgC hyC)
     exact lt_of_le_of_ne h1 fun h => hy0 (h2 h.symm)
   -- choose the homogenization whose affine space is the weight-one plane
-  let weightOnePlane := (affineSpan R {1}).comap g.toAffineMap
-  have : Nonempty weightOnePlane :=
-    ⟨⟨(g y)⁻¹ • y, by simp [inv_mul_cancel₀ hgy.ne', weightOnePlane]⟩⟩
-  let ℋ : IsHomogenization R weightOnePlane M := ofWeightOne g
+  let weightOnePlane := AffineSubspace.comap (g.toAffineMap) {1}
+  have : Fact (g ≠ 0) := fact_iff.mpr (fun h ↦ by simp [h] at hgy)
+  let ℋ : IsHomogenization R weightOnePlane M := ofWeightNeZero g
   -- view `C` as the homogenization of its weight-one slice
   let : ConvexSpace R M := ConvexSpace.ofModule
-  let := ConvexSpace.ofAddTorsor (R := R) (P := (affineSpan R {1}).comap g.toAffineMap)
+  let := ConvexSpace.ofAddTorsor (R := R) (P := AffineSubspace.comap (g.toAffineMap) {1})
   have hCP : homogenize ℋ (dehomogenize ℋ C) = C :=
-    homogenize_dehomogenize_of_le_positive ((ofWeightOne_weight g).symm ▸ hgC)
+    homogenize_dehomogenize_of_le_positive ((weight_ofWeightNeZero g).symm ▸ hgC)
   -- the slice is a polytope; apply the Krein-Milman theorem for polytopes
   have hP : IsPolytope R (dehomogenize ℋ C : Set weightOnePlane) := by
     rw [IsPolytope.iff_homogenize_fg (W := M), hCP]

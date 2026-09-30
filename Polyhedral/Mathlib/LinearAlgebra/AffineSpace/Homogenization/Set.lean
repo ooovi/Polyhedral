@@ -6,7 +6,7 @@ Authors: Martin Winter
 module
 
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
-public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomogenization
 
 import Polyhedral.Mathlib.Data.Set.Lattice.Image
 import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring

@@ -44,7 +44,7 @@ lemma IsFaceOf.singleton_convexHull_insert {s : Set A} {x : A}
   let W := Homogenization R A
   let : ConvexSpace R W := ConvexSpace.ofModule
   -- let : IsModuleConvexSpace R W := IsModuleConvexSpace.ofModule
-  let ℋ : IsHomogenization R A W := IsHomogenization.canonical R A
+  let ℋ : IsHomogenization R A W := IsHomogenization.ofHomogenization R A
   have hhom : homogenize ℋ (ConvexSet.convexHull R (insert x s)) =
       PointedCone.hull R (ℋ.ofPoint '' s) ⊔ (R ∙₊ ℋ.ofPoint x) := by
     rw [← hull_image_ofPoint_eq_homogenize_convexHull (W := W), Set.image_insert_eq, hull_insert,

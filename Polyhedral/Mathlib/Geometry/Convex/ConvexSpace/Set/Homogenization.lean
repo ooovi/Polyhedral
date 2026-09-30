@@ -7,10 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
-
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineMap
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomogenization
 
 /-! This file defines homogenization of convex sets in affine spaces. -/
 
@@ -47,7 +44,6 @@ def homogenizeOrderHom : ConvexSet R A →o PointedCone R W where
   toFun := homogenize ℋ
   monotone' := homogenize_monotone _
 
-@[simp]
 lemma homogenize_singleton (p : A) : homogenize ℋ ({p} : ConvexSet R A) = R ∙₊ ℋ.ofPoint p := by
   have h : (({p} : ConvexSet R A) : Set A) = {p} := rfl
   rw [homogenize, h, Set.image_singleton]
@@ -245,7 +241,7 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
         simpa [y', ℋ.ofPoint_range_eq_preimage_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       exact ⟨y', hy'C, hy'⟩
-    · exact C.isConvexSet.inter ℋ.ofPoint.range_isConvexSet
+    · exact C.isConvexSet.inter ℋ.ofPoint.isConvexSet_range
 
 lemma homogenize_mono_iff {K₁ K₂ : ConvexSet R A} :
     K₁.homogenize ℋ ≤ K₂.homogenize ℋ ↔ K₁ ≤ K₂ where

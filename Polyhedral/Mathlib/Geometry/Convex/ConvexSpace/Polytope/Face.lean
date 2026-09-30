@@ -33,7 +33,7 @@ include V in
 theorem IsPolytope.face_isPolytope (hC : IsPolytope R (C : Set A)) (hF : IsFaceOf F C) :
     IsPolytope R (F : Set A) := by
   let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
-  have homF := (IsHomogenization.canonical R A).homogenize_isFaceOf hF
+  have homF := (IsHomogenization.ofHomogenization R A).homogenize_isFaceOf hF
   have := PointedCone.IsFaceOf.fg (IsPolytope.homogenize_fg _ hC) homF
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
   simp [dehomogenize_homogenize]
@@ -51,11 +51,10 @@ This is private since it does not yet have the correct grading (off-by-one).
 private noncomputable instance Polytope.faceHomogenizationGradeOrder (P : Polytope R A) :
     GradeOrder ℕ (Face (P : ConvexSet R A)) := by
   let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
-  have : PointedCone.FG (homogenize _ (P : ConvexSet R A)) :=
-    IsPolytope.homogenize_fg (IsHomogenization.canonical R A) P.isPolytope
+  let ℋ := IsHomogenization.ofHomogenization R A
+  have : (homogenize _ (P : ConvexSet R A)).FG := IsPolytope.homogenize_fg ℋ P.isPolytope
   let := PointedCone.FG.gradeOrder_finrank this
-  refine GradeOrder.liftRight _
-    (IsHomogenization.Face.homogenizeIso (IsHomogenization.canonical R A) _).strictMono ?_
+  refine GradeOrder.liftRight _ (IsHomogenization.Face.homogenizeIso ℋ _).strictMono ?_
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 end Field

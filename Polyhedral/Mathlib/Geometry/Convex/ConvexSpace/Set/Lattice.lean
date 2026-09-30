@@ -8,7 +8,6 @@ module
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Defs
 public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Pointwise
 
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 
@@ -242,7 +241,7 @@ noncomputable section AddTorsor
 variable [AddTorsor X Y] [ConvexSpace R Y] [IsAffineConvexSpace R X Y]
 
 instance : VAdd X (ConvexSet R Y) where
-  vadd v K := ⟨_, K.isConvexSet.translate v⟩
+  vadd v K := ⟨_, K.isConvexSet.vadd_set v⟩
 
 instance : IsConcreteVAddSet X (ConvexSet R Y) Y := ⟨fun _ _ => rfl⟩
 

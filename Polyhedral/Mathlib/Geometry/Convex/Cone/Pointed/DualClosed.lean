@@ -95,7 +95,7 @@ theorem DualClosed.eq_sInf (hC : C.DualClosed p) :
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hC, by simp⟩
-  simp only [SetLike.le_def, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
+  simp only [IsConcreteLE.le_iff, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
   intro x hx D hD hsD
   rw [← hD]; rw [← hC] at hx
   exact (dual_dual_mono p hsD) hx
