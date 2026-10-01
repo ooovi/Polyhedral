@@ -40,12 +40,12 @@ abbrev FinDim {R V A : Type*} [Ring R] [AddCommGroup V] [Module R V] [AddTorsor 
 
 variable {s t : AffineSubspace K P}
 
-theorem finiteDimensional_iff_direction :
+theorem finDim_iff_direction :
     s.FinDim ↔ _root_.FiniteDimensional K s.direction := Iff.rfl
 
 /-- A nonempty affine subspace has the same finite-dimensionality as its underlying affine
 space. This comparison is a theorem, not an instance. -/
-theorem finiteDimensional_iff_affineSpace (s : AffineSubspace K P) [Nonempty s] :
+theorem finDim_iff_affineSpace (s : AffineSubspace K P) [Nonempty s] :
     s.FinDim ↔ AffineSpace.FiniteDimensional K s := Iff.rfl
 
 theorem dim_eq_affine_dim (s : AffineSubspace K P) [Nonempty s] :
@@ -57,7 +57,7 @@ theorem finDim_eq_affine_finDim (s : AffineSubspace K P) [Nonempty s] :
   finDim_eq_finrank (nonempty_iff_ne_bot s |>.mp (Set.nonempty_coe_sort.mp inferInstance))
 
 @[simp]
-theorem finiteDimensional_top_iff :
+theorem finDim_top_iff :
     (⊤ : AffineSubspace K P).FinDim ↔ _root_.FiniteDimensional K V := by
   unfold FinDim
   rw [direction_top]
@@ -68,102 +68,102 @@ theorem finiteDimensional_top_iff :
     infer_instance⟩
 
 @[simp]
-theorem finiteDimensional_toAffineSubspace_iff (S : Submodule K V) :
+theorem finDim_toAffineSubspace_iff (S : Submodule K V) :
     S.toAffineSubspace.FinDim ↔ _root_.FiniteDimensional K S := by
   unfold FinDim
   rw [Submodule.toAffineSubspace_direction]
 
-theorem finiteDimensional_toAffineSubspace (S : Submodule K V)
+theorem FinDim.toAffineSubspace (S : Submodule K V)
     (hS : _root_.FiniteDimensional K S) : S.toAffineSubspace.FinDim :=
-  (finiteDimensional_toAffineSubspace_iff S).mpr hS
+  (finDim_toAffineSubspace_iff S).mpr hS
 
-theorem finiteDimensional_mk' (p : P) (S : Submodule K V)
+theorem FinDim.mk' (p : P) (S : Submodule K V)
     (hS : _root_.FiniteDimensional K S) : (mk' p S).FinDim := by
   unfold FinDim
   rw [direction_mk']
   exact hS
 
 /-- Every affine subspace of a finite-dimensional ambient space is finite-dimensional. -/
-theorem finiteDimensional_of_finiteDimensional
+theorem FinDim.of_finiteDimensional
     [AffineSpace.FiniteDimensional K P] (s : AffineSubspace K P) : s.FinDim :=
   inferInstanceAs (_root_.FiniteDimensional K s.direction)
 
-theorem finiteDimensional_bot : (⊥ : AffineSubspace K P).FinDim := by
+theorem FinDim.bot : (⊥ : AffineSubspace K P).FinDim := by
   unfold FinDim
   rw [direction_bot]
   infer_instance
 
 /-- Finite-dimensionality descends to affine subspaces. -/
-theorem finiteDimensional_of_le (ht : t.FinDim) (h : s ≤ t) :
+theorem FinDim.mono (ht : t.FinDim) (h : s ≤ t) :
     s.FinDim := by
   let := ht
   exact Submodule.finiteDimensional_of_le (direction_le h)
 
-theorem finiteDimensional_inf_left (s t : AffineSubspace K P) (hs : s.FinDim) :
+theorem FinDim.inf_left (s t : AffineSubspace K P) (hs : s.FinDim) :
     (s ⊓ t).FinDim :=
-  finiteDimensional_of_le hs inf_le_left
+  FinDim.mono hs inf_le_left
 
-theorem finiteDimensional_inf_right (s t : AffineSubspace K P) (ht : t.FinDim) :
+theorem FinDim.inf_right (s t : AffineSubspace K P) (ht : t.FinDim) :
     (s ⊓ t).FinDim :=
-  finiteDimensional_of_le ht inf_le_right
+  FinDim.mono ht inf_le_right
 
 /-- An indexed intersection is finite-dimensional if one of its members is. -/
-theorem finiteDimensional_iInf {ι : Sort*} (S : ι → AffineSubspace K P) (i : ι)
+theorem FinDim.iInf {ι : Sort*} (S : ι → AffineSubspace K P) (i : ι)
     (hi : (S i).FinDim) : (⨅ j, S j).FinDim :=
-  finiteDimensional_of_le hi (iInf_le S i)
+  FinDim.mono hi (iInf_le S i)
 
-theorem finiteDimensional_finset_sup {ι : Type*} (I : Finset ι)
+theorem FinDim.finset_sup {ι : Type*} (I : Finset ι)
     (S : ι → AffineSubspace K P) (hS : ∀ i ∈ I, (S i).FinDim) :
     (I.sup S).FinDim := by
-  refine Finset.sup_induction finiteDimensional_bot ?_ hS
+  refine Finset.sup_induction FinDim.bot ?_ hS
   intro s hs t ht
   let := hs
   let := ht
   infer_instance
 
-theorem finiteDimensional_iSup {ι : Sort*} [Finite ι] (S : ι → AffineSubspace K P)
+theorem FinDim.iSup {ι : Sort*} [Finite ι] (S : ι → AffineSubspace K P)
     (hS : ∀ i, (S i).FinDim) : (⨆ i, S i).FinDim := by
   classical
   let := Fintype.ofFinite (PLift ι)
   simpa only [Finset.sup_univ_eq_iSup, iSup_plift_down] using
-    finiteDimensional_finset_sup Finset.univ (fun i : PLift ι ↦ S i.down) (fun i _ ↦ hS i.down)
+    FinDim.finset_sup Finset.univ (fun i : PLift ι ↦ S i.down) (fun i _ ↦ hS i.down)
 
 /-- A singleton is finite-dimensional, even in an infinite-dimensional ambient space. -/
-theorem finiteDimensional_singleton (p : P) : ({p} : AffineSubspace K P).FinDim :=
+theorem FinDim.singleton (p : P) : ({p} : AffineSubspace K P).FinDim :=
   inferInstance
 
 /-- Binary joins preserve finite-dimensionality. -/
-theorem finiteDimensional_sup_of_finiteDimensional (hs : s.FinDim)
+theorem FinDim.sup (hs : s.FinDim)
     (ht : t.FinDim) : (s ⊔ t).FinDim := by
   let := hs
   let := ht
   infer_instance
 
 /-- The affine span of a finite set is finite-dimensional. -/
-theorem finiteDimensional_affineSpan_of_finite {S : Set P} (hS : S.Finite) :
+theorem FinDim.affineSpan_of_finite {S : Set P} (hS : S.Finite) :
     (affineSpan K S).FinDim :=
   finiteDimensional_direction_affineSpan_of_finite K hS
 
-theorem finiteDimensional_affineSpan_finset (S : Finset P) :
+theorem FinDim.affineSpan_finset (S : Finset P) :
     (affineSpan K (S : Set P)).FinDim :=
-  finiteDimensional_affineSpan_of_finite S.finite_toSet
+  FinDim.affineSpan_of_finite S.finite_toSet
 
 /-- The affine span of a subset of a finite-dimensional subspace is finite-dimensional. -/
-theorem finiteDimensional_affineSpan_of_subset (hs : s.FinDim) {S : Set P}
+theorem FinDim.affineSpan_of_subset (hs : s.FinDim) {S : Set P}
     (hS : S ⊆ s) : (affineSpan K S).FinDim :=
-  finiteDimensional_of_le hs (affineSpan_le.mpr hS)
+  FinDim.mono hs (affineSpan_le.mpr hS)
 
 section Map
 
 variable {W Q : Type*} [AddCommGroup W] [Module K W] [AddTorsor W Q]
 
-theorem finiteDimensional_map (hs : s.FinDim) (f : P →ᵃ[K] Q) :
+theorem FinDim.map (hs : s.FinDim) (f : P →ᵃ[K] Q) :
     (s.map f).FinDim := by
   let := hs
   infer_instance
 
 /-- Finite-dimensionality descends along an injective affine map. -/
-theorem finiteDimensional_of_map {f : P →ᵃ[K] Q} (hf : Function.Injective f)
+theorem FinDim.of_map {f : P →ᵃ[K] Q} (hf : Function.Injective f)
     (hs : (s.map f).FinDim) : s.FinDim := by
   have : _root_.FiniteDimensional K (s.direction.map f.linear) := by
     rw [← map_direction]
@@ -171,26 +171,26 @@ theorem finiteDimensional_of_map {f : P →ᵃ[K] Q} (hf : Function.Injective f)
   exact (Submodule.equivMapOfInjective f.linear
     (f.linear_injective_iff.mpr hf) s.direction).symm.finiteDimensional
 
-theorem finiteDimensional_map_iff {f : P →ᵃ[K] Q} (hf : Function.Injective f) :
+theorem finDim_map_iff {f : P →ᵃ[K] Q} (hf : Function.Injective f) :
     (s.map f).FinDim ↔ s.FinDim := by
   constructor
-  · exact finiteDimensional_of_map hf
-  · exact fun h ↦ finiteDimensional_map h f
+  · exact FinDim.of_map hf
+  · exact fun h ↦ FinDim.map h f
 
 /-- An injective affine preimage of a finite-dimensional subspace is finite-dimensional. -/
-theorem finiteDimensional_comap_of_injective {f : P →ᵃ[K] Q} (hf : Function.Injective f)
+theorem FinDim.comap_of_injective {f : P →ᵃ[K] Q} (hf : Function.Injective f)
     (t : AffineSubspace K Q) (ht : t.FinDim) : (t.comap f).FinDim :=
-  finiteDimensional_of_map hf (finiteDimensional_of_le ht (map_comap_le f t))
+  FinDim.of_map hf (FinDim.mono ht (map_comap_le f t))
 
 @[simp]
-theorem finiteDimensional_map_equiv_iff (e : P ≃ᵃ[K] Q) :
+theorem finDim_map_equiv_iff (e : P ≃ᵃ[K] Q) :
     (s.map e.toAffineMap).FinDim ↔ s.FinDim :=
-  finiteDimensional_map_iff e.injective
+  finDim_map_iff e.injective
 
 end Map
 
 /-- Finite-dimensional affine subspaces are precisely the affine spans of finite sets. -/
-theorem finiteDimensional_iff_exists_finite_affineSpan :
+theorem finDim_iff_exists_finite_affineSpan :
     s.FinDim ↔ ∃ S : Set P, S.Finite ∧ affineSpan K S = s := by
   constructor
   · intro hs
@@ -203,17 +203,17 @@ theorem finiteDimensional_iff_exists_finite_affineSpan :
       exact (inferInstance : (affineSpan K S).FinDim)
     exact ⟨S, (finiteDimensional_iff_setFinite K hI).mp inferInstance, hspan⟩
   · rintro ⟨S, hS, rfl⟩
-    exact finiteDimensional_affineSpan_of_finite hS
+    exact FinDim.affineSpan_of_finite hS
 
-theorem finiteDimensional_iff_exists_finset_affineSpan :
+theorem finDim_iff_exists_finset_affineSpan :
     s.FinDim ↔ ∃ S : Finset P, affineSpan K (S : Set P) = s := by
   classical
-  rw [finiteDimensional_iff_exists_finite_affineSpan]
+  rw [finDim_iff_exists_finite_affineSpan]
   exact ⟨fun ⟨S, hS, hspan⟩ ↦ ⟨hS.toFinset, by simpa using hspan⟩,
     fun ⟨S, hspan⟩ ↦ ⟨S, S.finite_toSet, hspan⟩⟩
 
 /-- The cardinal-valued dimension detects finite-dimensionality, including for `⊥`. -/
-theorem finiteDimensional_iff_dim_lt_aleph0 :
+theorem finDim_iff_dim_lt_aleph0 :
     s.FinDim ↔ s.dim < (Cardinal.aleph0 : WithBot Cardinal) :=
   finite_iff_dim_lt_aleph0 s
 

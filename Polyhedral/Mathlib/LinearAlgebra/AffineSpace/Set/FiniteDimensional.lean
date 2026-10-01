@@ -176,7 +176,7 @@ variable {s t : Set A}
 theorem finDim_univ_iff :
     FinDim K (Set.univ : Set A) ↔ AffineSpace.FiniteDimensional K A := by
   rw [finDim_iff_affineSpan, AffineSubspace.span_univ,
-    AffineSubspace.finiteDimensional_top_iff]
+    AffineSubspace.finDim_top_iff]
 
 @[simp]
 theorem finDim_union_iff : FinDim K (s ∪ t) ↔ FinDim K s ∧ FinDim K t := by
@@ -192,7 +192,7 @@ theorem finDim_union_iff : FinDim K (s ∪ t) ↔ FinDim K s ∧ FinDim K t := b
 theorem finDim_iff_dim_lt_aleph0 :
     FinDim K s ↔ (_root_.affineSpan K s).dim < (Cardinal.aleph0 : WithBot Cardinal) := by
   rw [finDim_iff_affineSpan]
-  exact AffineSubspace.finiteDimensional_iff_dim_lt_aleph0
+  exact AffineSubspace.finDim_iff_dim_lt_aleph0
 
 theorem finDim_iff_rank_lt_aleph0 : FinDim K s ↔ rank K s < Cardinal.aleph0 := by
   unfold rank
@@ -201,11 +201,11 @@ theorem finDim_iff_rank_lt_aleph0 : FinDim K s ↔ rank K s < Cardinal.aleph0 :=
 
 theorem finDim_iff_exists_finite_affineSpan :
     FinDim K s ↔ ∃ t : Set A, t.Finite ∧ _root_.affineSpan K t = _root_.affineSpan K s := by
-  rw [finDim_iff_affineSpan, AffineSubspace.finiteDimensional_iff_exists_finite_affineSpan]
+  rw [finDim_iff_affineSpan, AffineSubspace.finDim_iff_exists_finite_affineSpan]
 
 theorem finDim_iff_exists_finset_affineSpan :
     FinDim K s ↔ ∃ t : Finset A, _root_.affineSpan K (t : Set A) = _root_.affineSpan K s := by
-  rw [finDim_iff_affineSpan, AffineSubspace.finiteDimensional_iff_exists_finset_affineSpan]
+  rw [finDim_iff_affineSpan, AffineSubspace.finDim_iff_exists_finset_affineSpan]
 
 namespace FinDim
 
