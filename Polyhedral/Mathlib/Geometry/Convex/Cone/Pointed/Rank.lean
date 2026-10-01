@@ -46,9 +46,17 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsOrderedRing R]
 variable [AddCommMonoid M] [Module R M]
 
-noncomputable abbrev rank (C : PointedCone R M) := Module.rank R (span R (C : Set M))
+noncomputable def rank (C : PointedCone R M) := Module.rank R (span R (C : Set M))
 
-noncomputable abbrev finrank (C : PointedCone R M) := Module.finrank R (span R (C : Set M))
+noncomputable def finrank (C : PointedCone R M) := Module.finrank R (span R (C : Set M))
+
+@[simp] protected lemma rank_bot [Nontrivial R] : (⊥ : PointedCone R M).rank = 0 :=
+  have : Subsingleton (span R ((⊥ : PointedCone R M) : Set M)) :=
+    Submodule.subsingleton_iff_eq_bot.mpr (by simp)
+  rank_subsingleton' _ _
+
+@[simp] protected lemma finrank_bot [Nontrivial R] : (⊥ : PointedCone R M).finrank = 0 :=
+  Module.finrank_eq_zero_of_rank_eq_zero PointedCone.rank_bot
 
 -- NOTE: this is not the same as Module.Finite or FG!
 abbrev FinRank (C : PointedCone R M) := (span R (C : Set M)).FG
@@ -81,11 +89,11 @@ theorem affineSpan_ne_bot (C : PointedCone R M) : affineSpan R (C : Set M) ≠ �
 
 theorem dim_affineSpan_eq_rank (C : PointedCone R M) :
     (affineSpan R (C : Set M)).dim = C.rank := by
-  simp [affineSpan_eq_span]
+  simp [rank, affineSpan_eq_span]
 
 theorem finDim_affineSpan_eq_finrank (C : PointedCone R M) :
     (affineSpan R (C : Set M)).finDim = C.finrank := by
-  simp [affineSpan_eq_span]
+  simp [finrank, affineSpan_eq_span]
 
 variable [IsDomain R] [Module.IsTorsionFree R M] {C : PointedCone R M}
 
