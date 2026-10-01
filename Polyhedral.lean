@@ -77,5 +77,6 @@ public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Set
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Lattice
 public import Polyhedral.Mathlib.LinearAlgebra.BilinearMap
 public import Polyhedral.Mathlib.LinearAlgebra.Dual.Basis
+public import Polyhedral.Mathlib.Order.WithBot
 public import Polyhedral.Mathlib.RingTheory.Finiteness.Cofinite
 public import Polyhedral.Mathlib.RingTheory.Finiteness.Corank

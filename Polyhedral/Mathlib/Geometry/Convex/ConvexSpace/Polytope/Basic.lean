@@ -6,10 +6,12 @@ Authors: Martin Winter, Olivia Röhrig
 module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
+public import Mathlib.RingTheory.Finiteness.Basic
 
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 import Mathlib.Algebra.Group.Pointwise.Finset.Scalar
+import Mathlib.Algebra.Group.Pointwise.Set.Finite
 
 /-! This file introduces `IsPolytope` and proves basic properties about convex polytopes. -/
 
@@ -96,6 +98,23 @@ protected lemma prod {P₂ : Set Y} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolyt
   rw [Finset.coe_product, convexHull_prod]
 
 end Semiring
+
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X]
+variable [AddCommGroup V] [Module R V] [AddTorsor V X] [IsAffineConvexSpace R V X]
+
+variable {P : Set X}
+
+theorem finite_vectorSpan (hP : IsPolytope R P) : Module.Finite R (vectorSpan R P) := by
+  obtain ⟨t, rfl⟩ := hP
+  rw [vectorSpan_convexHull]
+  -- TODO: Can be `infer_instance` after https://github.com/leanprover-community/mathlib4/pull/43770
+  rw [vectorSpan_def]
+  exact Module.Finite.span_of_finite _ <| t.finite_toSet.vsub t.finite_toSet
+
+end Ring
 
 section Field
 
