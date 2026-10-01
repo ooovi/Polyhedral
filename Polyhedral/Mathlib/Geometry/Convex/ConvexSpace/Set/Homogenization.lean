@@ -175,15 +175,16 @@ lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive 
   congr! with x
   simp
 
-theorem finDim_affineSpan_homogenize
+variable (W) in
+theorem finrank_homogenize
     (K : ConvexSet R A) [Module.Finite R (vectorSpan R (K : Set A))] :
-    (affineSpan R (homogenize W K : Set W)).finDim =
-      Order.succ (affineSpan R (K : Set A)).finDim := by
+    (homogenize W K).finrank = Order.succ (affineSpan R (K : Set A)).finDim := by
   by_cases hK : K = ∅
   · simp [hK, ← SetLike.bot_eq_empty]
   obtain ⟨t, -, ht₂, ht₃, ht₄⟩ := exists_affineIndepOn_of_finiteDimensional R V (K : Set A)
-  rw [AffineSubspace.finDim_eq_finrank (PointedCone.affineSpan_ne_bot _), homogenize,
-    affineSpan_hull, ← affineSpan_insert_zero', ← WithBot.succ_eq_succ, ← ht₄,
+  rw [← WithBot.succ_eq_succ, ← ht₄, ← finDim_affineSpan_eq_finrank, homogenize,
+    AffineSubspace.finDim_eq_finrank (PointedCone.affineSpan_ne_bot _),
+    affineSpan_hull, ← affineSpan_insert_zero',
     affineSpan_insert_congr R 0 (t := hom.ofPoint '' t) (by simp [← AffineSubspace.map_span, ht₂])]
   have ht : t.Finite := by
     have : affineSpan R (K : Set A) ≠ ⊥ := by simpa
@@ -197,11 +198,11 @@ theorem finDim_affineSpan_homogenize
     Set.ncard_image_of_injective t hom.ofPoint_injective]
   norm_cast
 
+variable (W) in
 theorem finDim_affineSpan_eq_pred_finrank_homogenize
     (K : ConvexSet R A) [Module.Finite R (vectorSpan R (K : Set A))] :
     (affineSpan R (K : Set A)).finDim = Order.pred ((homogenize W K).finrank : WithBot ℕ) := by
-  rw [← finDim_affineSpan_eq_finrank, finDim_affineSpan_homogenize]
-  simp
+  simp [finrank_homogenize]
 
 variable [ConvexSpace R W] [IsAffineConvexSpace R V A] [IsModuleConvexSpace R W]
 
