@@ -7,6 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
+public import Mathlib.Order.Grade
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
@@ -57,7 +58,7 @@ noncomputable instance (P : Polytope R A) :
   grade_strictMono x y h := by
     let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
     simp only [Face.carrier_eq_coe, Face.coe_eq_toConvexSet_coe,
-      finDim_affineSpan_eq_pred_finrank_homogenize (W := Homogenization R A)]
+      finDim_affineSpan_eq_pred_finrank_homogenize (Homogenization R A)]
     refine Order.pred_lt_pred_of_not_isMin ?_ (by simp)
     exact_mod_cast PointedCone.FG.finrank_strictMono (IsPolytope.homogenize_fg P.isPolytope)
       (IsHomogenization.Face.homogenizeIso.strictMono h)
@@ -70,7 +71,7 @@ noncomputable instance (P : Polytope R A) :
         = (homogenize (Homogenization R A) y.toConvexSet).finrank :=
       Nat.covBy_iff_add_one_eq.mp this
     simp only [Face.carrier_eq_coe, Face.coe_eq_toConvexSet_coe,
-      finDim_affineSpan_eq_pred_finrank_homogenize (W := Homogenization R A), ← this]
+      finDim_affineSpan_eq_pred_finrank_homogenize (Homogenization R A), ← this]
     exact Order.succ_eq_iff_covBy.mp (by simp)
   isMin_grade f h := by simp [isMin_iff_eq_bot.mp h]
 
@@ -78,15 +79,16 @@ section Homogenization
 
 variable [AddCommGroup W] [Module R W] [hom : IsHomogenization R A W]
 
+variable (W) in
 theorem Polytope.grade_eq_pred_finrank_homogenize {P : Polytope R A}
     (f : Face (P : ConvexSet R A)) :
     GradeOrder.grade f = Order.pred ((homogenize W f.toConvexSet).finrank : WithBot ℕ) :=
-  finDim_affineSpan_eq_pred_finrank_homogenize _
+  finDim_affineSpan_eq_pred_finrank_homogenize ..
 
 theorem Polytope.succ_grade_eq_finrank_homogenize {P : Polytope R A}
     (f : Face (P : ConvexSet R A)) :
     Order.succ (GradeOrder.grade f : WithBot ℕ) = (homogenize W f.toConvexSet).finrank := by
-  rw [Polytope.grade_eq_pred_finrank_homogenize (W := W), Order.succ_pred_of_not_isMin (by simp)]
+  rw [Polytope.grade_eq_pred_finrank_homogenize W, Order.succ_pred_of_not_isMin (by simp)]
 
 end Homogenization
 
