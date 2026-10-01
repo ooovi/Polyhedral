@@ -3,6 +3,7 @@ module
 public import Polyhedral.Mathlib.Geometry.Convex.AffineMap.Module
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Polyhedral.Mathlib.Geometry.Convex.Hull
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.FinDim
 
 public section
 
@@ -27,6 +28,17 @@ theorem affineSpan_convexHull (s : Set A) :
 theorem vectorSpan_convexHull (s : Set A) :
     vectorSpan R (convexHull R s : Set A) = vectorSpan R s := by
   rw [← direction_affineSpan, affineSpan_convexHull, direction_affineSpan]
+
+/-- Taking the convex hull preserves finite-dimensionality of a set. -/
+@[simp]
+theorem finDim_convexHull_iff (s : Set A) :
+    Affine.FinDim R (convexHull R s : Set A) ↔ Affine.FinDim R s := by
+  unfold Affine.FinDim
+  rw [vectorSpan_convexHull]
+
+theorem _root_.Affine.FinDim.convexHull {s : Set A} (hs : Affine.FinDim R s) :
+    Affine.FinDim R (convexHull R s : Set A) :=
+  (finDim_convexHull_iff s).mpr hs
 
 variable [ConvexSpace R V] [IsModuleConvexSpace R V]
 
