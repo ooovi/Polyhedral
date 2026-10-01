@@ -195,7 +195,7 @@ theorem finDim_iff_dim_lt_aleph0 :
   exact AffineSubspace.finiteDimensional_iff_dim_lt_aleph0
 
 theorem finDim_iff_rank_lt_aleph0 : FinDim K s ↔ rank K s < Cardinal.aleph0 := by
-  unfold FinDim rank
+  unfold rank
   rw [direction_affineSpan]
   exact Module.rank_lt_aleph0_iff.symm
 
