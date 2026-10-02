@@ -3,7 +3,7 @@ module
 public import Polyhedral.Mathlib.Geometry.Convex.AffineMap.Module
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Polyhedral.Mathlib.Geometry.Convex.Hull
-public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.FinDim
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Set.FiniteDimensional
 
 public section
 
