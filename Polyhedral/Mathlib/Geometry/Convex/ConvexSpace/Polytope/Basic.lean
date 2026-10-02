@@ -97,6 +97,20 @@ protected lemma prod {P₂ : Set Y} (hP₁ : IsPolytope R P₁) (hP₂ : IsPolyt
 
 end Semiring
 
+section Ring
+
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X]
+variable [AddCommGroup V] [Module R V] [AddTorsor V X] [IsAffineConvexSpace R V X]
+
+/-- Every polytope has finite-dimensional affine span, even in an infinite-dimensional
+ambient space. -/
+theorem finDim {P : Set X} (hP : IsPolytope R P) : Affine.FinDim R P := by
+  obtain ⟨t, rfl⟩ := hP
+  exact (Affine.FinDim.finset t).convexHull
+
+end Ring
+
 section Field
 
 variable [Field R] [PartialOrder R] [IsStrictOrderedRing R]
