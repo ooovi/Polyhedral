@@ -193,18 +193,18 @@ section Constructions
 variable (R P) in
 /-- The canonical homogenization is a homogenization. -/
 @[expose]
-def ofHomogenization : IsHomogenization R P (Homogenization R P) := ofRepr <| LinearEquiv.refl ..
+def canonical : IsHomogenization R P (Homogenization R P) := ofRepr <| LinearEquiv.refl ..
 
 @[simp]
-theorem ofPoint_ofHomogenization : (ofHomogenization R P).ofPoint = Homogenization.ofPoint :=
+theorem ofPoint_canonical : (canonical R P).ofPoint = Homogenization.ofPoint :=
   (rfl)
 
 @[simp]
-theorem ofVector_ofHomogenization : (ofHomogenization R P).ofVector = Homogenization.ofVector :=
+theorem ofVector_canonical : (canonical R P).ofVector = Homogenization.ofVector :=
   (rfl)
 
 @[simp]
-theorem weight_ofHomogenization : (ofHomogenization R P).weight = Homogenization.weight :=
+theorem weight_canonical : (canonical R P).weight = Homogenization.weight :=
   (rfl)
 
 /-- Construct a homogenization from an embedding of the affine space `P` into the vector
@@ -216,7 +216,7 @@ def ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed) {weight : W �
     IsHomogenization R P W where
   repr := by
     apply (LinearEquiv.ofBijective (Homogenization.lift embed) ?_).symm
-    exact lift_bijective_of_injective_of_range_preimage (ofHomogenization R P) embed_inj embed_range
+    exact lift_bijective_of_injective_of_range_preimage (canonical R P) embed_inj embed_range
 
 /-- The embedding used in the construction becomes the embedding in the homogenization. -/
 @[simp]
