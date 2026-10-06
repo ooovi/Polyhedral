@@ -243,24 +243,29 @@ theorem weight_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
   exact congr(embed x ∈ $embed_range).mp <| Set.mem_range_self x
 
 /-- A module is a homogenization of the weight-one hyperplane of any linear functional,
-provided that hyperplane is nonempty. -/
-def ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
+provided that hyperplane contains 1. -/
+def ofWeightOne (g : W →ₗ[R] R) (h : 1 ∈ g.range) :
+    have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
     IsHomogenization R (comap g.toAffineMap {1}) W :=
+  have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
 @[simp]
-theorem ofPoint_ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
-    (ofWeightOne g).ofPoint = (comap g.toAffineMap {1}).subtype := by
+theorem ofPoint_ofWeightOne (g : W →ₗ[R] R) (h : 1 ∈ g.range) :
+    have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
+    (ofWeightOne g h).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightOne]
 
 @[simp]
-theorem ofVector_ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
-    (ofWeightOne g).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
+theorem ofVector_ofWeightOne (g : W →ₗ[R] R) (h : 1 ∈ g.range) :
+    have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
+    (ofWeightOne g h).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
   simp [ofWeightOne]
 
 @[simp]
-theorem weight_ofWeightOne (g : W →ₗ[R] R) [Nonempty (comap g.toAffineMap {1})] :
-    (ofWeightOne g).weight = g := by
+theorem weight_ofWeightOne (g : W →ₗ[R] R) (h : 1 ∈ g.range) :
+    have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
+    (ofWeightOne g h).weight = g := by
   simp [ofWeightOne]
 
 end Constructions
@@ -280,29 +285,39 @@ variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {P : Type*} [AddTorsor V P]
 variable {W : Type*} [AddCommGroup W] [Module R W]
 
-instance {g : W →ₗ[R] R} [h : Fact (g ≠ 0)] : Nonempty (comap g.toAffineMap {1}) := by
-  obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h.out
-  use (g y)⁻¹ • y
-  simp [hy]
-
 /-- A module is a homogenization of the weight-one hyperplane of any nonzero linear functional. -/
-def ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
+def ofWeightNeZero (g : W →ₗ[R] R) (h : g ≠ 0) :
+    have : Nonempty (comap g.toAffineMap {1}) := by
+      obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
+      exact ⟨(g y)⁻¹ • y, by simp [hy]⟩
     IsHomogenization R (comap g.toAffineMap {1}) W :=
+  have : Nonempty (comap g.toAffineMap {1}) := by
+    obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
+    exact ⟨(g y)⁻¹ • y, by simp [hy]⟩
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
 @[simp]
-theorem ofPoint_ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
-    (ofWeightNeZero g).ofPoint = (comap g.toAffineMap {1}).subtype := by
+theorem ofPoint_ofWeightNeZero (g : W →ₗ[R] R) (h : g ≠ 0) :
+    have : Nonempty (comap g.toAffineMap {1}) := by
+      obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
+      exact ⟨(g y)⁻¹ • y, by simp [hy]⟩
+    (ofWeightNeZero g h).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightNeZero]
 
 @[simp]
-theorem ofVector_ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
-    (ofWeightNeZero g).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
+theorem ofVector_ofWeightNeZero (g : W →ₗ[R] R) (h : g ≠ 0) :
+    have : Nonempty (comap g.toAffineMap {1}) := by
+      obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
+      exact ⟨(g y)⁻¹ • y, by simp [hy]⟩
+    (ofWeightNeZero g h).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
   simp [ofWeightNeZero]
 
 @[simp]
-theorem weight_ofWeightNeZero (g : W →ₗ[R] R) [Fact (g ≠ 0)] :
-    (ofWeightNeZero g).weight = g := by
+theorem weight_ofWeightNeZero (g : W →ₗ[R] R) (h : g ≠ 0) :
+    have : Nonempty (comap g.toAffineMap {1}) := by
+      obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
+      exact ⟨(g y)⁻¹ • y, by simp [hy]⟩
+    (ofWeightNeZero g h).weight = g := by
   simp [ofWeightNeZero]
 
 end IsHomogenization
