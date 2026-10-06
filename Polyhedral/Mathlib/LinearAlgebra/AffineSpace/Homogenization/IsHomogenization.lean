@@ -112,7 +112,7 @@ theorem lift_symm_apply (f : W →ₗ[R] U) (p : P) : ℋ.lift.symm f p = f (ℋ
 
 end
 
-/-- The linear map that is constantly `1` when restricted to `P`. -/
+/-- The linear map that is constant with value `1` when restricted to `P` -/
 def weight : W →ₗ[R] R := Homogenization.weight ∘ₗ ℋ.repr.toLinearMap
 
 /-- The homogenization of a point in `P` has weight 1. -/
