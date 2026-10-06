@@ -212,7 +212,7 @@ space `W` and a weight map that is the constant 1-map on the embedded `P`. This 
 axiomatization in Definition 4.2 of [Gallier2011GeometricMethods]
 https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
 def ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed) {weight : W →ₗ[R] R}
-    (embed_range : Set.range embed = weight ⁻¹' {1}) :
+    (embed_range : embed.range = weight ⁻¹' {1}) :
     IsHomogenization R P W where
   repr := by
     apply (LinearEquiv.ofBijective (Homogenization.lift embed) ?_).symm
@@ -221,14 +221,14 @@ def ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed) {weight : W �
 /-- The embedding used in the construction becomes the embedding in the homogenization. -/
 @[simp]
 theorem ofPoint_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
+    {weight : W →ₗ[R] R} (embed_range : embed.range = weight ⁻¹' {1}) :
     (ofEmbed embed_inj embed_range).ofPoint = embed := by
   ext p
   exact Homogenization.lift_apply_ofPoint ..
 
 @[simp]
 theorem ofVector_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
+    {weight : W →ₗ[R] R} (embed_range : embed.range = weight ⁻¹' {1}) :
     (ofEmbed embed_inj embed_range).ofVector = embed.linear := by
   ext p
   exact Homogenization.lift_apply_ofVector ..
@@ -236,7 +236,7 @@ theorem ofVector_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
 /-- The weight used in the construction becomes the weight in the homogenization. -/
 @[simp]
 theorem weight_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : Set.range embed = weight ⁻¹' {1}) :
+    {weight : W →ₗ[R] R} (embed_range : embed.range = weight ⁻¹' {1}) :
     (ofEmbed embed_inj embed_range).weight = weight := by
   refine (ofEmbed embed_inj embed_range).hom_ext fun x => ?_
   rw [weight_ofPoint, ofPoint_ofEmbed, eq_comm]
