@@ -7,6 +7,8 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
@@ -120,7 +122,7 @@ lemma dehomogenize_bot : dehomogenize A (⊥ : PointedCone R W) = ⊥ := by
 @[simp]
 lemma dehomogenize_top : dehomogenize A (⊤ : PointedCone R W) = ⊤ := by
   ext
-  simp [dehomogenize, SetLike.mem_coe.mp]
+  simp [dehomogenize, ← SetLike.mem_coe]
 
 @[simp]
 lemma dehomogenize_weight_positive : dehomogenize A hom.weight.positive = ⊤ :=
@@ -172,6 +174,35 @@ lemma homogenize_top : homogenize W (⊤ : ConvexSet R A) = hom.weight.positive 
     ← hom.ofPoint_range_eq_preimage_weight_one]
   congr! with x
   simp
+
+variable (W) in
+theorem finrank_homogenize
+    (K : ConvexSet R A) [Module.Finite R (vectorSpan R (K : Set A))] :
+    (homogenize W K).finrank = Order.succ (affineSpan R (K : Set A)).finDim := by
+  by_cases hK : K = ∅
+  · simp [hK, ← SetLike.bot_eq_empty]
+  obtain ⟨t, -, ht₂, ht₃, ht₄⟩ := exists_affineIndepOn_of_finiteDimensional R V (K : Set A)
+  rw [← WithBot.succ_eq_succ, ← ht₄, ← finDim_affineSpan_eq_finrank, homogenize,
+    AffineSubspace.finDim_eq_finrank (PointedCone.affineSpan_ne_bot _),
+    affineSpan_hull, ← affineSpan_insert_zero',
+    affineSpan_insert_congr R 0 (t := hom.ofPoint '' t) (by simp [← AffineSubspace.map_span, ht₂])]
+  have ht : t.Finite := by
+    have : affineSpan R (K : Set A) ≠ ⊥ := by simpa
+    exact Set.finite_of_ncard_pos <| by
+      simp [AffineSubspace.finDim_eq_finrank this, ht₄, WithBot.succ_natCast]
+  have hai : AffineIndepOn R id (insert 0 (hom.ofPoint '' t)) := by
+    refine (ht₃.map' _ hom.ofPoint_injective).id_image.insert ?_
+    simp [← AffineSubspace.map_span, hom.ofPoint_ne_zero]
+  rw [direction_affineSpan, hai.finrank_vectorSpan (by simp [ht.image _]) (by simp),
+    Set.ncard_insert_of_notMem (by simp [hom.ofPoint_ne_zero]) (ht.image _),
+    Set.ncard_image_of_injective t hom.ofPoint_injective]
+  norm_cast
+
+variable (W) in
+theorem finDim_affineSpan_eq_pred_finrank_homogenize
+    (K : ConvexSet R A) [Module.Finite R (vectorSpan R (K : Set A))] :
+    (affineSpan R (K : Set A)).finDim = Order.pred ((homogenize W K).finrank : WithBot ℕ) := by
+  simp [finrank_homogenize]
 
 variable [ConvexSpace R W] [IsAffineConvexSpace R V A] [IsModuleConvexSpace R W]
 
