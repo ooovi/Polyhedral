@@ -10,7 +10,6 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Order
 
 import Mathlib.Algebra.Module.BigOperators
 import Mathlib.Data.Finset.Sort
-import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Positivity.Basic
 
 /-!
@@ -62,24 +61,28 @@ protected theorem IsConvexSet.add_smul {s : Set X}
 
 end Field
 
-variable {R M N : Type*} [Semiring R] [AddCommGroup M] [Module R M]
+variable {R M N : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
 
 open Finset in
 /-- **Abel summation**: a weighted sum `∑ k < n, c k • y k` is determined by the tail sums of `c`
-and the increments of `y`. -/
-private lemma sum_smul_eq_sum_tail_smul_sub (n : ℕ) (c : ℕ → R) (y : ℕ → M) :
+and the increments `d` of `y`. -/
+private lemma sum_smul_eq_sum_tail_smul (n : ℕ) (c : ℕ → R) (y d : ℕ → M)
+    (hd : ∀ i, y (i + 1) = y i + d i) :
     ∑ k ∈ range n, c k • y k =
-      (∑ k ∈ range n, c k) • y 0 +
-        ∑ i ∈ range n, (∑ k ∈ Ico (i + 1) n, c k) • (y (i + 1) - y i) := by
-  have step (k : ℕ) : c k • y k = c k • y 0 + ∑ i ∈ range k, c k • (y (i + 1) - y i) := by
-    rw [← Finset.smul_sum, sum_range_sub, smul_sub]
-    abel
+      (∑ k ∈ range n, c k) • y 0 + ∑ i ∈ range n, (∑ k ∈ Ico (i + 1) n, c k) • d i := by
+  have hy (k : ℕ) : y k = y 0 + ∑ i ∈ range k, d i := by
+    induction k with
+    | zero => simp
+    | succ k ih => rw [hd k, ih, sum_range_succ, add_assoc]
+  have step (k : ℕ) : c k • y k = c k • y 0 + ∑ i ∈ range k, c k • d i := by
+    rw [hy k, smul_add, Finset.smul_sum]
   rw [sum_congr rfl fun k _ ↦ step k, sum_add_distrib, ← Finset.sum_smul]
   congr 1
   rw [sum_comm' (t' := range n) (s' := fun i ↦ Ico (i + 1) n) (by intro k i; simp; omega)]
   exact sum_congr rfl fun i _ ↦ Finset.sum_smul.symm
 
-variable [PartialOrder R] [LinearOrder M] [IsOrderedAddMonoid M] [SMulPosMono R M]
+variable [PartialOrder R] [LinearOrder M] [IsOrderedCancelAddMonoid M] [ExistsAddOfLE M]
+  [SMulPosMono R M]
 
 open Finset in
 /-- If the tail sums of `a` are dominated by those of `b` and the two have the same total, then
@@ -89,9 +92,11 @@ private lemma sum_smul_le_sum_smul {n : ℕ} {a b : ℕ → R} {y : ℕ → M} (
     (hab : ∑ k ∈ range n, a k = ∑ k ∈ range n, b k)
     (h : ∀ i, ∑ k ∈ Ico i n, a k ≤ ∑ k ∈ Ico i n, b k) :
     ∑ k ∈ range n, a k • y k ≤ ∑ k ∈ range n, b k • y k := by
-  rw [sum_smul_eq_sum_tail_smul_sub n a y, sum_smul_eq_sum_tail_smul_sub n b y, hab]
+  choose d hd₀ hd using fun i : ℕ ↦ exists_nonneg_add_of_le (hy i.le_succ)
+  rw [sum_smul_eq_sum_tail_smul n a y d fun i ↦ (hd i).symm,
+    sum_smul_eq_sum_tail_smul n b y d fun i ↦ (hd i).symm, hab]
   gcongr with i hi
-  · exact sub_nonneg.2 (hy i.le_succ)
+  · exact hd₀ i
   · exact h (i + 1)
 
 variable [IsStrictOrderedRing R] [ConvexSpace R M] [IsModuleConvexSpace R M]
