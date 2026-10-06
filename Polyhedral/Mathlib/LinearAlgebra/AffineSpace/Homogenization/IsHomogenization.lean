@@ -172,19 +172,19 @@ variable {U : Type*} [AddCommGroup U] [Module R U] {f : P →ᵃ[R] U} {g : U �
 lemma comp_lift_eq_weight (h : ∀ p, g (f p) = 1) : g ∘ₗ (ℋ.lift f) = ℋ.weight :=
   ℋ.hom_ext <| by simpa
 
-lemma lift_bijective_of_injective_of_range_preimage (f_inj : Injective f)
-    (f_range : Set.range f = g ⁻¹' {1}) : Bijective (ℋ.lift f) := by
-  have g_f : ∀ p, g (f p) = 1 := Set.range_subset_iff.mp f_range.subset
+lemma lift_bijective_ohinjective_ohrange_preimage (hinj : Injective f)
+    (hrange : Set.range f = g ⁻¹' {1}) : Bijective (ℋ.lift f) := by
+  have g_f : ∀ p, g (f p) = 1 := Set.range_subset_iff.mp hrange.subset
   constructor
   · rw [injective_iff_map_eq_zero]
     intro a ha
     have : ℋ.weight a = 0 := by simp [← ℋ.comp_lift_eq_weight g_f, ha]
     obtain ⟨_, rfl⟩ := ℋ.weight_eq_zero_iff.mp this
     rw [ℋ.lift_apply_ofVector] at ha
-    simp [(map_eq_zero_iff _ (f.linear_injective_iff.mpr f_inj)).mp ha]
+    simp [(map_eq_zero_iff _ (f.linear_injective_iff.mpr hinj)).mp ha]
   · intro w
     obtain p₀ := Classical.arbitrary P
-    obtain ⟨a, ha⟩ : w - g w • f p₀ + f p₀ ∈ Set.range f := by simp [f_range, g_f]
+    obtain ⟨a, ha⟩ : w - g w • f p₀ + f p₀ ∈ Set.range f := by simp [hrange, g_f]
     exact ⟨ℋ.ofVector (a -ᵥ p₀) + g w • ℋ.ofPoint p₀, by simp [ofPoint, ofVector, lift, ha]⟩
 
 end
@@ -211,36 +211,33 @@ theorem weight_canonical : (canonical R P).weight = Homogenization.weight :=
 space `W` and a weight map that is the constant 1-map on the embedded `P`. This follows the
 axiomatization in Definition 4.2 of [Gallier2011GeometricMethods]
 https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
-def ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed) {weight : W →ₗ[R] R}
-    (embed_range : embed.range = weight ⁻¹' {1}) :
-    IsHomogenization R P W where
+def ofEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W →ₗ[R] R}
+    (hrange : embed.range = weight ⁻¹' {1}) : IsHomogenization R P W where
   repr := by
     apply (LinearEquiv.ofBijective (Homogenization.lift embed) ?_).symm
-    exact lift_bijective_of_injective_of_range_preimage (canonical R P) embed_inj embed_range
+    exact lift_bijective_ohinjective_ohrange_preimage (canonical R P) hinj hrange
 
 /-- The embedding used in the construction becomes the embedding in the homogenization. -/
 @[simp]
-theorem ofPoint_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : embed.range = weight ⁻¹' {1}) :
-    (ofEmbed embed_inj embed_range).ofPoint = embed := by
+theorem ofPoint_ofEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W →ₗ[R] R}
+    (hrange : embed.range = weight ⁻¹' {1}) : (ofEmbed hinj hrange).ofPoint = embed := by
   ext p
   exact Homogenization.lift_apply_ofPoint ..
 
 @[simp]
-theorem ofVector_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : embed.range = weight ⁻¹' {1}) :
-    (ofEmbed embed_inj embed_range).ofVector = embed.linear := by
+theorem ofVector_ofEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W →ₗ[R] R}
+    (hrange : embed.range = weight ⁻¹' {1}) : (ofEmbed hinj hrange).ofVector = embed.linear := by
   ext p
   exact Homogenization.lift_apply_ofVector ..
 
 /-- The weight used in the construction becomes the weight in the homogenization. -/
 @[simp]
-theorem weight_ofEmbed {embed : P →ᵃ[R] W} (embed_inj : Injective embed)
-    {weight : W →ₗ[R] R} (embed_range : embed.range = weight ⁻¹' {1}) :
-    (ofEmbed embed_inj embed_range).weight = weight := by
-  refine (ofEmbed embed_inj embed_range).hom_ext fun x => ?_
+theorem weight_ofEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed)
+    {weight : W →ₗ[R] R} (hrange : embed.range = weight ⁻¹' {1}) :
+    (ofEmbed hinj hrange).weight = weight := by
+  refine (ofEmbed hinj hrange).hom_ext fun x => ?_
   rw [weight_ofPoint, ofPoint_ofEmbed, eq_comm]
-  exact congr(embed x ∈ $embed_range).mp <| Set.mem_range_self x
+  exact congr(embed x ∈ $hrange).mp <| Set.mem_range_self x
 
 /-- A module is a homogenization of the weight-one hyperplane of any linear functional,
 provided that hyperplane contains 1. -/
