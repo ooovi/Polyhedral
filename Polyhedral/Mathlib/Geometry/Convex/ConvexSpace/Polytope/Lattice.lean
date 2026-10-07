@@ -5,8 +5,11 @@ Authors: Martin Winter, Olivia Röhrig
 -/
 module
 
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+-- public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
 
 /-! This file defines polytopes as bundles objects. -/
 
@@ -52,8 +55,8 @@ variable (P) in
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : Polytope R X) = s := by ext; simp
 
-instance : Coe (Polytope R X) (ConvexSet R X) where
-  coe P := ⟨P, P.isPolytope.isConvexSet⟩
+-- instance : Coe (Polytope R X) (ConvexSet R X) where
+--   coe P := ⟨P, P.isPolytope.isConvexSet⟩
 
 /- # LE -/
 
@@ -162,7 +165,7 @@ instance : Neg (Polytope R X) where
 
 instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
 
-instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
+-- instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
 
 /-! ### Minkowski addition -/
 
