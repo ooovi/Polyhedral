@@ -247,13 +247,11 @@ def ofWeightOne {g : W →ₗ[R] R} (h : 1 ∈ g.range) :
   have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
-@[simp]
 theorem ofPoint_ofWeightOne {g : W →ₗ[R] R} (h : 1 ∈ g.range) :
     have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
     (ofWeightOne h).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightOne]
 
-@[simp]
 theorem ofVector_ofWeightOne {g : W →ₗ[R] R} (h : 1 ∈ g.range) :
     have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
     (ofWeightOne h).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
@@ -293,7 +291,6 @@ def ofWeightNeZero {g : W →ₗ[R] R} (h : g ≠ 0) :
     exact ⟨(g y)⁻¹ • y, by simp [hy]⟩
   ofEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
 
-@[simp]
 theorem ofPoint_ofWeightNeZero {g : W →ₗ[R] R} (h : g ≠ 0) :
     have : Nonempty (comap g.toAffineMap {1}) := by
       obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
@@ -301,7 +298,6 @@ theorem ofPoint_ofWeightNeZero {g : W →ₗ[R] R} (h : g ≠ 0) :
     (ofWeightNeZero h).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightNeZero]
 
-@[simp]
 theorem ofVector_ofWeightNeZero {g : W →ₗ[R] R} (h : g ≠ 0) :
     have : Nonempty (comap g.toAffineMap {1}) := by
       obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
