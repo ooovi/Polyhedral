@@ -7,7 +7,6 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
--- public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 
@@ -36,11 +35,6 @@ lemma isConvexSet (P : PointedCone R M) : IsConvexSet R (P : Set M) := by
   rw [sConvexComb_eq_sum w]
   refine P.finsuppSum_mem _ _ (fun i r ↦ r • i) (fun c hc ↦ ?_)
   exact P.smul_mem (w.weights_nonneg c) <| hw (Finsupp.mem_support_iff.mpr hc)
-
--- @[coe]
--- def toConvexSet (P : PointedCone R M) : ConvexSet R M := ⟨_, P.isConvexSet⟩
-
--- instance : Coe (PointedCone R M) (ConvexSet R M) := ⟨toConvexSet⟩
 
 @[simp] theorem hull_convexHull (t : Set M) :
     hull R (Convexity.convexHull R t) = hull R t := by
