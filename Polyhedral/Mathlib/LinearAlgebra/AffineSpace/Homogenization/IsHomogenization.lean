@@ -172,7 +172,7 @@ variable {U : Type*} [AddCommGroup U] [Module R U] {f : P →ᵃ[R] U} {g : U �
 lemma comp_lift_eq_weight (h : ∀ p, g (f p) = 1) : g ∘ₗ (ℋ.lift f) = ℋ.weight :=
   ℋ.hom_ext <| by simpa
 
-lemma lift_bijective_ohinjective_ohrange_preimage (hinj : Injective f)
+lemma lift_bijective_injective_range_preimage (hinj : Injective f)
     (hrange : Set.range f = g ⁻¹' {1}) : Bijective (ℋ.lift f) := by
   have g_f : ∀ p, g (f p) = 1 := Set.range_subset_iff.mp hrange.subset
   constructor
@@ -215,7 +215,7 @@ def ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W �
     (hrange : embed.range = weight ⁻¹' {1}) : IsHomogenization R P W where
   repr := by
     apply (LinearEquiv.ofBijective (Homogenization.lift embed) ?_).symm
-    exact lift_bijective_ohinjective_ohrange_preimage (canonical R P) hinj hrange
+    exact lift_bijective_injective_range_preimage (canonical R P) hinj hrange
 
 /-- The embedding used in the construction becomes the embedding in the homogenization. -/
 @[simp]
