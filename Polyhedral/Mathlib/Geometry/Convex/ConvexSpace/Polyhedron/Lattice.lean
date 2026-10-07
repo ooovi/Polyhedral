@@ -17,7 +17,7 @@ namespace Convexity
 open Convexity
 
 variable {R : Type*} [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable {V : Type*} [AddCommGroup V] [Module R V] -- [ConvexSpace R V] [IsModuleConvexSpace R V]
+variable {V : Type*} [AddCommGroup V] [Module R V]
 variable {A : Type*} [AddTorsor V A] [ConvexSpace R A]
 
 variable (R A) in
@@ -49,11 +49,6 @@ instance : Coe (Polytope R A) (Polyhedron R A) := ⟨toPolytope⟩
 section IsModuleConvexSpace
 
 variable [ConvexSpace R V] [IsModuleConvexSpace R V] [IsAffineConvexSpace R V A]
-
-@[coe] def toConvexSet (P : Polyhedron R A) : ConvexSet R A :=
-  ⟨P, P.isPolyhedron.isConvexSet⟩
-
-instance : Coe (Polyhedron R A) (ConvexSet R A) := ⟨toConvexSet⟩
 
 end IsModuleConvexSpace
 
