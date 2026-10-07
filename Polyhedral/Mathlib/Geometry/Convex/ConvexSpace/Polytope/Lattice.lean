@@ -5,7 +5,6 @@ Authors: Martin Winter, Olivia Röhrig
 -/
 module
 
--- public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
 public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
@@ -54,9 +53,6 @@ variable (P) in
 @[simp] theorem mem_mk {s h x} : x ∈ (⟨s, h⟩ : Polytope R X) ↔ x ∈ s := .rfl
 
 @[simp] theorem mk_eq {s h} : (⟨s, h⟩ : Polytope R X) = s := by ext; simp
-
--- instance : Coe (Polytope R X) (ConvexSet R X) where
---   coe P := ⟨P, P.isPolytope.isConvexSet⟩
 
 /- # LE -/
 
@@ -164,8 +160,6 @@ instance : Neg (Polytope R X) where
   neg K := ⟨_, K.isPolytope.neg⟩
 
 instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
-
--- instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
 
 /-! ### Minkowski addition -/
 
