@@ -254,7 +254,7 @@ variable (ℋ : IsHomogenization R A W)
 
 lemma nonneg_smulSet_ofPoint_range_le_weight_positive :
     R≥0 ∙ (Set.range ℋ.ofPoint) ≤ ℋ.weight.positive := by
-  rw [ofPoint_range_eq_preimage_weight_one]
+  rw [← AffineMap.coe_range, ofPoint_range_eq_comap_weight_one]
   exact nonneg_smulSet_preimage_one_le_positive _
 
 @[simp] lemma homogenize_univ_le_weight_positive :
@@ -267,8 +267,7 @@ lemma homogenize_le_weight_positive (s : Set A) :
 
 @[simp] theorem homogenize_dehomogenize_le_weight_positive {S : SubMulAction₀ R≥0 W} :
     homogenize ℋ (S.dehomogenize ℋ) ≤ S ⊓ ℋ.weight.positive := by
-  have aux : Set.range ℋ.ofPoint = ℋ.ofPoint.range := rfl
-  rw [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, aux]
+  rw [homogenize, dehomogenize, Set.image_preimage_eq_inter_range, ← AffineMap.coe_range]
   refine le_trans (smulSet_inter_le _ _) ?_
   simp only [smulSet_eq, le_inf_iff, inf_le_left, true_and]
   exact le_trans inf_le_right (nonneg_smulSet_ofPoint_range_le_weight_positive _)
@@ -339,7 +338,7 @@ variable (ℋ : IsHomogenization R A W)
 
 lemma nonneg_smulSet_ofPoint_range :
     R≥0 ∙ (Set.range ℋ.ofPoint) = ℋ.weight.positive := by
-  rw [ofPoint_range_eq_preimage_weight_one]
+  rw [← AffineMap.coe_range, ofPoint_range_eq_comap_weight_one]
   exact nonneg_smulSet_preimage_one_eq_positive _
 
 @[simp] lemma homogenize_univ : homogenize ℋ (Set.univ : Set A) = ℋ.weight.positive := by
