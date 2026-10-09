@@ -214,21 +214,23 @@ space `W` and a weight map that is the constant 1-map on the embedded `P`. This 
 axiomatization in Definition 4.2 of [Gallier2011GeometricMethods]
 https://www.cis.upenn.edu/~jean/gma-v2-root.pdf -/
 def ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W →ₗ[R] R}
-    (hrange : embed.range = weight ⁻¹' {1}) : IsHomogenization R P W where
+    (hrange : embed.range = comap weight.toAffineMap {1}) : IsHomogenization R P W where
   repr := by
     apply (LinearEquiv.ofBijective (Homogenization.lift embed) ?_).symm
-    exact lift_bijective_injective_range_preimage (canonical R P) hinj hrange
+    have : embed.range = weight ⁻¹' {1} := by ext; simp [hrange]
+    exact lift_bijective_injective_range_preimage (canonical R P) hinj this
 
 /-- The embedding used in the construction becomes the embedding in the homogenization. -/
 @[simp]
 theorem ofPoint_ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W →ₗ[R] R}
-    (hrange : embed.range = weight ⁻¹' {1}) : (ofWeightEmbed hinj hrange).ofPoint = embed := by
+    (hrange : embed.range = comap weight.toAffineMap {1}) :
+    (ofWeightEmbed hinj hrange).ofPoint = embed := by
   ext p
   exact Homogenization.lift_apply_ofPoint ..
 
 @[simp]
 theorem ofVector_ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W →ₗ[R] R}
-    (hrange : embed.range = weight ⁻¹' {1}) :
+    (hrange : embed.range = comap weight.toAffineMap {1}) :
     (ofWeightEmbed hinj hrange).ofVector = embed.linear := by
   ext p
   exact Homogenization.lift_apply_ofVector ..
@@ -236,7 +238,7 @@ theorem ofVector_ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) 
 /-- The weight used in the construction becomes the weight in the homogenization. -/
 @[simp]
 theorem weight_ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed)
-    {weight : W →ₗ[R] R} (hrange : embed.range = weight ⁻¹' {1}) :
+    {weight : W →ₗ[R] R} (hrange : embed.range = comap weight.toAffineMap {1}) :
     (ofWeightEmbed hinj hrange).weight = weight := by
   refine (ofWeightEmbed hinj hrange).hom_ext fun x => ?_
   rw [weight_ofPoint, ofPoint_ofWeightEmbed, eq_comm]
@@ -248,7 +250,7 @@ def ofWeightOne {g : W →ₗ[R] R} (h : 1 ∈ g.range) :
     have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
     IsHomogenization R (comap g.toAffineMap {1}) W :=
   have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
-  ofWeightEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
+  ofWeightEmbed (weight := g) (AffineSubspace.subtype_injective _) (by ext; simp)
 
 theorem ofPoint_ofWeightOne {g : W →ₗ[R] R} (h : 1 ∈ g.range) :
     have : Nonempty (comap g.toAffineMap {1}) := nonempty_subtype.mpr <| g.mem_range.mp h
@@ -290,7 +292,7 @@ def ofWeightNeZero :
     have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
     IsHomogenization R (comap g.toAffineMap {1}) W :=
   have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
-  ofWeightEmbed (weight := g) (AffineSubspace.subtype_injective _) (by simp; rfl)
+  ofWeightEmbed (weight := g) (AffineSubspace.subtype_injective _) (by ext; simp)
 
 theorem ofPoint_ofWeightNeZero :
     have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
