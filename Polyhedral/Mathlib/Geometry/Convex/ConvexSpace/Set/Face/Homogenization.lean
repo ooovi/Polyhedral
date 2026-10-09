@@ -107,7 +107,7 @@ its homogenization cone.
 This isomorphism is used to translate results between face lattices of cones and face lattices
 of convex sets.
 -/
-def Face.homogenizeIso (P : ConvexSet R A) :
+def _root_.ConvexSet.face_homogenizeIso (P : ConvexSet R A) :
     Face P ≃o PointedCone.Face (P.homogenize ℋ) where
   toFun F := ⟨_, ℋ.homogenize_isFaceOf F.isFaceOf⟩
   invFun F := ⟨dehomogenize ℋ F.toSubmodule,

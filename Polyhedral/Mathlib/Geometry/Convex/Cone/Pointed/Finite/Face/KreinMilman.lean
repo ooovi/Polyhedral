@@ -55,18 +55,16 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
     simpa using this
   -- the weight-one slice of `C` is nonempty
   obtain ⟨y, hyC, hy0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hbot
-  have hgy : 0 < g y := by
-    obtain ⟨h1, h2⟩ := LinearMap.mem_positive'.mp (hgC hyC)
-    exact lt_of_le_of_ne h1 fun h => hy0 (h2 h.symm)
+  have hg : g ≠ 0 := fun h ↦ hy0 <| by simpa [h] using (LinearMap.mem_positive'.mp (hgC hyC)).2
   -- choose the homogenization whose affine space is the weight-one plane
-  let weightOnePlane := AffineSubspace.comap (g.toAffineMap) {1}
-  have : Fact (g ≠ 0) := fact_iff.mpr (fun h ↦ by simp [h] at hgy)
-  let ℋ : IsHomogenization R weightOnePlane M := ofWeightNeZero g
+  let ℋ := ofWeightNeZero hg
   -- view `C` as the homogenization of its weight-one slice
-  let : ConvexSpace R M := ConvexSpace.ofModule
-  let := ConvexSpace.ofAddTorsor (R := R) (P := AffineSubspace.comap (g.toAffineMap) {1})
+  let weightOnePlane := AffineSubspace.comap (g.toAffineMap) {1}
+  have : Nonempty weightOnePlane := comap_nonempty_of_ne_zero hg
+  let : ConvexSpace R weightOnePlane := .ofAddTorsor
+  let : ConvexSpace R M := .ofModule
   have hCP : homogenize ℋ (dehomogenize ℋ C) = C :=
-    homogenize_dehomogenize_of_le_positive ((weight_ofWeightNeZero g).symm ▸ hgC)
+    homogenize_dehomogenize_of_le_positive ((weight_ofWeightNeZero hg).symm ▸ hgC)
   -- the slice is a polytope; apply the Krein-Milman theorem for polytopes
   have hP : IsPolytope R (dehomogenize ℋ C : Set weightOnePlane) := by
     rw [IsPolytope.iff_homogenize_fg (W := M), hCP]
