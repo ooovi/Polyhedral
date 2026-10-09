@@ -7,6 +7,7 @@ module
 
 public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+import Mathlib.RingTheory.SimpleModule.Basic
 
 /-!
 This file adds features for affine spaces.
@@ -62,4 +63,26 @@ instance : Neg (AffineSubspace R V) where
 
 instance : IsConcreteNeg (AffineSubspace R V) V := ⟨fun _ => rfl⟩
 
+lemma nonempty_comap_of_nonempty_of_surjective {E : AffineSubspace R R} (hE : (E : Set R).Nonempty)
+    {g : V →ₗ[R] R} (hg : Function.Surjective g) : Nonempty (E.comap g.toAffineMap) := by
+  obtain ⟨e, he⟩ := hE
+  obtain ⟨_, rfl⟩ := hg e
+  exact ⟨_, AffineSubspace.mem_comap.mpr he⟩
+
 end Module
+
+section DivisionRing
+
+open AffineSubspace
+
+variable {R : Type*} [DivisionRing R]
+variable {V : Type*} [AddCommGroup V] [Module R V]
+
+variable {g : V →ₗ[R] R}
+
+lemma comap_nonempty_of_ne_zero (h : g ≠ 0) : Nonempty (comap g.toAffineMap {1}) := by
+  obtain ⟨y, hy⟩ : ∃ y, g y ≠ 0 := DFunLike.ne_iff.mp h
+  apply nonempty_comap_of_nonempty_of_surjective (Set.singleton_nonempty 1)
+  exact g.surjective_of_ne_zero h
+
+end DivisionRing
