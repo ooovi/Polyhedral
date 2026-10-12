@@ -7,6 +7,7 @@ module
 
 public import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
 public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+import Mathlib.RingTheory.SimpleModule.Basic
 
 /-!
 This file adds features for affine spaces.
