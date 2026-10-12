@@ -10,6 +10,7 @@ public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Range
 public import Mathlib.LinearAlgebra.AffineSpace.Homogenization
 
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+public import Mathlib.RingTheory.SimpleModule.Basic
 
 /-! This file defines affine homogenization as any vector space linearly equivalent to
 `Homogenization`, the canonical homogenization from Mathlib. It also proves every object
@@ -274,7 +275,7 @@ section Field
 
 namespace IsHomogenization
 
-open Function Submodule AffineSubspace
+open Function Submodule AffineSubspace Set
 
 variable {R : Type*} [DivisionRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
@@ -285,24 +286,29 @@ variable {g : W →ₗ[R] R} (h : g ≠ 0)
 
 /-- A module is a homogenization of the weight-one hyperplane of any nonzero linear functional. -/
 def ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     IsHomogenization R (comap g.toAffineMap {1}) W :=
-  have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+  have : Nonempty (comap g.toAffineMap {1}) :=
+    Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
   ofWeightEmbed (weight := g) (AffineSubspace.subtype_injective _) (by ext; simp)
 
 theorem ofPoint_ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     (ofWeightNeZero h).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightNeZero]
 
 theorem ofVector_ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     (ofWeightNeZero h).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
   simp [ofWeightNeZero]
 
 @[simp]
 theorem weight_ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     (ofWeightNeZero h).weight = g := by
   simp [ofWeightNeZero]
 
