@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 
-/-! This file defines faces of convex sets.
+/-! This file defines faces oF Convex sets.
 
 TODO: align this API with `IsFaceOf` for cones.
 -/
@@ -41,34 +41,34 @@ theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
   all_goals (rw [convexCombPair_symm] at hz; rw [add_comm] at hmn; use hmn)
 
 variable (R) in
-/-- A subset `f` of a set `c` is a face of `c` iff it is an extreme subset. -/
-structure IsFaceOf (f c : Set M) : Prop where
-  le : f ⊆ c
-  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ c → ∀ ⦃y⦄, y ∈ c →
-    ∀ ⦃z⦄, z ∈ f → z ∈ openSegment R x y → x ∈ f
+/-- A subset `F` of a set `c` is a face of `c` iff it is an extreme subset. -/
+structure IsFaceOf (F C : Set M) : Prop where
+  le : F ⊆ C
+  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
+    ∀ ⦃z⦄, z ∈ F → z ∈ openSegment R x y → x ∈ F
 
 namespace IsFaceOf
 
-variable {c f c₁ c₂ f₁ f₂ : Set M}
+variable {C F C₁ C₂ F₁ F₂ : Set M}
 
-theorem empty : IsFaceOf R (∅ : Set M) c where
-  le := Set.empty_subset c
+theorem empty : IsFaceOf R (∅ : Set M) C where
+  le := Set.empty_subset C
   left_mem_of_mem_openSegment := by simp
 
 /- A set is a face of itself. -/
-theorem refl : IsFaceOf R c c :=
+theorem refl : IsFaceOf R C C :=
   ⟨subset_rfl, fun _ hx _ _ _ _ _ ↦ hx⟩
 
 /- The face relation is transitive. -/
-theorem trans (h₁ : IsFaceOf R f₂ f₁) (h₂ : IsFaceOf R f₁ c) : IsFaceOf R f₂ c := by
+theorem trans (h₁ : IsFaceOf R F₂ F₁) (h₂ : IsFaceOf R F₁ C) : IsFaceOf R F₂ C := by
   refine ⟨h₁.le.trans h₂.le, ?_⟩
   intro x hx y hy z hz hhz
-  have hz' : z ∈ f₁ := h₁.le hz
+  have hz' : z ∈ F₁ := h₁.le hz
   exact h₁.2 (h₂.2 hx hy hz' hhz) (h₂.2 hy hx hz' (by simpa [openSegment_symm] using hhz)) hz hhz
 
-/- For two faces `f₁, f₂` of `c`, `f₁` is a face of `f₂` iff it is a subset of `f₂`. -/
-theorem iff_le_of_isFaceOf (h₁ : IsFaceOf R f₁ c) (h₂ : IsFaceOf R f₂ c) :
-    IsFaceOf R f₁ f₂ ↔ f₁ ⊆ f₂ := by
+/- For two faces `F₁, F₂` of `c`, `F₁` is a face of `F₂` iff it is a subset of `F₂`. -/
+theorem iff_le_of_isFaceOf (h₁ : IsFaceOf R F₁ C) (h₂ : IsFaceOf R F₂ C) :
+    IsFaceOf R F₁ F₂ ↔ F₁ ⊆ F₂ := by
   constructor
   · exact fun h ↦ h.1
   · intro hh
@@ -78,32 +78,32 @@ theorem iff_le_of_isFaceOf (h₁ : IsFaceOf R f₁ c) (h₂ : IsFaceOf R f₂ c)
 
 /- A set is a face of a face iff it is contained in the face and it is a face
 of the ambient set. -/
-lemma isFaceOf_iff (H : IsFaceOf R f c) :
-    IsFaceOf R f₁ f ↔ f₁ ⊆ f ∧ IsFaceOf R f₁ c := by
+lemma isFaceOf_iff (H : IsFaceOf R F C) :
+    IsFaceOf R F₁ F ↔ F₁ ⊆ F ∧ IsFaceOf R F₁ C := by
   refine ⟨fun h ↦ ⟨h.1, trans h H⟩, fun h ↦ ⟨h.1, ?_⟩⟩
   intro x hx y hy z hz hhz
   exact h.2.2 (H.le hx) (H.le hy) hz hhz
 
 /- The intersection of two faces of two sets is a face of the intersection of the sets. -/
-theorem inf (h₁ : IsFaceOf R f₁ c₁) (h₂ : IsFaceOf R f₂ c₂) :
-    IsFaceOf R (f₁ ∩ f₂) (c₁ ∩ c₂) := by
+theorem inf (h₁ : IsFaceOf R F₁ C₁) (h₂ : IsFaceOf R F₂ C₂) :
+    IsFaceOf R (F₁ ∩ F₂) (C₁ ∩ C₂) := by
   refine ⟨fun x hx ↦ ⟨h₁.le hx.1, h₂.le hx.2⟩, ?_⟩
   intro a ha b hb z hz hhz
   exact ⟨h₁.2 ha.1 hb.1 hz.1 hhz, h₂.2 ha.2 hb.2 hz.2 hhz⟩
 
 /- The intersection of two faces is a face. -/
-theorem inf_left (h₁ : IsFaceOf R f₁ c) (h₂ : IsFaceOf R f₂ c) : IsFaceOf R (f₁ ∩ f₂) c := by
+theorem inf_left (h₁ : IsFaceOf R F₁ C) (h₂ : IsFaceOf R F₂ C) : IsFaceOf R (F₁ ∩ F₂) C := by
   refine ⟨fun x hx ↦ h₁.le hx.1, ?_⟩
   intro x hx y hy z hz hhz
   exact ⟨h₁.2 hx hy hz.1 hhz, h₂.2 hx hy hz.2 hhz⟩
 
 /- A face of two sets is a face of the intersection. -/
-theorem inf_right (h₁ : IsFaceOf R f c₁) (h₂ : IsFaceOf R f c₂) : IsFaceOf R f (c₁ ∩ c₂) :=
+theorem inf_right (h₁ : IsFaceOf R F C₁) (h₂ : IsFaceOf R F C₂) : IsFaceOf R F (C₁ ∩ C₂) :=
   ⟨Set.subset_inter h₁.1 h₂.1, fun _ hx _ hy _ hz hhz ↦ h₁.2 hx.1 hy.1 hz hhz⟩
 
 /-- The intersection of a set `c` with any family of faces of `c` is a face of `c`. -/
-theorem sInf {c : Set M} {Fs : Set (Set M)} (h : ∀ f ∈ Fs, IsFaceOf R f c) :
-    IsFaceOf R (c ∩ ⋂₀ Fs) c where
+theorem sInf {c : Set M} {Fs : Set (Set M)} (h : ∀ F ∈ Fs, IsFaceOf R F C) :
+    IsFaceOf R (C ∩ ⋂₀ Fs) C where
   le _ sm := sm.1
   left_mem_of_mem_openSegment := by
     intro x hx y hy z hz hxyz
@@ -113,11 +113,11 @@ theorem sInf {c : Set M} {Fs : Set (Set M)} (h : ∀ f ∈ Fs, IsFaceOf R f c) :
 section map
 
 variable [ConvexSpace R M₁] [ConvexSpace R M₂]
-variable {c₁ f₁ : Set M₁} {c₂ f₂ : Set M₂}
+variable {C₁ F₁ : Set M₁} {C₂ F₂ : Set M₂}
 
 /- The image of a face under an injective affine map is a face of the image. -/
 theorem map {φ : M₁ → M₂} (hφ : IsAffineMap R φ) (hinj : Injective φ)
-    (hF : IsFaceOf R f₁ c₁) : IsFaceOf R (φ '' f₁) (φ '' c₁) := by
+    (hF : IsFaceOf R F₁ C₁) : IsFaceOf R (φ '' F₁) (φ '' C₁) := by
   refine ⟨fun x ⟨y, hy, hyx⟩ ↦ ⟨y, hF.le hy, hyx⟩, ?_⟩
   intro x hx y hy z hz hhz
   rcases hx with ⟨m, hmC, rfl⟩
@@ -134,8 +134,8 @@ theorem map {φ : M₁ → M₂} (hφ : IsAffineMap R φ) (hinj : Injective φ)
   exact Set.mem_image_of_mem _ (hF.2 hmC hnC hlF hl)
 
 /- The preimage of a face is a face of the preimage. -/
-theorem comap_face {φ : M₁ → M₂} (hφ : IsAffineMap R φ) (hF : IsFaceOf R f₂ c₂) :
-    IsFaceOf R (φ ⁻¹' f₂) (φ ⁻¹' c₂) := by
+theorem comap_face {φ : M₁ → M₂} (hφ : IsAffineMap R φ) (hF : IsFaceOf R F₂ C₂) :
+    IsFaceOf R (φ ⁻¹' F₂) (φ ⁻¹' C₂) := by
   refine ⟨Set.preimage_mono hF.1, ?_⟩
   intro x hx y hy z hz hhz
   have hhz' : φ z ∈ openSegment R (φ x) (φ y) := by
@@ -150,7 +150,7 @@ theorem comap_face {φ : M₁ → M₂} (hφ : IsAffineMap R φ) (hF : IsFaceOf 
 /- `F` is a face of `C` iff the image of `F` is a face of the image of `C` under an injective affine
 map -/
 theorem isFaceOf_map_iff {φ : M₁ → M₂} (hφ : IsAffineMap R φ) (hinj : Injective φ) :
-    IsFaceOf R (φ '' f₁) (φ '' c₁) ↔ IsFaceOf R f₁ c₁ := by
+    IsFaceOf R (φ '' F₁) (φ '' C₁) ↔ IsFaceOf R F₁ C₁ := by
   refine ⟨fun h ↦ ?_, map hφ hinj⟩
   have h' := comap_face hφ h
   rwa [Set.preimage_image_eq _ hinj, Set.preimage_image_eq _ hinj] at h'
