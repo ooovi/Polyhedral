@@ -21,6 +21,8 @@ variable {R V A : Type*}
 
 open Convexity IsConvexSet Affine
 
+namespace Convexity
+
 section Field
 
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
@@ -31,18 +33,17 @@ variable {C F : Set A}
 
 include V in
 /-- Faces of polytopes are polytopes. -/
-theorem IsPolytope.face_isPolytope
-    (hC : IsPolytope R C) (hF : IsFaceOf R F C) (hcF : IsConvexSet R F) :
+theorem IsPolytope.face_isPolytope (hC : IsPolytope R C) (hF : IsFaceOf R F C) :
     IsPolytope R (F : Set A) := by
   let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
-  have homF := (IsHomogenization.canonical R A).homogenize_isFaceOf hcF hC.isConvexSet hF
+  have homF := (IsHomogenization.canonical R A).homogenize_isFaceOf hC.isConvexSet hF
   have := PointedCone.IsFaceOf.fg (IsPolytope.homogenize_fg _ hC) homF
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
-  rw [dehomogenize_homogenize _  hcF]
+  rw [dehomogenize_homogenize _  hF.isConvexSet]
 
 include V in
 instance {P : Polytope R A} : CoeOut (Face P.isPolytope.isConvexSet) (Polytope R A) where
-  coe F := ⟨_, IsPolytope.face_isPolytope P.isPolytope F.isFaceOf F.isConvexSet⟩
+  coe F := ⟨_, IsPolytope.face_isPolytope P.isPolytope F.isFaceOf⟩
 
 include V in
 /-- The face lattice of a polytope as a graded order with grading given by the dimensions of
@@ -60,3 +61,5 @@ private noncomputable instance Polytope.faceHomogenizationGradeOrder (P : Polyto
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 end Field
+
+end Convexity
