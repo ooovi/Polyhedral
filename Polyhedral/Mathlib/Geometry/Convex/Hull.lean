@@ -31,7 +31,7 @@ For finite `ι`, this can be interpreted as saying that a polytope is the image 
 simplex under some affine map. -/
 lemma convexHull_range (f : ι → X) :
     convexHull R (.range f) = .range (fun w : StdSimplex R ι ↦ iConvexComb w f) := by
-  refine (convexHull_min ?_ isAffineMap_iConvexComb.isConvexSet_range).antisymm ?_
+  refine (convexHull_min ?_ (.range isAffineMap_iConvexComb)).antisymm ?_
   · rintro _ ⟨i, rfl⟩
     exact ⟨.single i, by simp⟩
   · rintro _ ⟨w, rfl⟩

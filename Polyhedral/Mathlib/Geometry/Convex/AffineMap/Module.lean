@@ -8,28 +8,10 @@ public section
 open Convexity
 open scoped Pointwise
 
-namespace LinearMap
-variable {R M N : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommMonoid M]
-  [Module R M] [AddCommMonoid N] [Module R N] [ConvexSpace R M] [IsModuleConvexSpace R M]
-  [ConvexSpace R N] [IsModuleConvexSpace R N] (f : M →ₗ[R] N)
-
-alias isAffineMap := IsAffineMap.linearMap
-
-@[simp] lemma map_sConvexComb (w : StdSimplex R M) :
-    f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
-
-lemma isConvexSet_image {s : Set M} (hs : IsConvexSet R s) : IsConvexSet R (f '' s) :=
-  hs.image f.isAffineMap
-
-lemma isConvexSet_range : IsConvexSet R (Set.range f) := by
-  rw [← Set.image_univ]
-  exact isConvexSet_image f .univ
-
-end LinearMap
-
 namespace Convexity
 variable {R S M : Type*}
 
+alias _root_.LinearMap.isAffineMap := IsAffineMap.linearMap
 
 section Semiring
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]

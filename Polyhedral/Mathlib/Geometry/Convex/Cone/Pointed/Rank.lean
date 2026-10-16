@@ -1,13 +1,13 @@
 /-
-Copyright (c) 2025 Olivia Röhig, Kilian Rueß, Mrtin Winter. All rights reserved.
+Copyright (c) 2025 Olivia Röhig, Kilian Rueß, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhig, Kilian Rueß, Mrtin Winter
+Authors: Olivia Röhig, Kilian Rueß, Martin Winter
 -/
 module
 
+public import Mathlib.LinearAlgebra.AffineSpace.Dimension
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
-public import Mathlib.LinearAlgebra.AffineSpace.Dimension
 
 /-!
 ## Rank of Pointed Cones
