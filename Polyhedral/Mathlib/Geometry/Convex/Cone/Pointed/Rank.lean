@@ -7,7 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Dual.Field
-public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Dimension
+public import Mathlib.LinearAlgebra.AffineSpace.Dimension
 
 /-!
 ## Rank of Pointed Cones

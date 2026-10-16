@@ -35,13 +35,6 @@ variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
 variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
 variable (f : P₁ →ᵃ[R] P₂)
 
--- PR #39437
-lemma isAffineMap : IsAffineMap R f where
-  map_sConvexComb s := by
-    rw [sConvexComb_eq_affineCombination, sConvexComb_map, iConvexComb_eq_affineCombination]
-    simpa only [Function.comp_id] using
-      map_affineCombination (s := s.weights.support) _root_.id s.weights s.total f
-
 @[simp] lemma map_sConvexComb (w : StdSimplex R P₁) :
     f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
 

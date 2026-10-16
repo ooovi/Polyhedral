@@ -17,7 +17,7 @@ import Mathlib.Algebra.Order.Nonneg.Field
 In particular, the homogenization is never empty. This enables to prove suitable order
 isomorphisms. -/
 
-@[expose] public section
+@[expose] public noncomputable section
 
 namespace Affine.Set
 

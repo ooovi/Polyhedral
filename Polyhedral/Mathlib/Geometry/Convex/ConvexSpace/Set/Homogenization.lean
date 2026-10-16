@@ -11,7 +11,7 @@ public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomo
 
 /-! This file defines homogenization of convex sets in affine spaces. -/
 
-@[expose] public section
+@[expose] public noncomputable section
 
 open Convexity Pointwise Set PointedCone Submodule
 

@@ -148,7 +148,7 @@ lemma span_inf_of_codisjoint_lineal {S : Submodule R M} (hS : Codisjoint C.linea
     span R (C ⊓ S : PointedCone R M) = span R C ⊓ S := by
   nth_rw 2 [← C.inf_sup_lineal hS]
   rw [← coe_sup_submodule_span, Submodule.span_union, coe_ofSubmodule, Submodule.span_eq C.lineal]
-  rw [sup_inf_assoc_of_le C.lineal (Submodule.span_le.mpr fun _ hx ↦ hx.2)]
+  rw [sup_inf_assoc_of_le C.lineal (Submodule.span_le.mpr (by simp))]
   rw [Eq.comm, sup_eq_left]
   intro x hx
   apply Submodule.subset_span

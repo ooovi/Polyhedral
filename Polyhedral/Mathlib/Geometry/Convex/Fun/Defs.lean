@@ -98,14 +98,25 @@ lemma IsConvexFunOn.map_iConvexComb_le (hf : IsConvexFunOn R s f) {w : StdSimple
   grw [StdSimplex.weights_map, mapDomain_support]
   simpa [Set.subset_def]
 
-@[to_dual (dont_translate := R) le_map_convexCombPair]
+omit [ConvexSpace R X] in
+private lemma support_duple_subset (hx : x ∈ s) (hy : y ∈ s) {a b : R} {ha : 0 ≤ a} {hb : 0 ≤ b}
+    {hab : a + b = 1} :
+    ↑(StdSimplex.duple x y ha hb hab).weights.support ⊆ s := by
+  classical
+  grw [StdSimplex.weights_duple, support_add, support_single_subset, support_single_subset]
+  simp [Set.subset_def, *]
+
 lemma IsConvexFunOn.map_convexCombPair_le (hf : IsConvexFunOn R s f) (hx : x ∈ s) (hy : y ∈ s)
     {a b : R} {ha hb hab} :
     f (convexCombPair a b ha hb hab x y) ≤ convexCombPair a b ha hb hab (f x) (f y) := by
-  classical
-  grw [convexCombPair, hf.map_sConvexComb_le, iConvexComb_duple]
-  grw [StdSimplex.weights_duple, support_add, support_single_subset, support_single_subset]
-  simp [Set.subset_def, *]
+  rw [convexCombPair, ← iConvexComb_duple]
+  exact hf.map_sConvexComb_le (support_duple_subset hx hy)
+
+lemma IsConcaveFunOn.le_map_convexCombPair (hf : IsConcaveFunOn R s f) (hx : x ∈ s) (hy : y ∈ s)
+    {a b : R} {ha hb hab} :
+    convexCombPair a b ha hb hab (f x) (f y) ≤ f (convexCombPair a b ha hb hab x y) := by
+  rw [← iConvexComb_duple, convexCombPair]
+  exact hf.le_map_sConvexComb (support_duple_subset hx hy)
 
 @[to_dual (attr := simp)]
 protected lemma IsConvexFunOn.empty : IsConvexFunOn R (∅ : Set X) f := by simp [IsConvexFunOn]
