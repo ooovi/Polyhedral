@@ -170,9 +170,7 @@ theorem isFaceOf_map_iff {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsA
         rw [hf hzy] at hy
         use hy
       · intro hz
-        have hhz : f z ∈ (A.map hhf) := by
-          use z, hz
-        apply Set.mem_preimage.mp hhz
+        exact ⟨z, hz, rfl⟩
     rw [h F, h C] at hh
     exact hh
   · intro h
