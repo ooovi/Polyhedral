@@ -59,7 +59,7 @@ instance : CoeOut (Face P) (Set M) := ⟨carrier⟩
 instance : PartialOrder (Face P) := .ofSetLike ..
 
 instance : OrderBot (Face P) where
-  bot := ⟨_, IsFaceOf.empty⟩
+  bot := ⟨∅, IsFaceOf.empty⟩
   bot_le _ _ := by simp
 
 lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := by
