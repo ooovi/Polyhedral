@@ -30,9 +30,8 @@ end LinearMap
 namespace Convexity
 variable {R S M : Type*}
 
-
-section Semiring
-variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
+section AddCommMonoid
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommMonoid M]
   [Module R M] [ConvexSpace R M] [IsModuleConvexSpace R M] {K K₁ K₂ : Set M}
 
 protected lemma IsConvexSet.add (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) :
@@ -45,10 +44,10 @@ lemma isAffineMap_smul (s : S) : IsAffineMap R fun x : M ↦ s • x := (s • L
 protected lemma IsConvexSet.smul (s : S) {K : Set M} (hK : IsConvexSet R K) :
     IsConvexSet R (s • K) := by rw [← Set.image_smul]; exact hK.image (isAffineMap_smul s)
 
-end Semiring
+end AddCommMonoid
 
-section Ring
-variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
+section AddCommGroup
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup M]
   [Module R M] [ConvexSpace R M] [IsModuleConvexSpace R M] {K K₁ K₂ : Set M}
 
 protected lemma IsConvexSet.neg (hK : IsConvexSet R K) : IsConvexSet R (-K) := by
@@ -62,5 +61,5 @@ protected lemma IsConvexSet.neg (hK : IsConvexSet R K) : IsConvexSet R (-K) := b
 protected lemma IsConvexSet.sub (hK₁ : IsConvexSet R K₁) (hK₂ : IsConvexSet R K₂) :
     IsConvexSet R (K₁ - K₂) := by rw [← Set.image2_sub]; exact hK₁.image2 (by fun_prop) hK₂
 
-end Ring
+end AddCommGroup
 end Convexity
