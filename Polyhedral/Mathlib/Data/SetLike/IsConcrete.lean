@@ -5,7 +5,7 @@ Authors: Martin Winter
 -/
 module
 
-public import Mathlib.Data.SetLike.Basic
+public import Mathlib.Basic.SetLike.Basic
 public import Mathlib.Order.CompleteLattice.Defs
 
 import Mathlib.Data.Set.Basic
