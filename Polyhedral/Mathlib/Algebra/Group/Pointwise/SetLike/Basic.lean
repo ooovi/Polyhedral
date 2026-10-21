@@ -12,7 +12,7 @@ import Mathlib.Algebra.Group.Equiv.Basic
 import Mathlib.Algebra.Group.Prod
 import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
 import Mathlib.Data.Set.NAry
-import Mathlib.Data.SetLike.Basic
+import Mathlib.Basic.SetLike.Basic
 import Mathlib.Algebra.Group.Defs
 
 /-! This files defines the pointwise operations on `SetLike` that are inherited from `Set`-/

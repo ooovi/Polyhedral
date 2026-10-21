@@ -11,7 +11,7 @@ public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomo
 
 /-! This file defines homogenization of convex sets in affine spaces. -/
 
-@[expose] public section
+@[expose] public noncomputable section
 
 open Convexity Pointwise Set PointedCone Submodule
 
@@ -237,7 +237,7 @@ theorem homogenize_dehomogenize_of_le_positive {C : PointedCone R W}
         simpa [y', ℋ.ofPoint_range_eq_comap_weight_one]
           using inv_mul_cancel₀ (@hC y hyC hy0).ne.symm
       exact ⟨y', hy'C, hy'⟩
-    · exact C.isConvexSet.inter ℋ.ofPoint.isConvexSet_range
+    · exact C.isConvexSet.inter (.range ℋ.ofPoint.isAffineMap)
 
 lemma homogenize_mono_iff {K₁ K₂ : Set A} (h₁ : IsConvexSet R K₁) (h₂ : IsConvexSet R K₂) :
     homogenize ℋ K₁ ≤ homogenize ℋ K₂ ↔ K₁ ≤ K₂ where

@@ -79,7 +79,6 @@ variable (hom) in
 embedding of the set. -/
 theorem image_hull_eq_convexHull_image {s : Set A} :
     ℋ.ofPoint '' Convexity.convexHull R s ⊆ hull R (ℋ.ofPoint '' s) := by
-  apply Set.image_subset_iff.mp
   rw [ℋ.ofPoint.isAffineMap.image_convexHull]
   simpa using (hull R _).isConvexSet.convexHull_subset_iff.mpr subset_hull
 
