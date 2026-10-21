@@ -10,6 +10,7 @@ public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Range
 public import Mathlib.LinearAlgebra.AffineSpace.Homogenization
 
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Basic
+public import Mathlib.RingTheory.SimpleModule.Basic
 
 /-! This file defines affine homogenization as any vector space linearly equivalent to
 `Homogenization`, the canonical homogenization from Mathlib. It also proves every object
@@ -138,18 +139,15 @@ theorem ofPoint_ne_ofVector [Nontrivial R] (p : P) (v : V) : ℋ.ofPoint p ≠ �
 theorem ofPoint_ne_zero [Nontrivial R] (p : P) : ℋ.ofPoint p ≠ 0 := by
   simpa using ℋ.ofPoint_ne_ofVector p 0
 
-theorem ofPoint_range_eq_preimage_weight_one : Set.range ℋ.ofPoint = ℋ.weight ⁻¹' {1} := by
+theorem ofPoint_range_eq_comap_weight_one : ℋ.ofPoint.range = comap ℋ.weight.toAffineMap {1} := by
   ext; simp [↓weight_eq_one_iff, eq_comm]
 
-theorem ofVector_range_eq_preimage_weight_zero : Set.range ℋ.ofVector = ℋ.weight ⁻¹' {0} := by
+theorem ofVector_range_eq_comap_weight_zero : ℋ.ofVector.range = Submodule.comap ℋ.weight ⊥ := by
   ext; simp [↓weight_eq_zero_iff, eq_comm]
 
 /-- Embedding the underlying vector space is exactly the weight-0 hyperplane. -/
 theorem ofVector_range_eq_weight_ker : ℋ.ofVector.range = ℋ.weight.ker := by
-  apply SetLike.ext'
-  rw [LinearMap.coe_range, ofVector_range_eq_preimage_weight_zero, LinearMap.ker]
-  ext x
-  simp
+  rw [ofVector_range_eq_comap_weight_zero, LinearMap.ker]
 
 theorem repr_comp_ofPoint : ℋ.repr ∘ ℋ.ofPoint = Homogenization.ofPoint := by
   ext a; simp [ofPoint]
@@ -174,9 +172,9 @@ variable {U : Type*} [AddCommGroup U] [Module R U] {f : P →ᵃ[R] U} {g : U �
 lemma comp_lift_eq_weight (h : ∀ p, g (f p) = 1) : g ∘ₗ (ℋ.lift f) = ℋ.weight :=
   ℋ.hom_ext <| by simpa
 
-lemma lift_bijective_injective_range_preimage (hinj : Injective f)
-    (hrange : Set.range f = g ⁻¹' {1}) : Bijective (ℋ.lift f) := by
-  have g_f : ∀ p, g (f p) = 1 := Set.range_subset_iff.mp hrange.subset
+lemma lift_bijective_injective_range_comap (hinj : Injective f)
+    (hrange : f.range = comap g.toAffineMap {1}) : Bijective (ℋ.lift f) := by
+  have g_f : ∀ p, g (f p) = 1 := AffineMap.range_subset_iff.mp hrange.le
   constructor
   · rw [injective_iff_map_eq_zero]
     intro a ha
@@ -186,7 +184,7 @@ lemma lift_bijective_injective_range_preimage (hinj : Injective f)
     simp [(map_eq_zero_iff _ (f.linear_injective_iff.mpr hinj)).mp ha]
   · intro w
     obtain p₀ := Classical.arbitrary P
-    obtain ⟨a, ha⟩ : w - g w • f p₀ + f p₀ ∈ Set.range f := by simp [hrange, g_f]
+    obtain ⟨a, ha⟩ : w - g w • f p₀ + f p₀ ∈ f.range := by simp [hrange, g_f]
     exact ⟨ℋ.ofVector (a -ᵥ p₀) + g w • ℋ.ofPoint p₀, by simp [ofPoint, ofVector, lift, ha]⟩
 
 end
@@ -217,8 +215,7 @@ def ofWeightEmbed {embed : P →ᵃ[R] W} (hinj : Injective embed) {weight : W �
     (hrange : embed.range = comap weight.toAffineMap {1}) : IsHomogenization R P W where
   repr := by
     apply (LinearEquiv.ofBijective (Homogenization.lift embed) ?_).symm
-    have : embed.range = weight ⁻¹' {1} := by ext; simp [hrange]
-    exact lift_bijective_injective_range_preimage (canonical R P) hinj this
+    exact lift_bijective_injective_range_comap (canonical R P) hinj hrange
 
 /-- The embedding used in the construction becomes the embedding in the homogenization. -/
 @[simp]
@@ -278,7 +275,7 @@ section Field
 
 namespace IsHomogenization
 
-open Function Submodule AffineSubspace
+open Function Submodule AffineSubspace Set
 
 variable {R : Type*} [DivisionRing R]
 variable {V : Type*} [AddCommGroup V] [Module R V]
@@ -289,24 +286,29 @@ variable {g : W →ₗ[R] R} (h : g ≠ 0)
 
 /-- A module is a homogenization of the weight-one hyperplane of any nonzero linear functional. -/
 def ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     IsHomogenization R (comap g.toAffineMap {1}) W :=
-  have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+  have : Nonempty (comap g.toAffineMap {1}) :=
+    Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
   ofWeightEmbed (weight := g) (AffineSubspace.subtype_injective _) (by ext; simp)
 
 theorem ofPoint_ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     (ofWeightNeZero h).ofPoint = (comap g.toAffineMap {1}).subtype := by
   simp [ofWeightNeZero]
 
 theorem ofVector_ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     (ofWeightNeZero h).ofVector = (comap g.toAffineMap {1}).direction.subtype := by
   simp [ofWeightNeZero]
 
 @[simp]
 theorem weight_ofWeightNeZero :
-    have : Nonempty (comap g.toAffineMap {1}) := comap_nonempty_of_ne_zero h
+    have : Nonempty (comap g.toAffineMap {1}) :=
+      Surjective.nonempty (restrictPreimage_surjective {1} (g.surjective_of_ne_zero h))
     (ofWeightNeZero h).weight = g := by
   simp [ofWeightNeZero]
 

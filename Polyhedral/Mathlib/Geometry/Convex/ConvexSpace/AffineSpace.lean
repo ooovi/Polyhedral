@@ -26,33 +26,6 @@ public section
 open Convexity Finset AddTorsor
 open scoped Pointwise
 
-namespace AffineMap
-variable {R V₁ V₂ P₁ P₂ : Type*}
-variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V₁] [Module R V₁] [AddTorsor V₁ P₁]
-variable [AddCommGroup V₂] [Module R V₂] [AddTorsor V₂ P₂]
-variable [ConvexSpace R P₁] [IsAffineConvexSpace R V₁ P₁]
-variable [ConvexSpace R P₂] [IsAffineConvexSpace R V₂ P₂]
-variable (f : P₁ →ᵃ[R] P₂)
-
--- PR #39437
-lemma isAffineMap : IsAffineMap R f where
-  map_sConvexComb s := by
-    rw [sConvexComb_eq_affineCombination, sConvexComb_map, iConvexComb_eq_affineCombination]
-    simpa only [Function.comp_id] using
-      map_affineCombination (s := s.weights.support) _root_.id s.weights s.total f
-
-@[simp] lemma map_sConvexComb (w : StdSimplex R P₁) :
-    f (sConvexComb w) = sConvexComb (w.map f) := f.isAffineMap.map_sConvexComb w
-
-lemma isConvexSet_image {s : Set P₁} (hs : IsConvexSet R s) : IsConvexSet R (f '' s) :=
-  hs.image f.isAffineMap
-
-lemma isConvexSet_range : IsConvexSet R (Set.range f) := by
-  simpa using f.isConvexSet_image .univ
-
-end AffineMap
-
 namespace Convexity
 variable {R V P I : Type*}
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
