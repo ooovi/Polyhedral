@@ -110,7 +110,7 @@ section Module
 
 def dehomogenize (C : PointedCone R W) : Set A := ℋ.ofPoint ⁻¹' C
 
-alias _root_.PointedCone.dehomogenize := dehomogenize
+-- alias _root_.PointedCone.dehomogenize := dehomogenize
 
 @[simp]
 lemma dehomogenize_bot : dehomogenize ℋ (⊥ : PointedCone R W) = ∅ := by
@@ -144,6 +144,23 @@ lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
   · rintro ⟨hxC, y, rfl⟩
     use y
     simpa
+
+/-- The dehomogenization of the ray spanned by an embedded point is the singleton of that
+point. -/
+@[simp]
+lemma dehomogenize_hull_singleton_ofPoint (p : A) : dehomogenize ℋ (R ∙₊ ℋ.ofPoint p) = {p} := by
+  ext q
+  constructor
+  · intro hq
+    simp only [dehomogenize, mem_preimage, SetLike.mem_coe, mem_span_singleton, Subtype.exists,
+      Nonneg.mk_smul] at hq
+    obtain ⟨a, -, ha⟩ := hq
+    have hw := congrArg ℋ.weight ha
+    simp only [map_smul, ℋ.weight_ofPoint, smul_eq_mul, mul_one] at hw
+    rw [hw, one_smul] at ha
+    exact ℋ.ofPoint_injective ha ▸ rfl
+  · rintro rfl
+    simp [Convexity.dehomogenize]
 
 section
 
@@ -191,21 +208,6 @@ lemma smul_pos_of_mem_homogenize {P : Set A} (hP : IsConvexSet R P) {x} (h : x �
     x ∈ Set.Ioi (0 : R) • ℋ.ofPoint '' (P : Set A) :=
   (mem_hull_iff_mem_pos_smul_of_convex_nonzero
     (hP.image ℋ.ofPoint.isAffineMap) hx).mp h
-
-@[simp] lemma dehomogenize_hull_singleton_ofPoint (p : A) :
-    dehomogenize ℋ (R ∙₊ ℋ.ofPoint p) = ({p} : ConvexSet R A) := by
-  ext q
-  constructor
-  · intro hq
-    have hq' : ℋ.ofPoint q ∈ R ∙₊ ℋ.ofPoint p := hq
-    simp only [Submodule.mem_span_singleton, Subtype.exists, Nonneg.mk_smul, exists_prop] at hq'
-    obtain ⟨c, -, hc⟩ := hq'
-    have hw := congrArg ℋ.weight hc
-    simp only [map_smul, ℋ.weight_ofPoint, smul_eq_mul, mul_one] at hw
-    rw [hw, one_smul] at hc
-    exact ℋ.ofPoint_injective hc ▸ rfl
-  · rintro rfl
-    exact subset_hull rfl
 
 -- TODO: This lemma should be proven for general sets (homogenizing to SubMulAction) and then
 --  applied here as a special case.

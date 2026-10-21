@@ -5,7 +5,6 @@ Authors: Moritz Firsching
 -/
 module
 
-public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.KreinMilman
 
@@ -31,7 +30,7 @@ variable [AddCommGroup M] [Module R M]
 
 variable {C : PointedCone R M}
 
-open Convexity ConvexSet Affine Affine.IsHomogenization
+open Convexity Affine Affine.IsHomogenization
 
 /-- Krein-Milman theorem: every finitely generated cone is spanned by its rays, that is,
 by the finite set of its 1-dimensional faces. -/
@@ -57,10 +56,11 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   obtain ⟨y, hyC, hy0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hbot
   have hg : g ≠ 0 := fun h ↦ hy0 <| by simpa [h] using (LinearMap.mem_positive'.mp (hgC hyC)).2
   -- choose the homogenization whose affine space is the weight-one plane
-  let ℋ := ofWeightNeZero hg
+  let ℋ := IsHomogenization.ofWeightNeZero hg
   -- view `C` as the homogenization of its weight-one slice
   let weightOnePlane := AffineSubspace.comap (g.toAffineMap) {1}
-  have : Nonempty weightOnePlane := comap_nonempty_of_ne_zero hg
+  have : Nonempty weightOnePlane :=
+    Function.Surjective.nonempty (Set.restrictPreimage_surjective {1} (g.surjective_of_ne_zero hg))
   let : ConvexSpace R weightOnePlane := .ofAddTorsor
   let : ConvexSpace R M := .ofModule
   have hCP : homogenize ℋ (dehomogenize ℋ C) = C :=
@@ -68,13 +68,14 @@ lemma FG.krein_milman (hfg : C.FG) (hsal : C.Salient) :
   -- the slice is a polytope; apply the Krein-Milman theorem for polytopes
   have hP : IsPolytope R (dehomogenize ℋ C : Set weightOnePlane) := by
     rw [IsPolytope.iff_homogenize_fg (W := M), hCP]
-    exact hfg
+    · exact hfg
+    · exact dehomogenize_isConvexSet ℋ C
   obtain ⟨s, hs, hface⟩ := IsPolytope.krein_milman hP
   refine ⟨s.image ℋ.ofPoint, ?_, ?_⟩
   · rw [Finset.coe_image, hull_image_ofPoint_eq_homogenize_convexHull, hs, hCP]
   · intro x hx
     obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hx
-    have h := homogenize_isFaceOf ℋ (hface q hq)
+    have h := homogenize_isFaceOf ℋ (dehomogenize_isConvexSet ℋ C) (hface q hq)
     rwa [homogenize_singleton, hCP] at h
 
 end Field
