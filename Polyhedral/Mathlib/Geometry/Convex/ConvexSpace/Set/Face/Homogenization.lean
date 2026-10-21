@@ -11,7 +11,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
 /-! This files proves results about faces of convex sets / cones and homogenization. -/
 
-@[expose] public section
+@[expose] public noncomputable section
 
 namespace Affine.IsHomogenization
 

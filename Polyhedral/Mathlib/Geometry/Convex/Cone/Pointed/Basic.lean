@@ -10,7 +10,7 @@ public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
 public import Mathlib.Algebra.Order.Nonneg.Basic
 
 import Mathlib.RingTheory.LocalRing.Basic
-import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
+import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
 
 /-! This file proves basic facts about cones that are intended to go into Pointed/Basic. -/
 

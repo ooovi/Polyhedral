@@ -215,7 +215,7 @@ lemma dual_eq_bot_iff_forall_eq_zero_or_exists_neg :
 lemma dual_dual_eq_top_iff_exists_ne_zero_forall_nonneg :
     dual p.flip (dual p C) ≠ ⊤ ↔ ∃ φ : N, p.flip φ ≠ 0 ∧ ∀ x ∈ C, 0 ≤ p x φ := by
   constructor <;> intro h
-  · obtain ⟨x, hx⟩ := SetLike.exists_not_mem_of_ne_top _ h
+  · obtain ⟨x, hx⟩ := SetLike.exists_notMem_of_ne_top _ h
     obtain ⟨φ, hxφ, hφ⟩ := farkas (dual_dualClosed _ _) hx
     use φ
     constructor

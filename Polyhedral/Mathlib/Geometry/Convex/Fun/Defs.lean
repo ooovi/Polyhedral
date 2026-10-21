@@ -53,7 +53,7 @@ See `IsConvexFunOn.of_map_convexCombPair_le`.
 
 Under mild assumptions, convexity of the function `f` implies convexity of the set `s`.
 See `IsConvexFunOn.isConvexSet`. -/
-@[to_dual IsConcaveFunOn
+@[to_dual (dont_translate := R) IsConcaveFunOn
 /-- A function `f : X → Y` from a convex space to an ordered convex space is concave on a set `s`
 if its hypograph `{(x, y) : X × Y | x ∈ s ∧ y ≤ f x}` is a convex set.
 
@@ -64,7 +64,7 @@ Under mild assumptions, concavity of the function `f` implies convexity of the s
 See `IsConcaveFunOn.isConvexSet`. -/]
 def IsConvexFunOn : Prop := IsConvexSet R {(x, y) : X × Y | x ∈ s ∧ f x ≤ y}
 
-@[to_dual]
+@[to_dual (dont_translate := R)]
 lemma IsConvexFunOn.isConvexSet_epigraph (hf : IsConvexFunOn R s f) :
     IsConvexSet R {(x, y) : X × Y | x ∈ s ∧ f x ≤ y} := hf
 
@@ -80,7 +80,7 @@ lemma IsConvexFunOn.isConvexSet (hf : IsConvexFunOn R s f) : IsConvexSet R s := 
     grw [StdSimplex.weights_map, mapDomain_support]; simpa
   simpa [Function.comp_def] using (hf.isConvexSet_epigraph.sConvexComb_mem this).1
 
-@[to_dual le_map_sConvexComb]
+@[to_dual (dont_translate := R) le_map_sConvexComb]
 lemma IsConvexFunOn.map_sConvexComb_le (hf : IsConvexFunOn R s f) {w : StdSimplex R X}
     (hw : ↑w.weights.support ⊆ s) :
     f w.sConvexComb ≤ w.iConvexComb f := by
