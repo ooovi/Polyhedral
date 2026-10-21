@@ -115,7 +115,7 @@ lemma upperMass_eq_one_iff : w.upperMass x = 1 ↔ ∀ y, w.weights y ≠ 0 → 
   refine ⟨fun h1 y hy ↦ ?_, fun hall ↦ ?_⟩
   · rw [h1] at h
     have hz := add_left_cancel (h.trans (add_zero 1).symm)
-    by_contra! hxy
+    by_contra hxy
     exact hy <| (Finset.sum_eq_zero_iff_of_nonneg fun _ _ ↦ w.weights_nonneg _).1 hz y <| by
       simp [hy, hxy]
   · rwa [Finset.sum_eq_zero fun y ↦ by simp +contextual [hall], add_zero] at h
