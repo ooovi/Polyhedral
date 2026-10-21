@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2025 Olivia Röhrig. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig
+Copyright (c) 2026 Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter.
+All rights reserved. Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 module
 

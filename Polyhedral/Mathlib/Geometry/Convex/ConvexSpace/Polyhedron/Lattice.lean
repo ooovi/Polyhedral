@@ -7,6 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polyhedron.Basic
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines polyhedra as bundled objects. -/
 
@@ -49,6 +50,11 @@ instance : Coe (Polytope R A) (Polyhedron R A) := ⟨toPolytope⟩
 section IsModuleConvexSpace
 
 variable [ConvexSpace R V] [IsModuleConvexSpace R V] [IsAffineConvexSpace R V A]
+
+@[coe] def toConvexSet (P : Polyhedron R A) : ConvexSet R A :=
+  ⟨P, P.isPolyhedron.isConvexSet⟩
+
+instance : Coe (Polyhedron R A) (ConvexSet R A) := ⟨toConvexSet⟩
 
 end IsModuleConvexSpace
 
