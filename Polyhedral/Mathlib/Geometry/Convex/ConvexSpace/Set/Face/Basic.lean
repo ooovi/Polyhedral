@@ -134,7 +134,6 @@ theorem preimage {φ : M → N} (hφ : IsAffineMap R φ) (hF : IsFaceOf R F₂ C
     refine hF.3 hx hy hz ⟨a, b, ha, hb, hab, ?_⟩
     exact hcomb ▸ (hφ.map_convexCombPair ha.le hb.le hab x y).symm
 
-<<<<<<< HEAD
 theorem of_map_injective {φ : M → N} (hφ : IsAffineMap R φ) (hinj : Injective φ)
     (hF : IsFaceOf R (φ '' F₁) (φ '' C₁)) : IsFaceOf R F₁ C₁ := by
   have h' := IsFaceOf.preimage hφ hF
@@ -154,28 +153,6 @@ theorem of_preimage_surjective {φ : M → N} (hφ : IsAffineMap R φ) (hsurj : 
     exact hc.left_mem_of_mem_Ioo xC yC zF b
 
 end Map
-=======
-/- `F` is a face of `C` iff the image of `F` is a face of the image of `C` under an injective affine
-map -/
-theorem isFaceOf_map_iff {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f)
-    (hf : Injective f) : (F.map hhf).IsFaceOf (C.map hhf) ↔ F.IsFaceOf C := by
-  constructor
-  · intro h
-    have hh := comap_face hhf h
-    have h (A : ConvexSet R M₁) : (A.map hhf).comap hhf = A := by
-      ext z
-      constructor
-      · intro hz
-        rcases hz with ⟨y, hy, hzy⟩
-        rw [hf hzy] at hy
-        use hy
-      · intro hz
-        exact ⟨z, hz, rfl⟩
-    rw [h F, h C] at hh
-    exact hh
-  · intro h
-    apply map hhf hf h
->>>>>>> version-bump
 
 end IsFaceOf
 

@@ -145,6 +145,23 @@ lemma ofPoint_dehomogenize_eq_inter_ofPoint (C : PointedCone R W) :
     use y
     simpa
 
+/-- The dehomogenization of the ray spanned by an embedded point is the singleton of that
+point. -/
+@[simp]
+lemma dehomogenize_hull_singleton_ofPoint (p : A) : dehomogenize ℋ (R ∙₊ ℋ.ofPoint p) = {p} := by
+  ext q
+  constructor
+  · intro hq
+    simp only [dehomogenize, mem_preimage, SetLike.mem_coe, mem_span_singleton, Subtype.exists,
+      Nonneg.mk_smul] at hq
+    obtain ⟨a, -, ha⟩ := hq
+    have hw := congrArg ℋ.weight ha
+    simp only [map_smul, ℋ.weight_ofPoint, smul_eq_mul, mul_one] at hw
+    rw [hw, one_smul] at ha
+    exact ℋ.ofPoint_injective ha ▸ rfl
+  · rintro rfl
+    simp [Convexity.dehomogenize]
+
 section
 
 variable [ConvexSpace R A] [ConvexSpace R W] [IsModuleConvexSpace R W] [IsAffineConvexSpace R V A]
