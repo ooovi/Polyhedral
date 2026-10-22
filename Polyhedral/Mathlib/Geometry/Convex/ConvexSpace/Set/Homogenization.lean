@@ -31,7 +31,7 @@ variable [AddTorsor V A]
 
 variable (ℋ : Affine.IsHomogenization R A W)
 
-/-- The homogenization cone of a convex set in an affine space. -/
+/-- The homogenization cone of a set in an affine space. -/
 def homogenize (P : Set A) : PointedCone R W := hull R (ℋ.ofPoint '' P)
 
 lemma homogenize_mono {K₁ K₂ : Set A} (h : K₁ ≤ K₂) :
