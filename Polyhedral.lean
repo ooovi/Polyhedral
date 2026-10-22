@@ -64,6 +64,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.WithTop
 public import Polyhedral.Mathlib.Geometry.Convex.Fun.Defs
 public import Polyhedral.Mathlib.Geometry.Convex.Fun.Dual
+public import Polyhedral.Mathlib.Geometry.Convex.Segment
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Closure
 public import Polyhedral.Mathlib.GroupTheory.GroupAction.SubMulActionWithZero.Nonneg
