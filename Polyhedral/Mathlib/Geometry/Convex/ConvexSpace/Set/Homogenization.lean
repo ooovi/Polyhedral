@@ -8,6 +8,7 @@ module
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
 public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 
 /-! This file defines homogenization of convex sets in affine spaces. -/
 
@@ -248,15 +249,15 @@ lemma homogenize_mono_iff {K₁ K₂ : Set A} (h₁ : IsConvexSet R K₁) (h₂ 
 -- Issue #66
 /-- The lattice of convex sets is isomorphic to the lattice of convex sub-cones of the
 positive cone. -/
-def homogenizeOrderEquiv : {s : Set A // IsConvexSet R s} ≃o Set.Iic ℋ.weight.positive where
-  toFun K := ⟨_, homogenize_le_weight_positive _ K.val⟩
+def homogenizeOrderEquiv : ConvexSet R A ≃o Set.Iic ℋ.weight.positive where
+  toFun K := ⟨_, homogenize_le_weight_positive _ K⟩
   invFun C := ⟨dehomogenize ℋ C.1, dehomogenize_isConvexSet _ _⟩
-  left_inv K := by simp [dehomogenize_homogenize _ K.prop]
+  left_inv K := by simp [← ConvexSet.carrier_eq_coe, dehomogenize_homogenize ℋ K.isConvexSet]
   right_inv C := by dsimp; congr; exact homogenize_dehomogenize_of_le_positive C.2
   map_rel_iff' := by
     refine homogenize_mono_iff _ ?_ ?_
-    · expose_names; exact a.prop
-    · expose_names; exact b.prop
+    · expose_names; exact a.isConvexSet
+    · expose_names; exact b.isConvexSet
 
 end
 
