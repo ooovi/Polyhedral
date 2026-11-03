@@ -38,5 +38,10 @@ lemma filter_mapDomain (v : α →₀ M) (f : α → β) (p : β → Prop) [Deci
   congr! 2 with a
   grind
 
+-- PR #43261
+lemma mapDomain_eq_single_add_mapDomain_erase {v : α →₀ M} (f : α → β) (a : α) :
+    v.mapDomain f = single (f a) (v a) + (v.erase a).mapDomain f := by
+  rw [← mapDomain_single, ← mapDomain_add, single_add_erase]
+
 end MapDomain
 end Finsupp

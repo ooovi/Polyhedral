@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Geometry.Convex.AffineMap.Module
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Order
+public import Polyhedral.Mathlib.Algebra.Order.GroupWithZero.Basic
 
 import Mathlib.Algebra.Module.BigOperators
 import Mathlib.Data.Finset.Sort
@@ -60,6 +61,25 @@ protected theorem IsConvexSet.add_smul {s : Set X}
     grind
 
 end Field
+
+-- PR #43261
+
+section LinearOrder
+variable [Semiring R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup M] [Module R M]
+  [ConvexSpace R M] [IsModuleConvexSpace R M] [Module.IsTorsionFree R M]
+
+/-- A torsion-free module over linearly ordered scalars is a cancellative convex space. -/
+instance IsCancelConvexSpace.of_module : IsCancelConvexSpace R M where
+  eq_of_sConvexComb ha _ _ _ _ _ hw₁ hw₂ h := by
+    rw [sConvexComb_eq_sum, sConvexComb_eq_sum, hw₁, hw₂,
+      Finsupp.sum_add_index' (by simp) fun _ _ _ ↦ add_smul .., Finsupp.sum_single_index (by simp),
+      Finsupp.sum_add_index' (by simp) fun _ _ _ ↦ add_smul .., Finsupp.sum_single_index (by simp)]
+      at h
+    exact (IsRegular.of_pos ha).isSMulRegular (add_right_cancel h)
+
+end LinearOrder
+
+-- end PR #43261
 
 variable {R M N : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
 
