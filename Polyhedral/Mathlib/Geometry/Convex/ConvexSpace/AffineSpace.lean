@@ -7,8 +7,7 @@ module
 
 
 public import Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
-public import Mathlib.Geometry.Convex.ConvexSpace.Module
-public import Mathlib.Geometry.Convex.ConvexSpace.Prod
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
 
 /-!
 # Convex combinations in affine convex spaces
@@ -101,3 +100,53 @@ protected lemma IsConvexSet.vsub {K₁ K₂ : Set P} (hK₁ : IsConvexSet R K₁
   rw [← Set.image_vsub_prod]; exact (hK₁.prod hK₂).image isAffineMap_vsub
 
 end Convexity
+
+-- PR #43261
+
+namespace AddTorsor
+
+open Convexity
+
+variable {R V P I : Type*}
+variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [AddTorsor V P]
+variable [ConvexSpace R P] [IsAffineConvexSpace R V P]
+
+section Module
+variable [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+/-- Subtracting a fixed base point is an affine map from an affine space to its model module. -/
+@[fun_prop]
+lemma isAffineMap_vsub_const (p : P) : IsAffineMap R ((· -ᵥ p) : P → V) where
+  map_sConvexComb s := by
+    have := Finset.map_affineCombination s.weights.support id s.weights s.total
+      (AffineEquiv.vaddConst R p).symm.toAffineMap
+    rw [Finset.affineCombination_eq_linear_combination _ _ _ s.total] at this
+    rw [sConvexComb_map, iConvexComb_eq_sum, sConvexComb_eq_affineCombination]
+    simpa [Finsupp.sum] using this
+
+end Module
+
+attribute [local instance] Convexity.ConvexSpace.ofModule in
+/-- Subtracting a base point from a convex combination in an affine space gives the corresponding
+linear combination in the model module. -/
+lemma sConvexComb_vsub (s : StdSimplex R P) (p : P) :
+    s.sConvexComb -ᵥ p = s.weights.sum fun x r ↦ r • (x -ᵥ p) := by
+  rw [(isAffineMap_vsub_const (V := V) p).map_sConvexComb, sConvexComb_map, iConvexComb_eq_sum]
+
+end AddTorsor
+
+namespace Convexity
+variable {R V P : Type*} [Ring R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V]
+  [Module R V] [AddTorsor V P] [ConvexSpace R P] [IsAffineConvexSpace R V P]
+
+attribute [local instance] ConvexSpace.ofModule in
+/-- An affine space modelled on a torsion-free module over linearly ordered scalars is a
+cancellative convex space. -/
+instance IsCancelConvexSpace.of_addTorsor [Module.IsTorsionFree R V] : IsCancelConvexSpace R P :=
+  .of_injective (AddTorsor.isAffineMap_vsub_const (V := V) (Classical.arbitrary P))
+    fun _ _ ↦ vsub_left_cancel
+
+end Convexity
+
+-- end PR #43261
