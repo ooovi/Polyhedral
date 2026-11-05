@@ -26,13 +26,6 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R M]
 
-variable (R) in
-/-- A point `x` is an extreme point of a set `A` if the only way to write `x` as a binary convex
-combination with positive weights of points of `A` is the trivial one. -/
-def extremePoints (A : Set M) : Set M :=
-  {x ∈ A | ∀ ⦃y⦄, y ∈ A → ∀ ⦃z⦄, z ∈ A → ∀ ⦃a b : R⦄ (ha : 0 < a) (hb : 0 < b) (hab : a + b = 1),
-    convexCombPair a b ha.le hb.le hab y z = x → y = x}
-
 namespace ConvexSet
 
 /- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
