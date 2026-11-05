@@ -5,6 +5,7 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 module
 
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Join
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines faces of convex sets.
@@ -18,42 +19,35 @@ namespace Convexity
 
 open Function
 
-variable {R M M₁ M₂ : Type*}
+variable {R K M M₁ M₂ : Type*}
 
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R M]
 
-/- NOTE: this is a copy of mathlib convexity API adapted to `ConvexSpace`. -/
 variable (R) in
-/-- Open segment in a convex space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
-the base semiring has some element between `0` and `1`. -/
-def openSegment (x y : M) : Set M :=
-  { z : M | ∃ (a b : R) (a0 : 0 < a) (b0 : 0 < b) (ab : a + b = 1),
-    convexCombPair a b a0.le b0.le ab x y = z }
-
-/- (x,y) = (y,x) -/
-theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
-  ext z
-  constructor
-  all_goals (intro h; rcases h with ⟨m, n, hm , hn , hmn , hz⟩; use n, m, hn, hm)
-  all_goals (rw [convexCombPair_symm] at hz; rw [add_comm] at hmn; use hmn)
+/-- A point `x` is an extreme point of a set `A` if the only way to write `x` as a binary convex
+combination with positive weights of points of `A` is the trivial one. -/
+def extremePoints (A : Set M) : Set M :=
+  {x ∈ A | ∀ ⦃y⦄, y ∈ A → ∀ ⦃z⦄, z ∈ A → ∀ ⦃a b : R⦄ (ha : 0 < a) (hb : 0 < b) (hab : a + b = 1),
+    convexCombPair a b ha.le hb.le hab y z = x → y = x}
 
 namespace ConvexSet
 
 /- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
 /-- A subset `F` of a convex set `C` is a face of `C` iff it is an extreme subset. -/
+@[mk_iff]
 structure IsFaceOf (F C : ConvexSet R M) where
   le : F ≤ C
-  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
-    ∀ ⦃z⦄, z ∈ F → z ∈ openSegment R x y → x ∈ F
+  left_mem_of_mem_Ioo : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
+    ∀ ⦃z⦄, z ∈ F → z ∈ Ioo R x y → x ∈ F
 
 namespace IsFaceOf
 
 theorem empty {C : ConvexSet R M} : IsFaceOf ∅ C where
   le := SetLike.empty_le _
-  left_mem_of_mem_openSegment := by simp
+  left_mem_of_mem_Ioo := by simp
 
 /- A convex set is a face of itself. -/
 theorem refl (C : ConvexSet R M) : C.IsFaceOf C :=
@@ -66,7 +60,7 @@ theorem trans {C F₁ F₂ : ConvexSet R M} (h₁ : F₂.IsFaceOf F₁) (h₂ : 
   · apply Set.Subset.trans h₁.1 h₂.1
   · intro x hx y hy z hz hhz
     have hz' : z ∈ F₁.carrier := Set.mem_of_mem_of_subset hz h₁.1
-    exact @h₁.2 x (@h₂.2 x hx y hy z hz' hhz) y (@h₂.2 y hy x hx z hz' (by simpa [openSegment_symm]
+    exact @h₁.2 x (@h₂.2 x hx y hy z hz' hhz) y (@h₂.2 y hy x hx z hz' (by simpa [Ioo_symm]
     using hhz)) z hz hhz
 
 /- For two faces `F₁, F₂` of `C`, `F₁` is a face of `F₂` iff it is a subset of `F₂`. -/
@@ -82,7 +76,7 @@ theorem iff_le_of_isFaceOf {C F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf C
 
 /- A convex set is a face of a face iff it is contained in the face and it is a face
 of the ambient set. -/
-lemma isFaceOf_iff {F C : ConvexSet R M} (F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
+lemma iff_of_isFaceOf {F C : ConvexSet R M} (F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
     F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
   apply Iff.intro
   · exact fun h => ⟨h.1, trans h H⟩
@@ -129,7 +123,7 @@ theorem map {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f)
     rcases hx with ⟨m , hmC, rfl⟩
     rcases hy with ⟨n , hnC, rfl⟩
     rcases hz with ⟨l , hlF, rfl⟩
-    have hl : l ∈ Convexity.openSegment R m n := by
+    have hl : l ∈ Convexity.Ioo R m n := by
       rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
       have h : f (convexCombPair a b ha.le hb.le hab m n) =
       convexCombPair a b ha.le hb.le hab (f m) (f n) := hhf.map_convexCombPair ha.le hb.le hab m n
@@ -145,7 +139,7 @@ theorem comap_face {f : M₁ → M₂} {F C : ConvexSet R M₂} (hf : IsAffineMa
   · apply Set.preimage_mono hF.1
   · have hF1 := hF.2
     intro x hx y hy z hz hhz
-    have hhz' : f z ∈ Convexity.openSegment R (f x) (f y) := by
+    have hhz' : f z ∈ Convexity.Ioo R (f x) (f y) := by
       rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
       have hff : f (convexCombPair a b ha.le hb.le hab x y) =
         convexCombPair a b ha.le hb.le hab (f x) (f y) := hf.map_convexCombPair ha.le hb.le hab x y
@@ -181,5 +175,38 @@ end IsFaceOf
 end ConvexSet
 
 end Semiring
+
+section IsCancelConvexSpace
+
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+
+variable {P : Set M}
+
+variable [ConvexSpace R M] [IsCancelConvexSpace R M]
+
+/-- If a point `x` does not lie in the convex hull of a set `s`, then the singleton of `x` is
+a face of the convex hull of `insert x s`. -/
+lemma IsFaceOf.singleton_convexHull_insert {s : Set M} {x : M} (hx : x ∉ Convexity.convexHull R s) :
+    ConvexSet.IsFaceOf {x} (Convexity.ConvexSet.convexHull R (insert x s)) := by
+  by_cases h : s.Nonempty
+  · constructor
+    · rintro y rfl; exact subset_convexHull_self (Set.mem_insert ..)
+    · simp only [ConvexSet.convexHull, convexHull_insert h, convexJoin_singleton_left, Icc,
+      ConvexSet.mem_mk, Set.mem_iUnion, Set.mem_ofPred_eq, SetLike.mem_singleton_iff,
+      Ioo, forall_exists_index, forall_eq]
+      rintro x₁ i hi a₁ b₁ ha₁ hb₁ hab₁ rfl y j hj a₂ b₂ ha₂ hb₂ hab₂ rfl a b ha hb hab h
+      by_cases hb0 : b₁ = 0
+      · subst hb0; simp at hab₁; simp [hab₁]
+      · exfalso
+        have : (![x, x] : Fin 2 → M) = fun _ => x := by funext k; fin_cases k <;> rfl
+        rw [convexCombPair_convexCombPair_convexCombPair_comm ha.le hb.le hab
+          ha₁ hb₁ hab₁ ha₂ hb₂ hab₂ x x i j, this, iConvexComb_const] at h
+        have hij := (convexCombPair_eq_left _ (by positivity) _).1 h
+        exact hx (hij ▸ IsConvexSet.convexHull.iConvexComb_mem (by simp [hi, hj]))
+  · simp only [ConvexSet.convexHull, Set.not_nonempty_iff_eq_empty.mp h, insert_empty_eq,
+    convexHull_singleton]
+    exact ConvexSet.IsFaceOf.refl {x}
+
+end IsCancelConvexSpace
 
 end Convexity
