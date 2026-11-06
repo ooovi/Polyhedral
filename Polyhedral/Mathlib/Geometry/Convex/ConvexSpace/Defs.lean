@@ -72,6 +72,37 @@ theorem convexCombPair_convexCombPair_convexCombPair_comm {a b a₁ b₁ a₂ b�
     field_simp
   · simp; field_simp; grind
 
+/-- A convex combination of four points x₁...x₄ can be expressed by convex combinations of convex
+combinations of any two of the points. Informally (x₁ ∘ y₁) ∘ (x₂ ∘ y₂) = (x₁ ∘ x₂) ∘ (y₁ ∘ y₂) -/
+-- maybe there is a nicer way to write the hypotheses, like using StdSimplex Fin2?
+-- or using split simplex for the outer pair too?
+theorem convexCombPair_convexCombPair_convexCombPair_comm' {a b a₁ b₁ a₂ b₂ α β γ δ : R}
+    (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a + b = 1)
+    (ha₁ : 0 ≤ a₁) (hb₁ : 0 ≤ b₁) (hab₁ : a₁ + b₁ = 1)
+    (ha₂ : 0 ≤ a₂) (hb₂ : 0 ≤ b₂) (hab₂ : a₂ + b₂ = 1)
+    (hα : 0 ≤ α) (hβ : 0 ≤ β) (hαβ : α + β = 1)
+    (hγ : 0 ≤ γ) (hδ : 0 ≤ δ) (hγδ : γ + δ = 1)
+    (hα' : ((a * a₁) + (b * a₂)) * α = (a * a₁))
+    (hβ' : ((a * a₁) + (b * a₂)) * β = (b * a₂))
+    (hγ' : ((a * b₁) + (b * b₂)) * γ = (a * b₁))
+    (hδ' : ((a * b₁) + (b * b₂)) * δ = (b * b₂))
+    (x₁ x₂ y₁ y₂ : M) :
+    convexCombPair a b ha hb hab
+        (convexCombPair a₁ b₁ ha₁ hb₁ hab₁ x₁ y₁)
+        (convexCombPair a₂ b₂ ha₂ hb₂ hab₂ x₂ y₂) =
+    convexCombPair (a * a₁ + b * a₂) (a * b₁ + b * b₂)
+        (add_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂))
+        (add_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂))
+        (by grind)
+        (convexCombPair α β hα hβ hαβ x₁ x₂)
+        (convexCombPair γ δ hγ hδ hγδ y₁ y₂) := by
+  rw [convexCombPair_def _ _ _ x₁ y₁, convexCombPair_def _ _ _ x₂ y₂,
+    convexCombPair_def _ _ _ x₁ x₂, convexCombPair_def _ _ _ y₁ y₂,
+    convexCombPair_iConvexComb_iConvexComb, convexCombPair_iConvexComb_iConvexComb]
+  congr 1
+  apply StdSimplex.ext
+  simp [hα', hβ', hγ', hδ']; grind
+
 end Pair
 
 section iConvexComb

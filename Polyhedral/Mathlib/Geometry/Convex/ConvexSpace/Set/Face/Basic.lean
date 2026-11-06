@@ -190,12 +190,27 @@ lemma IsFaceOf.singleton_convexHull_insert {s : Set M} {x : M} (hx : x ∉ Conve
       rintro x₁ i hi a₁ b₁ ha₁ hb₁ hab₁ rfl y j hj a₂ b₂ ha₂ hb₂ hab₂ rfl a b ha hb hab h
       by_cases hb0 : b₁ = 0
       · subst hb0; simp at hab₁; simp [hab₁]
-      · exfalso
-        have : (![x, x] : Fin 2 → M) = fun _ => x := by funext k; fin_cases k <;> rfl
-        rw [convexCombPair_convexCombPair_convexCombPair_comm ha.le hb.le hab
-          ha₁ hb₁ hab₁ ha₂ hb₂ hab₂ x x i j, this, iConvexComb_const] at h
-        have hij := (convexCombPair_eq_left _ (by positivity) _).1 h
-        exact hx (hij ▸ IsConvexSet.convexHull.iConvexComb_mem (by simp [hi, hj]))
+      · by_cases hp : (a * a₁ + b * a₂) ≠ 0
+        · exfalso
+          let hα : 0 ≤ (a * a₁) / (a * a₁ + b * a₂) := by positivity
+          let hβ : 0 ≤ (b * a₂) / (a * a₁ + b * a₂) := by positivity
+          let hγ : 0 ≤ (a * b₁) / (a * b₁ + b * b₂) := by positivity
+          let hδ : 0 ≤ (b * b₂) / (a * b₁ + b * b₂) := by positivity
+          have := convexCombPair_convexCombPair_convexCombPair_comm' (M := M) ha.le hb.le hab
+            ha₁ hb₁ hab₁ ha₂ hb₂ hab₂ hα hβ ?_ hγ hδ ?_ ?_ ?_ ?_ ?_
+          · rw [this x x i j, convexCombPair_same] at h
+            have hij := (convexCombPair_eq_left _ (by positivity) _).1 h
+            exact hx (hij ▸ IsConvexSet.convexHull.convexCombPair_mem hi hj ..)
+          all_goals field_simp
+        · push Not at hp
+          obtain ⟨h₁, h₂⟩ := (add_eq_zero_iff_of_nonneg (by positivity) (by positivity)).mp hp
+          have h₁ := (mul_eq_zero.mp h₁).resolve_left ha.ne'
+          have h₂ := (mul_eq_zero.mp h₂).resolve_left hb.ne'
+          simp only [h₁, h₂, zero_add] at hab₁ hab₂
+          simp only [h₁, h₂, hab₁, convexCombPair_zero, hab₂] at h ⊢
+          exfalso
+          rw [← h] at hx
+          exact hx <| IsConvexSet.convexHull.convexCombPair_mem hi hj ..
   · simp only [ConvexSet.convexHull, Set.not_nonempty_iff_eq_empty.mp h, insert_empty_eq,
     convexHull_singleton]
     exact ConvexSet.IsFaceOf.refl {x}
