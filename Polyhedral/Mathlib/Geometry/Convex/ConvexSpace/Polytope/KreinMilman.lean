@@ -20,7 +20,7 @@ homogenization. -/
 
 @[expose] public section
 
-variable {R V A : Type*}
+variable {R A : Type*}
 
 open Convexity ConvexSet
 
@@ -29,14 +29,10 @@ namespace Convexity
 section Field
 
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
-variable [AddCommGroup V] [Module R V]
-variable [AddTorsor V A]
-
-variable [ConvexSpace R A] [IsAffineConvexSpace R V A]
+variable [ConvexSpace R A] [IsCancelConvexSpace R A]
 
 variable {P : ConvexSet R A}
 
-include V in
 /-- Krein-Milman theorem for polytopes: every polytope is the convex hull of its vertices,
 that is, of the finite set of points whose singletons are faces. -/
 theorem IsPolytope.krein_milman (hP : IsPolytope R (P : Set A)) :
