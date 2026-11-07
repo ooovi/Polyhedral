@@ -6,6 +6,10 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Geometry.Convex.ConvexSpace.Defs
+
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.LinearCombination
 public import Polyhedral.Mathlib.Data.Finsupp.Basic
 
 /-!
@@ -19,6 +23,87 @@ public section
 namespace Convexity
 
 attribute [simp] StdSimplex.nonneg
+
+section Pair
+variable {R M I : Type*}
+variable [Semifield R] [LinearOrder R] [IsStrictOrderedRing R] [ConvexSpace R M]
+
+open StdSimplex
+
+/-- The distribution putting weight p/(p + q) on the one and  q/(p + q) on the other element. -/
+@[expose]
+noncomputable def split (p q : R) (hp : 0 ≤ p) (hq : 0 ≤ q) : StdSimplex R (Fin 2) :=
+  if h : p + q = 0 then single 0
+  else duple 0 1 (div_nonneg hp (add_nonneg hp hq)) (div_nonneg hq (add_nonneg hp hq))
+    (by rw [← add_div, div_self h])
+
+/-- A convex combination of four points x₁...x₄ can be expressed by convex combinations of convex
+combinations of any two of the points. Informally (x₁ ∘ y₁) ∘ (x₂ ∘ y₂) = (x₁ ∘ x₂) ∘ (y₁ ∘ y₂) -/
+-- maybe there is a nicer way to write the hypotheses, like using StdSimplex Fin2?
+-- or using split simplex for the outer pair too?
+theorem convexCombPair_convexCombPair_convexCombPair_comm {a b a₁ b₁ a₂ b₂ : R}
+    (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a + b = 1)
+    (ha₁ : 0 ≤ a₁) (hb₁ : 0 ≤ b₁) (hab₁ : a₁ + b₁ = 1)
+    (ha₂ : 0 ≤ a₂) (hb₂ : 0 ≤ b₂) (hab₂ : a₂ + b₂ = 1) (x₁ x₂ y₁ y₂ : M) :
+    convexCombPair a b ha hb hab
+        (convexCombPair a₁ b₁ ha₁ hb₁ hab₁ x₁ y₁)
+        (convexCombPair a₂ b₂ ha₂ hb₂ hab₂ x₂ y₂) =
+    convexCombPair (a * a₁ + b * a₂) (a * b₁ + b * b₂)
+        (add_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂))
+        (add_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂))
+        (by grind)
+        (iConvexComb (split (a * a₁) (b * a₂)
+          (mul_nonneg ha ha₁) (mul_nonneg hb ha₂)) ![x₁, x₂])
+        (iConvexComb (split (a * b₁) (b * b₂)
+          (mul_nonneg ha hb₁) (mul_nonneg hb hb₂)) ![y₁, y₂]) := by
+  rw [convexCombPair_def _ _ _ x₁ y₁, convexCombPair_def _ _ _ x₂ y₂,
+    convexCombPair_iConvexComb_iConvexComb, convexCombPair_iConvexComb_iConvexComb]
+  congr 1
+  apply StdSimplex.ext
+  simp only [split]
+  split_ifs with h₁ h₂ h₁
+  · exfalso
+    have hsum : (a * a₁ + b * a₂) + (a * b₁ + b * b₂) = 1 := by grind
+    rw [h₁, h₂, add_zero] at hsum
+    exact zero_ne_one hsum
+  · simp [(add_eq_zero_iff_of_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂)).mp h₁]
+    field_simp
+  · simp [(add_eq_zero_iff_of_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂)).mp h₁]
+    field_simp
+  · simp; field_simp; grind
+
+/-- A convex combination of four points x₁...x₄ can be expressed by convex combinations of convex
+combinations of any two of the points. Informally (x₁ ∘ y₁) ∘ (x₂ ∘ y₂) = (x₁ ∘ x₂) ∘ (y₁ ∘ y₂) -/
+-- maybe there is a nicer way to write the hypotheses, like using StdSimplex Fin2?
+-- or using split simplex for the outer pair too?
+theorem convexCombPair_convexCombPair_convexCombPair_comm' {a b a₁ b₁ a₂ b₂ α β γ δ : R}
+    (ha : 0 ≤ a) (hb : 0 ≤ b) (hab : a + b = 1)
+    (ha₁ : 0 ≤ a₁) (hb₁ : 0 ≤ b₁) (hab₁ : a₁ + b₁ = 1)
+    (ha₂ : 0 ≤ a₂) (hb₂ : 0 ≤ b₂) (hab₂ : a₂ + b₂ = 1)
+    (hα : 0 ≤ α) (hβ : 0 ≤ β) (hαβ : α + β = 1)
+    (hγ : 0 ≤ γ) (hδ : 0 ≤ δ) (hγδ : γ + δ = 1)
+    (hα' : ((a * a₁) + (b * a₂)) * α = (a * a₁))
+    (hβ' : ((a * a₁) + (b * a₂)) * β = (b * a₂))
+    (hγ' : ((a * b₁) + (b * b₂)) * γ = (a * b₁))
+    (hδ' : ((a * b₁) + (b * b₂)) * δ = (b * b₂))
+    (x₁ x₂ y₁ y₂ : M) :
+    convexCombPair a b ha hb hab
+        (convexCombPair a₁ b₁ ha₁ hb₁ hab₁ x₁ y₁)
+        (convexCombPair a₂ b₂ ha₂ hb₂ hab₂ x₂ y₂) =
+    convexCombPair (a * a₁ + b * a₂) (a * b₁ + b * b₂)
+        (add_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂))
+        (add_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂))
+        (by grind)
+        (convexCombPair α β hα hβ hαβ x₁ x₂)
+        (convexCombPair γ δ hγ hδ hγδ y₁ y₂) := by
+  rw [convexCombPair_def _ _ _ x₁ y₁, convexCombPair_def _ _ _ x₂ y₂,
+    convexCombPair_def _ _ _ x₁ x₂, convexCombPair_def _ _ _ y₁ y₂,
+    convexCombPair_iConvexComb_iConvexComb, convexCombPair_iConvexComb_iConvexComb]
+  congr 1
+  apply StdSimplex.ext
+  simp [hα', hβ', hγ', hδ']; grind
+
+end Pair
 
 section iConvexComb
 variable {R M I : Type*}
