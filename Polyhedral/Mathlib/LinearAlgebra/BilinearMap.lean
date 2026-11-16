@@ -32,14 +32,14 @@ instance [inst : Fact (Injective p)] : Fact p.SeparatingLeft :=
   ⟨SeparatingLeft.of_injective inst.elim⟩
 
 variable [Module.Projective R N] in
-instance : Fact (SeparatingRight (M₁ := N →ₗ[R] R) .id) :=
+instance : Fact (SeparatingRight (M₁ := N →ₗ[R] R) (.id (R := R))) :=
   ⟨fun x hx => by simpa using (forall_dual_apply_eq_zero_iff R x).mp hx⟩
 
 variable [Module.Projective R M] in
 instance : Fact (Dual.eval R M).SeparatingLeft :=
   ⟨by simp [separatingLeft_iff_linear_nontrivial, eval_apply_eq_zero_iff]⟩
 
-instance : Fact (SeparatingLeft (M₁ := N →ₗ[R] R) .id) :=
+instance : Fact (SeparatingLeft (M₁ := N →ₗ[R] R) (.id (R := R))) :=
   ⟨fun x hx => by ext y; exact hx y⟩
 
 instance : Fact (Dual.eval R M).SeparatingRight :=

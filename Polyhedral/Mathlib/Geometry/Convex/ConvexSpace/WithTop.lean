@@ -28,7 +28,7 @@ variable {R X : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 namespace StdSimplex
 
 /-- Turn a distribution on `WithTop X` putting no weight on `⊤` into a distribution on `X`. -/
-@[expose, to_dual (dont_translate := R) (attr := simps)
+@[expose, to_dual (dont_translate := R) (attr := simps!)
 /-- Turn a distribution on `WithBot X` putting no weight on `⊥` into a distribution on `X`. -/]
 def untop (w : StdSimplex R (WithTop X)) (hw : w.weights ⊤ = 0) : StdSimplex R X where
   weights := w.weights.withTopSome

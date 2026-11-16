@@ -152,7 +152,7 @@ lemma dual_inf_dual_sup_dual_of_dualClosed {S T : Submodule R M}
     (hS : S.DualClosed p) (hT : T.DualClosed p) (hST : (dual p S ⊔ dual p T).DualClosed p.flip) :
       dual p (S ⊓ T) = dual p S ⊔ dual p T := by
   nth_rw 1 [← hS, ← hT]
-  simp only [inf_eq_inter, ← coe_inf, ← dual_union, ← dual_sup]
+  simp only [← coe_inf, ← dual_union, ← dual_sup]
   exact hST
 
 /-- For `S` and `T` being dual closed submodules, the statement `(S ⊓ T)* = S* ⊔ T*`

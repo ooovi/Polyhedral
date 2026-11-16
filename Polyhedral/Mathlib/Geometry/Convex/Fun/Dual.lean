@@ -10,6 +10,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.WithTop
 public import Polyhedral.Mathlib.Geometry.Convex.Fun.Defs
 public import Mathlib.LinearAlgebra.BilinearMap
 public import Mathlib.Order.ConditionallyCompleteLattice.Basic
+public import Mathlib.Order.ConditionallyCompleteLattice.WithTop
 
 /-!
 # The dual of a convex function
