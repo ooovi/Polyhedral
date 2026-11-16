@@ -5,7 +5,7 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 module
 
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Join
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines faces of convex sets.
