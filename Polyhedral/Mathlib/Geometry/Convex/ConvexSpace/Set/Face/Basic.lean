@@ -184,9 +184,8 @@ lemma IsFaceOf.singleton_convexHull_insert {s : Set M} {x : M} (hx : x ∉ Conve
   by_cases h : s.Nonempty
   · constructor
     · rintro y rfl; exact subset_convexHull_self (Set.mem_insert ..)
-    · simp only [ConvexSet.convexHull, convexHull_insert h, convexJoin_singleton_left, Icc,
-      ConvexSet.mem_mk, Set.mem_iUnion, Set.mem_ofPred_eq, SetLike.mem_singleton_iff,
-      Ioo, forall_exists_index, forall_eq]
+    · simp only [ConvexSet.convexHull, convexHull_insert h, Icc, ConvexSet.mem_mk, Set.mem_iUnion,
+      Set.mem_ofPred_eq, SetLike.mem_singleton_iff, Ioo, forall_exists_index, forall_eq]
       rintro x₁ i hi a₁ b₁ ha₁ hb₁ hab₁ rfl y j hj a₂ b₂ ha₂ hb₂ hab₂ rfl a b ha hb hab h
       by_cases hb0 : b₁ = 0
       · subst hb0; simp at hab₁; simp [hab₁]
