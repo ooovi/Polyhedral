@@ -8,6 +8,8 @@ module
 public import Mathlib.RingTheory.LocalRing.Basic
 
 import Mathlib.Algebra.Algebra.Basic
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.LinearCombination
 
 /-!
 This file contains results about linear maps.
@@ -51,12 +53,14 @@ lemma exists_smul_of_ker_le_ker {p q : M →ₗ[R] R} (h : p.ker ≤ q.ker) :
     ∃ a : R, q = a • p := by
   by_cases hp : p = 0
   · simpa [hp] using h
-  · simp only [LinearMap.ext_iff, not_forall] at hp
+  · simp only [LinearMap.ext_iff, LinearMap.zero_apply, not_forall] at hp
     obtain ⟨x, hx⟩ := hp
     refine ⟨q x / p x, LinearMap.ext fun y ↦ ?_⟩
-    rw [smul_apply, smul_eq_mul, div_mul_eq_mul_div, eq_div_iff hx]
     have hxy := h (show p x • y - p y • x ∈ p.ker by simp [mul_comm])
-    simpa [sub_eq_zero, mul_comm] using hxy
+    rw [LinearMap.mem_ker, map_sub, map_smul, map_smul, smul_eq_mul, smul_eq_mul] at hxy
+    rw [LinearMap.smul_apply, smul_eq_mul]
+    field_simp
+    linear_combination hxy
 
 lemma ker_le_ker {p q : M →ₗ[R] R} (hq : q ≠ 0) :
     p.ker ≤ q.ker ↔ p.ker = q.ker where

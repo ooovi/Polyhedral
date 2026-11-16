@@ -128,7 +128,6 @@ lemma DualClosed.neg {C : PointedCone R M} (hC : C.DualClosed p) : (-C).DualClos
 lemma dual_inf_dual_sup_dual_of_dualClosed (C D : PointedCone R M)
     (hC : C.DualClosed p) (hD : D.DualClosed p) (hCD : (dual p C ⊔ dual p D).DualClosed p.flip) :
       dual p (C ⊓ D) = dual p C ⊔ dual p D := by
-  change dual p (C ∩ D) = _ -- don't we have a theorem for this?
   nth_rw 1 [← hC, ← hD, ← Submodule.coe_inf, ← dual_sup_dual_inf_dual]
   exact hCD
 

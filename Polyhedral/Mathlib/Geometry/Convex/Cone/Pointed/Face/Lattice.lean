@@ -48,7 +48,9 @@ variable {C : PointedCone R M} {F F₁ F₂ : Face C}
 @[simp, norm_cast]
 theorem toPointedCone_eq_iff {F₁ F₂ : Face C} :
     F₁.toPointedCone = F₂.toPointedCone ↔ F₁ = F₂ := by
-  constructor <;> intro h <;> try rw [mk.injEq] at *; exact h
+  constructor <;> intro h
+  · rwa [mk.injEq]
+  · rw [h]
 
 @[simp]
 theorem coe_toPointedCone {F : Face C} :

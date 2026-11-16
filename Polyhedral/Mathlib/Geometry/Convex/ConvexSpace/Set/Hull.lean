@@ -3,7 +3,7 @@ module
 public import Polyhedral.Mathlib.Geometry.Convex.AffineMap.Module
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.AffineSpace
 public import Polyhedral.Mathlib.Geometry.Convex.Hull
-public import Polyhedral.Mathlib.Geometry.Convex.Segment
+public import Mathlib.Geometry.Convex.Segment
 
 public section
 
@@ -12,9 +12,35 @@ open scoped Pointwise
 
 namespace Convexity
 
-section Ring
-
 variable {R V A : Type*}
+
+section AddCommMonoid
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommMonoid V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+@[simp]
+theorem span_convexHull (s : Set V) :
+    Submodule.span R (convexHull R s : Set V) = Submodule.span R s := by
+  ext x
+  grind [Submodule.mem_span, mem_convexHull_iff, isConvexSet_coe]
+
+end AddCommMonoid
+
+section AddCommGroup
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+@[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by
+  ext x
+  simp only [mem_neg, mem_convexHull_iff]
+  constructor <;> intro h t hst hcvx
+  · exact neg_mem_neg.mp <| h (-t) (neg_subset.mp hst) hcvx.neg
+  · exact mem_neg.mp <| h (-t) (neg_subset_neg.mpr hst) hcvx.neg
+
+end AddCommGroup
+
+section Ring
 variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
@@ -32,19 +58,6 @@ theorem vectorSpan_convexHull (s : Set A) :
   rw [← direction_affineSpan, affineSpan_convexHull, direction_affineSpan]
 
 variable [ConvexSpace R V] [IsModuleConvexSpace R V]
-
-@[simp]
-theorem span_convexHull (s : Set V) :
-    Submodule.span R (convexHull R s : Set V) = Submodule.span R s := by
-  ext x
-  grind [Submodule.mem_span, mem_convexHull_iff, isConvexSet_coe]
-
-@[simp] lemma convexHull_neg (s : Set V) : -convexHull R s = convexHull R (-s) := by
-  ext x
-  simp only [mem_neg, mem_convexHull_iff]
-  constructor <;> intro h t hst hcvx
-  · exact neg_mem_neg.mp <| h (-t) (neg_subset.mp hst) hcvx.neg
-  · exact mem_neg.mp <| h (-t) (neg_subset_neg.mpr hst) hcvx.neg
 
 /-- The convex hull of a Minkowski sum is the Minkowski sum of the convex hulls, since
 translation is an affine map on the product convex space (`isAffineMap_vadd`). -/
@@ -74,7 +87,7 @@ protected theorem IsConvexSet.convexHull_union (hs : IsConvexSet 𝕜 s) (ht : I
     exact ⟨_, hs.iConvexComb_mem (by simp [hx₁, hx₂]), _, ht.iConvexComb_mem (by simp [hy₁, hy₂]),
       convexCombPair_mem_Icc (by positivity) (by positivity) (by grind)⟩
   · refine iUnion₂_subset fun x hx => iUnion₂_subset fun y hy => Convexity.Icc_subset_iff.mpr ?_
-    refine (IsConvexSet.convexHull.convexCombPair_mem ?_ ?_)
+    refine fun _ _ ↦ (IsConvexSet.convexHull.convexCombPair_mem ?_ ?_)
     · exact (subset_union_left.trans <| subset_convexHull_self ..) hx
     · exact (subset_union_right.trans <| subset_convexHull_self ..) hy
 

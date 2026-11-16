@@ -183,8 +183,7 @@ lemma monotone_map {w : StdSimplex R I} : Monotone (w.map : (I → X) → StdSim
   rw [upperMass_map, upperMass_map, sum_filter_index, sum_filter_index, support_filter,
     support_filter]
   gcongr
-  · simp
-  · exact hfg _
+  exact hfg x
 
 @[gcongr, to_dual self]
 lemma map_le_map {w : StdSimplex R I} {f g : I → X} (hfg : f ≤ g) : w.map f ≤ w.map g :=
