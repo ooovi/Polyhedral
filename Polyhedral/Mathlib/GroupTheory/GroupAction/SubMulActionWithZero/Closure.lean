@@ -311,7 +311,7 @@ lemma smulSet_smulSet_inter (s t : Set M) :
 
 lemma smulSet_inter_smulSet (s t : Set M) :
     R ∙ (s ∩ (R ∙ t)) = R ∙ s ⊓ R ∙ t := by
-  rw [Set.inter_comm, inf_comm, smulSet_smulSet_inter]
+  rw [Set.inter_comm, smulSet_smulSet_inter, inf_comm]
 
 lemma smulSet_inter_left (s : SubMulAction₀ R M) (t : Set M) :
     R ∙ (s ∩ t) = s ⊓ R ∙ t := by
@@ -320,7 +320,7 @@ lemma smulSet_inter_left (s : SubMulAction₀ R M) (t : Set M) :
 
 lemma smulSet_inter_right (s : Set M) (t : SubMulAction₀ R M) :
     R ∙ (s ∩ t) = R ∙ s ⊓ t := by
-  rw [Set.inter_comm, inf_comm, smulSet_inter_left]
+  rw [Set.inter_comm, smulSet_inter_left, inf_comm]
 
 end GroupWithZero
 

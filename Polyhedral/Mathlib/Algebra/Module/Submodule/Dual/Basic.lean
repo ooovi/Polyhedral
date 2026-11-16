@@ -172,8 +172,8 @@ lemma dual_span (s : Set M) : dual p (span R s) = dual p s := by
   induction hy using Submodule.span_induction with
   | mem _y h => exact hx h
   | zero => simp
-  | add y z _hy _hz hy hz => rw [map_add, add_apply, ← hy, ← hz, add_zero]
-  | smul t y _hy hy => simp only [map_smul, smul_apply, smul_eq_mul, ← hy, mul_zero]
+  | add y z _hy _hz hy hz => rw [map_add, LinearMap.add_apply, ← hy, ← hz, add_zero]
+  | smul t y _hy hy => simp only [map_smul, LinearMap.smul_apply, smul_eq_mul, ← hy, mul_zero]
 
 /-- Conversion to the standard algebraic duality operator. -/
 lemma dual_id (s : Set M) : dual p s = dual .id (p '' s) := by ext; simp

@@ -38,14 +38,14 @@ theorem exists_sConvexComb_preimage_of_mem_hull {x} {s : Set W} (hs : s ⊆ Set.
   obtain ⟨c, ha, hb, hc⟩ := mem_hull_set.mp hx
   -- use the same weights, just un-embed the domain
   use StdSimplex.mk (c.comapDomain ℋ.ofPoint ℋ.ofPoint_injective.injOn) ?_ ?_
-  constructor
-  · -- the convex combo yields x
-    apply ℋ.ofPoint_injective
-    rw [ℋ.ofPoint.isAffineMap.map_sConvexComb, sConvexComb_eq_sum,
-      StdSimplex.weights_map, ← hc, Finsupp.mapDomain_comapDomain _ ℋ.ofPoint_injective]
-    exact ha.trans hs
-  · -- the weights are a subset of the preimage of s
-    simpa using (Set.preimage_mono ha)
+  · constructor
+    · -- the convex combo yields x
+      apply ℋ.ofPoint_injective
+      rw [ℋ.ofPoint.isAffineMap.map_sConvexComb, sConvexComb_eq_sum,
+        StdSimplex.weights_map, ← hc, Finsupp.mapDomain_comapDomain _ ℋ.ofPoint_injective]
+      exact ha.trans hs
+    · -- the weights are a subset of the preimage of s
+      simpa using (Set.preimage_mono ha)
   · -- they're always nonneg
     intro y
     simpa using hb (ℋ.ofPoint y)
