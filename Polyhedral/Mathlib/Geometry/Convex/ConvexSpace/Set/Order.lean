@@ -1,6 +1,10 @@
-import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
-import Mathlib.Geometry.Convex.Hull
-import Mathlib.Tactic.Ring
+module
+
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Module
+public import Mathlib.Geometry.Convex.Hull
+public import Mathlib.Tactic.Ring
+
+public section
 
 namespace Convexity
 
