@@ -7,6 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Mathlib.Geometry.Convex.Segment
 
 /-! This file defines faces of convex sets.
 
