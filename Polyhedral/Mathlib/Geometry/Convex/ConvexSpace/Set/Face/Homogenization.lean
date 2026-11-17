@@ -33,10 +33,10 @@ variable (ℋ : Affine.IsHomogenization R A W)
 variable {ℋ} in
 /-- If the homogenization of a point `q` is a positive combination of the homogenization
 of two other points, then `q` lies in the open segment between them. -/
-theorem pos_combo_openSegment {r₁ r₂ t : R} {p₁ p₂ q : A}
+theorem pos_combo_Ioo {r₁ r₂ t : R} {p₁ p₂ q : A}
     (h₁ : 0 < r₁) (h₂ : 0 < r₂) (hₜ : 0 < t)
     (h : r₁ • ℋ.ofPoint p₁ + r₂ • ℋ.ofPoint p₂ = t • ℋ.ofPoint q) :
-      q ∈ Convexity.openSegment R p₁ p₂ := by
+      q ∈ Convexity.Ioo R p₁ p₂ := by
   have : r₁ + r₂ = t := by simpa [ℋ.weight_ofPoint, map_add, map_smul] using congr_arg ℋ.weight h
   have : t⁻¹ • r₁ + t⁻¹ • r₂ = 1 := by
       simp_rw [← smul_add, smul_eq_mul, this, mul_comm, Field.mul_inv_cancel _ hₜ.ne.symm]
@@ -76,10 +76,10 @@ theorem homogenize_isFaceOf {F P : ConvexSet R A} (he : F.IsFaceOf P) :
             exact (smul_ne_zero rw0.ne.symm (ℋ.ofPoint_ne_zero q')) <|
               hhom _ hw _ (PointedCone.smul_mem _ ha.le hv) (by simpa [add_comm] using hc)
           obtain ⟨_, rvw0, _, ⟨_, qqp, rfl⟩, pdp⟩ := smul_pos_of_mem_homogenize hvw this
-          have := he.left_mem_of_mem_openSegment pp qq qqp ?_
+          have := he.left_mem_of_mem_Ioo pp qq qqp ?_
           · refine ⟨rv, rv0.le, smul_mem_smul_set <| mem_image_of_mem ℋ.ofPoint this⟩
           rw [← smul_assoc _ rv] at pdp
-          exact pos_combo_openSegment (smul_pos ha rv0) rw0 rvw0 pdp.symm
+          exact pos_combo_Ioo (smul_pos ha rv0) rw0 rvw0 pdp.symm
     · have := not_nonempty_iff_eq_empty.mp hnf
       simp_all only [homogenize, SetLike.coe, image_empty, span_empty, mem_bot]
       by_contra hxx
@@ -95,7 +95,7 @@ of `C`. -/
 theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     (ConvexSet.dehomogenize ℋ F).IsFaceOf (ConvexSet.dehomogenize ℋ C) where
   le := preimage_mono (fun _ x ↦ hf.le x)
-  left_mem_of_mem_openSegment  := by
+  left_mem_of_mem_Ioo  := by
     rintro x hx y hy z hz ⟨a, b, ha, hb, hab, hzo⟩
     refine hf.mem_of_smul_add_mem hx (C.smul_mem hb.le hy) ha ?_
     rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,

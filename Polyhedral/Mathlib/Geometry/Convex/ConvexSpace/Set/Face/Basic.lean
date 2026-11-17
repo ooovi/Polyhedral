@@ -6,6 +6,7 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Mathlib.Geometry.Convex.Segment
 
 /-! This file defines faces of convex sets.
 
@@ -25,35 +26,20 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R M]
 
-/- NOTE: this is a copy of mathlib convexity API adapted to `ConvexSpace`. -/
-variable (R) in
-/-- Open segment in a convex space. Note that `openSegment 𝕜 x x = {x}` instead of being `∅` when
-the base semiring has some element between `0` and `1`. -/
-def openSegment (x y : M) : Set M :=
-  { z : M | ∃ (a b : R) (a0 : 0 < a) (b0 : 0 < b) (ab : a + b = 1),
-    convexCombPair a b a0.le b0.le ab x y = z }
-
-/- (x,y) = (y,x) -/
-theorem openSegment_symm (x y : M) : openSegment R x y = openSegment R y x := by
-  ext z
-  constructor
-  all_goals (intro h; rcases h with ⟨m, n, hm , hn , hmn , hz⟩; use n, m, hn, hm)
-  all_goals (rw [convexCombPair_symm] at hz; rw [add_comm] at hmn; use hmn)
-
 namespace ConvexSet
 
 /- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
 /-- A subset `F` of a convex set `C` is a face of `C` iff it is an extreme subset. -/
 structure IsFaceOf (F C : ConvexSet R M) where
   le : F ≤ C
-  left_mem_of_mem_openSegment : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
-    ∀ ⦃z⦄, z ∈ F → z ∈ openSegment R x y → x ∈ F
+  left_mem_of_mem_Ioo : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
+    ∀ ⦃z⦄, z ∈ F → z ∈ Ioo R x y → x ∈ F
 
 namespace IsFaceOf
 
 theorem empty {C : ConvexSet R M} : IsFaceOf ∅ C where
   le := SetLike.empty_le _
-  left_mem_of_mem_openSegment := by simp
+  left_mem_of_mem_Ioo := by simp
 
 /- A convex set is a face of itself. -/
 theorem refl (C : ConvexSet R M) : C.IsFaceOf C :=
@@ -66,7 +52,7 @@ theorem trans {C F₁ F₂ : ConvexSet R M} (h₁ : F₂.IsFaceOf F₁) (h₂ : 
   · apply Set.Subset.trans h₁.1 h₂.1
   · intro x hx y hy z hz hhz
     have hz' : z ∈ F₁.carrier := Set.mem_of_mem_of_subset hz h₁.1
-    exact @h₁.2 x (@h₂.2 x hx y hy z hz' hhz) y (@h₂.2 y hy x hx z hz' (by simpa [openSegment_symm]
+    exact @h₁.2 x (@h₂.2 x hx y hy z hz' hhz) y (@h₂.2 y hy x hx z hz' (by simpa [Ioo_symm]
     using hhz)) z hz hhz
 
 /- For two faces `F₁, F₂` of `C`, `F₁` is a face of `F₂` iff it is a subset of `F₂`. -/
@@ -129,7 +115,7 @@ theorem map {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f)
     rcases hx with ⟨m , hmC, rfl⟩
     rcases hy with ⟨n , hnC, rfl⟩
     rcases hz with ⟨l , hlF, rfl⟩
-    have hl : l ∈ Convexity.openSegment R m n := by
+    have hl : l ∈ Convexity.Ioo R m n := by
       rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
       have h : f (convexCombPair a b ha.le hb.le hab m n) =
       convexCombPair a b ha.le hb.le hab (f m) (f n) := hhf.map_convexCombPair ha.le hb.le hab m n
@@ -145,7 +131,7 @@ theorem comap_face {f : M₁ → M₂} {F C : ConvexSet R M₂} (hf : IsAffineMa
   · apply Set.preimage_mono hF.1
   · have hF1 := hF.2
     intro x hx y hy z hz hhz
-    have hhz' : f z ∈ Convexity.openSegment R (f x) (f y) := by
+    have hhz' : f z ∈ Convexity.Ioo R (f x) (f y) := by
       rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩
       have hff : f (convexCombPair a b ha.le hb.le hab x y) =
         convexCombPair a b ha.le hb.le hab (f x) (f y) := hf.map_convexCombPair ha.le hb.le hab x y

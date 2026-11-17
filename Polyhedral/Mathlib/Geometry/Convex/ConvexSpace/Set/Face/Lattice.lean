@@ -103,10 +103,10 @@ instance : Min (Face P) where
 protected theorem IsFaceOf.sInf (F : Set (ConvexSet R M)) (h : ∀ f ∈ F, f.IsFaceOf P) :
     (P ⊓ sInf F).IsFaceOf P where
   le _ sm := sm.1
-  left_mem_of_mem_openSegment := by
+  left_mem_of_mem_Ioo := by
     simp only [SetLike.mem_min, SetLike.mem_sInf, and_imp]
     intro x hx y hy z hz h₁ h₂
-    simpa [hx] using fun F Fs ↦ (h F Fs).left_mem_of_mem_openSegment hx hy (by grind) h₂
+    simpa [hx] using fun F Fs ↦ (h F Fs).left_mem_of_mem_Ioo hx hy (by grind) h₂
 
 instance : InfSet (Face P) where
   sInf S :=
