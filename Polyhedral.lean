@@ -13,6 +13,7 @@ public import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
+public import Polyhedral.Mathlib.Algebra.Order.GroupWithZero.Basic
 public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 public import Polyhedral.Mathlib.Data.Finsupp.Basic
 public import Polyhedral.Mathlib.Data.Finsupp.Option
@@ -55,6 +56,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Face
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Grounded
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.KreinMilman
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
