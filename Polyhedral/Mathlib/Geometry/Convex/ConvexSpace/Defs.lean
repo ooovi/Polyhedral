@@ -6,6 +6,7 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Geometry.Convex.ConvexSpace.Defs
+public import Polyhedral.Mathlib.Data.Finsupp.Basic
 
 public import Mathlib.Tactic.FieldSimp
 public import Mathlib.Tactic.Positivity
