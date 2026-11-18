@@ -13,6 +13,7 @@ public import Polyhedral.Mathlib.Algebra.Module.Submodule.Hyperplane
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Map
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Restrict
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.SubMulActionWithZero
+public import Polyhedral.Mathlib.Algebra.Order.GroupWithZero.Basic
 public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Ring
 public import Polyhedral.Mathlib.Data.Finsupp.Basic
 public import Polyhedral.Mathlib.Data.Finsupp.Option
