@@ -32,19 +32,42 @@ section Pointwise
 
 open Pointwise
 
-section Semiring
+section AddCommMonoid
 
-variable [Ring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [AddCommMonoid V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
+
+/-- The Minkowski sum of two polytopes is a polytope. -/
+protected lemma add {P₁ : Set V} {P₂ : Set V}
+    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ + P₂) := by
+  rw [← Set.add_image_prod]
+  exact (hP₁.prod hP₂).image isAffineMap_add
+
+/-- Scaling preserves polytopes. -/
+protected lemma smul [SMulCommClass R R V] (r : R) {K : Set V} (hK : IsPolytope R K) :
+    IsPolytope R (r • K) := by
+  rw [← Set.image_smul]
+  exact hK.image (isAffineMap_smul r)
+
+end AddCommMonoid
+
+section AddCommGroup
+
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [ConvexSpace R V] [IsModuleConvexSpace R V]
 
-variable {P P₁ P₂ : Set V}
-
-protected lemma neg (hP : IsPolytope R P) : IsPolytope R (-P) := by classical
+protected lemma neg {P : Set V} (hP : IsPolytope R P) : IsPolytope R (-P) := by classical
   obtain ⟨s, rfl⟩ := hP
   use -s
   simp only [convexHull_neg, Finset.coe_neg]
 
-end Semiring
+/-- The Minkowski difference of two polytopes is a polytope. -/
+protected lemma sub {P₁ : Set V} {P₂ : Set V}
+    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ - P₂) := by
+  rw [sub_eq_add_neg]
+  exact hP₁.add hP₂.neg
+
+end AddCommGroup
 
 section Ring
 
@@ -62,23 +85,6 @@ protected lemma vadd {P₁ : Set V} {P₂ : Set A} (hP₁ : IsPolytope R P₁) (
 /-- Translation preserves polytopes. -/
 lemma translate (t : V) {K : Set A} (hK : IsPolytope R K) : IsPolytope R (t +ᵥ K) := by
   exact hK.image (by fun_prop)
-
-/-- The Minkowski sum of two polytopes is a polytope. -/
-protected lemma add {P₁ : Set V} {P₂ : Set V}
-    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ + P₂) := by
-  exact hP₁.vadd hP₂
-
-/-- The Minkowski difference of two polytopes is a polytope. -/
-protected lemma sub {P₁ : Set V} {P₂ : Set V}
-    (hP₁ : IsPolytope R P₁) (hP₂ : IsPolytope R P₂) : IsPolytope R (P₁ - P₂) := by
-  rw [sub_eq_add_neg]
-  exact hP₁.add hP₂.neg
-
-/-- Scaling preserves polytopes. -/
-protected lemma smul [SMulCommClass R R V] (r : R) {K : Set V} (hK : IsPolytope R K) :
-    IsPolytope R (r • K) := by
-  rw [← Set.image_smul]
-  exact hK.image (isAffineMap_smul r)
 
 end Ring
 

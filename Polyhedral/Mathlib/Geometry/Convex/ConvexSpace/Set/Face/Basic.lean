@@ -5,9 +5,8 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 module
 
-public import Mathlib.Analysis.Convex.Extreme
-public import Polyhedral.Mathlib.Geometry.Convex.Segment
-public import Mathlib.Geometry.Convex.Set
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+public import Mathlib.Geometry.Convex.Segment
 
 /-!
 # Faces of sets
@@ -199,8 +198,9 @@ protected theorem fst {C₁ : Set M} {C₂ : Set N} {F : Set (M × N)}
     refine ⟨ha, hF.left_mem_of_mem_Ioo (x := (x, ha)) (y := (y, ha)) (z := (a, ha)) ?_ ?_ z ?_⟩
     · exact Set.mem_prod.mp ⟨hx, (hF.le z).2⟩
     · exact Set.mem_prod.mp ⟨hy, (hF.le z).2⟩
-    · rw [← Prod.image_mk_Ioo_left R x y ha]
-      simpa
+    · have := (IsAffineMap.prodMk (.id (R := R)) (.const ha)).image_Ioo x y
+      simp only [id_eq] at this
+      simpa [← this]
 
 /-- The projection of a face of a product set onto the second component is a face of the
 projection of the product set onto the second component. -/

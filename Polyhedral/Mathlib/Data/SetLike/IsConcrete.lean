@@ -134,7 +134,7 @@ theorem le_eq_empty {a b : A} (h : b ≤ a) (e : a = ∅) : b = ∅ := by
   rw [← coe_set_eq] at ⊢ e
   rw [← coe_subset_coe] at h
   rw [coe_empty] at ⊢ e
-  exact Set.subset_eq_empty h e
+  exact Set.eq_empty_of_subset h e
 
 end LE
 

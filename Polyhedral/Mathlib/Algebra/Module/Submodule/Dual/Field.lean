@@ -276,7 +276,6 @@ variable [Fact p.SeparatingLeft] in
 /-- This states `(S ⊓ T)* = S* ⊔ T*` for `S` and `T` being FG. -/
 lemma FG.dual_inf_dual_sup_dual (hS : S.FG) (hT : T.FG) :
     dual p (S ∩ T) = dual p S ⊔ dual p T := by
-  simp only [← Set.inf_eq_inter]
   rw [← dual_inf_eq_sup_dual_iff_dualClosed (hS.dualClosed p) (hT.dualClosed p)]
   refine DualFG.dualClosed <| DualFG.sup (hS.dual_dualfg p) _
 
@@ -287,7 +286,7 @@ lemma FG.dual_inf_dual_dualClosed_sup_dual (hS : S.FG) (hT : T.DualClosed p) :
   rw [sup_comm, ← sup_inf_assoc_of_le S hT.ker_le, sup_comm]
   have hclosed : (dual p (S ⊔ ker p : Submodule R M) ⊔ dual p T).DualClosed p.flip := by
     simpa only [dual_sup, dual_union_ker] using ((hS.dual_dualfg p).sup (dual p T)).dualClosed_flip
-  simpa only [coe_inf, Set.inf_eq_inter, dual_sup, dual_union_ker] using
+  simpa only [coe_inf, dual_sup, dual_union_ker] using
     dual_inf_dual_sup_dual_of_dualClosed (hS.sup_ker_dualClosed p) hT hclosed
 
 alias DualClosed.dual_f_inf_dual_sup_dual := FG.dual_inf_dual_dualClosed_sup_dual
