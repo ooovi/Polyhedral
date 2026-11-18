@@ -178,8 +178,7 @@ variable {P : Set M}
 
 variable [ConvexSpace R M] [IsCancelConvexSpace R M]
 
-/-- If a point `x` does not lie in the convex hull of a set `s`, then the singleton of `x` is
-a face of the convex hull of `insert x s`. -/
+/-- If a point `x` does not lie in the convex hull of a set `s`, then `{x}` is a face of the convex hull of `s` and `{x}`. -/
 lemma IsFaceOf.singleton_convexHull_insert {s : Set M} {x : M} (hx : x ∉ Convexity.convexHull R s) :
     ConvexSet.IsFaceOf {x} (Convexity.ConvexSet.convexHull R (insert x s)) := by
   by_cases h : s.Nonempty
