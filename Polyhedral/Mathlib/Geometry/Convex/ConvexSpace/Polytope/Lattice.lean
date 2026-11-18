@@ -5,8 +5,11 @@ Authors: Martin Winter, Olivia Röhrig
 -/
 module
 
-public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Pointwise
+public import Polyhedral.Mathlib.Data.SetLike.IsConcrete
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Basic
+public import Polyhedral.Mathlib.Algebra.Group.Pointwise.SetLike.Scalar
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines polytopes as bundles objects. -/
 
@@ -162,7 +165,7 @@ instance : Neg (Polytope R X) where
 
 instance : IsConcreteNeg (Polytope R X) X := ⟨fun _ => rfl⟩
 
-instance : InvolutiveNeg (ConvexSet R X) := .ofSetLike ..
+instance : InvolutiveNeg (Polytope R X) := .ofSetLike ..
 
 /-! ### Minkowski addition -/
 
