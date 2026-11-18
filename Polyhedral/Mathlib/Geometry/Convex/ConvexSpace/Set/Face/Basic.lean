@@ -5,6 +5,7 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 -/
 module
 
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Mathlib.Geometry.Convex.Segment
 
@@ -19,7 +20,7 @@ namespace Convexity
 
 open Function
 
-variable {R M M₁ M₂ : Type*}
+variable {R K M M₁ M₂ : Type*}
 
 section Semiring
 
@@ -30,6 +31,7 @@ namespace ConvexSet
 
 /- NOTE: maybe this should be defined on `Set` instead of `ConvexSet`. -/
 /-- A subset `F` of a convex set `C` is a face of `C` iff it is an extreme subset. -/
+@[mk_iff]
 structure IsFaceOf (F C : ConvexSet R M) where
   le : F ≤ C
   left_mem_of_mem_Ioo : ∀ ⦃x⦄, x ∈ C → ∀ ⦃y⦄, y ∈ C →
@@ -68,7 +70,7 @@ theorem iff_le_of_isFaceOf {C F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf C
 
 /- A convex set is a face of a face iff it is contained in the face and it is a face
 of the ambient set. -/
-lemma isFaceOf_iff {F C : ConvexSet R M} (F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
+lemma iff_of_isFaceOf {F C : ConvexSet R M} (F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
     F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
   apply Iff.intro
   · exact fun h => ⟨h.1, trans h H⟩
@@ -167,5 +169,52 @@ end IsFaceOf
 end ConvexSet
 
 end Semiring
+
+section IsCancelConvexSpace
+
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+
+variable {P : Set M}
+
+variable [ConvexSpace R M] [IsCancelConvexSpace R M]
+
+/-- If a point `x` does not lie in the convex hull of a set `s`, then `{x}` is a face of the convex
+hull of `s` and `{x}`. -/
+lemma IsFaceOf.singleton_convexHull_insert {s : Set M} {x : M} (hx : x ∉ Convexity.convexHull R s) :
+    ConvexSet.IsFaceOf {x} (Convexity.ConvexSet.convexHull R (insert x s)) := by
+  by_cases h : s.Nonempty
+  · constructor
+    · rintro y rfl; exact subset_convexHull_self (Set.mem_insert ..)
+    · simp only [ConvexSet.convexHull, convexHull_insert h, Icc, ConvexSet.mem_mk, Set.mem_iUnion,
+      Set.mem_ofPred_eq, SetLike.mem_singleton_iff, Ioo, forall_exists_index, forall_eq]
+      rintro x₁ i hi a₁ b₁ ha₁ hb₁ hab₁ rfl y j hj a₂ b₂ ha₂ hb₂ hab₂ rfl a b ha hb hab h
+      by_cases hb0 : b₁ = 0
+      · subst hb0; simp at hab₁; simp [hab₁]
+      · by_cases hp : (a * a₁ + b * a₂) ≠ 0
+        · exfalso
+          let hα : 0 ≤ (a * a₁) / (a * a₁ + b * a₂) := by positivity
+          let hβ : 0 ≤ (b * a₂) / (a * a₁ + b * a₂) := by positivity
+          let hγ : 0 ≤ (a * b₁) / (a * b₁ + b * b₂) := by positivity
+          let hδ : 0 ≤ (b * b₂) / (a * b₁ + b * b₂) := by positivity
+          have := convexCombPair_convexCombPair_convexCombPair_comm' (M := M) ha.le hb.le hab
+            ha₁ hb₁ hab₁ ha₂ hb₂ hab₂ hα hβ ?_ hγ hδ ?_ ?_ ?_ ?_ ?_
+          · rw [this x x i j, convexCombPair_same] at h
+            have hij := (convexCombPair_eq_left _ (by positivity) _).1 h
+            exact hx (hij ▸ IsConvexSet.convexHull.convexCombPair_mem hi hj ..)
+          all_goals field_simp
+        · push Not at hp
+          obtain ⟨h₁, h₂⟩ := (add_eq_zero_iff_of_nonneg (by positivity) (by positivity)).mp hp
+          have h₁ := (mul_eq_zero.mp h₁).resolve_left ha.ne'
+          have h₂ := (mul_eq_zero.mp h₂).resolve_left hb.ne'
+          simp only [h₁, h₂, zero_add] at hab₁ hab₂
+          simp only [h₁, h₂, hab₁, convexCombPair_zero, hab₂] at h ⊢
+          exfalso
+          rw [← h] at hx
+          exact hx <| IsConvexSet.convexHull.convexCombPair_mem hi hj ..
+  · simp only [ConvexSet.convexHull, Set.not_nonempty_iff_eq_empty.mp h, insert_empty_eq,
+    convexHull_singleton]
+    exact ConvexSet.IsFaceOf.refl {x}
+
+end IsCancelConvexSpace
 
 end Convexity
