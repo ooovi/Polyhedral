@@ -91,15 +91,15 @@ protected theorem IsConvexSet.convexHull_union (hs : IsConvexSet 𝕜 s) (ht : I
     · exact (subset_union_left.trans <| subset_convexHull_self ..) hx
     · exact (subset_union_right.trans <| subset_convexHull_self ..) hy
 
-theorem convexHull_union (hs : s.Nonempty) (ht : t.Nonempty) :
+theorem convexHull_union (hs₀ : s.Nonempty) (ht₀ : t.Nonempty) :
     convexHull 𝕜 (s ∪ t) = ⋃ (x ∈ convexHull 𝕜 s) (y ∈ convexHull 𝕜 t), Icc 𝕜 x y := by
   rw [← convexHull_convexHull_union, ← convexHull_union_convexHull]
-  apply IsConvexSet.convexHull.convexHull_union .convexHull (convexHull_nonempty.mpr hs)
-  exact (convexHull_nonempty.mpr ht)
+  apply IsConvexSet.convexHull.convexHull_union .convexHull (convexHull_nonempty.mpr hs₀)
+  exact (convexHull_nonempty.mpr ht₀)
 
-theorem convexHull_insert (hs : s.Nonempty) :
+theorem convexHull_insert (hs₀ : s.Nonempty) :
     convexHull 𝕜 (insert x s) = ⋃ y ∈ convexHull 𝕜 s, Icc 𝕜 x y := by
-  rw [insert_eq, convexHull_union (singleton_nonempty _) hs, convexHull_singleton]
+  rw [insert_eq, convexHull_union (singleton_nonempty _) hs₀, convexHull_singleton]
   simp
 
 end Field
