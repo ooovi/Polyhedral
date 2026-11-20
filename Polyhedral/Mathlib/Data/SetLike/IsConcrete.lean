@@ -104,6 +104,9 @@ variable {A B : Type*} [setLike : SetLike A B] [EmptyCollection A] [IsConcreteEm
 
 @[simp] lemma coe_empty : (∅ : A) = (∅ : Set B) := IsConcreteEmpty.coe_empty'
 
+@[simp, norm_cast]
+lemma coe_eq_empty {a : A} : (a : Set B) = ∅ ↔ a = ∅ := by rw [← coe_empty (A := A), coe_set_eq]
+
 @[simp, grind =, push]
 theorem mem_empty_iff_false {x : B} : x ∈ (∅ : A) ↔ False := by simp [← mem_coe]
 
@@ -124,7 +127,7 @@ include setLike in
 
 include setLike in
 @[simp, grind =]
-theorem le_empty_iff {a : A} : a ≤ ∅ ↔ a = ∅ := by simp [← coe_set_eq, ← coe_subset_coe]
+theorem le_empty_iff {a : A} : a ≤ ∅ ↔ a = ∅ := by simp [← coe_subset_coe]
 
 include setLike in
 theorem eq_empty_of_le_empty {a : A} : a ≤ ∅ → a = ∅ := le_empty_iff.1
