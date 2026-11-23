@@ -301,7 +301,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 lemma DualClosed.dual_dual_lineal (hC : C.DualClosed p) :
     (dual p.flip (dual p C)).lineal = .dual p.flip (Submodule.dual p C.lineal) := by
-  sorry
+  rw [hC, hC.lineal]
 
 /-- For a dual closed cone, finite salient rank of the dual cone is equivalent to finite salient
 rank of the cone itself. The reverse direction is `FinSalRank.dual_finSalRank`, which holds

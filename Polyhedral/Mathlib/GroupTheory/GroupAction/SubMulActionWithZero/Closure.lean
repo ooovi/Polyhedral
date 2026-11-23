@@ -21,8 +21,6 @@ finite generation for `SubMulAction₀`.
 
 @[expose] public section
 
-@[expose] public section
-
 namespace SubMulAction₀
 
 open Function Set
@@ -109,11 +107,11 @@ section SMulWithZero
 variable [Zero M] [SMulZeroClass R M]
 variable {s t : Set M} {x : M}
 
-lemma closure_union (s t : Set M) : closure R (s ∪ t) = closure R s ⊔ closure R t := by
-  sorry
+lemma closure_union (s t : Set M) : closure R (s ∪ t) = closure R s ⊔ closure R t :=
+  closure_gc.l_sup
 
-lemma closure_sSup (s : Set (Set M)) : closure R (sSup s) = sSup (closure R '' s) := by
-  sorry
+lemma closure_sSup (s : Set (Set M)) : closure R (sSup s) = sSup (closure R '' s) :=
+  closure_gc.l_sSup_eq_sSup_image
 
 @[simp]
 theorem closure_empty : closure R (∅ : Set M) = ⊥ := by
