@@ -103,6 +103,7 @@ theorem dehomogenize_isFaceOf {F C : PointedCone R W} (hf : F.IsFaceOf C) :
     rwa [← convexCombPair_eq_sum _ _ ha.le hb.le hab,
       ← ℋ.ofPoint.isAffineMap.map_convexCombPair, hzo]
 
+open ConvexSet in
 /-- The isomorphism between the face lattice of a convex set `P` and the face lattice of
 its homogenization cone.
 
@@ -110,7 +111,7 @@ This isomorphism is used to translate results between face lattices of cones and
 of convex sets.
 -/
 def _root_.Convexity.face_homogenizeIso (P : ConvexSet R A) :
-    ConvexSet.Face P ≃o PointedCone.Face (homogenize ℋ P) where
+    Face P ≃o PointedCone.Face (homogenize ℋ P) where
   toFun F := ⟨_, ℋ.homogenize_isFaceOf P.isConvexSet F.isFaceOf⟩
   invFun F := ⟨⟨dehomogenize ℋ F, dehomogenize_isConvexSet ℋ F⟩,
     by
@@ -123,7 +124,6 @@ def _root_.Convexity.face_homogenizeIso (P : ConvexSet R A) :
     exact (ofPoint_mem_homogenize_iff_mem _ x a.isFaceOf.isConvexSet).mpr xm
   left_inv F := by
     ext
-    simp only [ConvexSet.Face.mem_mk, ConvexSet.mem_mk]
     simp [dehomogenize_homogenize ℋ F.isFaceOf.isConvexSet]
   right_inv F := by
     have := homogenize_dehomogenize_of_le_positive

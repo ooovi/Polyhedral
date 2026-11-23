@@ -41,8 +41,10 @@ theorem IsPolytope.face_isPolytope (hC : IsPolytope R C) (hF : IsFaceOf R F C) :
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
   rw [dehomogenize_homogenize _  hF.isConvexSet]
 
+open ConvexSet
+
 include V in
-instance {P : Polytope R A} : CoeOut (P : ConvexSet R A).Face (Polytope R A) where
+instance {P : Polytope R A} : CoeOut (Face (P : ConvexSet R A)) (Polytope R A) where
   coe F := ⟨_, IsPolytope.face_isPolytope P.isPolytope F.isFaceOf⟩
 
 include V in
@@ -52,7 +54,7 @@ homogenization cones.
 This is private since it does not yet have the correct grading (off-by-one).
 -/
 private noncomputable instance Polytope.faceHomogenizationGradeOrder (P : Polytope R A) :
-    GradeOrder ℕ (P : ConvexSet R A).Face := by
+    GradeOrder ℕ (Face (P : ConvexSet R A)) := by
   let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
   let ℋ := IsHomogenization.canonical R A
   have : (homogenize _ (P : ConvexSet R A)).FG := IsPolytope.homogenize_fg ℋ P.isPolytope
