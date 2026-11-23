@@ -6,10 +6,8 @@ Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
 module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
-public import Polyhedral.Mathlib.Geometry.Convex.Set
-import Polyhedral.Mathlib.Data.SetLike.IsConcrete
 
--- import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
+import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
 /-! This file defines faces of convex sets.
 
@@ -27,30 +25,37 @@ section Semiring
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R M]
 
-namespace IsConvexSet
+namespace ConvexSet
 
-/-- A face of a convex set `P`. Represents the face lattice of `P`. -/
-@[ext]
-structure Face {p : Set M} (P : IsConvexSet R p) where
-  carrier : Set M
-  isFaceOf : IsFaceOf R carrier p
+/-- A face of a convex set `P`. Represents the face lattice of `P`.
 
-attribute [coe] Face.carrier
+Note: this is defined on bundled `ConvexSet` since convexity is required for the lattice to have a
+top element.
+-/
+structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
+  isFaceOf : IsFaceOf R toConvexSet (P : Set M)
+
+attribute [coe] Face.toConvexSet
 
 namespace Face
 
-variable {p : Set M} {P : IsConvexSet R p}
+variable {P : ConvexSet R M}
 
 instance : SetLike (Face P) M where
-  coe F := F.carrier
+  coe F := F.toConvexSet
   coe_injective a b h := by
-    cases a; cases b; congr
+    cases a; cases b; congr; exact SetLike.coe_injective h
 
-instance : CoeOut (Face P) (Set M) := ⟨carrier⟩
+instance : CoeOut (Face P) (ConvexSet R M) := ⟨toConvexSet⟩
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 
 @[simp] theorem mem_coe {F : Face P} (x : M) : x ∈ F.carrier ↔ x ∈ F := .rfl
+
+@[ext] theorem ext {F₁ F₂ : Face P} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
+
+@[simp] theorem coe_eq_toConvexSet_coe {F : Face P} : (F : Set M) = F.toConvexSet :=
+  SetLike.ext'_iff.mp rfl
 
 @[simp] theorem mem_mk {s h x} : x ∈ (⟨s, h⟩ : Face P) ↔ x ∈ s := .rfl
 
@@ -67,24 +72,53 @@ lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := 
   intro heq
   apply h
   ext
-  simp [heq, Bot.bot]
+  simp [← SetLike.mem_coe, heq, Bot.bot]
 
 instance : OrderTop (Face P) where
-  top := ⟨_, IsFaceOf.refl P⟩
+  top := ⟨P, IsFaceOf.refl P.isConvexSet⟩
   le_top F := F.isFaceOf.le
 
 instance : Inhabited (Face P) := ⟨⊤⟩
 
+theorem toConvexSet_le {F : Face P} : F ≤ P := F.isFaceOf.le
+
+@[simp]
+theorem toConvexSet_le_toConvexSet {F₁ F₂ : Face P} :
+    F₁.toConvexSet ≤ F₂.toConvexSet ↔ F₁ ≤ F₂ := .rfl
+
+@[simp]
+theorem toConvexSet_lt_toConvexSet {F₁ F₂ : Face P} :
+    F₁.toConvexSet < F₂.toConvexSet ↔ F₁ < F₂ := .rfl
+
+@[simp]
+theorem mem_toConvexSet {F : Face P} (x : M) : x ∈ F.toConvexSet ↔ x ∈ F := .rfl
+
+@[simp] theorem toConvexSet_bot : ((⊥ : Face P) : ConvexSet R M) = ∅ := rfl
+
+@[simp] theorem toConvexSet_top : ((⊤ : Face P) : ConvexSet R M) = P := rfl
+
 /-! ### Infimum, supremum and lattice -/
 
-/-- The infimum of two faces `F₁`, `F₂` of `P` is the intersection of `F₁` and `F₂`. -/
+/-- The infimum of two faces `F₁`, `F₂` of `C` is the intersection of the cones `F₁` and `F₂`. -/
 instance : Min (Face P) where
-  min F₁ F₂ := ⟨_, F₁.isFaceOf.inf_left F₂.isFaceOf⟩
+  min F₁ F₂ := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inf_left F₂.isFaceOf⟩
+
+protected theorem IsFaceOf.sInf (F : Set (ConvexSet R M)) (h : ∀ f ∈ F, IsFaceOf R f (P : Set M)) :
+    IsFaceOf R (P ⊓ sInf F).carrier P where
+  isConvexSet := ConvexSet.isConvexSet _
+  le _ sm := sm.1
+  left_mem_of_mem_Ioo := by
+    simp only [SetLike.mem_coe, ConvexSet.carrier_eq_coe, SetLike.coe_min, SetLike.coe_sInf,
+      Set.sInter_image, Set.mem_inter_iff, Set.mem_iInter, and_imp]
+    intro x y z hx hy hz h₁ h₂
+    simpa [hx]
+    using fun f fs ↦ (h f fs).left_mem_of_mem_Ioo hx hy (SetLike.mem_coe.mp (h₁ f fs)) h₂
+
 
 instance : InfSet (Face P) where
   sInf S :=
-    { carrier := p ∩ sInf {s.1 | s ∈ S}
-      isFaceOf := IsFaceOf.sInf P (fun _ hf ↦ hf.choose_spec.2 ▸ hf.choose.isFaceOf) }
+    { toConvexSet := P ⊓ sInf {s.1 | s ∈ S}
+      isFaceOf := IsFaceOf.sInf _ (fun _ ⟨s, _, hs2⟩ ↦ hs2 ▸ s.isFaceOf) }
 
 instance : SemilatticeInf (Face P) where
   inf := min
@@ -96,20 +130,19 @@ instance : CompleteSemilatticeInf (Face P) where
   __ := instSemilatticeInf
   isGLB_sInf S := by
     constructor <;> intro f fS
-    · rintro _ ⟨_, hz⟩
-      simp only [carrier_eq_coe, Set.sInf_eq_sInter, Set.mem_sInter, Set.mem_ofPred_eq,
-        forall_exists_index, and_imp, forall_apply_eq_imp_iff₂, SetLike.mem_coe] at hz
-      exact hz _ fS
-    · simp only [sInf, carrier_eq_coe, Set.mem_ofPred_eq, forall_exists_index, and_imp,
-      forall_apply_eq_imp_iff₂, SetLike.mem_coe]
-      simpa [LE.le] using fun x a ↦ ⟨f.isFaceOf.le a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
+    · rw [← toConvexSet_le_toConvexSet]
+      refine inf_le_of_right_le ?_
+      simpa [LE.le] using fun _ xs ↦ xs f fS
+    · simp only [sInf, Set.sInter_image, Set.mem_ofPred_eq,
+        Set.iInter_exists, Set.biInter_and', Set.iInter_iInter_eq_right]
+      simpa [LE.le] using fun x a ↦ ⟨f.2.2 a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
 
 instance : CompleteLattice (Face P) where
-  top := ⟨_, .refl P⟩
-  le_top f := f.isFaceOf.le
+  top := ⟨P, .refl P.isConvexSet⟩
+  le_top _ := toConvexSet_le
   __ := completeLatticeOfCompleteSemilatticeInf _
 
-end IsConvexSet.Face
+end ConvexSet.Face
 
 end Semiring
 

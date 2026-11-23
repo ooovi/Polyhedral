@@ -109,19 +109,22 @@ its homogenization cone.
 This isomorphism is used to translate results between face lattices of cones and face lattices
 of convex sets.
 -/
-def _root_.Convexity.face_homogenizeIso {P : Set A} (hP : IsConvexSet R P) :
-    Face hP ≃o PointedCone.Face (homogenize ℋ P) where
-  toFun F := ⟨_, ℋ.homogenize_isFaceOf hP F.isFaceOf⟩
-  invFun F := ⟨dehomogenize ℋ F.toSubmodule,
-    by simpa [dehomogenize_homogenize ℋ hP] using dehomogenize_isFaceOf ℋ F.isFaceOf⟩
+def _root_.Convexity.face_homogenizeIso (P : ConvexSet R A) :
+    ConvexSet.Face P ≃o PointedCone.Face (homogenize ℋ P) where
+  toFun F := ⟨_, ℋ.homogenize_isFaceOf P.isConvexSet F.isFaceOf⟩
+  invFun F := ⟨⟨dehomogenize ℋ F, dehomogenize_isConvexSet ℋ F⟩,
+    by
+      convert dehomogenize_isFaceOf ℋ F.isFaceOf
+      rw [dehomogenize_homogenize ℋ]; exact P.isConvexSet⟩
   map_rel_iff' := by
     intro a b
     refine ⟨fun h x xm ↦ ?_, fun h _ xm ↦ span_mono (image_mono h) xm⟩
     refine (ofPoint_mem_homogenize_iff_mem _ x b.isFaceOf.isConvexSet).mp (h ?_)
     exact (ofPoint_mem_homogenize_iff_mem _ x a.isFaceOf.isConvexSet).mpr xm
   left_inv F := by
-    simp only [Face.carrier_eq_coe, Face.ext_iff]
-    exact dehomogenize_homogenize ℋ F.isFaceOf.isConvexSet
+    ext
+    simp only [ConvexSet.Face.mem_mk, ConvexSet.mem_mk]
+    simp [dehomogenize_homogenize ℋ F.isFaceOf.isConvexSet]
   right_inv F := by
     have := homogenize_dehomogenize_of_le_positive
       (fun _ h n ↦ weight_pos_of_mem_homogenize (F.isFaceOf.le h) n)

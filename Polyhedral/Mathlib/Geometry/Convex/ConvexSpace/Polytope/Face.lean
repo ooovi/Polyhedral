@@ -42,7 +42,7 @@ theorem IsPolytope.face_isPolytope (hC : IsPolytope R C) (hF : IsFaceOf R F C) :
   rw [dehomogenize_homogenize _  hF.isConvexSet]
 
 include V in
-instance {P : Polytope R A} : CoeOut (Face P.isPolytope.isConvexSet) (Polytope R A) where
+instance {P : Polytope R A} : CoeOut (P : ConvexSet R A).Face (Polytope R A) where
   coe F := ⟨_, IsPolytope.face_isPolytope P.isPolytope F.isFaceOf⟩
 
 include V in
@@ -52,12 +52,12 @@ homogenization cones.
 This is private since it does not yet have the correct grading (off-by-one).
 -/
 private noncomputable instance Polytope.faceHomogenizationGradeOrder (P : Polytope R A) :
-    GradeOrder ℕ (Face P.isPolytope.isConvexSet) := by
+    GradeOrder ℕ (P : ConvexSet R A).Face := by
   let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
   let ℋ := IsHomogenization.canonical R A
-  have : (homogenize _ P).FG := IsPolytope.homogenize_fg ℋ P.isPolytope
+  have : (homogenize _ (P : ConvexSet R A)).FG := IsPolytope.homogenize_fg ℋ P.isPolytope
   let := PointedCone.FG.gradeOrder_finrank this
-  refine GradeOrder.liftRight _ (face_homogenizeIso ℋ P.isPolytope.isConvexSet).strictMono ?_
+  refine GradeOrder.liftRight _ (face_homogenizeIso ℋ P).strictMono ?_
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 end Field
