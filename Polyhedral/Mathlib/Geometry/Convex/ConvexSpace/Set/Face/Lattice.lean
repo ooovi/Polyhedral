@@ -1,7 +1,8 @@
 /-
-Copyright (c) 2026 Olivia Röhrig, Xartin Winter. All rights reserved.
+Copyright (c) 2026 Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter. All rights
+reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig, Xara Gruß, Valentina Taylor Cerra, Xartin Winter
+Authors: Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter
 -/
 module
 
@@ -107,22 +108,14 @@ theorem mem_toConvexSet {F : Face P} (x : X) : x ∈ F.toConvexSet ↔ x ∈ F :
 instance : Min (Face P) where
   min F₁ F₂ := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inf_left F₂.isFaceOf⟩
 
-protected theorem IsFaceOf.sInf (F : Set (ConvexSet R X)) (h : ∀ f ∈ F, IsFaceOf R f (P : Set X)) :
-    IsFaceOf R (P ⊓ sInf F).carrier P where
-  isConvexSet := ConvexSet.isConvexSet _
-  le _ sm := sm.1
-  left_mem_of_mem_Ioo := by
-    simp only [SetLike.mem_coe, ConvexSet.carrier_eq_coe, SetLike.coe_min, SetLike.coe_sInf,
-      Set.sInter_image, Set.mem_inter_iff, Set.mem_iInter, and_imp]
-    intro x y z hx hy hz h₁ h₂
-    simpa [hx]
-    using fun f fs ↦ (h f fs).left_mem_of_mem_Ioo hx hy (SetLike.mem_coe.mp (h₁ f fs)) h₂
-
-
 instance : InfSet (Face P) where
   sInf S :=
     { toConvexSet := P ⊓ sInf {s.1 | s ∈ S}
-      isFaceOf := IsFaceOf.sInf _ (fun _ ⟨s, _, hs2⟩ ↦ hs2 ▸ s.isFaceOf) }
+      isFaceOf := IsFaceOf.sInf P.isConvexSet fun f hf ↦ by
+        simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and] at hf
+        obtain ⟨a, ha, rfl⟩ := hf
+        exact a.isFaceOf
+     }
 
 instance : SemilatticeInf (Face P) where
   inf := min
