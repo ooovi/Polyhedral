@@ -20,7 +20,7 @@ homogenization. -/
 
 @[expose] public section
 
-variable {R A : Type*}
+variable {R X : Type*}
 
 open Convexity ConvexSet
 
@@ -29,18 +29,18 @@ namespace Convexity
 section Field
 
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
-variable [ConvexSpace R A] [IsCancelConvexSpace R A]
+variable [ConvexSpace R X] [IsCancelConvexSpace R X]
 
-variable {P : Set A}
+variable {P : Set X}
 
 open Finset in
 /-- Krein-Milman theorem for polytopes: every polytope is the convex hull of its vertices,
 that is, of the finite set of points whose singletons are faces. -/
 theorem IsPolytope.krein_milman (hP : IsPolytope R P) :
-    ∃ s : Finset A, convexHull R s = P ∧ ∀ x ∈ s, IsFaceOf R {x} P := by
+    ∃ s : Finset X, convexHull R s = P ∧ ∀ x ∈ s, IsFaceOf R {x} P := by
   classical
-  suffices h : ∀ t : Finset A, ∀ P : Set A, convexHull R t = P →
-      ∃ s : Finset A, convexHull R s = P ∧ ∀ x ∈ s, IsFaceOf R {x} P by
+  suffices h : ∀ t : Finset X, ∀ P : Set X, convexHull R t = P →
+      ∃ s : Finset X, convexHull R s = P ∧ ∀ x ∈ s, IsFaceOf R {x} P by
     obtain ⟨t, ht⟩ := hP
     exact h t P ht.symm
   intro t
