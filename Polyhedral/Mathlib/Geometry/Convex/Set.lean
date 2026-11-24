@@ -11,11 +11,8 @@ variable {R X Y Z : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
   [ConvexSpace R X] [ConvexSpace R Y] [ConvexSpace R Z] {f : X → Y} {s : Set X} {t : Set Y}
 
 lemma IsConvexSet.convexCombPair'_mem (hs : IsConvexSet R s) {x y : X} (hx : x ∈ s) (hy : y ∈ s)
-    (a b : R) : convexCombPair' a b x y ∈ s := by
-  by_cases h : 0 ≤ a ∧ 0 ≤ b ∧ a + b = 1
-  · rw [convexCombPair'_eq_convexCombPair h.1 h.2.1 h.2.2]
-    exact hs.convexCombPair_mem hx hy h.1 h.2.1 h.2.2
-  · simpa only [convexCombPair'_eq_left_of_not h] using hx
+    (a b : R) : convexCombPair' a b x y ∈ s :=
+  convexCombPair'_cases a b x y (hs.convexCombPair_mem hx hy) (fun _ ↦ hx)
 
 /-- The range of an affine map between convex spaces is convex. -/
 lemma IsConvexSet.range (hf : IsAffineMap R f) :
