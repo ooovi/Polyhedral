@@ -5,6 +5,7 @@ Authors: Yaël Dillies
 -/
 module
 
+public meta import Lean.PrettyPrinter.Delaborator.Builtins
 public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 public import Polyhedral.Mathlib.Data.Finsupp.Basic
 
@@ -67,22 +68,53 @@ section convexCombPair'
 variable {R X : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
 
 /-- Take a convex combination of two points when both weights are nonnegative and sum to one.
-Returns the first point for all other weights. -/
+Returns the first point for all other weights.
+
+With `open scoped Convexity`, write `x ⊕[s, t] y` to supply both weights, or `x ⊕[t] y` to use
+the weights `1 - t` and `t`. -/
 noncomputable def convexCombPair' (s t : R) (x y : X) : X :=
   sConvexComb (.duple' x y s t)
 
+scoped notation:65 x:66 " ⊕[" s ", " t "] " y:66 => convexCombPair' s t x y
+scoped notation:65 x:66 " ⊕[" t "] " y:66 => convexCombPair' (1 - t) t x y
+
+open Lean PrettyPrinter Delaborator SubExpr in
+/-- Print `convexCombPair' s t x y` using the two-weight notation. -/
+@[scoped app_delab convexCombPair']
+meta def delabConvexCombPair'TwoWeights : Delab :=
+  whenPPOption getPPNotation <| whenNotPPOption getPPExplicit <| withOverApp 10 do
+    let s ← withNaryArg 6 delab
+    let t ← withNaryArg 7 delab
+    let x ← withNaryArg 8 delab
+    let y ← withNaryArg 9 delab
+    `($x ⊕[$s, $t] $y)
+
+-- Lean tries the later registration first, giving the one-weight form priority.
+open Lean PrettyPrinter Delaborator SubExpr in
+/-- Print `convexCombPair' (1 - t) t x y` using the one-weight notation. -/
+@[scoped app_delab convexCombPair']
+meta def delabConvexCombPair' : Delab :=
+  whenPPOption getPPNotation <| whenNotPPOption getPPExplicit <| withOverApp 10 do
+    let #[R, _, _, _, _, _, leftWeight, rightWeight, _, _] := (← getExpr).getAppArgs | failure
+    let_expr HSub.hSub α β γ _ one subtrahend := leftWeight | failure
+    guard (α == R && β == R && γ == R && one.nat? == some 1 && subtrahend == rightWeight)
+    let t ← withNaryArg 7 delab
+    let x ← withNaryArg 8 delab
+    let y ← withNaryArg 9 delab
+    `($x ⊕[$t] $y)
+
 lemma convexCombPair'_eq_sConvexComb_duple' (s t : R) (x y : X) :
-    convexCombPair' s t x y = sConvexComb (.duple' x y s t) := by rfl
+    x ⊕[s, t] y = sConvexComb (.duple' x y s t) := by rfl
 
 lemma convexCombPair'_eq_sConvexComb {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1)
-    (x y : X) : convexCombPair' s t x y = sConvexComb (.duple x y hs ht hst) := by
+    (x y : X) : x ⊕[s, t] y = sConvexComb (.duple x y hs ht hst) := by
   simp only [convexCombPair', StdSimplex.duple'_eq_duple hs ht hst]
 
 lemma convexCombPair'_eq_convexCombPair {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1)
-    (x y : X) : convexCombPair' s t x y = convexCombPair s t hs ht hst x y :=
+    (x y : X) : x ⊕[s, t] y = convexCombPair s t hs ht hst x y :=
   convexCombPair'_eq_sConvexComb hs ht hst x y
 
-/-- Use this to prove a property of `convexCombPair' s t x y`. Use this as
+/-- To prove a property of `x ⊕[s, t] y`, use
 `refine convexCombPair'_cases s t x y ?_ ?_`. The valid branch gives the three weight proofs and
 replaces the combination with `sConvexComb` of the corresponding simplex. The invalid branch
 replaces the combination with `x`. -/
@@ -90,29 +122,29 @@ replaces the combination with `x`. -/
 lemma convexCombPair'_cases {motive : X → Prop} (s t : R) (x y : X)
     (valid : ∀ (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1),
       motive (sConvexComb (.duple x y hs ht hst)))
-    (invalid : ¬(0 ≤ s ∧ 0 ≤ t ∧ s + t = 1) → motive x) : motive (convexCombPair' s t x y) := by
+    (invalid : ¬(0 ≤ s ∧ 0 ≤ t ∧ s + t = 1) → motive x) : motive (x ⊕[s, t] y) := by
   unfold convexCombPair'
   refine StdSimplex.duple'_cases x y s t valid (fun h ↦ ?_)
   simpa only [sConvexComb_single] using invalid h
 
-@[simp] lemma convexCombPair'_zero {x y : X} : convexCombPair' (0 : R) 1 x y = y := by
+@[simp] lemma convexCombPair'_zero {x y : X} : x ⊕[(0 : R), 1] y = y := by
   simp [convexCombPair', StdSimplex.duple', StdSimplex.duple, StdSimplex.mk_single]
 
-@[simp] lemma convexCombPair'_one {x y : X} : convexCombPair' (1 : R) 0 x y = x := by
+@[simp] lemma convexCombPair'_one {x y : X} : x ⊕[(1 : R), 0] y = x := by
   simp [convexCombPair', StdSimplex.duple', StdSimplex.duple, StdSimplex.mk_single]
 
-@[simp] lemma convexCombPair'_same (s t : R) (x : X) : convexCombPair' s t x x = x :=
+@[simp] lemma convexCombPair'_same (s t : R) (x : X) : x ⊕[s, t] x = x :=
   convexCombPair'_cases s t x x (fun hs ht hst ↦ convexCombPair_same hs ht hst) (fun _ ↦ rfl)
 
 lemma convexCombPair'_symm {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1) (x y : X) :
-    convexCombPair' s t x y = convexCombPair' t s y x := by
+    x ⊕[s, t] y = y ⊕[t, s] x := by
   rw [convexCombPair'_eq_convexCombPair hs ht hst,
     convexCombPair'_eq_convexCombPair ht hs ((add_comm _ _).trans hst), convexCombPair_symm]
 
 variable {Y : Type*} [ConvexSpace R Y]
 
 lemma IsAffineMap.map_convexCombPair' {f : X → Y} (hf : IsAffineMap R f) (s t : R) (x y : X) :
-    f (convexCombPair' s t x y) = convexCombPair' s t (f x) (f y) := by
+    f (x ⊕[s, t] y) = f x ⊕[s, t] f y := by
   simp only [convexCombPair', hf.map_sConvexComb, StdSimplex.map_duple']
 
 end convexCombPair'
@@ -122,8 +154,7 @@ variable {R X I : Type*} [CommSemiring R] [PartialOrder R] [IsStrictOrderedRing 
   [ConvexSpace R X]
 
 lemma iConvexComb_convexCombPair'_comm (s t : R) (w : StdSimplex R I) (e₁ e₂ : I → X) :
-    w.iConvexComb (fun i ↦ convexCombPair' s t (e₁ i) (e₂ i)) =
-      convexCombPair' s t (w.iConvexComb e₁) (w.iConvexComb e₂) := by
+    w.iConvexComb (fun i ↦ e₁ i ⊕[s, t] e₂ i) = w.iConvexComb e₁ ⊕[s, t] w.iConvexComb e₂ := by
   refine StdSimplex.duple_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
   · simp only [convexCombPair'_eq_convexCombPair hs ht hst, iConvexComb_convexCombPair_comm]
   · simp [convexCombPair', StdSimplex.duple', h]
@@ -151,7 +182,7 @@ lemma iConvexComb_duple (i j : I) (a b : R) (ha hb hab) (x : I → M) :
   simp [iConvexComb, convexCombPair]
 
 lemma iConvexComb_duple' (i j : I) (a b : R) (x : I → M) :
-    iConvexComb (.duple' i j a b) x = convexCombPair' a b (x i) (x j) := by
+    iConvexComb (.duple' i j a b) x = x i ⊕[a, b] x j := by
   simp only [iConvexComb, StdSimplex.map_duple', convexCombPair'_eq_sConvexComb_duple']
 
 end iConvexComb
