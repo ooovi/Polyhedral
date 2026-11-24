@@ -75,10 +75,8 @@ noncomputable def convexCombPair' (s t : R) (x y : X) : X :=
   sConvexComb (.duple' x y s t)
 
 /-- The notation `s • x +ᶜ t • y` forms a convex combination with weights `s` and `t`. -/
-scoped syntax:65 (name := convexCombPairWeightedSum) term:66 " +ᶜ " term:66 : term
-
-macro_rules (kind := convexCombPairWeightedSum)
-  | `($s • $x +ᶜ $t • $y) => `(convexCombPair' $s $t $x $y)
+scoped notation:65 (priority := high) s:74 " • " x:73 " +ᶜ " t:74 " • " y:73 =>
+  convexCombPair' s t x y
 
 open Lean PrettyPrinter Delaborator SubExpr in
 /-- Print `convexCombPair' s t x y` as `s • x +ᶜ t • y`. -/
