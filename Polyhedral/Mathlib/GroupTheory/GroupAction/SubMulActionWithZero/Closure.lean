@@ -59,8 +59,12 @@ theorem closure_le {p : SubMulAction₀ R M} : closure R s ≤ p ↔ s ⊆ p :=
 lemma closure_gc : GaloisConnection (closure R : Set M → SubMulAction₀ R M) (↑) :=
   fun _ _ => closure_le
 
+/-- `closure` and the coercion to `Set` form a Galois insertion. -/
+def gi : GaloisInsertion (closure R : Set M → SubMulAction₀ R M) (↑) :=
+  closure_gc.toGaloisInsertion fun _ => subset_closure
+
 @[simp] theorem closure_eq (p : SubMulAction₀ R M) : closure R p = p :=
-  le_antisymm (closure_gc.l_u_le p) subset_closure
+  gi.l_u_eq p
 
 @[gcongr]
 theorem closure_mono (h : s ⊆ t) : closure R s ≤ closure R t :=
@@ -182,8 +186,12 @@ theorem smulSet_le {p : SubMulAction₀ R M} : R ∙ s ≤ p ↔ s ⊆ p := by
 lemma smulSet_gc : GaloisConnection (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
   fun _ _ => smulSet_le
 
+/-- `smulSet` and the coercion to `Set` form a Galois insertion. -/
+def smulSet.gi : GaloisInsertion (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
+  smulSet_gc.toGaloisInsertion fun _ => subset_smulSet
+
 @[simp] theorem smulSet_eq (p : SubMulAction₀ R M) : R ∙ p = p :=
-  le_antisymm (smulSet_gc.l_u_le p) subset_smulSet
+  smulSet.gi.l_u_eq p
 
 @[gcongr]
 theorem smulSet_mono (h : s ⊆ t) : R ∙ s ≤ R ∙ t :=
