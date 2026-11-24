@@ -9,7 +9,7 @@ public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 public import Polyhedral.Mathlib.Data.Finsupp.Basic
 
 /-!
-# Missing lemmas about convex spaces
+# Additional definitions and lemmas about convex spaces
 
 This file contains material destined for `Mathlib/Geometry/Convex/ConvexSpace/Defs.lean`.
 -/
@@ -19,6 +19,31 @@ public section
 namespace Convexity
 
 attribute [simp] StdSimplex.nonneg
+
+section convexCombPair
+variable {R X : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R X]
+
+/-- Take a convex combination of two points when both weights are nonnegative and sum to one.
+Returns the first point for all other weights. -/
+noncomputable def convexCombPair' (s t : R) (x y : X) : X := by classical
+  exact if h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1 then convexCombPair s t h.1 h.2.1 h.2.2 x y else x
+
+lemma convexCombPair'_eq_convexCombPair {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1)
+    (x y : X) : convexCombPair' s t x y = convexCombPair s t hs ht hst x y := by
+  simp [convexCombPair', hs, ht, hst]
+
+@[simp] lemma convexCombPair'_zero {x y : X} : convexCombPair' (0 : R) 1 x y = y := by
+  rw [convexCombPair'_eq_convexCombPair (by simp) (by simp) (by simp), convexCombPair_zero]
+
+@[simp] lemma convexCombPair'_one {x y : X} : convexCombPair' (1 : R) 0 x y = x := by
+  rw [convexCombPair'_eq_convexCombPair (by simp) (by simp) (by simp), convexCombPair_one]
+
+@[simp] lemma convexCombPair'_same (s t : R) (x : X) : convexCombPair' s t x x = x := by
+  by_cases h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1
+  · rw [convexCombPair'_eq_convexCombPair h.1 h.2.1 h.2.2, convexCombPair_same]
+  · simp [convexCombPair']
+
+end convexCombPair
 
 section iConvexComb
 variable {R M I : Type*}
