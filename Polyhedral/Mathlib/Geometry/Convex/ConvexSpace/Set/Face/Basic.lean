@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter.
-All rights reserved. Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
+Copyright (c) 2026 Olivia Röhrig, Xara Gruß, Valentina Taylor Cerra, Xartin Winter.
+All rights reserved. Released under Apache 2.0 license as described in the file LICEYSE.
+Authors: Olivia Röhrig, Xara Gruß, Valentina Taylor Cerra, Xartin Winter
 -/
 module
 
@@ -18,6 +18,14 @@ establishes basic properties of this relation.
 
 * `IsFaceOf F C`: States that the set `F` is a face of the set `C`.
 
+## Implementation details
+
+The property is defined on general sets that don't need to be convex. This yields the expected
+lattice structure on convex sets.
+
+We require faces to be convex subsets since if we didn't, unions of faces would always be faces and
+we wold not get the expected lattice structure. As a result, only convex sets are faces of
+themselves.
 -/
 
 open Function Convexity
@@ -26,31 +34,33 @@ open Function Convexity
 
 namespace Convexity
 
-variable {R M N : Type*}
+variable {R X Y : Type*}
 
 section Semiring
 
-variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [ConvexSpace R M] [ConvexSpace R N]
+variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [ConvexSpace R X] [ConvexSpace R Y]
 
 variable (R) in
-/-- A subset `F` of a set `F` is a face of `C` iff it is an extreme convex subset. -/
+/-- A subset `F` of a set `F` is a face of `C` iff it is a convex subset such that if a point in `F`
+is contained in the open interval between two points in `C`, the endpoints of that interval are
+also in `F`. -/
 @[mk_iff]
-structure IsFaceOf (F C : Set M) : Prop where
+structure IsFaceOf (F C : Set X) : Prop where
   isConvexSet : IsConvexSet R F
   le : F ⊆ C
-  left_mem_of_mem_Ioo {x y z : M} : x ∈ C → y ∈ C →
-    z ∈ F → z ∈ Ioo R x y → x ∈ F
+  left_mem_of_mem_Ioo {x y z : X} : x ∈ C → y ∈ C → z ∈ F → z ∈ Ioo R x y → x ∈ F
 
-variable {C C₁ C₂ F F₁ F₂ : Set M}
+variable {C C₁ C₂ F F₁ F₂ : Set X}
 
 namespace IsFaceOf
 
 /-- A convex set `C` is a face of itself. -/
 @[refl, simp]
-protected theorem refl {C : Set M} (h : IsConvexSet R C) : IsFaceOf R C C :=
+protected theorem refl {C : Set X} (h : IsConvexSet R C) : IsFaceOf R C C :=
   ⟨h, fun _ a ↦ a, fun hx _ _ _ ↦ hx⟩
 
-protected theorem rfl {C : Set M} {h : IsConvexSet R C} : IsFaceOf R C C := .refl h
+protected theorem rfl {C : Set X} {h : IsConvexSet R C} : IsFaceOf R C C := .refl h
 
 /-- A face of a set is a face of another if and only if they are contained in each other. -/
 theorem isFaceOf_iff_le (h₁ : IsFaceOf R F₁ C) (h₂ : IsFaceOf R F₂ C) :
@@ -58,7 +68,7 @@ theorem isFaceOf_iff_le (h₁ : IsFaceOf R F₁ C) (h₂ : IsFaceOf R F₂ C) :
   ⟨IsFaceOf.le, fun h ↦ ⟨h₁.isConvexSet, h, fun hx hy hz hs↦ h₁.3 (h₂.le hx) (h₂.le hy) hz hs⟩⟩
 
 /-- The empty set is a face of every set. -/
-protected theorem empty {C : Set M} : IsFaceOf R ∅ C :=
+protected theorem empty {C : Set X} : IsFaceOf R ∅ C :=
   ⟨IsConvexSet.empty, Set.empty_subset C, fun _ _ h _ ↦ h⟩
 
 /-- The intersection of two faces of two sets is a face of the intersection of the sets. -/
@@ -80,7 +90,7 @@ theorem inf_left (h₁ : IsFaceOf R F₁ C) (h₂ : IsFaceOf R F₂ C) : IsFaceO
 theorem inf_right (h₁ : IsFaceOf R F C₁) (h₂ : IsFaceOf R F C₂) : IsFaceOf R F (C₁ ∩ C₂) :=
   inf_idem F ▸ IsFaceOf.inf h₁ h₂
 
-protected theorem sInf (hc : IsConvexSet R C) {F : Set (Set M)} (h : ∀ f ∈ F, IsFaceOf R f C) :
+protected theorem sInf (hc : IsConvexSet R C) {F : Set (Set X)} (h : ∀ f ∈ F, IsFaceOf R f C) :
     IsFaceOf R (C ∩ sInf F) C where
   isConvexSet := IsConvexSet.inter hc <| IsConvexSet.sInter (fun f hf ↦ (h f hf).isConvexSet)
   le _ sm := sm.1
@@ -89,7 +99,7 @@ protected theorem sInf (hc : IsConvexSet R C) {F : Set (Set M)} (h : ∀ f ∈ F
     intro _ _ _ xc yc zc zf zs
     simpa [xc] using fun f hf ↦ (h f hf).left_mem_of_mem_Ioo xc yc (zf f hf) zs
 
-protected theorem sInf' {F : Set (Set M)} (hne : F.Nonempty) (h : ∀ f ∈ F, IsFaceOf R f C) :
+protected theorem sInf' {F : Set (Set X)} (hne : F.Nonempty) (h : ∀ f ∈ F, IsFaceOf R f C) :
     IsFaceOf R (sInf F) C where
   isConvexSet := IsConvexSet.sInter (fun f hf ↦ (h f hf).isConvexSet)
   le := by
@@ -109,12 +119,12 @@ protected theorem trans (h₁ : IsFaceOf R F₂ F₁) (h₂ : IsFaceOf R F₁ C)
   exact h₁.3 (h₂.3 hx hy hz' hhz)
       (h₂.3 hy hx hz' (by simpa [Ioo_symm, Ioo_symm] using hhz)) hz hhz
 
-section Map
+section Xap
 
-variable {C₁ F₁ : Set M} {C₂ F₂ : Set N}
+variable {C₁ F₁ : Set X} {C₂ F₂ : Set Y}
 
 /- The image of a face under an injective affine map is a face of the image. -/
-theorem map {φ : M → N} (hφ : IsAffineMap R φ) (hinj : Injective φ)
+theorem map {φ : X → Y} (hφ : IsAffineMap R φ) (hinj : Injective φ)
     (hF : IsFaceOf R F₁ C₁) : IsFaceOf R (φ '' F₁) (φ '' C₁) where
   isConvexSet := IsConvexSet.image hφ hF.isConvexSet
   le := Set.image_mono hF.le
@@ -124,7 +134,7 @@ theorem map {φ : M → N} (hφ : IsAffineMap R φ) (hinj : Injective φ)
     simpa [hφ.map_convexCombPair] using hcomb
 
 /- The preimage of a face is a face of the preimage. -/
-theorem preimage {φ : M → N} (hφ : IsAffineMap R φ) (hF : IsFaceOf R F₂ C₂) :
+theorem preimage {φ : X → Y} (hφ : IsAffineMap R φ) (hF : IsFaceOf R F₂ C₂) :
     IsFaceOf R (φ ⁻¹' F₂) (φ ⁻¹' C₂) where
   isConvexSet := IsConvexSet.preimage hφ hF.isConvexSet
   le := Set.preimage_mono hF.le
@@ -133,12 +143,12 @@ theorem preimage {φ : M → N} (hφ : IsAffineMap R φ) (hF : IsFaceOf R F₂ C
     refine hF.3 hx hy hz ⟨a, b, ha, hb, hab, ?_⟩
     exact hcomb ▸ (hφ.map_convexCombPair ha.le hb.le hab x y).symm
 
-theorem of_map_injective {φ : M → N} (hφ : IsAffineMap R φ) (hinj : Injective φ)
+theorem of_map_injective {φ : X → Y} (hφ : IsAffineMap R φ) (hinj : Injective φ)
     (hF : IsFaceOf R (φ '' F₁) (φ '' C₁)) : IsFaceOf R F₁ C₁ := by
   have h' := IsFaceOf.preimage hφ hF
   rwa [Set.preimage_image_eq _ hinj, Set.preimage_image_eq _ hinj] at h'
 
-theorem of_preimage_surjective {φ : M → N} (hφ : IsAffineMap R φ) (hsurj : Function.Surjective φ)
+theorem of_preimage_surjective {φ : X → Y} (hφ : IsAffineMap R φ) (hsurj : Function.Surjective φ)
     (hc : IsFaceOf R (φ ⁻¹' F₂) (φ ⁻¹' C₂)) : IsFaceOf R F₂ C₂ := by
   have hcv := IsConvexSet.image hφ hc.isConvexSet
   rw [Set.image_preimage_eq _ hsurj] at hcv
@@ -151,20 +161,20 @@ theorem of_preimage_surjective {φ : M → N} (hφ : IsAffineMap R φ) (hsurj : 
     obtain ⟨a, b, rfl⟩ := h
     exact hc.left_mem_of_mem_Ioo xC yC zF b
 
-end Map
+end Xap
 
 end IsFaceOf
 
 /- `F` is a face of `C` iff the image of `F` is a face of the image of `C` under an injective affine
 map -/
-theorem isFaceOf_map_iff {φ : M → N} (hφ : IsAffineMap R φ) (hinj : Injective φ) :
+theorem isFaceOf_map_iff {φ : X → Y} (hφ : IsAffineMap R φ) (hinj : Injective φ) :
     IsFaceOf R (φ '' F₁) (φ '' C₁) ↔ IsFaceOf R F₁ C₁ :=
   ⟨IsFaceOf.of_map_injective hφ hinj, IsFaceOf.map hφ hinj⟩
 
-variable {C₂ F₂ : Set N} in
+variable {C₂ F₂ : Set Y} in
 /-- The preimage of a set `F` under a surjective affine map is a face of the
 preimage of another set `F` if and only if `F` is a face of `C`. -/
-theorem isFaceOf_preimage_iff {φ : M → N} (hφ : IsAffineMap R φ) (hsurj : Function.Surjective φ) :
+theorem isFaceOf_preimage_iff {φ : X → Y} (hφ : IsAffineMap R φ) (hsurj : Function.Surjective φ) :
     IsFaceOf R (φ ⁻¹' F₂) (φ ⁻¹' C₂) ↔ IsFaceOf R F₂ C₂ :=
   ⟨IsFaceOf.of_preimage_surjective hφ hsurj, IsFaceOf.preimage hφ⟩
 
@@ -173,7 +183,7 @@ namespace IsFaceOf
 section Prod
 
 /-- The product of two faces of two sets is a face of the product of the sets. -/
-protected theorem prod {C₁ F₁ : Set M} {C₂ F₂ : Set N}
+protected theorem prod {C₁ F₁ : Set X} {C₂ F₂ : Set Y}
     (hF₁ : IsFaceOf R F₁ C₁) (hF₂ : IsFaceOf R F₂ C₂) : IsFaceOf R (F₁ ×ˢ F₂) (C₁ ×ˢ C₂) where
   isConvexSet := IsConvexSet.prod hF₁.isConvexSet hF₂.isConvexSet
   le := fun x hx ↦ by simpa [Set.mem_prod] using ⟨hF₁.le hx.1, hF₂.le hx.2⟩
@@ -185,7 +195,7 @@ protected theorem prod {C₁ F₁ : Set M} {C₂ F₂ : Set N}
 
 /-- The projection of a face of a product set onto the first component is a face of the
 projection of the product set onto the first component. -/
-protected theorem fst {C₁ : Set M} {C₂ : Set N} {F : Set (M × N)}
+protected theorem fst {C₁ : Set X} {C₂ : Set Y} {F : Set (X × Y)}
     (hF : IsFaceOf R F (C₁ ×ˢ C₂)) : IsFaceOf R (Prod.fst '' F) C₁ where
   isConvexSet := IsConvexSet.image Prod.isAffineMap_fst hF.isConvexSet
   le := by
@@ -204,7 +214,7 @@ protected theorem fst {C₁ : Set M} {C₂ : Set N} {F : Set (M × N)}
 
 /-- The projection of a face of a product set onto the second component is a face of the
 projection of the product set onto the second component. -/
-protected theorem snd {C₁ : Set M} {C₂ : Set N} {F : Set (M × N)}
+protected theorem snd {C₁ : Set X} {C₂ : Set Y} {F : Set (X × Y)}
     (hF : IsFaceOf R F (C₁ ×ˢ C₂)) : IsFaceOf R (Prod.snd '' F) C₂ := by
   have := hF.map (φ := Prod.swap) ((Prod.isAffineMap_snd).prodMk (Prod.isAffineMap_fst))
     Prod.swap_injective

@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 Olivia Röhrig, Martin Winter. All rights reserved.
+Copyright (c) 2026 Olivia Röhrig, Xartin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig, Mara Gruß, Valentina Taylor Cerra, Martin Winter
+Authors: Olivia Röhrig, Xara Gruß, Valentina Taylor Cerra, Xartin Winter
 -/
 module
 
@@ -9,21 +9,25 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 
-/-! This file defines faces of convex sets.
+/-! This file defines faces of convex sets. Since reflexivity only holds for convex sets, this type
+is defined on bundled `ConvexSet`. The use of bundled `ConvexSet` should be avoided where possible,
+since it requires tedious coercions. If `Face` being defined on `ConvexSets` turns out to bring
+this sort of trouble, we should consider other approaches (like requiring `Fact F.IsConvexSet` for
+the `OrderTop`).
 
 TODO: align this API with `Face` for cones.
 -/
 
 public section
 
-variable {R M : Type*}
+variable {R X : Type*}
 
 namespace Convexity
 
 section Semiring
 
 variable [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
-variable [ConvexSpace R M]
+variable [ConvexSpace R X]
 
 namespace ConvexSet
 
@@ -32,29 +36,29 @@ namespace ConvexSet
 Note: this is defined on bundled `ConvexSet` since convexity is required for the lattice to have a
 top element.
 -/
-structure Face (P : ConvexSet R M) extends toConvexSet : ConvexSet R M where
-  isFaceOf : IsFaceOf R toConvexSet (P : Set M)
+structure Face (P : ConvexSet R X) extends toConvexSet : ConvexSet R X where
+  isFaceOf : IsFaceOf R toConvexSet (P : Set X)
 
 attribute [coe] Face.toConvexSet
 
 namespace Face
 
-variable {P : ConvexSet R M}
+variable {P : ConvexSet R X}
 
-instance : SetLike (Face P) M where
+instance : SetLike (Face P) X where
   coe F := F.toConvexSet
   coe_injective a b h := by
     cases a; cases b; congr; exact SetLike.coe_injective h
 
-instance : CoeOut (Face P) (ConvexSet R M) := ⟨toConvexSet⟩
+instance : CoeOut (Face P) (ConvexSet R X) := ⟨toConvexSet⟩
 
 @[simp] theorem carrier_eq_coe {F : Face P} : F.carrier = F := by rfl
 
-@[simp] theorem mem_coe {F : Face P} (x : M) : x ∈ F.carrier ↔ x ∈ F := .rfl
+@[simp] theorem mem_coe {F : Face P} (x : X) : x ∈ F.carrier ↔ x ∈ F := .rfl
 
 @[ext] theorem ext {F₁ F₂ : Face P} (h : ∀ x, x ∈ F₁ ↔ x ∈ F₂) : F₁ = F₂ := SetLike.ext h
 
-@[simp] theorem coe_eq_toConvexSet_coe {F : Face P} : (F : Set M) = F.toConvexSet :=
+@[simp] theorem coe_eq_toConvexSet_coe {F : Face P} : (F : Set X) = F.toConvexSet :=
   SetLike.ext'_iff.mp rfl
 
 @[simp] theorem mem_mk {s h x} : x ∈ (⟨s, h⟩ : Face P) ↔ x ∈ s := .rfl
@@ -67,7 +71,7 @@ instance : OrderBot (Face P) where
   bot := ⟨∅, IsFaceOf.empty⟩
   bot_le _ _ := by simp
 
-lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := by
+lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set X).Nonempty := by
   rw [Set.nonempty_iff_ne_empty]
   intro heq
   apply h
@@ -91,11 +95,11 @@ theorem toConvexSet_lt_toConvexSet {F₁ F₂ : Face P} :
     F₁.toConvexSet < F₂.toConvexSet ↔ F₁ < F₂ := .rfl
 
 @[simp]
-theorem mem_toConvexSet {F : Face P} (x : M) : x ∈ F.toConvexSet ↔ x ∈ F := .rfl
+theorem mem_toConvexSet {F : Face P} (x : X) : x ∈ F.toConvexSet ↔ x ∈ F := .rfl
 
-@[simp] theorem toConvexSet_bot : ((⊥ : Face P) : ConvexSet R M) = ∅ := rfl
+@[simp] theorem toConvexSet_bot : ((⊥ : Face P) : ConvexSet R X) = ∅ := rfl
 
-@[simp] theorem toConvexSet_top : ((⊤ : Face P) : ConvexSet R M) = P := rfl
+@[simp] theorem toConvexSet_top : ((⊤ : Face P) : ConvexSet R X) = P := rfl
 
 /-! ### Infimum, supremum and lattice -/
 
@@ -103,7 +107,7 @@ theorem mem_toConvexSet {F : Face P} (x : M) : x ∈ F.toConvexSet ↔ x ∈ F :
 instance : Min (Face P) where
   min F₁ F₂ := ⟨F₁ ⊓ F₂, F₁.isFaceOf.inf_left F₂.isFaceOf⟩
 
-protected theorem IsFaceOf.sInf (F : Set (ConvexSet R M)) (h : ∀ f ∈ F, IsFaceOf R f (P : Set M)) :
+protected theorem IsFaceOf.sInf (F : Set (ConvexSet R X)) (h : ∀ f ∈ F, IsFaceOf R f (P : Set X)) :
     IsFaceOf R (P ⊓ sInf F).carrier P where
   isConvexSet := ConvexSet.isConvexSet _
   le _ sm := sm.1
