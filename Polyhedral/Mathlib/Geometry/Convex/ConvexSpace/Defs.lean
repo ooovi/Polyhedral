@@ -20,16 +20,18 @@ namespace Convexity
 
 attribute [simp] StdSimplex.nonneg
 
-private lemma convexPairWeights_cases {R : Type*} [Semiring R] [PartialOrder R]
-    (s t : R) {P : Prop} (valid : 0 ≤ s → 0 ≤ t → s + t = 1 → P)
+namespace StdSimplex
+
+variable {R X Y : Type*} [Semiring R] [PartialOrder R]
+
+lemma duple_cases (s t : R) {P : Prop}
+    (valid : 0 ≤ s → 0 ≤ t → s + t = 1 → P)
     (invalid : ¬(0 ≤ s ∧ 0 ≤ t ∧ s + t = 1) → P) : P := by
   rcases em (0 ≤ s ∧ 0 ≤ t ∧ s + t = 1) with ⟨hs, ht, hst⟩ | h
   · exact valid hs ht hst
   · exact invalid h
 
-namespace StdSimplex
-
-variable {R X Y : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R]
+variable [IsStrictOrderedRing R]
 
 /-- Assign weights `s` and `t` to `x` and `y` when the weights are nonnegative and sum to one.
 For all other weights, put all the weight on `x`. -/
@@ -52,13 +54,13 @@ open Classical in
 lemma duple'_cases {motive : StdSimplex R X → Prop} (x y : X) (s t : R)
     (valid : ∀ (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1), motive (duple x y hs ht hst))
     (invalid : ¬(0 ≤ s ∧ 0 ≤ t ∧ s + t = 1) → motive (single x)) : motive (duple' x y s t) := by
-  refine convexPairWeights_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
+  refine duple_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
   · simpa only [duple'_eq_duple hs ht hst] using valid hs ht hst
   · simpa [duple', h] using invalid h
 
 @[simp] lemma map_duple' (x y : X) (s t : R) (f : X → Y) :
     (duple' x y s t).map f = duple' (f x) (f y) s t := by
-  refine convexPairWeights_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
+  refine duple_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
   · simp only [duple'_eq_duple hs ht hst, map_duple]
   · simp [duple', h]
 
@@ -125,7 +127,7 @@ variable {R X I : Type*} [CommSemiring R] [PartialOrder R] [IsStrictOrderedRing 
 lemma iConvexComb_convexCombPair'_comm (s t : R) (w : StdSimplex R I) (e₁ e₂ : I → X) :
     w.iConvexComb (fun i ↦ convexCombPair' s t (e₁ i) (e₂ i)) =
       convexCombPair' s t (w.iConvexComb e₁) (w.iConvexComb e₂) := by
-  refine convexPairWeights_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
+  refine StdSimplex.duple_cases s t (fun hs ht hst ↦ ?_) (fun h ↦ ?_)
   · simp only [convexCombPair'_eq_convexCombPair hs ht hst, iConvexComb_convexCombPair_comm]
   · simp [convexCombPair', StdSimplex.duple', h]
 
