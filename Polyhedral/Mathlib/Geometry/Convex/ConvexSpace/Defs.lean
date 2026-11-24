@@ -26,24 +26,58 @@ variable {R X : Type*} [Semiring R] [PartialOrder R] [IsStrictOrderedRing R] [Co
 /-- Take a convex combination of two points when both weights are nonnegative and sum to one.
 Returns the first point for all other weights. -/
 noncomputable def convexCombPair' (s t : R) (x y : X) : X := by classical
-  exact if h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1 then convexCombPair s t h.1 h.2.1 h.2.2 x y else x
+  exact if h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1 then sConvexComb (.duple x y h.1 h.2.1 h.2.2) else x
 
-lemma convexCombPair'_eq_convexCombPair {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1)
-    (x y : X) : convexCombPair' s t x y = convexCombPair s t hs ht hst x y := by
+lemma convexCombPair'_eq_sConvexComb {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1)
+    (x y : X) : convexCombPair' s t x y = sConvexComb (.duple x y hs ht hst) := by
   simp [convexCombPair', hs, ht, hst]
 
+lemma convexCombPair'_eq_convexCombPair {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1)
+    (x y : X) : convexCombPair' s t x y = convexCombPair s t hs ht hst x y :=
+  convexCombPair'_eq_sConvexComb hs ht hst x y
+
+lemma convexCombPair'_eq_left_of_not {s t : R} (h : ¬(0 ≤ s ∧ 0 ≤ t ∧ s + t = 1)) (x y : X) :
+    convexCombPair' s t x y = x := by
+  simp [convexCombPair', h]
+
 @[simp] lemma convexCombPair'_zero {x y : X} : convexCombPair' (0 : R) 1 x y = y := by
-  rw [convexCombPair'_eq_convexCombPair (by simp) (by simp) (by simp), convexCombPair_zero]
+  simp [convexCombPair', StdSimplex.duple, StdSimplex.mk_single]
 
 @[simp] lemma convexCombPair'_one {x y : X} : convexCombPair' (1 : R) 0 x y = x := by
-  rw [convexCombPair'_eq_convexCombPair (by simp) (by simp) (by simp), convexCombPair_one]
+  simp [convexCombPair', StdSimplex.duple, StdSimplex.mk_single]
 
 @[simp] lemma convexCombPair'_same (s t : R) (x : X) : convexCombPair' s t x x = x := by
   by_cases h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1
   · rw [convexCombPair'_eq_convexCombPair h.1 h.2.1 h.2.2, convexCombPair_same]
-  · simp [convexCombPair']
+  · exact convexCombPair'_eq_left_of_not h x x
+
+lemma convexCombPair'_symm {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1) (x y : X) :
+    convexCombPair' s t x y = convexCombPair' t s y x := by
+  rw [convexCombPair'_eq_convexCombPair hs ht hst,
+    convexCombPair'_eq_convexCombPair ht hs ((add_comm _ _).trans hst), convexCombPair_symm]
+
+variable {Y : Type*} [ConvexSpace R Y]
+
+lemma IsAffineMap.map_convexCombPair' {f : X → Y} (hf : IsAffineMap R f) (s t : R) (x y : X) :
+    f (convexCombPair' s t x y) = convexCombPair' s t (f x) (f y) := by
+  by_cases h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1
+  · simp only [convexCombPair'_eq_convexCombPair h.1 h.2.1 h.2.2, hf.map_convexCombPair]
+  · simp only [convexCombPair'_eq_left_of_not h]
 
 end convexCombPair
+
+section CommSemiring
+variable {R X I : Type*} [CommSemiring R] [PartialOrder R] [IsStrictOrderedRing R]
+  [ConvexSpace R X]
+
+lemma iConvexComb_convexCombPair'_comm (s t : R) (w : StdSimplex R I) (e₁ e₂ : I → X) :
+    w.iConvexComb (fun i ↦ convexCombPair' s t (e₁ i) (e₂ i)) =
+      convexCombPair' s t (w.iConvexComb e₁) (w.iConvexComb e₂) := by
+  by_cases h : 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1
+  · simp only [convexCombPair'_eq_convexCombPair h.1 h.2.1 h.2.2, iConvexComb_convexCombPair_comm]
+  · simp only [convexCombPair'_eq_left_of_not h]
+
+end CommSemiring
 
 section iConvexComb
 variable {R M I : Type*}
