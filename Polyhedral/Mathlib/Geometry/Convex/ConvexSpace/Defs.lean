@@ -42,12 +42,9 @@ lemma duple'_eq_duple {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1) 
     duple' x y s t = duple x y hs ht hst := by
   simp [duple', hs, ht, hst]
 
-open Classical in
-@[simp] lemma weights_duple' (x y : X) (s t : R) :
-    (duple' x y s t).weights =
-      if 0 ≤ s ∧ 0 ≤ t ∧ s + t = 1 then Finsupp.single x s + Finsupp.single y t
-      else Finsupp.single x 1 := by
-  simp [duple', apply_dite weights]
+@[simp] lemma weights_duple' (x y : X) {s t : R} (hs : 0 ≤ s) (ht : 0 ≤ t) (hst : s + t = 1) :
+    (duple' x y s t).weights = Finsupp.single x s + Finsupp.single y t := by
+  rw [duple'_eq_duple hs ht hst, weights_duple]
 
 /-- Split a goal about `duple' x y s t` into the `duple` and `single` cases. -/
 @[elab_as_elim]
