@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 Olivia Röhrig, Xartin Winter. All rights reserved.
+Copyright (c) 2026 Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Olivia Röhrig, Xara Gruß, Valentina Taylor Cerra, Xartin Winter
+Authors: Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter
 -/
 module
 
