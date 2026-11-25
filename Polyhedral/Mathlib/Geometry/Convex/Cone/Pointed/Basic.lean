@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Geometry.Convex.Cone.Pointed
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-public import Mathlib.Algebra.Order.Nonneg.Basic
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 
 import Mathlib.RingTheory.LocalRing.Basic
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
@@ -161,7 +161,7 @@ def linealCone (C : PointedCone R M) : PointedCone R M where
   smul_mem' r _ hx := by
     by_cases hr : 0 ≤ r
     · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.right)
-    · by_contra; exact hr r.property
+    · by_contra; exact hr r.nonneg
 
 end AddCommGroup
 
