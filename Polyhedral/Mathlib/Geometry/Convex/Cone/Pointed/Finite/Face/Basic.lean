@@ -42,8 +42,8 @@ lemma IsFaceOf.fg (hC : C.FG) (hF : F.IsFaceOf C) : F.FG := by
 /-- A finitely generated cone has only finitely many faces. -/
 lemma FG.finite_face (hC : C.FG) : Finite (Face C) := by
   obtain ⟨s, rfl⟩ := hC
-  let T := {t : {t : Finset M // t ∈ s.powerset} // (hull R (t.1 : Set M)).IsFaceOf (hull R s)}
-  let f : T → Face (hull R s) := fun t ↦ ⟨hull R (t.1.1 : Set M), t.2⟩
+  let T := {t : {t : Finset M // t ∈ s.powerset} // (hull R (t.val : Set M)).IsFaceOf (hull R s)}
+  let f : T → Face (hull R s) := fun t ↦ ⟨hull R (t.val.val : Set M), t.property⟩
   apply Finite.of_surjective f
   intro F
   obtain ⟨t, hts, ht⟩ := exists_fg_hull_subset_face F.isFaceOf

@@ -49,34 +49,37 @@ theorem refl (C : ConvexSet R M) : C.IsFaceOf C :=
 theorem trans {C F₁ F₂ : ConvexSet R M} (h₁ : F₂.IsFaceOf F₁) (h₂ : F₁.IsFaceOf C) :
     F₂.IsFaceOf C := by
   constructor
-  · apply Set.Subset.trans h₁.1 h₂.1
+  · apply Set.Subset.trans h₁.le h₂.le
   · intro x hx y hy z hz hhz
-    have hz' : z ∈ F₁.carrier := Set.mem_of_mem_of_subset hz h₁.1
-    exact @h₁.2 x (@h₂.2 x hx y hy z hz' hhz) y (@h₂.2 y hy x hx z hz' (by simpa [Ioo_symm]
-    using hhz)) z hz hhz
+    have hz' : z ∈ F₁.carrier := Set.mem_of_mem_of_subset hz h₁.le
+    refine h₁.left_mem_of_mem_Ioo (h₂.left_mem_of_mem_Ioo hx hy hz' hhz)
+      (h₂.left_mem_of_mem_Ioo hy hx hz' ?_) hz hhz
+    simpa [Ioo_symm] using hhz
 
 /- For two faces `F₁, F₂` of `C`, `F₁` is a face of `F₂` iff it is a subset of `F₂`. -/
 theorem iff_le_of_isFaceOf {C F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
     F₁.IsFaceOf F₂ ↔ F₁.carrier ⊆ F₂.carrier := by
   constructor
-  · exact fun h => h.1
+  · exact fun h => h.le
   · intro hh
     constructor
     · exact hh
     · intro x hx y hy z hz hhz
-      exact h₁.2 (Set.mem_of_mem_of_subset hx h₂.1) (Set.mem_of_mem_of_subset hy h₂.1) hz hhz
+      exact h₁.left_mem_of_mem_Ioo (Set.mem_of_mem_of_subset hx h₂.le)
+        (Set.mem_of_mem_of_subset hy h₂.le) hz hhz
 
 /- A convex set is a face of a face iff it is contained in the face and it is a face
 of the ambient set. -/
 lemma isFaceOf_iff {F C : ConvexSet R M} (F₁ : ConvexSet R M) (H : F.IsFaceOf C) :
     F₁.IsFaceOf F ↔ F₁.carrier ⊆ F.carrier ∧ F₁.IsFaceOf C:= by
   apply Iff.intro
-  · exact fun h => ⟨h.1, trans h H⟩
+  · exact fun h => ⟨h.le, trans h H⟩
   · intro h
     constructor
     · apply h.1
     · intro x hx y hy z hz hhz
-      exact @h.2.2 x (Set.mem_of_mem_of_subset hx H.1) y (Set.mem_of_mem_of_subset hy H.1) z hz hhz
+      exact h.2.left_mem_of_mem_Ioo (Set.mem_of_mem_of_subset hx H.le)
+        (Set.mem_of_mem_of_subset hy H.le) hz hhz
 
 /- The intersection of two faces of two convex sets is a face of the intersection of the convex
 sets. -/
@@ -84,9 +87,9 @@ theorem inf {S₁ S₂ F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf S₁) (h
     (F₁ ⊓ F₂).IsFaceOf (S₁ ⊓ S₂) := by
   constructor
   · intro x hx
-    exact ⟨Set.mem_of_mem_of_subset hx.1 h₁.1, Set.mem_of_mem_of_subset hx.2 h₂.1⟩
+    exact ⟨Set.mem_of_mem_of_subset hx.1 h₁.le, Set.mem_of_mem_of_subset hx.2 h₂.le⟩
   · intro a ha b hb z hz hhz
-    exact ⟨@h₁.2 a ha.1 b hb.1 z hz.1 hhz, @h₂.2 a ha.2 b hb.2 z hz.2 hhz⟩
+    exact ⟨h₁.left_mem_of_mem_Ioo ha.1 hb.1 hz.1 hhz, h₂.left_mem_of_mem_Ioo ha.2 hb.2 hz.2 hhz⟩
 
 /- The intersection of two faces is a face. -/
 theorem inf_left {C F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf C) (h₂ : F₂.IsFaceOf C) :
@@ -94,12 +97,13 @@ theorem inf_left {C F₁ F₂ : ConvexSet R M} (h₁ : F₁.IsFaceOf C) (h₂ : 
   constructor
   · exact le_trans inf_le_left h₁.le
   · intro x hx y hy z hz hhz
-    exact ⟨@h₁.2 x hx y hy z hz.1 hhz, @h₂.2 x hx y hy z hz.2 hhz⟩
+    exact ⟨h₁.left_mem_of_mem_Ioo hx hy hz.1 hhz, h₂.left_mem_of_mem_Ioo hx hy hz.2 hhz⟩
 
 /- The face of two convex sets is a face of the intersection. -/
 theorem inf_right {S₁ S₂ F : ConvexSet R M} (h₁ : F.IsFaceOf S₁) (h₂ : F.IsFaceOf S₂) :
     F.IsFaceOf (S₁ ⊓ S₂) :=
-  ⟨Set.subset_inter h₁.1 h₂.1, by intro x hx y hy z hz hhz; exact @h₁.2 x hx.1 y hy.1 z hz hhz⟩
+  ⟨Set.subset_inter h₁.le h₂.le,
+    by intro x hx y hy z hz hhz; exact h₁.left_mem_of_mem_Ioo hx.1 hy.1 hz hhz⟩
 
 variable [ConvexSpace R M₁]
 variable [ConvexSpace R M₂]
@@ -110,7 +114,7 @@ theorem map {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f)
   constructor
   · intro x hx
     rcases hx with ⟨y , hy, rfl⟩
-    exact Set.mem_image_of_mem _ (Set.mem_of_mem_of_subset hy hF.1)
+    exact Set.mem_image_of_mem _ (Set.mem_of_mem_of_subset hy hF.le)
   · intro x hx y hy z hz hhz
     rcases hx with ⟨m , hmC, rfl⟩
     rcases hy with ⟨n , hnC, rfl⟩
@@ -122,14 +126,14 @@ theorem map {f : M₁ → M₂} {F C : ConvexSet R M₁} (hhf : IsAffineMap R f)
       have hh : f (convexCombPair a b ha.le hb.le hab m n) = f l := by
         simpa [h] using hcomb
       exact ⟨ a, b, ha, hb, hab, hf hh⟩
-    exact Set.mem_image_of_mem _ (@hF.2 m hmC n hnC l hlF hl)
+    exact Set.mem_image_of_mem _ (hF.left_mem_of_mem_Ioo hmC hnC hlF hl)
 
 /- The preimage of a face is a face of the preimage. -/
 theorem comap_face {f : M₁ → M₂} {F C : ConvexSet R M₂} (hf : IsAffineMap R f) (hF : F.IsFaceOf C) :
    (F.comap hf).IsFaceOf (C.comap hf) := by
   constructor
-  · apply Set.preimage_mono hF.1
-  · have hF1 := hF.2
+  · apply Set.preimage_mono hF.le
+  · have hF1 := hF.left_mem_of_mem_Ioo
     intro x hx y hy z hz hhz
     have hhz' : f z ∈ Convexity.Ioo R (f x) (f y) := by
       rcases hhz with ⟨ a, b, ha, hb, hab, hcomb⟩

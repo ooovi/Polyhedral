@@ -134,13 +134,13 @@ lemma FG.codisjoint_cofg {S T : Submodule R M} (hST : Codisjoint S T) (hS : S.FG
 example {S : Submodule R M} (hS : S.CoFG) :
     ∃ T : Submodule R M, T.FG ∧ IsCompl S T := by
   obtain ⟨T, hST⟩ := S.exists_isCompl
-  exact ⟨T, CoFG.disjoint_fg hST.1 hS, hST⟩
+  exact ⟨T, CoFG.disjoint_fg hST.disjoint hS, hST⟩
 
 -- does not hold over a general ring
 example {S : Submodule R M} (hS : S.FG) :
     ∃ T : Submodule R M, T.CoFG ∧ IsCompl S T := by
   obtain ⟨T, hST⟩ := S.exists_isCompl
-  exact ⟨T, FG.codisjoint_cofg hST.2 hS, hST⟩
+  exact ⟨T, FG.codisjoint_cofg hST.codisjoint hS, hST⟩
 
 end DivisionRing
 

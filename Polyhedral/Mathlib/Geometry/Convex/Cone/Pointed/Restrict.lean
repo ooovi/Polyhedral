@@ -77,12 +77,12 @@ lemma embed_mono_rev {S : Submodule R M} {C₁ C₂ : PointedCone R S} (hC : emb
 
 @[simp] lemma embed_le {S : Submodule R M} {C : PointedCone R S} : embed C ≤ S := by
   rintro x ⟨y, _, rfl⟩
-  exact y.2
+  exact y.property
 
 @[simp] lemma embed_restrict (S : Submodule R M) (C : PointedCone R M) :
     (C.restrict S).embed = (S ⊓ C : PointedCone R M) := by
   ext x
-  exact ⟨fun ⟨y, hy, h⟩ => h ▸ ⟨y.2, hy⟩,
+  exact ⟨fun ⟨y, hy, h⟩ => h ▸ ⟨y.property, hy⟩,
     fun ⟨hxS, hxC⟩ ↦ ⟨⟨x, hxS⟩, hxC, rfl⟩⟩
 
 @[simp]

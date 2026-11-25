@@ -65,7 +65,7 @@ instance : OrderBot (Face P) where
   bot_le _ _ := by simp
 
 lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set M).Nonempty := by
-  rw [Set.nonempty_iff_ne_empty]
+  rw [← Set.ne_empty_iff_nonempty]
   intro heq
   apply h
   ext
@@ -110,7 +110,7 @@ protected theorem IsFaceOf.sInf (F : Set (ConvexSet R M)) (h : ∀ f ∈ F, f.Is
 
 instance : InfSet (Face P) where
   sInf S :=
-    { toConvexSet := P ⊓ sInf {s.1 | s ∈ S}
+    { toConvexSet := P ⊓ sInf {(s.toConvexSet) | s ∈ S}
       isFaceOf := IsFaceOf.sInf _ (fun _ ⟨s, _, hs2⟩ ↦ hs2 ▸ s.isFaceOf) }
 
 instance : SemilatticeInf (Face P) where
@@ -128,7 +128,7 @@ instance : CompleteSemilatticeInf (Face P) where
       simpa [LE.le] using fun _ xs ↦ xs f fS
     · simp only [sInf, Set.sInter_image, Set.mem_ofPred_eq,
         Set.iInter_exists, Set.biInter_and', Set.iInter_iInter_eq_right]
-      simpa [LE.le] using fun x a ↦ ⟨f.2.1 a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
+      simpa [LE.le] using fun x a ↦ ⟨f.isFaceOf.le a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
 
 instance : CompleteLattice (Face P) where
   top := ⟨P, .refl _⟩

@@ -160,8 +160,8 @@ def linealCone (C : PointedCone R M) : PointedCone R M where
   __ := C.support
   smul_mem' r _ hx := by
     by_cases hr : 0 ≤ r
-    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
-    · by_contra; exact hr r.2
+    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.right)
+    · by_contra; exact hr r.property
 
 end AddCommGroup
 

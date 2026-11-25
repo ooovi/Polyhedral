@@ -171,7 +171,7 @@ section Bot
 variable [Bot A] [IsConcreteBot A B]
 
 theorem bot_ne_top [Nonempty B] : (⊥ : A) ≠ ⊤ := by
-  simpa [← coe_set_eq] using Set.empty_ne_univ
+  · simp [← coe_set_eq]
 
 end Bot
 

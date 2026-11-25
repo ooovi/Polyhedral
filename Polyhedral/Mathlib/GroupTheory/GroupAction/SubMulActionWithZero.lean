@@ -272,7 +272,7 @@ end SMulZeroClass
 
 instance (priority := 75) toSMulZeroClass [Zero M] [SMulZeroClass R M]
     (p : SubMulAction₀ R M) : SMulZeroClass R p where
-  smul r x := ⟨_, p.smul_mem r x.2⟩
+  smul r x := ⟨_, p.smul_mem r x.property⟩
   smul_zero r := Subtype.ext (smul_zero r)
 
 instance (priority := 75) toSMulWithZero [Zero R] [Zero M] [SMulWithZero R M]
