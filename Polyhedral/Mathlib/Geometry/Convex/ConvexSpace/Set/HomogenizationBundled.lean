@@ -5,9 +5,7 @@ Authors: Martin Winter, Olivia Röhrig
 -/
 module
 
-public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Convexity
-public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Lineal
-public import Polyhedral.Mathlib.LinearAlgebra.AffineSpace.Homogenization.IsHomogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
 
 deprecated_module "This is the version using bundled convex sets. If you're not currently
 experimenting with bundled convex sets, please use
