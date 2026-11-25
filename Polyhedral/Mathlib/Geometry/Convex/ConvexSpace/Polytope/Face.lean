@@ -7,6 +7,7 @@ module
 
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
 
 import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Finite.Face.Grade
 import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Polytope.Homogenization
@@ -18,7 +19,9 @@ public section
 
 variable {R V A : Type*}
 
-open Convexity ConvexSet Affine
+open Convexity IsConvexSet Affine
+
+namespace Convexity
 
 section Field
 
@@ -26,17 +29,19 @@ variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V]
 variable [AddTorsor V A] [ConvexSpace R A] [IsAffineConvexSpace R V A]
 
-variable {C F : ConvexSet R A}
+variable {C F : Set A}
 
 include V in
 /-- Faces of polytopes are polytopes. -/
-theorem IsPolytope.face_isPolytope (hC : IsPolytope R (C : Set A)) (hF : IsFaceOf F C) :
+theorem IsPolytope.face_isPolytope (hC : IsPolytope R C) (hF : IsFaceOf R F C) :
     IsPolytope R (F : Set A) := by
   let : ConvexSpace R (Homogenization R A) := ConvexSpace.ofModule
-  have homF := (IsHomogenization.canonical R A).homogenize_isFaceOf hF
+  have homF := (IsHomogenization.canonical R A).homogenize_isFaceOf hC.isConvexSet hF
   have := PointedCone.IsFaceOf.fg (IsPolytope.homogenize_fg _ hC) homF
   convert FG.dehomogenize_isPolytope this (fun _ a b ↦ weight_pos_of_mem_homogenize a b)
-  simp [dehomogenize_homogenize]
+  rw [dehomogenize_homogenize _  hF.isConvexSet]
+
+open ConvexSet
 
 include V in
 instance {P : Polytope R A} : CoeOut (Face (P : ConvexSet R A)) (Polytope R A) where
@@ -58,3 +63,5 @@ private noncomputable instance Polytope.faceHomogenizationGradeOrder (P : Polyto
   exact fun x y ↦ (apply_covBy_apply_iff _).mpr
 
 end Field
+
+end Convexity
