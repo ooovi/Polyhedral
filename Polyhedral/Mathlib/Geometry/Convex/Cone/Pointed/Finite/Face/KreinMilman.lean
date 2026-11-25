@@ -145,7 +145,7 @@ lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
     absurd hx
     push Not at H
     simp only [← Set.mem_singleton_iff] at H
-    simpa [h] using Submodule.span_mono (R := {c : R // 0 ≤ c}) H
+    simpa [h] using Submodule.span_mono (R := Nonneg R) H
   simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton,
     Subtype.exists] at hy
   obtain ⟨hys, a, ha, rfl⟩ := hy

@@ -32,7 +32,7 @@ variable [AddCommMonoid M] [Module R M]
 character `•` U+2022. -/
 /-- Notation for the `SubMulAction₀` generated from a set `s` w.r.t. positive scalars,
 short for `SubMulAction₀.closure R≥0 s`. -/
-scoped notation:70 (priority := high) R:70 " ∙₊ " s:70 => { c : R // 0 ≤ c } ∙ s
+scoped notation:70 (priority := high) R:70 " ∙₊ " s:70 => (Nonneg R) ∙ s
 
 local notation "R≥0" => {c : R // 0 ≤ c}
 

@@ -25,7 +25,7 @@ open Function SubMulAction₀ IsHomogenization
 
 variable {R V A W : Type*}
 
-local notation3 "R≥0" => {c : R // 0 ≤ c}
+local notation3 "R≥0" => Nonneg R
 
 section Ring
 

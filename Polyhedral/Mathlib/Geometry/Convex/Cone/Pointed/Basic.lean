@@ -325,7 +325,7 @@ section CommRing
 variable {R M : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
 
-local notation "R≥0" => {c : R // 0 ≤ c}
+local notation "R≥0" => Nonneg R
 
 noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
     {C : PointedCone R M} (hSC : S ≤ C) : C.quot S ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=
