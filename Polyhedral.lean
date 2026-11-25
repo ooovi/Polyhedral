@@ -62,6 +62,7 @@ public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Basic
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Homogenization
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Face.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Homogenization
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.HomogenizationBundled
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Order
