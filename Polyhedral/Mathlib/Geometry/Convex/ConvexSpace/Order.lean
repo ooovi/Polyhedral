@@ -246,7 +246,7 @@ lemma iConvexComb_le_iConvexComb_of_support
   classical
   calc
     v.iConvexComb f = v.iConvexComb (fun i ↦ if f i ≤ g i then f i else g i) :=
-      iConvexComb_congr fun i hi ↦ by simp [hfg i hi]
+      iConvexComb_congr rfl fun i hi ↦ by simp [hfg i hi]
     _ ≤ v.iConvexComb g := iConvexComb_le_iConvexComb fun i ↦ by
       split_ifs with hi
       · exact hi
