@@ -64,7 +64,7 @@ abbrev quot (S T : Submodule R M) := map T.mkQ S
 
 /-- Restricted scalars version of `Submodule.range_mkQ`. -/
 theorem range_mkQ' (p : Submodule R M) : range (p.mkQ.restrictScalars S) = ⊤ :=
-  eq_top_iff'.2 <| by rintro ⟨x⟩; exact ⟨x, rfl⟩
+  eq_top_iff'.mpr <| by rintro ⟨x⟩; exact ⟨x, rfl⟩
 
 example (p : Submodule R M) : range p.mkQ = ⊤ := range_mkQ' p
 
@@ -116,11 +116,11 @@ def mkQ_orderHom (p : Submodule R M) : Submodule S M →o Submodule S (M ⧸ p) 
 /-- `mkQ` as an order isomorphism between the submodules of M ⧸ p and the submodules of
   M that contain p. -/
 def mkQ_orderIso (p : Submodule R M) : Set.Ici (p.restrictScalars S) ≃o Submodule S (M ⧸ p) where
-  toFun s := s.1.map (p.mkQ.restrictScalars S)
+  toFun s := s.val.map (p.mkQ.restrictScalars S)
   invFun s := ⟨s.comap (p.mkQ.restrictScalars S), le_comap_mkQ' s⟩
   left_inv s := by
     simp only [comap_map_mkQ']; congr
-    exact (right_eq_sup.mpr (Set.mem_Ici.mp s.2)).symm
+    exact (right_eq_sup.mpr (Set.mem_Ici.mp s.property)).symm
   right_inv s := by simp [map_comap_eq, range_mkQ']
   map_rel_iff' := by
     intro s t
@@ -128,7 +128,7 @@ def mkQ_orderIso (p : Submodule R M) : Set.Ici (p.restrictScalars S) ≃o Submod
     · intro h
       replace h := comap_mono h (f := p.mkQ.restrictScalars S)
       simp only [Equiv.coe_fn_mk, comap_map_mkQ', sup_le_iff, le_sup_left, true_and] at h
-      rw [← right_eq_sup.mpr t.2] at h
+      rw [← right_eq_sup.mpr t.property] at h
       exact h
     · exact (map_mono ·)
 
@@ -201,10 +201,10 @@ def IsCompl.IicOrderIsoIci_restrictScalars {p q : Submodule R M} (hpq : IsCompl 
   toFun s := ⟨s ⊔ q.restrictScalars S, by simp⟩
   invFun s := ⟨s ⊓ p.restrictScalars S, by simp⟩
   left_inv s := by
-    simp [sup_inf_assoc_of_le_restrictScalars _ s.2, ← restrictScalars_inf,
+    simp [sup_inf_assoc_of_le_restrictScalars _ s.property, ← restrictScalars_inf,
       disjoint_iff.mp hpq.symm.disjoint]
   right_inv s := by
-    simp [inf_sup_assoc_of_restrictScalars_le _ s.2, ← restrictScalars_sup,
+    simp [inf_sup_assoc_of_restrictScalars_le _ s.property, ← restrictScalars_sup,
       codisjoint_iff.mp hpq.codisjoint]
   map_rel_iff' := by
     simp only [Equiv.coe_fn_mk, Subtype.mk_le_mk, sup_le_iff, le_sup_right, and_true,
@@ -230,7 +230,7 @@ def quot_orderIso_Ici_restrictScalars (p : Submodule R M) :
   invFun q := map (p.mkQ.restrictScalars S) q
   left_inv _ := by simp
   right_inv q := by
-    have hq := q.2
+    have hq := q.property
     rw [Set.mem_Ici] at hq
     simp [hq]
   map_rel_iff' := by
@@ -254,14 +254,14 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
     {s : Submodule S M} (hps : p.restrictScalars S ≤ s) :
     map (p.mkQ : M →ₗ[S] M ⧸ p) s ≃ₗ[S] (s ⊓ q.restrictScalars S : Submodule S M) where
   toFun x := ⟨quotientEquivOfIsCompl _ _ hpq x, by
-    obtain ⟨y, hys, hy⟩ := x.2; rw [← hy]
+    obtain ⟨y, hys, hy⟩ := x.property; rw [← hy]
     obtain ⟨yp, yq, rfl, _⟩ := existsUnique_add_of_isCompl hpq y
     rw [← Submodule.quotientEquivOfIsCompl_apply_mk_right hpq yq]
     simp only [LinearMap.coe_restrictScalars, mkQ_apply,
-      map_add, coe_add, mem_inf, restrictScalars_mem, (Quotient.mk_eq_zero p).mpr yp.2]
-    simpa using add_mem (hps <| neg_mem (S := Submodule R M) yp.2) hys
+      map_add, coe_add, mem_inf, restrictScalars_mem, (Quotient.mk_eq_zero p).mpr yp.property]
+    simpa using add_mem (hps <| neg_mem (S := Submodule R M) yp.property) hys
   ⟩
-  invFun x := ⟨p.mkQ x, x, by simpa using x.2.1⟩
+  invFun x := ⟨p.mkQ x, x, by simpa using x.property.left⟩
   map_add' x y := by simp
   map_smul' r x := by -- this part is AI generated; check for improvement.
     have h : quotientEquivOfIsCompl p q hpq (r • (x : M ⧸ p)) =
@@ -272,7 +272,7 @@ noncomputable def IsCompl.map_mkQ_equiv_inf {p q : Submodule R M} (hpq : IsCompl
     exact congrArg (fun y : q ↦ (y : M)) h
   left_inv x := by simp
   right_inv x := by
-    have H : (x : M) = (⟨x.1, x.2.2⟩ : q) := rfl
+    have H : (x : M) = (⟨x.val, x.property.right⟩ : q) := rfl
     ext; simp only [mkQ_apply]; rw [H]; congr
     exact Submodule.quotientEquivOfIsCompl_apply_mk_right ..
 

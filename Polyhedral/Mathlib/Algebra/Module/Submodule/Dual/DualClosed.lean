@@ -134,7 +134,7 @@ theorem DualClosed.eq_sInf {S : Submodule R M} (hS : S.DualClosed p) :
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hS, by simp⟩
-  simp only [IsConcreteLE.le_iff, mem_sInf, mem_ofPred_eq, and_imp]
+  simp only [le_iff_mem_imp_mem, mem_sInf, mem_ofPred_eq, and_imp]
   intro x hx T hT hsT
   rw [← hT]; rw [← hS] at hx
   exact (dual_dual_mono p hsT) hx
@@ -181,7 +181,7 @@ lemma dual_dual_bilin_eq_dual_dual_eval (s : Set M) :
   rw [le_antisymm_iff, and_comm]
   constructor
   · exact dual_dual_eval_le_dual_dual_bilin p s
-  simp only [IsConcreteLE.le_iff, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe,
+  simp only [le_iff_mem_imp_mem, mem_dual, SetLike.mem_coe, flip_apply, Dual.eval_apply, id_coe,
     id_eq]
   intro x hx y hy
   obtain ⟨x', hx'⟩ := (Fact.elim inferInstance : Surjective p.flip) y

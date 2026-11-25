@@ -200,7 +200,7 @@ lemma IsConvexFunOn.of_map_sConvexComb_le (hs : IsConvexSet R s)
     _ = w.iConvexComb fun p ↦ f p.1 := iConvexComb_map ..
     -- The two functions agree on the support of `w`, where `f p.1 ≤ p.2` by assumption.
     _ = w.iConvexComb fun p ↦ min (f p.1) p.2 :=
-        iConvexComb_congr fun p hp ↦ (min_eq_left (hw <| by simpa using hp).2).symm
+        iConvexComb_congr rfl fun p hp ↦ (min_eq_left (hw <| by simpa using hp).2).symm
     _ ≤ w.iConvexComb Prod.snd := iConvexComb_le_iConvexComb fun p ↦ min_le_right ..
 
 /-- **Jensen's inequality** characterises convexity of a function: `f` is convex on `s` iff `s` is

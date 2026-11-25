@@ -65,7 +65,8 @@ protected theorem rfl {C : Set X} {h : IsConvexSet R C} : IsFaceOf R C C := .ref
 /-- A face of a set is a face of another if and only if they are contained in each other. -/
 theorem isFaceOf_iff_le (h₁ : IsFaceOf R F₁ C) (h₂ : IsFaceOf R F₂ C) :
     IsFaceOf R F₁ F₂ ↔ F₁ ⊆ F₂ :=
-  ⟨IsFaceOf.le, fun h ↦ ⟨h₁.isConvexSet, h, fun hx hy hz hs↦ h₁.3 (h₂.le hx) (h₂.le hy) hz hs⟩⟩
+  ⟨IsFaceOf.le, fun h ↦ ⟨h₁.isConvexSet, h,
+    fun hx hy hz hs ↦ h₁.left_mem_of_mem_Ioo (h₂.le hx) (h₂.le hy) hz hs⟩⟩
 
 /-- The empty set is a face of every set. -/
 protected theorem empty {C : Set X} : IsFaceOf R ∅ C :=
@@ -116,8 +117,8 @@ protected theorem trans (h₁ : IsFaceOf R F₂ F₁) (h₂ : IsFaceOf R F₁ C)
   refine ⟨h₁.isConvexSet, h₁.le.trans h₂.le, ?_⟩
   intro x y z hx hy hz hhz
   have hz' : z ∈ F₁ := h₁.le hz
-  exact h₁.3 (h₂.3 hx hy hz' hhz)
-      (h₂.3 hy hx hz' (by simpa [Ioo_symm, Ioo_symm] using hhz)) hz hhz
+  exact h₁.left_mem_of_mem_Ioo (h₂.left_mem_of_mem_Ioo hx hy hz' hhz)
+      (h₂.left_mem_of_mem_Ioo hy hx hz' (by simpa [Ioo_symm, Ioo_symm] using hhz)) hz hhz
 
 section Xap
 
@@ -130,7 +131,7 @@ theorem map {φ : X → Y} (hφ : IsAffineMap R φ) (hinj : Injective φ)
   le := Set.image_mono hF.le
   left_mem_of_mem_Ioo := by
     rintro _ _ a ⟨x, hmC, rfl⟩ ⟨y, hnC, rfl⟩ ⟨z, hlF, rfl⟩ ⟨_, _, ha, hb, hab, hcomb⟩
-    refine Set.mem_image_of_mem _ (hF.3 hmC hnC hlF ⟨_, _, ha, hb, hab, hinj ?_⟩)
+    refine Set.mem_image_of_mem _ (hF.left_mem_of_mem_Ioo hmC hnC hlF ⟨_, _, ha, hb, hab, hinj ?_⟩)
     simpa [hφ.map_convexCombPair] using hcomb
 
 /- The preimage of a face is a face of the preimage. -/
@@ -140,7 +141,7 @@ theorem preimage {φ : X → Y} (hφ : IsAffineMap R φ) (hF : IsFaceOf R F₂ C
   le := Set.preimage_mono hF.le
   left_mem_of_mem_Ioo := by
     rintro x y z hx hy hz ⟨a, b, ha, hb, hab, hcomb⟩
-    refine hF.3 hx hy hz ⟨a, b, ha, hb, hab, ?_⟩
+    refine hF.left_mem_of_mem_Ioo hx hy hz ⟨a, b, ha, hb, hab, ?_⟩
     exact hcomb ▸ (hφ.map_convexCombPair ha.le hb.le hab x y).symm
 
 theorem of_map_injective {φ : X → Y} (hφ : IsAffineMap R φ) (hinj : Injective φ)
@@ -191,7 +192,7 @@ protected theorem prod {C₁ F₁ : Set X} {C₂ F₂ : Set Y}
     simp only [Set.mem_prod, and_imp, Prod.forall]
     intro _ _ _ _ _ _ xC₁ xC₂ yC₁ yC₂ ha hb hs
     have := Prod.Ioo_subset R _ _ hs
-    exact ⟨hF₁.3 xC₁ yC₁ ha this.1, hF₂.3 xC₂ yC₂ hb this.2⟩
+    exact ⟨hF₁.left_mem_of_mem_Ioo xC₁ yC₁ ha this.1, hF₂.left_mem_of_mem_Ioo xC₂ yC₂ hb this.2⟩
 
 /-- The projection of a face of a product set onto the first component is a face of the
 projection of the product set onto the first component. -/

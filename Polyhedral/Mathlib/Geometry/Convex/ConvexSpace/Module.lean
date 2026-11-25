@@ -155,7 +155,7 @@ instance (priority := low) IsOrderedConvexSpace.ofModule : IsOrderedConvexSpace 
       ext x
       simp only [mem_image, mem_range, Finset.mem_univ, true_and]
       exact ⟨fun ⟨k, hk, hkx⟩ ↦ ⟨⟨k, hk⟩, by rwa [← hyk k hk]⟩,
-        fun ⟨i, hix⟩ ↦ ⟨i, i.2, by rwa [hyk i i.2]⟩⟩
+        fun ⟨i, hix⟩ ↦ ⟨i, i.isLt, by rwa [hyk i i.isLt]⟩⟩
     -- Sums over `S` are sums over `range n`.
     have hsumM (f : M → M) : ∑ x ∈ S, f x = ∑ k ∈ range n, f (y k) := by
       rw [← himg, Finset.sum_image hinj]
