@@ -5,6 +5,7 @@ Authors: Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter
 -/
 module
 
+public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Hull
 public import Polyhedral.Mathlib.Geometry.Convex.ConvexSpace.Set.Lattice
 public import Mathlib.Geometry.Convex.Segment
 
@@ -227,5 +228,54 @@ end Prod
 end IsFaceOf
 
 end Semiring
+
+section IsCancelConvexSpace
+
+variable [DivisionRing R] [LinearOrder R] [IsStrictOrderedRing R]
+
+variable {P : Set X}
+
+variable [ConvexSpace R X] [IsCancelConvexSpace R X]
+
+/-- If a point `x` does not lie in the convex hull of a set `s`, then `{x}` is a face of the convex
+hull of `s` and `{x}`. -/
+lemma IsFaceOf.singleton_convexHull_insert {s : Set X} {x : X} (hx : x ∉ convexHull R s) :
+    IsFaceOf R {x} (convexHull R (insert x s)) := by
+  by_cases h : s.Nonempty
+  · constructor
+    · exact IsConvexSet.singleton
+    · exact le_trans (by simp) subset_convexHull_self
+    · simp only [convexHull_insert h, Icc, Set.mem_iUnion, Set.mem_ofPred_eq, Ioo,
+        forall_exists_index]
+      rintro x₁ y _ i hi a₁ b₁ ha₁ hb₁ hab₁ rfl j hj a₂ b₂ ha₂ hb₂ hab₂ rfl rfl a b ha hb hab h
+      by_cases hb0 : b₁ = 0
+      · subst hb0; simp at hab₁; simp [hab₁]
+      · by_cases hp : (a * a₁ + b * a₂) ≠ 0
+        · exfalso
+          have nonneg {s x : R} (hs : 0 ≤ s) (hx : 0 ≤ x) : 0 ≤ s⁻¹ * x :=
+            mul_nonneg (inv_nonneg.mpr hs) hx -- maybe "positivity" tactic should know this
+          let hα : 0 ≤ (a * a₁ + b * a₂)⁻¹ * (a * a₁) := nonneg (by positivity) (by positivity)
+          let hβ : 0 ≤ (a * a₁ + b * a₂)⁻¹ * (b * a₂) := nonneg (by positivity) (by positivity)
+          let hγ : 0 ≤ (a * b₁ + b * b₂)⁻¹ * (a * b₁) := nonneg (by positivity) (by positivity)
+          let hδ : 0 ≤ (a * b₁ + b * b₂)⁻¹ * (b * b₂) := nonneg (by positivity) (by positivity)
+          have := convexCombPair_convexCombPair_convexCombPair_comm' (M := X) ha.le hb.le hab
+            ha₁ hb₁ hab₁ ha₂ hb₂ hab₂ hα hβ ?_ hγ hδ ?_ ?_ ?_ ?_ ?_
+          · rw [this _ _ i j, convexCombPair_same] at h
+            have hij := (convexCombPair_eq_left _ (by positivity) _).1 h
+            exact hx (hij ▸ IsConvexSet.convexHull.convexCombPair_mem hi hj ..)
+          all_goals try rw [← mul_add]; exact inv_mul_cancel₀ (by positivity)
+          all_goals rw [← mul_assoc, mul_inv_cancel₀, one_mul]; positivity
+        · push Not at hp
+          obtain ⟨h₁, h₂⟩ := (add_eq_zero_iff_of_nonneg (by positivity) (by positivity)).mp hp
+          have h₁ := (mul_eq_zero.mp h₁).resolve_left ha.ne'
+          have h₂ := (mul_eq_zero.mp h₂).resolve_left hb.ne'
+          simp only [h₁, h₂, zero_add] at hab₁ hab₂
+          simp only [h₁, h₂, hab₁, convexCombPair_zero, hab₂] at h ⊢
+          exfalso
+          rw [← h] at hx
+          exact hx <| IsConvexSet.convexHull.convexCombPair_mem hi hj ..
+  · simp [Set.not_nonempty_iff_eq_empty.mp h]
+
+end IsCancelConvexSpace
 
 end Convexity
