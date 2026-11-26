@@ -28,7 +28,7 @@ namespace Convexity
 
 section Field
 
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+variable [DivisionRing R] [LinearOrder R] [IsStrictOrderedRing R]
 variable [ConvexSpace R X] [IsCancelConvexSpace R X]
 
 variable {P : Set X}

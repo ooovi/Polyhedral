@@ -68,9 +68,9 @@ lemma convexHull_vadd (s₁ : Set V) (s₂ : Set A) :
 
 end Ring
 
-section Field
+section DivisionRing
 
-variable {𝕜 E : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [ConvexSpace 𝕜 E]
+variable {𝕜 E : Type*} [DivisionRing 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [ConvexSpace 𝕜 E]
   {s t : Set E} {x : E}
 
 protected theorem IsConvexSet.convexHull_union (hs : IsConvexSet 𝕜 s) (ht : IsConvexSet 𝕜 t)
@@ -84,8 +84,9 @@ protected theorem IsConvexSet.convexHull_union (hs : IsConvexSet 𝕜 s) (ht : I
     obtain ⟨_, hx₁, _, hy₁, ⟨_, _, ha₁, hb₁, hab₁, rfl⟩⟩ := hz₁
     obtain ⟨_, hx₂, _, hy₂, ⟨a₂, b₂, ha₂, hb₂, hab₂, rfl⟩⟩ := hz₂
     rw [convexCombPair_convexCombPair_convexCombPair_comm ha hb hab ha₁ hb₁ hab₁ ha₂ hb₂ hab₂]
-    exact ⟨_, hs.iConvexComb_mem (by simp [hx₁, hx₂]), _, ht.iConvexComb_mem (by simp [hy₁, hy₂]),
-      convexCombPair_mem_Icc (by positivity) (by positivity) (by grind)⟩
+    refine ⟨_, hs.iConvexComb_mem (by simp [hx₁, hx₂]), _, ht.iConvexComb_mem (by simp [hy₁, hy₂]),
+      convexCombPair_mem_Icc (by positivity) (by positivity) ?_⟩
+    simp [add_add_add_comm, ← mul_add, hab₁, hab₂, hab]
   · refine iUnion₂_subset fun x hx => iUnion₂_subset fun y hy => Convexity.Icc_subset_iff.mpr ?_
     refine fun _ _ ↦ (IsConvexSet.convexHull.convexCombPair_mem ?_ ?_)
     · exact (subset_union_left.trans <| subset_convexHull_self ..) hx
@@ -102,6 +103,6 @@ theorem convexHull_insert (hs₀ : s.Nonempty) :
   rw [insert_eq, convexHull_union (singleton_nonempty _) hs₀, convexHull_singleton]
   simp
 
-end Field
+end DivisionRing
 
 end Convexity

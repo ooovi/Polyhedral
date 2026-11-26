@@ -231,7 +231,7 @@ end Semiring
 
 section IsCancelConvexSpace
 
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+variable [DivisionRing R] [LinearOrder R] [IsStrictOrderedRing R]
 
 variable {P : Set X}
 
@@ -252,16 +252,19 @@ lemma IsFaceOf.singleton_convexHull_insert {s : Set X} {x : X} (hx : x ∉ conve
       · subst hb0; simp at hab₁; simp [hab₁]
       · by_cases hp : (a * a₁ + b * a₂) ≠ 0
         · exfalso
-          let hα : 0 ≤ (a * a₁) / (a * a₁ + b * a₂) := by positivity
-          let hβ : 0 ≤ (b * a₂) / (a * a₁ + b * a₂) := by positivity
-          let hγ : 0 ≤ (a * b₁) / (a * b₁ + b * b₂) := by positivity
-          let hδ : 0 ≤ (b * b₂) / (a * b₁ + b * b₂) := by positivity
+          have nonneg {s x : R} (hs : 0 ≤ s) (hx : 0 ≤ x) : 0 ≤ s⁻¹ * x :=
+            mul_nonneg (inv_nonneg.mpr hs) hx -- maybe "positivity" tactic should know this
+          let hα : 0 ≤ (a * a₁ + b * a₂)⁻¹ * (a * a₁) := nonneg (by positivity) (by positivity)
+          let hβ : 0 ≤ (a * a₁ + b * a₂)⁻¹ * (b * a₂) := nonneg (by positivity) (by positivity)
+          let hγ : 0 ≤ (a * b₁ + b * b₂)⁻¹ * (a * b₁) := nonneg (by positivity) (by positivity)
+          let hδ : 0 ≤ (a * b₁ + b * b₂)⁻¹ * (b * b₂) := nonneg (by positivity) (by positivity)
           have := convexCombPair_convexCombPair_convexCombPair_comm' (M := X) ha.le hb.le hab
             ha₁ hb₁ hab₁ ha₂ hb₂ hab₂ hα hβ ?_ hγ hδ ?_ ?_ ?_ ?_ ?_
           · rw [this _ _ i j, convexCombPair_same] at h
             have hij := (convexCombPair_eq_left _ (by positivity) _).1 h
             exact hx (hij ▸ IsConvexSet.convexHull.convexCombPair_mem hi hj ..)
-          all_goals field_simp
+          all_goals try rw [← mul_add]; exact inv_mul_cancel₀ (by positivity)
+          all_goals rw [← mul_assoc, mul_inv_cancel₀, one_mul]; positivity
         · push Not at hp
           obtain ⟨h₁, h₂⟩ := (add_eq_zero_iff_of_nonneg (by positivity) (by positivity)).mp hp
           have h₁ := (mul_eq_zero.mp h₁).resolve_left ha.ne'

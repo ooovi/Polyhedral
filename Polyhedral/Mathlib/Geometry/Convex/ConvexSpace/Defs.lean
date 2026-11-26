@@ -27,16 +27,19 @@ attribute [simp] StdSimplex.nonneg
 
 section Pair
 variable {R M I : Type*}
-variable [Semifield R] [LinearOrder R] [IsStrictOrderedRing R] [ConvexSpace R M]
+variable [DivisionSemiring R] [LinearOrder R] [IsStrictOrderedRing R] [ConvexSpace R M]
 
 open StdSimplex
 
-/-- The distribution putting weight p/(p + q) on the one and  q/(p + q) on the other element. -/
+/-- The distribution putting weight (p + q)⁻¹ * p on the one and (p + q)⁻¹ * q on the other element.
+-/
 @[expose]
 noncomputable def split (p q : R) (hp : 0 ≤ p) (hq : 0 ≤ q) : StdSimplex R (Fin 2) :=
   if h : p + q = 0 then single 0
-  else duple 0 1 (div_nonneg hp (add_nonneg hp hq)) (div_nonneg hq (add_nonneg hp hq))
-    (by rw [← add_div, div_self h])
+  else duple 0 1
+    (mul_nonneg (inv_nonneg.mpr (add_nonneg hp hq)) hp)
+    (mul_nonneg (inv_nonneg.mpr (add_nonneg hp hq)) hq)
+    (by rw [← mul_add, inv_mul_cancel₀ h])
 
 /-- A convex combination of four points x₁...x₄ can be expressed by convex combinations of convex
 combinations of any two of the points. Informally (x₁ ∘ y₁) ∘ (x₂ ∘ y₂) = (x₁ ∘ x₂) ∘ (y₁ ∘ y₂) -/
@@ -52,7 +55,7 @@ theorem convexCombPair_convexCombPair_convexCombPair_comm {a b a₁ b₁ a₂ b�
     convexCombPair (a * a₁ + b * a₂) (a * b₁ + b * b₂)
         (add_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂))
         (add_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂))
-        (by grind)
+        (by simp [add_add_add_comm, ← mul_add, hab₁, hab₂, hab])
         (iConvexComb (split (a * a₁) (b * a₂)
           (mul_nonneg ha ha₁) (mul_nonneg hb ha₂)) ![x₁, x₂])
         (iConvexComb (split (a * b₁) (b * b₂)
@@ -62,16 +65,17 @@ theorem convexCombPair_convexCombPair_convexCombPair_comm {a b a₁ b₁ a₂ b�
   congr 1
   apply StdSimplex.ext
   simp only [split]
-  split_ifs with h₁ h₂ h₁
+  split_ifs with h₁ h₂ h₃
   · exfalso
-    have hsum : (a * a₁ + b * a₂) + (a * b₁ + b * b₂) = 1 := by grind
+    have hsum : (a * a₁ + b * a₂) + (a * b₁ + b * b₂) = 1 := by
+      simp [add_add_add_comm, ← mul_add, hab₁, hab₂, hab]
     rw [h₁, h₂, add_zero] at hsum
     exact zero_ne_one hsum
-  · simp [(add_eq_zero_iff_of_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂)).mp h₁]
-    field_simp
-  · simp [(add_eq_zero_iff_of_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂)).mp h₁]
-    field_simp
-  · simp; field_simp; grind
+  · simp [(add_eq_zero_iff_of_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂)).mp h₁,
+      mul_inv_cancel_left₀ h₂]
+  · simp [(add_eq_zero_iff_of_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂)).mp h₃,
+      mul_inv_cancel_left₀ h₁]
+  · simp [mul_inv_cancel_left₀ h₁, mul_inv_cancel_left₀ h₃]; grind
 
 /-- A convex combination of four points x₁...x₄ can be expressed by convex combinations of convex
 combinations of any two of the points. Informally (x₁ ∘ y₁) ∘ (x₂ ∘ y₂) = (x₁ ∘ x₂) ∘ (y₁ ∘ y₂) -/
@@ -94,7 +98,7 @@ theorem convexCombPair_convexCombPair_convexCombPair_comm' {a b a₁ b₁ a₂ b
     convexCombPair (a * a₁ + b * a₂) (a * b₁ + b * b₂)
         (add_nonneg (mul_nonneg ha ha₁) (mul_nonneg hb ha₂))
         (add_nonneg (mul_nonneg ha hb₁) (mul_nonneg hb hb₂))
-        (by grind)
+        (by simp [add_add_add_comm, ← mul_add, hab₁, hab₂, hab])
         (convexCombPair α β hα hβ hαβ x₁ x₂)
         (convexCombPair γ δ hγ hδ hγδ y₁ y₂) := by
   rw [convexCombPair_def _ _ _ x₁ y₁, convexCombPair_def _ _ _ x₂ y₂,
