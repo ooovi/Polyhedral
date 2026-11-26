@@ -63,7 +63,7 @@ theorem hull_eq_smul (hs : s.Nonempty) (hc : IsConvexSet R s) :
     carrier := {y | ∃ r : R, 0 ≤ r ∧ y ∈ r • s}
     smul_mem' := by
       intro c x ⟨r, hr, hx⟩
-      refine ⟨c.val * r, mul_nonneg c.prop hr, ?_⟩
+      refine ⟨c.val * r, mul_nonneg c.nonneg hr, ?_⟩
       obtain ⟨y, hy, rfl⟩ := hx
       exact ⟨y, hy, by simp [mul_smul]⟩
     add_mem' := by

@@ -35,7 +35,7 @@ def nonneg (f : M →ₗ[R] R) : PointedCone R M where
   zero_mem' := by simp
   smul_mem' r x hx := by
     simp only [Set.mem_ofPred_eq, map_smul_of_tower]
-    exact smul_nonneg r.property hx
+    exact smul_nonneg r.nonneg hx
 
 @[simp] lemma mem_nonneg {f : M →ₗ[R] R} {x : M} :
   x ∈ f.nonneg ↔ 0 ≤ f x := .rfl
@@ -82,7 +82,7 @@ def positive (f : M →ₗ[R] R) : PointedCone R M where
     intro _
     have hr : r.val ≠ 0 := by simp [hr]
     simp only [map_smul_of_tower, gt_iff_lt]
-    apply smul_pos (lt_of_le_of_ne r.property hr.symm) (hx hx0)
+    apply smul_pos (lt_of_le_of_ne r.nonneg hr.symm) (hx hx0)
 
 @[simp] lemma mem_positive {f : M →ₗ[R] R} {x : M} : x ∈ f.positive ↔ (x ≠ 0 → 0 < f x) := .rfl
 

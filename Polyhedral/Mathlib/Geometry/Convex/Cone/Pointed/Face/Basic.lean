@@ -172,9 +172,9 @@ lemma hull_inter_face_hull_inf_face {s : Set M} (hF : F.IsFaceOf (hull R s)) :
     · refine smul_mem _ (le_of_lt hh) ?_
       apply subset_hull (E := M)
       exact Set.mem_inter (Subtype.coe_prop (g i))
-        (hF.hull_nonneg_lc_mem (fun i => (c i).property) h hh)
+        (hF.hull_nonneg_lc_mem (fun i => (c i).nonneg) h hh)
     · push Not at hh
-      rw [le_antisymm hh (c i).property]
+      rw [le_antisymm hh (c i).nonneg]
       simp
 
 end LinearOrder
