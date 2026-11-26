@@ -46,7 +46,7 @@ theorem forall_mem_bot {p : B → Prop} : (∀ x ∈ (⊥ : A), p x) ↔ True :=
 
 section LE
 
-variable [LE A] [IsConcreteLE A B]
+variable [LE A] [IsMemLE A B]
 
 @[reducible] def _root_.OrderBot.ofSetLike : OrderBot A where
   bot_le := by simp [← coe_subset_coe]
@@ -83,7 +83,7 @@ theorem forall_mem_bot_iff_zero {p : B → Prop} : (∀ x ∈ (⊥ : A), p x) �
 
 section LE
 
-variable [LE A] [IsConcreteLE A B]
+variable [LE A] [IsMemLE A B]
 
 @[reducible] def _root_.OrderBot.ofSetLike₀ : OrderBot A where
   bot_le := by simp [← coe_subset_coe]
@@ -117,7 +117,7 @@ theorem forall_mem_empty {p : B → Prop} : (∀ x ∈ (∅ : A), p x) ↔ True 
 
 section LE
 
-variable [LE A] [IsConcreteLE A B]
+variable [LE A] [IsMemLE A B]
 
 include setLike in
 @[simp] theorem empty_le (a : A) : ∅ ≤ a := by simp [← coe_subset_coe]
@@ -171,7 +171,7 @@ section Bot
 variable [Bot A] [IsConcreteBot A B]
 
 theorem bot_ne_top [Nonempty B] : (⊥ : A) ≠ ⊤ := by
-  simpa [← coe_set_eq] using Set.empty_ne_univ
+  · simp [← coe_set_eq]
 
 end Bot
 
@@ -190,7 +190,7 @@ theorem ne_top_iff_exists_notMem (a : A) : a ≠ ⊤ ↔ ∃ x, x ∉ a := by
 
 section LE
 
-variable [LE A] [IsConcreteLE A B]
+variable [LE A] [IsMemLE A B]
 
 @[reducible] def _root_.OrderTop.ofSetLike : OrderTop A where
   le_top := by simp [← coe_subset_coe]
@@ -240,7 +240,7 @@ theorem ne_univ_iff_exists_notMem (a : A) : a ≠ univ ↔ ∃ x, x ∉ a := by
 
 section LE
 
-variable [LE A] [IsConcreteLE A B]
+variable [LE A] [IsMemLE A B]
 
 theorem not_univ_le {a : A} : ¬univ ≤ a ↔ ∃ x, x ∉ a := by
   simp only [← coe_subset_coe, coe_univ]
@@ -263,7 +263,7 @@ end LE
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 theorem lt_univ_iff {a : A} : a < univ ↔ a ≠ univ := by
   simp only [← coe_ssubset_coe, coe_univ, ne_eq, ← coe_set_eq]
@@ -347,7 +347,7 @@ def subtypeInsertEquivOption
 
 section LE
 
-variable [LE A] [IsConcreteLE A B]
+variable [LE A] [IsMemLE A B]
 
 @[simp]
 theorem le_insert (x : B) (a : A) : a ≤ insert x a := by simp [← coe_subset_coe]
@@ -376,7 +376,7 @@ end LE
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 theorem lt_iff_insert : a < b ↔ ∃ x ∉ a, insert x a ≤ b := by
   simp only [← coe_ssubset_coe, ← coe_subset_coe, coe_insert]; exact Set.ssubset_iff_insert
@@ -524,7 +524,7 @@ alias mem_inf := mem_min
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 variable (A B) in
 @[reducible] def _root_.SemilatticeInf.ofSetLike : SemilatticeInf A where
@@ -567,7 +567,7 @@ lemma sInf_eq_iInf (s : Set A) : sInf s = ⨅ a ∈ s, a := by
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 variable (A B) in
 @[reducible] def _root_.CompleteSemilatticeInf.ofSetLike : CompleteSemilatticeInf A where
@@ -600,7 +600,7 @@ alias mem_sup := mem_max
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 variable (A B) in
 @[reducible] def _root_.SemilatticeSup.ofSetLike : SemilatticeSup A where
@@ -639,7 +639,7 @@ variable {A B : Type*} [setlike : SetLike A B] [SupSet A] [IsConcreteSupSet A B]
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 variable (A B) in
 @[reducible] def _root_.CompleteSemilatticeSup.ofSetLike : CompleteSemilatticeSup A where
@@ -678,7 +678,7 @@ variable [Bot A] [IsConcreteBot₀ A B] in
 
 section PartialOrder
 
-variable [PartialOrder A] [IsConcreteLE A B]
+variable [PartialOrder A] [IsMemLE A B]
 
 variable (A B) [Bot A] [IsConcreteBot₀ A B] in
 @[reducible] def _root_.CompleteSemilatticeSup.ofSetLike₀ : CompleteSemilatticeSup A where

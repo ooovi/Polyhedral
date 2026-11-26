@@ -51,7 +51,7 @@ lemma hull_nonneg_lc_mem {ι : Type*} [Fintype ι] {c : ι → R} {s : Set M} (h
 -- ## Restrict / Embed
 
 lemma restrict (S : Submodule R M) (hF : F.IsFaceOf C) :
-    (restrict S F).IsFaceOf (restrict S C) := ⟨restrict_mono S hF.1, hF.2⟩
+    (restrict S F).IsFaceOf (restrict S C) := ⟨restrict_mono S hF.le, hF.mem_of_smul_add_mem⟩
 
 lemma embed {S : Submodule R M} {C F : PointedCone R S} (hF : F.IsFaceOf C) :
     (embed F).IsFaceOf (embed C) := hF.map _ (S.subtype_injective)
@@ -171,9 +171,10 @@ lemma hull_inter_face_hull_inf_face {s : Set M} (hF : F.IsFaceOf (hull R s)) :
     by_cases hh : 0 < c i
     · refine smul_mem _ (le_of_lt hh) ?_
       apply subset_hull (E := M)
-      exact Set.mem_inter (Subtype.coe_prop (g i)) (hF.hull_nonneg_lc_mem (fun i => (c i).2) h hh)
+      exact Set.mem_inter (Subtype.coe_prop (g i))
+        (hF.hull_nonneg_lc_mem (fun i => (c i).nonneg) h hh)
     · push Not at hh
-      rw [le_antisymm hh (c i).property]
+      rw [le_antisymm hh (c i).nonneg]
       simp
 
 end LinearOrder

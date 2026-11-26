@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Geometry.Convex.Cone.Pointed
 public import Polyhedral.Mathlib.Algebra.Module.Submodule.Basic
-public import Mathlib.Algebra.Order.Nonneg.Basic
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 
 import Mathlib.RingTheory.LocalRing.Basic
 import Mathlib.LinearAlgebra.AffineSpace.AffineSubspace.Defs
@@ -160,8 +160,8 @@ def linealCone (C : PointedCone R M) : PointedCone R M where
   __ := C.support
   smul_mem' r _ hx := by
     by_cases hr : 0 ≤ r
-    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.2)
-    · by_contra; exact hr r.2
+    · simpa using And.intro (C.smul_mem hr hx.1) (C.smul_mem hr hx.right)
+    · by_contra; exact hr r.nonneg
 
 end AddCommGroup
 
@@ -325,7 +325,7 @@ section CommRing
 variable {R M : Type*} [CommRing R] [PartialOrder R] [IsOrderedRing R] [AddCommGroup M]
   [Module R M] {S : Set M}
 
-local notation "R≥0" => {c : R // 0 ≤ c}
+local notation "R≥0" => Nonneg R
 
 noncomputable def IsCompl.map_mkQ_equiv_inf {S T : Submodule R M} (hST : IsCompl S T)
     {C : PointedCone R M} (hSC : S ≤ C) : C.quot S ≃ₗ[R≥0] (C ⊓ T : PointedCone R M) :=

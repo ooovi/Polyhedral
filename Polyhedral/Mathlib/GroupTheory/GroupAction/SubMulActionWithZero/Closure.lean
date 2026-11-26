@@ -21,8 +21,6 @@ finite generation for `SubMulAction₀`.
 
 @[expose] public section
 
-@[expose] public section
-
 namespace SubMulAction₀
 
 open Function Set
@@ -51,33 +49,30 @@ theorem subset_closure : s ⊆ closure R s :=
 theorem smul_mem_closure_of_mem (r : R) (hx : x ∈ s) : r • x ∈ closure R s :=
   smul_mem _ r (subset_closure hx)
 
-@[simp] theorem closure_eq (p : SubMulAction₀ R M) :
-    closure R p = p := by
-  ext x
-  constructor <;> intro h
-  · rw [mem_closure] at h
-    exact h p (subset_refl _)
-  · exact subset_closure h
-
 @[simp]
 theorem zero_mem_closure : 0 ∈ closure R s :=
   (closure R s).zero_mem
 
-theorem closure_le {p : SubMulAction₀ R M} : closure R s ≤ p ↔ s ⊆ p := by
-  constructor
-  · intro h x hx
-    exact h (subset_closure hx)
-  · intro h x hx
-    exact mem_closure.1 hx p h
+theorem closure_le {p : SubMulAction₀ R M} : closure R s ≤ p ↔ s ⊆ p :=
+  ⟨le_trans subset_closure, (sInf_le ·)⟩
+
+lemma closure_gc : GaloisConnection (closure R : Set M → SubMulAction₀ R M) (↑) :=
+  fun _ _ => closure_le
+
+/-- `closure` and the coercion to `Set` form a Galois insertion. -/
+def gi : GaloisInsertion (closure R : Set M → SubMulAction₀ R M) (↑) :=
+  closure_gc.toGaloisInsertion fun _ => subset_closure
+
+@[simp] theorem closure_eq (p : SubMulAction₀ R M) : closure R p = p :=
+  gi.l_u_eq p
 
 @[gcongr]
-theorem closure_mono (h : s ⊆ t) : closure R s ≤ closure R t := by
-  rw [closure_le]
-  exact h.trans subset_closure
+theorem closure_mono (h : s ⊆ t) : closure R s ≤ closure R t :=
+  closure_gc.monotone_l h
 
 @[gcongr]
 theorem closure_monotone : Monotone (closure R : Set M → SubMulAction₀ R M) :=
-  fun _ _ => closure_mono
+  closure_gc.monotone_l
 
 variable (R) in
 def closureOrderHom : Set M →o SubMulAction₀ R M where
@@ -89,7 +84,7 @@ lemma closure_sInf (s : Set (Set M)) : closure R (sInf s) ≤ sInf (closure R ''
   simpa using fun _ hx => closure_mono (sInf_le hx) ht
 
 lemma closure_inter_le (s t : Set M) : closure R (s ∩ t) ≤ closure R s ⊓ closure R t :=
-  fun _ ha => ⟨closure_mono inf_le_left ha, closure_mono inf_le_right ha⟩
+  closure_monotone.map_inf_le s t
 
 /-- A `SubMulAction₀` is finitely generated if it is the closure of a finite set. -/
 def FG (p : SubMulAction₀ R M) : Prop :=
@@ -99,9 +94,6 @@ theorem fg_iff {p : SubMulAction₀ R M} :
     p.FG ↔ ∃ (s : Finset M), p = closure R s :=
   Set.exists_finite_iff_finset
 
-lemma closure_gc : GaloisConnection (closure R : Set M → SubMulAction₀ R M) (↑) :=
-  fun _ _ => ⟨le_trans subset_closure, (sInf_le ·)⟩
-
 end SMul
 
 section SMulWithZero
@@ -109,20 +101,15 @@ section SMulWithZero
 variable [Zero M] [SMulZeroClass R M]
 variable {s t : Set M} {x : M}
 
-lemma closure_union (s t : Set M) : closure R (s ∪ t) = closure R s ⊔ closure R t := by
-  sorry
+lemma closure_union (s t : Set M) : closure R (s ∪ t) = closure R s ⊔ closure R t :=
+  closure_gc.l_sup
 
-lemma closure_sSup (s : Set (Set M)) : closure R (sSup s) = sSup (closure R '' s) := by
-  sorry
+lemma closure_sSup (s : Set (Set M)) : closure R (sSup s) = sSup (closure R '' s) :=
+  closure_gc.l_sSup_eq_sSup_image
 
 @[simp]
-theorem closure_empty : closure R (∅ : Set M) = ⊥ := by
-  ext x
-  rw [mem_bot]
-  constructor <;> intro h
-  · rw [mem_closure] at h
-    simpa using h ⊥
-  · simp [h]
+theorem closure_empty : closure R (∅ : Set M) = ⊥ :=
+  closure_gc.l_bot
 
 end SMulWithZero
 
@@ -186,13 +173,6 @@ theorem mem_smulSet_of_mem (hx : x ∈ s) : x ∈ R ∙ s :=
 theorem smul_mem_smulSet_of_mem (r : R) (hx : x ∈ s) : r • x ∈ R ∙ s :=
   .inr ⟨x, hx, r, rfl⟩
 
-@[simp] theorem smulSet_eq (p : SubMulAction₀ R M) :
-    R ∙ p = p := by
-  refine le_antisymm ?_ subset_smulSet
-  rintro x (rfl | ⟨y, hy, r, rfl⟩)
-  · exact zero_mem
-  · exact p.smul_mem r hy
-
 @[simp] theorem zero_mem_smulSet : 0 ∈ R ∙ s := .inl rfl
 
 theorem smulSet_le {p : SubMulAction₀ R M} : R ∙ s ≤ p ↔ s ⊆ p := by
@@ -203,86 +183,49 @@ theorem smulSet_le {p : SubMulAction₀ R M} : R ∙ s ≤ p ↔ s ⊆ p := by
     · exact zero_mem
     · exact p.smul_mem r (h hy)
 
+lemma smulSet_gc : GaloisConnection (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
+  fun _ _ => smulSet_le
+
+/-- `smulSet` and the coercion to `Set` form a Galois insertion. -/
+def smulSet.gi : GaloisInsertion (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
+  smulSet_gc.toGaloisInsertion fun _ => subset_smulSet
+
+@[simp] theorem smulSet_eq (p : SubMulAction₀ R M) : R ∙ p = p :=
+  smulSet.gi.l_u_eq p
+
 @[gcongr]
-theorem smulSet_mono (h : s ⊆ t) : R ∙ s ≤ R ∙ t := by
-  rw [smulSet_le]
-  exact h.trans subset_smulSet
+theorem smulSet_mono (h : s ⊆ t) : R ∙ s ≤ R ∙ t :=
+  smulSet_gc.monotone_l h
 
 @[gcongr]
 theorem smulSet_monotone : Monotone (smulSet R : Set M → SubMulAction₀ R M) :=
-  fun _ _ => smulSet_mono
+  smulSet_gc.monotone_l
 
 variable (R) in
 def smulSetOrderHom : Set M →o SubMulAction₀ R M where
   toFun := smulSet R
   monotone' := smulSet_monotone
 
-lemma smulSet_gc : GaloisConnection (smulSet R : Set M → SubMulAction₀ R M) (↑) :=
-  fun _ _=> ⟨le_trans subset_smulSet, by
-    rintro h _ (rfl | ⟨_, hy, _, rfl⟩)
-    · exact zero_mem
-    · exact smul_mem _ _ (h hy)⟩
-
 @[simp]
-theorem smulSet_empty : R ∙ (∅ : Set M) = ⊥ := by
-  ext x
-  rw [mem_bot]
-  constructor <;> intro h
-  · rcases h with (rfl | ⟨_, h, _, _⟩)
-    · rfl
-    · contradiction
-  · simp [h]
+theorem smulSet_empty : R ∙ (∅ : Set M) = ⊥ :=
+  smulSet_gc.l_bot
 
-lemma smulSet_inter_le (s t : Set M) : R ∙ (s ∩ t) ≤ R ∙ s ⊓ R ∙ t := by
-  rintro x (rfl | ⟨y, hy, r, rfl⟩)
-  · exact zero_mem
-  · exact ⟨smul_mem _ r (subset_smulSet hy.1), smul_mem _ r (subset_smulSet hy.2)⟩
+lemma smulSet_inter_le (s t : Set M) : R ∙ (s ∩ t) ≤ R ∙ s ⊓ R ∙ t :=
+  smulSet_monotone.map_inf_le s t
 
 lemma smulSet_sInf_le (S : Set (Set M)) : R ∙ (sInf S) ≤ sInf (smulSet R '' S) := by
-  intro x
-  simp only [sInf_eq_sInter, SetLike.mem_sInf, mem_image, forall_exists_index, and_imp,
-    forall_apply_eq_imp_iff₂]
-  rintro (rfl | ⟨y, hy, r, rfl⟩) s hs
-  · exact zero_mem
-  · exact smul_mem _ r <| subset_smulSet (hy s hs)
+  rw [sInf_image]
+  exact smulSet_monotone.map_sInf_le
 
-lemma smulSet_union (s t : Set M) : R ∙ (s ∪ t) = R ∙ s ⊔ R ∙ t := by
-  apply le_antisymm
-  · rintro x (rfl | ⟨y, hy, r, rfl⟩)
-    · exact zero_mem
-    · rcases hy with hy | hy
-      · exact .inl <| Or.inr ⟨y, hy, r, rfl⟩
-      · exact .inr <| Or.inr ⟨y, hy, r, rfl⟩
-  · rw [sup_le_iff]
-    constructor; all_goals
-    · rintro x (rfl | ⟨y, hy, r, rfl⟩)
-      · exact zero_mem
-      · exact smul_mem _ _ (subset_smulSet <| by simp [hy])
+lemma smulSet_union (s t : Set M) : R ∙ (s ∪ t) = R ∙ s ⊔ R ∙ t :=
+  smulSet_gc.l_sup
 
-lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup (smulSet R '' S) := by
-  apply le_antisymm
-  · rintro x (rfl | ⟨y, hy, r, rfl⟩)
-    · exact zero_mem
-    · obtain ⟨t, htS, hyt⟩ := hy
-      simpa using .inr ⟨t, htS, smul_mem_smulSet_of_mem r hyt⟩
-  · rintro x (rfl | ⟨y, hy, h⟩)
-    · exact zero_mem
-    · obtain ⟨s, rfl⟩ := hy
-      simp only [mem_image, iUnion_exists, mem_iUnion, SetLike.mem_coe, exists_prop,
-        exists_and_right] at h
-      obtain ⟨⟨s, hs, rfl⟩, (rfl | ⟨z, hz, r, rfl⟩)⟩ := h
-      · exact zero_mem
-      · exact smul_mem _ _ <| (le_trans (le_sSup hs) subset_smulSet) hz
+lemma smulSet_sSup (S : Set (Set M)) : R ∙ (sSup S) = sSup (smulSet R '' S) :=
+  smulSet_gc.l_sSup_eq_sSup_image
 
 variable (R) in
-theorem closure_eq_smulSet (s : Set M) : closure R s = R ∙ s := by
-  ext x; constructor
-  · have := closure_mono (R := R) <| subset_smulSet (R := R) (s := s)
-    rw [closure_eq] at this
-    exact fun hx => this hx
-  · rintro (rfl | ⟨y, hy, r, rfl⟩)
-    · exact zero_mem
-    · exact smul_mem_closure_of_mem _ hy
+theorem closure_eq_smulSet (s : Set M) : closure R s = R ∙ s :=
+  le_antisymm (closure_le.2 subset_smulSet) (smulSet_le.2 subset_closure)
 
 theorem mem_closure_iff_not_zero_exists_smul :
     x ∈ closure R s ↔ x = 0 ∨ ∃ y ∈ s, ∃ r : R, x = r • y :=

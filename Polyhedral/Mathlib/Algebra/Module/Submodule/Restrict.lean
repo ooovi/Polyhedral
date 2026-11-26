@@ -81,7 +81,7 @@ lemma codisjoint_restrict_sup (S T : Submodule R M) :
     Codisjoint (restrict (S ⊔ T) S) (restrict (S ⊔ T) T) := by
   rw [codisjoint_iff_exists_add_eq]
   intro x
-  obtain ⟨y, hy, z, hz, h⟩ := mem_sup.mp x.2
+  obtain ⟨y, hy, z, hz, h⟩ := mem_sup.mp x.property
   use ⟨y, mem_sup_left hy⟩
   use ⟨z, mem_sup_right hz⟩
   constructor
@@ -231,7 +231,7 @@ lemma embed_codisjoint {U : Submodule R M} {S T : Submodule R U} (hST : Codisjoi
 -- Q: Can this be expressed using LinearEquiv.ofInjective and subtype_injective?
 def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T where
   toFun x := ⟨S.subtype x, by simp⟩
-  invFun x := ⟨⟨_, mem_of_mem_embed x.2⟩, mem_embed_iff.mp x.2⟩
+  invFun x := ⟨⟨_, mem_of_mem_embed x.property⟩, mem_embed_iff.mp x.property⟩
   map_add' x y := by simp
   map_smul' r x := by simp
   left_inv x := by simp
@@ -239,8 +239,8 @@ def embed_equiv {S : Submodule R M} (T : Submodule R S) : T ≃ₗ[R] embed T wh
 
 def restrict_equiv (S T : Submodule R M) :
     (S ⊓ T : Submodule R M) ≃ₗ[R] S.restrict T where
-  toFun x := ⟨⟨x.1, x.2.1⟩, x.2.2⟩
-  invFun x := ⟨x.1.1, ⟨x.1.2, mem_restrict x.2⟩⟩
+  toFun x := ⟨⟨x.val, x.property.1⟩, x.property.2⟩
+  invFun x := ⟨x.val.val, ⟨x.val.property, mem_restrict x.property⟩⟩
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
   left_inv _ := rfl
@@ -256,7 +256,7 @@ def embed_restrict_orderIso (S : Submodule R M) :
   toFun T := ⟨embed T, embed_le⟩
   invFun T := restrict S T
   left_inv := restrict_embed
-  right_inv T := Subtype.ext (embed_restrict_of_le T.2)
+  right_inv T := Subtype.ext (embed_restrict_of_le T.property)
   map_rel_iff' := embed_mono_iff
 
 def embed_latticeHom (S : Submodule R M) :
@@ -290,7 +290,7 @@ noncomputable def quot_restrict_iso_sup_quot_restrict (S T : Submodule R M) :
   See `quot_restrict_quot_linearMap_injective` for the proof of injectivity. -/
 def quot_restrict_linearMap_quot (S T : Submodule R M) : S ⧸ restrict S T →ₗ[R] M ⧸ T :=
     liftQ _ (T.mkQ ∘ₗ S.subtype) (by
-      simp only [restrict_eq_comap_subtype, IsConcreteLE.le_iff, mem_comap, subtype_apply,
+      simp only [restrict_eq_comap_subtype, le_iff_mem_imp_mem, mem_comap, subtype_apply,
         mem_ker, coe_comp, coe_subtype, Function.comp_apply, mkQ_apply, Subtype.forall]
       exact fun _ _ => (Quotient.mk_eq_zero T).mpr)
 
@@ -298,7 +298,7 @@ lemma quot_restrict_linearMap_quot_injective (S T : Submodule R M) :
     Injective (quot_restrict_linearMap_quot S T) := by
   rw [← ker_eq_bot]
   apply ker_liftQ_eq_bot
-  simp only [restrict_eq_comap_subtype, IsConcreteLE.le_iff, mem_ker, coe_comp, coe_subtype,
+  simp only [restrict_eq_comap_subtype, le_iff_mem_imp_mem, mem_ker, coe_comp, coe_subtype,
     Function.comp_apply, mkQ_apply, mem_comap, subtype_apply, Subtype.forall]
   exact fun _ _ => (Quotient.mk_eq_zero _).mp
 

@@ -25,7 +25,7 @@ open Function SubMulAction₀ IsHomogenization
 
 variable {R V A W : Type*}
 
-local notation3 "R≥0" => {c : R // 0 ≤ c}
+local notation3 "R≥0" => Nonneg R
 
 section Ring
 
@@ -56,7 +56,7 @@ lemma mem_homogenize_iff_exist_lt_zero {s : Set A} {x : W} (hx : x ∈ homogeniz
     x = 0 ∨ ∃ y ∈ s, ∃ r : R, 0 < r ∧ x = r • ℋ.ofPoint y := by
   obtain (rfl | ⟨y, ⟨z, hz, rfl⟩, _, ⟨r, _⟩, hr0, rfl⟩) := mem_smulSet_iff_exists_ne_zero hx
   · exact .inl rfl
-  · exact .inr ⟨z, hz, r, by rwa [← zero_lt_iff] at hr0, rfl⟩
+  · exact .inr ⟨z, hz, r, by rwa [← pos_iff_ne_zero] at hr0, rfl⟩
 
 lemma mem_homogenize_iff_ne_zero {s : Set A} {x : W} (hx : x ≠ 0) :
     x ∈ homogenize ℋ s ↔ ∃ y ∈ s, ∃ r : R, 0 ≤ r ∧ x = r • ℋ.ofPoint y := by
@@ -367,9 +367,9 @@ variable {ℋ} in
 
 def homogenizeOrderIso : Set A ≃o Set.Iic (ℋ.weight.positive : SubMulAction₀ R≥0 W) where
   toFun s := ⟨_, homogenize_le_weight_positive _ s⟩
-  invFun S := S.1.dehomogenize ℋ
+  invFun S := S.val.dehomogenize ℋ
   left_inv := dehomogenize_homogenize _
-  right_inv S := by simp only [homogenize_dehomogenize_of_le_weight_positive S.2]
+  right_inv S := by simp only [homogenize_dehomogenize_of_le_weight_positive S.property]
   map_rel_iff' := homogenize_mono_iff _
 
 end LinearOrderDivisionRing

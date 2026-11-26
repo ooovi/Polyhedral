@@ -1,6 +1,6 @@
 /-
-Copyright (c) 2026 Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter. All rights
-reserved.
+Copyright (c) 2026 Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter.
+All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Valentina Taylor Cerra, Mara Gruß, Olivia Röhrig, Martin Winter
 -/
@@ -73,7 +73,7 @@ instance : OrderBot (Face P) where
   bot_le _ _ := by simp
 
 lemma nonempty_of_ne_bot {F : Face P} (h : F ≠ ⊥) : (F : Set X).Nonempty := by
-  rw [Set.nonempty_iff_ne_empty]
+  rw [← Set.ne_empty_iff_nonempty]
   intro heq
   apply h
   ext
@@ -110,7 +110,7 @@ instance : Min (Face P) where
 
 instance : InfSet (Face P) where
   sInf S :=
-    { toConvexSet := P ⊓ sInf {s.1 | s ∈ S}
+    { toConvexSet := P ⊓ sInf {(s.toConvexSet) | s ∈ S}
       isFaceOf := IsFaceOf.sInf P.isConvexSet fun f hf ↦ by
         simp only [Set.mem_image, Set.mem_ofPred_eq, exists_exists_and_eq_and] at hf
         obtain ⟨a, ha, rfl⟩ := hf
@@ -132,7 +132,7 @@ instance : CompleteSemilatticeInf (Face P) where
       simpa [LE.le] using fun _ xs ↦ xs f fS
     · simp only [sInf, Set.sInter_image, Set.mem_ofPred_eq,
         Set.iInter_exists, Set.biInter_and', Set.iInter_iInter_eq_right]
-      simpa [LE.le] using fun x a ↦ ⟨f.2.2 a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
+      simpa [LE.le] using fun x a ↦ ⟨f.isFaceOf.le a, fun i hi ↦ (mem_coe x).mp (fS hi a)⟩
 
 instance : CompleteLattice (Face P) where
   top := ⟨P, .refl P.isConvexSet⟩

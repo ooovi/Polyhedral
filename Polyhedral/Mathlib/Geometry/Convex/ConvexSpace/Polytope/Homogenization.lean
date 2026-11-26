@@ -62,7 +62,7 @@ theorem IsPolytope.iff_homogenize_fg {C : Set A} (hC : IsConvexSet R C) :
   · apply hC.convexHull_subset_iff.mpr
     intro x hx
     simp only [Set.mem_preimage, SetLike.mem_coe] at hx
-    have := Set.mem_preimage.mpr <| Submodule.mem_span_of_mem (R := {c : R // 0 ≤ c}) hx
+    have := Set.mem_preimage.mpr <| Submodule.mem_span_of_mem (R := Nonneg R) hx
     simp_rw [hg, homogenize] at this
     rw [preimage_hull_eq_convexHull_preimage (Set.image_subset_range ℋ.ofPoint C)] at this
     rw [← hC.convexHull_eq_self]

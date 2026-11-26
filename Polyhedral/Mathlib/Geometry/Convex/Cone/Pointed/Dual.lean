@@ -266,7 +266,7 @@ lemma FinSalRank.dual_finSalRank (hC : C.FinSalRank) : (dual p C).FinSalRank := 
         have he := LinearMap.congr_fun hy ⟨C.lineal.mkQ x, hqx⟩
         change p x y = 0 at he
         exact he.symm
-      exact (hDL.le_bot ⟨y.2, hyL⟩)
+      exact (hDL.le_bot ⟨y.property, hyL⟩)
     · rintro rfl
       simp
   have hQ : Q.FG := hC

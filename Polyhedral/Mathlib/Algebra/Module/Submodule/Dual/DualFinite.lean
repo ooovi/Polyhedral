@@ -117,8 +117,8 @@ lemma dualfg_top : (⊤ : Submodule R N).DualFG p := ⟨⊥, by simp⟩
 separates points on the right. -/
 lemma dualfg_bot [IsNoetherianRing R] [Module.Finite R N] [Fact p.SeparatingRight] :
     (⊥ : Submodule R N).DualFG p := by classical
-  let g : range p → M := (·.2.choose)
-  have hg (f : range p) : p (g f) = f := f.2.choose_spec
+  let g : range p → M := (·.property.choose)
+  have hg (f : range p) : p (g f) = f := f.property.choose_spec
   obtain ⟨s, hs⟩ := (Module.Finite.fg_top : (⊤ : Submodule R (range p)).FG)
   refine ⟨s.image g, eq_bot_iff.mpr fun x hx ↦ ?_⟩
   apply (Fact.elim (inferInstance : Fact p.SeparatingRight)) x

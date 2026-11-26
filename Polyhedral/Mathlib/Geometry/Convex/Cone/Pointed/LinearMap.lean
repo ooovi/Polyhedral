@@ -33,7 +33,9 @@ def nonneg (f : M →ₗ[R] R) : PointedCone R M where
   carrier := {x : M | 0 ≤ f x}
   add_mem' hx hy := by simpa using add_nonneg hx hy
   zero_mem' := by simp
-  smul_mem' r x hx := by simp only [Set.mem_ofPred_eq, map_smul_of_tower]; exact smul_nonneg r.2 hx
+  smul_mem' r x hx := by
+    simp only [Set.mem_ofPred_eq, map_smul_of_tower]
+    exact smul_nonneg r.nonneg hx
 
 @[simp] lemma mem_nonneg {f : M →ₗ[R] R} {x : M} :
   x ∈ f.nonneg ↔ 0 ≤ f x := .rfl
@@ -78,9 +80,9 @@ def positive (f : M →ₗ[R] R) : PointedCone R M where
     by_cases hr : r = 0
     · simp [hr]
     intro _
-    have hr : r.1 ≠ 0 := by simp [hr]
+    have hr : r.val ≠ 0 := by simp [hr]
     simp only [map_smul_of_tower, gt_iff_lt]
-    apply smul_pos (lt_of_le_of_ne r.2 hr.symm) (hx hx0)
+    apply smul_pos (lt_of_le_of_ne r.nonneg hr.symm) (hx hx0)
 
 @[simp] lemma mem_positive {f : M →ₗ[R] R} {x : M} : x ∈ f.positive ↔ (x ≠ 0 → 0 < f x) := .rfl
 

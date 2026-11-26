@@ -6,8 +6,9 @@ Authors: Olivia Röhrig, Martin Winter
 module
 
 public import Mathlib.Geometry.Convex.Cone.Face.Lattice
-public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
+public import Mathlib.Order.Interval.Set.OrderIso
 public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Rank
+public import Polyhedral.Mathlib.Geometry.Convex.Cone.Pointed.Face.Basic
 
 /-!
 ## Face
@@ -192,7 +193,7 @@ def quot_orderIso (F : Face C) : Face (C ⧸ F) ≃o Set.Ici F where
   toFun G := ⟨fiberFace G, le_fiber G⟩
   invFun G := F.quotFace G
   left_inv := quotFace_fiberFace
-  right_inv G := by simp only [fiberFace_quotFace_of_le G.2]
+  right_inv G := by simp only [fiberFace_quotFace_of_le G.property]
   map_rel_iff' := by
     intro G G'
     exact fiberFace_le_fiberFace_iff
@@ -228,7 +229,7 @@ lemma fiberFace_eq_iff (G : Face (C ⧸ F)) : F = fiberFace G ↔ G.toPointedCon
       rw [Submodule.mem_bot, ← hcx, hczero]
   · simp only [fiberFace, quotMap, comap, h, comap_bot, LinearMap.ker_restrictScalars, ker_mkQ,
     ← toPointedCone_eq_iff]
-    suffices C ⊓ restrictScalars { c // 0 ≤ c } F.span = F by symm; exact this
+    suffices C ⊓ restrictScalars (Nonneg R) F.span = F by symm; exact this
     convert F.isFaceOf.inf_span
 
 lemma le_span_iff_le {G : Face C} : (F : PointedCone R M) ≤ G.span ↔ F ≤ G := by
@@ -289,7 +290,7 @@ def embed_orderIso (F : Face C) : Face (F : PointedCone R M) ≃o Set.Iic F wher
   toFun G := ⟨G, Face.embed_le G⟩
   invFun G := F.restrict G
   left_inv := restrict_embed
-  right_inv G := by simp only [embed_restrict_of_le G.2]
+  right_inv G := by simp only [embed_restrict_of_le G.property]
   map_rel_iff' := by
     intro G G'
     rfl

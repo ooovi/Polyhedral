@@ -5,8 +5,8 @@ Authors: Martin Winter
 -/
 module
 
-public import Mathlib.Algebra.Order.Nonneg.Basic
 public import Mathlib.Algebra.Order.Ring.Defs
+public import Polyhedral.Mathlib.Algebra.Order.Nonneg.Basic
 
 /-!
 This file contains auxiliary lemmas for working with `Nonneg R`, where `R` is a semiring.

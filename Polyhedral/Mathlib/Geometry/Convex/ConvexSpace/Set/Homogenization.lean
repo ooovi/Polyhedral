@@ -93,7 +93,7 @@ theorem homogenize_fg_ofPoint_range {C : Set A} (h : (homogenize ℋ C).FG) :
   have gsum {x} (hx : x ∈ g) := mem_hull_set.mp (hg ▸ (Submodule.mem_span_of_mem hx))
   classical
   -- collect all said stuff and use as the new generators
-  let g' := g.attach.biUnion (fun x => (Classical.choose (gsum x.2)).support)
+  let g' := g.attach.biUnion (fun x => (Classical.choose (gsum x.property)).support)
   use g'
   have g'sub : (g' : Set W) ⊆ ℋ.ofPoint '' C := by
     simpa [g'] using fun _ b ↦ (Classical.choose_spec (gsum b)).1
@@ -102,7 +102,7 @@ theorem homogenize_fg_ofPoint_range {C : Set A} (h : (homogenize ℋ C).FG) :
     obtain ⟨_, hnn, hsum⟩ := Classical.choose_spec (gsum hx)
     refine hsum ▸ mem_hull_set.mpr ⟨Classical.choose (gsum hx), ?_, hnn, rfl⟩
     simpa using Finset.subset_biUnion_of_mem
-      (fun p ↦ (Classical.choose (gsum p.2)).support) (Finset.mem_attach g ⟨x, hx⟩)
+      (fun p ↦ (Classical.choose (gsum p.property)).support) (Finset.mem_attach g ⟨x, hx⟩)
   refine ⟨le_antisymm (hull_mono g'sub) ?_, g'sub.trans (by simp)⟩
   simpa [hg] using hull_mono (R := R) gsubhull
 
@@ -251,9 +251,9 @@ lemma homogenize_mono_iff {K₁ K₂ : Set A} (h₁ : IsConvexSet R K₁) (h₂ 
 positive cone. -/
 def homogenizeOrderEquiv : ConvexSet R A ≃o Set.Iic ℋ.weight.positive where
   toFun K := ⟨_, homogenize_le_weight_positive _ K⟩
-  invFun C := ⟨dehomogenize ℋ C.1, dehomogenize_isConvexSet _ _⟩
+  invFun C := ⟨dehomogenize ℋ C.val, dehomogenize_isConvexSet _ _⟩
   left_inv K := by simp [← ConvexSet.carrier_eq_coe, dehomogenize_homogenize ℋ K.isConvexSet]
-  right_inv C := by dsimp; congr; exact homogenize_dehomogenize_of_le_positive C.2
+  right_inv C := by dsimp; congr; exact homogenize_dehomogenize_of_le_positive C.property
   map_rel_iff' := by
     refine homogenize_mono_iff _ ?_ ?_
     · expose_names; exact a.isConvexSet

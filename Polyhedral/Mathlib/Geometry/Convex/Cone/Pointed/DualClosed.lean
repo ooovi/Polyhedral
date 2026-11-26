@@ -95,7 +95,7 @@ theorem DualClosed.eq_sInf (hC : C.DualClosed p) :
   rw [Eq.comm, le_antisymm_iff]
   constructor
   · exact sInf_le ⟨hC, by simp⟩
-  simp only [IsConcreteLE.le_iff, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
+  simp only [le_iff_mem_imp_mem, Submodule.mem_sInf, Set.mem_ofPred_eq, and_imp]
   intro x hx D hD hsD
   rw [← hD]; rw [← hC] at hx
   exact (dual_dual_mono p hsD) hx
@@ -300,7 +300,7 @@ variable {p : M →ₗ[R] N →ₗ[R] R}
 
 lemma DualClosed.dual_dual_lineal (hC : C.DualClosed p) :
     (dual p.flip (dual p C)).lineal = .dual p.flip (Submodule.dual p C.lineal) := by
-  sorry
+  rw [hC, hC.lineal]
 
 /-- For a dual closed cone, finite salient rank of the dual cone is equivalent to finite salient
 rank of the cone itself. The reverse direction is `FinSalRank.dual_finSalRank`, which holds

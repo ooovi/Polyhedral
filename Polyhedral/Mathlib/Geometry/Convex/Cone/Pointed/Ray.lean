@@ -50,7 +50,7 @@ lemma ray_of_rank_one (hS : C.Salient) (h : C.rank = 1) : ∃ x : M, C = hull R 
   by_cases hyx : ∃ a : R, y = a • x
   · obtain ⟨a, rfl⟩ := hyx
     by_cases ha0 : 0 ≤ a
-    · exact smul_mem ({ c // 0 ≤ c } ∙ x) ha0 <| Submodule.mem_span_singleton_self x
+    · exact smul_mem (R ∙₊ x) ha0 <| Submodule.mem_span_singleton_self x
     exfalso
     have ha : a < 0 := lt_of_not_ge ha0
     have hnegx : -x = (-a⁻¹) • (a • x) := by

@@ -44,7 +44,7 @@ def opt (C : PointedCone R M) (f g : M →ₗ[R] R) : PointedCone R M where
      implies_true, and_self]
   smul_mem' := by
     intro a x hx
-    refine ⟨C.smul_mem a.2 hx.1, ?_⟩
+    refine ⟨C.smul_mem a.nonneg hx.1, ?_⟩
     intro y hy
     by_cases! h : a ≤ 0
     · simp [nonpos_iff_eq_zero.mp h]
@@ -124,7 +124,7 @@ lemma FG.exists_ne_zero_mem_opt (C : PointedCone R M) (hC : C.FG) (hC0 : C ≠ �
   | add y z _ _ hy hz =>
       simpa [map_add, add_mul, mul_add] using add_le_add hy hz
   | smul a y _ hy =>
-      have hy' := mul_le_mul_of_nonneg_left hy a.2
+      have hy' := mul_le_mul_of_nonneg_left hy a.nonneg
       simp only [LinearMap.map_smul_of_tower, Algebra.mul_smul_comm, Algebra.smul_mul_assoc,
         ge_iff_le]
       exact hy'
@@ -145,7 +145,7 @@ lemma IsFaceOf.hull_ray {s : Set M} {x : M} (hx : x ≠ 0)
     absurd hx
     push Not at H
     simp only [← Set.mem_singleton_iff] at H
-    simpa [h] using Submodule.span_mono (R := {c : R // 0 ≤ c}) H
+    simpa [h] using Submodule.span_mono (R := Nonneg R) H
   simp only [Set.mem_inter_iff, SetLike.mem_coe, Submodule.mem_span_singleton,
     Subtype.exists] at hy
   obtain ⟨hys, a, ha, rfl⟩ := hy
